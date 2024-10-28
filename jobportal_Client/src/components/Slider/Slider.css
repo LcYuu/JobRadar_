@@ -1,0 +1,25 @@
+/* src/components/Slider/Slider.css */
+
+/* Giới hạn kích thước của slider */
+.slider-container {
+    width: 100; /* Chiều rộng 100% của phần tử cha */
+    max-width: 800px; /* Giới hạn chiều rộng tối đa của slider */
+    margin: 0 auto; /* Căn giữa slider */
+    overflow: hidden; /* Ẩn phần thừa ra ngoài của slider */
+  }
+  
+  /* Đặt chiều cao của slider (Tùy chọn) */
+  .awssld {
+    height: auto; /* Đảm bảo chiều cao tự động điều chỉnh theo hình ảnh */
+  }
+  
+  .awssld__content {
+    max-height: 400px; /* Giới hạn chiều cao của các hình ảnh */
+  }
+  
+  .awssld__wrapper img {
+    object-fit: cover; /* Đảm bảo hình ảnh lấp đầy không gian mà không bị biến dạng */
+    width: 100%; /* Chiều rộng của ảnh bằng với chiều rộng của slider */
+    
+  }
+  

@@ -1,0 +1,51 @@
+.job-type-badge {
+  background-color: rgba(0, 128, 0, 0.1); 
+  color: green; 
+  border: 1px solid green; /* Thêm viền cho badge */
+  padding: 2px 8px; 
+  border-radius: 8px; 
+  font-size: 12px;
+  font-weight: 600; 
+  text-transform: uppercase; 
+}
+
+.location-ellipsis {
+  display: inline-block;
+  max-width: 100px; 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* JobCard.css */
+.card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Thêm hiệu ứng chuyển tiếp */
+  border: 1px solid transparent; /* Thêm viền trong suốt */
+  border-radius: 8px; /* Bo góc thẻ */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Thêm hiệu ứng đổ bóng ban đầu */
+}
+
+.card:hover {
+  transform: translateY(-5px); /* Di chuyển nhẹ lên trên */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Tăng hiệu ứng đổ bóng khi hover */
+  border-color: rgba(0, 0, 0, 0.1); /* Đổi màu viền khi hover */
+  border-width: 2px; /* Tăng độ dày viền khi hover */
+  border-style: solid; /* Định nghĩa kiểu viền khi hover */
+}
+
+.card-header {
+  transition: background-color 0.3s ease; /* Thay đổi màu nền mượt mà */
+}
+
+.card:hover .card-header {
+  background-color: rgba(0, 0, 0, 0.1); /* Đổi màu nền khi hover */
+}
+
+/* Xóa hiệu ứng blur */
+.card-content {
+  transition: color 0.3s ease; /* Thay đổi màu chữ mượt mà */
+}
+
+.card:hover .card-content {
+  color: green; /* Đổi màu chữ sang xanh lá cây khi hover */
+}

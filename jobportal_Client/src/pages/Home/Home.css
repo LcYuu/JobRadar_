@@ -1,0 +1,163 @@
+/* CSS for JobRadar Component */
+
+/* General layout */
+body {
+    background-color: #1a202c;
+    color: #fff;
+    min-height: 100vh;
+    font-family: sans-serif;
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+  
+  .header, .footer {
+    background-color: #2d3748;
+    padding: 24px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .header .logo {
+    display: flex;
+    align-items: center;
+  }
+  
+  .header .logo .logo-icon {
+    width: 32px;
+    height: 32px;
+    background-color: #5a67d8;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+  
+  .header .nav {
+    display: flex;
+    gap: 16px;
+  }
+  
+  .nav li {
+    list-style: none;
+  }
+  
+  .main-content {
+    padding-top: 80px;
+  }
+  
+  .main-content h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 16px;
+  }
+  
+  .main-content p {
+    color: #a0aec0;
+    margin-bottom: 32px;
+  }
+  
+  .main-content .search-bar {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+  
+  .search-bar input {
+    flex-grow: 1;
+    padding: 8px 16px;
+    background-color: #2d3748;
+    border-radius: 8px;
+    border: none;
+    color: white;
+  }
+  
+  .search-bar button {
+    background-color: #5a67d8;
+    padding: 8px 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    border: none;
+    color: white;
+  }
+  
+  .search-bar svg {
+    margin-right: 8px;
+  }
+  
+  .companies-list {
+    display: flex;
+    gap: 32px;
+  }
+  
+  .companies-list div {
+    color: #a0aec0;
+  }
+  
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding-top: 48px;
+  }
+  
+  .category-item {
+    background-color: #2d3748;
+    padding: 16px;
+    border-radius: 8px;
+  }
+  
+  .category-item .icon {
+    width: 48px;
+    height: 48px;
+    background-color: #5a67d8;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+  
+  .category-item h3 {
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  
+  .category-item p {
+    color: #a0aec0;
+  }
+  
+  .category-item a {
+    color: #5a67d8;
+    display: flex;
+    align-items: center;
+  }
+  
+  .category-item a svg {
+    margin-left: 4px;
+  }
+  
+  .footer-content {
+    padding: 24px 0;
+    border-top: 1px solid #4a5568;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .footer-content p {
+    color: #a0aec0;
+  }
+  
+  .social-icons {
+    display: flex;
+    gap: 16px;
+  }
+  
+  .social-icons div {
+    width: 32px;
+    height: 32px;
+    background-color: #4a5568;
+    border-radius: 50%;
+  }
+  

@@ -1,0 +1,59 @@
+/* src/components/CategoryCard/CategoryCard.css */
+
+.category-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+    cursor: pointer;
+  }
+  
+  .category-card:hover {
+    transform: translateY(-7px);
+    background-color: #bebcc2;
+  }
+  .category-card.active {
+    background-color: #4f46e5; /* Màu của card đang được chọn */
+  }
+  
+  .icon img {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .category-info {
+    flex: 1;
+    margin-left: 10px;
+  }
+  
+  .category-title {
+    font-size: 1.2rem;
+    color: #333;
+    margin: 0;
+  }
+  
+  .job-count {
+    font-size: 0.9rem;
+    color: #888;
+    margin-top: 5px;
+  }
+  
+  .arrow {
+    margin-left: 10px;
+  }
+  
+  .arrow svg {
+    stroke: #888;
+  }
+  
+  .arrow:hover svg {
+    stroke: #333;
+  }
+  .category-card:hover .arrow svg {
+    stroke: #f3f4f6; /* Màu mũi tên nhạt hơn khi hover */
+  }
+  

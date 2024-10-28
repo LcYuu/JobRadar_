@@ -1,0 +1,21 @@
+/* src/components/CategoryList/CategoryList.css */
+
+.category-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  @media (min-width: 768px) {
+    .category-list {
+      grid-template-columns: repeat(3, 1fr); /* 3 cột trên màn hình lớn hơn */
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .category-list {
+      grid-template-columns: repeat(4, 1fr); /* 4 cột trên màn hình lớn hơn */
+    }
+  }
+  
