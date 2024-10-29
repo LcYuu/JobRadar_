@@ -59,6 +59,8 @@ public class CompanyController {
 	    List<Company> res = companyRepository.findAll();
 	    return new ResponseEntity<>(res, HttpStatus.OK);
 	}
+	
+	
 
 	@PutMapping("/update-company")
 	public ResponseEntity<String> updateCompany(@RequestHeader("Authorization") String jwt,
