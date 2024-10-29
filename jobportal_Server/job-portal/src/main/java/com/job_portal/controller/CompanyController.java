@@ -32,6 +32,7 @@ import com.job_portal.models.UserAccount;
 import com.job_portal.repository.ApplyJobRepository;
 import com.job_portal.repository.CompanyRepository;
 import com.job_portal.repository.UserAccountRepository;
+import com.job_portal.service.IApplyJobService;
 import com.job_portal.service.ICompanyService;
 import com.social.exceptions.AllExceptions;
 
@@ -46,6 +47,9 @@ public class CompanyController {
 
 	@Autowired
 	private UserAccountRepository userAccountRepository;
+	
+	@Autowired
+	private IApplyJobService applyJobService;
 	
 
 	@GetMapping("/get-all")
@@ -167,5 +171,13 @@ public class CompanyController {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		}
 	}
+	@GetMapping("/can-rating/{companyId}")
+    public ResponseEntity<Boolean> checkIfSaved(@RequestHeader("Authorization") String jwt, 
+    		@PathVariable("companyId") UUID companyId) {
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+        boolean isSaved = applyJobService.isEligibleForRating(user.get().getUserId(), companyId);
+        return ResponseEntity.ok(isSaved);
+    }
 
 }
