@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.job_portal.DTO.CompanyDTO;
 import com.job_portal.DTO.DailyJobCount;
+import com.job_portal.DTO.JobCountType;
 import com.job_portal.DTO.JobPostDTO;
 import com.job_portal.DTO.SeekerDTO;
 import com.job_portal.config.JwtProvider;
@@ -328,4 +329,22 @@ public class JobPostController {
 	                             .body(null);
 	    }
 	}
+	
+	@GetMapping("/count-job-by-type")
+    public List<JobCountType> getCountJobByTypeOfWork() {
+		 return jobPostService.getJobCountByType(); 
+    }
+	@GetMapping("/search-job-by-feature")
+    public ResponseEntity<Page<JobPost>> searchJobsWithPagination(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) List<String> selectedTypesOfWork,
+            @RequestParam(required = false) Long minSalary,
+            @RequestParam(required = false) Long maxSalary,
+            @RequestParam(required = false) Integer cityId,
+            @RequestParam(required = false) List<Integer> selectedIndustryIds,
+            Pageable pageable) {
+        
+        Page<JobPost> jobsPage = jobPostService.searchJobsWithPagination(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds, pageable);
+        return ResponseEntity.ok(jobsPage);
+    }
 }

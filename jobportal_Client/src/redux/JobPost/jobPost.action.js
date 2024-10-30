@@ -1,6 +1,6 @@
 import axios from "axios"
 import { api } from "../../configs/api"
-import { CREATE_COMMENT_FAILURE,GET_ALL_JOB_REQUEST, GET_ALL_JOB_FAILURE, CREATE_COMMENT_REQUEST, CREATE_COMMENT_SUCCESS, CREATE_POST_FAILURE, CREATE_POST_REQUEST, CREATE_POST_SUCCESS, GET_ALL_JOB_SUCCESS, GET_ALL_POST_FAILURE, GET_ALL_POST_REQUEST, GET_ALL_POST_SUCCESS, GET_USERS_POST_FAILURE, GET_USERS_POST_REQUEST, GET_USERS_POST_SUCCESS, LIKE_POST_FAILURE, LIKE_POST_REQUEST, LIKE_POST_SUCCESS, GET_TOP8_JOB_REQUEST, GET_TOP8_JOB_FAILURE, GET_TOP8_JOB_SUCCESS } from "./jobPost.actionType"
+import { CREATE_COMMENT_FAILURE,GET_ALL_JOB_REQUEST, GET_ALL_JOB_FAILURE, CREATE_COMMENT_REQUEST, CREATE_COMMENT_SUCCESS, CREATE_POST_FAILURE, CREATE_POST_REQUEST, CREATE_POST_SUCCESS, GET_ALL_JOB_SUCCESS, GET_ALL_POST_FAILURE, GET_ALL_POST_REQUEST, GET_ALL_POST_SUCCESS, GET_USERS_POST_FAILURE, GET_USERS_POST_REQUEST, GET_USERS_POST_SUCCESS, LIKE_POST_FAILURE, LIKE_POST_REQUEST, LIKE_POST_SUCCESS, GET_TOP8_JOB_REQUEST, GET_TOP8_JOB_FAILURE, GET_TOP8_JOB_SUCCESS, COUNT_JOB_BY_TYPE_REQUEST, COUNT_JOB_BY_TYPE_SUCCESS, COUNT_JOB_BY_TYPE_FAILURE } from "./jobPost.actionType"
 
 
 // export const createPostAction = (postData) => async(dispatch) =>{
@@ -44,6 +44,22 @@ export const getTop8LastestJob = () => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: GET_TOP8_JOB_FAILURE,
+            payload: error.message // Hoặc error.response.data
+        });
+    }
+};
+
+export const countJobByType = () => async (dispatch) => {
+    dispatch({ type: COUNT_JOB_BY_TYPE_REQUEST });
+    try {
+        const response = await axios.get(`http://localhost:8080/job-post/count-job-by-type`); // Thay thế với URL thực tế
+        dispatch({
+            type: COUNT_JOB_BY_TYPE_SUCCESS,
+            payload: response.data // Trả về dữ liệu nhận được từ API
+        });
+    } catch (error) {
+        dispatch({
+            type: COUNT_JOB_BY_TYPE_FAILURE,
             payload: error.message // Hoặc error.response.data
         });
     }

@@ -3,12 +3,14 @@ package com.job_portal.service;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.job_portal.DTO.DailyJobCount;
+import com.job_portal.DTO.JobCountType;
 import com.job_portal.DTO.JobPostDTO;
 import com.job_portal.models.JobPost;
 import com.social.exceptions.AllExceptions;
@@ -29,5 +31,6 @@ public interface IJobPostService {
 	public Page<JobPost>findByIsApprove(Pageable pageable);
 	public void exportJobPostToCSV(String filePath) throws IOException;
 	public List<JobPost> getTop8LatestJobPosts();
-
+	public List<JobCountType> getJobCountByType();
+	public Page<JobPost> searchJobsWithPagination(String title, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, Pageable pageable);
 }

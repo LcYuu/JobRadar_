@@ -179,5 +179,6 @@ public class CompanyController {
         boolean isSaved = applyJobService.isEligibleForRating(user.get().getUserId(), companyId);
         return ResponseEntity.ok(isSaved);
     }
+	
 
 }
