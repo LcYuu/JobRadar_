@@ -27,6 +27,7 @@ import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.ReviewRepository;
 import com.job_portal.repository.SeekerRepository;
 import com.job_portal.repository.UserAccountRepository;
+import com.job_portal.service.IApplyJobService;
 import com.job_portal.service.IJobPostService;
 import com.job_portal.service.IReviewService;
 import com.social.exceptions.AllExceptions;
@@ -42,6 +43,9 @@ public class ReviewController {
 	IReviewService reviewService;
 	@Autowired
 	SeekerRepository seekerRepository;
+	
+	@Autowired
+	IApplyJobService applyJobService;
 
 
 	@Autowired
