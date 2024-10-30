@@ -1,4 +1,6 @@
+
 import { useEffect, useState } from "react";
+
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { Card, CardContent } from "../..//ui/card";
@@ -22,6 +24,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+
 import { useDispatch, useSelector } from "react-redux";
 import { countJobByType, getAllJobAction } from "../../redux/JobPost/jobPost.action";
 import Pagination from "../../components/layout/Pagination";
@@ -30,6 +33,7 @@ import { getCity } from "../../redux/City/city.action";
 import { getIndustryCount } from "../../redux/Industry/industry.action";
 
 export default function JobSearchPage() {
+
   const [filters, setFilters] = useState({
     employmentType: {
       fullTime: false,
@@ -57,6 +61,7 @@ export default function JobSearchPage() {
     },
     salaryRange: { range1: false, range2: false, range3: false, range4: false },
   });
+
   const dispatch = useDispatch();
   const {
     jobPost = [],
@@ -85,6 +90,7 @@ export default function JobSearchPage() {
     dispatch(getIndustryCount());
   }, []);
   
+
   const handleFilterChange = (category, item) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
@@ -98,6 +104,7 @@ export default function JobSearchPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="container mx-auto px-4 py-8">
+
         <h1 className="text-3xl font-bold mb-6">
           Tim kiếm{" "}
           <span className="text-primary">công việc trong mơ của bạn</span>
@@ -115,6 +122,7 @@ export default function JobSearchPage() {
             </div>
 
             <div className="relative w-64">
+
               {/* <MapPin className="absolute top-1/2 transform -translate-y-1/2 text-gray-400" /> */}
               <Select>
                 <SelectTrigger className="w-full">
@@ -142,6 +150,7 @@ export default function JobSearchPage() {
           <aside className="w-64 space-y-6">
             <div>
               <h3 className="font-semibold mb-2 flex justify-between items-center">
+
                 Type of Work
                 <ChevronDown size={20} />
               </h3>
@@ -151,6 +160,7 @@ export default function JobSearchPage() {
                   <Checkbox
                     id="full-time"
                     // checked={filters.employmentType.fullTime}
+
                     onCheckedChange={() =>
                       handleFilterChange("employmentType", "fullTime")
                     }
@@ -184,12 +194,15 @@ export default function JobSearchPage() {
             </div>
             <div>
               <h3 className="font-semibold mb-2 flex justify-between items-center">
+
                 Salary Range
+
                 <ChevronDown size={20} />
               </h3>
               <div className="space-y-2">
                 <div className="flex items-center">
                   <Checkbox
+
                     id="700-1000"
                     checked={filters.salaryRange.range1}
                     onCheckedChange={() =>
