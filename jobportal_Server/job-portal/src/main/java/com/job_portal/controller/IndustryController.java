@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.job_portal.DTO.CountJobByIndustry;
+import com.job_portal.DTO.JobCountType;
 import com.job_portal.models.Industry;
 import com.job_portal.repository.IndustryRepository;
 import com.job_portal.service.IIndustryService;
@@ -81,4 +82,9 @@ public class IndustryController {
 		List<CountJobByIndustry> industries = industryRepository.countJobsByIndustry();
 		return industries;
 	}
+	
+	@GetMapping("/industry/count-industry")
+    public List<CountJobByIndustry> getCountIndustry() {
+		 return industryService.getIndustryCount(); 
+    }
 }

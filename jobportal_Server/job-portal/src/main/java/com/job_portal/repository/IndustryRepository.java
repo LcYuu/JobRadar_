@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.job_portal.DTO.CountJobByIndustry;
+import com.job_portal.DTO.JobCountType;
 import com.job_portal.models.Industry;
 
 public interface IndustryRepository extends JpaRepository<Industry, Integer> {
@@ -25,6 +26,14 @@ public interface IndustryRepository extends JpaRepository<Industry, Integer> {
 		       "WHERE jp.expireDate > CURRENT_DATE OR jp.expireDate IS NULL " +
 		       "GROUP BY i.industryId, i.industryName")
 		List<CountJobByIndustry> countJobsByIndustry();
+
+	@Query("SELECT new com.job_portal.DTO.CountJobByIndustry(i.industryId, i.industryName, COUNT(c.companyId)) " +
+		       "FROM Industry i " +
+		       "INNER JOIN Company c ON c.industry.industryId = i.industryId " +
+		       "INNER JOIN JobPost jp ON jp.company.companyId = c.companyId " +
+		       "WHERE jp.expireDate > CURRENT_DATE OR jp.expireDate IS NULL " +
+		       "GROUP BY i.industryId, i.industryName")
+		List<CountJobByIndustry> countByIndustry();
 
 
 

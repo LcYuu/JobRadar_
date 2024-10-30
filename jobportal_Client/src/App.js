@@ -8,7 +8,7 @@ import SignInForm from "./pages/SignIn/SignIn";
 import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 import FindJobs from "./pages/FindJobs/FindJobs";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { getProfileAction } from "./redux/Auth/auth.action";
 import ChangePassword from "./pages/ForgotPassword/ChangePassword";
 import MyAccount from "./pages/MyAccount/MyAccount";
@@ -26,22 +26,27 @@ const App = () => {
 
   const isAuthenticated = !!auth.user;
 
-  // Ẩn Header nếu người dùng đang ở trang đăng ký và đăng nhập
-  const showHeader = location.pathname !== '/auth/sign-up' && location.pathname !== '/auth/sign-in'&& location.pathname !== '/auth/forgot-password' ;
-
+  // Move this logic into a memoized value to prevent unnecessary re-renders
+  const showHeader = useMemo(() => {
+    const noHeaderPaths = ['/auth/sign-up', '/auth/sign-in', '/auth/forgot-password'];
+    return !noHeaderPaths.includes(location.pathname);
+  }, [location.pathname]);
+  
   return (
-    <>
-      {showHeader && <Header />} 
-      <Routes>
-        <Route path="/auth/sign-up" element={<SignUpForm />} />
-        <Route path="/account-management" element={<MyAccount />} />
-        <Route path="/auth/sign-in" element={<SignInForm />} />
-        <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-        <Route path="/" element={isAuthenticated ? <Home /> : <SignInForm />} />
-        <Route path="/change-password" element={<ChangePassword />} />
-        <Route path="/find-jobs" element={<FindJobs />} />
-      </Routes>
-    </>
+    <div className="app-container">
+      {showHeader && <Header />}
+      <main>
+        <Routes>
+          <Route path="/auth/sign-up" element={<SignUpForm />} />
+          <Route path="/account-management" element={<MyAccount />} />
+          <Route path="/auth/sign-in" element={<SignInForm />} />
+          <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+          <Route path="/" element={isAuthenticated ? <Home /> : <SignInForm />} />
+          <Route path="/change-password" element={<ChangePassword />} />
+          <Route path="/find-jobs" element={<FindJobs />} />
+        </Routes>
+      </main>
+    </div>
   );
 };
 
