@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import { getProfileAction } from "./redux/Auth/auth.action";
 import ChangePassword from "./pages/ForgotPassword/ChangePassword";
 import MyAccount from "./pages/MyAccount/MyAccount";
+import FindCompanies from "./pages/FindComapnies/FindCompanies";
 const App = () => {
   const location = useLocation();
   const { auth } = useSelector(store => store);
@@ -40,6 +41,7 @@ const App = () => {
         <Route path="/" element={isAuthenticated ? <Home /> : <SignInForm />} />
         <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/find-jobs" element={<FindJobs />} />
+        <Route path="/find-companies" element={<FindCompanies />} />
       </Routes>
     </>
   );
