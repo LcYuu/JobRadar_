@@ -29,7 +29,7 @@ public class ReviewServiceImpl implements IReviewService {
 
 		Review review = new Review();
 		Optional<Company> companyOptional = companyRepository.findById(companyId);
-
+		
 		if (companyOptional.isPresent()) {
 			Company company = companyOptional.get();
 			review.setCompany(company);

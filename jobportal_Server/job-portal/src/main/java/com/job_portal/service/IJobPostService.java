@@ -29,4 +29,5 @@ public interface IJobPostService {
 	public Page<JobPost>findByIsApprove(Pageable pageable);
 	public void exportJobPostToCSV(String filePath) throws IOException;
 	public List<JobPost> getTop8LatestJobPosts();
+
 }
