@@ -4,11 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../ui/dialog";
 import { motion, AnimatePresence } from 'framer-motion';
 import SuccessIcon from '../../components/common/Icon/Sucess/Sucess';
 import FailureIcon from '../../components/common/Icon/Failed/Failed';
-import { FaGoogle } from 'react-icons/fa';
 import googleIcon from '../../assets/icons/google.png';
 import logo1 from '../../assets/images/common/logo1.jpg';
 import { loginAction } from '../../redux/Auth/auth.action';
@@ -22,11 +21,11 @@ export default function SignInForm() {
   const [loginStatus, setLoginStatus] = useState(null); // null, 'success', 'failure'
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent default form submission
 
-    e.preventDefault();
-
-    setError(''); // Xóa lỗi cũ
+    setError(''); // Clear previous error
     if (!isStrongPassword(password)) {
       setLoginStatus('failure');
       setIsModalOpen(true);
@@ -35,27 +34,30 @@ export default function SignInForm() {
     }
 
     try {
-        const response = await dispatch(loginAction({ email, password }));
-        if (response.success) {
-            setLoginStatus('success');
-            setIsModalOpen(true);
-            setTimeout(() => {
-                setIsModalOpen(false);
-                navigate('/'); // Điều hướng đến trang Home
-            }, 2000);
-        } else {
-            setLoginStatus('failure');
-            setIsModalOpen(true);
-            // Hiển thị thông báo lỗi từ API
-            setError(response.error || 'Đăng nhập thất bại. Vui lòng thử lại.');
-        }
-    } catch (error) {
+      const response = await dispatch(loginAction({ email, password }));
+      if (response.success) {
+        setLoginStatus('success');
+        setIsModalOpen(true);
+        setTimeout(() => {
+          setIsModalOpen(false);
+          navigate('/'); // Navigate to the Home page
+        }, 2000);
+      } else {
         setLoginStatus('failure');
         setIsModalOpen(true);
-        setError('Đã xảy ra lỗi. Vui lòng thử lại sau.');
+        setError(response.error || 'Đăng nhập thất bại. Vui lòng thử lại.');
+      }
+    } catch (error) {
+      setLoginStatus('failure');
+      setIsModalOpen(true);
+      setError('Đã xảy ra lỗi. Vui lòng thử lại sau.');
     }
-};
+  };
 
+  const handleGoogleLogin = () => {
+    // Implement Google login functionality here
+    console.log("Google login clicked");
+  };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -103,8 +105,13 @@ export default function SignInForm() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
+          {/* Remove onSubmit from the form to prevent Google login from triggering it */}
           <form className="space-y-4">
-            <Button variant="outline" className="w-full flex items-center justify-center gap-2 border border-gray-300 hover:bg-gray-50">
+            <Button
+              variant="outline"
+              onClick={handleGoogleLogin} // Use a separate handler for Google login
+              className="w-full flex items-center justify-center gap-2 border border-gray-300 hover:bg-gray-50"
+            >
               <img src={googleIcon} className="w-5 h-5" alt="Google Icon" />
               <span>Sign In with Google</span>
             </Button>
@@ -132,6 +139,11 @@ export default function SignInForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSubmit(e); // Call handleSubmit when Enter key is pressed
+                  }
+                }}
               />
             </div>
             <div className="flex justify-between items-center">
@@ -139,6 +151,7 @@ export default function SignInForm() {
                 Quên mật khẩu?
               </a>
             </div>
+            {/* Attach the handleSubmit to the onClick of the email/password login button */}
             <Button onClick={handleSubmit} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">
               Đăng nhập
             </Button>
