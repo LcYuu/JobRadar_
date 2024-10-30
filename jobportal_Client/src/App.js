@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import './App.css';
 import Header from './components/common/Header/header';
@@ -13,17 +14,18 @@ import { getProfileAction } from "./redux/Auth/auth.action";
 import ChangePassword from "./pages/ForgotPassword/ChangePassword";
 import MyAccount from "./pages/MyAccount/MyAccount";
 import FindCompanies from "./pages/FindComapnies/FindCompanies";
+
 const App = () => {
   const location = useLocation();
   const { auth } = useSelector(store => store);
   const dispatch = useDispatch();
-  const jwt = localStorage.getItem("jwt");
 
   useEffect(() => {
+    const jwt = localStorage.getItem("jwt");
     if (jwt) {
       dispatch(getProfileAction(jwt));
     }
-  }, [jwt, dispatch]);
+  }, [dispatch]);
 
   const isAuthenticated = !!auth.user;
 
