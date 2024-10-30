@@ -1,6 +1,7 @@
 package com.job_portal.service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,6 +52,11 @@ public class ApplyJobServiceImpl implements IApplyJobService {
 		} catch (Exception e) {
 			return false;
 		}
+	}
+
+	@Override
+	public boolean isEligibleForRating(UUID userId, UUID companyId) {
+		return applyJobRepository.existsByUserIdAndCompanyId(userId, companyId);
 	}
 
 }
