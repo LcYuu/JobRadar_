@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import './App.css';
 import Header from './components/common/Header/header';
@@ -12,17 +13,19 @@ import { useEffect, useMemo } from "react";
 import { getProfileAction } from "./redux/Auth/auth.action";
 import ChangePassword from "./pages/ForgotPassword/ChangePassword";
 import MyAccount from "./pages/MyAccount/MyAccount";
+import FindCompanies from "./pages/FindComapnies/FindCompanies";
+
 const App = () => {
   const location = useLocation();
   const { auth } = useSelector(store => store);
   const dispatch = useDispatch();
-  const jwt = localStorage.getItem("jwt");
 
   useEffect(() => {
+    const jwt = localStorage.getItem("jwt");
     if (jwt) {
       dispatch(getProfileAction(jwt));
     }
-  }, [jwt, dispatch]);
+  }, [dispatch]);
 
   const isAuthenticated = !!auth.user;
 
@@ -33,20 +36,19 @@ const App = () => {
   }, [location.pathname]);
   
   return (
-    <div className="app-container">
-      {showHeader && <Header />}
-      <main>
-        <Routes>
-          <Route path="/auth/sign-up" element={<SignUpForm />} />
-          <Route path="/account-management" element={<MyAccount />} />
-          <Route path="/auth/sign-in" element={<SignInForm />} />
-          <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-          <Route path="/" element={isAuthenticated ? <Home /> : <SignInForm />} />
-          <Route path="/change-password" element={<ChangePassword />} />
-          <Route path="/find-jobs" element={<FindJobs />} />
-        </Routes>
-      </main>
-    </div>
+    <>
+      {showHeader && <Header />} 
+      <Routes>
+        <Route path="/auth/sign-up" element={<SignUpForm />} />
+        <Route path="/account-management" element={<MyAccount />} />
+        <Route path="/auth/sign-in" element={<SignInForm />} />
+        <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+        <Route path="/" element={isAuthenticated ? <Home /> : <SignInForm />} />
+        <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/find-jobs" element={<FindJobs />} />
+        <Route path="/find-companies" element={<FindCompanies />} />
+      </Routes>
+    </>
   );
 };
 
