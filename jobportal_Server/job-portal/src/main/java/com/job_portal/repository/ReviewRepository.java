@@ -13,4 +13,5 @@ import com.job_portal.models.Review;
 public interface ReviewRepository extends JpaRepository<Review, UUID> {
 	@Query("SELECT r FROM Review r WHERE r.company.companyId = :companyId")
 	public List<Review> findReviewByCompanyId(@Param("companyId") UUID companyId);
+	
 }
