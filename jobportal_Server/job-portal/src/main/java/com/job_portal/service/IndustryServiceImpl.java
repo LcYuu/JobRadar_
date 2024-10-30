@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.job_portal.DTO.CountJobByIndustry;
 import com.job_portal.models.Industry;
 import com.job_portal.models.UserAccount;
 import com.job_portal.repository.IndustryRepository;
@@ -77,6 +78,11 @@ public class IndustryServiceImpl implements IIndustryService {
 			return industry.get();
 		}
 		throw new AllExceptions("Industry not exist with id: " + industry_id);
+	}
+
+	@Override
+	public List<CountJobByIndustry> getIndustryCount() {
+		return industryRepository.countByIndustry();
 	}
 
 	

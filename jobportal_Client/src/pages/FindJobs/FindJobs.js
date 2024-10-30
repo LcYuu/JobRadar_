@@ -1,4 +1,6 @@
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
+
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { Card, CardContent } from "../..//ui/card";
@@ -23,79 +25,14 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+import { useDispatch, useSelector } from "react-redux";
+import { countJobByType, getAllJobAction } from "../../redux/JobPost/jobPost.action";
+import Pagination from "../../components/layout/Pagination";
+import { store } from "../../redux/store";
+import { getCity } from "../../redux/City/city.action";
+import { getIndustryCount } from "../../redux/Industry/industry.action";
+
 export default function JobSearchPage() {
-  const [jobs, setJobs] = useState([
-    {
-      id: 1,
-      title: "Social Media Assistant",
-      company: "Nomad",
-      location: "Paris, France",
-      type: "Full-Time",
-      tags: ["Marketing", "Design"],
-      applied: 5,
-      capacity: 10,
-    },
-    {
-      id: 2,
-      title: "Brand Designer",
-      company: "Dropbox",
-      location: "San Francisco, USA",
-      type: "Full-Time",
-      tags: ["Marketing", "Design"],
-      applied: 2,
-      capacity: 10,
-    },
-    {
-      id: 3,
-      title: "Interactive Developer",
-      company: "Terraform",
-      location: "Hamburg, Germany",
-      type: "Full-Time",
-      tags: ["Marketing", "Design"],
-      applied: 8,
-      capacity: 12,
-    },
-    {
-      id: 4,
-      title: "Email Marketing",
-      company: "Revolut",
-      location: "Madrid, Spain",
-      type: "Full-Time",
-      tags: ["Marketing", "Design"],
-      applied: 0,
-      capacity: 10,
-    },
-    {
-      id: 5,
-      title: "Lead Engineer",
-      company: "Canva",
-      location: "Ankara, Turkey",
-      type: "Full-Time",
-      tags: ["Marketing", "Design"],
-      applied: 5,
-      capacity: 10,
-    },
-    {
-      id: 6,
-      title: "Product Designer",
-      company: "ClassPass",
-      location: "Berlin, Germany",
-      type: "Full-Time",
-      tags: ["Marketing", "Design"],
-      applied: 5,
-      capacity: 10,
-    },
-    {
-      id: 7,
-      title: "Customer Manager",
-      company: "Pitch",
-      location: "Berlin, Germany",
-      type: "Full-Time",
-      tags: ["Marketing", "Design"],
-      applied: 5,
-      capacity: 10,
-    },
-  ]);
 
   const [filters, setFilters] = useState({
     employmentType: {
@@ -125,6 +62,35 @@ export default function JobSearchPage() {
     salaryRange: { range1: false, range2: false, range3: false, range4: false },
   });
 
+  const dispatch = useDispatch();
+  const {
+    jobPost = [],
+    totalPages,
+    jobCountByType = [],
+    loading,
+    error,
+  } = useSelector((store) => store.jobPost);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [size] = useState(7);
+
+  const { cities = [] } = useSelector((store) => store.city);
+  const { industryCount = [] } = useSelector((store) => store.industry);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  useEffect(() => {
+    dispatch(getAllJobAction(currentPage, size));
+  }, [currentPage, size]);
+  
+  useEffect(() => {
+    dispatch(getCity());
+    dispatch(countJobByType());
+    dispatch(getIndustryCount());
+  }, []);
+  
+
   const handleFilterChange = (category, item) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
@@ -138,15 +104,11 @@ export default function JobSearchPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="container mx-auto px-4 py-8">
-        <div className="text-center my-8">
-          <h1 className="text-3xl font-bold">
-            Tìm kiếm{" "}
-            <span className="relative inline-block text-primary text-blue-500">
-              công việc trong mơ của bạn
-              <span className="absolute bottom-0 left-0 w-full h-1 bg-blue-300 opacity-50"></span>
-            </span>
-          </h1>
-        </div>
+
+        <h1 className="text-3xl font-bold mb-6">
+          Tim kiếm{" "}
+          <span className="text-primary">công việc trong mơ của bạn</span>
+        </h1>
 
         <div className="bg-white rounded-lg shadow-sm p-4 mb-8">
           <div className="flex space-x-2">
@@ -160,19 +122,19 @@ export default function JobSearchPage() {
             </div>
 
             <div className="relative w-64">
-              <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+
+              {/* <MapPin className="absolute top-1/2 transform -translate-y-1/2 text-gray-400" /> */}
               <Select>
-                <SelectTrigger className="w-full pl-12 pr-4 py-3 text-left rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <SelectValue placeholder="Hồ Chí Minh" />
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a location" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent >
                   <SelectGroup>
-                    <SelectLabel>Locations</SelectLabel>
-                    <SelectItem value="Hồ Chí Minh">Hồ Chí Minh</SelectItem>
-                    <SelectItem value="Hà Nội">Hà Nội</SelectItem>
-                    <SelectItem value="Đà Nẵng">Đà Nẵng</SelectItem>
-                    <SelectItem value="Cần Thơ">Cần Thơ</SelectItem>
-                    <SelectItem value="Hải Phòng">Hải Phòng</SelectItem>
+                    {cities.map((c) => (
+                      <SelectItem key={c.cityId} value={c.cityId}>
+                        {c.cityName}
+                      </SelectItem>
+                    ))}
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -188,70 +150,26 @@ export default function JobSearchPage() {
           <aside className="w-64 space-y-6">
             <div>
               <h3 className="font-semibold mb-2 flex justify-between items-center">
-                Type of Employment
+
+                Type of Work
                 <ChevronDown size={20} />
               </h3>
               <div className="space-y-2">
-                <div className="flex items-center">
+              {jobCountByType.map(job => <div className="flex items-center">
+                  
                   <Checkbox
                     id="full-time"
-                    checked={filters.employmentType.fullTime}
+                    // checked={filters.employmentType.fullTime}
+
                     onCheckedChange={() =>
                       handleFilterChange("employmentType", "fullTime")
                     }
                   />
                   <label htmlFor="full-time" className="ml-2 text-sm">
-                    Full-time (3)
+                    {job.typeOfWork} ({job.count})
                   </label>
-                </div>
-                <div className="flex items-center">
-                  <Checkbox
-                    id="part-time"
-                    checked={filters.employmentType.partTime}
-                    onCheckedChange={() =>
-                      handleFilterChange("employmentType", "partTime")
-                    }
-                  />
-                  <label htmlFor="part-time" className="ml-2 text-sm">
-                    Part-Time (5)
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <Checkbox
-                    id="remote"
-                    checked={filters.employmentType.remote}
-                    onCheckedChange={() =>
-                      handleFilterChange("employmentType", "remote")
-                    }
-                  />
-                  <label htmlFor="remote" className="ml-2 text-sm">
-                    Remote (2)
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <Checkbox
-                    id="internship"
-                    checked={filters.employmentType.internship}
-                    onCheckedChange={() =>
-                      handleFilterChange("employmentType", "internship")
-                    }
-                  />
-                  <label htmlFor="internship" className="ml-2 text-sm">
-                    Internship (24)
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <Checkbox
-                    id="contract"
-                    checked={filters.employmentType.contract}
-                    onCheckedChange={() =>
-                      handleFilterChange("employmentType", "contract")
-                    }
-                  />
-                  <label htmlFor="contract" className="ml-2 text-sm">
-                    Contract (3)
-                  </label>
-                </div>
+                </div>)}
+              
               </div>
             </div>
             <div>
@@ -260,7 +178,7 @@ export default function JobSearchPage() {
                 <ChevronDown size={20} />
               </h3>
               <div className="space-y-2">
-                <div className="flex items-center">
+                {industryCount.map(industry => <div className="flex items-center">
                   <Checkbox
                     id="design"
                     checked={filters.categories.design}
@@ -269,171 +187,22 @@ export default function JobSearchPage() {
                     }
                   />
                   <label htmlFor="design" className="ml-2 text-sm">
-                    Design (24)
+                    {industry.industryName} ({industry.jobCount})
                   </label>
-                </div>
-                <div className="flex items-center">
-                  <Checkbox
-                    id="sales"
-                    checked={filters.categories.sales}
-                    onCheckedChange={() =>
-                      handleFilterChange("categories", "sales")
-                    }
-                  />
-                  <label htmlFor="sales" className="ml-2 text-sm">
-                    Sales (3)
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <Checkbox
-                    id="marketing"
-                    checked={filters.categories.marketing}
-                    onCheckedChange={() =>
-                      handleFilterChange("categories", "marketing")
-                    }
-                  />
-                  <label htmlFor="marketing" className="ml-2 text-sm">
-                    Marketing (3)
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <Checkbox
-                    id="business"
-                    checked={filters.categories.business}
-                    onCheckedChange={() =>
-                      handleFilterChange("categories", "business")
-                    }
-                  />
-                  <label htmlFor="business" className="ml-2 text-sm">
-                    Business (3)
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <Checkbox
-                    id="human-resource"
-                    checked={filters.categories.humanResource}
-                    onCheckedChange={() =>
-                      handleFilterChange("categories", "humanResource")
-                    }
-                  />
-                  <label htmlFor="human-resource" className="ml-2 text-sm">
-                    Human Resource (6)
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <Checkbox
-                    id="finance"
-                    checked={filters.categories.finance}
-                    onCheckedChange={() =>
-                      handleFilterChange("categories", "finance")
-                    }
-                  />
-                  <label htmlFor="finance" className="ml-2 text-sm">
-                    Finance (4)
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <Checkbox
-                    id="engineering"
-                    checked={filters.categories.engineering}
-                    onCheckedChange={() =>
-                      handleFilterChange("categories", "engineering")
-                    }
-                  />
-                  <label htmlFor="engineering" className="ml-2 text-sm">
-                    Engineering (4)
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <Checkbox
-                    id="technology"
-                    checked={filters.categories.technology}
-                    onCheckedChange={() =>
-                      handleFilterChange("categories", "technology")
-                    }
-                  />
-                  <label htmlFor="technology" className="ml-2 text-sm">
-                    Technology (5)
-                  </label>
-                </div>
+                </div>)}
               </div>
             </div>
             <div>
               <h3 className="font-semibold mb-2 flex justify-between items-center">
-                Job Level
-                <ChevronDown size={20} />
-              </h3>
-              <div className="space-y-2">
-                <div className="flex items-center">
-                  <Checkbox
-                    id="entry-level"
-                    checked={filters.jobLevel.entryLevel}
-                    onCheckedChange={() =>
-                      handleFilterChange("jobLevel", "entryLevel")
-                    }
-                  />
-                  <label htmlFor="entry-level" className="ml-2 text-sm">
-                    Entry Level (57)
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <Checkbox
-                    id="mid-level"
-                    checked={filters.jobLevel.midLevel}
-                    onCheckedChange={() =>
-                      handleFilterChange("jobLevel", "midLevel")
-                    }
-                  />
-                  <label htmlFor="mid-level" className="ml-2 text-sm">
-                    Mid Level (3)
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <Checkbox
-                    id="senior-level"
-                    checked={filters.jobLevel.seniorLevel}
-                    onCheckedChange={() =>
-                      handleFilterChange("jobLevel", "seniorLevel")
-                    }
-                  />
-                  <label htmlFor="senior-level" className="ml-2 text-sm">
-                    Senior Level (5)
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <Checkbox
-                    id="director"
-                    checked={filters.jobLevel.director}
-                    onCheckedChange={() =>
-                      handleFilterChange("jobLevel", "director")
-                    }
-                  />
-                  <label htmlFor="director" className="ml-2 text-sm">
-                    Director (12)
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <Checkbox
-                    id="vp-above"
-                    checked={filters.jobLevel.vpOrAbove}
-                    onCheckedChange={() =>
-                      handleFilterChange("jobLevel", "vpOrAbove")
-                    }
-                  />
-                  <label htmlFor="vp-above" className="ml-2 text-sm">
-                    VP or Above (8)
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2 flex justify-between items-center">
+
                 Salary Range
+
                 <ChevronDown size={20} />
               </h3>
               <div className="space-y-2">
                 <div className="flex items-center">
                   <Checkbox
+
                     id="700-1000"
                     checked={filters.salaryRange.range1}
                     onCheckedChange={() =>
@@ -489,7 +258,7 @@ export default function JobSearchPage() {
               <div className="flex items-center space-x-2">
                 <h2 className="text-xl font-semibold">All Jobs</h2>
                 <span className="text-sm text-gray-500">
-                  Showing 73 results
+                  Showing {jobPost.length} results
                 </span>
               </div>
               <div className="flex items-center space-x-2">
@@ -531,27 +300,16 @@ export default function JobSearchPage() {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">All Jobs</h2>
               <span className="text-sm text-gray-500">
-                Showing {jobs.length} results
+                Showing {jobPost.length} results
               </span>
             </div>
-            <JobList_AllJob jobs={jobs} />
-            <div className="flex justify-center items-center space-x-2 mt-8">
-              <Button variant="outline" size="icon">
-                <ChevronLeft size={16} />
-              </Button>
-              <Button variant="outline" className="bg-purple-600 text-white">
-                1
-              </Button>
-              <Button variant="outline">2</Button>
-              <Button variant="outline">3</Button>
-              <Button variant="outline">4</Button>
-              <Button variant="outline">5</Button>
-              <span>...</span>
-              <Button variant="outline">33</Button>
-              <Button variant="outline" size="icon">
-                <ChevronRight size={16} />
-              </Button>
-            </div>
+            <JobList_AllJob jobs={jobPost} />
+            <Pagination
+              currentPage={currentPage}
+              size={size}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
           </div>
         </div>
       </main>
