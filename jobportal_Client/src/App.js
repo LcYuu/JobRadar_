@@ -22,19 +22,17 @@ const App = () => {
 
   useEffect(() => {
     const jwt = localStorage.getItem("jwt");
-    if (jwt) {
+    if (jwt && !auth.user) {
       dispatch(getProfileAction(jwt));
     }
-  }, [dispatch]);
+  }, [dispatch, auth.user]);
 
   const isAuthenticated = !!auth.user;
 
-  // Move this logic into a memoized value to prevent unnecessary re-renders
-  const showHeader = useMemo(() => {
-    const noHeaderPaths = ['/auth/sign-up', '/auth/sign-in', '/auth/forgot-password'];
-    return !noHeaderPaths.includes(location.pathname);
-  }, [location.pathname]);
-  
+  // Ẩn Header nếu người dùng đang ở trang đăng ký và đăng nhập
+  const showHeader = location.pathname !== '/auth/sign-up' && location.pathname !== '/auth/sign-in' && location.pathname !== '/auth/forgot-password';
+
+
   return (
     <>
       {showHeader && <Header />} 
@@ -43,7 +41,7 @@ const App = () => {
         <Route path="/account-management" element={<MyAccount />} />
         <Route path="/auth/sign-in" element={<SignInForm />} />
         <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-        <Route path="/" element={isAuthenticated ? <Home /> : <SignInForm />} />
+        <Route path="/" element={<Home />} />
         <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/find-jobs" element={<FindJobs />} />
         <Route path="/find-companies" element={<FindCompanies />} />
