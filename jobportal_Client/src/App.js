@@ -22,15 +22,15 @@ const App = () => {
 
   useEffect(() => {
     const jwt = localStorage.getItem("jwt");
-    if (jwt) {
+    if (jwt && !auth.user) {
       dispatch(getProfileAction(jwt));
     }
-  }, [dispatch]);
+  }, [dispatch, auth.user]);
 
   const isAuthenticated = !!auth.user;
 
   // Ẩn Header nếu người dùng đang ở trang đăng ký và đăng nhập
-  const showHeader = location.pathname !== '/auth/sign-up' && location.pathname !== '/auth/sign-in'&& location.pathname !== '/auth/forgot-password' ;
+  const showHeader = location.pathname !== '/auth/sign-up' && location.pathname !== '/auth/sign-in' && location.pathname !== '/auth/forgot-password';
 
   return (
     <>
@@ -40,7 +40,7 @@ const App = () => {
         <Route path="/account-management" element={<MyAccount />} />
         <Route path="/auth/sign-in" element={<SignInForm />} />
         <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-        <Route path="/" element={isAuthenticated ? <Home /> : <SignInForm />} />
+        <Route path="/" element={<Home />} />
         <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/find-jobs" element={<FindJobs />} />
         <Route path="/find-companies" element={<FindCompanies />} />

@@ -6,14 +6,24 @@ import { Avatar, AvatarImage, AvatarFallback } from "../../ui/avatar";
 import { Separator } from "../../ui/separator";
 import logo from '../../assets/images/common/logo.jpg';
 import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { logoutAction } from '../../redux/Auth/auth.action'; // Adjust the import path as necessary
 
 export default function Sidebar({ selectedSection, setSelectedSection }) {
   const { user } = useSelector(store => store.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logoutAction()); // Dispatch the logout action
+    navigate('/auth/sign-in'); // Redirect to the sign-in page after logout
+  };
 
   return (
     <nav className="w-64 border-r bg-white p-6 relative h-screen">
       <div className="flex items-center gap-3 pb-8">
-        <img src={logo} alt="logo" className="h-10 w-10 rounded-full bg-primary" />
+       <a href="/"> <img src={logo} alt="logo" className="h-10 w-10 rounded-full bg-primary" /></a>
         <span className="text-2xl font-bold text-primary">JobRadar</span>
       </div>
 
@@ -77,6 +87,7 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
         variant="ghost" 
         size="icon"
         className="absolute bottom-6 right-6 hover:bg-red-50 hover:text-red-500 transition-colors duration-200"
+        onClick={handleLogout}
       >
         <LogOut className="h-5 w-5" />
       </Button>
