@@ -17,11 +17,11 @@ export default function Header() {
   useEffect(() => {
     const storedJwt = localStorage.getItem('jwt');
     if (storedJwt && !user) {
-      dispatch(getProfileAction());
+      dispatch(getProfileAction(storedJwt));
     }
   }, [dispatch, user]);
-
-  const isAuthenticated = !!jwt || !!localStorage.getItem('jwt');
+  // const isAuthenticated = !!jwt || !!localStorage.getItem('jwt');
+  const isAuthenticated = !!user;
 
   const handleSignUpClick = () => {
     navigate('/auth/sign-up');
