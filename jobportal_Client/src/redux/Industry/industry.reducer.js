@@ -1,11 +1,12 @@
 import { GET_ALL_JOB_SUCCESS } from "../JobPost/jobPost.actionType";
-import { GET_INDUSTRY_FAILURE, GET_INDUSTRY_REQUEST, GET_INDUSTRY_SUCCESS } from "./industry.actionType";
+import { GET_INDUSTRY_COUNT_SUCCESS, GET_INDUSTRY_FAILURE, GET_INDUSTRY_REQUEST, GET_INDUSTRY_SUCCESS } from "./industry.actionType";
 
 const initialState = {
     industry: null,
     loading: false,
     error: null,
-    industries: [], // Mảng lưu trữ các bài đăng công việc
+    industries: [],
+    industryCount: [], // Mảng lưu trữ các bài đăng công việc
 };
 
 
@@ -24,7 +25,13 @@ export const indutryReducer = (state = initialState, action) => {
                 loading: false, 
                 error: null 
             };
-
+        case GET_INDUSTRY_COUNT_SUCCESS:
+            return{
+                ...state,
+                industryCount: action.payload,
+                loading: false,
+                error: null
+            }
         case GET_INDUSTRY_FAILURE:
             return { 
                 ...state, 

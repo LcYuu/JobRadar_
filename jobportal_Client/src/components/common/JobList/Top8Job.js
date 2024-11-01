@@ -6,7 +6,7 @@ import { getTop8LastestJob } from '../../../redux/JobPost/jobPost.action';
 
 export default function Top8Job() {
   const dispatch = useDispatch();
-  const { jobPost = [], loading, error } = useSelector(store => store.jobPost);
+  const { top8Job = [], loading, error } = useSelector(store => store.jobPost);
 
   useEffect(() => {
     dispatch(getTop8LastestJob());
@@ -22,8 +22,8 @@ export default function Top8Job() {
         <h2 className="text-2xl font-bold">Công việc mới nhất</h2>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {jobPost.length > 0 ? (
-          jobPost.map((job) => (
+        {top8Job.length > 0 ? (
+          top8Job.map((job) => (
             <JobCard
               key={job.postId}
               jobTitle={job.title}

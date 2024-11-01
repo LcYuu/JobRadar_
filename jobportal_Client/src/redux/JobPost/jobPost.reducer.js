@@ -1,4 +1,6 @@
 import {
+  COUNT_JOB_BY_TYPE_REQUEST,
+  COUNT_JOB_BY_TYPE_SUCCESS,
   GET_ALL_JOB_FAILURE,
   GET_ALL_JOB_REQUEST,
   GET_ALL_JOB_SUCCESS,
@@ -11,6 +13,8 @@ const initialState = {
   post: null,
   loading: false,
   error: null,
+  top8Job: [],
+  jobCountByType: [],
   jobPost: [], // Mảng lưu trữ các bài đăng công việc
   totalPages: 0, // Tổng số trang
   approve: false,
@@ -20,6 +24,7 @@ export const jobPostReducer = (state = initialState, action) => {
   switch (action.type) {
     case GET_ALL_JOB_REQUEST:
     case GET_TOP8_JOB_REQUEST:
+    case COUNT_JOB_BY_TYPE_REQUEST:
       return {
         ...state,
         loading: true, // Bắt đầu trạng thái tải
@@ -36,7 +41,14 @@ export const jobPostReducer = (state = initialState, action) => {
     case GET_TOP8_JOB_SUCCESS:
       return {
         ...state,
-        jobPost: action.payload,
+        top8Job: action.payload,
+        loading: false, // Kết thúc trạng thái tải
+        error: null, // Đặt lỗi về null
+      };
+    case COUNT_JOB_BY_TYPE_SUCCESS:
+      return {
+        ...state,
+        jobCountByType: action.payload,
         loading: false, // Kết thúc trạng thái tải
         error: null, // Đặt lỗi về null
       };

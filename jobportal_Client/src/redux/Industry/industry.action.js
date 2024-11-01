@@ -1,5 +1,5 @@
 import axios from "axios";
-import { GET_INDUSTRY_FAILURE, GET_INDUSTRY_REQUEST, GET_INDUSTRY_SUCCESS } from "./industry.actionType";
+import { GET_INDUSTRY_COUNT_FAILURE, GET_INDUSTRY_COUNT_REQUEST, GET_INDUSTRY_COUNT_SUCCESS, GET_INDUSTRY_FAILURE, GET_INDUSTRY_REQUEST, GET_INDUSTRY_SUCCESS } from "./industry.actionType";
 import { API_BASE_URL } from "../../configs/api";
 
 
@@ -32,6 +32,22 @@ export const getIndustry = () => async (dispatch) => {
     } catch (error) {
         dispatch({
             type: GET_INDUSTRY_FAILURE,
+            payload: error.message // Hoặc error.response.data
+        });
+    }
+};
+
+export const getIndustryCount = () => async (dispatch) => {
+    dispatch({ type: GET_INDUSTRY_COUNT_REQUEST });
+    try {
+        const response = await axios.get(`http://localhost:8080/industry/count-industry`); // Thay thế với URL thực tế
+        dispatch({
+            type: GET_INDUSTRY_COUNT_SUCCESS,
+            payload: response.data // Trả về dữ liệu nhận được từ API
+        });
+    } catch (error) {
+        dispatch({
+            type: GET_INDUSTRY_COUNT_FAILURE,
             payload: error.message // Hoặc error.response.data
         });
     }
