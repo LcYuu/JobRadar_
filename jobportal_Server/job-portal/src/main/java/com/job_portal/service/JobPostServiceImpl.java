@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -13,9 +15,11 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.job_portal.DTO.DailyJobCount;
+import com.job_portal.DTO.JobCountType;
 import com.job_portal.DTO.JobPostDTO;
 import com.job_portal.models.City;
 import com.job_portal.models.Company;
@@ -30,6 +34,7 @@ import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.SearchHistoryRepository;
 import com.job_portal.repository.SeekerRepository;
 import com.job_portal.repository.SkillRepository;
+import com.job_portal.specification.JobPostSpecification;
 import com.opencsv.CSVWriter;
 import com.social.exceptions.AllExceptions;
 
@@ -386,5 +391,17 @@ public class JobPostServiceImpl implements IJobPostService {
 		        .limit(8)
 		        .collect(Collectors.toList());
 	}
+
+	@Override
+	public List<JobCountType> getJobCountByType() {
+		 return jobPostRepository.countByTypeOfWork(); 
+	}
+
+	@Override
+	public Page<JobPost> searchJobsWithPagination(String title, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, Pageable pageable) {
+        Specification<JobPost> spec = JobPostSpecification.withFilters(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds);
+        return jobPostRepository.findByIsApproveTrue(spec, pageable);
+    }
+
 
 }

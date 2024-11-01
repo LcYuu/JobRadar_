@@ -3,6 +3,7 @@ package com.job_portal.models;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -45,7 +46,7 @@ public class ApplyJob {
     private String description;
 
     // Quan hệ với JobPosts
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "post_id", referencedColumnName = "post_id", insertable = false, updatable = false)
     private JobPost jobPost;
 

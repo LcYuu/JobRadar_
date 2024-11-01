@@ -6,13 +6,16 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.job_portal.DTO.JobCountType;
 import com.job_portal.models.JobPost;
 
-public interface JobPostRepository extends JpaRepository<JobPost, UUID> {
+public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpecificationExecutor<JobPost> {
 
 	 @Query("SELECT j FROM JobPost j WHERE (j.title LIKE %:query% OR j.typeOfWork LIKE %:query%) AND j.isApprove = true")
 	 public List<JobPost> findJobByJobName(@Param("query") String query);
@@ -43,6 +46,12 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID> {
      
      @Query("SELECT j FROM JobPost j WHERE j.isApprove = true ORDER BY j.createDate DESC")
      List<JobPost> findTop8LatestJobPosts();
+     
+     @Query("SELECT new com.job_portal.DTO.JobCountType(j.typeOfWork, COUNT(j)) " +
+             "FROM JobPost j GROUP BY j.typeOfWork")
+     List<JobCountType> countByTypeOfWork();
+     
+     Page<JobPost> findByIsApproveTrue(Specification<JobPost> spec, Pageable pageable);
  }
     
 
