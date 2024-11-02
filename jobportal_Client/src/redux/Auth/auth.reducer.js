@@ -34,11 +34,7 @@ export const authReducer = (state = initialState, action) => {
       return { ...state, loading: false, jwt: action.payload, error: null };
     
     case LOGOUT_SUCCESS:
-      return {
-        ...state,
-        user: null,
-        jwt: null,
-      };
+      return initialState;
     
     case SIGNUP_FAILURE:
     case LOGIN_FAILURE:
