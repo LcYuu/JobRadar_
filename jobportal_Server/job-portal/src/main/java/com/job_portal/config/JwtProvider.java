@@ -68,7 +68,6 @@ public class JwtProvider {
 
 	public Date getExpirationDateFromJWT(String token) {
 		Claims claims = ((JwtParserBuilder) Jwts.builder()).setSigningKey(key).build().parseClaimsJws(token).getBody();
-
 		return claims.getExpiration();
 	}
 }
