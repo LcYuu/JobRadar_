@@ -6,6 +6,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,9 +17,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.job_portal.DTO.ApplyJobDTO;
+import com.job_portal.DTO.ApplyJobInProfile;
+import com.job_portal.DTO.CompanyWithCountJobDTO;
 import com.job_portal.config.JwtProvider;
 import com.job_portal.models.ApplyJob;
 
@@ -101,6 +107,17 @@ public class ApplyJobController {
 		return new ResponseEntity<>(apply, HttpStatus.OK);
 	}
 
+	@GetMapping("/get-apply-job-by-user")
+	public Page<ApplyJobInProfile> findApplyJobByUserId(
+			@RequestHeader("Authorization") String jwt,
+	        @RequestParam(defaultValue = "0") int page, 
+	        @RequestParam(defaultValue = "3") int size) { 
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+	    
+	    Pageable pageable = PageRequest.of(page, size); 
+	    return applyJobRepository.findApplyJobByUserId(user.get().getSeeker().getUserId(), pageable);
+	}
 	private ApplyJob convertToEntity(ApplyJobDTO applyDTO, UUID userId, UUID postId) {
 		ApplyJob apply = new ApplyJob();
 		apply.setPostId(postId);
