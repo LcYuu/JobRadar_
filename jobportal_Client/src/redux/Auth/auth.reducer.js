@@ -16,7 +16,8 @@ const initialState = {
   loading: false,
   user: null,
   error: null,
-  jwt: null,
+  jwt: sessionStorage.getItem('jwt') || null,
+  isAuthenticated: !!sessionStorage.getItem('jwt')
 };
 
 export const authReducer = (state = initialState, action) => {

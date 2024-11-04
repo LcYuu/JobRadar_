@@ -85,7 +85,7 @@ export default function MyAccount() {
       <main className="flex-1 p-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold">Dashboard</h1>
-          <a href="/"> <Button variant="outline">Trở về trang chủ</Button></a>
+          <Link to="/"> <Button variant="outline">Trở về trang chủ</Button></Link>
         </div>
 
         <Card className="mb-8">
