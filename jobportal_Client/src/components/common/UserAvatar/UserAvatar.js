@@ -17,8 +17,6 @@ const UserAvatar = () => {
     navigate('/account-management');
   };
 
-  console.log(auth.user); // Kiểm tra thông tin người dùng
-
   return (
     <div onClick={handleAvatarClick} className="flex items-center cursor-pointer">
       <img 

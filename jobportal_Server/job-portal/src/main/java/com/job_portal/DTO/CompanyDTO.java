@@ -13,7 +13,7 @@ public class CompanyDTO {
     private String contact;
     private String email;
     private LocalDate establishedDate;
-
+    
     public CompanyDTO() {
         // Constructor không tham số
     }

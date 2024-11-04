@@ -17,7 +17,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -49,25 +49,20 @@ public class AppConfig {
         return http.build();    
     }
     private CorsConfigurationSource corsConfigurationSource() {
-		
-		return new CorsConfigurationSource() {
-			
-			@Override
-			public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-				
-				CorsConfiguration cfg = new CorsConfiguration();
-				
-				cfg.setAllowedOrigins(Arrays.asList(
-						"http://localhost:3000"));
-				cfg.setAllowedMethods(Collections.singletonList("*"));
-				cfg.setAllowCredentials(true);
-				cfg.setAllowedHeaders(Collections.singletonList("*"));
-				cfg.setExposedHeaders(Arrays.asList("Authorization"));
-				cfg.setMaxAge(3600L);
-				return cfg;
-			}
-		};
-	}
+        CorsConfiguration cfg = new CorsConfiguration();
+        
+        cfg.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // Địa chỉ front-end
+        cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Các phương thức HTTP cho phép
+        cfg.setAllowCredentials(true); // Cho phép cookie
+        cfg.setAllowedHeaders(Collections.singletonList("*")); // Tất cả các header
+        cfg.setExposedHeaders(Arrays.asList("Authorization")); // Header được phép xuất hiện trong response
+        cfg.setMaxAge(3600L); // Thời gian cache cho cấu hình CORS
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", cfg); // Áp dụng cho tất cả các endpoint
+        return source;
+    }
+
 	@Bean
     PasswordEncoder passwordEncoder() {
     	return new BCryptPasswordEncoder();
