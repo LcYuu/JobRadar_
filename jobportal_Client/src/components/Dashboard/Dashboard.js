@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getApplyJobByUser } from "../../redux/ApplyJob/applyJob.action";
 import Pagination from "../layout/Pagination";
 export default function Dashboard_Seeker() {
+
   const dispatch = useDispatch();
   const {
     applyJobByUser = [],
@@ -31,6 +32,9 @@ export default function Dashboard_Seeker() {
   // const sortedApplications = applications.sort((a, b) => {
   //   return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
   // });
+
+  
+
 
   const handlePageChange = (page) => {
     setCurrentPage(page);

@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SuccessIcon from '../../components/common/Icon/Sucess/Sucess';
 import FailureIcon from '../../components/common/Icon/Failed/Failed';
 import logo1 from '../../assets/images/common/logo1.jpg';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { forgotPasswordAction, verifyOtpAction } from '../../redux/ForgotPassword/forgotPassword.action';
 import { isStrongPassword } from '../../utils/passwordValidator';
 
@@ -119,7 +119,7 @@ export default function ForgotPassword() {
       <Card className="w-full max-w-md bg-white shadow-lg rounded-lg">
         <CardHeader className="border-b border-indigo-300">
           <div className="flex justify-center items-center mb-4">
-            <a href="/"><img src={logo1} alt="JobRadar Logo" className="h-20 w-20" /></a>
+            <Link to="/"><img src={logo1} alt="JobRadar Logo" className="h-20 w-20" /></Link>
           </div>
           <CardTitle className="text-2xl font-bold text-indigo-700 text-center">Quên mật khẩu</CardTitle>
         </CardHeader>

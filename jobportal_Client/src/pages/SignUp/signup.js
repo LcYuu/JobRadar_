@@ -6,7 +6,7 @@ import { Input } from '../../ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { Tabs, TabsList, TabsTrigger } from "../../ui/tab";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../ui/dialog";
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import SuccessIcon from '../../components/common/Icon/Sucess/Sucess';
 import FailureIcon from '../../components/common/Icon/Failed/Failed';
@@ -262,7 +262,7 @@ const handleTabChange = (tab) => {
       <Card className="w-full max-w-md bg-white shadow-lg rounded-lg">
         <CardHeader className="border-b border-indigo-300">
           <div className="flex justify-between items-center mb-4">
-            <a href="/"><img src={logo1} alt="JobRadar Logo" className="h-20 w-20" /></a>
+            <Link to="/"><img src={logo1} alt="JobRadar Logo" className="h-20 w-20" /></Link>
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-auto">
               <TabsList className="bg-indigo-50 rounded-md">
                 <TabsTrigger value="job-seeker" className={`px-4 py-2 ${activeTab === 'job-seeker' ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-600'}`}>
@@ -318,9 +318,9 @@ const handleTabChange = (tab) => {
           </form>
           <p className="mt-4 text-center text-sm text-gray-600">
             Đã có tài khoản?{" "}
-            <a href="/auth/sign-in" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <Link  to="/auth/sign-in" className="font-medium text-indigo-600 hover:text-indigo-500">
               Đăng nhập
-            </a>
+            </Link>
           </p>
           <p className="mt-4 text-center text-xs text-gray-500">
             By clicking 'Đăng kí', you acknowledge that you have read and accept the{" "}
