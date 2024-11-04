@@ -11,7 +11,9 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -48,6 +50,7 @@ import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.UserAccountRepository;
 import com.job_portal.service.ICompanyService;
 import com.job_portal.service.IJobPostService;
+import com.job_portal.specification.JobPostSpecification;
 import com.social.exceptions.AllExceptions;
 
 @RestController
@@ -334,17 +337,35 @@ public class JobPostController {
     public List<JobCountType> getCountJobByTypeOfWork() {
 		 return jobPostService.getJobCountByType(); 
     }
+	
 	@GetMapping("/search-job-by-feature")
-    public ResponseEntity<Page<JobPost>> searchJobsWithPagination(
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) List<String> selectedTypesOfWork,
-            @RequestParam(required = false) Long minSalary,
-            @RequestParam(required = false) Long maxSalary,
-            @RequestParam(required = false) Integer cityId,
-            @RequestParam(required = false) List<Integer> selectedIndustryIds,
-            Pageable pageable) {
-        
-        Page<JobPost> jobsPage = jobPostService.searchJobsWithPagination(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds, pageable);
-        return ResponseEntity.ok(jobsPage);
-    }
+	public Page<JobPost> searchJobs(
+	        @RequestParam(required = false) String title,
+	        @RequestParam(required = false) List<String> selectedTypesOfWork,
+	        @RequestParam(required = false) Long minSalary,
+	        @RequestParam(required = false) Long maxSalary,
+	        @RequestParam(required = false) Integer cityId,
+	        @RequestParam(required = false) List<Integer> selectedIndustryIds,
+	        @RequestParam(defaultValue = "0") int page, 
+	        @RequestParam(defaultValue = "7") int size) { 
+
+	    Specification<JobPost> spec = JobPostSpecification.withFilters(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds);
+	    
+	    Pageable pageable = PageRequest.of(page, size); // Tạo đối tượng Pageable
+	    return jobPostRepository.findAll(spec, pageable); // Trả về đối tượng Page
+	}
+	
+	@GetMapping("/salary-range")
+	public ResponseEntity<Map<String, Long>> getSalaryRange() {
+	    Long minSalary = jobPostRepository.findMinSalary(); // Tạo phương thức trong repository
+	    Long maxSalary = jobPostRepository.findMaxSalary(); // Tạo phương thức trong repository
+
+	    Map<String, Long> salaryRange = new HashMap<>();
+	    salaryRange.put("minSalary", minSalary);
+	    salaryRange.put("maxSalary", maxSalary);
+
+	    return ResponseEntity.ok(salaryRange);
+	}
+
+
 }
