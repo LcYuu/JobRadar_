@@ -44,7 +44,7 @@ export const loginAction = (loginData) => async (dispatch) => {
       sessionStorage.setItem("jwt", data.token);
       dispatch({ type: LOGIN_SUCCESS, payload: data.token });
       
-      // Fetch user profile immediately after successful login
+      // Fetch user profile
       const profileResponse = await axios.get(`${API_BASE_URL}/users/profile`, {
         headers: {
           Authorization: `Bearer ${data.token}`,
@@ -52,10 +52,14 @@ export const loginAction = (loginData) => async (dispatch) => {
       });
       
       dispatch({ type: GET_PROFILE_SUCCESS, payload: profileResponse.data });
+      
+      // Đảm bảo trả về object với success: true
       return { success: true };
+    } else {
+      throw new Error('Token not received');
     }
   } catch (error) {
-    const errorMessage = error.response?.data?.message || error.message || "Đã xảy ra lỗi không xác định.";
+    const errorMessage = error.response?.data?.message || error.message || "Đăng nhập thất bại";
     dispatch({ type: LOGIN_FAILURE, payload: errorMessage });
     return { success: false, error: errorMessage };
   }
@@ -75,10 +79,21 @@ export const getProfileAction = () => async (dispatch) => {
         Authorization: `Bearer ${jwt}`,
       },
     });
-    dispatch({ type: GET_PROFILE_SUCCESS, payload: data });
+    
+    if (data) {
+      dispatch({ type: GET_PROFILE_SUCCESS, payload: data });
+      return true;
+    } else {
+      throw new Error('Invalid profile data');
+    }
   } catch (error) {
     console.error("Profile Fetch Error: ", error);
-    dispatch({ type: GET_PROFILE_FAILURE, payload: error });
+    dispatch({ type: GET_PROFILE_FAILURE, payload: error.message });
+    // Chỉ xóa token nếu lỗi 401/403
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      sessionStorage.removeItem('jwt');
+    }
+    return false;
   }
 };
 

@@ -14,7 +14,15 @@ export default function Dashboard_Seeker() {
   ];
   const [applications, setApplications] = useState(initialApplications);
   const handleDelete = (id) => {
-    setApplications(applications.filter(app => app.id !== id));
+    try {
+      const elementToRemove = document.getElementById(id);
+      if (elementToRemove) {
+        elementToRemove.remove();
+      }
+      // Thực hiện các hành động xóa khác
+    } catch (error) {
+      console.error('Error removing element:', error);
+    }
   };
 
   const handlePin = (id) => {
