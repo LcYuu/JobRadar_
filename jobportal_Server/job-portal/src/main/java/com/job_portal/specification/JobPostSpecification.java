@@ -40,9 +40,8 @@ public class JobPostSpecification {
                 predicate = criteriaBuilder.and(predicate, root.get("typeOfWork").in(selectedTypesOfWork));
             }
 
-            // Lọc theo ngành nghề
             if (selectedIndustryIds != null && !selectedIndustryIds.isEmpty()) {
-                predicate = criteriaBuilder.and(predicate, root.get("industry").get("id").in(selectedIndustryIds));
+                predicate = criteriaBuilder.and(predicate, root.join("company").get("industry").get("id").in(selectedIndustryIds));
             }
 
             // Chỉ lấy các job đã phê duyệt

@@ -7,12 +7,19 @@ import {
   GET_TOP8_JOB_FAILURE,
   GET_TOP8_JOB_REQUEST,
   GET_TOP8_JOB_SUCCESS,
+  SEARCH_JOBS_FAILURE,
+  SEARCH_JOBS_REQUEST,
+  SEARCH_JOBS_SUCCESS,
+  SET_SALARY_RANGE_SUCCESS,
 } from "./jobPost.actionType";
 
 const initialState = {
+  minSalary: null,
+  maxSalary: null,
   post: null,
   loading: false,
   error: null,
+  searchJob : [],
   top8Job: [],
   jobCountByType: [],
   jobPost: [], // Mảng lưu trữ các bài đăng công việc
@@ -25,6 +32,7 @@ export const jobPostReducer = (state = initialState, action) => {
     case GET_ALL_JOB_REQUEST:
     case GET_TOP8_JOB_REQUEST:
     case COUNT_JOB_BY_TYPE_REQUEST:
+    case SEARCH_JOBS_REQUEST:
       return {
         ...state,
         loading: true, // Bắt đầu trạng thái tải
@@ -34,6 +42,7 @@ export const jobPostReducer = (state = initialState, action) => {
       return {
         ...state,
         jobPost: action.payload.content, // Lưu trữ tất cả các công việc vào mảng jobPost
+       
         totalPages: action.payload.page.totalPages, // Lưu trữ tổng số trang
         loading: false, // Kết thúc trạng thái tải
         error: null, // Đặt lỗi về null
@@ -45,6 +54,13 @@ export const jobPostReducer = (state = initialState, action) => {
         loading: false, // Kết thúc trạng thái tải
         error: null, // Đặt lỗi về null
       };
+      case SET_SALARY_RANGE_SUCCESS:
+        return {
+            ...state,
+            loading: false,
+            minSalary: action.payload.minSalary,
+            maxSalary: action.payload.maxSalary,
+        };
     case COUNT_JOB_BY_TYPE_SUCCESS:
       return {
         ...state,
@@ -52,8 +68,17 @@ export const jobPostReducer = (state = initialState, action) => {
         loading: false, // Kết thúc trạng thái tải
         error: null, // Đặt lỗi về null
       };
+    case SEARCH_JOBS_SUCCESS:
+      return {
+        ...state,
+        searchJob: action.payload.content,
+        totalPages: action.payload.page.totalPages,
+        loading: false,
+        error: null
+      }
     case GET_TOP8_JOB_FAILURE:
     case GET_ALL_JOB_FAILURE:
+    case SEARCH_JOBS_FAILURE:
       return {
         ...state,
         loading: false, // Kết thúc trạng thái tải

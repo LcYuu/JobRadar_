@@ -52,6 +52,13 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
      List<JobCountType> countByTypeOfWork();
      
      Page<JobPost> findByIsApproveTrue(Specification<JobPost> spec, Pageable pageable);
+     
+     @Query("SELECT MIN(j.salary) FROM JobPost j")
+     Long findMinSalary();
+
+     @Query("SELECT MAX(j.salary) FROM JobPost j")
+     Long findMaxSalary();
+
  }
     
 

@@ -1,0 +1,31 @@
+.slider{
+    width: 100%;
+    height: 2px;
+    background-color:rgb(182, 181, 181);
+    margin-top: 20px;
+}
+.slider .thumb {
+    width: 23px;
+    height: 23px;
+    cursor: grab;
+    background: #fff;
+    border-radius: 50%;
+    border: 2px solid blueviolet;
+    top: -10px;
+}
+.container {
+    text-align: justify; 
+    padding-top: 10px;
+}
+
+.from {
+    display: inline-block; 
+    width: 50%; 
+    text-align: left; 
+}
+
+.to {
+    display: inline-block; 
+    width: 50%; 
+    text-align: right; 
+}
