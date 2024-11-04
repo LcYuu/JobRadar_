@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
@@ -23,9 +23,9 @@ export default function SignInForm() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
 
-    setError(''); // Clear previous error
+    setError('');
     if (!isStrongPassword(password)) {
       setLoginStatus('failure');
       setIsModalOpen(true);
@@ -40,8 +40,8 @@ export default function SignInForm() {
         setIsModalOpen(true);
         setTimeout(() => {
           setIsModalOpen(false);
-          navigate('/'); // Navigate to the Home page
-        }, 2000);
+          window.location.href = 'http://localhost:3000/'; // Redirects to home after a few seconds
+        }, 3000); // Adjust the time (in milliseconds) as needed
       } else {
         setLoginStatus('failure');
         setIsModalOpen(true);
@@ -98,18 +98,17 @@ export default function SignInForm() {
       <Card className="w-full max-w-md bg-white shadow-lg rounded-lg">
         <CardHeader className="border-b border-indigo-300">
           <div className="flex justify-between items-center mb-4">
-            <a href="/"><img src={logo1} alt="JobRadar Logo" className="h-20 w-20" /></a>
+            <Link to="/"><img src={logo1} alt="JobRadar Logo" className="h-20 w-20" /></Link>
           </div>
           <CardTitle className="text-2xl font-bold text-indigo-700 text-center">
             Đăng nhập
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          {/* Remove onSubmit from the form to prevent Google login from triggering it */}
           <form className="space-y-4">
             <Button
               variant="outline"
-              onClick={handleGoogleLogin} // Use a separate handler for Google login
+              onClick={handleGoogleLogin}
               className="w-full flex items-center justify-center gap-2 border border-gray-300 hover:bg-gray-50"
             >
               <img src={googleIcon} className="w-5 h-5" alt="Google Icon" />
@@ -141,26 +140,25 @@ export default function SignInForm() {
                 className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    handleSubmit(e); // Call handleSubmit when Enter key is pressed
+                    handleSubmit(e);
                   }
                 }}
               />
             </div>
             <div className="flex justify-between items-center">
-              <a href="/auth/forgot-password" className="text-indigo-600 hover:underline text-sm">
+              <Link to="/auth/forgot-password" className="text-indigo-600 hover:underline text-sm">
                 Quên mật khẩu?
-              </a>
+              </Link>
             </div>
-            {/* Attach the handleSubmit to the onClick of the email/password login button */}
             <Button onClick={handleSubmit} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">
               Đăng nhập
             </Button>
           </form>
           <p className="mt-4 text-center text-sm text-gray-600">
             Chưa có tài khoản?{" "}
-            <a href="/auth/sign-up" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <Link to="/auth/sign-up" className="font-medium text-indigo-600 hover:text-indigo-500">
               Đăng kí
-            </a>
+            </Link>
           </p>
         </CardContent>
       </Card>
