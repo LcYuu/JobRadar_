@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
@@ -73,7 +73,7 @@ export default function ChangePassword() {
       <Card className="w-full max-w-md bg-white shadow-lg rounded-lg">
         <CardHeader className="border-b border-indigo-300">
           <div className="flex justify-center items-center mb-4">
-            <a href="/"><img src={logo1} alt="JobRadar Logo" className="h-20 w-20" /></a>
+            <Link to="/"><img src={logo1} alt="JobRadar Logo" className="h-20 w-20" /></Link>
           </div>
           <CardTitle className="text-2xl font-bold text-indigo-700 text-center">Thay đổi mật khẩu</CardTitle>
         </CardHeader>
