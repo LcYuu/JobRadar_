@@ -14,41 +14,71 @@ import { getProfileAction } from "./redux/Auth/auth.action";
 import ChangePassword from "./pages/ForgotPassword/ChangePassword";
 import MyAccount from "./pages/MyAccount/MyAccount";
 import FindCompanies from "./pages/FindComapnies/FindCompanies";
+import { useNavigate } from "react-router-dom";
+const ProtectedRoute = ({ children, isAuthenticated }) => {
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/auth/sign-in');
+    }
+  }, [isAuthenticated, navigate]);
+
+  return isAuthenticated ? children : null;
+};
 
 const App = () => {
   const location = useLocation();
-  const { auth } = useSelector(store => store);
+  const { user, jwt, isAuthenticated } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const jwt = localStorage.getItem("jwt");
-    if (jwt) {
-      dispatch(getProfileAction(jwt));
+    const token = sessionStorage.getItem("jwt");
+    if (token && !user) {
+      const fetchProfile = async () => {
+        const success = await dispatch(getProfileAction());
+        if (!success && !location.pathname.startsWith('/auth')) {
+          navigate('/auth/sign-in');
+        }
+      };
+      fetchProfile();
     }
-  }, [dispatch]);
+  }, [dispatch, user, navigate, location.pathname]);
 
-  const isAuthenticated = !!auth.user;
-
-  // Move this logic into a memoized value to prevent unnecessary re-renders
   const showHeader = useMemo(() => {
     const noHeaderPaths = ['/auth/sign-up', '/auth/sign-in', '/auth/forgot-password'];
     return !noHeaderPaths.includes(location.pathname);
   }, [location.pathname]);
   
   return (
-    <>
+    <div className="app-container">
       {showHeader && <Header />} 
       <Routes>
         <Route path="/auth/sign-up" element={<SignUpForm />} />
-        <Route path="/account-management" element={<MyAccount />} />
         <Route path="/auth/sign-in" element={<SignInForm />} />
         <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-        <Route path="/" element={isAuthenticated ? <Home /> : <SignInForm />} />
+        <Route 
+          path="/" 
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <Home />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/account-management" 
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <MyAccount />
+            </ProtectedRoute>
+          } 
+        />
         <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/find-jobs" element={<FindJobs />} />
         <Route path="/find-companies" element={<FindCompanies />} />
       </Routes>
-    </>
+    </div>
   );
 };
 
