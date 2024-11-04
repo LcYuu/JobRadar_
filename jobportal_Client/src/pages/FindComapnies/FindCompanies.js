@@ -1,152 +1,58 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
 import { Card } from "../../ui/card";
 import { Input } from "../../ui/input";
 import { Badge } from "../../ui/badge";
-import {
-  Search,
-  Briefcase,
-  Code,
-  Building2,
-  Globe,
-  MapPin,
-} from "lucide-react";
-import logo from "../../assets/images/common/logo.jpg";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "../../ui/select";
-const categoryStyles = {
-  Design: {
-    backgroundColor: "rgba(0, 128, 0, 0.1)",
-    color: "green",
-  },
-  Business: {
-    backgroundColor: "rgba(128, 0, 128, 0.1)",
-    color: "purple",
-  },
-  Marketing: {
-    backgroundColor: "rgba(255, 165, 0, 0.1)",
-    color: "orange",
-  },
-  Technology: {
-    backgroundColor: "rgba(0, 0, 255, 0.1)",
-    color: "blue",
-  },
-  Education: {
-    backgroundColor: "rgba(255, 192, 203, 0.1)",
-    color: "pink",
-  },
-};
-
-// Sample data for recommended companies
-const recommendedCompanies = [
-  {
-    id: 1,
-    name: "Nomad",
-    logo: logo,
-    jobCount: 3,
-    description:
-      "Nomad is located in Paris, France. Nomad has generated $728,000 in sales (USD).",
-    category: "Business",
-  },
-  {
-    id: 2,
-    name: "Discord",
-    logo: logo,
-    jobCount: 3,
-    description:
-      "We'd love to work with someone like you. We care about creating a delightful experience.",
-    category: "Technology",
-  },
-  {
-    id: 3,
-    name: "Maze",
-    logo: logo,
-    jobCount: 3,
-    description:
-      "We're a passionate bunch working from all over the world to build the future of rapid testing together.",
-    category: "Design",
-  },
-  {
-    id: 4,
-    name: "Udacity",
-    logo: logo,
-    jobCount: 3,
-    description:
-      "Udacity is a new type of online university that teaches the actual programming skills.",
-    category: "Education",
-  },
-];
-
-// Sample data for companies list
-const companies = [
-  {
-    id: 7,
-    name: "Pentagram",
-    logo: logo,
-    jobCount: 3,
-    description: "One of the best design agencies",
-    category: "Design",
-  },
-  {
-    id: 8,
-    name: "Square",
-    logo: logo,
-    jobCount: 3,
-    description: "Mobile payment company",
-    category: "Business",
-  },
-];
-
-// Categories
-const categories = [
-  { id: "all", name: "Tât cả", icon: Briefcase },
-  { id: "design", name: "Design", icon: Code },
-  { id: "business", name: "Business", icon: Building2 },
-  { id: "technology", name: "Technology", icon: Globe },
-];
+import { Search } from "lucide-react";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
+import { useDispatch, useSelector } from "react-redux";
+import { getCity } from "../../redux/City/city.action";
+import { getCompanyFitSeeker, searhCompanies } from "../../redux/Company/company.action";
 
 export default function FindCompanies() {
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [followedCompanies, setFollowedCompanies] = useState([]);
+  const dispatch = useDispatch();
+  const { companyByFeature = [], companyFitSeeker = [], loading, error } = useSelector((store) => store.company);
+  const { cities = [] } = useSelector((store) => store.city);
 
-  const filteredCompanies = companies.filter((company) => {
-    const matchesCategory =
-      selectedCategory === "all" ||
-      company.category.toLowerCase() === selectedCategory.toLowerCase();
-    const matchesSearch =
-      company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      company.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+  const [filters, setFilters] = useState({
+    title: "",
+    cityId: "",
+    industryId: "",
   });
+  
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [size] = useState(6);
+  const isFilterApplied = filters.title || filters.cityId || filters.industryId;
 
-  function handleCompanyClick(companyId) {
-    // Implement the logic to handle the company click, e.g., navigate to a detailed page
-  }
+  useEffect(() => {
+    dispatch(searhCompanies(filters, currentPage, size));
+  }, [filters, currentPage, dispatch]);
 
-  const handleFollowClick = (companyId) => {
-    setFollowedCompanies((prev) =>
-      prev.includes(companyId)
-        ? prev.filter((id) => id !== companyId)
-        : [...prev, companyId]
-    );
+  useEffect(() => {
+    dispatch(getCity());
+    dispatch(getCompanyFitSeeker());
+  }, [dispatch]);
+
+  const handleCategoryChange = (industryId) => {
+    setSelectedCategory(industryId);
+    setFilters((prev) => ({ ...prev, industryId }));
   };
 
+  const filteredCompanies = selectedCategory
+    ? companyByFeature.filter((company) => company.industryId === selectedCategory)
+    : companyByFeature;
+
+  const hasFilteredCompanies = filteredCompanies.length > 0;
+  const hasSuggestedCompanies = companyFitSeeker.length > 0;
+
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-6xl mx-auto space-y-12">
-        {/* Search Section */}
         <div className="text-center my-8">
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-3xl font-bold text-gray-800">
             Tìm kiếm{" "}
             <span className="relative inline-block text-primary text-blue-500">
               công ty yêu thích của bạn
@@ -163,157 +69,124 @@ export default function FindCompanies() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Nhập tên công ty hoặc từ khóa mong muốn"
-              className="pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500"
+              value={filters.title}
+              onChange={(e) => {
+                setFilters({ ...filters, title: e.target.value });
+              }}
             />
           </div>
           <div className="relative w-64">
-            <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <Select>
-              <SelectTrigger className="w-full pl-12 pr-4 py-3 text-left rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <SelectValue placeholder="Hồ Chí Minh" />
+            <Select
+              onValueChange={(value) => {
+                setFilters({ ...filters, cityId: value });
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Chọn địa điểm" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectLabel>Locations</SelectLabel>
-                  <SelectItem value="Hồ Chí Minh">Hồ Chí Minh</SelectItem>
-                  <SelectItem value="Hà Nội">Hà Nội</SelectItem>
-                  <SelectItem value="Đà Nẵng">Đà Nẵng</SelectItem>
-                  <SelectItem value="Cần Thơ">Cần Thơ</SelectItem>
-                  <SelectItem value="Hải Phòng">Hải Phòng</SelectItem>
+                  {cities.map((c) => (
+                    <SelectItem key={c.cityId} value={c.cityId}>
+                      {c.cityName}
+                    </SelectItem>
+                  ))}
                 </SelectGroup>
               </SelectContent>
             </Select>
           </div>
 
-          <Button className="bg-purple-600 text-white px-6 py-3 rounded-lg">
+          <Button className="bg-purple-600 text-white px-6 py-3 rounded-lg shadow hover:bg-purple-700 transition duration-200">
             Tìm kiếm
           </Button>
         </div>
 
-        {/* Recommended Companies Section */}
-        <div className="space-y-6">
-          <h2 className="text-2xl font-semibold">Công ty đề xuất</h2>
-          <p className="text-sm text-muted-foreground">
-            Based on your profile, company preferences, and recent activity
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recommendedCompanies.map((company) => (
-              <Card
-                key={company.id}
-                className="p-6 space-y-4 transition-transform duration-300 hover:scale-105 cursor-pointer"
-                onClick={() => handleCompanyClick(company.id)}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Danh mục</h2>
+          <div className="flex gap-4 flex-wrap">
+            <Button
+              variant={selectedCategory === null ? "default" : "outline"}
+              onClick={() => handleCategoryChange(null)}
+              className="hover:bg-gray-200 transition duration-200"
+            >
+              Tất cả ngành nghề
+            </Button>
+            {companyByFeature.map((company) => (
+              <Button
+                key={company.industryId}
+                variant={selectedCategory === company.industryId ? "default" : "outline"}
+                onClick={() => handleCategoryChange(company.industryId)}
+                className="hover:bg-gray-200 transition duration-200"
               >
-                <div className="flex items-center gap-4">
-                  <img
-                    src={company.logo}
-                    alt={`${company.name} logo`}
-                    className="h-12 w-12 rounded-lg object-contain"
-                  />
-                  <div>
-                    <h3 className="font-semibold">{company.name}</h3>
-                    <p className="text-sm text-primary">
-                      {company.jobCount} Jobs
-                    </p>
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {company.description}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <Badge
-                    style={categoryStyles[company.category] || {}}
-                    className="text-xs"
-                  >
-                    {company.category}
-                  </Badge>
-                </div>
-              </Card>
+                {company.industryName}
+              </Button>
             ))}
           </div>
         </div>
 
-        {/* Company Categories */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Danh mục</h2>
-          <div className="flex gap-4 flex-wrap">
-            {categories.map((category) => {
-              const Icon = category.icon;
-              const isActive = selectedCategory === category.id;
-              const categoryStyle = categoryStyles[category.name] || {};
-
-              return (
-                <Button
-                  key={category.id}
-                  variant={isActive ? "default" : "outline"}
-                  className={`flex items-center gap-2 transition-colors duration-300 ${
-                    isActive ? "active" : ""
-                  } hover:bg-opacity-80`}
-                  style={{
-                    backgroundColor: isActive
-                      ? categoryStyle.backgroundColor
-                      : "transparent",
-                    color: isActive ? categoryStyle.color : "inherit",
-                    borderColor: isActive ? categoryStyle.color : "inherit",
-                  }}
-                  onClick={() => setSelectedCategory(category.id)}
-                >
-                  <Icon className="h-4 w-4" />
-                  {category.name}
-                </Button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Filtered Companies List */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Danh sách công ty theo danh mục bạn chọn</h2>
+            <h2 className="text-xl font-semibold">Danh sách tất cả công ty</h2>
             <p className="text-muted-foreground">
-              {filteredCompanies.length} kết quả
+              {hasFilteredCompanies ? filteredCompanies.length : 0} kết quả
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCompanies.map((company) => {
-              const isFollowed = followedCompanies.includes(company.id);
-              return (
-                <Card key={company.id} className="p-6 space-y-4">
+          {hasFilteredCompanies ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredCompanies.map((company) => (
+                <Card key={company.companyId} className="p-6 space-y-4 transition-transform duration-300 hover:scale-105 cursor-pointer shadow-lg">
                   <div className="flex items-center gap-4">
                     <img
                       src={company.logo}
-                      alt={`${company.name} logo`}
-                      className="h-12 w-12 rounded-lg"
+                      alt={`${company.companyName} logo`}
+                      className="h-16 w-16 rounded-lg shadow-md"
                     />
                     <div>
-                      <h3 className="font-semibold">{company.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {company.jobCount} việc làm
-                      </p>
+                      <h3 className="font-semibold text-lg">{company.companyName}</h3>
+                      <p className="text-sm text-primary">{company.countJob} Jobs</p>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {company.description}
-                  </p>
+                  <p className="text-sm text-muted-foreground line-clamp-2">{company.description}</p>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge className="text-xs">{company.industryName}</Badge>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500">Không có kết quả nào phù hợp với tìm kiếm của bạn.</p>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Danh sách công ty đề xuất</h2>
+          {hasSuggestedCompanies ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {companyFitSeeker.map((company) => (
+                <Card key={company.companyId} className="p-6 space-y-4 shadow-lg">
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={company.logo}
+                      alt={`${company.companyName} logo`}
+                      className="h-12 w-12 rounded-lg shadow-md"
+                    />
+                    <div>
+                      <h3 className="font-semibold">{company.companyName}</h3>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{company.description}</p>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" className="transition duration-200 hover:bg-gray-200">
                       Xem các công việc
-                    </Button>
-                    <Button
-                      size="sm"
-                      className={`transition-transform duration-300 ${
-                        isFollowed ? "bg-green-500 text-white" : ""
-                      }`}
-                      onClick={() => handleFollowClick(company.id)}
-                    >
-                      {isFollowed ? "Đã theo dõi" : "Theo dõi"}
                     </Button>
                   </div>
                 </Card>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500">Không có công ty đề xuất nào.</p>
+          )}
         </div>
       </div>
     </div>

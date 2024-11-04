@@ -9,6 +9,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.job_portal.DTO.CompanyDTO;
-
+import com.job_portal.DTO.CompanyWithCountJobDTO;
 import com.job_portal.config.JwtProvider;
 import com.job_portal.models.ApplyJob;
 import com.job_portal.models.City;
@@ -31,9 +35,12 @@ import com.job_portal.models.JobPost;
 import com.job_portal.models.UserAccount;
 import com.job_portal.repository.ApplyJobRepository;
 import com.job_portal.repository.CompanyRepository;
+import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.UserAccountRepository;
 import com.job_portal.service.IApplyJobService;
 import com.job_portal.service.ICompanyService;
+import com.job_portal.specification.CompanySpecification;
+import com.job_portal.specification.JobPostSpecification;
 import com.social.exceptions.AllExceptions;
 
 @RestController
@@ -64,7 +71,17 @@ public class CompanyController {
 	    return new ResponseEntity<>(res, HttpStatus.OK);
 	}
 	
-	
+	@GetMapping("/find-companies-fit-userId")
+	public ResponseEntity<List<Company>> findTop8CompanyFitUserId(@RequestHeader("Authorization") String jwt) throws AllExceptions {
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+
+		
+		List<Company> companies = companyRepository.findTop6CompaniesByIndustryId(user.get().getSeeker().getIndustry().getIndustryId()).stream()
+		        .limit(6)
+		        .collect(Collectors.toList());
+		return new ResponseEntity<>(companies, HttpStatus.OK);
+	}
 
 	@PutMapping("/update-company")
 	public ResponseEntity<String> updateCompany(@RequestHeader("Authorization") String jwt,
@@ -180,5 +197,18 @@ public class CompanyController {
         return ResponseEntity.ok(isSaved);
     }
 	
+	@GetMapping("/search-company-by-feature")
+	public Page<CompanyWithCountJobDTO> searchCompanies(
+	        @RequestParam(required = false) String title,
+	        @RequestParam(required = false) Integer cityId,
+	        @RequestParam(required = false) Integer industryId,
+	        @RequestParam(defaultValue = "0") int page, 
+	        @RequestParam(defaultValue = "6") int size) { 
+
+	    
+	    Pageable pageable = PageRequest.of(page, size); 
+	    return companyRepository.findCompaniesByFilters(title, cityId, industryId, pageable);
+	}
+
 
 }

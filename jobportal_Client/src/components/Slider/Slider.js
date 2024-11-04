@@ -19,7 +19,7 @@ const Slider = () => {
         <div data-src={logo1} />
         <div data-src={logo}/>
         <div data-src={logo1} />
-        <div data-src= {logo}/>
+        <div data-src={logo}/>
       </AutoplaySlider>
     </div>
   );
