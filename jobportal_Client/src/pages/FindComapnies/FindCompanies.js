@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { useDispatch, useSelector } from "react-redux";
 import { getCity } from "../../redux/City/city.action";
 import { getCompanyFitSeeker, searhCompanies } from "../../redux/Company/company.action";
+import CompanyCard from "../../components/common/CompanyCard/CompanyCard";
 
 export default function FindCompanies() {
   const dispatch = useDispatch();
@@ -135,23 +136,7 @@ export default function FindCompanies() {
           {hasFilteredCompanies ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredCompanies.map((company) => (
-                <Card key={company.companyId} className="p-6 space-y-4 transition-transform duration-300 hover:scale-105 cursor-pointer shadow-lg">
-                  <div className="flex items-center gap-4">
-                    <img
-                      src={company.logo}
-                      alt={`${company.companyName} logo`}
-                      className="h-16 w-16 rounded-lg shadow-md"
-                    />
-                    <div>
-                      <h3 className="font-semibold text-lg">{company.companyName}</h3>
-                      <p className="text-sm text-primary">{company.countJob} Jobs</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{company.description}</p>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge className="text-xs">{company.industryName}</Badge>
-                  </div>
-                </Card>
+                <CompanyCard key={company.companyId} company={company} />
               ))}
             </div>
           ) : (
@@ -164,24 +149,11 @@ export default function FindCompanies() {
           {hasSuggestedCompanies ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {companyFitSeeker.map((company) => (
-                <Card key={company.companyId} className="p-6 space-y-4 shadow-lg">
-                  <div className="flex items-center gap-4">
-                    <img
-                      src={company.logo}
-                      alt={`${company.companyName} logo`}
-                      className="h-12 w-12 rounded-lg shadow-md"
-                    />
-                    <div>
-                      <h3 className="font-semibold">{company.companyName}</h3>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{company.description}</p>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="transition duration-200 hover:bg-gray-200">
-                      Xem các công việc
-                    </Button>
-                  </div>
-                </Card>
+                <CompanyCard 
+                  key={company.companyId} 
+                  company={company} 
+                  variant="suggested" 
+                />
               ))}
             </div>
           ) : (
