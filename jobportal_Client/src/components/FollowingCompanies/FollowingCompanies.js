@@ -34,13 +34,13 @@ export default function FavoriteCompanies() {
       <Card>
         <CardContent className="p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">All (45)</h2>
+            <h2 className="text-xl font-semibold">Tất cả ({companies.length})</h2>
           </div>
           <table className="w-full">
             <thead>
               <tr>
-                <th className="text-left p-2">#</th>
-                <th className="text-left p-2">Company Name</th>
+                <th className="text-left p-2">STT</th>
+                <th className="text-left p-2">Tên công ty</th>
               </tr>
             </thead>
             <tbody>

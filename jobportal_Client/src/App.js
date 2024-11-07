@@ -14,18 +14,15 @@ import { getProfileAction } from "./redux/Auth/auth.action";
 import ChangePassword from "./pages/ForgotPassword/ChangePassword";
 import MyAccount from "./pages/MyAccount/MyAccount";
 import FindCompanies from "./pages/FindComapnies/FindCompanies";
+import CompanyProfile from "./pages/CompanyProfile/CompanyProfile";
 import { useNavigate } from "react-router-dom";
-const ProtectedRoute = ({ children, isAuthenticated }) => {
-  const navigate = useNavigate();
-  
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/auth/sign-in');
-    }
-  }, [isAuthenticated, navigate]);
-
-  return isAuthenticated ? children : null;
-};
+import PublicRoute from './components/PublicRoute/PublicRoute';
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
+import Dashboard_Seeker from './components/Dashboard/Dashboard';
+import MyCV from './components/MyCv/MyCv';
+import FavoriteCompanies from './components/FollowingCompanies/FollowingCompanies';
+import MyProfile from './components/MyProfile/MyProfile';
+import JobDetail from './pages/JobDetail/JobDetail';
 
 const App = () => {
   const location = useLocation();
@@ -47,7 +44,7 @@ const App = () => {
   }, [dispatch, user, navigate, location.pathname]);
 
   const showHeader = useMemo(() => {
-    const noHeaderPaths = ['/auth/sign-up', '/auth/sign-in', '/auth/forgot-password'];
+    const noHeaderPaths = ['/auth/sign-up', '/auth/sign-in', '/auth/forgot-password','user/account-management', '/change-password' ];
     return !noHeaderPaths.includes(location.pathname);
   }, [location.pathname]);
   
@@ -55,28 +52,69 @@ const App = () => {
     <div className="app-container">
       {showHeader && <Header />} 
       <Routes>
-        <Route path="/auth/sign-up" element={<SignUpForm />} />
-        <Route path="/auth/sign-in" element={<SignInForm />} />
-        <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-        <Route 
-          path="/" 
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <Home />
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/account-management" 
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <MyAccount />
-            </ProtectedRoute>
-          } 
-        />
-        <Route path="/change-password" element={<ChangePassword />} />
-        <Route path="/find-jobs" element={<FindJobs />} />
-        <Route path="/find-companies" element={<FindCompanies />} />
+        {/* Public Routes - Không cần đăng nhập và có redirect khi đã đăng nhập */}
+        <Route path="/auth/sign-up" element={
+          <PublicRoute restricted={true}>
+            <SignUpForm />
+          </PublicRoute>
+        } />
+        <Route path="/auth/sign-in" element={
+          <PublicRoute restricted={true}>
+            <SignInForm />
+          </PublicRoute>
+        } />
+        <Route path="/auth/forgot-password" element={
+          <PublicRoute restricted={true}>
+            <ForgotPassword />
+          </PublicRoute>
+        } />
+        
+        {/* Public Routes - Không cần đăng nhập và không redirect */}
+        <Route path="/" element={
+          <PublicRoute>
+            <Home />
+          </PublicRoute>
+        } />
+        <Route path="/find-jobs" element={
+          <PublicRoute>
+            <FindJobs />
+          </PublicRoute>
+        } />
+        <Route path="/find-companies" element={
+          <PublicRoute>
+            <FindCompanies />
+          </PublicRoute>
+        } />
+        <Route path="/change-password" element={
+          <PublicRoute>
+            <ChangePassword />
+          </PublicRoute>
+        } />
+
+        {/* Protected Routes - Cần đăng nhập */}
+        <Route path="/user/account-management" element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <MyAccount />
+          </ProtectedRoute>
+        }>
+          <Route index element={<Dashboard_Seeker />} />
+          <Route path="dashboard" element={<Dashboard_Seeker />} />
+          <Route path="cv" element={<MyCV />} />
+          <Route path="following-companies" element={<FavoriteCompanies />} />
+          <Route path="profile" element={<MyProfile />} />
+        </Route>
+
+        <Route path="/jobs/job-detail/:id" element={
+          <PublicRoute>
+            <JobDetail />
+          </PublicRoute>
+        } />
+
+        <Route path="/companies/:id" element={
+          <PublicRoute>
+            <CompanyProfile />
+          </PublicRoute>
+        } />
       </Routes>
     </div>
   );

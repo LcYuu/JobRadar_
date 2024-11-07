@@ -19,7 +19,7 @@ const UserAvatar = () => {
   const handleAvatarClick = (e) => {
     e.preventDefault();
     if (isAuthenticated && auth.user) {
-      navigate('/account-management');
+      navigate('user/account-management');
     }
   };
 
