@@ -25,7 +25,7 @@ export default function Header() {
   };
 
   const handleProfileClick = () => {
-    navigate('/account-management');
+    navigate('user/account-management');
   };
 
   return (

@@ -54,6 +54,7 @@ function JobCardContent({ company, location, category }) {
 }
 
 export default function JobCard({
+  jobId,
   jobTitle,
   company,
   location,
@@ -64,16 +65,16 @@ export default function JobCard({
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    navigate("/"); // Điều hướng đến trang công việc chi tiết
+    navigate(`jobs/job-detail/${jobId}`);
   };
 
   return (
-    <Card onClick={handleCardClick} className="card cursor-pointer"> {/* Thêm class card */}
-      <CardHeader className="card-header"> {/* Thêm class card-header */}
+    <Card onClick={handleCardClick} className="card cursor-pointer">
+      <CardHeader className="card-header">
         <JobCardHeader jobType={jobType} companyLogo={companyLogo} />
         <CardTitle>{jobTitle}</CardTitle>
       </CardHeader>
-      <CardContent className="card-content"> {/* Thêm class card-content */}
+      <CardContent className="card-content">
         <JobCardContent
           company={company}
           location={location}
