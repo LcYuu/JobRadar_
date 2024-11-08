@@ -1,4 +1,4 @@
-"use client";
+
 
 import { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
@@ -15,6 +15,8 @@ export default function FindCompanies() {
   const dispatch = useDispatch();
   const { companyByFeature = [], companyFitSeeker = [], loading, error } = useSelector((store) => store.company);
   const { cities = [] } = useSelector((store) => store.city);
+  
+
 
   const [filters, setFilters] = useState({
     title: "",
@@ -47,6 +49,8 @@ export default function FindCompanies() {
 
   const hasFilteredCompanies = filteredCompanies.length > 0;
   const hasSuggestedCompanies = companyFitSeeker.length > 0;
+
+  const uniqueCompanies = [...new Map(companyByFeature.map(company => [company.industryId, company])).values()];
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -112,7 +116,7 @@ export default function FindCompanies() {
             >
               Tất cả ngành nghề
             </Button>
-            {companyByFeature.map((company) => (
+            {uniqueCompanies.map((company) => (
               <Button
                 key={company.industryId}
                 variant={selectedCategory === company.industryId ? "default" : "outline"}
@@ -144,7 +148,7 @@ export default function FindCompanies() {
                     />
                     <div>
                       <h3 className="font-semibold text-lg">{company.companyName}</h3>
-                      <p className="text-sm text-primary">{company.countJob} Jobs</p>
+                      <p className="text-sm text-primary">{company.countJob} công việc đang mở</p>
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground line-clamp-2">{company.description}</p>

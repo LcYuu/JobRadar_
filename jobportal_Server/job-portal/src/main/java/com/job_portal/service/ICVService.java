@@ -10,6 +10,6 @@ import com.social.exceptions.AllExceptions;
 public interface ICVService {
 	public boolean createCV(CVDTO cvdto, UUID userId);
 	public boolean deleteCV(Integer cvId) throws AllExceptions;
-	public boolean updateImg(CVDTO cvdto, Integer cvId) throws AllExceptions;	
+	public boolean updateIsMain(Integer cvId, UUID userId);	
 	public List<CV> findCVBySeekerId(UUID userId) throws AllExceptions;
 }

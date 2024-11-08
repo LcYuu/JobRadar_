@@ -16,6 +16,7 @@ import com.job_portal.models.Seeker;
 import com.job_portal.repository.CityRepository;
 import com.job_portal.repository.CompanyRepository;
 import com.job_portal.repository.IndustryRepository;
+import com.job_portal.repository.SeekerRepository;
 import com.social.exceptions.AllExceptions;
 
 @Service
@@ -31,6 +32,9 @@ public class CompanyServiceImpl implements ICompanyService {
 	IndustryRepository industryRepository;
 	@Autowired
 	ISeekerService seekerService;
+	
+	@Autowired
+	SeekerRepository seekerRepository;
 
 	@Override
 	public boolean deleteCompany(UUID companyId) throws AllExceptions {
@@ -201,6 +205,7 @@ public class CompanyServiceImpl implements ICompanyService {
 	    }
 
 	    companyRepository.save(company);
+	    seekerRepository.save(seeker);
 	    return result;
 	}
 

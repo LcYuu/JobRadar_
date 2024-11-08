@@ -15,6 +15,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
@@ -72,6 +73,11 @@ public class Company {
 	
 	@JsonIgnore
 	@ManyToMany
+	@JoinTable(
+		    name = "company_follows",
+		    joinColumns = @JoinColumn(name = "company_id"),
+		    inverseJoinColumns = @JoinColumn(name = "seeker_id")
+		)
 	private List<Seeker> follows = new ArrayList<>();
 	
 	@JsonIgnore

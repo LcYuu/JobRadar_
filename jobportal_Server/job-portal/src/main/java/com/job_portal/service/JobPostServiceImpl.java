@@ -276,57 +276,57 @@ public class JobPostServiceImpl implements IJobPostService {
 		}
 	}
 
-	@Override
-	public List<JobPost> findBySalaryGreaterThanEqual(Long minSalary) throws AllExceptions {
-		try {
-			List<JobPost> jobPosts = jobPostRepository.findBySalaryGreaterThanEqualAndIsApproveTrue(minSalary);
-			if (jobPosts.isEmpty()) {
-				throw new AllExceptions("Không tìm thấy công việc với lương >= " + minSalary);
-			}
-			return jobPosts;
-		} catch (AllExceptions e) {
-			throw e; // Ném lại ngoại lệ đã định nghĩa
-		} catch (Exception e) {
-			throw new AllExceptions("Lỗi khi tìm kiếm công việc với lương >= " + minSalary);
-		}
-	}
+//	@Override
+//	public List<JobPost> findBySalaryGreaterThanEqual(Long minSalary) throws AllExceptions {
+//		try {
+//			List<JobPost> jobPosts = jobPostRepository.findBySalaryGreaterThanEqualAndIsApproveTrue(minSalary);
+//			if (jobPosts.isEmpty()) {
+//				throw new AllExceptions("Không tìm thấy công việc với lương >= " + minSalary);
+//			}
+//			return jobPosts;
+//		} catch (AllExceptions e) {
+//			throw e; // Ném lại ngoại lệ đã định nghĩa
+//		} catch (Exception e) {
+//			throw new AllExceptions("Lỗi khi tìm kiếm công việc với lương >= " + minSalary);
+//		}
+//	}
 
-	@Override
-	public List<JobPost> findBySalaryLessThanEqual(Long maxSalary) throws AllExceptions {
-		try {
-			List<JobPost> jobPosts = jobPostRepository.findBySalaryLessThanEqualAndIsApproveTrue(maxSalary);
-			if (jobPosts.isEmpty()) {
-				throw new AllExceptions("Không tìm thấy công việc với lương >= " + maxSalary);
-			}
-			return jobPosts;
-		} catch (AllExceptions e) {
-			throw e; // Ném lại ngoại lệ đã định nghĩa
-		} catch (Exception e) {
-			throw new AllExceptions("Lỗi khi tìm kiếm công việc với lương < " + maxSalary);
-		}
-	}
-
-	@Override
-	public List<JobPost> findBySalaryBetween(Long minSalary, Long maxSalary) throws AllExceptions {
-		if (minSalary == null || maxSalary == null) {
-			throw new AllExceptions("minSalary và maxSalary không được để trống");
-		}
-		if (minSalary > maxSalary) {
-			throw new AllExceptions("minSalary không thể lớn hơn maxSalary");
-		}
-		try {
-			List<JobPost> jobPosts = jobPostRepository.findBySalaryBetweenAndIsApproveTrue(minSalary, maxSalary);
-			if (jobPosts.isEmpty()) {
-				throw new AllExceptions("Không tìm thấy công việc với lương >= " + minSalary + " và < " + maxSalary);
-			}
-			return jobPosts;
-		} catch (AllExceptions e) {
-			throw e; // Ném lại ngoại lệ đã định nghĩa
-		} catch (Exception e) {
-			throw new AllExceptions("Lỗi khi tìm kiếm công việc với lương >= " + minSalary + " và < " + maxSalary);
-		}
-
-	}
+//	@Override
+//	public List<JobPost> findBySalaryLessThanEqual(Long maxSalary) throws AllExceptions {
+//		try {
+//			List<JobPost> jobPosts = jobPostRepository.findBySalaryLessThanEqualAndIsApproveTrue(maxSalary);
+//			if (jobPosts.isEmpty()) {
+//				throw new AllExceptions("Không tìm thấy công việc với lương >= " + maxSalary);
+//			}
+//			return jobPosts;
+//		} catch (AllExceptions e) {
+//			throw e; // Ném lại ngoại lệ đã định nghĩa
+//		} catch (Exception e) {
+//			throw new AllExceptions("Lỗi khi tìm kiếm công việc với lương < " + maxSalary);
+//		}
+//	}
+//
+//	@Override
+//	public List<JobPost> findBySalaryBetween(Long minSalary, Long maxSalary) throws AllExceptions {
+//		if (minSalary == null || maxSalary == null) {
+//			throw new AllExceptions("minSalary và maxSalary không được để trống");
+//		}
+//		if (minSalary > maxSalary) {
+//			throw new AllExceptions("minSalary không thể lớn hơn maxSalary");
+//		}
+//		try {
+//			List<JobPost> jobPosts = jobPostRepository.findBySalaryBetweenAndIsApproveTrue(minSalary, maxSalary);
+//			if (jobPosts.isEmpty()) {
+//				throw new AllExceptions("Không tìm thấy công việc với lương >= " + minSalary + " và < " + maxSalary);
+//			}
+//			return jobPosts;
+//		} catch (AllExceptions e) {
+//			throw e; // Ném lại ngoại lệ đã định nghĩa
+//		} catch (Exception e) {
+//			throw new AllExceptions("Lỗi khi tìm kiếm công việc với lương >= " + minSalary + " và < " + maxSalary);
+//		}
+//
+//	}
 
 	@Override
 	public boolean approveJob(UUID postId) {

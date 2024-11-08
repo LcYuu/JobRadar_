@@ -158,27 +158,6 @@ public class CompanyController {
 		}
 	}
 
-	@PutMapping("/follow/{companyId}")
-	public ResponseEntity<Map<String, Object>> followCompany(
-	        @PathVariable("companyId") UUID companyId,
-	        @RequestHeader("Authorization") String jwt) throws Exception {
-
-	    String email = JwtProvider.getEmailFromJwtToken(jwt);
-	    Optional<UserAccount> reqUser = userAccountRepository.findByEmail(email);
-
-	    // Kiểm tra nếu user không tồn tại
-	    if (reqUser.isEmpty()) {
-	        throw new Exception("Người dùng không tồn tại");
-	    }
-
-	    // Gọi service và nhận về kết quả hành động follow/unfollow
-	    Map<String, Object> result = companyService.followCompany(companyId, reqUser.get().getUserId());
-
-	    // Trả về phản hồi với message theo kết quả nhận được từ service
-	    return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
-	}
-
-	
 	@GetMapping("/profile-company/{companyId}")
 	public ResponseEntity<Company> getCompanyById(@PathVariable("companyId") UUID companyId) throws AllExceptions {
 		try {
@@ -209,6 +188,8 @@ public class CompanyController {
 	    Pageable pageable = PageRequest.of(page, size); 
 	    return companyRepository.findCompaniesByFilters(title, cityId, industryId, pageable);
 	}
+	
+	
 
 
 }
