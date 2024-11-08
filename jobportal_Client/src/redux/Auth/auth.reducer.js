@@ -10,6 +10,7 @@ import {
   LOGOUT_REQUEST,
   LOGOUT_SUCCESS,
   LOGOUT_FAILURE,
+  UPDATE_PROFILE_SUCCESS,
 } from "./auth.actionType";
 
 const initialState = {
@@ -29,6 +30,7 @@ export const authReducer = (state = initialState, action) => {
       return { ...state, loading: true, error: null };
     
     case GET_PROFILE_SUCCESS:
+    case UPDATE_PROFILE_SUCCESS:
       return { ...state, loading: false, user: action.payload, error: null };
     
     case LOGIN_SUCCESS:

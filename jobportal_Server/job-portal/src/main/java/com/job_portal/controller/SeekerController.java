@@ -1,6 +1,7 @@
 package com.job_portal.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,13 +18,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.job_portal.DTO.FollowCompanyDTO;
 import com.job_portal.DTO.SeekerDTO;
 import com.job_portal.config.JwtProvider;
 import com.job_portal.models.JobPost;
 import com.job_portal.models.Seeker;
 import com.job_portal.models.UserAccount;
+import com.job_portal.repository.CompanyRepository;
 import com.job_portal.repository.SeekerRepository;
 import com.job_portal.repository.UserAccountRepository;
+import com.job_portal.service.ICompanyService;
 import com.job_portal.service.ISeekerService;
 import com.social.exceptions.AllExceptions;
 
@@ -33,11 +39,14 @@ public class SeekerController {
 
 	@Autowired
 	private SeekerRepository seekerRepository;
-
+	@Autowired
+	ICompanyService companyService;
 	@Autowired
 	private ISeekerService seekerService;
 	@Autowired
 	private UserAccountRepository userAccountRepository;
+	@Autowired
+	private CompanyRepository companyRepository;
 
 	@GetMapping("/get-all")
 	public ResponseEntity<List<Seeker>> getSeeker() {
@@ -59,16 +68,18 @@ public class SeekerController {
 					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
 		}
 	}
-	@GetMapping("/search/{userId}")
-	public ResponseEntity<Seeker> getSeekerById(@PathVariable("userId") UUID userId) throws AllExceptions {
+
+	@GetMapping("/seeker-profile")
+	public ResponseEntity<Seeker> getSeekerById(@RequestHeader("Authorization") String jwt) throws AllExceptions {
 		try {
-			Seeker seeker = seekerService.findSeekerById(userId);
+			String email = JwtProvider.getEmailFromJwtToken(jwt);
+			Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+			Seeker seeker = seekerService.findSeekerById(user.get().getUserId());
 			return new ResponseEntity<>(seeker, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		}
 	}
-	
 
 	@GetMapping("/search-by-industry")
 	public ResponseEntity<Object> searchSeekersByIndustry(@RequestParam("industryName") String industryName) {
@@ -102,15 +113,42 @@ public class SeekerController {
 
 	@PutMapping("/update-seeker")
 	public ResponseEntity<String> updateSeeker(@RequestHeader("Authorization") String jwt,
-			@RequestBody SeekerDTO seeker) throws AllExceptions {
+			@RequestBody SeekerDTO seeker) throws AllExceptions, JsonProcessingException {
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 
-		boolean isUpdated = seekerService.updateSeeker(seeker, user.get().getUserId());
+		boolean isUpdated = seekerService.updateSeeker(seeker, user.get().getSeeker().getUserId());
 		if (isUpdated) {
 			return new ResponseEntity<>("Cập nhật thông tin thành công", HttpStatus.CREATED);
 		} else {
 			return new ResponseEntity<>("Cập nhật thông tin thất bại", HttpStatus.BAD_REQUEST);
 		}
+	}
+	
+	@PutMapping("/follow/{companyId}")
+	public ResponseEntity<Map<String, Object>> followCompany(
+	        @PathVariable("companyId") UUID companyId,
+	        @RequestHeader("Authorization") String jwt) throws Exception {
+
+	    String email = JwtProvider.getEmailFromJwtToken(jwt);
+	    Optional<UserAccount> reqUser = userAccountRepository.findByEmail(email);
+
+	    if (reqUser.isEmpty()) {
+	        throw new Exception("Người dùng không tồn tại");
+	    }
+
+	    Map<String, Object> result = companyService.followCompany(companyId, reqUser.get().getUserId());
+
+	    return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
+	}
+
+	@GetMapping("/followed-companies")
+	public ResponseEntity<List<FollowCompanyDTO>> findCompaniesBySeekerId(@RequestHeader("Authorization") String jwt) {
+
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+		List<FollowCompanyDTO> companies = companyRepository
+				.findCompaniesFollowedBySeeker(user.get().getSeeker().getUserId());
+		return ResponseEntity.ok(companies);
 	}
 }

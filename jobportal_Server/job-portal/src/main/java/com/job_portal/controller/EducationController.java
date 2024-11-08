@@ -101,7 +101,7 @@ public class EducationController {
 		}
 	}
 
-	@GetMapping("/user/{userId}")
+	@GetMapping("/seeker")
 	public ResponseEntity<Object> searchEduByUserId(@RequestHeader("Authorization") String jwt) {
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
