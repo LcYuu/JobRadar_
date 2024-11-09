@@ -61,7 +61,9 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
         </Avatar>
         <div className="space-y-1">
           <p className="text-base font-semibold text-gray-800">{user?.userName || 'Loading...'}</p>
-          <p className="text-sm text-gray-500">{user?.email || 'Loading...'}</p>
+          <p className="text-sm text-gray-500 break-words whitespace-normal">
+            {user?.email || 'Loading...'}
+          </p>
         </div>
       </div>
 
@@ -90,6 +92,10 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
         <Button 
           variant="ghost" 
           className="w-full justify-start text-base font-medium hover:bg-gray-100 hover:text-primary hover:scale-105 transition-all duration-200"
+          onClick={() => handleMenuClick({
+            path: '/user/account-management/settings',
+            icon: Settings
+          })}
         >
           <Settings className="mr-3 h-5 w-5" />
           Cài đặt

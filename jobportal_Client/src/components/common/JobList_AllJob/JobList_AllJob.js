@@ -4,11 +4,18 @@ import Pagination from "../../layout/Pagination"; // Đúng nếu Pagination.js 
 
 
 const JobList_AllJob = ({ jobs = [], currentPage, size, totalPages, onPageChange }) => {
+  console.log("JobList_AllJob received:", {
+    totalJobs: jobs.length,
+    currentPage,
+    size,
+    totalPages
+  });
+
   return (
     <div className="space-y-4">
       {jobs.length > 0 ? (
         jobs.map((job) => (
-          <JobCard_AllJob key={job.postId} job={job} /> // Sử dụng postId làm key
+          <JobCard_AllJob key={job.postId} job={job} />
         ))
       ) : (
         <p>Không có công việc nào được tìm thấy.</p>
@@ -17,8 +24,8 @@ const JobList_AllJob = ({ jobs = [], currentPage, size, totalPages, onPageChange
         <Pagination
           currentPage={currentPage}
           size={size}
-          totalPages={totalPages} // Cập nhật totalPages
-          onPageChange={onPageChange} // Gọi hàm xử lý khi trang thay đổi
+          totalPages={totalPages}
+          onPageChange={onPageChange}
         />
       )}
     </div>

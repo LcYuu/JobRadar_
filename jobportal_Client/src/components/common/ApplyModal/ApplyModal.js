@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 import { Button } from "../../../ui/button";
 import { X, LinkIcon } from "lucide-react";
 import {
@@ -13,9 +11,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../../../ui/alert-dialog";
+import { Editor } from 'react-draft-wysiwyg';
+import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
+import { EditorState } from 'draft-js';
 
-const ApplyModal = ({ job, isOpen, onClose, onSubmit, formData, handleInputChange, handleFileChange }) => {
+const ApplyModal = ({ job, isOpen, onClose, onSubmit, formData, handleInputChange, onFileChange }) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [editorState, setEditorState] = useState(EditorState.createEmpty());
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const handleClose = () => {
     if (formData.fullName || formData.email || formData.phone || formData.additionalInfo || formData.cv) {
@@ -48,21 +51,6 @@ const ApplyModal = ({ job, isOpen, onClose, onSubmit, formData, handleInputChang
     setShowConfirmDialog(false);
   };
 
-  const modules = {
-    toolbar: [
-      ['bold', 'italic'],
-      [{ 'list': 'bullet' }],
-      ['link'],
-      ['clean']
-    ],
-  };
-
-  const formats = [
-    'bold', 'italic',
-    'list', 'bullet',
-    'link'
-  ];
-
   const handleQuillChange = (content) => {
     handleInputChange({
       target: {
@@ -70,6 +58,17 @@ const ApplyModal = ({ job, isOpen, onClose, onSubmit, formData, handleInputChang
         value: content
       }
     });
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile({
+        name: file.name,
+        size: (file.size / (1024 * 1024)).toFixed(2)
+      });
+      onFileChange(e);
+    }
   };
 
   return (
@@ -85,7 +84,7 @@ const ApplyModal = ({ job, isOpen, onClose, onSubmit, formData, handleInputChang
           <div className="sticky top-0 bg-white z-10 p-6 border-b">
             <button 
               onClick={handleCloseButtonClick}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+              className="absolute top-4 right-4 text-gray-500"
             >
               <X className="h-6 w-6" />
             </button>
@@ -124,7 +123,7 @@ const ApplyModal = ({ job, isOpen, onClose, onSubmit, formData, handleInputChang
                   value={formData.fullName}
                   onChange={handleInputChange}
                   placeholder="Nhập họ tên"
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
                   required
                 />
               </div>
@@ -139,7 +138,7 @@ const ApplyModal = ({ job, isOpen, onClose, onSubmit, formData, handleInputChang
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="Nhập địa chỉ email"
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
                   required
                 />
               </div>
@@ -154,28 +153,45 @@ const ApplyModal = ({ job, isOpen, onClose, onSubmit, formData, handleInputChang
                   value={formData.phone}
                   onChange={handleInputChange}
                   placeholder="Nhập số điện thoại"
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className=" cursor-text hover:cursor-default block text-sm font-medium text-gray-700 mb-1">
                   Thông tin thêm
                 </label>
                 <div className="border rounded-lg">
-                  <ReactQuill
-                    theme="snow"
-                    value={formData.additionalInfo}
-                    onChange={handleQuillChange}
-                    modules={modules}
-                    formats={formats}
-                    placeholder="Thêm thư xin việc hoặc bất cứ điều gì khác mà bạn muốn chia sẻ"
-                    className="h-[200px] mb-12"
+                  <Editor
+                    editorState={editorState}
+                    onEditorStateChange={(newState) => {
+                      const plainText = newState.getCurrentContent().getPlainText();
+                      if (plainText.length <= 500) {
+                        setEditorState(newState);
+                        handleInputChange({
+                          target: {
+                            name: 'additionalInfo',
+                            value: plainText
+                          }
+                        });
+                      }
+                    }}
+                    toolbar={{
+                      options: ['inline', 'list'],
+                      inline: {
+                        options: ['bold', 'italic', 'underline'],
+                      },
+                    }}
+                    editorClassName="px-3 py-2 min-h-[200px] cursor-text"
+                    toolbarClassName="!border-0 !mb-0 cursor-default"
+                    wrapperClassName="!border-0 cursor-default"
+                    toolbarStyle={{ cursor: 'default' }}
+                    editorStyle={{ cursor: 'text' }}
                   />
                   <div className="border-t p-2 flex justify-end">
                     <span className="text-sm text-gray-500">
-                      {formData.additionalInfo.replace(/<[^>]*>/g, '').length} / 500
+                      {formData.additionalInfo.length} / 500
                     </span>
                   </div>
                 </div>
@@ -194,19 +210,41 @@ const ApplyModal = ({ job, isOpen, onClose, onSubmit, formData, handleInputChang
                     id="cv-upload"
                     required
                   />
-                  <label 
-                    htmlFor="cv-upload"
-                    className="cursor-pointer flex items-center justify-center space-x-2 text-indigo-600"
-                  >
-                    <LinkIcon className="h-5 w-5" />
-                    <span>Attach CV</span>
-                  </label>
+                  {!selectedFile ? (
+                    <label 
+                      htmlFor="cv-upload"
+                      className="cursor-pointer flex items-center justify-center space-x-2 text-indigo-600"
+                    >
+                      <LinkIcon className="h-5 w-5" />
+                      <span>Attach CV</span>
+                    </label>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-center space-x-2 text-gray-700">
+                        <LinkIcon className="h-5 w-5" />
+                        <span>{selectedFile.name}</span>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {selectedFile.size} MB
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedFile(null);
+                          document.getElementById('cv-upload').value = '';
+                        }}
+                        className="text-sm text-red-600"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
               <Button 
                 type="submit" 
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg"
+                className="w-full bg-indigo-600 text-white py-3 rounded-lg"
               >
                 Gửi
               </Button>
@@ -242,13 +280,13 @@ const ApplyModal = ({ job, isOpen, onClose, onSubmit, formData, handleInputChang
           <AlertDialogFooter className="space-x-2">
             <AlertDialogCancel 
               onClick={handleCancelClose}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg"
             >
               Tiếp tục chỉnh sửa
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleConfirmClose}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+              className="px-4 py-2 bg-red-600 text-white rounded-lg"
             >
               Thoát
             </AlertDialogAction>

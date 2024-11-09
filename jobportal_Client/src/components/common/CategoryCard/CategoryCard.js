@@ -1,9 +1,24 @@
 import React from 'react';
 import './CategoryCard.css';
+import { useNavigate } from 'react-router-dom';
 
-const CategoryCard = ({ icon, title, jobCount, isActive }) => {
+const CategoryCard = ({ icon, title, jobCount, isActive, industryId }) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    // Chuyển hướng đến trang find-jobs với state chứa industryId
+    navigate('/find-jobs', {
+      state: {
+        selectedIndustryIds: [industryId]
+      }
+    });
+  };
+
   return (
-    <div className={`category-card ${isActive ? 'active' : ''}`}>
+    <div 
+      className={`category-card ${isActive ? 'active' : ''}`}
+      onClick={handleCardClick}
+    >
       <div className="icon">
         <img src={icon} alt={title} />
       </div>

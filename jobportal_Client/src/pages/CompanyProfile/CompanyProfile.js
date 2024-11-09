@@ -3,17 +3,27 @@ import { useParams, Link } from 'react-router-dom';
 import { Button } from "../../ui/button";
 import { Card } from "../../ui/card";
 import { Badge } from "../../ui/badge";
-import { Calendar, Users, MapPin, Briefcase, Heart, Clock, GraduationCap, Users2, ChevronRight } from "lucide-react";
+import { Calendar, Users, MapPin, Briefcase, Heart, Clock, GraduationCap, Users2, ChevronRight, Star } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import JobCard_AllJob from '../../components/common/JobCard_AllJob/JobCard_AllJob';
 import { getAllJobAction } from '../../redux/JobPost/jobPost.action';
 import logo from '../../assets/images/common/logo.jpg';
+
 export default function CompanyProfile() {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { jobPost = [], totalPages, loading, error } = useSelector(store => store.jobPost);
   const [currentPage, setCurrentPage] = useState(0);
   const [size] = useState(6);
+  const { token } = useSelector((state) => state.auth);
+  const isAuthenticated = !!token;
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, []);
 
   useEffect(() => {
     // Fetch jobs for this specific company
@@ -96,24 +106,39 @@ export default function CompanyProfile() {
             <div className="flex items-center gap-3 mb-1">
               <h1 className="text-2xl font-bold text-gray-900">{company.name}</h1>
               <Badge className="bg-gray-100 text-gray-600 hover:bg-gray-200">
-                {jobPost.length} Jobs
+                {jobPost.length} việc làm
               </Badge>
             </div>
             <a href={company.website} className="text-sm text-blue-600 hover:underline">
               {company.website}
             </a>
+            <div className="mt-3">
+              <Button
+                variant="outline"
+                className="flex items-center gap-2"
+                disabled={!isAuthenticated}
+                onClick={() => {
+                  if (isAuthenticated) {
+                    // Handle company rating
+                  }
+                }}
+              >
+                <Star className={`h-4 w-4 ${isAuthenticated ? 'text-yellow-400' : 'text-gray-400'}`} />
+                <span>{isAuthenticated ? 'Đánh giá công ty' : 'Đăng nhập để đánh giá'}</span>
+              </Button>
+            </div>
             <div className="flex gap-8 mt-4">
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Calendar className="w-4 h-4 text-gray-400" />
-                <span>Founded {company.foundedDate}</span>
+                <span>Thành lập {company.foundedDate}</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Users className="w-4 h-4 text-gray-400" />
-                <span>{company.employeeCount}+ Employees</span>
+                <span>{company.employeeCount}+ Nhân viên</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <MapPin className="w-4 h-4 text-gray-400" />
-                <span>{company.locations.length} countries</span>
+                <span>{company.locations.length} quốc gia</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Briefcase className="w-4 h-4 text-gray-400" />
@@ -125,7 +150,7 @@ export default function CompanyProfile() {
 {/* Company Profile, Tech Stack, and Office Location Grid */}
 <div className="grid grid-cols-3 gap-8 mb-12">
   <div className="col-span-2">
-    <h2 className="text-xl font-semibold mb-4">Company Profile</h2>
+    <h2 className="text-xl font-semibold mb-4">Giới thiệu</h2>
     <p className="text-gray-600 leading-relaxed">{company.description}</p>
   </div>
 
@@ -151,7 +176,7 @@ export default function CompanyProfile() {
         </div>
         {/* Contact Section */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Contact</h2>
+          <h2 className="text-xl font-semibold mb-4">Liên hệ</h2>
           <div className="space-y-2">
             <Link 
               to="/" 
