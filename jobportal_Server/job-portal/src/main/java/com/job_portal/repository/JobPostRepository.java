@@ -59,6 +59,13 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
      @Query("SELECT MAX(j.salary) FROM JobPost j")
      Long findMaxSalary();
 
+     
+     default Specification<JobPost> alwaysActiveJobs() {
+         return (root, query, criteriaBuilder) -> criteriaBuilder.and(
+             criteriaBuilder.isTrue(root.get("isApprove")),
+             criteriaBuilder.greaterThanOrEqualTo(root.get("expireDate"), LocalDateTime.now())
+         );
+     }
  }
     
 

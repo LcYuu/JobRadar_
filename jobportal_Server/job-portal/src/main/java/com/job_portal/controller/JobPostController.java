@@ -197,50 +197,50 @@ public class JobPostController {
 		}
 	}
 
-	@GetMapping("/min-salary/{minSalary}")
-	public ResponseEntity<Object> findBySalaryGreaterThanEqual(@PathVariable("minSalary") Long minSalary) {
-		try {
-			List<JobPost> jobs = jobPostService.findBySalaryGreaterThanEqual(minSalary);
-			return ResponseEntity.ok(jobs);
-		} catch (AllExceptions e) {
-			// Trả về thông báo từ service
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-		} catch (Exception e) {
-			// Trả về thông báo lỗi chung
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
-		}
-	}
-
-	@GetMapping("/max-salary/{maxSalary}")
-	public ResponseEntity<Object> findBySalaryLessThanEqual(@PathVariable("maxSalary") Long maxSalary) {
-		try {
-			List<JobPost> jobs = jobPostService.findBySalaryLessThanEqual(maxSalary);
-			return ResponseEntity.ok(jobs);
-		} catch (AllExceptions e) {
-			// Trả về thông báo từ service
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-		} catch (Exception e) {
-			// Trả về thông báo l���i chung
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
-		}
-	}
-
-	@GetMapping("/salary-between")
-	public ResponseEntity<Object> findBySalaryBetween(@RequestParam Long minSalary, @RequestParam Long maxSalary) {
-		try {
-			List<JobPost> jobs = jobPostService.findBySalaryBetween(minSalary, maxSalary);
-			return ResponseEntity.ok(jobs);
-		} catch (AllExceptions e) {
-			// Trả về thông báo từ service
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-		} catch (Exception e) {
-			// Trả về thông báo lỗi chung
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
-		}
-	}
+//	@GetMapping("/min-salary/{minSalary}")
+//	public ResponseEntity<Object> findBySalaryGreaterThanEqual(@PathVariable("minSalary") Long minSalary) {
+//		try {
+//			List<JobPost> jobs = jobPostService.findBySalaryGreaterThanEqual(minSalary);
+//			return ResponseEntity.ok(jobs);
+//		} catch (AllExceptions e) {
+//			// Trả về thông báo từ service
+//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+//		} catch (Exception e) {
+//			// Trả về thông báo lỗi chung
+//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
+//		}
+//	}
+//
+//	@GetMapping("/max-salary/{maxSalary}")
+//	public ResponseEntity<Object> findBySalaryLessThanEqual(@PathVariable("maxSalary") Long maxSalary) {
+//		try {
+//			List<JobPost> jobs = jobPostService.findBySalaryLessThanEqual(maxSalary);
+//			return ResponseEntity.ok(jobs);
+//		} catch (AllExceptions e) {
+//			// Trả về thông báo từ service
+//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+//		} catch (Exception e) {
+//			// Trả về thông báo lỗi chung
+//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
+//		}
+//	}
+//
+//	@GetMapping("/salary-between")
+//	public ResponseEntity<Object> findBySalaryBetween(@RequestParam Long minSalary, @RequestParam Long maxSalary) {
+//		try {
+//			List<JobPost> jobs = jobPostService.findBySalaryBetween(minSalary, maxSalary);
+//			return ResponseEntity.ok(jobs);
+//		} catch (AllExceptions e) {
+//			// Trả về thông báo từ service
+//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+//		} catch (Exception e) {
+//			// Trả về thông báo lỗi chung
+//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
+//		}
+//	}
 
 	@GetMapping("/findJob/{postId}")
 	public ResponseEntity<JobPost> getJobById(@PathVariable("postId") UUID postId) throws AllExceptions {
@@ -349,10 +349,12 @@ public class JobPostController {
 	        @RequestParam(defaultValue = "0") int page, 
 	        @RequestParam(defaultValue = "7") int size) { 
 
-	    Specification<JobPost> spec = JobPostSpecification.withFilters(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds);
-	    
-	    Pageable pageable = PageRequest.of(page, size); // Tạo đối tượng Pageable
-	    return jobPostRepository.findAll(spec, pageable); // Trả về đối tượng Page
+	    // Sử dụng điều kiện mặc định để đảm bảo chỉ lấy các công việc đang hoạt động
+	    Specification<JobPost> spec = Specification.where(jobPostRepository.alwaysActiveJobs())
+	        .and(JobPostSpecification.withFilters(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds));
+
+	    Pageable pageable = PageRequest.of(page, size);
+	    return jobPostRepository.findAll(spec, pageable);
 	}
 	
 	@GetMapping("/salary-range")

@@ -1,85 +1,53 @@
-import React, { useState } from 'react';
+import React, { useEffect } from "react";
 import { Card, CardContent } from "../../ui/card";
-import logo from '../../assets/images/common/logo.jpg';
-
-const companies = [
-  { id: 1, name: 'Nomad', logo: logo },
-  { id: 2, name: 'Udacity', logo: logo },
-  { id: 3, name: 'Packer', logo: logo },
-  { id: 4, name: 'Divvy', logo: logo },
-  { id: 5, name: 'DigitalOcean', logo: logo },
-  // Add more companies as needed
-];
+import { useDispatch, useSelector } from "react-redux";
+import { getFollowedCompany } from "../../redux/Seeker/seeker.action";
 
 export default function FavoriteCompanies() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const companiesPerPage = 5;
+  const dispatch = useDispatch();
+  const { followedCompany } = useSelector((store) => store.seeker);
 
-  // Calculate pagination
-  const totalPages = Math.ceil(companies.length / companiesPerPage);
-  const displayedCompanies = companies.slice(
-    (currentPage - 1) * companiesPerPage,
-    currentPage * companiesPerPage
-  );
-
-  const handlePageChange = (page) => {
-    if (page > 0 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
+  useEffect(() => {
+    dispatch(getFollowedCompany());
+  }, [dispatch]);
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Danh sách công ty yêu thích</h1>
-      <Card>
+    <div className="space-y-6 p-4">
+      <h1 className="text-2xl font-bold text-gray-700">Danh sách công ty yêu thích</h1>
+      <Card className="shadow-lg border rounded-lg">
         <CardContent className="p-6">
           <div className="flex justify-between items-center mb-4">
+
             <h2 className="text-xl font-semibold">Tất cả ({companies.length})</h2>
+
           </div>
-          <table className="w-full">
-            <thead>
+          <table className="w-full border border-gray-200 rounded-lg shadow-sm">
+            <thead className="bg-gray-100 text-gray-600">
               <tr>
+
                 <th className="text-left p-2">STT</th>
                 <th className="text-left p-2">Tên công ty</th>
               </tr>
             </thead>
             <tbody>
-              {displayedCompanies.map((company, index) => (
-                <tr key={company.id} className="border-b hover:bg-gray-100">
-                  <td className="p-2">{index + 1 + (currentPage - 1) * companiesPerPage}</td>
-                  <td className="p-2 flex items-center space-x-3">
-                    <img src={company.logo} alt={`${company.name} logo`} className="h-8 w-8 rounded-full" />
-                    <span>{company.name}</span>
+              {followedCompany.map((company, index) => (
+                <tr
+                  key={company.companyId}
+                  className="border-b last:border-b-0 hover:bg-blue-50 transition duration-200 ease-in-out"
+                >
+                  <td className="p-3 font-medium text-gray-700">{index + 1}</td>
+                  <td className="p-3 flex items-center space-x-3 text-gray-800">
+                    <img
+                      src={company.logo}
+                      alt={`${company.companyName} logo`}
+                      className="h-10 w-10 rounded-full shadow-sm border border-gray-300 hover:scale-105 transition-transform duration-200"
+                    />
+                    <span className="font-semibold">{company.companyName}</span>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <div className="flex justify-center mt-6">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className={`px-3 py-1 border rounded-l ${currentPage === 1 ? 'text-gray-400' : 'text-blue-600'}`}
-            >
-              &lt;
-            </button>
-            {[...Array(totalPages)].map((_, pageIndex) => (
-              <button
-                key={pageIndex}
-                onClick={() => handlePageChange(pageIndex + 1)}
-                className={`px-3 py-1 border ${currentPage === pageIndex + 1 ? 'bg-blue-500 text-white' : 'text-blue-600'}`}
-              >
-                {pageIndex + 1}
-              </button>
-            ))}
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className={`px-3 py-1 border rounded-r ${currentPage === totalPages ? 'text-gray-400' : 'text-blue-600'}`}
-            >
-              &gt;
-            </button>
-          </div>
         </CardContent>
       </Card>
     </div>

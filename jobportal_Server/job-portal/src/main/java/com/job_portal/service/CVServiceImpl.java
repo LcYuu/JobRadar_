@@ -24,13 +24,10 @@ public class CVServiceImpl implements ICVService {
 	@Override
 	public boolean createCV(CVDTO cvdto, UUID userId) {
 		Optional<Seeker> seeker = seekerRepository.findById(userId);
-
 		CV cv = new CV();
-
 		cv.setSeeker(seeker.get());
 		cv.setPathCV(cvdto.getPathCV());
 		cv.setIsMain(false);
-
 		try {
 			CV saveCV = cvRepository.save(cv);
 			return saveCV != null;
@@ -52,10 +49,31 @@ public class CVServiceImpl implements ICVService {
 	}
 
 	@Override
-	public boolean updateImg(CVDTO cvdto, Integer cvId) throws AllExceptions {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean updateIsMain(Integer cvId, UUID userId) {
+	    Optional<CV> optionalCV = cvRepository.findById(cvId);
+	    if (optionalCV.isPresent()) {
+	        CV cv = optionalCV.get();
+
+	        // Kiểm tra nếu CV thuộc về người dùng
+	        if (cv.getSeeker().getUserId().equals(userId)) {
+	            // Đặt tất cả các CV khác của seeker này thành isMain = false
+	            List<CV> userCVs = cvRepository.findCVBySeekerId(userId);
+	            for (CV userCV : userCVs) {
+	                if (!userCV.getCvId().equals(cvId) && userCV.getIsMain()) {
+	                    userCV.setIsMain(false);
+	                    cvRepository.save(userCV);
+	                }
+	            }
+
+	            // Cập nhật CV hiện tại thành isMain = true
+	            cv.setIsMain(true);
+	            cvRepository.save(cv);
+	            return true;
+	        }
+	    }
+	    return false;
 	}
+
 
 	@Override
 	public List<CV> findCVBySeekerId(UUID userId) throws AllExceptions {
