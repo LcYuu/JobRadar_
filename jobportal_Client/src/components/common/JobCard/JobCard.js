@@ -69,9 +69,9 @@ export default function JobCard({
   };
 
   return (
-    <Card onClick={handleCardClick} className="card cursor-pointer">
-      <CardHeader className="card-header">
-        <JobCardHeader jobType={jobType} companyLogo={companyLogo} />
+    <Card onClick={handleCardClick} className="card cursor-pointer border-zinc-900">
+      <CardHeader className="card-header ">
+        <JobCardHeader jobType={jobType} companyLogo={companyLogo} className='border-red-900'/>
         <CardTitle>{jobTitle}</CardTitle>
       </CardHeader>
       <CardContent className="card-content">
@@ -87,7 +87,7 @@ export default function JobCard({
 
 function JobCardHeader({ jobType, companyLogo }) {
   return (
-    <div className="flex justify-between items-start mb-4">
+    <div className="flex justify-between items-start mb-4 ">
       <img
         src={companyLogo}
         alt="Company Logo"

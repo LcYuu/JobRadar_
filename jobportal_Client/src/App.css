@@ -36,3 +36,9 @@
     transform: rotate(360deg);
   }
 }
+.app-container {
+  position: relative;
+  min-height: 100vh;
+  z-index: 1;
+  background: transparent;
+}

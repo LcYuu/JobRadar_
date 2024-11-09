@@ -221,7 +221,7 @@ public class JobPostController {
 			// Trả về thông báo từ service
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 		} catch (Exception e) {
-			// Trả về thông báo lỗi chung
+			// Trả về thông báo l���i chung
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
 		}
