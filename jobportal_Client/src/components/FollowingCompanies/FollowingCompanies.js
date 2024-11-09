@@ -17,15 +17,16 @@ export default function FavoriteCompanies() {
       <Card className="shadow-lg border rounded-lg">
         <CardContent className="p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-600">
-              Số lượng công ty đã theo dõi: <span className="text-blue-600">{followedCompany.length}</span>
-            </h2>
+
+            <h2 className="text-xl font-semibold">Tất cả ({companies.length})</h2>
+
           </div>
           <table className="w-full border border-gray-200 rounded-lg shadow-sm">
             <thead className="bg-gray-100 text-gray-600">
               <tr>
-                <th className="text-left p-3 border-b">#</th>
-                <th className="text-left p-3 border-b">Company Name</th>
+
+                <th className="text-left p-2">STT</th>
+                <th className="text-left p-2">Tên công ty</th>
               </tr>
             </thead>
             <tbody>
