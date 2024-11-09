@@ -20,7 +20,7 @@
 /* JobCard.css */
 .card {
   transition: transform 0.3s ease, box-shadow 0.3s ease; /* Thêm hiệu ứng chuyển tiếp */
-  border: 1px solid transparent; /* Thêm viền trong suốt */
+  /* Thêm viền trong suốt */
   border-radius: 8px; /* Bo góc thẻ */
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Thêm hiệu ứng đổ bóng ban đầu */
 }
@@ -35,6 +35,7 @@
 
 .card-header {
   transition: background-color 0.3s ease; /* Thay đổi màu nền mượt mà */
+  border: 2px solid rgba(153, 45, 45, 0.1); 
 }
 
 .card:hover .card-header {

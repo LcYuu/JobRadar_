@@ -1,25 +1,87 @@
-/* src/components/Slider/Slider.css */
-
-/* Giới hạn kích thước của slider */
 .slider-container {
-    width: 100; /* Chiều rộng 100% của phần tử cha */
-    max-width: 800px; /* Giới hạn chiều rộng tối đa của slider */
-    margin: 0 auto; /* Căn giữa slider */
-    overflow: hidden; /* Ẩn phần thừa ra ngoài của slider */
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.awssld {
+  --slider-height-percentage: 35%;
+  --slider-transition-duration: 700ms;
+  --organic-arrow-thickness: 4px;
+  --organic-arrow-border-radius: 0px;
+  --organic-arrow-height: 40px;
+  --organic-arrow-color: #000000;
+  --control-button-width: 10%;
+  --control-button-height: 25%;
+  --control-button-background: transparent;
+  --control-bullet-color: #000000;
+  --control-bullet-active-color: #667eea;
+  height: 300px !important;
+}
+
+.slider-item {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.slider-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.awssld__content {
+  background-color: transparent;
+  width: 100%;
+  height: 100%;
+}
+
+.caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+  padding: 20px;
+  color: white;
+  text-align: center;
+}
+
+.caption h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+/* Tùy chỉnh mũi tên */
+.awssld__controls button {
+  outline: none !important;
+}
+
+.awssld__controls__arrow-left,
+.awssld__controls__arrow-right {
+  opacity: 0.8 !important;
+}
+
+.awssld__controls__arrow-left:hover,
+.awssld__controls__arrow-right:hover {
+  opacity: 1 !important;
+}
+
+@media (max-width: 768px) {
+  .slider-container {
+    padding: 10px;
   }
   
-  /* Đặt chiều cao của slider (Tùy chọn) */
   .awssld {
-    height: auto; /* Đảm bảo chiều cao tự động điều chỉnh theo hình ảnh */
+    height: 200px !important;
   }
   
-  .awssld__content {
-    max-height: 400px; /* Giới hạn chiều cao của các hình ảnh */
+  .caption h2 {
+    font-size: 1.2rem;
   }
-  
-  .awssld__wrapper img {
-    object-fit: cover; /* Đảm bảo hình ảnh lấp đầy không gian mà không bị biến dạng */
-    width: 100%; /* Chiều rộng của ảnh bằng với chiều rộng của slider */
-    
-  }
-  
+}
