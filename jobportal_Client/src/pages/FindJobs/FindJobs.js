@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
-import { Search, MapPin, ChevronDown, Grid, List } from "lucide-react";
+import { Search, MapPin, ChevronDown, Grid, List, Star } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   countJobByType,
@@ -25,9 +25,17 @@ import Pagination from "../../components/layout/Pagination";
 import { getCity } from "../../redux/City/city.action";
 import { getIndustryCount } from "../../redux/Industry/industry.action";
 import RangeSlider from "../../components/common/RangeSlider/RangeSlider";
+import { useLocation } from 'react-router-dom';
+
 
 export default function JobSearchPage() {
   const dispatch = useDispatch();
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, []);
   const {
     searchJob = [],
     jobPost = [],
@@ -60,6 +68,17 @@ export default function JobSearchPage() {
     (filters.minSalary !== undefined && filters.minSalary !== null) ||
     (filters.maxSalary !== undefined && filters.maxSalary !== null);
 
+  const location = useLocation();
+
+  useEffect(() => {
+    // Kiểm tra xem có state được truyền từ CategoryCard không
+    if (location.state?.selectedIndustryIds) {
+      setFilters(prev => ({
+        ...prev,
+        selectedIndustryIds: location.state.selectedIndustryIds
+      }));
+    }
+  }, [location]);
 
   useEffect(() => {
     if (isFilterApplied) {
@@ -67,6 +86,13 @@ export default function JobSearchPage() {
     } else {
       dispatch(getAllJobAction(currentPage, size));
     }
+    console.log({
+      totalJobs: isFilterApplied ? searchJob.length : jobPost.length,
+      currentPage,
+      size,
+      results: isFilterApplied ? searchJob : jobPost,
+      totalPages: isFilterApplied ? totalPagesFromSearch : totalPagesFromAll
+    });
   }, [filters, currentPage, dispatch]);
 
   useEffect(() => {
@@ -103,12 +129,16 @@ export default function JobSearchPage() {
   const totalPages = isFilterApplied ? totalPagesFromSearch : totalPagesFromAll;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-transparent">
       <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">
-          Tìm kiếm{" "}
-          <span className="text-primary">công việc trong mơ của bạn</span>
-        </h1>
+      <h1 className="text-3xl font-bold text-gray-800 text-center my-8">
+      
+            Tìm kiếm{" "}
+            <span className="relative inline-block text-primary text-blue-500">
+              công việc trong mơ của bạn
+              <span className="absolute bottom-0 left-0 w-full h-1 bg-blue-300 opacity-50"></span>
+            </span>
+          </h1>
 
         <div className="bg-white rounded-lg shadow-sm p-4 mb-8">
           <div className="flex space-x-2">
@@ -197,12 +227,10 @@ export default function JobSearchPage() {
                 {industryCount.map((industry) => (
                   <div className="flex items-center" key={industry.industryId}>
                     <Checkbox
+                      checked={filters.selectedIndustryIds.includes(industry.industryId)}
                       onCheckedChange={(checked) => {
                         const updatedIndustryIds = checked
-                          ? [
-                              ...filters.selectedIndustryIds,
-                              industry.industryId,
-                            ]
+                          ? [...filters.selectedIndustryIds, industry.industryId]
                           : filters.selectedIndustryIds.filter(
                               (id) => id !== industry.industryId
                             );
@@ -235,7 +263,8 @@ export default function JobSearchPage() {
               <div className="flex items-center space-x-2">
                 <h2 className="text-xl font-semibold">Tất cả công việc</h2>
                 <span className="text-sm text-gray-500">
-                  Hiển thị {results.length} kết quả
+                  Tổng số: {isFilterApplied ? searchJob.length : jobPost.length} kết quả
+                  (Trang {currentPage + 1}/{totalPages})
                 </span>
               </div>
               <div className="flex items-center space-x-2">

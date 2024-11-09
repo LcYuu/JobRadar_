@@ -29,10 +29,11 @@ const CategoryList = () => {
     <div className="category-list">
       {industries.slice(1).map((industry, index) => (
         <CategoryCard
-          key={index}
+          key={industry.industryId}
           icon={iconUrls[index]} 
           title={industry.industryName}
           jobCount={industry.jobCount}
+          industryId={industry.industryId}
         />
       ))}
     </div>
