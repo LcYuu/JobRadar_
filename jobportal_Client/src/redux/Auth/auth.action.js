@@ -11,9 +11,13 @@ import {
   GET_PROFILE_FAILURE,
   LOGOUT_REQUEST,
   LOGOUT_SUCCESS,
-  LOGOUT_FAILURE
+  LOGOUT_FAILURE,
+  UPDATE_PROFILE_REQUEST,
+  UPDATE_PROFILE_SUCCESS,
+  UPDATE_PROFILE_FAILURE
 } from "./auth.actionType";
-import { API_BASE_URL } from "../../configs/api";
+import { api, API_BASE_URL } from "../../configs/api";
+import { UPDATE_JOB_REQUEST } from "../JobPost/jobPost.actionType";
 
 
 export const signupAction = (userData) => async (dispatch) => {
@@ -74,7 +78,7 @@ export const getProfileAction = () => async (dispatch) => {
       throw new Error('No token found');
     }
     
-    const { data } = await axios.get(`${API_BASE_URL}/users/profile`, {
+    const { data } = await api.get(`${API_BASE_URL}/users/profile`, {
       headers: {
         Authorization: `Bearer ${jwt}`,
       },
@@ -89,11 +93,7 @@ export const getProfileAction = () => async (dispatch) => {
   } catch (error) {
     console.error("Profile Fetch Error: ", error);
     dispatch({ type: GET_PROFILE_FAILURE, payload: error.message });
-    // Chỉ xóa token nếu lỗi 401/403
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      sessionStorage.removeItem('jwt');
-    }
-    return false;
+
   }
 };
 
@@ -115,5 +115,20 @@ export const logoutAction = () => async (dispatch) => {
     }
   } catch (error) {
     dispatch({ type: LOGOUT_FAILURE, payload: error.message });
+  }
+};
+
+
+export const updateProfileAction = (userData) => async (dispatch) => {
+  dispatch({ type: UPDATE_PROFILE_REQUEST });
+  try {
+      const { data } = await api.put("/users/update-user", userData);
+      console.log("Profile updated: ", data);
+      dispatch({ type: UPDATE_PROFILE_SUCCESS, payload: data });
+      return data; 
+  } catch (error) {
+      console.error("Profile Update Error: ", error);
+      dispatch({ type: UPDATE_PROFILE_FAILURE, payload: error });
+      throw error; 
   }
 };

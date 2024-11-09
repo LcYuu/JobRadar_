@@ -61,6 +61,9 @@ public class Seeker {
     @JoinColumn(name = "user_id")
     private UserAccount userAccount;
     
+    @ManyToMany(mappedBy = "follows")
+    private List<Company> followedCompanies = new ArrayList<>();
+    
     @ManyToMany
 	private List<Skills> skills = new ArrayList<>();
     
