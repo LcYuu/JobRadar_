@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import './App.css';
 import Header from './components/common/Header/header';
+import Footer from './components/common/Footer/Footer';
 import Home from './pages/Home/Home';
 import SignUpForm from './pages/SignUp/signup';
 import './global.css';
@@ -23,6 +24,9 @@ import MyCV from './components/MyCv/MyCv';
 import FavoriteCompanies from './components/FollowingCompanies/FollowingCompanies';
 import MyProfile from './components/MyProfile/MyProfile';
 import JobDetail from './pages/JobDetail/JobDetail';
+import Settings from './components/Settings/settings';
+import Banner from './components/common/Banner/banner';
+import Background from './components/common/Background/background';
 
 const App = () => {
   const location = useLocation();
@@ -47,10 +51,17 @@ const App = () => {
     const noHeaderPaths = ['/auth/sign-up', '/auth/sign-in', '/auth/forgot-password','user/account-management', '/change-password' ];
     return !noHeaderPaths.includes(location.pathname);
   }, [location.pathname]);
-  
+
+  const showFooter = useMemo(() => {
+    const noFooterPaths = ['/auth/sign-up', '/auth/sign-in', '/auth/forgot-password', '/change-password'];
+    return !noFooterPaths.includes(location.pathname) && !location.pathname.includes('/user/account-management');
+  }, [location.pathname]);
+
   return (
     <div className="app-container">
+      {/* <Background /> */}
       {showHeader && <Header />} 
+      {/* {showHeader && <Banner />}  */}
       <Routes>
         {/* Public Routes - Không cần đăng nhập và có redirect khi đã đăng nhập */}
         <Route path="/auth/sign-up" element={
@@ -102,6 +113,7 @@ const App = () => {
           <Route path="cv" element={<MyCV />} />
           <Route path="following-companies" element={<FavoriteCompanies />} />
           <Route path="profile" element={<MyProfile />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
 
         <Route path="/jobs/job-detail/:id" element={
@@ -116,6 +128,7 @@ const App = () => {
           </PublicRoute>
         } />
       </Routes>
+      {showFooter && <Footer />}
     </div>
   );
 };

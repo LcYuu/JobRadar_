@@ -54,7 +54,7 @@ export default function FindCompanies() {
   const uniqueCompanies = [...new Map(companyByFeature.map(company => [company.industryId, company])).values()];
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen bg-transparent p-6">
       <div className="max-w-6xl mx-auto space-y-12">
         <div className="text-center my-8">
           <h1 className="text-3xl font-bold text-gray-800">
@@ -176,7 +176,7 @@ export default function FindCompanies() {
                   company={company} 
                   variant="suggested" 
                 />
-              ))}
+              ))} 
             </div>
           ) : (
             <p className="text-center text-gray-500">Không có công ty đề xuất nào.</p>
