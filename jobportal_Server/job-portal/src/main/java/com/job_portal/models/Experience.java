@@ -34,7 +34,7 @@ public class Experience {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column(name = "is_current_job", nullable = false)
+    @Column(name = "is_current_job")
     private Boolean isCurrentJob;
 
     @Column(name = "job_title", length = 100, nullable = false)

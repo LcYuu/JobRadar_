@@ -32,7 +32,7 @@ public class ExperienceServiceImpl implements IExperienceService {
 	        Experience experience = new Experience();
 	        experience.setStartDate(experienceDTO.getStartDate());
 	        experience.setEndDate(experienceDTO.getEndDate());
-	        experience.setIsCurrentJob(experienceDTO.getIsCurrentJob());
+	        experience.setIsCurrentJob(false);
 	        experience.setJobTitle(experienceDTO.getJobTitle());
 	        experience.setCompanyName(experienceDTO.getCompanyName());
 	        experience.setDescription(experienceDTO.getDescription());
@@ -68,76 +68,73 @@ public class ExperienceServiceImpl implements IExperienceService {
 		return true;
 	}
 
-	@Override
-	public boolean updateExp(Experience experience, Integer expId, UUID userId) throws AllExceptions {
-		Optional<Experience> existingExp = experienceRepository.findById(expId);
-
-		if (existingExp.isEmpty()) {
-			throw new AllExceptions("Experience not exist with id " + expId);
-		}
-
-		// Lấy đối tượng Company cũ
-		Experience oldExp = existingExp.get();
-		boolean isUpdated = false;
-
-		// Cập nhật các trường cơ bản
-		if (experience.getStartDate() != null) {
-			oldExp.setStartDate(experience.getStartDate());
-			isUpdated = true;
-		}
-
-		// Cập nhật các trường cơ bản
-		if (experience.getEndDate() != null) {
-			oldExp.setEndDate(experience.getEndDate());
-			isUpdated = true;
-		}
-		if (experience.getIsCurrentJob() != null) {
-			oldExp.setIsCurrentJob(experience.getIsCurrentJob());
-			isUpdated = true;
-		}
-
-		if (experience.getJobTitle() != null) {
-			oldExp.setJobTitle(experience.getJobTitle());
-			isUpdated = true;
-		}
-		if (experience.getCompanyName() != null) {
-			oldExp.setCompanyName(experience.getCompanyName());
-			isUpdated = true;
-		}
-		if (experience.getDescription() != null) {
-			oldExp.setDescription(experience.getDescription());
-			isUpdated = true;
-		}
-
-
-		// Tìm Industry mới dựa trên industryId
-		if (userId != null) {
-			Optional<Seeker> newSeeker = seekerRepository.findById(userId);
-			if (newSeeker.isEmpty()) {
-				throw new AllExceptions("Seeker not exist with id " + userId);
-			}
-			// Cập nhật Industry nếu khác
-			if (!newSeeker.get().equals(oldExp.getSeeker())) {
-				oldExp.setSeeker(newSeeker.get());
-				isUpdated = true;
-			}
-		}
-
-		if (isUpdated) {
-			experienceRepository.save(oldExp);
-		}
-
-		return isUpdated;
-	}
+//	@Override
+//	public boolean updateExp(Integer expId) throws AllExceptions {
+//		Optional<Experience> existingExp = experienceRepository.findById(expId);
+//
+//		if (existingExp.isEmpty()) {
+//			throw new AllExceptions("Experience not exist with id " + expId);
+//		}
+//
+//		// Lấy đối tượng Company cũ
+//		Experience oldExp = existingExp.get();
+//		boolean isUpdated = false;
+//
+//		// Cập nhật các trường cơ bản
+//		if (experience.getStartDate() != null) {
+//			oldExp.setStartDate(experience.getStartDate());
+//			isUpdated = true;
+//		}
+//
+//		// Cập nhật các trường cơ bản
+//		if (experience.getEndDate() != null) {
+//			oldExp.setEndDate(experience.getEndDate());
+//			isUpdated = true;
+//		}
+//		if (experience.getIsCurrentJob() != null) {
+//			oldExp.setIsCurrentJob(experience.getIsCurrentJob());
+//			isUpdated = true;
+//		}
+//
+//		if (experience.getJobTitle() != null) {
+//			oldExp.setJobTitle(experience.getJobTitle());
+//			isUpdated = true;
+//		}
+//		if (experience.getCompanyName() != null) {
+//			oldExp.setCompanyName(experience.getCompanyName());
+//			isUpdated = true;
+//		}
+//		if (experience.getDescription() != null) {
+//			oldExp.setDescription(experience.getDescription());
+//			isUpdated = true;
+//		}
+//
+//
+//		// Tìm Industry mới dựa trên industryId
+//		if (userId != null) {
+//			Optional<Seeker> newSeeker = seekerRepository.findById(userId);
+//			if (newSeeker.isEmpty()) {
+//				throw new AllExceptions("Seeker not exist with id " + userId);
+//			}
+//			// Cập nhật Industry nếu khác
+//			if (!newSeeker.get().equals(oldExp.getSeeker())) {
+//				oldExp.setSeeker(newSeeker.get());
+//				isUpdated = true;
+//			}
+//		}
+//
+//		if (isUpdated) {
+//			experienceRepository.save(oldExp);
+//		}
+//
+//		return isUpdated;
+//	}
 
 	@Override
 	public List<Experience> searchExpByUserId(UUID userId) throws AllExceptions {
 		try {
 
 			List<Experience> experiences = experienceRepository.findExpByUserId(userId);
-			if (experiences.isEmpty()) {
-				throw new AllExceptions("Không có kinh nghiệm");
-			}
 			return experiences;
 		} catch (Exception e) {
 			throw new AllExceptions(e.getMessage());
