@@ -1,24 +1,26 @@
-const cloud_name = "ddqygrb0g"
-const upload_preset = "GiaThuan"
+const cloud_name = "ddqygrb0g";
+const upload_preset = "GiaThuan";
 
-export const uploadToCloudinary = async(pics, fileType) =>{
-    
-    if(pics && fileType){
-        const data = new FormData()
-        data.append("file", pics)
-        data.append("upload_preset", upload_preset)
-        data.append("cloud_name", cloud_name)
+export const uploadToCloudinary = async (file) => {
+    if (file) {
+        const data = new FormData();
+        data.append("file", file);
+        data.append("upload_preset", upload_preset);
+        data.append("cloud_name", cloud_name);
 
-        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/${fileType}/upload`,
-            {method: "post", body:data})
-        console.log("res", res)
+        // Tự động xác định fileType dựa trên loại file
+        const fileType = file.type.startsWith("image/") ? "image" : "raw";
 
-        const fileData = await res.json()
-        console.log("res", fileData.url)
+        const res = await fetch(
+            `https://api.cloudinary.com/v1_1/${cloud_name}/${fileType}/upload`,
+            { method: "post", body: data }
+        );
 
-        return fileData.url
+        const fileData = await res.json();
+        console.log("Uploaded File URL:", fileData.url);
+
+        return fileData.url;
+    } else {
+        console.log("Error: Missing file...");
     }
-    else{
-        console.log("error....")
-    }
-}
+};

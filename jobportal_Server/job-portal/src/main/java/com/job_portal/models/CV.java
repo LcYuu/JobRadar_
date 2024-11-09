@@ -1,6 +1,5 @@
 package com.job_portal.models;
 
-import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
