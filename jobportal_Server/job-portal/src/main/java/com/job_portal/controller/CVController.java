@@ -60,7 +60,7 @@ public class CVController {
 		}
 	}
 
-	@PostMapping("/cv-main")
+	@PostMapping("/cv-main/{cvId}")
 	public ResponseEntity<String> updateIsMain(@RequestHeader("Authorization") String jwt,
 			@PathVariable("cvId") Integer cvId) {
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
@@ -68,9 +68,9 @@ public class CVController {
 
 		boolean isUpdated = cvService.updateIsMain(cvId, user.get().getUserId());
 		if (isUpdated) {
-			return new ResponseEntity<>("Cập nhật CV thành công", HttpStatus.CREATED);
+			return new ResponseEntity<>("Đặt thành CV chính thành công", HttpStatus.CREATED);
 		} else {
-			return new ResponseEntity<>("Cập nhật CV thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>("Thất bại trong việc đặt thành CV chính", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 

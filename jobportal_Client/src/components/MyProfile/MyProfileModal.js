@@ -66,7 +66,7 @@ export default function ProfileModal({ open, handleClose }) {
 
   const handleSelectImage = async (event) => {
     setIsLoading(true);
-    const imageUrl = await uploadToCloudinary(event.target.files[0], "image");
+    const imageUrl = await uploadToCloudinary(event.target.files[0]);
     setSelectedAvatar(imageUrl);
     formik.setFieldValue("avatar", imageUrl); // Cập nhật giá trị avatar trong formik
     setIsLoading(false);

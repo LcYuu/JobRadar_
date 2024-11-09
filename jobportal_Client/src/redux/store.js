@@ -11,6 +11,7 @@ import { seekerReducer } from "./Seeker/seeker.reducer";
 import { expReducer } from "./Experience/exp.reducer";
 import { eduReducer } from "./Education/edu.reducer";
 import { skillReducer } from "./Skills/skill.reducer";
+import { cvReducer } from "./CV/cv.reducer";
 const rootReducer = combineReducers({
     auth:authReducer,
     jobPost:jobPostReducer,
@@ -22,6 +23,7 @@ const rootReducer = combineReducers({
     seeker:seekerReducer,
     exp:expReducer,
     edu:eduReducer,
-    skill:skillReducer
+    skill:skillReducer,
+    cv:cvReducer
 })
 export const store = legacy_createStore(rootReducer, applyMiddleware(thunk))
