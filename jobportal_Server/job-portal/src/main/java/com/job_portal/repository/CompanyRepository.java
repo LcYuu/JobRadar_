@@ -14,10 +14,11 @@ import org.springframework.data.repository.query.Param;
 
 import com.job_portal.DTO.CompanyDTO;
 import com.job_portal.DTO.CompanyWithCountJobDTO;
+import com.job_portal.DTO.FollowCompanyDTO;
 import com.job_portal.models.Company;
 import com.job_portal.models.JobPost;
 
-public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpecificationExecutor<Company>{
+public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpecificationExecutor<Company> {
 
 	@Query("SELECT c FROM Company c WHERE c.companyName LIKE %:companyName%")
 	List<Company> findCompanyByCompanyName(@Param("companyName") String companyName);
@@ -33,39 +34,60 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 
 	@Query("SELECT c FROM Company c WHERE c.industry.industryId = :industryId")
 	List<Company> findTop6CompaniesByIndustryId(@Param("industryId") Integer industryId);
-	
-	@Query("SELECT new com.job_portal.DTO.CompanyDTO(" + "c.companyName, " + // Lấy userId từ UserAccount
-			"COUNT(a.postId), " + // Đếm số lượng đơn ứng tuyển
-			"c.industry.industryId, " + "c.city.cityId, " + "c.address, " + "c.description, " + "c.logo, "
-			+ "c.contact, " + "c.email, " + "c.establishedTime) " + "FROM Company c " + "LEFT JOIN c.jobPosts jp " + // Kết
-																														// nối																				// ty
-			"LEFT JOIN ApplyJob a ON jp.postId = a.jobPost.postId " + // Kết nối với đơn ứng tuyển
-			"WHERE a.isSave = true OR a.postId IS NULL " + // Cho phép kết quả NULL
-			"GROUP BY c.companyName, " + // Sử dụng userId từ UserAccount
-			"c.industry.industryId, " + "c.city.cityId, " + "c.address, " + "c.description, " + "c.logo, "
-			+ "c.contact, " + "c.email, " + "c.establishedTime " + "ORDER BY COUNT(a.postId) DESC") // Sắp xếp giảm dần
-																									// theo số lượng đơn
-																									// ứng tuyển
-	List<CompanyDTO> findCompaniesWithSavedApplications();
+
+	@Query("SELECT new com.job_portal.DTO.CompanyDTO(" + 
+		       "c.companyName, " + 
+		       "COUNT(a.postId), " + 
+		       "c.industry.industryId, " + 
+		       "c.city.cityId, " + 
+		       "c.address, " + 
+		       "c.description, " + 
+		       "c.logo, " + 
+		       "c.contact, " + 
+		       "c.email, " + 
+		       "c.establishedTime) " + 
+		       "FROM Company c " + 
+		       "LEFT JOIN c.jobPosts jp " + 
+		       "LEFT JOIN ApplyJob a ON jp.postId = a.jobPost.postId " + 
+		       "WHERE (a.isSave = true OR a.postId IS NULL) " + 
+		       "AND (jp.isApprove = true AND jp.expireDate >= CURRENT_DATE) " + 
+		       "GROUP BY c.companyName, " + 
+		       "c.industry.industryId, " + 
+		       "c.city.cityId, " + 
+		       "c.address, " + 
+		       "c.description, " + 
+		       "c.logo, " + 
+		       "c.contact, " + 
+		       "c.email, " + 
+		       "c.establishedTime " + 
+		       "ORDER BY COUNT(a.postId) DESC")
+		List<CompanyDTO> findCompaniesWithSavedApplications();
+
 
 //	@Query("SELECT new com.job_portal.DTO.CompanyWithCountJobDTO(c.companyId, c.companyName, i.industryId, c.description, i.industryName, c.city.cityId, COUNT(j)) "
 //			+ "FROM Company c " + "JOIN c.jobPosts j " + "JOIN c.industry i " + "WHERE j.isApprove = true "
 //			+ "GROUP BY c.companyId, c.companyName, c.description, i.industryName")
 //	Page<CompanyWithCountJobDTO> findCompanyWithCountJob(Specification<Company> spec, Pageable pageable);
-	
-	@Query("SELECT new com.job_portal.DTO.CompanyWithCountJobDTO(c.companyId, c.companyName,c.logo, i.industryId, c.description, i.industryName, c.city.cityId, COUNT(j)) "
-		     + "FROM Company c "
-		     + "JOIN c.jobPosts j "
-		     + "JOIN c.industry i "
-		     + "WHERE j.isApprove = true "
-		     + "AND (:title IS NULL OR (LOWER(c.companyName) LIKE LOWER(CONCAT('%', :title, '%')) OR LOWER(c.description) LIKE LOWER(CONCAT('%', :title, '%')))) "
-		     + "AND (:cityId IS NULL OR c.city.id = :cityId) "
-		     + "AND (:industryId IS NULL OR i.industryId = :industryId) "
-		     + "GROUP BY c.companyId, c.companyName, c.description, i.industryName")
-		Page<CompanyWithCountJobDTO> findCompaniesByFilters(@Param("title") String title,
-		                                                    @Param("cityId") Integer cityId,
-		                                                    @Param("industryId") Integer industryId,
-		                                                    Pageable pageable);
 
+	@Query("SELECT new com.job_portal.DTO.CompanyWithCountJobDTO(c.companyId, c.companyName, c.logo, i.industryId, " +
+		       "c.description, i.industryName, c.city.cityId, COUNT(j)) " +
+		       "FROM Company c " +
+		       "LEFT JOIN c.jobPosts j ON j.isApprove = true AND j.expireDate >= CURRENT_DATE " + // Dùng LEFT JOIN với điều kiện
+		       "JOIN c.industry i " +
+		       "WHERE (:title IS NULL OR (LOWER(c.companyName) LIKE LOWER(CONCAT('%', :title, '%')) OR LOWER(c.description) LIKE LOWER(CONCAT('%', :title, '%')))) " +
+		       "AND (:cityId IS NULL OR c.city.cityId = :cityId) " +
+		       "AND (:industryId IS NULL OR i.industryId = :industryId) " +
+		       "GROUP BY c.companyId, c.companyName, c.logo, c.description, i.industryId, i.industryName, c.city.cityId")
+		Page<CompanyWithCountJobDTO> findCompaniesByFilters(
+		       @Param("title") String title, 
+		       @Param("cityId") Integer cityId,
+		       @Param("industryId") Integer industryId, 
+		       Pageable pageable);
+
+
+
+	@Query("SELECT new com.job_portal.DTO.FollowCompanyDTO(c.companyId, c.logo, c.companyName) " + "FROM Company c "
+			+ "JOIN c.follows s " + "WHERE s.userId = :seekerId")
+	List<FollowCompanyDTO> findCompaniesFollowedBySeeker(@Param("seekerId") UUID seekerId);
 
 }

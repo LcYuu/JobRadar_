@@ -11,6 +11,6 @@ import com.social.exceptions.AllExceptions;
 public interface IExperienceService {
 	public boolean createExp(ExperienceDTO experienceDTO, UUID userId);
 	public boolean deleteExp(Integer expId) throws AllExceptions;
-	public boolean updateExp(Experience experience,Integer expId, UUID userId) throws AllExceptions;
+//	public boolean updateCurrentJob(Integer expId) throws AllExceptions;
 	public List<Experience> searchExpByUserId(UUID userId) throws AllExceptions;
 }

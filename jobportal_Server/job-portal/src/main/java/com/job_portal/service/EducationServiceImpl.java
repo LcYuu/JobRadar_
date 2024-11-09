@@ -52,11 +52,6 @@ public class EducationServiceImpl implements IEducationService {
 	@Override
 	public boolean deleteEdu(Integer eduId) throws AllExceptions {
 		Optional<Education> education = educationRepository.findById(eduId);
-
-		if (education.isEmpty()) {
-			throw new AllExceptions("Education not exist");
-		}
-
 		educationRepository.delete(education.get());
 		return true;
 	}

@@ -12,6 +12,7 @@ import com.job_portal.repository.BlackListTokenRepository;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.JwtParserBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -67,7 +68,11 @@ public class JwtProvider {
 	}
 
 	public Date getExpirationDateFromJWT(String token) {
-		Claims claims = ((JwtParserBuilder) Jwts.builder()).setSigningKey(key).build().parseClaimsJws(token).getBody();
-		return claims.getExpiration();
+	    // Sử dụng JwtParser để phân tích JWT
+	    JwtParser parser = ((JwtParserBuilder) Jwts.builder()).setSigningKey(key) // Đảm bảo `key` là kiểu Key, ví dụ: `Key key = Keys.hmacShaKeyFor(secretKey.getBytes());`
+	            .build();
+	    Claims claims = parser.parseClaimsJws(token).getBody();
+	    return claims.getExpiration();
 	}
+
 }

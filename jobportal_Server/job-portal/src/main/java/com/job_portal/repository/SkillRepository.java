@@ -11,6 +11,5 @@ import com.job_portal.models.Review;
 import com.job_portal.models.Skills;
 
 public interface SkillRepository extends JpaRepository<Skills, Integer>{
-	@Query("SELECT r FROM Review r WHERE r.company.companyId = :companyId")
-	public List<Skills> findReviewByCompanyId(@Param("companyId") UUID companyId);
+	
 }

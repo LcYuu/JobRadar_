@@ -1,4 +1,4 @@
-"use client";
+
 
 import { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
@@ -16,6 +16,8 @@ export default function FindCompanies() {
   const dispatch = useDispatch();
   const { companyByFeature = [], companyFitSeeker = [], loading, error } = useSelector((store) => store.company);
   const { cities = [] } = useSelector((store) => store.city);
+  
+
 
   const [filters, setFilters] = useState({
     title: "",
@@ -48,6 +50,8 @@ export default function FindCompanies() {
 
   const hasFilteredCompanies = filteredCompanies.length > 0;
   const hasSuggestedCompanies = companyFitSeeker.length > 0;
+
+  const uniqueCompanies = [...new Map(companyByFeature.map(company => [company.industryId, company])).values()];
 
   return (
     <div className="min-h-screen bg-transparent p-6">
@@ -113,7 +117,7 @@ export default function FindCompanies() {
             >
               Tất cả ngành nghề
             </Button>
-            {companyByFeature.map((company) => (
+            {uniqueCompanies.map((company) => (
               <Button
                 key={company.industryId}
                 variant={selectedCategory === company.industryId ? "default" : "outline"}
@@ -136,7 +140,25 @@ export default function FindCompanies() {
           {hasFilteredCompanies ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredCompanies.map((company) => (
-                <CompanyCard key={company.companyId} company={company} />
+
+                <Card key={company.companyId} className="p-6 space-y-4 transition-transform duration-300 hover:scale-105 cursor-pointer shadow-lg">
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={company.logo}
+                      alt={`${company.companyName} logo`}
+                      className="h-16 w-16 rounded-lg shadow-md"
+                    />
+                    <div>
+                      <h3 className="font-semibold text-lg">{company.companyName}</h3>
+                      <p className="text-sm text-primary">{company.countJob} công việc đang mở</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground line-clamp-2">{company.description}</p>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge className="text-xs">{company.industryName}</Badge>
+                  </div>
+                </Card>
+
               ))}
             </div>
           ) : (
