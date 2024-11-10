@@ -369,5 +369,39 @@ public class JobPostController {
 	    return ResponseEntity.ok(salaryRange);
 	}
 
+	@GetMapping("/company/{companyId}")
+	public ResponseEntity<Map<String, Object>> getJobsByCompany(
+	    @PathVariable UUID companyId,
+	    @RequestParam(defaultValue = "0") int page,
+	    @RequestParam(defaultValue = "2") int size
+	) {
+	    try {
+	        Pageable pageable = PageRequest.of(page, size);
+	        Page<JobPost> pageJobs = jobPostRepository.findByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(
+	            companyId, 
+	            pageable,
+	            LocalDateTime.now()
+	        );
+
+	        Map<String, Object> response = new HashMap<>();
+	        response.put("content", pageJobs.getContent());
+	        response.put("currentPage", pageJobs.getNumber());
+	        response.put("totalItems", pageJobs.getTotalElements());
+	        response.put("totalPages", pageJobs.getTotalPages());
+
+	        return ResponseEntity.ok(response);
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+	    }
+	}
+
+	@GetMapping("/count-by-company/{companyId}")
+	public ResponseEntity<Long> countJobsByCompany(@PathVariable UUID companyId) {
+	    long totalJobs = jobPostRepository.countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(
+	        companyId,
+	        LocalDateTime.now()
+	    );
+	    return ResponseEntity.ok(totalJobs);
+	}
 
 }

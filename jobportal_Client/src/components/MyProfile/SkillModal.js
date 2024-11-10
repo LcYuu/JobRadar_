@@ -1,8 +1,8 @@
 import { Button, Modal } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import {  IconButton } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
-import { store } from "../../redux/store";
-import { CheckBox } from "@mui/icons-material";
 import { getAllSkill } from "../../redux/Skills/skill.action";
 import { Checkbox } from "../../ui/checkbox";
 import {
@@ -50,12 +50,25 @@ const SkillModal = ({ open, handleClose }) => {
   console.log("Selected skills:", selectedSkills); // Kiểm tra danh sách skill đã chọn
 
   return (
-    <Modal open={open} onClose={handleClose}>
-      <div className="modal-content p-4 max-w-md mx-auto mt-16 bg-white rounded-lg shadow-lg">
-        <h2 className="text-xl font-semibold mb-4">Select Skills</h2>
-        <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
+    <Modal 
+      open={open} 
+      onClose={handleClose}
+      className="animate-fadeIn"
+    >
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-xl shadow-2xl p-6">
+        <div className="flex items-center justify-between border-b pb-4 mb-4">
+          <h2 className="text-xl font-semibold">Select Skills</h2>
+          <IconButton onClick={handleClose} className="hover:bg-gray-100">
+            <CloseIcon />
+          </IconButton>
+        </div>
+
+        <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto custom-scrollbar">
           {skills.map((skill) => (
-            <div key={skill.skillId} className="flex items-center">
+            <div
+              key={skill.skillId}
+              className="flex items-center p-3 hover:bg-gray-50 rounded-lg transition-colors"
+            >
               <Checkbox
                 checked={selectedSkills.some(
                   (selectedSkill) => selectedSkill.skillId === skill.skillId
@@ -64,26 +77,32 @@ const SkillModal = ({ open, handleClose }) => {
                   const update = checked
                     ? [...selectedSkills, skill]
                     : selectedSkills.filter(
-                        (selectedSkill) =>
-                          selectedSkill.skillId !== skill.skillId
+                        (selectedSkill) => selectedSkill.skillId !== skill.skillId
                       );
                   setSelectedSkills(update);
                 }}
+                className="mr-3"
               />
-              <span>{skill.skillName}</span>
+              <span className="text-gray-700">{skill.skillName}</span>
             </div>
           ))}
         </div>
-        <div className="mt-4 flex justify-end gap-4">
+
+        <div className="mt-6 flex justify-end gap-4">
+          <Button
+            variant="outlined"
+            onClick={handleClose}
+            className="hover:bg-gray-50"
+          >
+            Cancel
+          </Button>
           <Button
             variant="contained"
-            color="primary"
             onClick={handleSaveSkills}
+            className="bg-blue-600 hover:bg-blue-700"
+            disabled={isLoading}
           >
-            Save
-          </Button>
-          <Button variant="outlined" color="secondary" onClick={handleClose}>
-            Cancel
+            {isLoading ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
       </div>
