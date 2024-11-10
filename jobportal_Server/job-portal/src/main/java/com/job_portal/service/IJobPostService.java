@@ -33,4 +33,5 @@ public interface IJobPostService {
 	public List<JobPost> getTop8LatestJobPosts();
 	public List<JobCountType> getJobCountByType();
 	public Page<JobPost> searchJobsWithPagination(String title, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, Pageable pageable);
+	public Page<JobPost> findByCompanyId(UUID companyId, Pageable pageable);
 }

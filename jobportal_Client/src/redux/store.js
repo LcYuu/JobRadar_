@@ -24,6 +24,7 @@ const rootReducer = combineReducers({
     exp:expReducer,
     edu:eduReducer,
     skill:skillReducer,
-    cv:cvReducer
+    cv:cvReducer,
+    company: companyReducer,
 })
 export const store = legacy_createStore(rootReducer, applyMiddleware(thunk))
