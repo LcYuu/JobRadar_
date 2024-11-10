@@ -7,10 +7,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
+import * as Yup from 'yup';
 import { getProfileAction, updateProfileAction } from "../../redux/Auth/auth.action";
 import { uploadToCloudinary } from "../../utils/uploadToCloudinary";
 import { getSeekerByUser, updateSeekerAction } from "../../redux/Seeker/seeker.action";
-import { getUserProfileAction } from "../../redux/Auth/auth.action"; // Hàm lấy dữ liệu người dùng
 
 const style = {
   position: "absolute",
@@ -18,119 +18,149 @@ const style = {
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: 600,
+  maxHeight: "90vh",
   bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 2,
+  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+  p: 4,
   outline: "none",
-  overflow: "scroll-y",
-  borderRadius: 3,
+  overflowY: "auto",
+  borderRadius: 2,
+  border: "none",
 };
 
+const validationSchema = Yup.object({
+  userName: Yup.string().required("Username is required"),
+  address: Yup.string().required("Address is required"),
+});
+
 export default function ProfileModal({ open, handleClose }) {
-  const [selectedAvatar, setSelectedAvatar] = useState('');
+  const [selectedAvatar, setSelectedAvatar] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
+  const [imageLoading, setImageLoading] = useState(false);
+
   const dispatch = useDispatch();
   const { user } = useSelector((store) => store.auth);
   const { seeker } = useSelector((store) => store.seeker);
 
-  // Formik initialization
   const formik = useFormik({
     initialValues: {
-      userName: user?.userName || '',
-      avatar: user?.avatar || '',
-      address: seeker?.address || '',
+      userName: user?.userName || "",
+      avatar: user?.avatar || "",
+      address: seeker?.address || "",
     },
-    enableReinitialize: true, // Để form tự động cập nhật khi Redux store thay đổi
+    validationSchema,
+    enableReinitialize: true,
     onSubmit: async (values) => {
       setIsLoading(true);
       try {
-        // Gọi các action để cập nhật hồ sơ
         await Promise.all([
-          dispatch(updateProfileAction({ userName: values.userName, avatar: values.avatar })),
+          dispatch(updateProfileAction({ 
+            userName: values.userName, 
+            avatar: selectedAvatar || values.avatar 
+          })),
           dispatch(updateSeekerAction({ address: values.address })),
         ]);
-        dispatch(getProfileAction()); // Tải lại dữ liệu người dùng sau khi cập nhật
-        dispatch(getSeekerByUser());
+        await dispatch(getProfileAction());
+        await dispatch(getSeekerByUser());
+        handleClose();
       } catch (error) {
-        console.error("Cập nhật không thành công:", error);
-        alert("Có lỗi xảy ra. Vui lòng thử lại!"); // Thông báo lỗi
+        console.error("Update failed:", error);
       } finally {
         setIsLoading(false);
-        handleClose();
       }
     },
   });
-  
 
   const handleSelectImage = async (event) => {
-    setIsLoading(true);
-    const imageUrl = await uploadToCloudinary(event.target.files[0]);
-    setSelectedAvatar(imageUrl);
-    formik.setFieldValue("avatar", imageUrl); // Cập nhật giá trị avatar trong formik
-    setIsLoading(false);
-  };
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  
+    setImageLoading(true);
+    try {
+      const imageUrl = await uploadToCloudinary(file);
+      setSelectedAvatar(imageUrl);
+      formik.setFieldValue("avatar", imageUrl);
+    } catch (error) {
+      console.error("Image upload failed:", error);
+    } finally {
+      setImageLoading(false);
+    }
+  };
 
   return (
     <Modal
       open={open}
       onClose={handleClose}
-      aria-labelledby="modal-modal-title"
-      aria-describedby="modal-modal-description"
+      aria-labelledby="edit-profile-modal"
     >
       <Box sx={style}>
-        <form onSubmit={formik.handleSubmit}>
-          <div className="flex items-center justify-between">
+        <form onSubmit={formik.handleSubmit} className="space-y-6">
+          <div className="flex items-center justify-between border-b pb-4">
             <div className="flex items-center space-x-3">
-              <IconButton onClick={handleClose}>
+              <IconButton onClick={handleClose} size="small">
                 <CloseIcon />
               </IconButton>
-              <p>Edit Profile</p>
+              <h2 className="text-xl font-semibold">Edit Profile</h2>
             </div>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Saving...' : 'Save'}
+            <Button 
+              type="submit" 
+              variant="contained" 
+              disabled={isLoading || imageLoading}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {isLoading ? "Saving..." : "Save Changes"}
             </Button>
           </div>
-          <div className="flex flex-col items-center">
-            <Avatar
-              className="transform"
-              sx={{ width: "10rem", height: "10rem" }}
-              src={selectedAvatar || user.avatar}
-            />
-            <div>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleSelectImage}
-                style={{ display: "none" }}
-                id="image-input"
+
+          <div className="flex flex-col items-center space-y-4">
+            <div className="relative">
+              <Avatar
+                sx={{ width: 120, height: 120 }}
+                src={selectedAvatar || user?.avatar || "/default-avatar.png"}
+                className="border-4 border-white shadow-lg"
               />
-              <label htmlFor="image-input">
-                <IconButton color="primary" component="span">
-                  <ImageIcon />
-                </IconButton>
+              <label 
+                htmlFor="image-input"
+                className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-md cursor-pointer hover:bg-gray-50"
+              >
+                {imageLoading ? (
+                  <div className="animate-spin">⌛</div>
+                ) : (
+                  <ImageIcon className="text-gray-600" />
+                )}
               </label>
             </div>
+            <input
+              type="file"
+              id="image-input"
+              accept="image/*"
+              onChange={handleSelectImage}
+              className="hidden"
+            />
           </div>
-          <div className="space-y-3">
+
+          <div className="space-y-4">
             <TextField
               fullWidth
               id="userName"
               name="userName"
               label="Username"
+              variant="outlined"
               value={formik.values.userName}
               onChange={formik.handleChange}
+              error={formik.touched.userName && Boolean(formik.errors.userName)}
+              helperText={formik.touched.userName && formik.errors.userName}
             />
             <TextField
               fullWidth
               id="address"
               name="address"
               label="Address"
+              variant="outlined"
               value={formik.values.address}
               onChange={formik.handleChange}
+              error={formik.touched.address && Boolean(formik.errors.address)}
+              helperText={formik.touched.address && formik.errors.address}
             />
           </div>
         </form>

@@ -181,10 +181,10 @@ export default function MyProfile() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50/50">
-      <main className="flex-1 p-6">
-        {/* Profile Header */}
-        <Card className="mt-6">
+    <div className="min-h-screen bg-gray-50 -ml-8 -mr-8 ">
+      <main className="container mx-auto p-6">
+        {/* Profile Header Card */}
+        <Card className="mb-6">
           <div className="relative h-48 bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700">
             <Button
               size="icon"
@@ -198,7 +198,7 @@ export default function MyProfile() {
               <AvatarImage src={user?.avatar} />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 pt-20 flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-semibold">{user?.userName}</h2>
                 <p className="text-muted-foreground">{seeker.address}</p>
@@ -213,9 +213,10 @@ export default function MyProfile() {
           </section>
         </Card>
 
-        {/* Two Column Layout */}
-        <div className="mt-6 grid gap-6 md:grid-cols-3">
-          <div className="space-y-6 md:col-span-2">
+        {/* Main Content */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Left Column - 2/3 width */}
+          <div className="md:col-span-2 space-y-6">
             {/* About Me */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
@@ -405,7 +406,7 @@ export default function MyProfile() {
             </Card>
           </div>
 
-          {/* Right Column */}
+          {/* Right Column - 1/3 width */}
           <div className="space-y-6">
             {/* Contact Info */}
             <Card>

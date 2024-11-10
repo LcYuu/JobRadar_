@@ -403,5 +403,9 @@ public class JobPostServiceImpl implements IJobPostService {
         return jobPostRepository.findByIsApproveTrue(spec, pageable);
     }
 
+	@Override
+	public Page<JobPost> findByCompanyId(UUID companyId, Pageable pageable) {
+		return jobPostRepository.findByCompanyCompanyIdAndApproveTrue(companyId, pageable);
+	}
 
 }
