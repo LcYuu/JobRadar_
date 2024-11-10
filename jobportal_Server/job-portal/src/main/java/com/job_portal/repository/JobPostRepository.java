@@ -66,6 +66,21 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
              criteriaBuilder.greaterThanOrEqualTo(root.get("expireDate"), LocalDateTime.now())
          );
      }
+
+     Page<JobPost> findByCompanyCompanyIdAndApproveTrue(UUID companyId, Pageable pageable);
+
+     Page<JobPost> findByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(
+         UUID companyId, 
+         Pageable pageable,
+         LocalDateTime now
+     );
+
+     long countByCompanyCompanyIdAndIsApproveTrue(UUID companyId);
+
+     long countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(
+         UUID companyId,
+         LocalDateTime currentDate
+     );
  }
     
 

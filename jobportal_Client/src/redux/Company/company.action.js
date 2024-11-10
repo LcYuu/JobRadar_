@@ -1,5 +1,5 @@
 import axios from "axios";
-import { GET_COMPANY_BY_FEATURE_FAILURE, GET_COMPANY_BY_FEATURE_REQUEST, GET_COMPANY_BY_FEATURE_SUCCESS, GET_COMPANY_FIT_SEEKER_FAILURE, GET_COMPANY_FIT_SEEKER_REQUEST, GET_COMPANY_FIT_SEEKER_SUCCESS, GET_COMPANY_POPULAR_FAILURE, GET_COMPANY_POPULAR_REQUEST, GET_COMPANY_POPULAR_SUCCESS } from "./company.actionType";
+import { GET_COMPANY_BY_FEATURE_FAILURE, GET_COMPANY_BY_FEATURE_REQUEST, GET_COMPANY_BY_FEATURE_SUCCESS, GET_COMPANY_FIT_SEEKER_FAILURE, GET_COMPANY_FIT_SEEKER_REQUEST, GET_COMPANY_FIT_SEEKER_SUCCESS, GET_COMPANY_POPULAR_FAILURE, GET_COMPANY_POPULAR_REQUEST, GET_COMPANY_POPULAR_SUCCESS, GET_COMPANY_REQUEST, GET_COMPANY_SUCCESS, GET_COMPANY_FAILURE } from "./company.actionType";
 import { API_BASE_URL } from "../../configs/api";
 
 export const getCompanyPopular = () => async (dispatch) => {
@@ -76,3 +76,28 @@ export const searhCompanies = (filters, currentPage, size) => async (dispatch) =
         });
     }
 };
+export const getCompanyById = (companyId) => async (dispatch) => {
+    try {
+      dispatch({ type: GET_COMPANY_REQUEST });
+      
+      // Đảm bảo companyId là string hợp lệ
+      const cleanCompanyId = companyId.replace(/[^\w-]/g, '');
+      console.log("Fetching company with ID:", cleanCompanyId);
+      
+      const response = await axios.get(
+        `${API_BASE_URL}/company/profile-company/${cleanCompanyId}`
+      );
+      console.log("Company data received:", response.data);
+
+      dispatch({
+        type: GET_COMPANY_SUCCESS,
+        payload: response.data,
+      });
+    } catch (error) {
+      console.error("Error fetching company:", error);
+      dispatch({
+        type: GET_COMPANY_FAILURE,
+        payload: error.response?.data?.message || "Failed to fetch company details",
+      });
+    }
+  };
