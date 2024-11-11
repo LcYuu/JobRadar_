@@ -195,27 +195,29 @@ export default function JobSearchPage() {
                 <ChevronDown size={20} />
               </h3>
               <div className="space-y-2">
-                {jobCountByType.map((job) => (
-                  <div className="flex items-center" key={job.typeOfWork}>
-                    <Checkbox
-                      onCheckedChange={(checked) => {
-                        const updatedTypesOfWork = checked
-                          ? [...filters.selectedTypesOfWork, job.typeOfWork]
-                          : filters.selectedTypesOfWork.filter(
-                              (type) => type !== job.typeOfWork
-                            );
+                {jobCountByType
+                  .filter(job => job.count > 0)
+                  .map((job) => (
+                    <div className="flex items-center" key={job.typeOfWork}>
+                      <Checkbox
+                        onCheckedChange={(checked) => {
+                          const updatedTypesOfWork = checked
+                            ? [...filters.selectedTypesOfWork, job.typeOfWork]
+                            : filters.selectedTypesOfWork.filter(
+                                (type) => type !== job.typeOfWork
+                              );
 
-                        setFilters({
-                          ...filters,
-                          selectedTypesOfWork: updatedTypesOfWork,
-                        });
-                      }}
-                    />
-                    <label className="ml-2 text-sm">
-                      {job.typeOfWork} ({job.count})
-                    </label>
-                  </div>
-                ))}
+                          setFilters({
+                            ...filters,
+                            selectedTypesOfWork: updatedTypesOfWork,
+                          });
+                        }}
+                      />
+                      <label className="ml-2 text-sm">
+                        {job.typeOfWork} ({job.count})
+                      </label>
+                    </div>
+                  ))}
               </div>
             </div>
             <div>
