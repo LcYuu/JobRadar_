@@ -14,6 +14,16 @@ import logo from '../../assets/images/common/logo.jpg';
 import Pagination from "../../components/layout/Pagination";
 import axios from 'axios';
 
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+};
+
 export default function CompanyProfile() {
   const { id } = useParams();
   const dispatch = useDispatch();
@@ -74,7 +84,7 @@ export default function CompanyProfile() {
             <div className="flex flex-wrap gap-4 text-muted-foreground">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
-                <span>Thành lập: {company?.establishedTime}</span>
+                <span>Thành lập: {formatDate(company?.establishedTime)}</span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
@@ -218,10 +228,7 @@ export default function CompanyProfile() {
         <div>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-2">
-              <h2 className="text-xl font-semibold">Vị trí đang tuyển</h2>
-              <span className="text-sm text-gray-500">
-                ({totalJobs} kết quả)
-              </span>
+              <h2 className="text-xl font-semibold">Vị trí đang tuyển ({totalJobs})</h2>
             </div>
           </div>
 
