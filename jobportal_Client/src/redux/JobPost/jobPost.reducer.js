@@ -4,6 +4,8 @@ import {
   GET_ALL_JOB_FAILURE,
   GET_ALL_JOB_REQUEST,
   GET_ALL_JOB_SUCCESS,
+  GET_JOB_POST_BY_POST_ID_REQUEST,
+  GET_JOB_POST_BY_POST_ID_SUCCESS,
   GET_TOP8_JOB_FAILURE,
   GET_TOP8_JOB_REQUEST,
   GET_TOP8_JOB_SUCCESS,
@@ -19,10 +21,11 @@ const initialState = {
   post: null,
   loading: false,
   error: null,
-  searchJob : [],
+  searchJob: [],
   top8Job: [],
   jobCountByType: [],
   jobPost: [], // Mảng lưu trữ các bài đăng công việc
+  postByPostId: null,
   totalPages: 0, // Tổng số trang
   approve: false,
 };
@@ -33,6 +36,7 @@ export const jobPostReducer = (state = initialState, action) => {
     case GET_TOP8_JOB_REQUEST:
     case COUNT_JOB_BY_TYPE_REQUEST:
     case SEARCH_JOBS_REQUEST:
+    case GET_JOB_POST_BY_POST_ID_REQUEST:
       return {
         ...state,
         loading: true, // Bắt đầu trạng thái tải
@@ -42,7 +46,7 @@ export const jobPostReducer = (state = initialState, action) => {
       return {
         ...state,
         jobPost: action.payload.content, // Lưu trữ tất cả các công việc vào mảng jobPost
-       
+
         totalPages: action.payload.page.totalPages, // Lưu trữ tổng số trang
         loading: false, // Kết thúc trạng thái tải
         error: null, // Đặt lỗi về null
@@ -54,13 +58,13 @@ export const jobPostReducer = (state = initialState, action) => {
         loading: false, // Kết thúc trạng thái tải
         error: null, // Đặt lỗi về null
       };
-      case SET_SALARY_RANGE_SUCCESS:
-        return {
-            ...state,
-            loading: false,
-            minSalary: action.payload.minSalary,
-            maxSalary: action.payload.maxSalary,
-        };
+    case SET_SALARY_RANGE_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        minSalary: action.payload.minSalary,
+        maxSalary: action.payload.maxSalary,
+      };
     case COUNT_JOB_BY_TYPE_SUCCESS:
       return {
         ...state,
@@ -74,8 +78,15 @@ export const jobPostReducer = (state = initialState, action) => {
         searchJob: action.payload.content,
         totalPages: action.payload.page.totalPages,
         loading: false,
-        error: null
-      }
+        error: null,
+      };
+    case GET_JOB_POST_BY_POST_ID_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        postByPostId: action.payload,
+        error: null,
+      };
     case GET_TOP8_JOB_FAILURE:
     case GET_ALL_JOB_FAILURE:
     case SEARCH_JOBS_FAILURE:

@@ -30,22 +30,13 @@ public class ApplyJobServiceImpl implements IApplyJobService {
 	public boolean createApplyJob(ApplyJob applyJob) throws AllExceptions {
 		ApplyJob saveApplyJob = applyJobRepository.save(applyJob);
 		return saveApplyJob != null;
-
 	}
 
 	@Override
 	public boolean updateApplyJob(ApplyJob applyJob) throws AllExceptions {
-
 		// Kiểm tra tồn tại của JobPosts và SeekerProfile
 		Optional<JobPost> jobPost = jobPostRepository.findById(applyJob.getPostId());
-		if (!jobPost.isPresent()) {
-			throw new IllegalArgumentException("JobPost không tồn tại với postId: " + applyJob.getPostId());
-		}
-
 		Optional<Seeker> seeker = seekerRepository.findById(applyJob.getUserId());
-		if (!seeker.isPresent()) {
-			throw new IllegalArgumentException("SeekerProfile không tồn tại với userId: " + applyJob.getUserId());
-		}
 		try {
 			ApplyJob saveApplyJob = applyJobRepository.save(applyJob);
 			return saveApplyJob != null;
@@ -57,6 +48,11 @@ public class ApplyJobServiceImpl implements IApplyJobService {
 	@Override
 	public boolean isEligibleForRating(UUID userId, UUID companyId) {
 		return applyJobRepository.existsByUserIdAndCompanyId(userId, companyId);
+	}
+
+	@Override
+	public boolean hasApplied(UUID postId, UUID userId) {
+		 return applyJobRepository.existsByPostIdAndUserId(postId, userId);
 	}
 
 }
