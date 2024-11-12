@@ -10,11 +10,14 @@ import { getCity } from "../../redux/City/city.action";
 import { getCompanyFitSeeker, searhCompanies } from "../../redux/Company/company.action";
 import CompanyCard from "../../components/common/CompanyCard/CompanyCard";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { getAllIndustries } from "../../redux/Industry/industry.action";
 
 export default function FindCompanies() {
   const dispatch = useDispatch();
   const { companyByFeature = [], companyFitSeeker = [], loading, error } = useSelector((store) => store.company);
   const { cities = [] } = useSelector((store) => store.city);
+  const { allIndustries = [] } = useSelector(store => store.industry);
   
 
 
@@ -29,6 +32,8 @@ export default function FindCompanies() {
   const [size] = useState(6);
   const isFilterApplied = filters.title || filters.cityId || filters.industryId;
 
+  const [selectedCategoryName, setSelectedCategoryName] = useState("Tất cả công ty");
+
   useEffect(() => {
     dispatch(searhCompanies(filters, currentPage, size));
   }, [filters, currentPage, dispatch]);
@@ -38,13 +43,26 @@ export default function FindCompanies() {
     dispatch(getCompanyFitSeeker());
   }, [dispatch]);
 
+  useEffect(() => {
+    dispatch(getAllIndustries());
+  }, [dispatch]);
+
   const handleCategoryChange = (industryId) => {
     setSelectedCategory(industryId);
-    setFilters((prev) => ({ ...prev, industryId }));
+    if (industryId === null) {
+      setSelectedCategoryName("Tất cả công ty");
+    } else {
+      const selectedIndustry = allIndustries.find(industry => industry.industryId === industryId);
+      setSelectedCategoryName(selectedIndustry?.industryName || "Tất cả công ty");
+    }
+    setFilters(prev => ({
+      ...prev,
+      industryId: industryId || ''
+    }));
   };
 
   const filteredCompanies = selectedCategory
-    ? companyByFeature.filter((company) => company.industryId === selectedCategory)
+    ? companyByFeature.filter(company => company.industryId === selectedCategory)
     : companyByFeature;
 
   const hasFilteredCompanies = filteredCompanies.length > 0;
@@ -116,14 +134,14 @@ export default function FindCompanies() {
             >
               Tất cả ngành nghề
             </Button>
-            {uniqueCompanies.map((company) => (
+            {allIndustries.map((industry) => (
               <Button
-                key={company.industryId}
-                variant={selectedCategory === company.industryId ? "default" : "outline"}
-                onClick={() => handleCategoryChange(company.industryId)}
+                key={industry.industryId}
+                variant={selectedCategory === industry.industryId ? "default" : "outline"}
+                onClick={() => handleCategoryChange(industry.industryId)}
                 className="hover:bg-gray-200 transition duration-200"
               >
-                {company.industryName}
+                {industry.industryName}
               </Button>
             ))}
           </div>
@@ -131,7 +149,18 @@ export default function FindCompanies() {
 
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Danh sách tất cả công ty</h2>
+            <h2 className="text-xl font-semibold">
+              {selectedCategory === null ? (
+                <span>Tất cả công ty</span>
+              ) : (
+                <>
+                  Các công ty trong lĩnh vực{" "}
+                  <span className="font-bold text-blue-600">
+                    {selectedCategoryName}
+                  </span>
+                </>
+              )}
+            </h2>
             <p className="text-muted-foreground">
               {hasFilteredCompanies ? filteredCompanies.length : 0} kết quả
             </p>
