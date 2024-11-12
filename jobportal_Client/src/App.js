@@ -116,13 +116,13 @@ const App = () => {
           <Route path="settings" element={<Settings />} />
         </Route>
 
-        <Route path="/jobs/job-detail/:id" element={
+        <Route path="/jobs/job-detail/:postId" element={
           <PublicRoute>
             <JobDetail />
           </PublicRoute>
         } />
 
-        <Route path="/companies/:id" element={
+        <Route path="/companies/:companyId" element={
           <PublicRoute>
             <CompanyProfile />
           </PublicRoute>

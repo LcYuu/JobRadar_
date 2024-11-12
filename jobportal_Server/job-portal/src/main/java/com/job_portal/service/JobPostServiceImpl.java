@@ -202,7 +202,7 @@ public class JobPostServiceImpl implements IJobPostService {
 				isUpdated = true;
 			}
 		}
-		if (jobPostDTO.getSkillIds() != null) {
+		if (jobPostDTO.getSkillIds() != null && !jobPostDTO.getSkillIds().isEmpty()) {
 			List<Skills> skillsList = new ArrayList<>();
 			for (Integer skillId : jobPostDTO.getSkillIds()) {
 				Optional<Skills> skillOpt = skillRepository.findById(skillId);

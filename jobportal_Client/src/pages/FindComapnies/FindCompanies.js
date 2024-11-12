@@ -16,8 +16,6 @@ export default function FindCompanies() {
   const dispatch = useDispatch();
   const { companyByFeature = [], companyFitSeeker = [], loading, error } = useSelector((store) => store.company);
   const { cities = [] } = useSelector((store) => store.city);
-  
-
 
   const [filters, setFilters] = useState({
     title: "",

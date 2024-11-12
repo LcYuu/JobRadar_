@@ -72,8 +72,6 @@ export default function ProfileModal({ open, handleClose }) {
     setIsLoading(false);
   };
 
-  
-
   return (
     <Modal
       open={open}
@@ -98,7 +96,7 @@ export default function ProfileModal({ open, handleClose }) {
             <Avatar
               className="transform"
               sx={{ width: "10rem", height: "10rem" }}
-              src={selectedAvatar || user.avatar}
+              src={selectedAvatar || user?.avatar}
             />
             <div>
               <input

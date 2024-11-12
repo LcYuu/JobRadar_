@@ -1,5 +1,6 @@
 package com.job_portal.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,6 +28,8 @@ public class CVServiceImpl implements ICVService {
 		CV cv = new CV();
 		cv.setSeeker(seeker.get());
 		cv.setPathCV(cvdto.getPathCV());
+		cv.setCvName(cvdto.getCvName());
+		cv.setCreateTime(LocalDateTime.now());
 		cv.setIsMain(false);
 		try {
 			CV saveCV = cvRepository.save(cv);
@@ -64,7 +67,6 @@ public class CVServiceImpl implements ICVService {
 	                    cvRepository.save(userCV);
 	                }
 	            }
-
 	            // Cập nhật CV hiện tại thành isMain = true
 	            cv.setIsMain(true);
 	            cvRepository.save(cv);
@@ -78,12 +80,7 @@ public class CVServiceImpl implements ICVService {
 	@Override
 	public List<CV> findCVBySeekerId(UUID userId) throws AllExceptions {
 		try {
-
 			List<CV> cvs = cvRepository.findCVBySeekerId(userId);
-			if (cvs.isEmpty()) {
-				throw new AllExceptions("Không tìm thấy CV");
-			}
-
 			return cvs;
 		} catch (Exception e) {
 			throw new AllExceptions(e.getMessage());
