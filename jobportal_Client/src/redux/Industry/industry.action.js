@@ -1,5 +1,5 @@
 import axios from "axios";
-import { GET_INDUSTRY_COUNT_FAILURE, GET_INDUSTRY_COUNT_REQUEST, GET_INDUSTRY_COUNT_SUCCESS, GET_INDUSTRY_FAILURE, GET_INDUSTRY_REQUEST, GET_INDUSTRY_SUCCESS } from "./industry.actionType";
+import { GET_INDUSTRY_COUNT_FAILURE, GET_INDUSTRY_COUNT_REQUEST, GET_INDUSTRY_COUNT_SUCCESS, GET_INDUSTRY_FAILURE, GET_INDUSTRY_REQUEST, GET_INDUSTRY_SUCCESS, GET_ALL_INDUSTRIES_REQUEST, GET_ALL_INDUSTRIES_SUCCESS, GET_ALL_INDUSTRIES_FAILURE } from "./industry.actionType";
 import { API_BASE_URL } from "../../configs/api";
 
 
@@ -49,6 +49,27 @@ export const getIndustryCount = () => async (dispatch) => {
         dispatch({
             type: GET_INDUSTRY_COUNT_FAILURE,
             payload: error.message // Hoặc error.response.data
+        });
+    }
+};
+
+export const getAllIndustries = () => async (dispatch) => {
+    dispatch({ type: GET_ALL_INDUSTRIES_REQUEST });
+    try {
+        const response = await axios.get('http://localhost:8080/industry/get-all');
+        // Lọc bỏ các ngành nghề có giá trị null hoặc "None"
+        const validIndustries = response.data.filter(industry => 
+            industry.industryName && 
+            industry.industryName.toLowerCase() !== 'none'
+        );
+        dispatch({
+            type: GET_ALL_INDUSTRIES_SUCCESS,
+            payload: validIndustries
+        });
+    } catch (error) {
+        dispatch({
+            type: GET_ALL_INDUSTRIES_FAILURE,
+            payload: error.message
         });
     }
 };

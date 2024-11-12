@@ -12,7 +12,9 @@ import * as Yup from "yup";
 import {
   createEducation,
   getEduByUser,
+  updateEducation,
 } from "../../redux/Education/edu.action";
+import { formatDateForInput } from '../../utils/dateUtils';
 
 const style = {
   position: "absolute",
@@ -31,7 +33,7 @@ const style = {
   border: "none",
 };
 
-export default function EduModal({ open, handleClose }) {
+export default function EduModal({ open, handleClose, editingEducationId, setEditingEducationId, initialData, showSuccessToast }) {
   const validationSchema = Yup.object({
     certificateDegreeName: Yup.string().required("Bằng cấp là bắt buộc."),
     major: Yup.string().required("Chuyên ngành là bắt buộc."),
@@ -57,28 +59,32 @@ export default function EduModal({ open, handleClose }) {
   // Formik initialization
   const formik = useFormik({
     initialValues: {
-      certificateDegreeName: edu?.certificateDegreeName || "",
-      major: edu?.major || "",
-      universityName: edu?.universityName || "",
-      startDate: edu?.startDate || "",
-      endDate: edu?.endDate || "",
-      gpa: edu?.gpa || "",
+      certificateDegreeName: editingEducationId ? initialData.certificateDegreeName : "",
+      major: editingEducationId ? initialData.major : "",
+      universityName: editingEducationId ? initialData.universityName : "",
+      startDate: editingEducationId ? initialData.startDate : "",
+      endDate: editingEducationId ? initialData.endDate : "",
+      gpa: editingEducationId ? initialData.gpa : "",
     },
     validationSchema: validationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
       setIsLoading(true);
       try {
-        // Gọi các action để cập nhật hồ sơ
-        await dispatch(createEducation(values));
-        dispatch(getEduByUser());
-        formik.resetForm();
+        if (editingEducationId) {
+          await dispatch(updateEducation(editingEducationId, values));
+          setEditingEducationId(null);
+          showSuccessToast('Cập nhật học vấn thành công!');
+        } else {
+          await dispatch(createEducation(values));
+          showSuccessToast('Cập nhật học vấn thành công!');
+        }
+        handleClose();
+        dispatch(getEduByUser()); // Refresh the education list
       } catch (error) {
-        console.error("Cập nhật không thành công:", error);
-        alert("Có lỗi xảy ra. Vui lòng thử lại!"); // Thông báo lỗi
+        console.error("Error:", error);
       } finally {
         setIsLoading(false);
-        handleClose();
       }
     },
   });
@@ -96,7 +102,9 @@ export default function EduModal({ open, handleClose }) {
               <IconButton onClick={handleClose} className="hover:bg-gray-100">
                 <CloseIcon />
               </IconButton>
-              <h2 className="text-xl font-semibold">Add Education</h2>
+              <h2 className="text-xl font-semibold">
+                {editingEducationId ? 'Edit Education' : 'Add Education'}
+              </h2>
             </div>
             <Button 
               type="submit" 
@@ -114,7 +122,7 @@ export default function EduModal({ open, handleClose }) {
                   <span className="animate-spin">⏳</span>
                   <span>Saving...</span>
                 </div>
-              ) : 'Create'}
+              ) : editingEducationId ? 'Update' : 'Create'}
             </Button>
           </div>
 
@@ -199,6 +207,7 @@ export default function EduModal({ open, handleClose }) {
               helperText={formik.touched.gpa && formik.errors.gpa}
               inputProps={{
                 min: 0,
+                step: 0.01,
               }}
               className="bg-white rounded-lg"
             />
