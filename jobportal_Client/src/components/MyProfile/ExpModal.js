@@ -8,7 +8,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import * as Yup from 'yup';
-import { createExperience, getExpByUser } from "../../redux/Experience/exp.action";
+import { createExperience, getExpByUser, updateExperience } from "../../redux/Experience/exp.action";
+
 
 const style = {
   position: "absolute",
@@ -27,7 +28,7 @@ const style = {
   border: "none",
 };
 
-export default function ExpModal({ open, handleClose }) {
+export default function ExpModal({ open, handleClose, editingExperienceId, setEditingExperienceId, initialData, showSuccessToast }) {
   const validationSchema = Yup.object({
     jobTitle: Yup.string().required("Vui lòng nhập tiêu đề công việc"),
     companyName: Yup.string().required("Vui lòng nhập tên công ty"),
@@ -47,27 +48,31 @@ export default function ExpModal({ open, handleClose }) {
   // Formik initialization
   const formik = useFormik({
     initialValues: {
-      startDate: exp?.startDate || "",
-      endDate: exp?.endDate || "",
-      jobTitle: exp?.jobTitle || "",
-      companyName: exp?.companyName || "",
-      description: exp?.description || "",
+      startDate: editingExperienceId ? initialData.startDate : "",
+      endDate: editingExperienceId ? initialData.endDate : "",
+      jobTitle: editingExperienceId ? initialData.jobTitle : "",
+      companyName: editingExperienceId ? initialData.companyName : "",
+      description: editingExperienceId ? initialData.description : "",
     },
     validationSchema: validationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
       setIsLoading(true);
       try {
-        // Gọi các action để cập nhật hồ sơ
-        await dispatch(createExperience(values))
-        dispatch(getExpByUser())
-        formik.resetForm();
+        if (editingExperienceId) {
+          await dispatch(updateExperience(editingExperienceId, values));
+          setEditingExperienceId(null);
+          showSuccessToast('Cập nhật kinh nghiệm thành công!');
+        } else {
+          await dispatch(createExperience(values));
+          showSuccessToast('Cập nhật kinh nghiệm thành công!');
+        }
+        handleClose();
+        dispatch(getExpByUser()); // Refresh the experience list
       } catch (error) {
-        console.error("Cập nhật không thành công:", error);
-        alert("Có lỗi xảy ra. Vui lòng thử lại!"); // Thông báo lỗi
+        console.error("Error:", error);
       } finally {
         setIsLoading(false);
-        handleClose();
       }
     },
   });
@@ -85,7 +90,9 @@ export default function ExpModal({ open, handleClose }) {
               <IconButton onClick={handleClose} className="hover:bg-gray-100">
                 <CloseIcon />
               </IconButton>
-              <h2 className="text-xl font-semibold">Add Experience</h2>
+              <h2 className="text-xl font-semibold">
+                {editingExperienceId ? 'Edit Experience' : 'Add Experience'}
+              </h2>
             </div>
             <Button 
               type="submit" 
@@ -103,7 +110,7 @@ export default function ExpModal({ open, handleClose }) {
                   <span className="animate-spin">⏳</span>
                   <span>Saving...</span>
                 </div>
-              ) : 'Create'}
+              ) : editingExperienceId ? 'Update' : 'Create'}
             </Button>
           </div>
 

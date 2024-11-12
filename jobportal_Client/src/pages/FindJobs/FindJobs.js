@@ -266,7 +266,7 @@ export default function JobSearchPage() {
                 <h2 className="text-xl font-semibold">Tất cả công việc</h2>
                 <span className="text-sm text-gray-500">
                   Tổng số: {isFilterApplied ? searchJob.length : jobPost.length} kết quả
-                  (Trang {currentPage + 1}/{totalPages})
+                  
                 </span>
               </div>
               <div className="flex items-center space-x-2">

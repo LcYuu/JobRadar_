@@ -10,6 +10,9 @@ import {
   GET_EDU_BY_USER_FAILURE,
   GET_EDU_BY_USER_REQUEST,
   GET_EDU_BY_USER_SUCCESS,
+  UPDATE_EDU_REQUEST,
+  UPDATE_EDU_SUCCESS,
+  UPDATE_EDU_FAILURE,
 } from "./edu.actionType";
 
 export const getEduByUser = () => async (dispatch) => {
@@ -75,6 +78,39 @@ export const createEducation = (eduData) => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: CREATE_EDU_FAILURE,
+      payload: error.response ? error.response.data : error.message,
+    });
+  }
+};
+
+export const updateEducation = (educationId, educationData) => async (dispatch) => {
+  dispatch({ type: UPDATE_EDU_REQUEST });
+  try {
+    const jwt = sessionStorage.getItem("jwt");
+    if (!jwt) {
+      throw new Error("No token found");
+    }
+
+    const response = await axios.put(
+      `${API_BASE_URL}/education/update-education/${educationId}`,
+      educationData,
+      {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      }
+    );
+
+    dispatch({
+      type: UPDATE_EDU_SUCCESS,
+      payload: response.data,
+    });
+    
+    // Refresh education data
+    dispatch(getEduByUser());
+  } catch (error) {
+    dispatch({
+      type: UPDATE_EDU_FAILURE,
       payload: error.response ? error.response.data : error.message,
     });
   }
