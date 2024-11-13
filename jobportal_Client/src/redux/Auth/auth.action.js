@@ -14,7 +14,10 @@ import {
   LOGOUT_FAILURE,
   UPDATE_PROFILE_REQUEST,
   UPDATE_PROFILE_SUCCESS,
-  UPDATE_PROFILE_FAILURE
+  UPDATE_PROFILE_FAILURE,
+  GET_USER_ROLE_REQUEST,
+  GET_USER_ROLE_SUCCESS,
+  GET_USER_ROLE_FAILURE,
 } from "./auth.actionType";
 import { api, API_BASE_URL } from "../../configs/api";
 import { UPDATE_JOB_REQUEST } from "../JobPost/jobPost.actionType";
@@ -48,14 +51,27 @@ export const loginAction = (loginData) => async (dispatch) => {
       sessionStorage.setItem("jwt", data.token);
       dispatch({ type: LOGIN_SUCCESS, payload: data.token });
       
-      // Fetch user profile
+      // Fetch user profile và role
       const profileResponse = await axios.get(`${API_BASE_URL}/users/profile`, {
         headers: {
           Authorization: `Bearer ${data.token}`,
         },
       });
       
-      dispatch({ type: GET_PROFILE_SUCCESS, payload: profileResponse.data });
+      // Fetch role
+      const roleResponse = await axios.get(`${API_BASE_URL}/auth/user-role`, {
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+        },
+      });
+      
+      dispatch({ 
+        type: GET_PROFILE_SUCCESS, 
+        payload: {
+          ...profileResponse.data,
+          role: roleResponse.data.role
+        }
+      });
       
       // Đảm bảo trả về object với success: true
       return { success: true };
@@ -130,5 +146,22 @@ export const updateProfileAction = (userData) => async (dispatch) => {
       console.error("Profile Update Error: ", error);
       dispatch({ type: UPDATE_PROFILE_FAILURE, payload: error });
       throw error; 
+  }
+};
+
+export const getUserRole = () => async (dispatch) => {
+  dispatch({ type: GET_USER_ROLE_REQUEST });
+
+  try {
+    const response = await api.get('/auth/user-role');
+    dispatch({
+      type: GET_USER_ROLE_SUCCESS,
+      payload: response.data.role
+    });
+  } catch (error) {
+    dispatch({
+      type: GET_USER_ROLE_FAILURE,
+      payload: error.message,
+    });
   }
 };

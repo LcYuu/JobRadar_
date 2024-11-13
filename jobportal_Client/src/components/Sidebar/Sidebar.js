@@ -1,40 +1,73 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Home, FileText, Building2, User, Settings, HelpCircle, LogOut } from 'lucide-react';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  LayoutDashboard,
+  Building2,
+  Users,
+  FileText,
+  Settings,
+  HelpCircle,
+  LogOut
+} from 'lucide-react';
 import { Button } from "../../ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "../../ui/avatar";
 import { Separator } from "../../ui/separator";
 import logo from '../../assets/images/common/logo.jpg';
-import { useSelector } from 'react-redux';
 import { logoutAction } from '../../redux/Auth/auth.action';
-import { useDispatch } from 'react-redux';
+
 export default function Sidebar({ selectedSection, setSelectedSection }) {
-  const { user } = useSelector(store => store.auth);
+  const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const menuItems = [
+  const seekerMenuItems = [
     {
       label: 'Dashboard',
-      path: '/user/account-management/dashboard',
-      icon: Home
+      icon: LayoutDashboard,
+      path: '/user/account-management/dashboard'
     },
     {
       label: 'CV của tôi',
-      path: '/user/account-management/cv',
-      icon: FileText
+      icon: FileText,
+      path: '/user/account-management/cv'
     },
     {
       label: 'Công ty theo dõi',
-      path: '/user/account-management/following-companies',
-      icon: Building2
+      icon: Building2,
+      path: '/user/account-management/following-companies'
     },
     {
       label: 'Hồ sơ cá nhân',
-      path: '/user/account-management/profile',
-      icon: User
+      icon: Users,
+      path: '/user/account-management/profile'
     }
   ];
+
+  const employerMenuItems = [
+    {
+      label: 'Dashboard',
+      icon: LayoutDashboard,
+      path: '/employer/account-management/dashboard'
+    },
+    {
+      label: 'Profile công ty',
+      icon: Building2,
+      path: '/employer/account-management/company-profile'
+    },
+    {
+      label: 'Danh sách ứng tuyển',
+      icon: Users,
+      path: '/employer/account-management/candidate-management'
+    },
+    {
+      label: 'Danh sách công việc',
+      icon: FileText,
+      path: '/employer/account-management/job-management'
+    }
+  ];
+
+  const menuItems = user?.userType?.userTypeId === 2 ? seekerMenuItems : employerMenuItems;
 
   const handleMenuClick = (item) => {
     setSelectedSection(item.label);
@@ -46,10 +79,10 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
   };
 
   return (
-    <nav className="w-64 border-r bg-white p-6 relative h-screen">
+    <nav className="w-80 border-r bg-white p-6 relative h-screen">
       <div className="flex items-center gap-3 pb-8">
         <img src={logo} alt="logo" className="h-10 w-10 rounded-full bg-primary" />
-       <Link to="/" className="text-2xl font-bold text-primary">JobRadar</Link>
+        <Link to="/" className="text-2xl font-bold text-primary">JobRadar</Link>
       </div>
 
       <div className="mb-12 p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
