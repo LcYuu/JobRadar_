@@ -230,7 +230,6 @@ public class JobPostServiceImpl implements IJobPostService {
 				searchHistory.setSearchQuery(title);
 				searchHistory.setSearchDate(LocalDateTime.now());
 				searchHistoryRepository.save(searchHistory);
-
 			}
 
 			// Tìm kiếm công việc theo tên
@@ -261,20 +260,7 @@ public class JobPostServiceImpl implements IJobPostService {
 		}
 	}
 
-	@Override
-	public List<JobPost> searchJobByCity(Integer cityId) throws AllExceptions {
-		try {
-
-			List<JobPost> jobs = jobPostRepository.findJobByCityId(cityId);
-			if (jobs.isEmpty()) {
-				throw new AllExceptions("Không tìm thấy công viêc nào ở: " + cityId);
-			}
-
-			return jobs;
-		} catch (Exception e) {
-			throw new AllExceptions(e.getMessage());
-		}
-	}
+	
 
 //	@Override
 //	public List<JobPost> findBySalaryGreaterThanEqual(Long minSalary) throws AllExceptions {
@@ -402,6 +388,16 @@ public class JobPostServiceImpl implements IJobPostService {
         Specification<JobPost> spec = JobPostSpecification.withFilters(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds);
         return jobPostRepository.findByIsApproveTrue(spec, pageable);
     }
+
+	@Override
+	public List<JobPost> findJobByCompany(UUID companyId) throws AllExceptions {
+		try {
+			List<JobPost> jobs = jobPostRepository.findJobByCompanyId(companyId);
+			return jobs;
+		} catch (Exception e) {
+			throw new AllExceptions(e.getMessage());
+		}
+	}
 
 
 }
