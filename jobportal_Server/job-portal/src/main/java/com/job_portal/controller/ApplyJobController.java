@@ -64,7 +64,7 @@ public class ApplyJobController {
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 		boolean hasApplied = applyJobService.hasApplied(postId, user.get().getSeeker().getUserId());
-	    return ResponseEntity.ok(hasApplied); // Chỉ trả về true hoặc false
+	    return ResponseEntity.ok(hasApplied); 
     }
 
 	@GetMapping("/find/{postId}")

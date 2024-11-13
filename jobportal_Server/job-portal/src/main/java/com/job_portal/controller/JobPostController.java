@@ -182,10 +182,10 @@ public class JobPostController {
 		}
 	}
 
-	@GetMapping("/search-by-city")
-	public ResponseEntity<Object> searchJobByCity(@RequestParam("city") Integer city) {
+	@GetMapping("/search-by-company/{companyId}")
+	public ResponseEntity<Object> findJobByCompany(@PathVariable("companyId") UUID companyId) {
 		try {
-			List<JobPost> jobs = jobPostService.searchJobByCity(city);
+			List<JobPost> jobs = jobPostService.findJobByCompany(companyId);
 			return ResponseEntity.ok(jobs);
 		} catch (AllExceptions e) {
 			// Trả về thông báo từ service
