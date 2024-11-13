@@ -72,20 +72,13 @@ export default function ProfileModal({ open, handleClose }) {
   });
 
   const handleSelectImage = async (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setImageLoading(true);
-    try {
-      const imageUrl = await uploadToCloudinary(file);
-      setSelectedAvatar(imageUrl);
-      formik.setFieldValue("avatar", imageUrl);
-    } catch (error) {
-      console.error("Image upload failed:", error);
-    } finally {
-      setImageLoading(false);
-    }
+    setIsLoading(true);
+    const imageUrl = await uploadToCloudinary(event.target.files[0]);
+    setSelectedAvatar(imageUrl);
+    formik.setFieldValue("avatar", imageUrl); // Cập nhật giá trị avatar trong formik
+    setIsLoading(false);
   };
+
 
   return (
     <Modal
@@ -111,13 +104,19 @@ export default function ProfileModal({ open, handleClose }) {
               {isLoading ? "Saving..." : "Save Changes"}
             </Button>
           </div>
-
-          <div className="flex flex-col items-center space-y-4">
-            <div className="relative">
-              <Avatar
-                sx={{ width: 120, height: 120 }}
-                src={selectedAvatar || user?.avatar || "/default-avatar.png"}
-                className="border-4 border-white shadow-lg"
+          <div className="flex flex-col items-center">
+            <Avatar
+              className="transform"
+              sx={{ width: "10rem", height: "10rem" }}
+              src={selectedAvatar || user?.avatar}
+            />
+            <div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleSelectImage}
+                style={{ display: "none" }}
+                id="image-input"
               />
               <label 
                 htmlFor="image-input"

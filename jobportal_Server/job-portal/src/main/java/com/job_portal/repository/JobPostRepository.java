@@ -23,8 +23,8 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	@Query("SELECT j FROM JobPost j WHERE j.experience LIKE %:experience% AND j.isApprove = true")
 	public List<JobPost> findJobByExperience(@Param("experience") String experience);
 
-	@Query("SELECT j FROM JobPost j WHERE j.city.id = :cityId AND j.isApprove = true")
-	public List<JobPost> findJobByCityId(@Param("cityId") Integer cityId);
+	@Query("SELECT j FROM JobPost j WHERE j.company.companyId = :companyId AND j.isApprove = true")
+	public List<JobPost> findJobByCompanyId(@Param("companyId") UUID companyId);
 
 	 // Lọc các JobPost có salary >= minSalary và đã phê duyệt
     public List<JobPost> findBySalaryGreaterThanEqualAndIsApproveTrue(Long minSalary);

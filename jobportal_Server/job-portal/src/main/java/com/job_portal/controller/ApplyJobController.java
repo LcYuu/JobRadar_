@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,7 +56,26 @@ public class ApplyJobController {
 			return new ResponseEntity<>("Nộp đơn thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+	
+	@GetMapping("/checkApply/{postId}")
+    public ResponseEntity<Boolean> checkIfApplied(
+    		@PathVariable("postId") UUID postId,
+            @RequestHeader("Authorization") String jwt) {
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+		boolean hasApplied = applyJobService.hasApplied(postId, user.get().getSeeker().getUserId());
+	    return ResponseEntity.ok(hasApplied); 
+    }
 
+	@GetMapping("/find/{postId}")
+	public ResponseEntity<Optional<ApplyJob>> findApplyJobById(
+			@PathVariable("postId") UUID postId,
+			@RequestHeader("Authorization") String jwt) {
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+	    Optional<ApplyJob> apply = applyJobRepository.findByPostIdAndUserId(postId, user.get().getSeeker().getUserId());
+	    return ResponseEntity.ok(apply); 
+	}
 	@PostMapping("/setApprove/{postId}/{userId}")
 	public ResponseEntity<String> updateApprove(@RequestHeader("Authorization") String jwt,
 			@PathVariable("postId") UUID postId, @PathVariable("userId") UUID userId) throws AllExceptions {
@@ -86,7 +106,7 @@ public class ApplyJobController {
 		}
 	}
 
-	@PostMapping("/update-apply/{postId}")
+	@PutMapping("/update-apply/{postId}")
 	public ResponseEntity<String> updateApply(@RequestBody ApplyJobDTO applyDTO,
 			@RequestHeader("Authorization") String jwt, @PathVariable("postId") UUID postId) throws AllExceptions {
 

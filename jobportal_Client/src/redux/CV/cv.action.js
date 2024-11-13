@@ -1,6 +1,7 @@
 import { api } from "../../configs/api";
 import axios from "axios";
 import { CREATE_CV_FAILURE, CREATE_CV_REQUEST, CREATE_CV_SUCCESS, DELETE_CV_FAILURE, DELETE_CV_REQUEST, DELETE_CV_SUCCESS, GET_CV_FAILURE, GET_CV_REQUEST, GET_CV_SUCCESS, UPDATE_CV_MAIN_FAILURE, UPDATE_CV_MAIN_REQUEST, UPDATE_CV_MAIN_SUCCESS } from "./cv.actionType";
+import { toast } from "react-toastify";
 
 
 export const getCVBySeeker= () => async (dispatch) => {
@@ -61,6 +62,8 @@ export const deleteCV = (cvId) => async (dispatch) => {
       type: DELETE_CV_SUCCESS,
       payload: cvId, // Trả về experienceId để cập nhật state
     });
+
+    toast.success("CV đã được xóa thành công!");
   } catch (error) {
     dispatch({
       type: DELETE_CV_FAILURE,
