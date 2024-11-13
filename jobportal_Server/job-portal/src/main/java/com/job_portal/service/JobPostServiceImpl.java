@@ -394,7 +394,7 @@ public class JobPostServiceImpl implements IJobPostService {
 
 	@Override
 	public List<JobCountType> getJobCountByType() {
-		 return jobPostRepository.countByTypeOfWork(); 
+		return jobPostRepository.countJobsByType();
 	}
 
 	@Override
