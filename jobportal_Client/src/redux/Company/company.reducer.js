@@ -1,19 +1,23 @@
 import {
+  CHECK_IF_SAVED_SUCCESS,
   GET_COMPANY_BY_FEATURE_SUCCESS,
   GET_COMPANY_FIT_SEEKER_SUCCESS,
   GET_COMPANY_POPULAR_FAILURE,
   GET_COMPANY_POPULAR_REQUEST,
   GET_COMPANY_POPULAR_SUCCESS,
+  GET_PROFILE_COMPANY_REQUEST,
+  GET_PROFILE_COMPANY_SUCCESS,
   GET_COMPANY_REQUEST,
   GET_COMPANY_SUCCESS,
   GET_COMPANY_FAILURE,
 } from "./company.actionType";
 
 const initialState = {
-  company: null,
   companies: [],
   companyByFeature: [],
   companyFitSeeker: [],
+  companyProfile: null,
+  checkIfSaved: null,
   loading: false,
   message: null,
   error: null,
@@ -44,6 +48,20 @@ export const companyReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         companyFitSeeker: action.payload,
+        error: null,
+      };
+    case GET_PROFILE_COMPANY_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        companyProfile: action.payload,
+        error: null,
+      };
+    case CHECK_IF_SAVED_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        checkIfSaved: action.payload,
         error: null,
       };
 

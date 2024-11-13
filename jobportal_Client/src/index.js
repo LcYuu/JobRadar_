@@ -7,6 +7,7 @@ import reportWebVitals from "./reportWebVitals";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import ErrorBoundary from "./error";
+import { ToastContainer } from "react-toastify";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -16,6 +17,7 @@ root.render(
         <BrowserRouter>
           <App />
         </BrowserRouter>
+        <ToastContainer />
       </ErrorBoundary>
     </Provider>
 );
