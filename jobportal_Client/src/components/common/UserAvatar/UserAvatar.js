@@ -8,21 +8,36 @@ const UserAvatar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const isAuthenticated = !!auth.jwt || !!localStorage.getItem('jwt');
+  const isAuthenticated = !!sessionStorage.getItem('jwt');
 
   useEffect(() => {
-    if (isAuthenticated) {
-      dispatch(getProfileAction());
-    }
+    const fetchProfile = async () => {
+      if (isAuthenticated) {
+        await dispatch(getProfileAction());
+      }
+    };
+    fetchProfile();
   }, [dispatch, isAuthenticated]);
 
   const handleAvatarClick = (e) => {
     e.preventDefault();
     if (isAuthenticated && auth.user) {
-      navigate('user/account-management');
+      const userType = auth.user?.userType;
+      console.log('Current user type:', userType);
+      
+      // Make sure we're comparing with numbers
+      const userTypeId = parseInt(userType?.userTypeId);
+      console.log('UserTypeId:', userTypeId);
+
+      if (userTypeId === 2) {
+        navigate('/user/account-management/dashboard');
+      } else if (userTypeId === 3) {
+        navigate('/employer/account-management/dashboard');
+      }
     }
   };
 
+  // Don't render if not authenticated or no user data
   if (!isAuthenticated || !auth.user) {
     return null;
   }

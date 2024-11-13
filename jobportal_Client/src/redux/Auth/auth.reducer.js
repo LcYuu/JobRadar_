@@ -11,14 +11,18 @@ import {
   LOGOUT_SUCCESS,
   LOGOUT_FAILURE,
   UPDATE_PROFILE_SUCCESS,
+  GET_USER_ROLE_REQUEST,
+  GET_USER_ROLE_SUCCESS,
+  GET_USER_ROLE_FAILURE,
 } from "./auth.actionType";
 
 const initialState = {
-  loading: false,
   user: null,
+  loading: false,
   error: null,
   jwt: sessionStorage.getItem('jwt') || null,
-  isAuthenticated: !!sessionStorage.getItem('jwt')
+  isAuthenticated: !!sessionStorage.getItem('jwt'),
+  userRole: null,
 };
 
 export const authReducer = (state = initialState, action) => {
@@ -30,11 +34,19 @@ export const authReducer = (state = initialState, action) => {
       return { ...state, loading: true, error: null };
     
     case GET_PROFILE_SUCCESS:
-    case UPDATE_PROFILE_SUCCESS:
-      return { ...state, loading: false, user: action.payload, error: null };
+      return {
+        ...state,
+        user: action.payload,
+        loading: false
+      };
     
     case LOGIN_SUCCESS:
-      return { ...state, loading: false, jwt: action.payload, error: null };
+      return {
+        ...state,
+        jwt: action.payload,
+        isAuthenticated: true,
+        loading: false
+      };
     
     case LOGOUT_SUCCESS:
       return initialState;
@@ -42,6 +54,19 @@ export const authReducer = (state = initialState, action) => {
     case SIGNUP_FAILURE:
     case LOGIN_FAILURE:
     case LOGOUT_FAILURE:
+      return { ...state, loading: false, error: action.payload };
+    
+    case GET_USER_ROLE_REQUEST:
+      return { ...state, loading: true };
+    case GET_USER_ROLE_SUCCESS:
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          role: action.payload.role
+        }
+      };
+    case GET_USER_ROLE_FAILURE:
       return { ...state, loading: false, error: action.payload };
     
     default:
