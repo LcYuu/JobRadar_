@@ -48,8 +48,10 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
      List<JobPost> findTop8LatestJobPosts();
      
      @Query("SELECT new com.job_portal.DTO.JobCountType(j.typeOfWork, COUNT(j)) " +
-             "FROM JobPost j GROUP BY j.typeOfWork")
-     List<JobCountType> countByTypeOfWork();
+             "FROM JobPost j " +
+             "WHERE j.isApprove = true AND j.expireDate >= CURRENT_DATE " +
+             "GROUP BY j.typeOfWork")
+     List<JobCountType> countJobsByType();
      
      Page<JobPost> findByIsApproveTrue(Specification<JobPost> spec, Pageable pageable);
      
