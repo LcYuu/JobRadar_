@@ -7,6 +7,9 @@ import {
   GET_COMPANY_POPULAR_SUCCESS,
   GET_PROFILE_COMPANY_REQUEST,
   GET_PROFILE_COMPANY_SUCCESS,
+  GET_COMPANY_REQUEST,
+  GET_COMPANY_SUCCESS,
+  GET_COMPANY_FAILURE,
 } from "./company.actionType";
 
 const initialState = {
@@ -64,6 +67,26 @@ export const companyReducer = (state = initialState, action) => {
 
     case GET_COMPANY_POPULAR_FAILURE:
       return { ...state, loading: false, error: action.payload };
+    case GET_COMPANY_REQUEST:
+      return {
+        ...state,
+        loading: true,
+        error: null,
+        company: null
+      };
+    case GET_COMPANY_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        company: action.payload,
+        error: null
+      };
+    case GET_COMPANY_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
     default:
       return state;
   }

@@ -38,6 +38,8 @@ import SkillModal from "./SkillModal";
 import ExpModal from "./ExpModal";
 import EduModal from "./EduModal";
 import { getIndustry } from "../../redux/Industry/industry.action";
+import { formatDate, formatDateForInput } from '../../utils/dateUtils';
+
 export default function MyProfile() {
   const colors = [
     "bg-sky-500",
@@ -88,18 +90,32 @@ export default function MyProfile() {
 
   const [openExp, setOpenExp] = useState(false);
   const handleOpenExpModal = () => setOpenExp(true);
-  const handleCloseExp = () => setOpenExp(false);
+  const handleCloseExp = () => {
+    setOpenExp(false);
+    setRefreshData(true);
+  };
 
   const [openEdu, setOpenEdu] = useState(false);
   const handleOpenEduModal = () => setOpenEdu(true);
-  const handleCloseEdu = () => setOpenEdu(false);
+  const handleCloseEdu = () => {
+    setOpenEdu(false);
+    setRefreshData(true);
+  };
+
+  const [expUpdated, setExpUpdated] = useState(false);
+  const [eduUpdated, setEduUpdated] = useState(false);
+
+  const [refreshData, setRefreshData] = useState(false);
 
   useEffect(() => {
     dispatch(getExpByUser());
     dispatch(getEduByUser());
     dispatch(getProfileAction());
     dispatch(getSeekerByUser());
-  }, [dispatch]);
+    setRefreshData(false);
+    setExpUpdated(false);
+    setEduUpdated(false);
+  }, [dispatch, refreshData, expUpdated, eduUpdated]);
 
   const [isEditingDes, setIsEditingDes] = useState(false);
   const [isEditingInfo, setIsEditingInfo] = useState(false);
@@ -113,27 +129,33 @@ export default function MyProfile() {
     industryId: "",
   });
 
+  const [errors, setErrors] = useState({
+    emailContact: "",
+    phoneNumber: ""
+  });
+
   const handleDeleteExp = async (experienceId) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa kinh nghiệm này?")) {
       try {
         await dispatch(deleteExperience(experienceId));
-
         dispatch(getExpByUser());
+        showSuccessToast('Xóa kinh nghiệm thành công!');
       } catch (error) {
         console.error("Có lỗi xảy ra khi xóa kinh nghiệm:", error);
-        alert("Xóa không thành công. Vui lòng thử lại!");
+        showSuccessToast('Xóa kinh nghiệm thất bại. Vui lòng thử lại!', 'error');
       }
     }
   };
+
   const handleDeleteEdu = async (educationId) => {
     if (window.confirm("Bạn có chắc chắn muốn xóa học vấn này?")) {
       try {
         await dispatch(deleteEducation(educationId));
-
         dispatch(getEduByUser());
+        showSuccessToast('Xóa học vấn thành công!');
       } catch (error) {
         console.error("Có lỗi xảy ra khi xóa học vấn:", error);
-        alert("Xóa không thành công. Vui lòng thử lại!");
+        showSuccessToast('Xóa học vấn thất bại. Vui lòng thử lại!', 'error');
       }
     }
   };
@@ -161,11 +183,16 @@ export default function MyProfile() {
   };
 
   const handleSaveClick = async () => {
+    if (!validateForm()) {
+      return;
+    }
+    
     try {
-      await dispatch(updateSeekerAction(formData)); // Đợi update hoàn thành
+      await dispatch(updateSeekerAction(formData));
       setIsEditingDes(false);
       setIsEditingInfo(false);
-      dispatch(getSeekerByUser()); // Sau khi cập nhật, gọi getSeekerByUser
+      dispatch(getSeekerByUser());
+      showSuccessToast('Cập nhật thông tin thành công!');
     } catch (error) {
       console.error("Update failed: ", error);
     }
@@ -180,11 +207,135 @@ export default function MyProfile() {
     }));
   };
 
+  const [editingEducationId, setEditingEducationId] = useState(null);
+  const [editingExperienceId, setEditingExperienceId] = useState(null);
+
+  const handleEditEducation = (education) => {
+    setEditingEducationId(education.educationId);
+    setFormData({
+      certificateDegreeName: education.certificateDegreeName,
+      major: education.major,
+      universityName: education.universityName,
+      startDate: formatDateForInput(education.startDate),
+      endDate: formatDateForInput(education.endDate),
+      gpa: education.gpa
+    });
+    handleOpenEduModal();
+  };
+
+  const handleEditExperience = (experience) => {
+    setEditingExperienceId(experience.experienceId);
+    setFormData({
+      startDate: formatDateForInput(experience.startDate),
+      endDate: formatDateForInput(experience.endDate),
+      jobTitle: experience.jobTitle,
+      companyName: experience.companyName,
+      description: experience.description,
+    });
+    handleOpenExpModal();
+  };
+
+  const handleDeleteExperience = (experienceId) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa kinh nghiệm này?')) {
+      dispatch(deleteExperience(experienceId))
+        .then(() => {
+          setRefreshData(true);
+        })
+        .catch((error) => {
+          console.error("Error deleting experience:", error);
+        });
+    }
+  };
+
+  const handleDeleteEducation = (educationId) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa thông tin giáo dục này?')) {
+      dispatch(deleteEducation(educationId))
+        .then(() => {
+          setRefreshData(true);
+        })
+        .catch((error) => {
+          console.error("Error deleting education:", error);
+        });
+    }
+  };
+
+  useEffect(() => {
+    if (!openExp) {
+      setEditingExperienceId(null);
+      setFormData({
+        ...formData,
+        jobTitle: "",
+        companyName: "",
+        description: "",
+        startDate: "",
+        endDate: "",
+      });
+    }
+  }, [openExp]);
+
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const Toast = ({ message, onClose }) => (
+    <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded shadow-lg flex items-center gap-2 animate-fade-in-down z-50">
+      <span>{message}</span>
+      <button onClick={onClose} className="text-white hover:text-gray-200">
+        ✕
+      </button>
+    </div>
+  );
+
+  const showSuccessToast = (message) => {
+    setToastMessage(message);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
+
+  useEffect(() => {
+    if (!openEdu) {
+      setEditingEducationId(null);
+      setFormData({
+        ...formData,
+        certificateDegreeName: "",
+        major: "",
+        universityName: "",
+        startDate: "",
+        endDate: "",
+        gpa: ""
+      });
+    }
+  }, [openEdu]);
+
+  const validateForm = () => {
+    let tempErrors = {
+      emailContact: "",
+      phoneNumber: ""
+    };
+    let isValid = true;
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.emailContact && !emailRegex.test(formData.emailContact)) {
+      tempErrors.emailContact = "Email không hợp lệ";
+      isValid = false;
+    }
+
+    // Validate phone number (số điện thoại Việt Nam)
+    const phoneRegex = /(0[3|5|7|8|9])+([0-9]{8})\b/;
+    if (formData.phoneNumber && !phoneRegex.test(formData.phoneNumber)) {
+      tempErrors.phoneNumber = "Số điện thoại không hợp lệ";
+      isValid = false;
+    }
+
+    setErrors(tempErrors);
+    return isValid;
+  };
+
   return (
-    <div className="flex min-h-screen bg-gray-50/50">
-      <main className="flex-1 p-6">
-        {/* Profile Header */}
-        <Card className="mt-6">
+    <div className="min-h-screen bg-gray-50 -ml-8 -mr-8 ">
+      <main className="container mx-auto p-6">
+        {/* Profile Header Card */}
+        <Card className="mb-6">
           <div className="relative h-48 bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700">
             <Button
               size="icon"
@@ -213,9 +364,10 @@ export default function MyProfile() {
           </section>
         </Card>
 
-        {/* Two Column Layout */}
-        <div className="mt-6 grid gap-6 md:grid-cols-3">
-          <div className="space-y-6 md:col-span-2">
+        {/* Main Content */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Left Column - 2/3 width */}
+          <div className="md:col-span-2 space-y-6">
             {/* About Me */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
@@ -231,18 +383,25 @@ export default function MyProfile() {
               <CardContent>
                 {isEditingDes ? (
                   <div>
-                    <input
+                    <textarea
                       name="description"
                       value={formData.description || ""}
                       onChange={handleChange}
-                      className="border p-2 w-full"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSaveClick();
+                        }
+                      }}
+                      className="border p-2 w-full min-h-[100px] rounded-md resize-none"
+                      placeholder="Nhập mô tả về bản thân..."
                     />
                     <div className="mt-2 flex justify-end">
                       <Button onClick={handleSaveClick}>Save</Button>
                     </div>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground whitespace-pre-line">
                     {seeker.description}
                   </p>
                 )}
@@ -278,20 +437,27 @@ export default function MyProfile() {
                             Công ty: {experience.companyName}
                           </p>
                         </div>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="hover:bg-red-100 transition-colors duration-200"
-                          onClick={() =>
-                            handleDeleteExp(experience.experienceId)
-                          }
-                        >
-                          <Delete className="h-4 w-4 text-red-600" />
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="hover:bg-blue-100 transition-colors duration-200"
+                            onClick={() => handleEditExperience(experience)}
+                          >
+                            <Edit className="h-4 w-4 text-blue-600" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="hover:bg-red-100 transition-colors duration-200"
+                            onClick={() => handleDeleteExp(experience.experienceId)}
+                          >
+                            <Delete className="h-4 w-4 text-red-600" />
+                          </Button>
+                        </div>
                       </div>
                       <p className="mt-2 text-sm text-gray-600">
-                        {experience.startDate} •{" "}
-                        {experience.endDate || "Present"}
+                        {formatDate(experience.startDate)} - {experience.endDate ? formatDate(experience.endDate) : "Present"}
                       </p>
                       <p className="mt-2 text-sm text-gray-500">
                         {experience.description}
@@ -301,7 +467,14 @@ export default function MyProfile() {
                 ))}
               </CardContent>
               <section>
-                <ExpModal open={openExp} handleClose={handleCloseExp} />
+                <ExpModal 
+                  open={openExp}
+                  handleClose={handleCloseExp}
+                  editingExperienceId={editingExperienceId}
+                  setEditingExperienceId={setEditingExperienceId}
+                  initialData={formData}
+                  showSuccessToast={showSuccessToast}
+                />
               </section>
             </Card>
 
@@ -330,26 +503,33 @@ export default function MyProfile() {
                         <div className="flex items-start justify-between">
                           <div>
                             <h4 className="font-semibold text-lg">
-                              {education.universityName}
+                              {education.certificateDegreeName}
                             </h4>
                             <p className="text-sm text-muted-foreground">
-                              {education.certificateDegreeName}
+                              {education.universityName}
                             </p>
                           </div>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="hover:bg-red-100 transition-colors duration-200"
-                            onClick={() =>
-                              handleDeleteEdu(education.educationId)
-                            }
-                          >
-                            <Delete className="h-4 w-4 text-red-600" />
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="hover:bg-blue-100 transition-colors duration-200"
+                              onClick={() => handleEditEducation(education)}
+                            >
+                              <Edit className="h-4 w-4 text-blue-600" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="hover:bg-red-100 transition-colors duration-200"
+                              onClick={() => handleDeleteEdu(education.educationId)}
+                            >
+                              <Delete className="h-4 w-4 text-red-600" />
+                            </Button>
+                          </div>
                         </div>
                         <p className="mt-2 text-sm text-gray-600">
-                          {education.startDate} •{" "}
-                          {education.endDate || "Present"}
+                          {formatDate(education.startDate)} - {education.endDate ? formatDate(education.endDate) : "Present"}
                         </p>
                         <p className="mt-2 text-sm text-gray-500">
                           {education.major}
@@ -367,37 +547,57 @@ export default function MyProfile() {
                 )}
               </CardContent>
               <section>
-                <EduModal open={openEdu} handleClose={handleCloseEdu} />
+                <EduModal 
+                  open={openEdu}
+                  handleClose={handleCloseEdu}
+                  editingEducationId={editingEducationId}
+                  setEditingEducationId={setEditingEducationId}
+                  initialData={formData}
+                  showSuccessToast={showSuccessToast}
+                />
               </section>
             </Card>
 
             {/* Skills */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <h3 className="text-lg font-semibold">Skills</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-semibold">Skills</h3>
+                </div>
                 <Button
                   size="icon"
                   variant="ghost"
                   onClick={handleOpenSkillModal}
+                  className="hover:bg-primary/10 transition-colors"
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {seeker.skills && Array.isArray(seeker.skills) ? (
-                    seeker.skills.map((skill) => (
+                {seeker.skills && Array.isArray(seeker.skills) && seeker.skills.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {seeker.skills.map((skill, index) => (
                       <div
                         key={skill.skillId}
-                        className="rounded-full bg-primary/10 px-3 py-1 text-sm text-primary hover:bg-primary/20"
+                        className={`${getColorByIndex(index)} bg-opacity-15 rounded-full px-4 py-2 text-sm 
+                          flex items-center gap-2 transition-all duration-200 hover:bg-opacity-25`}
                       >
-                        {skill.skillName}
+                        <span className={`w-2 h-2 rounded-full ${getColorByIndex(index)}`}></span>
+                        <span className={`font-medium text-${getColorByIndex(index).replace('bg-', '')}`}>
+                          {skill.skillName}
+                        </span>
                       </div>
-                    ))
-                  ) : (
-                    <div>No skills available</div> // Hiển thị thông báo nếu không có kỹ năng
-                  )}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-gray-500">
+                    <div className="mb-2">
+                      <Plus className="h-12 w-12 mx-auto text-gray-400" />
+                    </div>
+                    <p className="text-sm">Chưa có kỹ năng nào được thêm</p>
+                    <p className="text-xs mt-1">Nhấn vào nút chỉnh sửa để thêm kỹ năng của bạn</p>
+                  </div>
+                )}
               </CardContent>
               <section>
                 <SkillModal open={openSkill} handleClose={handleCloseSkill} />
@@ -405,7 +605,7 @@ export default function MyProfile() {
             </Card>
           </div>
 
-          {/* Right Column */}
+          {/* Right Column - 1/3 width */}
           <div className="space-y-6">
             {/* Contact Info */}
             <Card>
@@ -422,18 +622,23 @@ export default function MyProfile() {
               <CardContent className="space-y-4">
                 {isEditingInfo ? (
                   <div>
-                    <Label className="text-sm font-medium">Email</Label>
+                    <Label className="text-sm font-medium whitespace-nowrap">Email</Label>
                     <input
                       name="emailContact"
                       value={formData.emailContact}
                       onChange={handleChange}
-                      className="border p-2 w-full"
+                      className={`border p-2 w-full mt-1 ${
+                        errors.emailContact ? 'border-red-500' : ''
+                      }`}
                     />
+                    {errors.emailContact && (
+                      <p className="text-red-500 text-xs mt-1">{errors.emailContact}</p>
+                    )}
                   </div>
                 ) : (
                   seeker?.emailContact && (
                     <div>
-                      <Label className="text-sm font-medium">Email</Label>
+                      <Label className="text-sm font-medium whitespace-nowrap">Email</Label>
                       <div className="mt-1 flex items-center gap-2">
                         <Mail className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">{seeker.emailContact}</span>
@@ -444,18 +649,23 @@ export default function MyProfile() {
 
                 {isEditingInfo ? (
                   <div>
-                    <Label className="text-sm font-medium">Phone</Label>
+                    <Label className="text-sm font-medium whitespace-nowrap">Số điện thoại</Label>
                     <input
                       name="phoneNumber"
                       value={formData.phoneNumber}
                       onChange={handleChange}
-                      className="border p-2 w-full"
+                      className={`border p-2 w-full mt-1 ${
+                        errors.phoneNumber ? 'border-red-500' : ''
+                      }`}
                     />
+                    {errors.phoneNumber && (
+                      <p className="text-red-500 text-xs mt-1">{errors.phoneNumber}</p>
+                    )}
                   </div>
                 ) : (
                   seeker?.phoneNumber && (
                     <div>
-                      <Label className="text-sm font-medium">Phone</Label>
+                      <Label className="text-sm font-medium whitespace-nowrap">Số điện thoại</Label>
                       <div className="mt-1 flex items-center gap-2">
                         <Phone className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">{seeker.phoneNumber}</span>
@@ -466,14 +676,14 @@ export default function MyProfile() {
 
                 {isEditingInfo ? (
                   <div>
-                    <Label className="text-sm font-medium">Gender</Label>
+                    <Label className="text-sm font-medium whitespace-nowrap">Giới tính</Label>
                     <select
                       name="gender"
                       value={formData.gender}
                       onChange={handleChange}
-                      className="border p-2 w-full"
+                      className="border p-2 w-full mt-1"
                     >
-                      <option value="">Select Gender</option>
+                      <option value="">Chọn giới tính</option>
                       <option value="Nam">Nam</option>
                       <option value="Nữ">Nữ</option>
                     </select>
@@ -481,7 +691,7 @@ export default function MyProfile() {
                 ) : (
                   seeker?.gender && (
                     <div>
-                      <Label className="text-sm font-medium">Gender</Label>
+                      <Label className="text-sm font-medium whitespace-nowrap">Giới tính</Label>
                       <div className="mt-1 flex items-center gap-2">
                         {seeker.gender === "Nam" && (
                           <FontAwesomeIcon
@@ -503,38 +713,36 @@ export default function MyProfile() {
 
                 {isEditingInfo ? (
                   <div>
-                    <Label className="text-sm font-medium">Date of Birth</Label>
+                    <Label className="text-sm font-medium whitespace-nowrap">Ngày sinh</Label>
                     <input
                       type="date"
                       name="dateOfBirth"
                       value={formData.dateOfBirth}
                       onChange={handleChange}
-                      className="border p-2 w-full"
+                      className="border p-2 w-full mt-1"
                     />
                   </div>
                 ) : (
                   seeker?.dateOfBirth && (
                     <div>
-                      <Label className="text-sm font-medium">
-                        Date of Birth
-                      </Label>
+                      <Label className="text-sm font-medium whitespace-nowrap">Ngày sinh</Label>
                       <div className="mt-1 flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{seeker.dateOfBirth}</span>
+                        <span className="text-sm">{formatDate(seeker.dateOfBirth)}</span>
                       </div>
                     </div>
                   )
                 )}
                 {isEditingInfo ? (
                   <div>
-                    <Label className="text-sm font-medium">Major</Label>
+                    <Label className="text-sm font-medium whitespace-nowrap">Chuyên ngành</Label>
                     <select
                       name="industryId"
                       value={formData.industryId}
                       onChange={handleChange}
-                      className="border p-2 w-full"
+                      className="border p-2 w-full mt-1"
                     >
-                      <option value="">Select Industry</option>
+                      <option value="">Chọn chuyên ngành</option>
                       {industries.slice(1).map((industry) => (
                         <option key={industry.industryId} value={industry.industryId}>
                           {industry.industryName}
@@ -545,7 +753,7 @@ export default function MyProfile() {
                 ) : (
                   seeker?.industry && (
                     <div>
-                      <Label className="text-sm font-medium">Major</Label>
+                      <Label className="text-sm font-medium whitespace-nowrap">Major</Label>
                       <div className="mt-1 flex items-center gap-2">
                         <Book className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">
@@ -558,7 +766,7 @@ export default function MyProfile() {
               </CardContent>
               {isEditingInfo && (
                 <div className="mt-4 flex justify-end">
-                  <Button onClick={handleSaveClick}>Save</Button>
+                  <Button onClick={handleSaveClick}>Lưu</Button>
                 </div>
               )}
             </Card>
@@ -592,13 +800,19 @@ export default function MyProfile() {
                     </div>
                   ))
                 ) : (
-                  <div>No social links available</div> // Hiển thị thông báo nếu không có liên kết mạng xã hội
+                  <div>Không có liên kết xã hội nào</div> // Hiển thị thông báo nếu không có liên kết mạng xã hội
                 )}
               </CardContent>
             </Card>
           </div>
         </div>
       </main>
+      {showToast && (
+        <Toast 
+          message={toastMessage} 
+          onClose={() => setShowToast(false)} 
+        />
+      )}
     </div>
   );
 }

@@ -42,6 +42,9 @@ import { StarBorder, StarRounded } from "@mui/icons-material";
 import { toast } from "react-toastify";
 import { checkIfApplied } from "../../redux/ApplyJob/applyJob.action";
 
+
+
+
 export default function CompanyProfile() {
   const { companyId } = useParams();
   const dispatch = useDispatch();
@@ -101,12 +104,13 @@ export default function CompanyProfile() {
     }
   };
 
+  // Thêm useEffect riêng để xử lý scroll
   useEffect(() => {
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
-  }, []);
+  },); // Chỉ scroll khi id thay đổi
 
   useEffect(() => {
     dispatch(getAllJobAction(currentPage, size)); // Assuming your action can accept companyId
@@ -119,7 +123,6 @@ export default function CompanyProfile() {
   }, [dispatch]);
 
   const totalStars = reviews.reduce((total, review) => total + review.star, 0);
-
   // Tính trung bình
   const averageStars = reviews.length > 0 ? totalStars / reviews.length : 0;
 
@@ -127,7 +130,7 @@ export default function CompanyProfile() {
   return (
     <main className="min-h-screen bg-background">
       <div className="container px-4 py-8 mx-auto">
-        {/* Company Header */}
+        {/* Company Header - Updated with API data */}
         <div className="flex items-start gap-6 mb-12">
           <div className="w-24 h-24 bg-indigo-100 rounded-xl overflow-hidden">
             <img
@@ -262,7 +265,7 @@ export default function CompanyProfile() {
               <span className="text-sm">{companyProfile?.contact}</span>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Company Images */}
         <h2 className="text-xl font-semibold mb-4">Một số hình ảnh công ty</h2>
@@ -403,14 +406,20 @@ export default function CompanyProfile() {
         {/* <div className="mb-12">
           <h2 className="text-xl font-semibold mb-4">Văn phòng</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {company.locations.map((location) => (
-              <Card key={location} className="p-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-muted rounded" />
-                  <span>{location}</span>
-                </div>
-              </Card>
-            ))}
+            {company.locations && company.locations.length > 0 ? (
+              company.locations.map((location) => (
+                <Card key={location} className="p-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 bg-muted rounded" />
+                    <span>{location}</span>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-full text-center text-muted-foreground">
+                Chưa có thông tin văn phòng
+              </div>
+            )}
           </div>
         </div>
 
@@ -421,13 +430,19 @@ export default function CompanyProfile() {
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
-            {company.team.map((member) => (
-              <div key={member.name} className="text-center">
-                <img src={member.avatar} alt='avatar' className="w-20 h-20 mx-auto mb-2 rounded-full bg-muted" />
-                <h3 className="font-medium">{member.name}</h3>
-                <p className="text-sm text-muted-foreground">{member.position}</p>
+            {company.team && company.team.length > 0 ? (
+              company.team.map((member) => (
+                <div key={member.name} className="text-center">
+                  <img src={member.avatar} alt={member.name} className="w-20 h-20 mx-auto mb-2 rounded-full bg-muted" />
+                  <h3 className="font-medium">{member.name}</h3>
+                  <p className="text-sm text-muted-foreground">{member.position}</p>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center text-muted-foreground">
+                Chưa có thông tin đội ngũ
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -435,17 +450,23 @@ export default function CompanyProfile() {
         <div className="mb-12">
           <h2 className="text-xl font-semibold mb-4">Phúc lợi</h2>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {company.benefits.map((benefit) => (
-              <Card key={benefit.title} className="p-6">
-                <div className="w-12 h-12 mb-4 rounded-lg bg-primary/10 flex items-center justify-center">
-                  {React.createElement(benefit.icon, {
-                    className: "w-6 h-6 text-primary"
-                  })}
-                </div>
-                <h3 className="font-medium mb-2">{benefit.title}</h3>
-                <p className="text-sm text-muted-foreground">{benefit.description}</p>
-              </Card>
-            ))}
+            {company.benefits && company.benefits.length > 0 ? (
+              company.benefits.map((benefit) => (
+                <Card key={benefit.title} className="p-6">
+                  <div className="w-12 h-12 mb-4 rounded-lg bg-primary/10 flex items-center justify-center">
+                    {benefit.icon && React.createElement(benefit.icon, {
+                      className: "w-6 h-6 text-primary"
+                    })}
+                  </div>
+                  <h3 className="font-medium mb-2">{benefit.title}</h3>
+                  <p className="text-sm text-muted-foreground">{benefit.description}</p>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-full text-center text-muted-foreground">
+                Chưa có thông tin phúc lợi
+              </div>
+            )}
           </div>
         </div> */}
 
@@ -505,6 +526,7 @@ export default function CompanyProfile() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </main>
   );

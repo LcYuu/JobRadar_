@@ -12,24 +12,28 @@ import * as Yup from "yup";
 import {
   createEducation,
   getEduByUser,
+  updateEducation,
 } from "../../redux/Education/edu.action";
+import { formatDateForInput } from '../../utils/dateUtils';
 
 const style = {
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 600,
+  width: "90%",
+  maxWidth: "600px",
+  maxHeight: "90vh",
   bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 2,
+  boxShadow: "0 25px 50px -12px rgb(0 0 0 / 0.25)",
+  borderRadius: "12px",
+  p: 3,
   outline: "none",
-  overflow: "scroll-y",
-  borderRadius: 3,
+  overflowY: "auto",
+  border: "none",
 };
 
-export default function EduModal({ open, handleClose }) {
+export default function EduModal({ open, handleClose, editingEducationId, setEditingEducationId, initialData, showSuccessToast }) {
   const validationSchema = Yup.object({
     certificateDegreeName: Yup.string().required("Bằng cấp là bắt buộc."),
     major: Yup.string().required("Chuyên ngành là bắt buộc."),
@@ -55,28 +59,32 @@ export default function EduModal({ open, handleClose }) {
   // Formik initialization
   const formik = useFormik({
     initialValues: {
-      certificateDegreeName: edu?.certificateDegreeName || "",
-      major: edu?.major || "",
-      universityName: edu?.universityName || "",
-      startDate: edu?.startDate || "",
-      endDate: edu?.endDate || "",
-      gpa: edu?.gpa || "",
+      certificateDegreeName: editingEducationId ? initialData.certificateDegreeName : "",
+      major: editingEducationId ? initialData.major : "",
+      universityName: editingEducationId ? initialData.universityName : "",
+      startDate: editingEducationId ? initialData.startDate : "",
+      endDate: editingEducationId ? initialData.endDate : "",
+      gpa: editingEducationId ? initialData.gpa : "",
     },
     validationSchema: validationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
       setIsLoading(true);
       try {
-        // Gọi các action để cập nhật hồ sơ
-        await dispatch(createEducation(values));
-        dispatch(getEduByUser());
-        formik.resetForm();
+        if (editingEducationId) {
+          await dispatch(updateEducation(editingEducationId, values));
+          setEditingEducationId(null);
+          showSuccessToast('Cập nhật học vấn thành công!');
+        } else {
+          await dispatch(createEducation(values));
+          showSuccessToast('Cập nhật học vấn thành công!');
+        }
+        handleClose();
+        dispatch(getEduByUser()); // Refresh the education list
       } catch (error) {
-        console.error("Cập nhật không thành công:", error);
-        alert("Có lỗi xảy ra. Vui lòng thử lại!"); // Thông báo lỗi
+        console.error("Error:", error);
       } finally {
         setIsLoading(false);
-        handleClose();
       }
     },
   });
@@ -85,105 +93,123 @@ export default function EduModal({ open, handleClose }) {
     <Modal
       open={open}
       onClose={handleClose}
-      aria-labelledby="modal-modal-title"
-      aria-describedby="modal-modal-description"
+      className="animate-fadeIn"
     >
       <Box sx={style}>
-        <form onSubmit={formik.handleSubmit}>
-          <div className="flex items-center justify-between">
+        <form onSubmit={formik.handleSubmit} className="space-y-6">
+          <div className="flex items-center justify-between border-b pb-4">
             <div className="flex items-center space-x-3">
-              <IconButton onClick={handleClose}>
+              <IconButton onClick={handleClose} className="hover:bg-gray-100">
                 <CloseIcon />
               </IconButton>
-              <p>Add Education</p>
+              <h2 className="text-xl font-semibold">
+                {editingEducationId ? 'Edit Education' : 'Add Education'}
+              </h2>
             </div>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Create"}
+            <Button 
+              type="submit" 
+              variant="contained"
+              disabled={isLoading}
+              sx={{
+                backgroundColor: '#2563eb',
+                '&:hover': {
+                  backgroundColor: '#1d4ed8',
+                },
+              }}
+            >
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <span className="animate-spin">⏳</span>
+                  <span>Saving...</span>
+                </div>
+              ) : editingEducationId ? 'Update' : 'Create'}
             </Button>
           </div>
-          <div className="space-y-3">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <TextField
-              type="date" // Đặt type là "date" để chọn ngày
+              type="date"
               fullWidth
               id="startDate"
               name="startDate"
-              InputLabelProps={{ shrink: true }}
-              label="StartDate"
+              InputLabelProps={{ 
+                shrink: true,
+                className: "font-semibold"
+              }}
+              label="Start Date"
               value={formik.values.startDate}
               onChange={formik.handleChange}
-              error={
-                formik.touched.startDate && Boolean(formik.errors.startDate)
-              }
+              error={formik.touched.startDate && Boolean(formik.errors.startDate)}
               helperText={formik.touched.startDate && formik.errors.startDate}
+              className="bg-white rounded-lg"
             />
             <TextField
               type="date"
               fullWidth
               id="endDate"
-              InputLabelProps={{ shrink: true }}
               name="endDate"
-              label="EndDate"
+              InputLabelProps={{ 
+                shrink: true,
+                className: "font-semibold"
+              }}
+              label="End Date"
               value={formik.values.endDate}
               onChange={formik.handleChange}
               error={formik.touched.endDate && Boolean(formik.errors.endDate)}
               helperText={formik.touched.endDate && formik.errors.endDate}
+              className="bg-white rounded-lg"
             />
+          </div>
 
+          <div className="space-y-4">
             <TextField
               fullWidth
               id="certificateDegreeName"
               name="certificateDegreeName"
-              label="Certificate Degree Name"
+              label="Certificate/Degree Name"
               value={formik.values.certificateDegreeName}
               onChange={formik.handleChange}
-              error={
-                formik.touched.certificateDegreeName &&
-                Boolean(formik.errors.certificateDegreeName)
-              }
-              helperText={
-                formik.touched.certificateDegreeName &&
-                formik.errors.certificateDegreeName
-              }
+              error={formik.touched.certificateDegreeName && Boolean(formik.errors.certificateDegreeName)}
+              helperText={formik.touched.certificateDegreeName && formik.errors.certificateDegreeName}
+              className="bg-white rounded-lg"
             />
             <TextField
               fullWidth
               id="major"
               name="major"
               label="Major"
-              multiline
               value={formik.values.major}
               onChange={formik.handleChange}
               error={formik.touched.major && Boolean(formik.errors.major)}
               helperText={formik.touched.major && formik.errors.major}
+              className="bg-white rounded-lg"
             />
             <TextField
               fullWidth
               id="universityName"
               name="universityName"
-              label="Oranization Name"
+              label="Organization Name"
               value={formik.values.universityName}
               onChange={formik.handleChange}
-              error={
-                formik.touched.universityName &&
-                Boolean(formik.errors.universityName)
-              }
-              helperText={
-                formik.touched.universityName && formik.errors.universityName
-              }
+              error={formik.touched.universityName && Boolean(formik.errors.universityName)}
+              helperText={formik.touched.universityName && formik.errors.universityName}
+              className="bg-white rounded-lg"
             />
             <TextField
               fullWidth
               id="gpa"
               name="gpa"
               label="Score"
-              type="number" // Đảm bảo đây là kiểu số
+              type="number"
               value={formik.values.gpa}
               onChange={formik.handleChange}
               error={formik.touched.gpa && Boolean(formik.errors.gpa)}
               helperText={formik.touched.gpa && formik.errors.gpa}
               inputProps={{
-                min: 0, // Giới hạn giá trị nhập là không âm
+                min: 0,
+                step: 0.01,
               }}
+              className="bg-white rounded-lg"
             />
           </div>
         </form>

@@ -48,11 +48,10 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
      List<JobPost> findTop8LatestJobPosts();
      
      @Query("SELECT new com.job_portal.DTO.JobCountType(j.typeOfWork, COUNT(j)) " +
-    	       "FROM JobPost j " +
-    	       "WHERE j.isApprove = true AND j.expireDate >= CURRENT_DATE " +
-    	       "GROUP BY j.typeOfWork")
-    	List<JobCountType> countByTypeOfWork();
-
+             "FROM JobPost j " +
+             "WHERE j.isApprove = true AND j.expireDate >= CURRENT_DATE " +
+             "GROUP BY j.typeOfWork")
+     List<JobCountType> countJobsByType();
      
      Page<JobPost> findByIsApproveTrue(Specification<JobPost> spec, Pageable pageable);
      
@@ -69,6 +68,21 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
              criteriaBuilder.greaterThanOrEqualTo(root.get("expireDate"), LocalDateTime.now())
          );
      }
+
+     Page<JobPost> findByCompanyCompanyIdAndApproveTrue(UUID companyId, Pageable pageable);
+
+     Page<JobPost> findByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(
+         UUID companyId, 
+         Pageable pageable,
+         LocalDateTime now
+     );
+
+     long countByCompanyCompanyIdAndIsApproveTrue(UUID companyId);
+
+     long countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(
+         UUID companyId,
+         LocalDateTime currentDate
+     );
  }
     
 
