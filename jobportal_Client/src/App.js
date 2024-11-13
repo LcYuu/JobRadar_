@@ -27,6 +27,10 @@ import JobDetail from './pages/JobDetail/JobDetail';
 import Settings from './components/Settings/settings';
 import Banner from './components/common/Banner/banner';
 import Background from './components/common/Background/background';
+import Dashboard_Employer from './components/Dashboard/DashboardEmployer';
+import CompanyProfile_Management from './components/CompanyProfile_Management/CompanyProfile_Management';
+import JobManagement from './components/JobManagement/JobManagement';
+import CandidateManagement from './components/CandidateManagement/CandidateManagement';
 
 const App = () => {
   const location = useLocation();
@@ -48,13 +52,27 @@ const App = () => {
   }, [dispatch, user, navigate, location.pathname]);
 
   const showHeader = useMemo(() => {
-    const noHeaderPaths = ['/auth/sign-up', '/auth/sign-in', '/auth/forgot-password','user/account-management', '/change-password' ];
+    const noHeaderPaths = [
+      '/auth/sign-up', 
+      '/auth/sign-in', 
+      '/auth/forgot-password',
+      'user/account-management',
+      'employer/account-management',
+      '/change-password'
+    ];
     return !noHeaderPaths.includes(location.pathname);
   }, [location.pathname]);
 
   const showFooter = useMemo(() => {
-    const noFooterPaths = ['/auth/sign-up', '/auth/sign-in', '/auth/forgot-password', '/change-password'];
-    return !noFooterPaths.includes(location.pathname) && !location.pathname.includes('/user/account-management');
+    const noFooterPaths = [
+      '/auth/sign-up', 
+      '/auth/sign-in', 
+      '/auth/forgot-password', 
+      '/change-password'
+    ];
+    return !noFooterPaths.includes(location.pathname) && 
+           !location.pathname.includes('/user/account-management') &&
+           !location.pathname.includes('/employer/account-management');
   }, [location.pathname]);
 
   return (
@@ -123,13 +141,29 @@ const App = () => {
         } />
 
 
+
         <Route path="/companies/:companyId" element={
           <PublicRoute>
             <CompanyProfile />
           </PublicRoute>
         } />
 // App.js
+
 <Route path="/company-profile/:id" element={<CompanyProfile />} />
+
+        {/* Employer Protected Routes */}
+        <Route path="/employer/account-management" element={
+          <ProtectedRoute isAuthenticated={isAuthenticated}>
+            <MyAccount />
+          </ProtectedRoute>
+        }>
+          <Route index element={<Dashboard_Employer />} />
+          <Route path="dashboard" element={<Dashboard_Employer />} />
+          <Route path="company-profile" element={<CompanyProfile_Management />} />
+          <Route path="job-management" element={<JobManagement />} />
+          <Route path="candidate-management" element={<CandidateManagement />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
       </Routes>
       {showFooter && <Footer />}
     </div>
