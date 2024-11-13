@@ -122,11 +122,14 @@ const App = () => {
           </PublicRoute>
         } />
 
+
         <Route path="/companies/:companyId" element={
           <PublicRoute>
             <CompanyProfile />
           </PublicRoute>
         } />
+// App.js
+<Route path="/company-profile/:id" element={<CompanyProfile />} />
       </Routes>
       {showFooter && <Footer />}
     </div>

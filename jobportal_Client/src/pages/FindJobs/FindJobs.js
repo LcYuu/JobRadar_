@@ -195,27 +195,29 @@ export default function JobSearchPage() {
                 <ChevronDown size={20} />
               </h3>
               <div className="space-y-2">
-                {jobCountByType.map((job) => (
-                  <div className="flex items-center" key={job.typeOfWork}>
-                    <Checkbox
-                      onCheckedChange={(checked) => {
-                        const updatedTypesOfWork = checked
-                          ? [...filters.selectedTypesOfWork, job.typeOfWork]
-                          : filters.selectedTypesOfWork.filter(
-                              (type) => type !== job.typeOfWork
-                            );
+                {jobCountByType
+                  .filter(job => job.count > 0)
+                  .map((job) => (
+                    <div className="flex items-center" key={job.typeOfWork}>
+                      <Checkbox
+                        onCheckedChange={(checked) => {
+                          const updatedTypesOfWork = checked
+                            ? [...filters.selectedTypesOfWork, job.typeOfWork]
+                            : filters.selectedTypesOfWork.filter(
+                                (type) => type !== job.typeOfWork
+                              );
 
-                        setFilters({
-                          ...filters,
-                          selectedTypesOfWork: updatedTypesOfWork,
-                        });
-                      }}
-                    />
-                    <label className="ml-2 text-sm">
-                      {job.typeOfWork} ({job.count})
-                    </label>
-                  </div>
-                ))}
+                          setFilters({
+                            ...filters,
+                            selectedTypesOfWork: updatedTypesOfWork,
+                          });
+                        }}
+                      />
+                      <label className="ml-2 text-sm">
+                        {job.typeOfWork} ({job.count})
+                      </label>
+                    </div>
+                  ))}
               </div>
             </div>
             <div>
@@ -264,7 +266,7 @@ export default function JobSearchPage() {
                 <h2 className="text-xl font-semibold">Tất cả công việc</h2>
                 <span className="text-sm text-gray-500">
                   Tổng số: {isFilterApplied ? searchJob.length : jobPost.length} kết quả
-                  (Trang {currentPage + 1}/{totalPages})
+                  
                 </span>
               </div>
               <div className="flex items-center space-x-2">

@@ -25,7 +25,7 @@ const CategoryList = () => {
   }, [dispatch]);
   return (
     <>
-    <h2 className="text-2xl font-bold">Danh mục </h2>
+    <h2 className="text-2xl font-bold">Công việc theo danh mục </h2>
     <div className="category-list">
       {industries.slice(1).map((industry, index) => (
         <CategoryCard

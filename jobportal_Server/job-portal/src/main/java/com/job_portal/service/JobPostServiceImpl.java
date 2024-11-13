@@ -380,7 +380,7 @@ public class JobPostServiceImpl implements IJobPostService {
 
 	@Override
 	public List<JobCountType> getJobCountByType() {
-		 return jobPostRepository.countByTypeOfWork(); 
+		return jobPostRepository.countJobsByType();
 	}
 
 	@Override
@@ -397,6 +397,10 @@ public class JobPostServiceImpl implements IJobPostService {
 		} catch (Exception e) {
 			throw new AllExceptions(e.getMessage());
 		}
+	}
+
+	public Page<JobPost> findByCompanyId(UUID companyId, Pageable pageable) {
+		return jobPostRepository.findByCompanyCompanyIdAndApproveTrue(companyId, pageable);
 	}
 
 

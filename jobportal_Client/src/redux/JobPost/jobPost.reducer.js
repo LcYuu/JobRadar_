@@ -13,6 +13,12 @@ import {
   SEARCH_JOBS_REQUEST,
   SEARCH_JOBS_SUCCESS,
   SET_SALARY_RANGE_SUCCESS,
+  GET_JOBS_BY_COMPANY_SUCCESS,
+  GET_JOBS_BY_COMPANY_FAILURE,
+  GET_JOBS_BY_COMPANY_REQUEST,
+  GET_TOTAL_JOBS_REQUEST,
+  GET_TOTAL_JOBS_SUCCESS,
+  GET_TOTAL_JOBS_FAILURE,
 } from "./jobPost.actionType";
 
 const initialState = {
@@ -28,6 +34,8 @@ const initialState = {
   postByPostId: null,
   totalPages: 0, // Tổng số trang
   approve: false,
+  totalItems: 0, 
+  totalJobs: 0,
 };
 
 export const jobPostReducer = (state = initialState, action) => {
@@ -133,6 +141,46 @@ export const jobPostReducer = (state = initialState, action) => {
     //         ...state, error: action.payload,
     //         loading: false
     //     }
+    case GET_JOBS_BY_COMPANY_REQUEST:
+  return {
+    ...state,
+    loading: true,
+    error: null
+  };
+case GET_JOBS_BY_COMPANY_SUCCESS:
+  return {
+    ...state,
+    jobPost: action.payload.content,
+    totalPages: action.payload.totalPages,
+    totalItems: action.payload.totalElements,
+    loading: false,
+    error: null
+  };
+case GET_JOBS_BY_COMPANY_FAILURE:
+  return {
+    ...state,
+    loading: false,
+    error: action.payload
+  };
+    case GET_TOTAL_JOBS_REQUEST:
+        return {
+            ...state,
+            loading: true,
+            error: null
+        };
+    case GET_TOTAL_JOBS_SUCCESS:
+        return {
+            ...state,
+            totalJobs: action.payload,
+            loading: false,
+            error: null
+        };
+    case GET_TOTAL_JOBS_FAILURE:
+        return {
+            ...state,
+            loading: false,
+            error: action.payload
+        };
     default:
       return state;
   }

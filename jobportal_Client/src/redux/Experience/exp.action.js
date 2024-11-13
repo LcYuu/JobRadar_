@@ -1,7 +1,6 @@
-
 import { api, API_BASE_URL } from "../../configs/api";
 import axios from "axios";
-import { CREATE_EXP_FAILURE, CREATE_EXP_REQUEST, CREATE_EXP_SUCCESS, DELETE_EXP_FAILURE, DELETE_EXP_REQUEST, DELETE_EXP_SUCCESS, GET_EXP_BY_USER_FAILURE, GET_EXP_BY_USER_REQUEST, GET_EXP_BY_USER_SUCCESS } from "./exp.actionType";
+import { CREATE_EXP_FAILURE, CREATE_EXP_REQUEST, CREATE_EXP_SUCCESS, DELETE_EXP_FAILURE, DELETE_EXP_REQUEST, DELETE_EXP_SUCCESS, GET_EXP_BY_USER_FAILURE, GET_EXP_BY_USER_REQUEST, GET_EXP_BY_USER_SUCCESS, UPDATE_EXP_REQUEST, UPDATE_EXP_SUCCESS, UPDATE_EXP_FAILURE } from "./exp.actionType";
 
 
 
@@ -69,6 +68,39 @@ export const deleteExperience = (experienceId) => async (dispatch) => {
     } catch (error) {
       dispatch({
         type: CREATE_EXP_FAILURE,
+        payload: error.response ? error.response.data : error.message,
+      });
+    }
+  };
+
+  export const updateExperience = (experienceId, experienceData) => async (dispatch) => {
+    dispatch({ type: UPDATE_EXP_REQUEST });
+    try {
+      const jwt = sessionStorage.getItem("jwt");
+      if (!jwt) {
+        throw new Error("No token found");
+      }
+
+      const response = await axios.put(
+        `${API_BASE_URL}/experience/update-experience/${experienceId}`,
+        experienceData,
+        {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+        }
+      );
+
+      dispatch({
+        type: UPDATE_EXP_SUCCESS,
+        payload: response.data,
+      });
+      
+      // Refresh experience data
+      dispatch(getExpByUser());
+    } catch (error) {
+      dispatch({
+        type: UPDATE_EXP_FAILURE,
         payload: error.response ? error.response.data : error.message,
       });
     }

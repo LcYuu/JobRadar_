@@ -58,35 +58,44 @@ public class ExperienceController {
 		}
 	}
 
-//	@PutMapping("/update-experience/{experienceId}")
-//	public ResponseEntity<String> updateJobPost(@RequestHeader("Authorization") String jwt,
-//			@RequestBody ExperienceDTO experienceDTO, @PathVariable("experienceId") Integer experienceId) {
-//		String email = JwtProvider.getEmailFromJwtToken(jwt);
-//		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-//
-//		Optional<Experience> reqExp = experienceRepository.findById(experienceId);
-//		if (reqExp.isEmpty()) {
-//			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//		}
-//		try {
-//			Experience newExp = new Experience();
-//			newExp.setStartDate(experienceDTO.getStartDate());
-//			newExp.setEndDate(experienceDTO.getEndDate());
-//			newExp.setIsCurrentJob(experienceDTO.getIsCurrentJob());
-//			newExp.setJobTitle(experienceDTO.getJobTitle());
-//			newExp.setCompanyName(experienceDTO.getCompanyName());
-//			newExp.setDescription(experienceDTO.getDescription());
-//			boolean isUpdated = experienceService.updateExp(newExp, reqExp.get().getExperienceId(),
-//					user.get().getSeeker().getUserId());
-//			if (isUpdated) {
-//				return new ResponseEntity<>("Update Experience success", HttpStatus.CREATED);
-//			} else {
-//				return new ResponseEntity<>("Update Experience failed", HttpStatus.BAD_REQUEST);
-//			}
-//		} catch (Exception e) {
-//			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//		}
-//	}
+	@PutMapping("/update-experience/{experienceId}")
+	public ResponseEntity<String> updateExperience(
+			@RequestHeader("Authorization") String jwt,
+			@RequestBody ExperienceDTO experienceDTO,
+			@PathVariable("experienceId") Integer experienceId) {
+		try {
+			String email = JwtProvider.getEmailFromJwtToken(jwt);
+			Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+
+			if (user.isEmpty()) {
+				return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+			}
+
+			Experience experience = new Experience();
+			experience.setJobTitle(experienceDTO.getJobTitle());
+			experience.setCompanyName(experienceDTO.getCompanyName());
+			experience.setDescription(experienceDTO.getDescription());
+			experience.setStartDate(experienceDTO.getStartDate());
+			experience.setEndDate(experienceDTO.getEndDate());
+
+			boolean isUpdated = experienceService.updateExp(
+				experience, 
+				experienceId,
+				user.get().getUserId()
+			);
+
+			if (isUpdated) {
+				return new ResponseEntity<>("Update Experience success", HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>("No changes made", HttpStatus.OK);
+			}
+		} catch (AllExceptions e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
+		}
+	}
 
 	@DeleteMapping("/delete-experience/{experienceId}")
 	public ResponseEntity<String> deleteUser(@PathVariable("experienceId") Integer experienceId) {

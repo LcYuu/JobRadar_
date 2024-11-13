@@ -1,5 +1,3 @@
-
-
 import { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
 import { Card } from "../../ui/card";
@@ -11,11 +9,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { getCity } from "../../redux/City/city.action";
 import { getCompanyFitSeeker, searhCompanies } from "../../redux/Company/company.action";
 import CompanyCard from "../../components/common/CompanyCard/CompanyCard";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import { getAllIndustries } from "../../redux/Industry/industry.action";
 
 export default function FindCompanies() {
   const dispatch = useDispatch();
   const { companyByFeature = [], companyFitSeeker = [], loading, error } = useSelector((store) => store.company);
   const { cities = [] } = useSelector((store) => store.city);
+  const { allIndustries = [] } = useSelector(store => store.industry);
 
   const [filters, setFilters] = useState({
     title: "",
@@ -28,6 +30,8 @@ export default function FindCompanies() {
   const [size] = useState(6);
   const isFilterApplied = filters.title || filters.cityId || filters.industryId;
 
+  const [selectedCategoryName, setSelectedCategoryName] = useState("Tất cả công ty");
+
   useEffect(() => {
     dispatch(searhCompanies(filters, currentPage, size));
   }, [filters, currentPage, dispatch]);
@@ -37,13 +41,26 @@ export default function FindCompanies() {
     dispatch(getCompanyFitSeeker());
   }, [dispatch]);
 
+  useEffect(() => {
+    dispatch(getAllIndustries());
+  }, [dispatch]);
+
   const handleCategoryChange = (industryId) => {
     setSelectedCategory(industryId);
-    setFilters((prev) => ({ ...prev, industryId }));
+    if (industryId === null) {
+      setSelectedCategoryName("Tất cả công ty");
+    } else {
+      const selectedIndustry = allIndustries.find(industry => industry.industryId === industryId);
+      setSelectedCategoryName(selectedIndustry?.industryName || "Tất cả công ty");
+    }
+    setFilters(prev => ({
+      ...prev,
+      industryId: industryId || ''
+    }));
   };
 
   const filteredCompanies = selectedCategory
-    ? companyByFeature.filter((company) => company.industryId === selectedCategory)
+    ? companyByFeature.filter(company => company.industryId === selectedCategory)
     : companyByFeature;
 
   const hasFilteredCompanies = filteredCompanies.length > 0;
@@ -115,14 +132,14 @@ export default function FindCompanies() {
             >
               Tất cả ngành nghề
             </Button>
-            {uniqueCompanies.map((company) => (
+            {allIndustries.map((industry) => (
               <Button
-                key={company.industryId}
-                variant={selectedCategory === company.industryId ? "default" : "outline"}
-                onClick={() => handleCategoryChange(company.industryId)}
+                key={industry.industryId}
+                variant={selectedCategory === industry.industryId ? "default" : "outline"}
+                onClick={() => handleCategoryChange(industry.industryId)}
                 className="hover:bg-gray-200 transition duration-200"
               >
-                {company.industryName}
+                {industry.industryName}
               </Button>
             ))}
           </div>
@@ -130,7 +147,18 @@ export default function FindCompanies() {
 
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Danh sách tất cả công ty</h2>
+            <h2 className="text-xl font-semibold">
+              {selectedCategory === null ? (
+                <span>Tất cả công ty</span>
+              ) : (
+                <>
+                  Các công ty trong lĩnh vực{" "}
+                  <span className="font-bold text-blue-600">
+                    {selectedCategoryName}
+                  </span>
+                </>
+              )}
+            </h2>
             <p className="text-muted-foreground">
               {hasFilteredCompanies ? filteredCompanies.length : 0} kết quả
             </p>
@@ -138,25 +166,29 @@ export default function FindCompanies() {
           {hasFilteredCompanies ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredCompanies.map((company) => (
-
-                <Card key={company.companyId} className="p-6 space-y-4 transition-transform duration-300 hover:scale-105 cursor-pointer shadow-lg">
-                  <div className="flex items-center gap-4">
-                    <img
-                      src={company.logo}
-                      alt={`${company.companyName} logo`}
-                      className="h-16 w-16 rounded-lg shadow-md"
-                    />
-                    <div>
-                      <h3 className="font-semibold text-lg">{company.companyName}</h3>
-                      <p className="text-sm text-primary">{company.countJob} công việc đang mở</p>
+                <Link 
+                  to={`/company-profile/${company.companyId.toString()}`} 
+                  className="block"
+                  key={company.companyId}
+                >
+                  <Card className="p-6 space-y-4 transition-transform duration-300 hover:scale-105 cursor-pointer shadow-lg">
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={company.logo}
+                        alt={`${company.companyName} logo`}
+                        className="h-16 w-16 rounded-lg shadow-md"
+                      />
+                      <div>
+                        <h3 className="font-semibold text-lg">{company.companyName}</h3>
+                        <p className="text-sm text-primary">{company.countJob} công việc đang mở</p>
+                      </div>
                     </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2">{company.description}</p>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge className="text-xs">{company.industryName}</Badge>
-                  </div>
-                </Card>
-
+                    <p className="text-sm text-muted-foreground line-clamp-2">{company.description}</p>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge className="text-xs">{company.industryName}</Badge>
+                    </div>
+                  </Card>
+                </Link>
               ))}
             </div>
           ) : (
