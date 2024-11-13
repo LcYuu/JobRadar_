@@ -16,6 +16,7 @@ export default function Dashboard_Seeker() {
     loading,
     error,
     totalPages,
+    totalElements,
   } = useSelector((store) => store.applyJob);
   const [currentPage, setCurrentPage] = useState(0);
   const [size] = useState(3);
@@ -47,7 +48,7 @@ export default function Dashboard_Seeker() {
           <h2 className="text-lg font-medium mb-2">Tổng đơn đã ứng tuyển</h2>
           <div className="flex items-center">
             <span className="text-5xl font-bold mr-4">
-              {applyJobByUser.length}
+              {totalElements}
             </span>
             <FileText className="h-12 w-12 text-gray-400" />
           </div>
@@ -102,11 +103,11 @@ export default function Dashboard_Seeker() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-end">
+                  {/* <div className="flex flex-col items-end">
                     <p className="text-lg font-semibold text-green-600">
                       {app.salary} VNĐ
                     </p>
-                  </div>
+                  </div> */}
                   <div className="flex items-center">
                     {app.pinned && (
                       <Pin className="text-yellow-500 h-5 w-5 mr-2" />

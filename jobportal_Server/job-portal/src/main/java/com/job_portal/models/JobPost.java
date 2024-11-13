@@ -85,7 +85,7 @@ public class JobPost {
     @Column(name = "nice_to_haves", columnDefinition = "MEDIUMTEXT")
     private String niceToHaves;
     
-    @ManyToMany
+    @ManyToMany	
 	private List<Skills> skills = new ArrayList<>();
 
     // Optional: Add auditing fields like createdBy, updatedBy, etc.

@@ -18,8 +18,6 @@ export default function FindCompanies() {
   const { companyByFeature = [], companyFitSeeker = [], loading, error } = useSelector((store) => store.company);
   const { cities = [] } = useSelector((store) => store.city);
   const { allIndustries = [] } = useSelector(store => store.industry);
-  
-
 
   const [filters, setFilters] = useState({
     title: "",

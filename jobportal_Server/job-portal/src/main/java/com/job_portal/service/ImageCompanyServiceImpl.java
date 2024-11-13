@@ -86,9 +86,6 @@ public class ImageCompanyServiceImpl implements IImageCompanyService {
 		try {
 
 			List<ImageCompany> imgs = imageRepository.findImgByCompanyId(companyId);
-			if (imgs.isEmpty()) {
-				throw new AllExceptions("Không tìm thấy hình ảnh");
-			}
 
 			return imgs;
 		} catch (Exception e) {
