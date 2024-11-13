@@ -19,6 +19,7 @@ import com.job_portal.models.IdApplyJob;
 public interface ApplyJobRepository extends JpaRepository<ApplyJob, IdApplyJob> {
 	Optional<ApplyJob> findByPostIdAndUserId(UUID postId, UUID userId);
 	
+	boolean existsByPostIdAndUserId(UUID postId, UUID userId);
 	@Query("SELECT COUNT(a) > 0 FROM ApplyJob a " +
 	           "INNER JOIN JobPost jp ON a.postId = jp.postId " +
 	           "WHERE a.isSave = true AND a.userId = :userId AND jp.company.companyId = :companyId")
@@ -42,5 +43,8 @@ public interface ApplyJobRepository extends JpaRepository<ApplyJob, IdApplyJob> 
 	        "JOIN Company c ON jp.company.companyId = c.companyId " +
 	        "WHERE sp.userId = :userId")
 	Page<ApplyJobInProfile> findApplyJobByUserId(@Param("userId") UUID userId, Pageable pageable);
+	
+	
+	
 
 }

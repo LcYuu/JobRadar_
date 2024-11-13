@@ -63,30 +63,30 @@ public class Company {
 
 	@Column(name = "email", length = 50)
 	private String email;
-	
+
 	@Column(name = "established_time", length = 50)
 	private LocalDate establishedTime;
-	
+
 	@JsonIgnore
 	@OneToMany
 	private List<Review> reviews = new ArrayList<>();
-	
+
 	@JsonIgnore
 	@ManyToMany
-	@JoinTable(
-		    name = "company_follows",
-		    joinColumns = @JoinColumn(name = "company_id"),
-		    inverseJoinColumns = @JoinColumn(name = "seeker_id")
-		)
+	@JoinTable(name = "company_follows", joinColumns = @JoinColumn(name = "company_id"), inverseJoinColumns = @JoinColumn(name = "seeker_id"))
 	private List<Seeker> follows = new ArrayList<>();
-	
+
 	@JsonIgnore
 	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<JobPost> jobPosts = new ArrayList<>();
-	
+	private List<JobPost> jobPosts = new ArrayList<>();
+
 	@OneToOne
-    @MapsId
-    @JoinColumn(name = "user_id")
-    private UserAccount userAccount;
-	
+	@MapsId
+	@JoinColumn(name = "user_id")
+	private UserAccount userAccount;
+
+//	@JsonIgnore
+	@OneToMany(mappedBy = "company", fetch = FetchType.EAGER, cascade = CascadeType.ALL , orphanRemoval = true)
+	private List<ImageCompany> images = new ArrayList<>();
+
 }

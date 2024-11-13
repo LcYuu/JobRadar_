@@ -59,7 +59,7 @@ public class CVController {
 			return new ResponseEntity<>("Tạo CV thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-
+	
 	@PostMapping("/cv-main/{cvId}")
 	public ResponseEntity<String> updateIsMain(@RequestHeader("Authorization") String jwt,
 			@PathVariable("cvId") Integer cvId) {

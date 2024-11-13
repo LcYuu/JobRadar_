@@ -202,7 +202,7 @@ public class JobPostServiceImpl implements IJobPostService {
 				isUpdated = true;
 			}
 		}
-		if (jobPostDTO.getSkillIds() != null) {
+		if (jobPostDTO.getSkillIds() != null && !jobPostDTO.getSkillIds().isEmpty()) {
 			List<Skills> skillsList = new ArrayList<>();
 			for (Integer skillId : jobPostDTO.getSkillIds()) {
 				Optional<Skills> skillOpt = skillRepository.findById(skillId);
@@ -230,7 +230,6 @@ public class JobPostServiceImpl implements IJobPostService {
 				searchHistory.setSearchQuery(title);
 				searchHistory.setSearchDate(LocalDateTime.now());
 				searchHistoryRepository.save(searchHistory);
-
 			}
 
 			// Tìm kiếm công việc theo tên
@@ -261,20 +260,7 @@ public class JobPostServiceImpl implements IJobPostService {
 		}
 	}
 
-	@Override
-	public List<JobPost> searchJobByCity(Integer cityId) throws AllExceptions {
-		try {
-
-			List<JobPost> jobs = jobPostRepository.findJobByCityId(cityId);
-			if (jobs.isEmpty()) {
-				throw new AllExceptions("Không tìm thấy công viêc nào ở: " + cityId);
-			}
-
-			return jobs;
-		} catch (Exception e) {
-			throw new AllExceptions(e.getMessage());
-		}
-	}
+	
 
 //	@Override
 //	public List<JobPost> findBySalaryGreaterThanEqual(Long minSalary) throws AllExceptions {
@@ -404,8 +390,18 @@ public class JobPostServiceImpl implements IJobPostService {
     }
 
 	@Override
+	public List<JobPost> findJobByCompany(UUID companyId) throws AllExceptions {
+		try {
+			List<JobPost> jobs = jobPostRepository.findJobByCompanyId(companyId);
+			return jobs;
+		} catch (Exception e) {
+			throw new AllExceptions(e.getMessage());
+		}
+	}
+
 	public Page<JobPost> findByCompanyId(UUID companyId, Pageable pageable) {
 		return jobPostRepository.findByCompanyCompanyIdAndApproveTrue(companyId, pageable);
 	}
+
 
 }

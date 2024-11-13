@@ -50,10 +50,6 @@ public class ReviewServiceImpl implements IReviewService {
 	public List<Review> findReviewByCompanyId(UUID companyId) throws AllExceptions {
 		try {
 			List<Review> reviews = reviewRepository.findReviewByCompanyId(companyId);
-			if (reviews.isEmpty()) {
-				throw new AllExceptions("Không tìm thấy đánh giá nào");
-			}
-
 			return reviews;
 		} catch (Exception e) {
 			throw new AllExceptions(e.getMessage());

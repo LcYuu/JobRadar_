@@ -9,4 +9,5 @@ public interface IApplyJobService {
 	public boolean createApplyJob(ApplyJob applyJob) throws AllExceptions;
 	public boolean updateApplyJob(ApplyJob applyJob) throws AllExceptions;
 	public boolean isEligibleForRating(UUID userId, UUID companyId);
+	public boolean hasApplied(UUID postId, UUID userId);
 }
