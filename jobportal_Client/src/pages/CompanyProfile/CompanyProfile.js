@@ -22,12 +22,11 @@ import {
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import JobCard_AllJob from "../../components/common/JobCard_AllJob/JobCard_AllJob";
-import { getAllJobAction } from "../../redux/JobPost/jobPost.action";
+import { getAllJobAction, getJobsByCompany } from "../../redux/JobPost/jobPost.action";
 import logo from "../../assets/images/common/logo.jpg";
 import { getProfileAction } from "../../redux/Auth/auth.action";
 import { store } from "../../redux/store";
 import {
-  checkIfSaved,
   checkSaved,
   getCompanyProfile,
 } from "../../redux/Company/company.action";
@@ -40,16 +39,14 @@ import {
 } from "../../redux/Review/review.action";
 import { StarBorder, StarRounded } from "@mui/icons-material";
 import { toast } from "react-toastify";
-import { checkIfApplied } from "../../redux/ApplyJob/applyJob.action";
-
-
-
+import { followCompany } from "../../redux/Seeker/seeker.action";
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function CompanyProfile() {
   const { companyId } = useParams();
   const dispatch = useDispatch();
   const {
-    jobPost = [],
+    jobPost = [], 
     totalPages,
     loading,
     error,
@@ -59,9 +56,11 @@ export default function CompanyProfile() {
 
   const { reviews } = useSelector((store) => store.review);
 
-  const { companyProfile, companyByFeature } = useSelector(
-    (store) => store.company
-  );
+  const { companyProfile } = useSelector((store) => store.company);
+  const { follow, message } = useSelector((store) => store.seeker);
+
+  const [isFollowing, setIsFollowing] = useState(false);  // Trạng thái theo dõi ban đầu
+
   const [currentPage, setCurrentPage] = useState(0);
   const [size] = useState(6);
 
@@ -104,13 +103,12 @@ export default function CompanyProfile() {
     }
   };
 
-  // Thêm useEffect riêng để xử lý scroll
   useEffect(() => {
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
-  },); // Chỉ scroll khi id thay đổi
+  }, [companyId]); // Chỉ cuộn khi companyId thay đổi
 
   useEffect(() => {
     dispatch(getAllJobAction(currentPage, size)); // Assuming your action can accept companyId
@@ -120,7 +118,30 @@ export default function CompanyProfile() {
     dispatch(getCompanyProfile(companyId));
     dispatch(getReviewByCompany(companyId));
     dispatch(checkSaved(companyId));
-  }, [dispatch]);
+    dispatch(followCompany(companyId));
+    dispatch(getJobsByCompany(companyId, currentPage, size))
+  }, [dispatch, currentPage, size]);
+
+  const handleFollowClick = async () => {
+    try {
+      // Gửi yêu cầu theo dõi hoặc bỏ theo dõi
+      await dispatch(followCompany(companyId));
+  
+      // Cập nhật trạng thái theo dõi sau khi gửi yêu cầu thành công
+      setIsFollowing(!isFollowing);  // Toggle trạng thái
+  
+      // Hiển thị thông báo toast
+      const message = isFollowing 
+        ? "Bỏ theo dõi công ty thành công"
+        : "Theo dõi công ty thành công";
+      toast(message);  // Hiển thị toast
+    } catch (error) {
+      // Xử lý lỗi nếu có
+      console.error("Có lỗi xảy ra khi theo dõi công ty:", error);
+      toast("Có lỗi xảy ra, vui lòng thử lại!");
+    }
+  };
+  
 
   const totalStars = reviews.reduce((total, review) => total + review.star, 0);
   // Tính trung bình
@@ -130,7 +151,6 @@ export default function CompanyProfile() {
   return (
     <main className="min-h-screen bg-background">
       <div className="container px-4 py-8 mx-auto">
-        {/* Company Header - Updated with API data */}
         <div className="flex items-start gap-6 mb-12">
           <div className="w-24 h-24 bg-indigo-100 rounded-xl overflow-hidden">
             <img
@@ -144,6 +164,7 @@ export default function CompanyProfile() {
               <h1 className="text-2xl font-bold text-gray-900">
                 {companyProfile?.companyName}
               </h1>
+
               <div className="mt-3 mb-4">
                 {averageStars !== 0 ? (
                   <div className="flex items-center">
@@ -221,6 +242,12 @@ export default function CompanyProfile() {
                 <span>{companyProfile?.industry?.industryName}</span>
               </div>
             </div>
+            <Button
+              onClick={handleFollowClick}
+              className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              {isFollowing ? "Bỏ theo dõi" : "Theo dõi"}
+            </Button>
           </div>
         </div>
         {/* Company Profile, Tech Stack, and Office Location Grid */}
@@ -265,7 +292,7 @@ export default function CompanyProfile() {
               <span className="text-sm">{companyProfile?.contact}</span>
             </div>
           </div>
-        </div> */}
+        </div>
 
         {/* Company Images */}
         <h2 className="text-xl font-semibold mb-4">Một số hình ảnh công ty</h2>
@@ -395,6 +422,7 @@ export default function CompanyProfile() {
 
             {/* Nút gửi */}
             <button
+              type="button"
               className="mt-4 px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               onClick={handleSubmitReview}
             >
@@ -514,7 +542,7 @@ export default function CompanyProfile() {
                     ...job,
                     company: {
                       ...job.company,
-                      logo: job.company.logo || "/placeholder.svg",
+                      logo: job.company.logo
                     },
                   }}
                 />
@@ -526,7 +554,6 @@ export default function CompanyProfile() {
             </div>
           )}
         </div>
-      </div>
       </div>
     </main>
   );
