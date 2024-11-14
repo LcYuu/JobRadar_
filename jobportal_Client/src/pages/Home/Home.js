@@ -5,6 +5,7 @@ import CategoryList from '../../components/common/CategoryList/CategoryList';
 import JobList from '../../components/common/JobList/JobList';
 import  TopListEmployers  from '../../components/TopListEmployer/TopListEmployer';
 import Top8Job from '../../components/common/JobList/Top8Job';
+import RecommendJob from '../../components/common/JobList/RecommendJob';
 const Home = () => {
   return (
     <>
@@ -12,6 +13,7 @@ const Home = () => {
       <CategoryList />
       <TopListEmployers/>
       <JobList />
+      <RecommendJob/>
       <Top8Job/>
       
     </>
