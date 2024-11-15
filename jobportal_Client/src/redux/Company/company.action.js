@@ -15,11 +15,18 @@ import {
   GET_PROFILE_COMPANY_FAILURE,
   GET_PROFILE_COMPANY_REQUEST,
   GET_PROFILE_COMPANY_SUCCESS,
+  GET_COMPANY_REQUEST,
+  GET_COMPANY_SUCCESS,
+  GET_COMPANY_FAILURE,
+  UPDATE_COMPANY_PROFILE_REQUEST,
+  UPDATE_COMPANY_PROFILE_SUCCESS,
+  UPDATE_COMPANY_PROFILE_FAILURE,
+  UPDATE_COMPANY_IMAGES_REQUEST,
+  UPDATE_COMPANY_IMAGES_SUCCESS,
+  UPDATE_COMPANY_IMAGES_FAILURE,
 } from "./company.actionType";
 import { api, API_BASE_URL } from "../../configs/api";
 import { CHECK_IF_APPLIED_SUCCESS } from "../ApplyJob/applyJob.actionType";
-import { GET_COMPANY_BY_FEATURE_FAILURE, GET_COMPANY_BY_FEATURE_REQUEST, GET_COMPANY_BY_FEATURE_SUCCESS, GET_COMPANY_FIT_SEEKER_FAILURE, GET_COMPANY_FIT_SEEKER_REQUEST, GET_COMPANY_FIT_SEEKER_SUCCESS, GET_COMPANY_POPULAR_FAILURE, GET_COMPANY_POPULAR_REQUEST, GET_COMPANY_POPULAR_SUCCESS, GET_COMPANY_REQUEST, GET_COMPANY_SUCCESS, GET_COMPANY_FAILURE } from "./company.actionType";
-import { API_BASE_URL } from "../../configs/api";
 
 
 export const getCompanyPopular = () => async (dispatch) => {
@@ -161,3 +168,70 @@ export const getCompanyById = (companyId) => async (dispatch) => {
       });
     }
   };
+
+export const updateCompanyProfile = (companyData) => async (dispatch) => {
+  dispatch({ type: UPDATE_COMPANY_PROFILE_REQUEST });
+  try {
+    const jwt = sessionStorage.getItem("jwt");
+    if (!jwt) {
+      throw new Error("No token found");
+    }
+
+    const response = await api.put("/company/update-company", companyData, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+    });
+
+    dispatch({
+      type: UPDATE_COMPANY_PROFILE_SUCCESS,
+      payload: response.data,
+    });
+    
+    // Refresh company profile after update
+    await dispatch(getCompanyProfile(companyData.companyId));
+    
+    return response.data;
+  } catch (error) {
+    dispatch({
+      type: UPDATE_COMPANY_PROFILE_FAILURE,
+      payload: error.response?.data || error.message,
+    });
+    throw error;
+  }
+};
+
+export const updateCompanyImages = (images) => async (dispatch) => {
+  dispatch({ type: UPDATE_COMPANY_IMAGES_REQUEST });
+  try {
+    const jwt = sessionStorage.getItem("jwt");
+    if (!jwt) {
+      throw new Error("No token found");
+    }
+
+    const formData = new FormData();
+    images.forEach((image) => {
+      formData.append('images', image);
+    });
+
+    const response = await api.post("/image-company/create-image", formData, {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    dispatch({
+      type: UPDATE_COMPANY_IMAGES_SUCCESS,
+      payload: response.data,
+    });
+    
+    return response.data;
+  } catch (error) {
+    dispatch({
+      type: UPDATE_COMPANY_IMAGES_FAILURE,
+      payload: error.response?.data || error.message,
+    });
+    throw error;
+  }
+};

@@ -196,12 +196,12 @@ function JobCard_AllJob({ job }) {
                 </span>
               }
             </div>
-            <Button 
+            {/* <Button 
               className="bg-purple-600 text-white hover:bg-purple-700 ml-2"
               onClick={handleApplyClick}
             >
               Apply
-            </Button>
+            </Button> */}
           </div>
         </div>
       </CardContent>
