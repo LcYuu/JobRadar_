@@ -21,7 +21,7 @@ public interface IJobPostService {
 	public boolean updateJob(JobPostDTO jobPost, UUID postId) throws AllExceptions;	
 	public List<JobPost> searchJobByJobName(String title, UUID userId) throws AllExceptions;
 	public List<JobPost> searchJobByExperience(String experience) throws AllExceptions;
-	public List<JobPost> findJobByCompany(UUID companyId) throws AllExceptions;
+	public Page<JobPost> findJobByCompanyId(UUID companyId, int page, int size);
 //	public List<JobPost> findBySalaryGreaterThanEqual(Long minSalary) throws AllExceptions;
 //	public List<JobPost> findBySalaryLessThanEqual(Long maxSalary) throws AllExceptions;
 //	public List<JobPost> findBySalaryBetween(Long minSalary, Long maxSalary) throws AllExceptions;

@@ -51,6 +51,8 @@ export default function JobSearchPage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [size] = useState(7);
 
+  const [searchInput, setSearchInput] = useState(''); // State tạm thời để lưu input
+
   const { cities = [] } = useSelector((store) => store.city);
   const { industryCount = [] } = useSelector((store) => store.industry);
   const [filters, setFilters] = useState({
@@ -148,9 +150,9 @@ export default function JobSearchPage() {
                 type="text"
                 placeholder="Nhập tên công việc hoặc từ khóa mong muốn"
                 className="pl-10"
-                value={filters.title}
+                value={searchInput}
                 onChange={(e) => {
-                  setFilters({ ...filters, title: e.target.value });
+                  setSearchInput(e.target.value);
                 }}
               />
             </div>
@@ -178,6 +180,8 @@ export default function JobSearchPage() {
             <Button
               className="bg-primary bg-purple-600 text-white"
               onClick={() => {
+                // Khi nhấn nút "Tìm kiếm", set lại giá trị của filters.title với giá trị từ input
+                setFilters({ ...filters, title: searchInput });
                 setCurrentPage(0); // Đặt lại trang hiện tại về 0
               }}
             >

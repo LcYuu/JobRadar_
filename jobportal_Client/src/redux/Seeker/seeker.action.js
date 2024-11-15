@@ -1,12 +1,15 @@
 import { api, API_BASE_URL } from "../../configs/api";
 import axios from "axios";
 import {
+  FOLLOW_COMPANY_FAILURE,
+  FOLLOW_COMPANY_SUCCESS,
     GET_FOLLOWED_COMPANY_FAILURE,
     GET_FOLLOWED_COMPANY_REQUEST,
   GET_FOLLOWED_COMPANY_SUCCESS,
   GET_SEEKER_BY_USER_FAILURE,
   GET_SEEKER_BY_USER_REQUEST,
   GET_SEEKER_BY_USER_SUCCESS,
+  UNFOLLOW_COMPANY_SUCCESS,
   UPDATE_SEEKER_FAILURE,
   UPDATE_SEEKER_REQUEST,
   UPDATE_SEEKER_SUCCESS,
@@ -80,5 +83,20 @@ export const getFollowedCompany = () => async (dispatch) => {
       type: GET_FOLLOWED_COMPANY_FAILURE,
       payload: error.message,
     });
+  }
+};
+
+export const followCompany = (companyId) => async (dispatch) => {
+  try {
+      const response = await api.put(`/seeker/follow/${companyId}`);
+      const { action, message } = response.data;
+
+      if (action === "follow") {
+          dispatch({ type: FOLLOW_COMPANY_SUCCESS, payload: { companyId, message } });
+      } else if (action === "unfollow") {
+          dispatch({ type: UNFOLLOW_COMPANY_SUCCESS, payload: { companyId, message } });
+      }
+  } catch (error) {
+      dispatch({ type: FOLLOW_COMPANY_FAILURE, error: error.message });
   }
 };

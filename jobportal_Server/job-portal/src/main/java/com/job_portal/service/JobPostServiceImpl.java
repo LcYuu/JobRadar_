@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import com.job_portal.DTO.DailyJobCount;
 import com.job_portal.DTO.JobCountType;
 import com.job_portal.DTO.JobPostDTO;
+import com.job_portal.DTO.JobRecommendationDTO;
 import com.job_portal.models.City;
 import com.job_portal.models.Company;
 import com.job_portal.models.Industry;
@@ -59,7 +61,7 @@ public class JobPostServiceImpl implements IJobPostService {
 	@Autowired
 	ISearchHistoryService searchHistoryService;
 
-	String filePath = "D:\\\\JobRadar_Project\\\\search_history.csv";
+	String filePath = "D:\\\\JobRadar_\\\\search_history.csv";
 
 	@Override
 	public boolean createJob(JobPostDTO jobPostDTO, UUID companyId) {
@@ -238,7 +240,7 @@ public class JobPostServiceImpl implements IJobPostService {
 			if (jobs.isEmpty()) {
 				throw new AllExceptions("Không tìm thấy công việc nào");
 			}
-			searchHistoryService.exportSearchHistoryToCSV(filePath);
+//			searchHistoryService.exportSearchHistoryToCSV(filePath);
 			return jobs;
 		} catch (Exception e) {
 			throw new AllExceptions(e.getMessage());
@@ -259,8 +261,6 @@ public class JobPostServiceImpl implements IJobPostService {
 			throw new AllExceptions(e.getMessage());
 		}
 	}
-
-	
 
 //	@Override
 //	public List<JobPost> findBySalaryGreaterThanEqual(Long minSalary) throws AllExceptions {
@@ -348,24 +348,29 @@ public class JobPostServiceImpl implements IJobPostService {
 
 	@Override
 	public Page<JobPost> findByIsApprove(Pageable pageable) {
-		Page<JobPost> jobPost = jobPostRepository.findByIsApproveTrueAndExpireDateGreaterThanEqual(pageable, LocalDateTime.now());
+		Page<JobPost> jobPost = jobPostRepository.findByIsApproveTrueAndExpireDateGreaterThanEqual(pageable,
+				LocalDateTime.now());
 		return jobPost;
 
 	}
 
 	@Override
 	public void exportJobPostToCSV(String filePath) throws IOException {
-		List<JobPost> jobPosts = jobPostRepository.findByIsApproveTrueAndExpireDateGreaterThanEqual(LocalDateTime.now());
+		List<JobRecommendationDTO> jobPosts = jobPostRepository
+				.findApprovedAndActiveJobs();
 		try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
 			// Viết tiêu đề
-			String[] header = { "postId", "title", "description", "location", "salary", "experience", "typeOfWork" };
+			String[] header = { "postId", "title", "description", "location", "salary", "experience", "typeOfWork", 
+					"createDate", "expireDate", "companyId", "companyName", "cityName", "industryName", "logo"};
 			writer.writeNext(header);
 
 			// Viết dữ liệu
-			for (JobPost jobPost : jobPosts) {
-				String[] data = { jobPost.getPostId().toString(),
-						jobPost.getTitle(), jobPost.getDescription(), jobPost.getLocation(), jobPost.getSalary().toString(), jobPost.getExperience(),
-						jobPost.getTypeOfWork()};
+			for (JobRecommendationDTO jobPost : jobPosts) {
+				String[] data = { jobPost.getPostId().toString(), jobPost.getTitle(), jobPost.getDescription(),
+						jobPost.getLocation(), jobPost.getSalary().toString(), jobPost.getExperience(),
+						jobPost.getTypeOfWork(), jobPost.getCreateDate().toString(), jobPost.getExpireDate().toString(),
+						jobPost.getCompanyId().toString(), jobPost.getCompanyName(), jobPost.getCityName(),
+						jobPost.getIndustryName(), jobPost.getLogo()};
 				writer.writeNext(data);
 			}
 		}
@@ -373,9 +378,7 @@ public class JobPostServiceImpl implements IJobPostService {
 
 	@Override
 	public List<JobPost> getTop8LatestJobPosts() {
-		return jobPostRepository.findTop8LatestJobPosts().stream()
-		        .limit(8)
-		        .collect(Collectors.toList());
+		return jobPostRepository.findTop8LatestJobPosts().stream().limit(8).collect(Collectors.toList());
 	}
 
 	@Override
@@ -384,24 +387,19 @@ public class JobPostServiceImpl implements IJobPostService {
 	}
 
 	@Override
-	public Page<JobPost> searchJobsWithPagination(String title, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, Pageable pageable) {
-        Specification<JobPost> spec = JobPostSpecification.withFilters(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds);
-        return jobPostRepository.findByIsApproveTrue(spec, pageable);
-    }
+	public Page<JobPost> searchJobsWithPagination(String title, List<String> selectedTypesOfWork, Long minSalary,
+			Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, Pageable pageable) {
+		Specification<JobPost> spec = JobPostSpecification.withFilters(title, selectedTypesOfWork, minSalary, maxSalary,
+				cityId, selectedIndustryIds);
+		return jobPostRepository.findByIsApproveTrue(spec, pageable);
+	}
 
-	@Override
-	public List<JobPost> findJobByCompany(UUID companyId) throws AllExceptions {
-		try {
-			List<JobPost> jobs = jobPostRepository.findJobByCompanyId(companyId);
-			return jobs;
-		} catch (Exception e) {
-			throw new AllExceptions(e.getMessage());
-		}
+	public Page<JobPost> findJobByCompanyId(UUID companyId, int page, int size) {
+		return jobPostRepository.findJobByCompanyId(companyId, PageRequest.of(page, size));
 	}
 
 	public Page<JobPost> findByCompanyId(UUID companyId, Pageable pageable) {
 		return jobPostRepository.findByCompanyCompanyIdAndApproveTrue(companyId, pageable);
 	}
-
 
 }

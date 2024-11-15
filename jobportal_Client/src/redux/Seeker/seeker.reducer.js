@@ -1,8 +1,11 @@
 import {
+  FOLLOW_COMPANY_FAILURE,
+  FOLLOW_COMPANY_SUCCESS,
   GET_FOLLOWED_COMPANY_SUCCESS,
   GET_SEEKER_BY_USER_FAILURE,
   GET_SEEKER_BY_USER_REQUEST,
   GET_SEEKER_BY_USER_SUCCESS,
+  UNFOLLOW_COMPANY_SUCCESS,
   UPDATE_SEEKER_SUCCESS,
 } from "./seeker.actionType";
 
@@ -11,6 +14,8 @@ const initialState = {
   loading: false,
   error: null,
   followedCompany: [],
+  follow: [],
+  message: "",
 };
 
 export const seekerReducer = (state = initialState, action) => {
@@ -32,6 +37,26 @@ export const seekerReducer = (state = initialState, action) => {
         loading: false,
         followedCompany: action.payload,
         error: null,
+      };
+    case FOLLOW_COMPANY_SUCCESS:
+      return {
+        ...state,
+        follow: [...state.follow, action.payload.companyId],
+        message: action.payload.message,
+        error: null,
+      };
+    case UNFOLLOW_COMPANY_SUCCESS:
+      return {
+        ...state,
+        follow: state.follow.filter((id) => id !== action.payload.companyId),
+        message: action.payload.message,
+        error: null,
+      };
+    case FOLLOW_COMPANY_FAILURE:
+      return {
+        ...state,
+        message: "",
+        error: action.error,
       };
     case GET_SEEKER_BY_USER_FAILURE:
       return { ...state, loading: false, error: action.payload };

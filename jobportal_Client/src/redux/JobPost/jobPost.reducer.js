@@ -19,6 +19,7 @@ import {
   GET_TOTAL_JOBS_REQUEST,
   GET_TOTAL_JOBS_SUCCESS,
   GET_TOTAL_JOBS_FAILURE,
+  GET_RECOMMEND_JOB_SUCCESS,
 } from "./jobPost.actionType";
 
 const initialState = {
@@ -30,12 +31,13 @@ const initialState = {
   searchJob: [],
   top8Job: [],
   jobCountByType: [],
-  jobPost: [], // Mảng lưu trữ các bài đăng công việc
+  jobPost: [], 
   postByPostId: null,
   totalPages: 0, // Tổng số trang
   approve: false,
-  totalItems: 0, 
+  totalItems: 0,
   totalJobs: 0,
+  recommendJob: []
 };
 
 export const jobPostReducer = (state = initialState, action) => {
@@ -95,6 +97,13 @@ export const jobPostReducer = (state = initialState, action) => {
         postByPostId: action.payload,
         error: null,
       };
+    case GET_RECOMMEND_JOB_SUCCESS:
+      return {
+        ...state,
+        recommendJob: action.payload,
+        loading: false, 
+        error: null, 
+      };
     case GET_TOP8_JOB_FAILURE:
     case GET_ALL_JOB_FAILURE:
     case SEARCH_JOBS_FAILURE:
@@ -142,45 +151,45 @@ export const jobPostReducer = (state = initialState, action) => {
     //         loading: false
     //     }
     case GET_JOBS_BY_COMPANY_REQUEST:
-  return {
-    ...state,
-    loading: true,
-    error: null
-  };
-case GET_JOBS_BY_COMPANY_SUCCESS:
-  return {
-    ...state,
-    jobPost: action.payload.content,
-    totalPages: action.payload.totalPages,
-    totalItems: action.payload.totalElements,
-    loading: false,
-    error: null
-  };
-case GET_JOBS_BY_COMPANY_FAILURE:
-  return {
-    ...state,
-    loading: false,
-    error: action.payload
-  };
+      return {
+        ...state,
+        loading: true,
+        error: null,
+      };
+    case GET_JOBS_BY_COMPANY_SUCCESS:
+      return {
+        ...state,
+        jobPost: action.payload.content,
+        totalPages: action.payload.totalPages,
+        totalItems: action.payload.totalElements,
+        loading: false,
+        error: null,
+      };
+    case GET_JOBS_BY_COMPANY_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
     case GET_TOTAL_JOBS_REQUEST:
-        return {
-            ...state,
-            loading: true,
-            error: null
-        };
+      return {
+        ...state,
+        loading: true,
+        error: null,
+      };
     case GET_TOTAL_JOBS_SUCCESS:
-        return {
-            ...state,
-            totalJobs: action.payload,
-            loading: false,
-            error: null
-        };
+      return {
+        ...state,
+        totalJobs: action.payload,
+        loading: false,
+        error: null,
+      };
     case GET_TOTAL_JOBS_FAILURE:
-        return {
-            ...state,
-            loading: false,
-            error: action.payload
-        };
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
     default:
       return state;
   }

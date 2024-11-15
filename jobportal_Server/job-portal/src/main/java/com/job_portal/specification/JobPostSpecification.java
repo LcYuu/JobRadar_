@@ -1,9 +1,16 @@
 package com.job_portal.specification;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import com.job_portal.models.JobPost;
+import com.opencsv.CSVWriter;
+
 import jakarta.persistence.criteria.Predicate;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class JobPostSpecification {
@@ -58,4 +65,5 @@ public class JobPostSpecification {
             return criteriaBuilder.conjunction(); // Không có thêm điều kiện nào
         };
     }
+    
 }
