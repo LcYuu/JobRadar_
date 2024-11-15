@@ -665,7 +665,7 @@ export default function MyProfile() {
                 ) : (
                   seeker?.phoneNumber && (
                     <div>
-                      <Label className="text-sm font-medium whitespace-nowrap">Số điện thoại</Label>
+                      <Label className="text-sm font-medium">Số điện thoại</Label>
                       <div className="mt-1 flex items-center gap-2">
                         <Phone className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">{seeker.phoneNumber}</span>
