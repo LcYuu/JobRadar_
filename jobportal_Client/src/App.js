@@ -31,6 +31,11 @@ import Dashboard_Employer from './components/Dashboard/DashboardEmployer';
 import CompanyProfile_Management from './components/CompanyProfile_Management/CompanyProfile_Management';
 import JobManagement from './components/JobManagement/JobManagement';
 import CandidateManagement from './components/CandidateManagement/CandidateManagement';
+import ApplicantDetail from './pages/ApplicantDetail/ApplicantDetail';
+import AdminDashboard from './pages/Admin/Dashboard/Dashboard';
+import CompanyList from './pages/Admin/CompanyList/CompanyList';
+import UserList from './pages/Admin/UserList/UserList';
+import AdminJobList from './pages/Admin/JobList/JobList';
 
 const App = () => {
   const location = useLocation();
@@ -162,6 +167,21 @@ const App = () => {
           <Route path="company-profile" element={<CompanyProfile_Management />} />
           <Route path="job-management" element={<JobManagement />} />
           <Route path="candidate-management" element={<CandidateManagement />} />
+          <Route path="candidate-management/applicants/:id" element={<ApplicantDetail />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
+
+        {/* Admin Protected Routes */}
+        <Route path="/admin" element={
+          <ProtectedRoute isAuthenticated={isAuthenticated && user?.userType?.userTypeId === 1}>
+            <MyAccount />
+          </ProtectedRoute>
+        }>
+          <Route index element={<AdminDashboard />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="company-list" element={<CompanyList />} />
+          <Route path="user-list" element={<UserList />} />
+          <Route path="job-list" element={<AdminJobList />} />
           <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>

@@ -167,7 +167,7 @@ export default function FindCompanies() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredCompanies.map((company) => (
                 <Link 
-                  to={`/company-profile/${company.companyId.toString()}`} 
+                  to={`/companies/${company.companyId.toString()}`} 
                   className="block"
                   key={company.companyId}
                 >
