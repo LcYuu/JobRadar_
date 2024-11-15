@@ -1,7 +1,9 @@
 package com.job_portal.controller;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +41,7 @@ import com.job_portal.DTO.CompanyDTO;
 import com.job_portal.DTO.DailyJobCount;
 import com.job_portal.DTO.JobCountType;
 import com.job_portal.DTO.JobPostDTO;
+import com.job_portal.DTO.JobRecommendationDTO;
 import com.job_portal.DTO.SeekerDTO;
 import com.job_portal.config.JwtProvider;
 import com.job_portal.models.Company;
@@ -50,6 +53,7 @@ import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.UserAccountRepository;
 import com.job_portal.service.ICompanyService;
 import com.job_portal.service.IJobPostService;
+import com.job_portal.service.SearchHistoryServiceImpl;
 import com.job_portal.specification.JobPostSpecification;
 import com.social.exceptions.AllExceptions;
 
@@ -70,6 +74,11 @@ public class JobPostController {
 
 	@Autowired
 	private UserAccountRepository userAccountRepository;
+	
+	@Autowired
+	private SearchHistoryServiceImpl searchHistoryService;
+	
+	String filePath = "D:\\\\JobRadar_\\\\search_history.csv";
 
 	@GetMapping("/get-all")
 	public ResponseEntity<List<JobPost>> getJob() {
@@ -183,19 +192,14 @@ public class JobPostController {
 	}
 
 	@GetMapping("/search-by-company/{companyId}")
-	public ResponseEntity<Object> findJobByCompany(@PathVariable("companyId") UUID companyId) {
-		try {
-			List<JobPost> jobs = jobPostService.findJobByCompany(companyId);
-			return ResponseEntity.ok(jobs);
-		} catch (AllExceptions e) {
-			// Trả về thông báo từ service
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-		} catch (Exception e) {
-			// Trả về thông báo lỗi chung
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
-		}
-	}
+	public ResponseEntity<Page<JobPost>> getJobsByCompanyId(
+            @PathVariable UUID companyId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size) {
+
+        Page<JobPost> jobPosts = jobPostService.findJobByCompanyId(companyId, page, size);
+        return ResponseEntity.ok(jobPosts);
+    }
 
 //	@GetMapping("/min-salary/{minSalary}")
 //	public ResponseEntity<Object> findBySalaryGreaterThanEqual(@PathVariable("minSalary") Long minSalary) {
@@ -264,9 +268,11 @@ public class JobPostController {
 	}
 
 	@PostMapping("/recommend-jobs")
-	public ResponseEntity<List<JobPost>> getJobRecommendations(@RequestHeader("Authorization") String jwt) {
+	public ResponseEntity<List<JobRecommendationDTO>> getJobRecommendations(@RequestHeader("Authorization") String jwt) {
 	    // Lấy email từ JWT
 	    String email = JwtProvider.getEmailFromJwtToken(jwt);
+	    
+	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss z");
 
 	    // Tìm người dùng bằng email
 	    Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
@@ -307,11 +313,29 @@ public class JobPostController {
 	        JsonNode jsonResponse = objectMapper.readTree(response.getBody());
 
 	        // Tạo danh sách JobPost
-	        List<JobPost> jobs = new ArrayList<>();
+	        List<JobRecommendationDTO> jobs = new ArrayList<>();
 
 	        // Duyệt qua từng đối tượng trong JsonNode và thiết lập từng giá trị cho JobPost
 	        for (JsonNode jobNode : jsonResponse) {
-	            JobPost job = new JobPost();
+	        	JobRecommendationDTO job = new JobRecommendationDTO();
+	            String createDateStr = jobNode.get("createDate").asText(null);
+	            if (createDateStr != null && !createDateStr.isEmpty()) {
+	                try {
+	                    job.setCreateDate(LocalDateTime.parse(createDateStr, formatter));
+	                } catch (Exception e) {
+	                    System.out.println("Error parsing createDate: " + createDateStr + " - " + e.getMessage());
+	                }
+	            }
+	            
+	            // Xử lý expireDate với kiểm tra null và định dạng
+	            String expireDateStr = jobNode.get("expireDate").asText(null);
+	            if (expireDateStr != null && !expireDateStr.isEmpty()) {
+	                try {
+	                    job.setExpireDate(LocalDateTime.parse(expireDateStr, formatter));
+	                } catch (Exception e) {
+	                    System.out.println("Error parsing expireDate: " + expireDateStr + " - " + e.getMessage());
+	                }
+	            }
 	            job.setDescription(jobNode.get("description").asText(null));
 	            job.setExperience(jobNode.get("experience").asText(null));
 	            job.setLocation(jobNode.get("location").asText(null));
@@ -319,7 +343,11 @@ public class JobPostController {
 	            job.setSalary(jobNode.get("salary").asLong());
 	            job.setTitle(jobNode.get("title").asText(null));
 	            job.setTypeOfWork(jobNode.get("typeOfWork").asText(null)); 
-
+	            job.setCompanyId(UUID.fromString(jobNode.get("companyId").asText(null))); 
+	            job.setCompanyName(jobNode.get("companyName").asText(null)); 
+	            job.setCityName(jobNode.get("cityName").asText(null)); 
+	            job.setIndustryName(jobNode.get("industryName").asText(null)); 
+	            job.setLogo(jobNode.get("logo").asText(null)); 
 	            jobs.add(job);
 	        }
 
@@ -340,6 +368,7 @@ public class JobPostController {
 	
 	@GetMapping("/search-job-by-feature")
 	public Page<JobPost> searchJobs(
+	        @RequestHeader(value = "Authorization", required = false) String jwt, // Jwt không bắt buộc
 	        @RequestParam(required = false) String title,
 	        @RequestParam(required = false) List<String> selectedTypesOfWork,
 	        @RequestParam(required = false) Long minSalary,
@@ -347,15 +376,27 @@ public class JobPostController {
 	        @RequestParam(required = false) Integer cityId,
 	        @RequestParam(required = false) List<Integer> selectedIndustryIds,
 	        @RequestParam(defaultValue = "0") int page, 
-	        @RequestParam(defaultValue = "7") int size) { 
-
-	    // Sử dụng điều kiện mặc định để đảm bảo chỉ lấy các công việc đang hoạt động
+	        @RequestParam(defaultValue = "7") int size) throws IOException { 
+	    
+	    // Khởi tạo tiêu chí tìm kiếm mặc định
 	    Specification<JobPost> spec = Specification.where(jobPostRepository.alwaysActiveJobs())
 	        .and(JobPostSpecification.withFilters(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds));
 
 	    Pageable pageable = PageRequest.of(page, size);
+	    
+	    if (jwt != null) {
+	        String email = JwtProvider.getEmailFromJwtToken(jwt);
+	        Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+	        
+	        // Lưu lịch sử tìm kiếm nếu người dùng đã đăng nhập
+	        if (user.isPresent() && user.get().getSeeker() != null) {
+	            searchHistoryService.exportSearchHistoryToCSV(filePath, title, user.get().getSeeker().getUserId());
+	        }
+	    }
+
 	    return jobPostRepository.findAll(spec, pageable);
 	}
+
 	
 	@GetMapping("/salary-range")
 	public ResponseEntity<Map<String, Long>> getSalaryRange() {
@@ -367,32 +408,6 @@ public class JobPostController {
 	    salaryRange.put("maxSalary", maxSalary);
 
 	    return ResponseEntity.ok(salaryRange);
-	}
-
-	@GetMapping("/company/{companyId}")
-	public ResponseEntity<Map<String, Object>> getJobsByCompany(
-	    @PathVariable UUID companyId,
-	    @RequestParam(defaultValue = "0") int page,
-	    @RequestParam(defaultValue = "2") int size
-	) {
-	    try {
-	        Pageable pageable = PageRequest.of(page, size);
-	        Page<JobPost> pageJobs = jobPostRepository.findByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(
-	            companyId, 
-	            pageable,
-	            LocalDateTime.now()
-	        );
-
-	        Map<String, Object> response = new HashMap<>();
-	        response.put("content", pageJobs.getContent());
-	        response.put("currentPage", pageJobs.getNumber());
-	        response.put("totalItems", pageJobs.getTotalElements());
-	        response.put("totalPages", pageJobs.getTotalPages());
-
-	        return ResponseEntity.ok(response);
-	    } catch (Exception e) {
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-	    }
 	}
 
 	@GetMapping("/count-by-company/{companyId}")

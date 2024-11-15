@@ -133,10 +133,6 @@ public class SeekerController {
 	    String email = JwtProvider.getEmailFromJwtToken(jwt);
 	    Optional<UserAccount> reqUser = userAccountRepository.findByEmail(email);
 
-	    if (reqUser.isEmpty()) {
-	        throw new Exception("Người dùng không tồn tại");
-	    }
-
 	    Map<String, Object> result = companyService.followCompany(companyId, reqUser.get().getUserId());
 
 	    return new ResponseEntity<>(result, HttpStatus.ACCEPTED);

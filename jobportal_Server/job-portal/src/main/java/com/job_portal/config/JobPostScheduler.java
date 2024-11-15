@@ -18,7 +18,7 @@ public class JobPostScheduler {
     @Scheduled(fixedRate = 300000)
     public void updateCSV() {
         try {
-            jobPostService.exportJobPostToCSV("D:\\\\\\\\Job_portal-main\\\\\\\\job_post.csv");
+            jobPostService.exportJobPostToCSV("D:\\\\\\\\JobRadar_\\\\\\\\job_post.csv");
         } catch (IOException e) {
             e.printStackTrace();
         }
