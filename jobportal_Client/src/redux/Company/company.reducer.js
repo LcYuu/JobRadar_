@@ -10,6 +10,12 @@ import {
   GET_COMPANY_REQUEST,
   GET_COMPANY_SUCCESS,
   GET_COMPANY_FAILURE,
+  UPDATE_COMPANY_PROFILE_REQUEST,
+  UPDATE_COMPANY_PROFILE_SUCCESS,
+  UPDATE_COMPANY_PROFILE_FAILURE,
+  UPDATE_COMPANY_IMAGES_REQUEST,
+  UPDATE_COMPANY_IMAGES_SUCCESS,
+  UPDATE_COMPANY_IMAGES_FAILURE,
 } from "./company.actionType";
 
 const initialState = {
@@ -87,6 +93,38 @@ export const companyReducer = (state = initialState, action) => {
         loading: false,
         error: action.payload,
       };
+    case UPDATE_COMPANY_PROFILE_REQUEST:
+    case UPDATE_COMPANY_IMAGES_REQUEST:
+      return {
+        ...state,
+        loading: true,
+        error: null,
+      };
+
+    case UPDATE_COMPANY_PROFILE_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        message: "Cập nhật thông tin công ty thành công",
+        error: null,
+      };
+
+    case UPDATE_COMPANY_IMAGES_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        message: "Cập nhật hình ảnh thành công",
+        error: null,
+      };
+
+    case UPDATE_COMPANY_PROFILE_FAILURE:
+    case UPDATE_COMPANY_IMAGES_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
+
     default:
       return state;
   }

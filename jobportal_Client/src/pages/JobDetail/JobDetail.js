@@ -100,7 +100,7 @@ export default function JobDetail() {
                     job={postByPostId}
                     open={open}
                     handleClose={handleClose}
-                    oneApplyJob={oneApplyJob} // Truyền dữ liệu đơn đã nộp nếu có
+                    oneApplyJob={oneApplyJob} // Truyền dữ liệu đơn đ nộp nếu có
                   />
                 </section>
               </div>
@@ -144,12 +144,12 @@ export default function JobDetail() {
               <section className="space-y-4">
                 <h2 className="text-lg font-semibold">Trách nhiệm công việc</h2>
                 <ul className="space-y-2 text-sm text-gray-600">
-                  {postByPostId?.niceToHaves.split(",").map((item, index) => (
+                  {postByPostId?.niceToHaves?.split(",").map((item, index) => (
                     <li key={index} className="flex items-start">
                       <CheckCircle2 className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
-                      <span>{item.trim()}</span>{" "}
+                      <span>{item.trim()}</span>
                     </li>
-                  ))}
+                  )) || <li>Chưa có thông tin</li>}
                 </ul>
               </section>
 
@@ -345,9 +345,9 @@ export default function JobDetail() {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Các kĩ năng cần thiết</h3>
                 <div className="flex flex-wrap gap-2">
-                  {postByPostId?.skills.map((skill, index) => (
+                  {postByPostId?.skills?.map((skill, index) => (
                     <Badge key={index} variant="outline">
-                      {skill}
+                      {skill.skillName}
                     </Badge>
                   ))}
                 </div>

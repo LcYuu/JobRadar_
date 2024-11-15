@@ -21,6 +21,29 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const adminMenuItems = [
+    {
+      label: 'Dashboard',
+      icon: LayoutDashboard,
+      path: '/admin/dashboard'
+    },
+    {
+      label: 'Danh sách công ty',
+      icon: Building2, 
+      path: '/admin/company-list'
+    },
+    {
+      label: 'Danh sách người dùng',
+      icon: Users,
+      path: '/admin/user-list'
+    },
+    {
+      label: 'Danh sách công việc',
+      icon: FileText,
+      path: '/admin/job-list'
+    }
+  ];
+
   const seekerMenuItems = [
     {
       label: 'Dashboard',
@@ -67,7 +90,20 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
     }
   ];
 
-  const menuItems = user?.userType?.userTypeId === 2 ? seekerMenuItems : employerMenuItems;
+  let menuItems;
+  switch(user?.userType?.userTypeId) {
+    case 1:
+      menuItems = adminMenuItems;
+      break;
+    case 2:
+      menuItems = seekerMenuItems;
+      break;
+    case 3:
+      menuItems = employerMenuItems;
+      break;
+    default:
+      menuItems = [];
+  }
 
   const handleMenuClick = (item) => {
     setSelectedSection(item.label);
@@ -126,7 +162,7 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
           variant="ghost" 
           className="w-full justify-start text-base font-medium hover:bg-gray-100 hover:text-primary hover:scale-105 transition-all duration-200"
           onClick={() => handleMenuClick({
-            path: '/user/account-management/settings',
+            path: user?.userType?.userTypeId === 1 ? '/admin/settings' : '/user/account-management/settings',
             icon: Settings
           })}
         >
