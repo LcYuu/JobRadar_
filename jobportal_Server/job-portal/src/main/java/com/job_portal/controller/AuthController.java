@@ -131,7 +131,7 @@ public class AuthController {
 			user.get().setOtpGeneratedTime(null);
 
 			if (user.get().getUserType().getUserTypeId() == 2) {
-				Integer defaultIndustryId = 1;
+				Integer defaultIndustryId = 0;
 				Optional<Industry> defaultIndustryOpt = industryRepository.findById(defaultIndustryId);
 
 				Industry defaultIndustry = defaultIndustryOpt.get();
@@ -141,7 +141,7 @@ public class AuthController {
 				user.get().setSeeker(seeker);
 				userAccountRepository.save(user.get());
 			} else if (user.get().getUserType().getUserTypeId() == 3) {
-				Integer defaultIndustryId = 1;
+				Integer defaultIndustryId = 0;
 				Optional<Industry> defaultIndustryOpt = industryRepository.findById(defaultIndustryId);
 
 				Integer defaultCityId = 0;
