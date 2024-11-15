@@ -14,7 +14,7 @@ const CompanyCard = ({ company, variant = "default" }) => {
   if (variant === "suggested") {
     return (
       <Link 
-        to={`/company-profile/${company.companyId}`} 
+        to={`/companies/${company.companyId}`} 
         className="block"
         onClick={(e) => {
           console.log("Clicked company:", company.companyId);

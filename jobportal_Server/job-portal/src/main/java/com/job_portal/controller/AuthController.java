@@ -3,7 +3,10 @@ package com.job_portal.controller;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -277,5 +281,27 @@ public class AuthController {
 		forgotPasswordRepository.deleteByUserAccountEmail(email);
 		return ResponseEntity.ok("Password đã thay đổi thành công");
 	}
+	@GetMapping("/user-role")
+	public ResponseEntity<Map<String, String>> getUserRole(@RequestHeader("Authorization") String jwt) {
+		try {
+			String email = JwtProvider.getEmailFromJwtToken(jwt);
+			Optional<UserAccount> userOpt = userAccountRepository.findByEmail(email);
+			
+			if (userOpt.isEmpty()) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body(Collections.singletonMap("error", "User not found"));
+			}
 
+			UserAccount user = userOpt.get();
+			String role = user.getUserType().getUserTypeId() == 2 ? "ROLE_USER" : "ROLE_EMPLOYER";
+			
+			Map<String, String> response = new HashMap<>();
+			response.put("role", role);
+			
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body(Collections.singletonMap("error", "Error fetching user role"));
+		}
+	}
 }

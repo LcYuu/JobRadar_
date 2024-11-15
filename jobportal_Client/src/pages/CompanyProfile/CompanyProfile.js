@@ -30,17 +30,40 @@ import {
   checkSaved,
   getCompanyProfile,
 } from "../../redux/Company/company.action";
-//@ts-ignore
-import Rating from "react-rating-stars-component";
-import {
-  createReview,
-  getReviewByCompany,
-  getRiviewByCompany,
-} from "../../redux/Review/review.action";
 import { StarBorder, StarRounded } from "@mui/icons-material";
 import { toast } from "react-toastify";
+
 import { followCompany } from "../../redux/Seeker/seeker.action";
 import 'react-toastify/dist/ReactToastify.css';
+
+import { checkIfApplied } from "../../redux/ApplyJob/applyJob.action";
+import {
+  createReview,
+  getReviewByCompany
+} from "../../redux/Review/review.action";
+
+const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
+  return (
+    <div className="flex">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          type="button"
+          disabled={readOnly}
+          onClick={() => !readOnly && onChange?.(star)}
+          className={`${readOnly ? 'cursor-default' : 'cursor-pointer'}`}
+        >
+          <StarRounded 
+            className={`w-6 h-6 ${
+              star <= value ? 'text-yellow-500' : 'text-gray-300'
+            }`}
+          />
+        </button>
+      ))}
+    </div>
+  );
+});
+
 
 export default function CompanyProfile() {
   const { companyId } = useParams();
@@ -110,9 +133,10 @@ export default function CompanyProfile() {
     });
   }, [companyId]); // Chỉ cuộn khi companyId thay đổi
 
+
   useEffect(() => {
-    dispatch(getAllJobAction(currentPage, size)); // Assuming your action can accept companyId
-  }, [dispatch, currentPage, size]);
+    dispatch(getAllJobAction(currentPage, size, companyId)); // Assuming your action can accept companyId
+  }, [dispatch, currentPage, size, companyId]);
 
   useEffect(() => {
     dispatch(getCompanyProfile(companyId));
@@ -294,6 +318,7 @@ export default function CompanyProfile() {
           </div>
         </div>
 
+
         {/* Company Images */}
         <h2 className="text-xl font-semibold mb-4">Một số hình ảnh công ty</h2>
         <div className="mb-12">
@@ -329,7 +354,7 @@ export default function CompanyProfile() {
             {reviews.length === 0 ? (
               <p className="text-gray-500">Chưa có đánh giá nào.</p>
             ) : (
-              // Sắp xếp các đánh giá theo thời gian (mới nhất đến cũ nhất)
+              // Sắp xếp các đánh giá theo thời gian (mới nhất đến cũ nht)
               reviews
                 .sort((a, b) => new Date(b.createDate) - new Date(a.createDate)) // Sắp xếp theo ngày tạo
                 .map((review, index) => (
@@ -377,7 +402,7 @@ export default function CompanyProfile() {
                           </span>
                         </div>
                         {/* Rating */}
-                        <Rating
+                        <RatingStars
                           count={5}
                           value={review.star}
                           size={20}
@@ -402,18 +427,16 @@ export default function CompanyProfile() {
 
             {/* Đánh giá sao */}
             <div className="mb-4">
-              <Rating
-                count={5}
-                onChange={handleRatingChange}
-                size={30}
-                activeColor="#ffd700"
+              <RatingStars
                 value={feedback.star}
+                onChange={handleRatingChange}
+                readOnly={false}
               />
             </div>
 
             {/* Viết review */}
             <textarea
-              placeholder="Nhập đánh giá của bạn..."
+              placeholder="Nhập đánh giá ca bạn..."
               value={feedback.message}
               onChange={handleReviewChange}
               rows={4}
