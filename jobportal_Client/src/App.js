@@ -42,6 +42,7 @@ import AdminDashboard from './pages/Admin/Dashboard/Dashboard';
 import CompanyList from './pages/Admin/CompanyList/CompanyList';
 import UserList from './pages/Admin/UserList/UserList';
 import AdminJobList from './pages/Admin/JobList/JobList';
+import CompanyDetail from './pages/Admin/CompanyDetail/CompanyDetail';
 
 
 const App = () => {
@@ -85,7 +86,8 @@ const App = () => {
     return (
       !noFooterPaths.includes(location.pathname) &&
       !location.pathname.includes("/user/account-management") &&
-      !location.pathname.includes("/employer/account-management")
+      !location.pathname.includes("/employer/account-management") &&
+      !location.pathname.includes("/admin")
     );
   }, [location.pathname]);
 
@@ -189,6 +191,14 @@ const App = () => {
             </PublicRoute>
           }
         />
+        <Route 
+  path="/admin/companies/:companyId" 
+  element={
+    user?.userType?.userTypeId === 1 ? 
+    <CompanyDetail /> : 
+    <CompanyProfile />
+  } 
+/>
 
         {/* <Route path="/company-profile/:id" element={<CompanyProfile />} /> */}
 
