@@ -42,8 +42,8 @@ import AdminDashboard from './pages/Admin/Dashboard/Dashboard';
 import CompanyList from './pages/Admin/CompanyList/CompanyList';
 import UserList from './pages/Admin/UserList/UserList';
 import AdminJobList from './pages/Admin/JobList/JobList';
-
-
+import JobDetailEmployer from './pages/JobDetailEmployer/JobDetailEmployer';
+import PostJob from './pages/PostJob/PostJob';
 const App = () => {
   const location = useLocation();
   const { user, jwt, isAuthenticated } = useSelector((state) => state.auth);
@@ -212,7 +212,8 @@ const App = () => {
           <Route path="candidate-management/applicants/:userId/:postId" element={<ApplicantDetail />} />
           <Route path="settings" element={<Settings />} />
         </Route>
-
+        <Route path="/employer/jobs/:jobId" element={<JobDetailEmployer />} />
+        <Route path="/employer/jobs/post" element={<PostJob />} />
         {/* Admin Protected Routes */}
         <Route path="/admin" element={
           <ProtectedRoute isAuthenticated={isAuthenticated && user?.userType?.userTypeId === 1}>

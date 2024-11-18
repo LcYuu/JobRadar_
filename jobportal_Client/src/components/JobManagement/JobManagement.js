@@ -41,7 +41,7 @@ const JobManagement = () => {
   ];
 
   const handleViewDetails = (jobId) => {
-    navigate(`/companies/${jobId}`);
+    navigate(`/employer/jobs/${jobId}`);
   };
 
   return (
@@ -57,7 +57,11 @@ const JobManagement = () => {
             <Calendar className="w-5 h-5 text-gray-500 mr-2" />
             <span>{selectedDate}</span>
           </div>
-          <Button variant="default" className="bg-indigo-600">
+          <Button 
+            variant="default" 
+            className="bg-indigo-600"
+            onClick={() => navigate('/employer/jobs/post')}
+          >
             + Đăng bài
           </Button>
         </div>
