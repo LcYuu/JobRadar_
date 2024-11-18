@@ -88,23 +88,7 @@ public class CompanyController {
 			@RequestBody CompanyDTO company) throws AllExceptions {
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-
-		Optional<Company> reqCompany = companyRepository.findById(user.get().getUserId());
-		if (reqCompany.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-
-		Company newCompany = new Company();
-		newCompany.setCompanyName(company.getCompanyName());
-		newCompany.setAddress(company.getAddress());
-		newCompany.setDescription(company.getDescription());
-		newCompany.setLogo(company.getLogo());
-		newCompany.setContact(company.getContact());
-		newCompany.setEmail(company.getEmail());
-		newCompany.setEstablishedTime(company.getEstablishedDate());
-
-		boolean isUpdated = companyService.updateCompany(newCompany, reqCompany.get().getCompanyId(),
-				company.getIndustryId(), company.getCityId());
+		boolean isUpdated = companyService.updateCompany(company, user.get().getCompany().getCompanyId());
 		if (isUpdated) {
 			return new ResponseEntity<>("Cập nhật thông tin thành công", HttpStatus.CREATED);
 		} else {
@@ -167,6 +151,19 @@ public class CompanyController {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		}
 	}
+	
+	@GetMapping("/profile")
+	public ResponseEntity<Company> getProfileCompany(@RequestHeader("Authorization") String jwt) throws AllExceptions {
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+		try {
+			Company company = companyService.findCompanyById(user.get().getCompany().getCompanyId());
+			return new ResponseEntity<>(company, HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+		}
+	}
+	
 	@GetMapping("/can-rating/{companyId}")
     public ResponseEntity<Boolean> checkIfSaved(@RequestHeader("Authorization") String jwt, 
     		@PathVariable("companyId") UUID companyId) {

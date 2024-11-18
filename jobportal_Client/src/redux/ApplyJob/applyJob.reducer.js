@@ -1,11 +1,13 @@
 import {
   CHECK_IF_APPLIED_SUCCESS,
   CREATE_APPLY_JOB_SUCCESS,
+  GET_APPLY_JOB_BY_COMPANY_SUCCESS,
   GET_APPLY_JOB_BY_USER_FAILURE,
   GET_APPLY_JOB_BY_USER_REQUEST,
   GET_APPLY_JOB_BY_USER_SUCCESS,
   GET_ONE_APPLY_JOB_SUCCESS,
   UPDATE_APPLY_JOB_SUCCESS,
+  UPDATE_APPROVE_SUCCESS,
 } from "./applyJob.actionType";
 
 const initialState = {
@@ -17,6 +19,8 @@ const initialState = {
   error: null,
   totalPages: null,
   hasApplied: null,
+  applyJobByCompany: [],
+  approveApply: null,
 };
 
 export const applyJobReducer = (state = initialState, action) => {
@@ -39,10 +43,26 @@ export const applyJobReducer = (state = initialState, action) => {
         totalElements: action.payload.page.totalElements,
         error: null,
       };
+    case GET_APPLY_JOB_BY_COMPANY_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        applyJobByCompany: action.payload.content,
+        totalPages: action.payload.page.totalPages,
+        totalElements: action.payload.page.totalElements,
+        error: null,
+      };
     case CHECK_IF_APPLIED_SUCCESS:
       return {
         ...state,
         hasApplied: action.payload,
+        error: null,
+        loading: false,
+      };
+    case UPDATE_APPROVE_SUCCESS:
+      return {
+        ...state,
+        approveApply: action.payload,
         error: null,
         loading: false,
       };

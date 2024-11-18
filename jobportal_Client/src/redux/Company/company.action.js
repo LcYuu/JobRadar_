@@ -6,15 +6,12 @@ import {
   GET_COMPANY_BY_FEATURE_FAILURE,
   GET_COMPANY_BY_FEATURE_REQUEST,
   GET_COMPANY_BY_FEATURE_SUCCESS,
-  GET_COMPANY_FAILURE,
   GET_COMPANY_FIT_SEEKER_FAILURE,
   GET_COMPANY_FIT_SEEKER_REQUEST,
   GET_COMPANY_FIT_SEEKER_SUCCESS,
   GET_COMPANY_POPULAR_FAILURE,
   GET_COMPANY_POPULAR_REQUEST,
   GET_COMPANY_POPULAR_SUCCESS,
-  GET_COMPANY_REQUEST,
-  GET_COMPANY_SUCCESS,
   GET_PROFILE_COMPANY_FAILURE,
   GET_PROFILE_COMPANY_REQUEST,
   GET_PROFILE_COMPANY_SUCCESS,
@@ -145,64 +142,48 @@ export const checkSaved = (companyId) => async (dispatch) => {
     });
   }
 };
-export const getCompanyById = (companyId) => async (dispatch) => {
-    try {
-      dispatch({ type: GET_COMPANY_REQUEST });
-      
-      // Đảm bảo companyId là string hợp lệ
-      const cleanCompanyId = companyId.replace(/[^\w-]/g, '');
-      console.log("Fetching company with ID:", cleanCompanyId);
-      
-      const response = await axios.get(
-        `${API_BASE_URL}/company/profile-company/${cleanCompanyId}`
-      );
-      console.log("Company data received:", response.data);
+export const getCompanyByJWT = () => async (dispatch) => {
+  dispatch({ type: GET_COMPANY_REQUEST });
 
-      dispatch({
-        type: GET_COMPANY_SUCCESS,
-        payload: response.data,
-      });
-    } catch (error) {
-      console.error("Error fetching company:", error);
-      dispatch({
-        type: GET_COMPANY_FAILURE,
-        payload: error.response?.data?.message || "Failed to fetch company details",
-      });
-    }
-  };
-
-export const updateCompanyProfile = (companyData) => async (dispatch) => {
-  dispatch({ type: UPDATE_COMPANY_PROFILE_REQUEST });
   try {
-    const jwt = sessionStorage.getItem("jwt");
+    const jwt = sessionStorage.getItem("jwt"); // Lấy JWT từ sessionStorage
     if (!jwt) {
       throw new Error("No token found");
     }
 
-    const response = await api.put("/company/update-company", companyData, {
+    const response = await api.get(`/company/profile`, {
       headers: {
         Authorization: `Bearer ${jwt}`,
       },
     });
 
+    console.log("Company: " + JSON.stringify(response.data, null, 2));
+
     dispatch({
-      type: UPDATE_COMPANY_PROFILE_SUCCESS,
+      type: GET_COMPANY_SUCCESS,
       payload: response.data,
     });
-    
-    // Refresh company profile after update
-    await dispatch(getCompanyProfile(companyData.companyId));
-    
-    return response.data;
   } catch (error) {
     dispatch({
-      type: UPDATE_COMPANY_PROFILE_FAILURE,
-      payload: error.response?.data || error.message,
+      type: GET_COMPANY_FAILURE,
+      payload: error.message,
     });
-    throw error;
   }
 };
 
+export const updateCompanyProfile = (companyData) => async (dispatch) => {
+  dispatch({ type: UPDATE_COMPANY_PROFILE_REQUEST });
+  try {
+    const { data } = await api.put("/company/update-company", companyData);
+    console.log("Company updated: ", data);
+    dispatch({ type: UPDATE_COMPANY_PROFILE_SUCCESS, payload: data });
+    return data;
+  } catch (error) {
+    console.error("Company Update Error: ", error);
+    dispatch({ type: UPDATE_COMPANY_PROFILE_FAILURE, payload: error });
+    throw error;
+  }
+};
 export const updateCompanyImages = (images) => async (dispatch) => {
   dispatch({ type: UPDATE_COMPANY_IMAGES_REQUEST });
   try {
@@ -213,13 +194,13 @@ export const updateCompanyImages = (images) => async (dispatch) => {
 
     const formData = new FormData();
     images.forEach((image) => {
-      formData.append('images', image);
+      formData.append("images", image);
     });
 
     const response = await api.post("/image-company/create-image", formData, {
       headers: {
         Authorization: `Bearer ${jwt}`,
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
 
@@ -227,7 +208,7 @@ export const updateCompanyImages = (images) => async (dispatch) => {
       type: UPDATE_COMPANY_IMAGES_SUCCESS,
       payload: response.data,
     });
-    
+
     return response.data;
   } catch (error) {
     dispatch({

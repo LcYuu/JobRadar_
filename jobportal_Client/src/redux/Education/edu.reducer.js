@@ -4,12 +4,14 @@ import {
   GET_EDU_BY_USER_FAILURE,
   GET_EDU_BY_USER_REQUEST,
   GET_EDU_BY_USER_SUCCESS,
+  GET_EDU_CANDIDATE_SUCCESS,
 } from "./edu.actionType";
 
 const initialState = {
   edu: [],
   loading: false,
   error: null,
+  eduCandidate: null,
 };
 
 export const eduReducer = (state = initialState, action) => {
@@ -22,6 +24,13 @@ export const eduReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         edu: action.payload,
+        error: null,
+      };
+    case GET_EDU_CANDIDATE_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        eduCandidate: action.payload,
         error: null,
       };
     case CREATE_EDU_SUCCESS:

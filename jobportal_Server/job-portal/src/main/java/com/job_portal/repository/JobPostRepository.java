@@ -14,6 +14,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.job_portal.DTO.JobCountType;
 import com.job_portal.DTO.JobRecommendationDTO;
+import com.job_portal.DTO.JobWithApplicationCountDTO;
 import com.job_portal.models.JobPost;
 
 public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpecificationExecutor<JobPost> {
@@ -26,6 +27,9 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 
 	@Query("SELECT j FROM JobPost j WHERE j.company.companyId = :companyId AND j.isApprove = true AND j.expireDate >= CURRENT_DATE")
 	public Page<JobPost> findJobByCompanyId(@Param("companyId") UUID companyId, Pageable pageable);
+	
+	@Query("SELECT j FROM JobPost j WHERE j.company.companyId = :companyId AND j.isApprove = true AND j.expireDate >= CURRENT_DATE")
+	public List<JobPost> findJobByCompany(@Param("companyId") UUID companyId);
 
 	// Lọc các JobPost có salary >= minSalary và đã phê duyệt
 	public List<JobPost> findBySalaryGreaterThanEqualAndIsApproveTrue(Long minSalary);
@@ -79,4 +83,17 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 
 	long countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(UUID companyId,
 			LocalDateTime currentDate);
+
+	@Query(value = "SELECT new com.job_portal.DTO.JobWithApplicationCountDTO("
+			+ "jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, " + "COUNT(a.postId), jp.status, i.industryName) "
+			+ "FROM JobPost jp " + "LEFT JOIN ApplyJob a ON jp.postId = a.postId "
+			+ "JOIN Company c ON jp.company.companyId = c.companyId " + "JOIN Industry i ON c.industry.industryId = i.industryId "
+			+ "WHERE jp.company.companyId = :companyId " + "AND jp.isApprove = true " + "AND jp.expireDate >= CURRENT_DATE "
+			+ "GROUP BY jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName "
+			+ "ORDER BY jp.createDate DESC", nativeQuery = false)
+	Page<JobWithApplicationCountDTO> findTop5JobsWithApplicationCountStatusAndIndustryName(
+			@Param("companyId") UUID companyId, Pageable pageable);
+
 }
