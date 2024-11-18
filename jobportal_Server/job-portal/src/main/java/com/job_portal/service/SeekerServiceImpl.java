@@ -210,12 +210,6 @@ public class SeekerServiceImpl implements ISeekerService {
 		try {
 			// Tìm kiếm công ty dựa trên companyId
 			Optional<Seeker> seeker = seekerRepository.findById(userId);
-
-			// Nếu không tìm thấy công ty, ném ra ngoại lệ
-			if (!seeker.isPresent()) {
-				throw new AllExceptions("Không tìm thấy người tìm việc với ID: " + userId.toString());
-			}
-
 			// Trả về công ty nếu tìm thấy
 			return seeker.get();
 		} catch (Exception e) {

@@ -209,7 +209,7 @@ const App = () => {
           />
           <Route path="job-management" element={<JobManagement />} />
           <Route path="candidate-management" element={<CandidateManagement />} />
-          <Route path="candidate-management/applicants/:id" element={<ApplicantDetail />} />
+          <Route path="candidate-management/applicants/:userId/:postId" element={<ApplicantDetail />} />
           <Route path="settings" element={<Settings />} />
         </Route>
 

@@ -1,3 +1,4 @@
+import { getAllJobPost } from "./jobPost.action";
 import {
   COUNT_JOB_BY_TYPE_REQUEST,
   COUNT_JOB_BY_TYPE_SUCCESS,
@@ -20,6 +21,8 @@ import {
   GET_TOTAL_JOBS_SUCCESS,
   GET_TOTAL_JOBS_FAILURE,
   GET_RECOMMEND_JOB_SUCCESS,
+  GET_EMPLOYER_COMPANY_SUCCESS,
+  GET_ALL_JOB_POST_SUCCESS,
 } from "./jobPost.actionType";
 
 const initialState = {
@@ -31,13 +34,15 @@ const initialState = {
   searchJob: [],
   top8Job: [],
   jobCountByType: [],
-  jobPost: [], 
+  jobPost: [],
   postByPostId: null,
   totalPages: 0, // Tổng số trang
   approve: false,
   totalItems: 0,
   totalJobs: 0,
-  recommendJob: []
+  recommendJob: [],
+  employerCompany: [],
+  positions: [],
 };
 
 export const jobPostReducer = (state = initialState, action) => {
@@ -56,7 +61,6 @@ export const jobPostReducer = (state = initialState, action) => {
       return {
         ...state,
         jobPost: action.payload.content, // Lưu trữ tất cả các công việc vào mảng jobPost
-
         totalPages: action.payload.page.totalPages, // Lưu trữ tổng số trang
         loading: false, // Kết thúc trạng thái tải
         error: null, // Đặt lỗi về null
@@ -82,6 +86,13 @@ export const jobPostReducer = (state = initialState, action) => {
         loading: false, // Kết thúc trạng thái tải
         error: null, // Đặt lỗi về null
       };
+    case GET_ALL_JOB_POST_SUCCESS:
+      return {
+        ...state,
+        positions: action.payload,
+        loading: false, // Kết thúc trạng thái tải
+        error: null, // Đặt lỗi về null
+      };
     case SEARCH_JOBS_SUCCESS:
       return {
         ...state,
@@ -97,12 +108,21 @@ export const jobPostReducer = (state = initialState, action) => {
         postByPostId: action.payload,
         error: null,
       };
+    case GET_EMPLOYER_COMPANY_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        employerCompany: action.payload.content,
+        totalPages: action.payload.page.totalPages,
+        totalElements: action.payload.page.totalElements,
+        error: null,
+      };
     case GET_RECOMMEND_JOB_SUCCESS:
       return {
         ...state,
         recommendJob: action.payload,
-        loading: false, 
-        error: null, 
+        loading: false,
+        error: null,
       };
     case GET_TOP8_JOB_FAILURE:
     case GET_ALL_JOB_FAILURE:

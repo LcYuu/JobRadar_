@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import com.job_portal.DTO.DailyJobCount;
 import com.job_portal.DTO.JobCountType;
 import com.job_portal.DTO.JobPostDTO;
+import com.job_portal.DTO.JobWithApplicationCountDTO;
 import com.job_portal.models.JobPost;
 import com.social.exceptions.AllExceptions;
 
@@ -34,4 +35,5 @@ public interface IJobPostService {
 	public List<JobCountType> getJobCountByType();
 	public Page<JobPost> searchJobsWithPagination(String title, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, Pageable pageable);
 	public Page<JobPost> findByCompanyId(UUID companyId, Pageable pageable);
+	public Page<JobWithApplicationCountDTO> getTop5JobsWithApplications(UUID companyId, int page, int size);
 }

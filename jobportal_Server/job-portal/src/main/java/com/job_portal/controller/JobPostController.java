@@ -42,6 +42,7 @@ import com.job_portal.DTO.DailyJobCount;
 import com.job_portal.DTO.JobCountType;
 import com.job_portal.DTO.JobPostDTO;
 import com.job_portal.DTO.JobRecommendationDTO;
+import com.job_portal.DTO.JobWithApplicationCountDTO;
 import com.job_portal.DTO.SeekerDTO;
 import com.job_portal.config.JwtProvider;
 import com.job_portal.models.Company;
@@ -198,6 +199,15 @@ public class JobPostController {
             @RequestParam(defaultValue = "6") int size) {
 
         Page<JobPost> jobPosts = jobPostService.findJobByCompanyId(companyId, page, size);
+        return ResponseEntity.ok(jobPosts);
+    }
+	
+	@GetMapping("/search-by-company")
+	public ResponseEntity<List<JobPost>> getJobsByCompanyId(@RequestHeader("Authorization") String jwt) {
+
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+        List<JobPost> jobPosts = jobPostRepository.findJobByCompany(user.get().getCompany().getCompanyId());
         return ResponseEntity.ok(jobPosts);
     }
 
@@ -418,5 +428,15 @@ public class JobPostController {
 	    );
 	    return ResponseEntity.ok(totalJobs);
 	}
+	
+	@GetMapping("/employer-company")
+    public ResponseEntity<Page<JobWithApplicationCountDTO>> getTop5JobsWithApplications(@RequestHeader("Authorization") String jwt,
+    		  @RequestParam int page,
+              @RequestParam int size) {
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+        Page<JobWithApplicationCountDTO> jobs = jobPostService.getTop5JobsWithApplications(user.get().getCompany().getCompanyId(),page, size);
+        return ResponseEntity.ok(jobs);
+    }
 
 }

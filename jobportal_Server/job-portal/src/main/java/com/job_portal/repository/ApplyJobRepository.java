@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.job_portal.DTO.ApplyJobEmployerDTO;
 import com.job_portal.DTO.ApplyJobInProfile;
 import com.job_portal.models.ApplyJob;
 import com.job_portal.models.IdApplyJob;
@@ -44,7 +45,16 @@ public interface ApplyJobRepository extends JpaRepository<ApplyJob, IdApplyJob> 
 	        "WHERE sp.userId = :userId")
 	Page<ApplyJobInProfile> findApplyJobByUserId(@Param("userId") UUID userId, Pageable pageable);
 	
+	@Query("SELECT new com.job_portal.DTO.ApplyJobEmployerDTO(a.postId, a.userId, a.isSave, a.applyDate, " +
+		       "a.pathCV, a.fullName, j.title, u.avatar) " +
+		       "FROM ApplyJob a " +
+		       "JOIN a.jobPost j " +
+		       "JOIN UserAccount u ON a.userId = u.userId " +
+		       "WHERE j.company.companyId = :companyId " +
+		       "ORDER BY a.applyDate DESC") // Thêm phần sắp xếp theo ngày nộp đơn mới nhất
+		Page<ApplyJobEmployerDTO> findApplyJobsWithAvatarByCompanyId(@Param("companyId") UUID companyId, Pageable pageable);
+}
+	
 	
 	
 
-}

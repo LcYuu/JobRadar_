@@ -3,6 +3,12 @@ import axios from "axios";
 import {
   FOLLOW_COMPANY_FAILURE,
   FOLLOW_COMPANY_SUCCESS,
+    GET_CANDIDATE_PROFILE_FAILURE,
+    GET_CANDIDATE_PROFILE_REQUEST,
+    GET_CANDIDATE_PROFILE_SUCCESS,
+    GET_CANDIDATE_SKILLS_FAILURE,
+    GET_CANDIDATE_SKILLS_REQUEST,
+    GET_CANDIDATE_SKILLS_SUCCESS,
     GET_FOLLOWED_COMPANY_FAILURE,
     GET_FOLLOWED_COMPANY_REQUEST,
   GET_FOLLOWED_COMPANY_SUCCESS,
@@ -100,3 +106,40 @@ export const followCompany = (companyId) => async (dispatch) => {
       dispatch({ type: FOLLOW_COMPANY_FAILURE, error: error.message });
   }
 };
+
+export const getCandidateProfile = (userId, postId) => async (dispatch) => {
+  dispatch({ type: GET_CANDIDATE_PROFILE_REQUEST });
+  try {
+    const response = await axios.get(`http://localhost:8080/seeker/profile-apply`, {
+      params: { userId, postId }
+    });
+    dispatch({
+      type: GET_CANDIDATE_PROFILE_SUCCESS,
+      payload: response.data, // Gửi dữ liệu về store
+    });
+  } catch (error) {
+    dispatch({
+      type: GET_CANDIDATE_PROFILE_FAILURE,
+      error: error.message,
+    });
+  }
+};
+
+export const getCandidateSkills= (userId) => async (dispatch) => {
+  dispatch({ type: GET_CANDIDATE_SKILLS_REQUEST });
+  try {
+    const response = await axios.get(`http://localhost:8080/seeker/candidate-skills`, {
+      params: { userId }
+    });
+    dispatch({
+      type: GET_CANDIDATE_SKILLS_SUCCESS,
+      payload: response.data, // Gửi dữ liệu về store
+    });
+  } catch (error) {
+    dispatch({
+      type: GET_CANDIDATE_SKILLS_FAILURE,
+      error: error.message,
+    });
+  }
+};
+

@@ -2,6 +2,9 @@ package com.job_portal.service;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,6 +26,7 @@ import com.job_portal.DTO.DailyJobCount;
 import com.job_portal.DTO.JobCountType;
 import com.job_portal.DTO.JobPostDTO;
 import com.job_portal.DTO.JobRecommendationDTO;
+import com.job_portal.DTO.JobWithApplicationCountDTO;
 import com.job_portal.models.City;
 import com.job_portal.models.Company;
 import com.job_portal.models.Industry;
@@ -356,12 +360,11 @@ public class JobPostServiceImpl implements IJobPostService {
 
 	@Override
 	public void exportJobPostToCSV(String filePath) throws IOException {
-		List<JobRecommendationDTO> jobPosts = jobPostRepository
-				.findApprovedAndActiveJobs();
+		List<JobRecommendationDTO> jobPosts = jobPostRepository.findApprovedAndActiveJobs();
 		try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
 			// Viết tiêu đề
-			String[] header = { "postId", "title", "description", "location", "salary", "experience", "typeOfWork", 
-					"createDate", "expireDate", "companyId", "companyName", "cityName", "industryName", "logo"};
+			String[] header = { "postId", "title", "description", "location", "salary", "experience", "typeOfWork",
+					"createDate", "expireDate", "companyId", "companyName", "cityName", "industryName", "logo" };
 			writer.writeNext(header);
 
 			// Viết dữ liệu
@@ -370,7 +373,7 @@ public class JobPostServiceImpl implements IJobPostService {
 						jobPost.getLocation(), jobPost.getSalary().toString(), jobPost.getExperience(),
 						jobPost.getTypeOfWork(), jobPost.getCreateDate().toString(), jobPost.getExpireDate().toString(),
 						jobPost.getCompanyId().toString(), jobPost.getCompanyName(), jobPost.getCityName(),
-						jobPost.getIndustryName(), jobPost.getLogo()};
+						jobPost.getIndustryName(), jobPost.getLogo() };
 				writer.writeNext(data);
 			}
 		}
@@ -402,4 +405,10 @@ public class JobPostServiceImpl implements IJobPostService {
 		return jobPostRepository.findByCompanyCompanyIdAndApproveTrue(companyId, pageable);
 	}
 
+	@Override
+	public Page<JobWithApplicationCountDTO> getTop5JobsWithApplications(UUID companyId, int page, int size) {
+		Pageable pageable = PageRequest.of(page, size); // Trang bắt đầu từ 0
+		return jobPostRepository.findTop5JobsWithApplicationCountStatusAndIndustryName(companyId, pageable);
+
+	}
 }
