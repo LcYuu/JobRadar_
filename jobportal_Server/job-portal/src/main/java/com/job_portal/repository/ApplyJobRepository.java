@@ -51,8 +51,16 @@ public interface ApplyJobRepository extends JpaRepository<ApplyJob, IdApplyJob> 
 		       "JOIN a.jobPost j " +
 		       "JOIN UserAccount u ON a.userId = u.userId " +
 		       "WHERE j.company.companyId = :companyId " +
-		       "ORDER BY a.applyDate DESC") // Thêm phần sắp xếp theo ngày nộp đơn mới nhất
-		Page<ApplyJobEmployerDTO> findApplyJobsWithAvatarByCompanyId(@Param("companyId") UUID companyId, Pageable pageable);
+		       "AND (:fullName IS NULL OR LOWER(a.fullName) LIKE LOWER(CONCAT('%', :fullName, '%'))) " + // Tìm kiếm theo fullName
+		       "AND (:isSave IS NULL OR a.isSave = :isSave) " +                                          // Lọc theo isSave
+		       "AND (:title IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :title, '%'))) " +          // Lọc theo title
+		       "ORDER BY a.applyDate DESC") // Sắp xếp theo ngày nộp đơn
+		Page<ApplyJobEmployerDTO> findApplyJobsWithFilters(
+		        @Param("companyId") UUID companyId,
+		        @Param("fullName") String fullName,
+		        @Param("isSave") Boolean isSave,
+		        @Param("title") String title,
+		        Pageable pageable);
 }
 	
 	

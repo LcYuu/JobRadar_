@@ -25,7 +25,6 @@ const CandidateManagement = () => {
   const dispatch = useDispatch();
   const {
     applyJobByCompany = [],
-    approveApply,
     totalPages,
     totalElements,
   } = useSelector((store) => store.applyJob);
@@ -34,37 +33,26 @@ const CandidateManagement = () => {
   const [currentPage, setCurrentPage] = useState(0); // Trang hiện tại
   const [size, setSize] = useState(5); // Số lượng bản ghi mỗi trang
 
+  const [searchTerm, setSearchTerm] = useState(""); // Từ khóa tìm kiếm
+  const [filterStatus, setFilterStatus] = useState(""); // Trạng thái duyệt
+  const [filterPosition, setFilterPosition] = useState(""); // Vị trí công việc
+  const [filteredCandidates, setFilteredCandidates] = useState([]); // Kết quả sau lọc
+
   useEffect(() => {
-    dispatch(getApplyJobByCompany(currentPage, size));
-  }, [dispatch, currentPage, size]);
+    dispatch(getApplyJobByCompany(currentPage, size, searchTerm, filterStatus, filterPosition));
+  }, [dispatch, currentPage, size]); // Thêm các tham số lọc vào dependency array
 
   useEffect(() =>{
     dispatch(getAllJobPost());
   }, [dispatch])
-
-  // const [selectedItems, setSelectedItems] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(""); // Từ khóa tìm kiếm
-  const [filterStatus, setFilterStatus] = useState(""); // Trạng thái duyệt
-  const [filterPosition, setFilterPosition] = useState(""); // Vị trí công việc
-  const [filteredCandidates, setFilteredCandidates] =
-    useState(applyJobByCompany); // Kết quả sau lọc
-  console.log(filteredCandidates);
-  useEffect(() => {
-    // Gọi API và chỉ cập nhật filteredCandidates khi có dữ liệu
-    if (applyJobByCompany.length > 0) {
-      setFilteredCandidates(applyJobByCompany);
-    }
-  }, [applyJobByCompany]); // Cập nhật khi applyJobByCompany thay đổi
 
   const handleUpdate = async (postId, userId) => {
     try {
       // Gọi hành động cập nhật và chờ nó thực hiện
       await dispatch(updateApprove(postId, userId));
   
-      // Hiển thị toast sau khi chấp thuận thành công
       toast.success("Đơn ứng tuyển đã được chấp thuận!");
   
-      // Cập nhật lại danh sách công việc
       dispatch(getApplyJobByCompany(currentPage, size));
     } catch (error) {
       // Hiển thị thông báo lỗi nếu có lỗi xảy ra
@@ -72,24 +60,12 @@ const CandidateManagement = () => {
     }
   };
   const applyFilters = () => {
-    const filtered = applyJobByCompany.filter((candidate) => {
-      const matchesSearch = candidate.fullName
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-
-      const matchesStatus = filterStatus
-        ? candidate?.isSave === (filterStatus === "1") // So sánh với boolean true/false
-        : true;
-
-      const matchesPosition = filterPosition
-        ? candidate.title.toLowerCase() === filterPosition.toLowerCase() // So sánh không phân biệt chữ hoa chữ thường
-        : true;
-
-      return matchesSearch && matchesStatus && matchesPosition;
-    });
-
-    setFilteredCandidates(filtered);
+    setCurrentPage(0)
+    dispatch(getApplyJobByCompany(currentPage, size, searchTerm,filterStatus, filterPosition));
   };
+
+  const displayData = filteredCandidates.length > 0 ? filteredCandidates : applyJobByCompany;
+
 
   // State cho phân trang
 
@@ -194,8 +170,8 @@ const CandidateManagement = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredCandidates.length > 0 ? (
-              filteredCandidates.map((candidate) => (
+            {displayData.length > 0 ? (
+              displayData.map((candidate) => (
                 <tr key={candidate.postId} className="border-t">
                   {/* <td className="p-4">
           <input
@@ -254,7 +230,7 @@ const CandidateManagement = () => {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                           align="end"
-                          className="bg-white border border-gray-300 shadow-lg rounded-md p-2 "
+                          className="bg-white border border-gray-300 shadow-lg rounded-md p-2"
                         >
                           <DropdownMenuItem
                             className="hover:bg-gray-100 cursor-pointer"
