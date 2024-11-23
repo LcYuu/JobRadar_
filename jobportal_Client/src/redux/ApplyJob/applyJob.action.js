@@ -42,8 +42,6 @@ export const getApplyJobByUser = (currentPage, size) => async (dispatch) => {
       }
     );
 
-    console.log("Apply Job: " + response.data);
-
     dispatch({
       type: GET_APPLY_JOB_BY_USER_SUCCESS,
       payload: response.data,
@@ -139,7 +137,13 @@ export const checkIfApplied = (postId) => async (dispatch) => {
   }
 };
 
-export const getApplyJobByCompany = (currentPage, size) => async (dispatch) => {
+export const getApplyJobByCompany = (
+  currentPage,
+  size,
+  fullName = "",
+  isSave = null,
+  title = ""
+) => async (dispatch) => {
   dispatch({ type: GET_APPLY_JOB_BY_COMPANY_REQUEST });
 
   try {
@@ -148,8 +152,18 @@ export const getApplyJobByCompany = (currentPage, size) => async (dispatch) => {
       throw new Error("No token found");
     }
 
+    // Tạo query string với các tham số lọc
+    const queryParams = new URLSearchParams({
+      page: currentPage,
+      size: size,
+      ...(fullName && { fullName }), // Thêm vào nếu fullName không rỗng
+      ...(isSave !== null && { isSave }), // Thêm vào nếu isSave không null
+      ...(title && { title }), // Thêm vào nếu title không rỗng
+    }).toString();
+
+    // Gọi API với query string và header JWT
     const response = await api.get(
-      `/apply-job/get-apply-job-by-company?page=${currentPage}&size=${size}`,
+      `/apply-job/get-apply-job-by-company?${queryParams}`,
       {
         headers: {
           Authorization: `Bearer ${jwt}`,
@@ -157,7 +171,7 @@ export const getApplyJobByCompany = (currentPage, size) => async (dispatch) => {
       }
     );
 
-    console.log("Apply Job: " + response.data);
+    console.log("Apply Job Response: ", response.data);
 
     dispatch({
       type: GET_APPLY_JOB_BY_COMPANY_SUCCESS,
@@ -171,6 +185,7 @@ export const getApplyJobByCompany = (currentPage, size) => async (dispatch) => {
     });
   }
 };
+
 
 
 export const updateApprove = (postId, userId) => async (dispatch) => {

@@ -23,6 +23,12 @@ import {
   GET_RECOMMEND_JOB_SUCCESS,
   GET_EMPLOYER_COMPANY_SUCCESS,
   GET_ALL_JOB_POST_SUCCESS,
+  GET_JOB_COMPANY_SUCCESS,
+  GET_DETAIL_JOB_BY_ID_SUCCESS,
+  UPDATE_JOB_REQUEST,
+  UPDATE_JOB_SUCCESS,
+  CREATE_JOB_SUCCESS,
+  GET_TOP_5_LASTEST_COMPANY_SUCCESS,
 } from "./jobPost.actionType";
 
 const initialState = {
@@ -43,6 +49,8 @@ const initialState = {
   recommendJob: [],
   employerCompany: [],
   positions: [],
+  jobs: [],
+  detailJob: null,
 };
 
 export const jobPostReducer = (state = initialState, action) => {
@@ -64,6 +72,14 @@ export const jobPostReducer = (state = initialState, action) => {
         totalPages: action.payload.page.totalPages, // Lưu trữ tổng số trang
         loading: false, // Kết thúc trạng thái tải
         error: null, // Đặt lỗi về null
+      };
+    case CREATE_JOB_SUCCESS:
+    case UPDATE_JOB_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        detailJob: action.payload,
+        error: null,
       };
     case GET_TOP8_JOB_SUCCESS:
       return {
@@ -117,10 +133,33 @@ export const jobPostReducer = (state = initialState, action) => {
         totalElements: action.payload.page.totalElements,
         error: null,
       };
+
+    case GET_JOB_COMPANY_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        jobs: action.payload.jobs,
+        totalPages: action.payload.totalPages,
+        totalElements: action.payload.totalElements,
+      };
+    case GET_TOP_5_LASTEST_COMPANY_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        jobs: action.payload
+      };
+
     case GET_RECOMMEND_JOB_SUCCESS:
       return {
         ...state,
         recommendJob: action.payload,
+        loading: false,
+        error: null,
+      };
+    case GET_DETAIL_JOB_BY_ID_SUCCESS:
+      return {
+        ...state,
+        detailJob: action.payload,
         loading: false,
         error: null,
       };

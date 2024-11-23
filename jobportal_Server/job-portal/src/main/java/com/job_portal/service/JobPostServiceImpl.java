@@ -70,12 +70,16 @@ public class JobPostServiceImpl implements IJobPostService {
 	@Override
 	public boolean createJob(JobPostDTO jobPostDTO, UUID companyId) {
 		Optional<City> city = cityRepository.findById(jobPostDTO.getCityId());
-
+		if (!city.isPresent()) {
+		    throw new IllegalArgumentException("City with ID " + jobPostDTO.getCityId() + " does not exist");
+		}
 		Optional<Company> company = companyRepository.findById(companyId);
-
+		if (!company.isPresent()) {
+		    throw new IllegalArgumentException("Company with ID " + companyId + " does not exist");
+		}
 		// Build the JobPost entity
-		JobPost jobPost = new JobPost();
-		jobPost.setCreateDate(jobPostDTO.getCreateDate());
+		JobPost jobPost = new JobPost(); 	
+		jobPost.setCreateDate(LocalDate.now());
 		jobPost.setExpireDate(jobPostDTO.getExpireDate());
 		jobPost.setTitle(jobPostDTO.getTitle());
 		jobPost.setDescription(jobPostDTO.getDescription());
@@ -86,7 +90,7 @@ public class JobPostServiceImpl implements IJobPostService {
 		jobPost.setLocation(jobPostDTO.getLocation());
 		jobPost.setTypeOfWork(jobPostDTO.getTypeOfWork());
 		jobPost.setPosition(jobPostDTO.getPosition());
-		jobPost.setStatus(jobPostDTO.getStatus());
+		jobPost.setStatus("Chưa duyệt");
 		jobPost.setCompany(company.get());
 		jobPost.setCity(city.get());
 		jobPost.setApprove(false);
@@ -102,7 +106,6 @@ public class JobPostServiceImpl implements IJobPostService {
 			jobPost.setSkills(skillsList);
 		}
 
-		// Save the JobPost entity
 		try {
 			JobPost saveJobPost = jobPostRepository.save(jobPost);
 			return saveJobPost != null;
@@ -202,7 +205,6 @@ public class JobPostServiceImpl implements IJobPostService {
 		if (jobPostDTO.getCityId() != null) {
 			Optional<City> newCity = cityRepository.findById(jobPostDTO.getCityId());
 
-			// Cập nhật Industry nếu khác
 			if (!newCity.get().equals(oldJob.getCity())) {
 				oldJob.setCity(newCity.get());
 				isUpdated = true;
@@ -324,6 +326,7 @@ public class JobPostServiceImpl implements IJobPostService {
 		if (jobPostOpt.isPresent()) {
 			JobPost jobPost = jobPostOpt.get();
 			jobPost.setApprove(true); // Đặt trường isApprove thành true
+			jobPost.setStatus("Đang mở");
 			jobPostRepository.save(jobPost); // Lưu công việc đã cập nhật
 			return true;
 		}
@@ -353,7 +356,7 @@ public class JobPostServiceImpl implements IJobPostService {
 	@Override
 	public Page<JobPost> findByIsApprove(Pageable pageable) {
 		Page<JobPost> jobPost = jobPostRepository.findByIsApproveTrueAndExpireDateGreaterThanEqual(pageable,
-				LocalDateTime.now());
+				LocalDate.now());
 		return jobPost;
 
 	}
@@ -407,8 +410,8 @@ public class JobPostServiceImpl implements IJobPostService {
 
 	@Override
 	public Page<JobWithApplicationCountDTO> getTop5JobsWithApplications(UUID companyId, int page, int size) {
-		Pageable pageable = PageRequest.of(page, size); // Trang bắt đầu từ 0
-		return jobPostRepository.findTop5JobsWithApplicationCountStatusAndIndustryName(companyId, pageable);
-
+//		Pageable pageable = PageRequest.of(page, size); // Trang bắt đầu từ 0
+//		return jobPostRepository.findTop5JobsWithApplicationCountStatusAndIndustryName(companyId, pageable);
+		return null;
 	}
 }
