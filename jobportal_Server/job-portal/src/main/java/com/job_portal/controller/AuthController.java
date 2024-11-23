@@ -165,25 +165,7 @@ public class AuthController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Xác thực OPT thất bại, vui lòng nhập lại email");
 		}
 	}
-
-	@PutMapping("/regenerate-otp")
-	public String regenerateOtp(@RequestParam String email) {
-		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-//		if (user == null) {
-//			throw new RuntimeException("User not found with email: " + email);
-//		}
-		String otp = otpUtil.generateOtp();
-		try {
-			emailUtil.sendOtpEmail(email, otp);
-		} catch (MessagingException e) {
-			throw new RuntimeException("Không thể gửi email, vui lòng thử lại");
-		}
-		user.get().setOtp(otp);
-		user.get().setOtpGeneratedTime(LocalDateTime.now());
-		userAccountRepository.save(user.get());
-		return "Vui lòng check email đã nhận mã đăng ký";
-	}
-
+	
 	@PostMapping("/login")
 	public AuthResponse signin(@RequestBody LoginDTO login) {
 		AuthResponse res;
@@ -206,6 +188,25 @@ public class AuthController {
 		return res;
 	}
 
+	@PutMapping("/regenerate-otp")
+	public String regenerateOtp(@RequestParam String email) {
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+//		if (user == null) {
+//			throw new RuntimeException("User not found with email: " + email);
+//		}
+		String otp = otpUtil.generateOtp();
+		try {
+			emailUtil.sendOtpEmail(email, otp);
+		} catch (MessagingException e) {
+			throw new RuntimeException("Không thể gửi email, vui lòng thử lại");
+		}
+		user.get().setOtp(otp);
+		user.get().setOtpGeneratedTime(LocalDateTime.now());
+		userAccountRepository.save(user.get());
+		return "Vui lòng check email đã nhận mã đăng ký";
+	}
+
+	
 	private Authentication authenticate(String email, String password) {
 		UserDetails userDetails = accountDetailService.loadUserByUsername(email);
 		if (userDetails == null) {
