@@ -1,5 +1,6 @@
 package com.job_portal.controller;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,10 +32,12 @@ import com.job_portal.config.JwtProvider;
 import com.job_portal.models.ApplyJob;
 import com.job_portal.models.City;
 import com.job_portal.models.Company;
+import com.job_portal.models.Industry;
 import com.job_portal.models.JobPost;
 import com.job_portal.models.UserAccount;
 import com.job_portal.repository.ApplyJobRepository;
 import com.job_portal.repository.CompanyRepository;
+import com.job_portal.repository.IndustryRepository;
 import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.UserAccountRepository;
 import com.job_portal.service.IApplyJobService;
@@ -48,7 +51,8 @@ import com.social.exceptions.AllExceptions;
 public class CompanyController {
 	@Autowired
 	CompanyRepository companyRepository;
-
+	@Autowired
+	IndustryRepository industryRepository;
 	@Autowired
 	ICompanyService companyService;
 
@@ -186,7 +190,21 @@ public class CompanyController {
 	    return companyRepository.findCompaniesByFilters(title, cityId, industryId, pageable);
 	}
 	
+	@GetMapping("/get-industry-name/{industryId}")
+	public ResponseEntity<String> getIndustryNameById(@PathVariable Integer industryId) {
+	    try {
+	        Optional<Industry> industry = industryRepository.findById(industryId);
+	        if (industry.isPresent()) {
+	            return ResponseEntity.ok(industry.get().getIndustryName());
+	        } else {
+	            return ResponseEntity.notFound().build();
+	        }
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("Error fetching industry name");
+	    }
+	}
 	
-
+	
 
 }
