@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.job_portal.DTO.CountReviewByCompanyDTO;
 import com.job_portal.DTO.JobPostDTO;
 import com.job_portal.config.JwtProvider;
 import com.job_portal.models.JobPost;
@@ -88,4 +89,15 @@ public class ReviewController {
 					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
 		}
 	}
+	@GetMapping("/countReviewByCompany")
+	public ResponseEntity<CountReviewByCompanyDTO> countReviewByCompany(@RequestHeader("Authorization") String jwt) throws AllExceptions {
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+		
+		CountReviewByCompanyDTO countReview = reviewRepository.countReviewsByCompany(user.get().getCompany().getCompanyId());
+		return new ResponseEntity<>(countReview, HttpStatus.OK);
+		
+	}
+	
+	
 }

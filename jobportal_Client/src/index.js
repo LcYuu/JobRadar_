@@ -15,7 +15,7 @@ root.render(
 
     <Provider store={store}>
       <ErrorBoundary>
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_relativeSplatPath: true }}>
           <App />
         </BrowserRouter>
         <ToastContainer position="top-right"
@@ -30,6 +30,7 @@ root.render(
         theme="light" />
       </ErrorBoundary>
     </Provider>
+    
 );
 
 // If you want to start measuring performance in your app, pass a function

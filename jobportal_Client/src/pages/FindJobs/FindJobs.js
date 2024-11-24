@@ -117,7 +117,6 @@ export default function JobSearchPage() {
   
 
   const handleSalaryChange = (newValues) => {
-
     setFilters({
       ...filters,
       minSalary: newValues[0],

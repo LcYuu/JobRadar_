@@ -104,7 +104,6 @@ export default function MyProfile() {
 
   const [expUpdated, setExpUpdated] = useState(false);
   const [eduUpdated, setEduUpdated] = useState(false);
-
   const [refreshData, setRefreshData] = useState(false);
 
   useEffect(() => {
@@ -186,7 +185,6 @@ export default function MyProfile() {
     if (!validateForm()) {
       return;
     }
-    
     try {
       await dispatch(updateSeekerAction(formData));
       setIsEditingDes(false);

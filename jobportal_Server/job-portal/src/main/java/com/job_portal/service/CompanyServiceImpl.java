@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.job_portal.DTO.CompanyDTO;
 import com.job_portal.models.City;
 import com.job_portal.models.Company;
 import com.job_portal.models.Industry;
@@ -55,7 +56,7 @@ public class CompanyServiceImpl implements ICompanyService {
 	}
 
 	@Override
-	public boolean updateCompany(Company company, UUID companyId, Integer industryId, Integer cityId)
+	public boolean updateCompany(CompanyDTO companyDTO, UUID companyId)
 			throws AllExceptions {
 		// Tìm kiếm Company theo id
 		Optional<Company> existingCompany = companyRepository.findById(companyId);
@@ -65,44 +66,44 @@ public class CompanyServiceImpl implements ICompanyService {
 		boolean isUpdated = false;
 
 		// Cập nhật các trường cơ bản
-		if (company.getCompanyName() != null) {
-			oldCompany.setCompanyName(company.getCompanyName());
+		if (companyDTO.getCompanyName() != null) {
+			oldCompany.setCompanyName(companyDTO.getCompanyName());
 			isUpdated = true;
 		}
 
-		if (company.getAddress() != null) {
-			oldCompany.setAddress(company.getAddress());
+		if (companyDTO.getAddress() != null) {
+			oldCompany.setAddress(companyDTO.getAddress());
 			isUpdated = true;
 		}
 
-		if (company.getDescription() != null) {
-			oldCompany.setDescription(company.getDescription());
+		if (companyDTO.getDescription() != null) {
+			oldCompany.setDescription(companyDTO.getDescription());
 			isUpdated = true;
 		}
 
-		if (company.getLogo() != null) {
-			oldCompany.setLogo(company.getLogo());
+		if (companyDTO.getLogo() != null) {
+			oldCompany.setLogo(companyDTO.getLogo());
 			isUpdated = true;
 		}
 
-		if (company.getContact() != null) {
-			oldCompany.setContact(company.getContact());
+		if (companyDTO.getContact() != null) {
+			oldCompany.setContact(companyDTO.getContact());
 			isUpdated = true;
 		}
 
-		if (company.getEmail() != null) {
-			oldCompany.setEmail(company.getEmail());
+		if (companyDTO.getEmail() != null) {
+			oldCompany.setEmail(companyDTO.getEmail());
 			isUpdated = true;
 		}
 		
-		if (company.getEstablishedTime() != null) {
-			oldCompany.setEstablishedTime(company.getEstablishedTime());
+		if (companyDTO.getEstablishedDate() != null) {
+			oldCompany.setEstablishedTime(companyDTO.getEstablishedDate());
 			isUpdated = true;
 		}
 
 		// Tìm Industry mới dựa trên industryId
-		if (industryId != null) {
-			Optional<Industry> newIndustry = industryRepository.findById(industryId);
+		if (companyDTO.getIndustryId() != null) {
+			Optional<Industry> newIndustry = industryRepository.findById(companyDTO.getIndustryId());
 	
 			// Cập nhật Industry nếu khác
 			if (!newIndustry.get().equals(oldCompany.getIndustry())) {
@@ -112,8 +113,8 @@ public class CompanyServiceImpl implements ICompanyService {
 		}
 
 		// Tìm City mới dựa trên cityId
-		if (cityId != null) {
-			Optional<City> newCity = cityRepository.findById(cityId);
+		if (companyDTO.getCityId() != null) {
+			Optional<City> newCity = cityRepository.findById(companyDTO.getCityId());
 	
 			// Cập nhật City nếu khác
 			if (!newCity.get().equals(oldCompany.getCity())) {
@@ -164,11 +165,6 @@ public class CompanyServiceImpl implements ICompanyService {
 		try {
 			// Tìm kiếm công ty dựa trên companyId
 			Optional<Company> companyOptional = companyRepository.findCompanyByCompanyId(companyId);
-
-			// Nếu không tìm thấy công ty, ném ra ngoại lệ
-			if (!companyOptional.isPresent()) {
-				throw new AllExceptions("Không tìm thấy công ty nào");
-			}
 
 			// Trả về công ty nếu tìm thấy
 			return companyOptional.get();

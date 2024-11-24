@@ -42,6 +42,7 @@ import com.job_portal.DTO.DailyJobCount;
 import com.job_portal.DTO.JobCountType;
 import com.job_portal.DTO.JobPostDTO;
 import com.job_portal.DTO.JobRecommendationDTO;
+import com.job_portal.DTO.JobWithApplicationCountDTO;
 import com.job_portal.DTO.SeekerDTO;
 import com.job_portal.config.JwtProvider;
 import com.job_portal.models.Company;
@@ -100,18 +101,23 @@ public class JobPostController {
 
 	@PostMapping("/create-job")
 	public ResponseEntity<String> createJobPost(@RequestHeader("Authorization") String jwt,
-			@RequestBody JobPostDTO jobPostDTO) {
-		String email = JwtProvider.getEmailFromJwtToken(jwt);
-		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+	        @RequestBody JobPostDTO jobPostDTO) {
+	    try {
+	        String email = JwtProvider.getEmailFromJwtToken(jwt);
+	        Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 
-		boolean isCreated = jobPostService.createJob(jobPostDTO, user.get().getUserId());
-		if (isCreated) {
-			return new ResponseEntity<>("Công việc được tạo thành công. Chờ Admin phê duyệt", HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>("Công việc tạo thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+	        boolean isCreated = jobPostService.createJob(jobPostDTO, user.get().getCompany().getCompanyId());
+	        if (isCreated) {
+	            return new ResponseEntity<>("Công việc được tạo thành công. Chờ Admin phê duyệt", HttpStatus.CREATED);
+	        } else {
+	            return new ResponseEntity<>("Công việc tạo thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
+	        }
+	    } catch (Exception e) {
+	        // Log lỗi và trả về lỗi chi tiết
+	        e.printStackTrace();
+	        return new ResponseEntity<>("Đã có lỗi xảy ra: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
 	}
-
 	@PostMapping("/approve/{postId}")
 	public ResponseEntity<String> approveJobPost(@PathVariable UUID postId) {
 		boolean isApproved = jobPostService.approveJob(postId);
@@ -182,10 +188,10 @@ public class JobPostController {
 			List<JobPost> jobs = jobPostService.searchJobByExperience(experience);
 			return ResponseEntity.ok(jobs);
 		} catch (AllExceptions e) {
-			// Trả về thông báo từ service
+			
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 		} catch (Exception e) {
-			// Trả về thông báo lỗi chung
+			
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
 		}
@@ -198,6 +204,15 @@ public class JobPostController {
             @RequestParam(defaultValue = "6") int size) {
 
         Page<JobPost> jobPosts = jobPostService.findJobByCompanyId(companyId, page, size);
+        return ResponseEntity.ok(jobPosts);
+    }
+	
+	@GetMapping("/search-by-company")
+	public ResponseEntity<List<JobPost>> getJobsByCompanyId(@RequestHeader("Authorization") String jwt) {
+
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+        List<JobPost> jobPosts = jobPostRepository.findJobByCompany(user.get().getCompany().getCompanyId());
         return ResponseEntity.ok(jobPosts);
     }
 
@@ -321,7 +336,7 @@ public class JobPostController {
 	            String createDateStr = jobNode.get("createDate").asText(null);
 	            if (createDateStr != null && !createDateStr.isEmpty()) {
 	                try {
-	                    job.setCreateDate(LocalDateTime.parse(createDateStr, formatter));
+	                    job.setCreateDate(LocalDate.parse(createDateStr, formatter));
 	                } catch (Exception e) {
 	                    System.out.println("Error parsing createDate: " + createDateStr + " - " + e.getMessage());
 	                }
@@ -331,7 +346,7 @@ public class JobPostController {
 	            String expireDateStr = jobNode.get("expireDate").asText(null);
 	            if (expireDateStr != null && !expireDateStr.isEmpty()) {
 	                try {
-	                    job.setExpireDate(LocalDateTime.parse(expireDateStr, formatter));
+	                    job.setExpireDate(LocalDate.parse(expireDateStr, formatter));
 	                } catch (Exception e) {
 	                    System.out.println("Error parsing expireDate: " + expireDateStr + " - " + e.getMessage());
 	                }
@@ -378,7 +393,6 @@ public class JobPostController {
 	        @RequestParam(defaultValue = "0") int page, 
 	        @RequestParam(defaultValue = "7") int size) throws IOException { 
 	    
-	    // Khởi tạo tiêu chí tìm kiếm mặc định
 	    Specification<JobPost> spec = Specification.where(jobPostRepository.alwaysActiveJobs())
 	        .and(JobPostSpecification.withFilters(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds));
 
@@ -393,11 +407,9 @@ public class JobPostController {
 	            searchHistoryService.exportSearchHistoryToCSV(filePath, title, user.get().getSeeker().getUserId());
 	        }
 	    }
-
 	    return jobPostRepository.findAll(spec, pageable);
 	}
 
-	
 	@GetMapping("/salary-range")
 	public ResponseEntity<Map<String, Long>> getSalaryRange() {
 	    Long minSalary = jobPostRepository.findMinSalary(); // Tạo phương thức trong repository
@@ -417,6 +429,55 @@ public class JobPostController {
 	        LocalDateTime.now()
 	    );
 	    return ResponseEntity.ok(totalJobs);
+	}
+
+	
+	@GetMapping("/top-5-job-lastest")
+    public ResponseEntity<List<JobWithApplicationCountDTO>> getTop5JobsWithApplications(@RequestHeader("Authorization") String jwt) {
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+        List<JobWithApplicationCountDTO> jobs = jobPostRepository.findJobsByCompanyIdSortedByCreateDateDesc(user.get().getCompany().getCompanyId());
+        return ResponseEntity.ok(jobs);
+    }
+	
+	@GetMapping("/employer-company")
+	public ResponseEntity<Page<JobWithApplicationCountDTO>> getFilteredJobs(
+	        @RequestHeader("Authorization") String jwt,
+	        @RequestParam(required = false) String status,  
+	        @RequestParam(required = false) String typeOfWork, 
+	        @RequestParam(required = false) String sortByCreateDate,
+	        @RequestParam(required = false) String sortByExpireDate,
+	        @RequestParam(required = false) String sortByCount,  
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "5") int size) {
+	    String email = JwtProvider.getEmailFromJwtToken(jwt);
+	    Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+
+	    if (user.isEmpty()) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+	    }
+	    String sortOrder = null;
+
+	    if (sortByCreateDate != null) {
+	        sortOrder = "createDate " + (sortByCreateDate.equalsIgnoreCase("ASC") ? "ASC" : "DESC");
+	    } else if (sortByExpireDate != null) {
+	        sortOrder = "expireDate " + (sortByExpireDate.equalsIgnoreCase("ASC") ? "ASC" : "DESC");
+	    } else if (sortByCount != null) {
+	        sortOrder = "applicationCount " + (sortByCount.equalsIgnoreCase("ASC") ? "ASC" : "DESC");
+	    }
+	    if (sortOrder == null) {
+	        sortOrder = "createDate DESC";
+	    }
+	    Pageable pageable = PageRequest.of(page, size);
+
+	    Page<JobWithApplicationCountDTO> jobs = jobPostRepository.findJobsWithFiltersAndSorting(
+	            user.get().getCompany().getCompanyId(),
+	            status,
+	            typeOfWork,
+	            sortOrder,
+	            pageable
+	    );
+	    return ResponseEntity.ok(jobs);
 	}
 	@GetMapping("/stats/daily")
 	public ResponseEntity<?> getDailyStats(
