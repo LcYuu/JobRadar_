@@ -522,5 +522,13 @@ public class JobPostController {
 	                .body("Error getting job stats: " + e.getMessage());
 	    }
 	}
-
+	@GetMapping("/admin/all-jobs")
+	public ResponseEntity<Page<JobPost>> getAllJobsForAdmin(
+	    @RequestParam(defaultValue = "0") int page,
+	    @RequestParam(defaultValue = "10") int size
+	) {
+	    Pageable pageable = PageRequest.of(page, size);
+	    Page<JobPost> jobs = jobPostRepository.findAll(pageable);
+	    return new ResponseEntity<>(jobs, HttpStatus.OK);
+	}
 }

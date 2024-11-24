@@ -133,4 +133,14 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	);
 	long countByCompanyCompanyIdAndExpireDateLessThan(UUID companyId, LocalDateTime date);
 	long countByCompanyCompanyIdAndIsApproveFalse(UUID companyId);
+
+	@Query("SELECT COUNT(j) FROM JobPost j " +
+		   "WHERE j.company.companyId = :companyId " +
+		   "AND j.isApprove = false " +
+		   "AND j.createDate BETWEEN :startDate AND :endDate")
+	long countPendingJobsByCompanyAndDateRange(
+		@Param("companyId") UUID companyId,
+		@Param("startDate") LocalDateTime startDate,
+		@Param("endDate") LocalDateTime endDate
+	);
 }
