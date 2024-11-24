@@ -134,10 +134,10 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 
 	long countByCompanyCompanyId(UUID companyId);
 
-	long countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(
-			UUID companyId, 
-			LocalDateTime date
-	);
+	/*
+	 * long countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(
+	 * UUID companyId, LocalDateTime date );
+	 */
 
 	long countByCompanyCompanyIdAndIsApproveFalseOrExpireDateLessThan(
 			UUID companyId, 

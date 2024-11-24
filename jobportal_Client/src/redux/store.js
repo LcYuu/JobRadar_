@@ -32,7 +32,7 @@ const rootReducer = combineReducers({
     skill:skillReducer,
     cv:cvReducer,
     review:reviewReducer,
-    imageCompany: imageCompanyReducer
+    imageCompany: imageCompanyReducer,
     stats: statsReducer,
     user: userReducer
 

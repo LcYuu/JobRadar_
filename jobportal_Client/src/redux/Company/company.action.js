@@ -39,6 +39,9 @@ import {
   GET_COMPANY_JOB_STATS_REQUEST,
   GET_COMPANY_JOB_STATS_SUCCESS,
   GET_COMPANY_JOB_STATS_FAILURE,
+  GET_COMPANY_REQUEST,
+  GET_COMPANY_SUCCESS,
+  GET_COMPANY_FAILURE,
   
 } from "./company.actionType";
 import { api, API_BASE_URL } from "../../configs/api";
@@ -377,6 +380,31 @@ export const getCompanyJobStats = (companyId, startDate, endDate) => async (disp
     dispatch({
       type: GET_COMPANY_JOB_STATS_FAILURE,
       payload: error.message
+    });
+  }
+};
+export const getCompanyById = (companyId) => async (dispatch) => {
+  try {
+    dispatch({ type: GET_COMPANY_REQUEST });
+    
+    // Đảm bảo companyId là string hợp lệ
+    const cleanCompanyId = companyId.replace(/[^\w-]/g, '');
+    console.log("Fetching company with ID:", cleanCompanyId);
+    
+    const response = await axios.get(
+      `${API_BASE_URL}/company/profile-company/${cleanCompanyId}`
+    );
+    console.log("Company data received:", response.data);
+
+    dispatch({
+      type: GET_COMPANY_SUCCESS,
+      payload: response.data,
+    });
+  } catch (error) {
+    console.error("Error fetching company:", error);
+    dispatch({
+      type: GET_COMPANY_FAILURE,
+      payload: error.response?.data?.message || "Failed to fetch company details",
     });
   }
 };
