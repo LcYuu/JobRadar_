@@ -478,7 +478,7 @@ public class JobPostController {
 	            pageable
 	    );
 	    return ResponseEntity.ok(jobs);
-
+	}
 	@GetMapping("/stats/daily")
 	public ResponseEntity<?> getDailyStats(
 	    @RequestParam String startDate,
