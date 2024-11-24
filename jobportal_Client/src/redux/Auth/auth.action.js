@@ -39,9 +39,6 @@ export const signupAction = (userData) => async (dispatch) => {
   }
 };
 
-
-
-
 export const loginAction = (loginData) => async (dispatch) => {
   dispatch({ type: LOGIN_REQUEST });
   try {

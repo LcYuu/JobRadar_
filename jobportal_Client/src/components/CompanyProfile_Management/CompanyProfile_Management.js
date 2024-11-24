@@ -12,6 +12,8 @@ import {
   Plus,
   X,
   Upload,
+  Code,
+  BanknoteIcon,
 } from "lucide-react";
 import { toast } from "react-toastify";
 import {
@@ -23,7 +25,10 @@ import {
 import CompanyProfileModal from "./CompanyProfile_Management_Modal";
 import { store } from "../../redux/store";
 import { uploadToCloudinary } from "../../utils/uploadToCloudinary";
-import { createImageCompany, deleteImageCompany } from "../../redux/ImageCompany/imageCompany.action";
+import {
+  createImageCompany,
+  deleteImageCompany,
+} from "../../redux/ImageCompany/imageCompany.action";
 
 const CompanyProfile_Management = () => {
   const dispatch = useDispatch();
@@ -45,6 +50,7 @@ const CompanyProfile_Management = () => {
 
   const [formData, setFormData] = useState({
     description: "",
+    taxCode: "",
     contact: "",
     email: "",
     imgPath: [],
@@ -122,7 +128,7 @@ const CompanyProfile_Management = () => {
       showSuccessToast("Cập nhật thông tin thành công!");
       setIsEditingImg(false);
       dispatch(getCompanyByJWT());
-      setImages([])
+      setImages([]);
     } catch (error) {
       console.error("Error saving data:", error);
     } finally {
@@ -136,6 +142,7 @@ const CompanyProfile_Management = () => {
         description: companyJwt?.description || "",
         contact: companyJwt?.contact || "",
         email: companyJwt?.email || "",
+        taxCode: companyJwt.taxCode | "",
       });
     }
   }, [companyJwt]);
@@ -158,15 +165,18 @@ const CompanyProfile_Management = () => {
   // };
 
   const removeImage = async (imgId) => {
-    console.log(imgId)
+    console.log(imgId);
     if (window.confirm("Bạn có chắc chắn muốn xóa hình ảnh này?")) {
       try {
         await dispatch(deleteImageCompany(imgId));
         dispatch(getCompanyByJWT());
-        showSuccessToast('Xóa kinh nghiệm thành công!');
+        showSuccessToast("Xóa kinh nghiệm thành công!");
       } catch (error) {
         console.error("Có lỗi xảy ra khi xóa kinh nghiệm:", error);
-        showSuccessToast('Xóa kinh nghiệm thất bại. Vui lòng thử lại!', 'error');
+        showSuccessToast(
+          "Xóa kinh nghiệm thất bại. Vui lòng thử lại!",
+          "error"
+        );
       }
     }
   };
@@ -324,6 +334,21 @@ const CompanyProfile_Management = () => {
                 <p className="text-red-500 text-xs mt-1">{errors.email}</p>
               )}
             </div>
+            <div>
+              <label className="block mb-2">TaxCode</label>
+              <input
+                name="taxCode"
+                type="taxCode"
+                className={`border p-2 w-full mt-1 ${
+                  errors.email ? "border-red-500" : ""
+                }`}
+                value={formData.taxCode}
+                onChange={handleChange}
+              />
+              {errors.email && (
+                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+              )}
+            </div>
             <div className="mt-2 flex justify-end">
               <Button onClick={handleSaveClick}>Save</Button>
             </div>
@@ -338,6 +363,14 @@ const CompanyProfile_Management = () => {
               <Mail className="w-4 h-4 text-gray-500" />
               <span>{companyJwt?.email}</span>
             </div>
+            <div className="flex items-center gap-2">
+              <BanknoteIcon className="w-4 h-4 text-gray-500" />
+              <span>{companyJwt?.taxCode}</span>
+            </div>
+            <p className="text-sm text-red-500 mt-1">
+              Hãy tự giác cung cấp chính xác mã số thuế, nếu không bạn sẽ không thể
+              tuyển dụng.
+            </p>
           </div>
         )}
       </Card>

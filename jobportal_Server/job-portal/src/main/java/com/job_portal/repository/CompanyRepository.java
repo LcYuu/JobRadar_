@@ -45,7 +45,7 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 		       "c.logo, " + 
 		       "c.contact, " + 
 		       "c.email, " + 
-		       "c.establishedTime) " + 
+		       "c.establishedTime, c.taxCode) " + 
 		       "FROM Company c " + 
 		       "LEFT JOIN c.jobPosts jp " + 
 		       "LEFT JOIN ApplyJob a ON jp.postId = a.jobPost.postId " + 
@@ -59,7 +59,7 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 		       "c.logo, " + 
 		       "c.contact, " + 
 		       "c.email, " + 
-		       "c.establishedTime " + 
+		       "c.establishedTime, c.taxCode " + 
 		       "ORDER BY COUNT(a.postId) DESC")
 		List<CompanyDTO> findCompaniesWithSavedApplications();
 
