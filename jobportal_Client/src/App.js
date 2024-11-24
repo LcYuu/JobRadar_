@@ -42,8 +42,13 @@ import AdminDashboard from './pages/Admin/Dashboard/Dashboard';
 import CompanyList from './pages/Admin/CompanyList/CompanyList';
 import UserList from './pages/Admin/UserList/UserList';
 import AdminJobList from './pages/Admin/JobList/JobList';
+
 import JobDetailEmployer from './pages/JobDetailEmployer/JobDetailEmployer';
 import PostJob from './pages/PostJob/PostJob';
+import CompanyDetail from './pages/Admin/CompanyDetail/CompanyDetail';
+import JobDetailAdmin from './pages/Admin/JobDetail/JobDetailAdmin';
+
+
 const App = () => {
   const location = useLocation();
   const { user, jwt, isAuthenticated } = useSelector((state) => state.auth);
@@ -85,7 +90,8 @@ const App = () => {
     return (
       !noFooterPaths.includes(location.pathname) &&
       !location.pathname.includes("/user/account-management") &&
-      !location.pathname.includes("/employer/account-management")
+      !location.pathname.includes("/employer/account-management") &&
+      !location.pathname.includes("/admin")
     );
   }, [location.pathname]);
 
@@ -189,6 +195,14 @@ const App = () => {
             </PublicRoute>
           }
         />
+        <Route 
+  path="/admin/companies/:companyId" 
+  element={
+    user?.userType?.userTypeId === 1 ? 
+    <CompanyDetail /> : 
+    <CompanyProfile />
+  } 
+/>
 
         {/* <Route path="/company-profile/:id" element={<CompanyProfile />} /> */}
 
@@ -227,6 +241,8 @@ const App = () => {
           <Route path="job-list" element={<AdminJobList />} />
           <Route path="settings" element={<Settings />} />
         </Route>
+
+        <Route path="/admin/jobs/:postId" element={<JobDetailAdmin />} />
       </Routes>
       {showFooter && <Footer />}
     </div>
