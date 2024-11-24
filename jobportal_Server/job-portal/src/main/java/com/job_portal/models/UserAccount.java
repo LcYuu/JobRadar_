@@ -44,7 +44,7 @@ public class UserAccount {
     @Column(name = "email", length = 50, nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password", length = 100, nullable = false)
+    @Column(name = "password", length = 100, nullable = true) // Thay đổi nullable từ false thành true
     private String password;
 
     @Column(name = "create_date", nullable = true)
@@ -55,6 +55,9 @@ public class UserAccount {
     
     private String otp;
 	private LocalDateTime otpGeneratedTime;
+	
+	@Column(name = "provider", nullable = false)
+    private String provider;  // Trường provider để phân biệt cách đăng nhập
 	
 	@JsonIgnore
 	@OneToOne(mappedBy = "userAccount", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -67,10 +70,11 @@ public class UserAccount {
 	@OneToOne(mappedBy = "userAccount")
 	private ForgotPassword forgotPassword;
 
+	
+
 	public UserAccount(UUID userId, UserType userType, boolean isActive, String userName, String avatar, String email,
 			String password, LocalDateTime createDate, LocalDateTime lastLogin, String otp,
-			LocalDateTime otpGeneratedTime, Seeker seeker, Company company) {
-		super();
+			LocalDateTime otpGeneratedTime, String provider, Seeker seeker, Company company) {
 		this.userId = userId;
 		this.userType = userType;
 		this.isActive = isActive;
@@ -82,9 +86,22 @@ public class UserAccount {
 		this.lastLogin = lastLogin;
 		this.otp = otp;
 		this.otpGeneratedTime = otpGeneratedTime;
+		this.provider = provider;
 		this.seeker = seeker;
 		this.company = company;
 	}
+	
+	public String getProvider() {
+		return provider;
+	}
+
+
+
+	public void setProvider(String provider) {
+		this.provider = provider;
+	}
+
+
 
 	public Company getCompany() {
 		return company;
@@ -106,10 +123,9 @@ public class UserAccount {
     public UserAccount() {
     	this.avatar = DEFAULT_AVATAR_URL;
     	this.isActive = false; // Hoặc true tùy theo yêu cầu của bạn
+    	this.provider = "LOCAL";
     }
     
-
-
 	public LocalDateTime getLastLogin() {
 		return lastLogin;
 	}
@@ -199,5 +215,19 @@ public class UserAccount {
 		this.otpGeneratedTime = otpGeneratedTime;
 	}
     
-    
+	@Override
+    public String toString() {
+        return "UserAccount{" +
+                "userId=" + userId +
+                ", email='" + email + '\'' +
+                ", userName='" + userName + '\'' +
+                ", password='" + password + '\'' +
+                ", createDate=" + createDate +
+                ", isActive=" + isActive +
+                ", otp='" + otp + '\'' +
+                ", otpGeneratedTime=" + otpGeneratedTime +
+                ", provider='" + provider + '\'' +
+                ", userType=" + userType +
+                '}';
+    }
 }
