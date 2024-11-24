@@ -3,9 +3,11 @@ package com.job_portal.controller;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -305,4 +307,5 @@ public class AuthController {
 				.body(Collections.singletonMap("error", "Error fetching user role"));
 		}
 	}
+	
 }
