@@ -25,47 +25,58 @@ import jakarta.servlet.http.HttpServletRequest;
 @EnableWebSecurity
 @EnableSpringDataWebSupport(pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO)
 public class AppConfig {
-	
-	@Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
-    
-    @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        
-        http.sessionManagement(management -> 
-                management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        
-        http.authorizeHttpRequests(Authorize -> 
-                Authorize.requestMatchers("/api/**").authenticated()
-                         .anyRequest().permitAll())
-        .addFilterBefore(new JwtValidator(), BasicAuthenticationFilter.class);
-       
-        http.csrf(csrf -> csrf.disable());
-        
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
-        
-        return http.build();    
-    }
-    private CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration cfg = new CorsConfiguration();
-        
-        cfg.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // Địa chỉ front-end
-        cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Các phương thức HTTP cho phép
-        cfg.setAllowCredentials(true); // Cho phép cookie
-        cfg.setAllowedHeaders(Collections.singletonList("*")); // Tất cả các header
-        cfg.setExposedHeaders(Arrays.asList("Authorization")); // Header được phép xuất hiện trong response
-        cfg.setMaxAge(3600L); // Thời gian cache cho cấu hình CORS
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", cfg); // Áp dụng cho tất cả các endpoint
-        return source;
-    }
 
 	@Bean
-    PasswordEncoder passwordEncoder() {
-    	return new BCryptPasswordEncoder();
-    	
-    }
+	public RestTemplate restTemplate() {
+		return new RestTemplate();
+	}
+
+	@Bean
+	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+		http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+//		 http
+//	        .headers()
+//	        .addHeaderWriter((request, response) -> {
+//	            response.addHeader("Cross-Origin-Opener-Policy", "same-origin"); // Cho phép tương tác với cùng nguồn gốc
+//	            response.addHeader("Cross-Origin-Embedder-Policy", "require-corp"); // Yêu cầu nguồn tài nguyên từ các nguồn gốc hợp lệ
+//	        });
+
+		http.authorizeHttpRequests(
+				Authorize -> Authorize.requestMatchers("/api/**").authenticated().anyRequest().permitAll())
+				.addFilterBefore(new JwtValidator(), BasicAuthenticationFilter.class);
+
+		http.csrf(csrf -> csrf.disable());
+		http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
+
+		// oauth config
+		http.oauth2Login(oauth -> oauth.loginPage("/auth/login") // Trang login nếu cần thiết
+				.defaultSuccessUrl("/", true) // Đường dẫn sau khi đăng nhập thành công
+				.failureUrl("/login?error=true") // Đường dẫn khi lỗi
+				.permitAll() // Cho phép tất cả truy cập
+		);
+		return http.build();
+	}
+
+	private CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration cfg = new CorsConfiguration();
+
+		cfg.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // Địa chỉ front-end
+		cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Các phương thức HTTP cho
+																							// phép
+		cfg.setAllowCredentials(true); // Cho phép cookie
+		cfg.setAllowedHeaders(Collections.singletonList("*")); // Tất cả các header
+		cfg.setExposedHeaders(Arrays.asList("Authorization")); // Header được phép xuất hiện trong response
+		cfg.setMaxAge(3600L); // Thời gian cache cho cấu hình CORS
+
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", cfg); // Áp dụng cho tất cả các endpoint
+		return source;
+	}
+
+	@Bean
+	PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+
+	}
 }

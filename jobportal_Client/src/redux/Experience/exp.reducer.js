@@ -6,12 +6,14 @@ import {
   GET_EXP_BY_USER_FAILURE,
   GET_EXP_BY_USER_REQUEST,
   GET_EXP_BY_USER_SUCCESS,
+  GET_EXP_CANDIDATE_SUCCESS,
 } from "./exp.actionType";
 
 const initialState = {
   exp: [],
   loading: false,
   error: null,
+  expCandidate: null,
 };
 
 export const expReducer = (state = initialState, action) => {
@@ -25,6 +27,13 @@ export const expReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         exp: action.payload,
+        error: null,
+      };
+    case GET_EXP_CANDIDATE_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        expCandidate: action.payload,
         error: null,
       };
     case CREATE_EXP_SUCCESS:

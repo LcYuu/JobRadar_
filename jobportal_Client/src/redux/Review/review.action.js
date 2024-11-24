@@ -1,6 +1,9 @@
 import { api, API_BASE_URL } from "../../configs/api";
 import axios from "axios";
 import {
+  COUNT_REVIEW_BY_COMPANY_FAILURE,
+  COUNT_REVIEW_BY_COMPANY_REQUEST,
+  COUNT_REVIEW_BY_COMPANY_SUCCESS,
   CREATE_REVIEW_FAILURE,
   CREATE_REVIEW_REQUEST,
   CREATE_REVIEW_SUCCESS,
@@ -24,6 +27,24 @@ export const getReviewByCompany = (companyId) => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: GET_REVIEW_BY_COMPANY_FAILURE,
+      payload: error.message,
+    });
+  }
+};
+
+export const countReviewByCompany = () => async (dispatch) => {
+  dispatch({ type: COUNT_REVIEW_BY_COMPANY_REQUEST });
+
+  try {
+    const response = await api.get(`/review/countReviewByCompany`);
+
+    dispatch({
+      type: COUNT_REVIEW_BY_COMPANY_SUCCESS,
+      payload: response.data,
+    });
+  } catch (error) {
+    dispatch({
+      type: COUNT_REVIEW_BY_COMPANY_FAILURE,
       payload: error.message,
     });
   }

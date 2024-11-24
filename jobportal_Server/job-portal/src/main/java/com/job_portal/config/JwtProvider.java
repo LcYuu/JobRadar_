@@ -41,6 +41,7 @@ public class JwtProvider {
 	public static String getEmailFromJwtToken(String jwt) {
 		jwt = jwt.substring(7);
 
+		@SuppressWarnings("deprecation")
 		Claims claims = Jwts.parser().setSigningKey(key).build().parseClaimsJws(jwt).getBody();
 
 		// Log the email extracted from JWT
