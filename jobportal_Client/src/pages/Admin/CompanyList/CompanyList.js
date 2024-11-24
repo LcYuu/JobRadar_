@@ -36,11 +36,37 @@ export default function CompanyList() {
   const [pageSize, setPageSize] = useState(5);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
+  const [filteredCompanies, setFilteredCompanies] = useState([]);
+  const [selectedIndustry, setSelectedIndustry] = useState('all');
 
   useEffect(() => {
     dispatch(getAllCompanies());
     dispatch(getAllIndustries());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (companies) {
+      let filtered = companies;
+
+      // Filter by search term
+      if (searchTerm) {
+        filtered = filtered.filter(company => 
+          company.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          company.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          company.contact?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }
+
+      // Filter by industry
+      if (selectedIndustry !== 'all') {
+        filtered = filtered.filter(company => 
+          company.industry?.industryId === parseInt(selectedIndustry)
+        );
+      }
+
+      setFilteredCompanies(filtered);
+    }
+  }, [companies, searchTerm, selectedIndustry]);
 
   // Function to get industry name by ID
   const getIndustryName = (industryId) => {
@@ -58,12 +84,14 @@ export default function CompanyList() {
     setCurrentPage(0);
   };
 
-  const totalPages = Math.ceil(totalItems / pageSize);
+  const totalPages = Math.ceil(filteredCompanies.length / pageSize);
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center mb-4">
-        <div className="text-sm text-gray-600">Tổng số công ty: {totalItems}</div>
+        <div className="text-sm text-gray-600">
+          Tổng số công ty: {filteredCompanies.length}
+        </div>
         <div className="flex items-center gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -71,14 +99,22 @@ export default function CompanyList() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Tìm kiếm"
-              className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Tìm kiếm theo tên, địa chỉ, số điện thoại..."
+              className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-80"
             />
           </div>
-          <Button variant="outline" className="flex items-center gap-2">
-            <Filter className="w-4 h-4" />
-            Filter
-          </Button>
+          <select
+            value={selectedIndustry}
+            onChange={(e) => setSelectedIndustry(e.target.value)}
+            className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="all">Tất cả lĩnh vực</option>
+            {allIndustries?.map((industry) => (
+              <option key={industry.industryId} value={industry.industryId.toString()}>
+                {industry.industryName}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -100,7 +136,7 @@ export default function CompanyList() {
                 <td colSpan="7" className="text-center p-4">Loading...</td>
               </tr>
             ) : (
-              companies?.map((company) => (
+              filteredCompanies?.map((company) => (
                 <tr key={company.companyId} className="border-b">
                   <td className="p-4 truncate">
                     <div className="flex items-center gap-3">

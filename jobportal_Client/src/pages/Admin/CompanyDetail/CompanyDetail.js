@@ -155,7 +155,9 @@ export default function CompanyDetail() {
     <div className="container mx-auto p-6">
       {/* Header với các nút hành động */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">{companyProfile?.companyName}</h1>
+        <h1 className="text-2xl font-bold ">{companyProfile?.companyName}</h1>
+        <br/>
+        
         <div className="flex gap-3">
           <Button
             variant={companyProfile?.isActive ? "destructive" : "success"}
@@ -259,6 +261,14 @@ export default function CompanyDetail() {
           <h2 className="text-lg font-semibold mb-4">Thông tin cơ bản</h2>
           <div className="space-y-4">
             <div className="flex items-center gap-4">
+            
+              <Users2 className="w-5 h-5 text-gray-500" />
+              <div>
+                <p className="text-sm text-gray-600">Giới thiệu công ty</p>
+                <p className="font-medium">{companyProfile?.description || 'Chưa cập nhật'}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
               <MapPin className="w-5 h-5 text-gray-500" />
               <div>
                 <p className="text-sm text-gray-600">Địa chỉ</p>
@@ -274,13 +284,7 @@ export default function CompanyDetail() {
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
-              <Users2 className="w-5 h-5 text-gray-500" />
-              <div>
-                <p className="text-sm text-gray-600">Quy mô công ty</p>
-                <p className="font-medium">{companyProfile?.companySize || 'Chưa cập nhật'}</p>
-              </div>
-            </div>
+            
 
             <div className="flex items-center gap-4">
               <Phone className="w-5 h-5 text-gray-500" />

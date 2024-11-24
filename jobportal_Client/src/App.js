@@ -43,7 +43,7 @@ import CompanyList from './pages/Admin/CompanyList/CompanyList';
 import UserList from './pages/Admin/UserList/UserList';
 import AdminJobList from './pages/Admin/JobList/JobList';
 import CompanyDetail from './pages/Admin/CompanyDetail/CompanyDetail';
-
+import JobDetailAdmin from './pages/Admin/JobDetail/JobDetailAdmin';
 
 const App = () => {
   const location = useLocation();
@@ -236,6 +236,8 @@ const App = () => {
           <Route path="job-list" element={<AdminJobList />} />
           <Route path="settings" element={<Settings />} />
         </Route>
+
+        <Route path="/admin/jobs/:postId" element={<JobDetailAdmin />} />
       </Routes>
       {showFooter && <Footer />}
     </div>
