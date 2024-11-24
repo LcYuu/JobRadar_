@@ -14,6 +14,9 @@ import {
   findEmployerCompany,
   findJobCompany,
 } from "../../redux/JobPost/jobPost.action";
+import { jwtDecode } from "jwt-decode";
+import { validateTaxCode } from "../../redux/Company/company.action";
+import { toast, ToastContainer } from "react-toastify";
 
 const JobManagement = () => {
   const work = [
@@ -31,6 +34,9 @@ const JobManagement = () => {
     totalPages,
     totalElements,
   } = useSelector((store) => store.jobPost);
+
+  const { isValid, loading, error } = useSelector((store) => store.company);
+
   const [currentPage, setCurrentPage] = useState(0);
   const [size, setSize] = useState(5);
   const [status, setStatus] = useState("");
@@ -67,6 +73,10 @@ const JobManagement = () => {
     size,
   ]);
 
+  useEffect(() => {
+    dispatch(validateTaxCode()); // Gọi action khi component được mount
+  }, [dispatch]);
+
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalPages) {
       setCurrentPage(newPage);
@@ -98,11 +108,22 @@ const JobManagement = () => {
   };
 
   const applyFilters = () => {
-    setCurrentPage(0)
+    setCurrentPage(0);
     dispatch(findEmployerCompany(status, typeOfWork, currentPage, size));
   };
 
   const displayData = filtered.length > 0 ? filtered : jobs;
+  console.log("adsad" + isValid);
+
+  const handleClick = () => {
+    if (isValid) {
+      navigate("/employer/jobs/post"); // Chuyển hướng nếu mã số thuế hợp lệ
+    } else {
+      toast.error(
+        "Mã số thuế không chính xác. Hãy cập nhật đúng để được đăng bài"
+      ); // Hiển thị toast lỗi nếu không hợp lệ
+    }
+  };
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -112,14 +133,14 @@ const JobManagement = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center border rounded-lg p-2">
+          {/* <div className="flex items-center border rounded-lg p-2">
             <Calendar className="w-5 h-5 text-gray-500 mr-2" />
             <span>{selectedDate}</span>
-          </div>
+          </div> */}
           <Button
             variant="default"
             className="bg-indigo-600"
-            onClick={() => navigate("/employer/jobs/post")}
+            onClick={handleClick} // Gọi hàm khi người dùng click
           >
             + Đăng bài
           </Button>
@@ -300,6 +321,11 @@ const JobManagement = () => {
           </div>
         </div>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={true}
+      />
     </div>
   );
 };

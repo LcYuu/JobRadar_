@@ -44,6 +44,7 @@ import UserList from './pages/Admin/UserList/UserList';
 import AdminJobList from './pages/Admin/JobList/JobList';
 import JobDetailEmployer from './pages/JobDetailEmployer/JobDetailEmployer';
 import PostJob from './pages/PostJob/PostJob';
+import RoleSelection from "./pages/SignIn/RoleSelection";
 const App = () => {
   const location = useLocation();
   const { user, jwt, isAuthenticated } = useSelector((state) => state.auth);
@@ -112,6 +113,7 @@ const App = () => {
             </PublicRoute>
           }
         />
+        <Route path="/role-selection" element={<RoleSelection />} />
         <Route
           path="/auth/forgot-password"
           element={

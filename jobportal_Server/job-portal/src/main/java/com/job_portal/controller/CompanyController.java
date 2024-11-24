@@ -17,7 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -39,6 +39,7 @@ import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.UserAccountRepository;
 import com.job_portal.service.IApplyJobService;
 import com.job_portal.service.ICompanyService;
+import com.job_portal.service.TaxCodeValidation;
 import com.job_portal.specification.CompanySpecification;
 import com.job_portal.specification.JobPostSpecification;
 import com.social.exceptions.AllExceptions;
@@ -57,7 +58,49 @@ public class CompanyController {
 	
 	@Autowired
 	private IApplyJobService applyJobService;
+	@Autowired
+	private TaxCodeValidation taxCodeValidation;
 	
+	@GetMapping("/validate")
+	public ResponseEntity<Boolean> validateTaxCode(@RequestParam UUID companyId) {
+	    // Tìm công ty theo ID
+	    Optional<Company> companyOptional = companyRepository.findById(companyId);
+
+	    if (companyOptional.isEmpty()) {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false); // Không tìm thấy công ty -> false
+	    }
+
+	    Company company = companyOptional.get();
+	    String taxCode = company.getTaxCode();
+
+	    // Kiểm tra mã số thuế qua API VietQR
+	    boolean isTaxCodeValid = taxCodeValidation.checkTaxCode(taxCode);
+
+	    // Trả về true nếu hợp lệ, false nếu không hợp lệ
+	    return ResponseEntity.ok(isTaxCodeValid);
+	}
+	
+	@GetMapping("/validate-tax")
+	public ResponseEntity<Boolean> validTaxCode(@RequestHeader("Authorization") String jwt) {
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+	    // Tìm công ty theo ID
+	    Optional<Company> companyOptional = companyRepository.findById(user.get().getCompany().getCompanyId());
+
+	    if (companyOptional.isEmpty()) {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false); // Không tìm thấy công ty -> false
+	    }
+
+	    Company company = companyOptional.get();
+	    String taxCode = company.getTaxCode();
+
+	    // Kiểm tra mã số thuế qua API VietQR
+	    boolean isTaxCodeValid = taxCodeValidation.checkTaxCode(taxCode);
+
+	    // Trả về true nếu hợp lệ, false nếu không hợp lệ
+	    return ResponseEntity.ok(isTaxCodeValid);
+	}
+
 
 	@GetMapping("/get-all")
 	public ResponseEntity<List<CompanyDTO>> getAllCompanies() {
