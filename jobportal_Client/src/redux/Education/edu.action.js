@@ -13,6 +13,9 @@ import {
   UPDATE_EDU_REQUEST,
   UPDATE_EDU_SUCCESS,
   UPDATE_EDU_FAILURE,
+  GET_EDU_CANDIDATE_REQUEST,
+  GET_EDU_CANDIDATE_SUCCESS,
+  GET_EDU_CANDIDATE_FAILURE,
 } from "./edu.actionType";
 
 export const getEduByUser = () => async (dispatch) => {
@@ -112,6 +115,25 @@ export const updateEducation = (educationId, educationData) => async (dispatch) 
     dispatch({
       type: UPDATE_EDU_FAILURE,
       payload: error.response ? error.response.data : error.message,
+    });
+  }
+};
+
+export const getEduCandidate = (userId) => async (dispatch) => {
+  dispatch({ type: GET_EDU_CANDIDATE_REQUEST });
+
+  try {
+    const response = await axios.get(`http://localhost:8080/education/profile-seeker`, {
+      params: {userId}
+    });
+    dispatch({
+      type: GET_EDU_CANDIDATE_SUCCESS,
+      payload: response.data,
+    });
+  } catch (error) {
+    dispatch({
+      type: GET_EDU_CANDIDATE_FAILURE,
+      payload: error.response ? error.response.data : "Đã xảy ra lỗi",
     });
   }
 };

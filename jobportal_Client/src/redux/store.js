@@ -13,6 +13,9 @@ import { eduReducer } from "./Education/edu.reducer";
 import { skillReducer } from "./Skills/skill.reducer";
 import { cvReducer } from "./CV/cv.reducer";
 import { reviewReducer } from "./Review/review.reducer";
+
+import { imageCompanyReducer } from "./ImageCompany/imageCompany.reducer";
+
 import { statsReducer } from './Stats/stats.reducer';
 import { userReducer } from './User/user.reducer';
 const rootReducer = combineReducers({
@@ -29,7 +32,9 @@ const rootReducer = combineReducers({
     skill:skillReducer,
     cv:cvReducer,
     review:reviewReducer,
+    imageCompany: imageCompanyReducer
     stats: statsReducer,
     user: userReducer
+
 })
 export const store = legacy_createStore(rootReducer, applyMiddleware(thunk))

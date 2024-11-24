@@ -2,6 +2,7 @@ package com.job_portal.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.job_portal.DTO.EducationDTO;
@@ -107,6 +109,18 @@ public class EducationController {
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 		try {
 			List<Education> edus = educationService.searchEduByUserId(user.get().getUserId());
+			return ResponseEntity.ok(edus);
+		} catch (AllExceptions e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
+		}
+	}
+	@GetMapping("/profile-seeker")
+	public ResponseEntity<Object> searchEducationByUserId(@RequestParam UUID userId) {
+		try {
+			List<Education> edus = educationService.searchEduByUserId(userId);
 			return ResponseEntity.ok(edus);
 		} catch (AllExceptions e) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

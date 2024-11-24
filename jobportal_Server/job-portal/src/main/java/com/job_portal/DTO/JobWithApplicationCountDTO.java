@@ -13,7 +13,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class JobRecommendationDTO {
+public class JobWithApplicationCountDTO {
 	private UUID postId;
 	private String title;
 	private String description;
@@ -23,9 +23,7 @@ public class JobRecommendationDTO {
 	private String typeOfWork;
 	private LocalDate createDate;
 	private LocalDate expireDate;
-	private UUID companyId;
-	private String companyName;
-	private String cityName;
-	private String industryName;
-	private String logo;
+	private Long applicationCount;
+	private String status;
+	private String industryName; 
 }
