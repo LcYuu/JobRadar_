@@ -1,5 +1,8 @@
 package com.job_portal.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +19,7 @@ import com.job_portal.models.Seeker;
 import com.job_portal.repository.CityRepository;
 import com.job_portal.repository.CompanyRepository;
 import com.job_portal.repository.IndustryRepository;
+import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.SeekerRepository;
 import com.social.exceptions.AllExceptions;
 
@@ -35,6 +39,8 @@ public class CompanyServiceImpl implements ICompanyService {
 	
 	@Autowired
 	SeekerRepository seekerRepository;
+	@Autowired
+	JobPostRepository jobPostRepository;
 
 	@Override
 	public boolean deleteCompany(UUID companyId) throws AllExceptions {
@@ -209,5 +215,6 @@ public class CompanyServiceImpl implements ICompanyService {
 	    return result;
 	}
 
+	
 
 }

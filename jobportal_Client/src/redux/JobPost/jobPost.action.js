@@ -1,7 +1,7 @@
 import axios from "axios"
 import { api, API_BASE_URL } from "../../configs/api"
 
-import { CREATE_COMMENT_FAILURE,GET_ALL_JOB_REQUEST, GET_ALL_JOB_FAILURE, CREATE_COMMENT_REQUEST, CREATE_COMMENT_SUCCESS, CREATE_POST_FAILURE, CREATE_POST_REQUEST, CREATE_POST_SUCCESS, GET_ALL_JOB_SUCCESS, GET_ALL_POST_FAILURE, GET_ALL_POST_REQUEST, GET_ALL_POST_SUCCESS, GET_USERS_POST_FAILURE, GET_USERS_POST_REQUEST, GET_USERS_POST_SUCCESS, LIKE_POST_FAILURE, LIKE_POST_REQUEST, LIKE_POST_SUCCESS, GET_TOP8_JOB_REQUEST, GET_TOP8_JOB_FAILURE, GET_TOP8_JOB_SUCCESS, COUNT_JOB_BY_TYPE_REQUEST, COUNT_JOB_BY_TYPE_SUCCESS, COUNT_JOB_BY_TYPE_FAILURE, SEARCH_JOBS_REQUEST, SEARCH_JOBS_SUCCESS, SEARCH_JOBS_FAILURE, SET_SALARY_RANGE_REQUEST, SET_SALARY_RANGE_SUCCESS, SET_SALARY_RANGE_FAILURE, GET_JOBS_BY_COMPANY_REQUEST, GET_JOBS_BY_COMPANY_SUCCESS, GET_JOBS_BY_COMPANY_FAILURE, GET_TOTAL_JOBS_REQUEST, GET_TOTAL_JOBS_SUCCESS, GET_TOTAL_JOBS_FAILURE, GET_JOB_POST_BY_POST_ID_REQUEST, GET_JOB_POST_BY_POST_ID_SUCCESS, GET_JOB_POST_BY_POST_ID_FAILURE, GET_RECOMMEND_JOB_REQUEST, GET_RECOMMEND_JOB_SUCCESS, GET_RECOMMEND_JOB_FAILURE } from "./jobPost.actionType"
+import { CREATE_COMMENT_FAILURE,GET_ALL_JOB_REQUEST, GET_ALL_JOB_FAILURE, CREATE_COMMENT_REQUEST, CREATE_COMMENT_SUCCESS, CREATE_POST_FAILURE, CREATE_POST_REQUEST, CREATE_POST_SUCCESS, GET_ALL_JOB_SUCCESS, GET_ALL_POST_FAILURE, GET_ALL_POST_REQUEST, GET_ALL_POST_SUCCESS, GET_USERS_POST_FAILURE, GET_USERS_POST_REQUEST, GET_USERS_POST_SUCCESS, LIKE_POST_FAILURE, LIKE_POST_REQUEST, LIKE_POST_SUCCESS, GET_TOP8_JOB_REQUEST, GET_TOP8_JOB_FAILURE, GET_TOP8_JOB_SUCCESS, COUNT_JOB_BY_TYPE_REQUEST, COUNT_JOB_BY_TYPE_SUCCESS, COUNT_JOB_BY_TYPE_FAILURE, SEARCH_JOBS_REQUEST, SEARCH_JOBS_SUCCESS, SEARCH_JOBS_FAILURE, SET_SALARY_RANGE_REQUEST, SET_SALARY_RANGE_SUCCESS, SET_SALARY_RANGE_FAILURE, GET_JOBS_BY_COMPANY_REQUEST, GET_JOBS_BY_COMPANY_SUCCESS, GET_JOBS_BY_COMPANY_FAILURE, GET_TOTAL_JOBS_REQUEST, GET_TOTAL_JOBS_SUCCESS, GET_TOTAL_JOBS_FAILURE, GET_JOB_POST_BY_POST_ID_REQUEST, GET_JOB_POST_BY_POST_ID_SUCCESS, GET_JOB_POST_BY_POST_ID_FAILURE, GET_RECOMMEND_JOB_REQUEST, GET_RECOMMEND_JOB_SUCCESS, GET_RECOMMEND_JOB_FAILURE, GET_ALL_ADMIN_JOBS_REQUEST, GET_ALL_ADMIN_JOBS_SUCCESS, GET_ALL_ADMIN_JOBS_FAILURE } from "./jobPost.actionType"
 
 
 
@@ -127,22 +127,33 @@ export const countJobByType = () => async (dispatch) => {
 };
 
 export const getJobPostByPostId = (postId) => async (dispatch) => {
-    dispatch({ type: GET_JOB_POST_BY_POST_ID_REQUEST });
-    try {
-
-      const response = await axios.get(`http://localhost:8080/job-post/findJob/${postId}`)
-  
-      dispatch({
-        type: GET_JOB_POST_BY_POST_ID_SUCCESS,
-        payload: response.data,
-      });
-    } catch (error) {
-      dispatch({
-        type: GET_JOB_POST_BY_POST_ID_FAILURE,
-        payload: error.message,
-      });
+  dispatch({ type: GET_JOB_POST_BY_POST_ID_REQUEST });
+  try {
+    console.log("Fetching job with postId:", postId); // Debug log
+    
+    const response = await api.get(`/job-post/findJob/${postId}`);
+    console.log("API Response:", response.data); // Debug log
+    
+    if (!response.data) {
+      throw new Error("Không tìm thấy dữ liệu công việc");
     }
-  };
+
+    dispatch({
+      type: GET_JOB_POST_BY_POST_ID_SUCCESS,
+      payload: response.data
+    });
+    
+    return response.data; // Return data for component use
+    
+  } catch (error) {
+    console.error("Error fetching job:", error.response || error);
+    dispatch({
+      type: GET_JOB_POST_BY_POST_ID_FAILURE,
+      payload: error.response?.data?.message || error.message
+    });
+    throw error; // Re-throw for component error handling
+  }
+};
 
 export const getJobsByCompany = (companyId, currentPage, size) => async (dispatch) => {
     dispatch({ type: GET_JOBS_BY_COMPANY_REQUEST });
@@ -181,6 +192,37 @@ export const getTotalJobsByCompany = (companyId) => async (dispatch) => {
             payload: error.message
         });
     }
+};
+
+export const getAllJobsForAdmin = (page, size) => async (dispatch) => {
+  dispatch({ type: GET_ALL_ADMIN_JOBS_REQUEST });
+  try {
+    const response = await api.get(`/job-post/admin/all-jobs`, {
+      params: {
+        page,
+        size
+      }
+    });
+    dispatch({
+      type: GET_ALL_ADMIN_JOBS_SUCCESS,
+      payload: response.data
+    });
+  } catch (error) {
+    dispatch({
+      type: GET_ALL_ADMIN_JOBS_FAILURE,
+      payload: error.message
+    });
+  }
+};
+
+export const approveJob = (postId) => async (dispatch) => {
+  try {
+    await api.post(`/job-post/approve/${postId}`);
+    // Sau khi approve thành công, fetch lại danh sách
+    dispatch(getAllJobsForAdmin(0, 10));
+  } catch (error) {
+    console.error('Error approving job:', error);
+  }
 };
 
 
