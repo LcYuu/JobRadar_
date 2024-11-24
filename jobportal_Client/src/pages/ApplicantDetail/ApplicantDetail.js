@@ -1,73 +1,88 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "../../ui/button";
-import { ChevronLeft, Mail, Phone, Instagram, Twitter, Globe, MessageSquare } from 'lucide-react';
+import {
+  ChevronLeft,
+  Mail,
+  Phone,
+  Instagram,
+  Twitter,
+  Globe,
+  MessageSquare,
+} from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tab";
+import { useDispatch, useSelector } from "react-redux";
+import { store } from "../../redux/store";
+import {
+  getCandidateProfile,
+  getCandidateSkills,
+} from "../../redux/Seeker/seeker.action";
+import { getEduCandidate } from "../../redux/Education/edu.action";
+import { getExpCandidate } from "../../redux/Experience/exp.action";
 
 const ApplicantDetail = () => {
-  const { id } = useParams();
+  const { userId, postId } = useParams();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("applicant-profile");
+  const { profileCandidate, skillsCandidate } = useSelector(
+    (store) => store.seeker
+  );
+  const { eduCandidate } = useSelector((store) => store.edu);
+  const { expCandidate } = useSelector((store) => store.exp);
 
-  // Mock data - thay thế bằng API call thực tế
-  const applicant = {
-    id: 1,
-    fullName: "Jerome Bell",
-    avatar: "/avatars/jerome.jpg",
-    rating: 4.0,
-    position: "Product Designer",
-    appliedJob: {
-      title: "Product Development",
-      department: "Marketing",
-      type: "Full-Time",
-      appliedDate: "2 days ago",
-      stage: "Interview",
-      progress: 75
-    },
-    contact: {
-      email: "jeromeBell45@email.com",
-      phone: "+44 1245 572 135",
-      instagram: "instagram.com/jeromebell",
-      twitter: "twitter.com/jeromebell",
-      website: "www.jeromebell.com"
-    },
-    personalInfo: {
-      gender: "Male",
-      dateOfBirth: "March 23, 1995",
-      age: "26 y.o",
-      language: "English, French, Bahasa",
-      address: "4517 Washington Ave. Manchester, Kentucky 39495"
-    },
-    professionalInfo: {
-      aboutMe: "I'm a product designer + filmmaker currently working remotely at Twitter from beautiful Manchester, United Kingdom. I'm passionate about designing digital products that have a positive impact on the world.",
-      experience: "For 10 years, I've specialised in interface, experience & interaction design as well as working in user research and product strategy for product agencies, big tech companies & start-ups.",
-      currentJob: "Product Designer",
-      experienceYears: "4 Years",
-      education: "Bachelors in Engineering",
-      skills: ["Project Management", "Copywriting", "English"]
-    }
+  const timeAgo = (date) => {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - new Date(date)) / 1000);
+
+    if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours} hours ago`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 30) return `${diffInDays} days ago`;
+    const diffInMonths = Math.floor(diffInDays / 30);
+    if (diffInMonths < 12) return `${diffInMonths} months ago`;
+    const diffInYears = Math.floor(diffInMonths / 12);
+    return `${diffInYears} years ago`;
   };
+
+  const calculateAge = (dob) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const month = today.getMonth() - birthDate.getMonth();
+    if (month < 0 || (month === 0 && today.getDate() < birthDate.getDate())) {
+      return age - 1;
+    }
+    return age;
+  };
+
+  useEffect(() => {
+    dispatch(getCandidateProfile(userId, postId));
+    dispatch(getCandidateSkills(userId));
+    dispatch(getEduCandidate(userId));
+    dispatch(getExpCandidate(userId));
+  }, [dispatch]);
 
   const contactIcons = {
     email: <Mail className="w-4 h-4 text-gray-500" />,
     phone: <Phone className="w-4 h-4 text-gray-500" />,
-    instagram: <Instagram className="w-4 h-4 text-gray-500" />,
-    twitter: <Twitter className="w-4 h-4 text-gray-500" />,
-    website: <Globe className="w-4 h-4 text-gray-500" />
   };
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           onClick={() => navigate(-1)}
           className="flex items-center gap-2"
         >
           <ChevronLeft className="w-4 h-4" />
-          Applicant Details
+          Back
         </Button>
-        <Button variant="outline">More Action</Button>
+        {/* <Button variant="outline">More Action</Button> */}
       </div>
 
       {/* Profile Card */}
@@ -76,28 +91,37 @@ const ApplicantDetail = () => {
           {/* Left Column */}
           <div className="col-span-1">
             <div className="text-center">
-              <img 
-                src={applicant.avatar} 
-                alt={applicant.fullName}
+              <img
+                src={profileCandidate?.avatar}
+                alt={profileCandidate?.fullName}
                 className="w-24 h-24 rounded-full mx-auto mb-3"
               />
-              <h1 className="text-xl font-semibold">{applicant.fullName}</h1>
-              <p className="text-gray-600">{applicant.position}</p>
-              <div className="flex items-center justify-center mt-2">
+              <h1 className="text-xl font-semibold">
+                {profileCandidate?.fullName}
+              </h1>
+              {/* <p className="text-gray-600">{applicant.position}</p> */}
+              {/* <div className="flex items-center justify-center mt-2">
                 <span className="text-yellow-500">★</span>
                 <span className="ml-1">{applicant.rating}</span>
-              </div>
+              </div> */}
 
               <div className="mt-6">
                 <h3 className="font-medium mb-2">Applied Jobs</h3>
-                <p className="text-sm text-gray-600">{applicant.appliedJob.title}</p>
-                <p className="text-sm text-gray-500">
-                  {applicant.appliedJob.department} • {applicant.appliedJob.type}
+                <p className="text-sm text-gray-600">
+                  {profileCandidate?.title}
                 </p>
-                <p className="text-xs text-gray-400 mt-1">{applicant.appliedJob.appliedDate}</p>
+                <p className="text-sm text-gray-500">
+                  {profileCandidate?.industryName} •{" "}
+                  {profileCandidate?.typeOfWork}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  {profileCandidate?.applyDate
+                    ? `${timeAgo(profileCandidate.applyDate)}`
+                    : "No apply date available"}
+                </p>
               </div>
 
-              <div className="mt-4">
+              {/* <div className="mt-4">
                 <p className="text-sm mb-2">Stage: {applicant.appliedJob.stage}</p>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 
@@ -113,19 +137,26 @@ const ApplicantDetail = () => {
               >
                 <MessageSquare className="w-4 h-4 mr-2" />
                 Schedule Interview
-              </Button>
+              </Button> */}
 
-              <div className="mt-8">
+              <div className="mt-10">
                 <h3 className="font-medium text-left mb-4">Contact</h3>
                 <div className="space-y-3">
-                  {Object.entries(applicant.contact).map(([key, value]) => (
-                    <div key={key} className="flex items-center gap-3 text-left">
-                      {contactIcons[key]}
-                      <a href="#" className="text-sm text-gray-600 hover:text-indigo-600">
-                        {value}
-                      </a>
-                    </div>
-                  ))}
+                  <div
+                    key="email"
+                    className="flex items-center gap-3 text-left"
+                  >
+                    {contactIcons.email} {/* Hiển thị icon email */}
+                    {profileCandidate?.emailContact} {/* Hiển thị email */}
+                  </div>
+                  <div
+                    key="phone"
+                    className="flex items-center gap-3 text-left"
+                  >
+                    {contactIcons.phone} {/* Hiển thị icon phone */}
+                    {profileCandidate?.phoneNumber}{" "}
+                    {/* Hiển thị số điện thoại */}
+                  </div>
                 </div>
               </div>
             </div>
@@ -135,22 +166,22 @@ const ApplicantDetail = () => {
           <div className="col-span-2">
             <Tabs defaultValue="applicant-profile" className="w-full">
               <TabsList className="border-b border-gray-200">
-                <TabsTrigger 
+                <TabsTrigger
                   value="applicant-profile"
                   className={`px-4 py-2 -mb-px ${
-                    activeTab === "applicant-profile" 
-                      ? "text-indigo-600 border-b-2 border-indigo-600" 
+                    activeTab === "applicant-profile"
+                      ? "text-indigo-600 border-b-2 border-indigo-600"
                       : "text-gray-500"
                   }`}
                   onClick={() => setActiveTab("applicant-profile")}
                 >
                   Applicant Profile
                 </TabsTrigger>
-                <TabsTrigger 
+                <TabsTrigger
                   value="resume"
                   className={`px-4 py-2 -mb-px ${
-                    activeTab === "resume" 
-                      ? "text-indigo-600 border-b-2 border-indigo-600" 
+                    activeTab === "resume"
+                      ? "text-indigo-600 border-b-2 border-indigo-600"
                       : "text-gray-500"
                   }`}
                   onClick={() => setActiveTab("resume")}
@@ -163,7 +194,7 @@ const ApplicantDetail = () => {
                 <div className="grid grid-cols-3 gap-6">
                   {/* Left Column */}
                   {/* <div className="col-span-1 space-y-6"> */}
-                    {/* <div className="bg-white rounded-lg p-6 shadow-sm">
+                  {/* <div className="bg-white rounded-lg p-6 shadow-sm">
                       <h2 className="font-semibold mb-4">Applied Jobs</h2>
                       <div className="space-y-2">
                         <p className="font-medium">{applicant.appliedJob.title}</p>
@@ -183,7 +214,7 @@ const ApplicantDetail = () => {
                       </div>
                     </div> */}
 
-                    {/* <div className="bg-white rounded-lg p-6 shadow-sm">
+                  {/* <div className="bg-white rounded-lg p-6 shadow-sm">
                       <h2 className="font-semibold mb-4">Contact</h2>
                       <div className="space-y-4">
                         {Object.entries(applicant.contact).map(([key, value]) => (
@@ -205,61 +236,125 @@ const ApplicantDetail = () => {
                       <div className="grid grid-cols-2 gap-y-4">
                         <div>
                           <p className="text-sm text-gray-600">Full Name</p>
-                          <p className="text-sm">{applicant.fullName}</p>
+                          <p className="text-sm">
+                            {profileCandidate?.fullName}
+                          </p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-600">Gender</p>
-                          <p className="text-sm">{applicant.personalInfo.gender}</p>
+                          <p className="text-sm">{profileCandidate?.gender}</p>
                         </div>
                         <div>
                           <p className="text-sm text-gray-600">Date of Birth</p>
-                          <p className="text-sm">{applicant.personalInfo.dateOfBirth} ({applicant.personalInfo.age})</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Language</p>
-                          <p className="text-sm">{applicant.personalInfo.language}</p>
+                          <p className="text-sm">
+                            {profileCandidate?.dateOfBirth ? (
+                              <>
+                                <span>{profileCandidate.dateOfBirth}</span>
+                                <span>
+                                  {" "}
+                                  ({calculateAge(
+                                    profileCandidate.dateOfBirth
+                                  )}{" "}
+                                  years old)
+                                </span>
+                              </>
+                            ) : (
+                              "No date of birth available"
+                            )}
+                          </p>
                         </div>
                         <div className="col-span-2">
                           <p className="text-sm text-gray-600">Address</p>
-                          <p className="text-sm">{applicant.personalInfo.address}</p>
+                          <p className="text-sm">{profileCandidate?.address}</p>
                         </div>
                       </div>
                     </div>
 
                     <div className="bg-white rounded-lg p-6 shadow-sm">
                       <h2 className="font-semibold mb-4">Professional Info</h2>
-                      <div className="space-y-6">
-                        <div>
-                          <p className="text-sm text-gray-600">About Me</p>
-                          <p className="text-sm mt-1">{applicant.professionalInfo.aboutMe}</p>
-                          <p className="text-sm mt-2">{applicant.professionalInfo.experience}</p>
-                        </div>
+                      <div className="bg-white rounded-lg p-6 shadow-sm">
+                        <h2 className="font-semibold mb-4">
+                          Professional Info
+                        </h2>
+                        <div className="space-y-6">
+                          <div>
+                            <p className="text-sm text-gray-600">About Me</p>
+                            <p className="text-sm mt-1">
+                              {profileCandidate?.description}
+                            </p>
+                          </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-sm text-gray-600">Current Job</p>
-                            <p className="text-sm">{applicant.professionalInfo.currentJob}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-600">Experience in Years</p>
-                            <p className="text-sm">{applicant.professionalInfo.experienceYears}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-600">Highest Qualification Held</p>
-                            <p className="text-sm">{applicant.professionalInfo.education}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-600">Skill set</p>
-                            <div className="flex gap-2 mt-1">
-                              {applicant.professionalInfo.skills.map((skill, index) => (
-                                <span 
-                                  key={index}
-                                  className="text-sm text-indigo-600"
-                                >
-                                  {skill}
-                                </span>
-                              ))}
+                          <div className="grid grid-cols-2 gap-6">
+                            {/* Cột bên trái - Experience */}
+                            <div>
+                              <p className="text-sm text-gray-600">
+                                Experience
+                              </p>
+                              {/* Kiểm tra nếu có dữ liệu kinh nghiệm */}
+                              {expCandidate?.length > 0 ? (
+                                expCandidate.map((exp, index) => (
+                                  <div
+                                    key={index}
+                                    className="space-y-2 flex items-center"
+                                  >
+                                    <span className="text-green-500 mr-2">
+                                      ✔️
+                                    </span>
+                                    <p className="text-sm">{exp.jobTitle}</p>
+                                  </div>
+                                ))
+                              ) : (
+                                <p className="text-sm text-gray-500">
+                                  No experience information available.
+                                </p>
+                              )}
                             </div>
+
+                            {/* Cột bên phải - Education */}
+                            <div>
+                              <p className="text-sm text-gray-600">Education</p>
+                              {eduCandidate?.length > 0 ? (
+                                eduCandidate.map((edu, index) => (
+                                  <div
+                                    key={index}
+                                    className="space-y-2 flex items-center"
+                                  >
+                                    <span className="text-green-500 mr-2">
+                                      ✔️
+                                    </span>
+                                    <p className="text-sm">
+                                      {edu?.certificateDegreeName}
+                                    </p>
+                                  </div>
+                                ))
+                              ) : (
+                                <p className="text-sm text-gray-500">
+                                  No education information available.
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-600">Skills</p>
+                            {skillsCandidate?.skills?.length > 0 ? (
+                              <div className="flex gap-2 mt-1">
+                                {skillsCandidate.skills.map((skill, index) => (
+                                  <span
+                                    key={index}
+                                    className="text-sm text-indigo-600 flex items-center"
+                                  >
+                                    <span className="text-green-500 mr-2">
+                                      ✔️
+                                    </span>
+                                    {skill.skillName}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-sm text-gray-500">
+                                No skills information available.
+                              </p>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -272,7 +367,17 @@ const ApplicantDetail = () => {
                 <div className="bg-white rounded-lg p-6 shadow-sm mt-6">
                   <h2 className="font-semibold mb-4">Resume</h2>
                   <div className="aspect-[3/4] bg-gray-100 rounded-lg flex items-center justify-center">
-                    <p className="text-gray-500">Resume preview will be displayed here</p>
+                    {profileCandidate?.pathCV ? (
+                      <iframe
+                        src={profileCandidate.pathCV}
+                        className="w-full h-full rounded-lg"
+                        title="Resume Preview"
+                      ></iframe>
+                    ) : (
+                      <p className="text-gray-500">
+                        No resume available for preview
+                      </p>
+                    )}
                   </div>
                 </div>
               </TabsContent>
@@ -284,4 +389,4 @@ const ApplicantDetail = () => {
   );
 };
 
-export default ApplicantDetail; 
+export default ApplicantDetail;

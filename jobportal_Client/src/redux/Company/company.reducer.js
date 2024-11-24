@@ -39,6 +39,7 @@ import {
 
 const initialState = {
   companies: [],
+  companyJwt: null,
   companyByFeature: [],
   companyFitSeeker: [],
   companyProfile: null,
@@ -100,13 +101,14 @@ export const companyReducer = (state = initialState, action) => {
         ...state,
         loading: true,
         error: null,
-        company: null
+        companyJwt: null
       };
     case GET_COMPANY_SUCCESS:
+    case UPDATE_COMPANY_PROFILE_SUCCESS:
       return {
         ...state,
         loading: false,
-        company: action.payload,
+        companyJwt: action.payload,
         error: null
       };
     case GET_COMPANY_FAILURE:
@@ -120,14 +122,6 @@ export const companyReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: true,
-        error: null,
-      };
-
-    case UPDATE_COMPANY_PROFILE_SUCCESS:
-      return {
-        ...state,
-        loading: false,
-        message: "Cập nhật thông tin công ty thành công",
         error: null,
       };
 

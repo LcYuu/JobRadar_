@@ -42,8 +42,12 @@ import AdminDashboard from './pages/Admin/Dashboard/Dashboard';
 import CompanyList from './pages/Admin/CompanyList/CompanyList';
 import UserList from './pages/Admin/UserList/UserList';
 import AdminJobList from './pages/Admin/JobList/JobList';
+
+import JobDetailEmployer from './pages/JobDetailEmployer/JobDetailEmployer';
+import PostJob from './pages/PostJob/PostJob';
 import CompanyDetail from './pages/Admin/CompanyDetail/CompanyDetail';
 import JobDetailAdmin from './pages/Admin/JobDetail/JobDetailAdmin';
+
 
 const App = () => {
   const location = useLocation();
@@ -219,10 +223,11 @@ const App = () => {
           />
           <Route path="job-management" element={<JobManagement />} />
           <Route path="candidate-management" element={<CandidateManagement />} />
-          <Route path="candidate-management/applicants/:id" element={<ApplicantDetail />} />
+          <Route path="candidate-management/applicants/:userId/:postId" element={<ApplicantDetail />} />
           <Route path="settings" element={<Settings />} />
         </Route>
-
+        <Route path="/employer/jobs/:postId" element={<JobDetailEmployer />} />
+        <Route path="/employer/jobs/post" element={<PostJob />} />
         {/* Admin Protected Routes */}
         <Route path="/admin" element={
           <ProtectedRoute isAuthenticated={isAuthenticated && user?.userType?.userTypeId === 1}>

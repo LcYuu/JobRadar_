@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Button } from '../../ui/button';
-import { Card } from '../../ui/card';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Button } from "../../ui/button";
+import { Card } from "../../ui/card";
 import {
   Calendar,
   MapPin,
@@ -10,115 +10,213 @@ import {
   Phone,
   PenSquare,
   Plus,
-  X
-} from 'lucide-react';
-import { toast } from 'react-toastify';
-import { updateCompanyProfile, updateCompanyImages, getCompanyProfile } from '../../redux/Company/company.action';
+  X,
+  Upload,
+} from "lucide-react";
+import { toast } from "react-toastify";
+import {
+  updateCompanyProfile,
+  updateCompanyImages,
+  getCompanyProfile,
+  getCompanyByJWT,
+} from "../../redux/Company/company.action";
+import CompanyProfileModal from "./CompanyProfile_Management_Modal";
+import { store } from "../../redux/store";
+import { uploadToCloudinary } from "../../utils/uploadToCloudinary";
+import { createImageCompany, deleteImageCompany } from "../../redux/ImageCompany/imageCompany.action";
 
 const CompanyProfile_Management = () => {
   const dispatch = useDispatch();
-  const { companyProfile, loading, error } = useSelector((store) => store.company);
-  
+  const { companyJwt, loading, error } = useSelector((store) => store.company);
+  const { imageCompany } = useSelector((store) => store.imageCompany);
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
-    // Fetch company profile on component mount
-    const fetchProfile = async () => {
-      try {
-        await dispatch(getCompanyProfile());
-      } catch (error) {
-        toast.error('Không thể tải thông tin công ty');
-      }
-    };
-    fetchProfile();
+    dispatch(getCompanyByJWT());
   }, [dispatch]);
 
-  const [editMode, setEditMode] = useState({
-    basicInfo: false,
-    contact: false,
-    description: false,
-    workspaceImages: false
-  });
+  const [open, setOpen] = useState(false);
+  const handleOpenProfileModal = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const [isEditingDes, setIsEditingDes] = useState(false);
+  const [isEditingInfo, setIsEditingInfo] = useState(false);
+  const [isEditingImg, setIsEditingImg] = useState(false);
 
   const [formData, setFormData] = useState({
-    companyName: '',
-    establishedTime: '',
-    location: '',
-    industry: '',
-    description: '',
-    contact: '',
-    email: '',
-    logo: null,
-    workspaceImages: []
+    description: "",
+    contact: "",
+    email: "",
+    imgPath: [],
   });
 
-  useEffect(() => {
-    if (companyProfile) {
-      setFormData({
-        companyName: companyProfile.companyName || '',
-        establishedTime: companyProfile.establishedTime || '',
-        location: companyProfile.address || '', // Match with backend field
-        industry: companyProfile.industry?.industryName || '',
-        industryId: companyProfile.industry?.industryId || null,
-        cityId: companyProfile.city?.cityId || null,
-        description: companyProfile.description || '',
-        contact: companyProfile.contact || '',
-        email: companyProfile.email || '',
-        logo: companyProfile.logo || null,
-        workspaceImages: companyProfile.images || [] // Match with backend field
-      });
-    }
-  }, [companyProfile]);
+  const [image, setImage] = useState(companyJwt?.images || []);
+  const [images, setImages] = useState([]); // Lưu trữ nhiều hình ảnh
 
-  const handleEdit = (section) => {
-    setEditMode(prev => ({
-      ...prev,
-      [section]: true
-    }));
+  const handleSelectImage = (event) => {
+    const files = event.target.files; // Lấy tất cả các file ảnh
+    if (files) {
+      const newFiles = Array.from(files); // Lấy file gốc
+
+      // Cập nhật formData với file gốc
+      setFormData((prevData) => {
+        const updatedImgPath = Array.isArray(prevData.imgPath)
+          ? prevData.imgPath
+          : [];
+        return {
+          ...prevData,
+          imgPath: [...updatedImgPath, ...newFiles], // Lưu file gốc vào imgPath
+        };
+      });
+
+      // Nếu cần hiển thị trước, tạo URL tạm thời
+      const previewUrls = newFiles.map((file) => URL.createObjectURL(file));
+      setImages((prevImages) => [...prevImages, ...previewUrls]);
+    }
   };
 
-  const handleSave = async (section) => {
-    try {
-      if (section === 'description' || section === 'contact' || section === 'basicInfo') {
-        const updateData = {
-          companyName: formData.companyName,
-          description: formData.description,
-          establishedDate: formData.establishedTime,
-          address: formData.location,
-          industryId: formData.industryId,
-          cityId: formData.cityId,
-          contact: formData.contact,
-          email: formData.email,
-          logo: formData.logo
-        };
+  const handleEditDesClick = () => {
+    setIsEditingDes(true);
+  };
+  const handleEditInfoClick = () => {
+    setIsEditingInfo(true);
+  };
 
-        await dispatch(updateCompanyProfile(updateData));
-        toast.success('Cập nhật thông tin thành công!');
-      } else if (section === 'workspaceImages') {
-        await dispatch(updateCompanyImages(formData.workspaceImages));
-        toast.success('Cập nhật hình ảnh thành công!');
+  const handleEditImgClick = () => {
+    setIsEditingImg(true);
+  };
+
+  const handleSaveClick = async () => {
+    if (!validateForm()) {
+      return;
+    }
+    try {
+      await dispatch(updateCompanyProfile(formData));
+      setIsEditingDes(false);
+      setIsEditingInfo(false);
+      dispatch(getCompanyByJWT());
+      showSuccessToast("Cập nhật thông tin thành công!");
+    } catch (error) {
+      console.error("Update failed: ", error);
+    }
+  };
+  console.log("aaa" + formData.imgPath);
+
+  const handleSave = async () => {
+    try {
+      setIsLoading(true);
+
+      if (formData.imgPath && formData.imgPath.length > 0) {
+        for (const file of formData.imgPath) {
+          // Upload từng file lên Cloudinary
+          const uploadedUrl = await uploadToCloudinary(file);
+          console.log(uploadedUrl);
+          // Gửi URL đã upload đến API backend
+          const imageData = {
+            pathImg: uploadedUrl, // Đây là URL của ảnh sau khi được upload
+          };
+          await dispatch(createImageCompany(imageData)); // Gửi từng URL một
+        }
       }
 
-      setEditMode(prev => ({
-        ...prev,
-        [section]: false
-      }));
+      showSuccessToast("Cập nhật thông tin thành công!");
+      setIsEditingImg(false);
+      dispatch(getCompanyByJWT());
+      setImages([])
     } catch (error) {
-      toast.error(error.response?.data || 'Có lỗi xảy ra khi cập nhật!');
+      console.error("Error saving data:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    setFormData(prev => ({
-      ...prev,
-      workspaceImages: [...prev.workspaceImages, ...files]
+  useEffect(() => {
+    if (companyJwt) {
+      setFormData({
+        description: companyJwt?.description || "",
+        contact: companyJwt?.contact || "",
+        email: companyJwt?.email || "",
+      });
+    }
+  }, [companyJwt]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    console.log(name, value); // Kiểm tra giá tr
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value, // Cập nhật giá trị cho trường tương ứng
     }));
   };
 
-  const removeImage = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      workspaceImages: prev.workspaceImages.filter((_, i) => i !== index)
-    }));
+  // const handleImageUpload = (e) => {
+  //   const files = Array.from(e.target.files);
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     workspaceImages: [...prev.workspaceImages, ...files],
+  //   }));
+  // };
+
+  const removeImage = async (imgId) => {
+    console.log(imgId)
+    if (window.confirm("Bạn có chắc chắn muốn xóa hình ảnh này?")) {
+      try {
+        await dispatch(deleteImageCompany(imgId));
+        dispatch(getCompanyByJWT());
+        showSuccessToast('Xóa kinh nghiệm thành công!');
+      } catch (error) {
+        console.error("Có lỗi xảy ra khi xóa kinh nghiệm:", error);
+        showSuccessToast('Xóa kinh nghiệm thất bại. Vui lòng thử lại!', 'error');
+      }
+    }
+  };
+
+  const [errors, setErrors] = useState({
+    contact: "",
+    phone: "",
+  });
+
+  const validateForm = () => {
+    let tempErrors = {
+      emailContact: "",
+      phoneNumber: "",
+    };
+    let isValid = true;
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (formData.email && !emailRegex.test(formData.email)) {
+      tempErrors.email = "Email không hợp lệ";
+      isValid = false;
+    }
+
+    // Validate phone number (số điện thoại Việt Nam)
+    const phoneRegex = /(0[3|5|7|8|9])+([0-9]{8})\b/;
+    if (formData.contact && !phoneRegex.test(formData.contact)) {
+      tempErrors.contact = "Số điện thoại không hợp lệ";
+      isValid = false;
+    }
+
+    setErrors(tempErrors);
+    return isValid;
+  };
+
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+
+  const Toast = ({ message, onClose }) => (
+    <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded shadow-lg flex items-center gap-2 animate-fade-in-down z-50">
+      <span>{message}</span>
+      <button onClick={onClose} className="text-white hover:text-gray-200">
+        ✕
+      </button>
+    </div>
+  );
+
+  const showSuccessToast = (message) => {
+    setToastMessage(message);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
   };
 
   return (
@@ -126,55 +224,62 @@ const CompanyProfile_Management = () => {
       {/* Company Header */}
       <div className="flex items-center gap-6 mb-8">
         <div className="w-24 h-24 bg-emerald-100 rounded-xl overflow-hidden">
-          <img 
-            src={formData.logo || '/company-placeholder.png'} 
+          <img
+            src={companyJwt?.logo}
             alt="Company Logo"
             className="w-full h-full object-cover"
           />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">{formData.companyName}</h1>
+          <h1 className="text-2xl font-bold">{companyJwt?.companyName}</h1>
           <div className="flex gap-4 mt-2 text-gray-600">
             <div className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
-              <span>Thành lập: {formData.establishedTime}</span>
+              <span>Thành lập: {companyJwt?.establishedTime}</span>
             </div>
             <div className="flex items-center gap-1">
               <MapPin className="w-4 h-4" />
-              <span>{formData.location}</span>
+              <span>{companyJwt?.address}</span>
             </div>
             <div className="flex items-center gap-1">
               <Building2 className="w-4 h-4" />
-              <span>{formData.industry}</span>
+              <span>{companyJwt?.industry?.industryName}</span>
             </div>
           </div>
+          <Button variant="outline" onClick={handleOpenProfileModal}>
+            Chỉnh sửa hồ sơ
+          </Button>
         </div>
+        <section>
+          <CompanyProfileModal open={open} handleClose={handleClose} />
+        </section>
       </div>
 
       {/* Company Description */}
       <Card className="mb-6 p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Hồ sơ công ty</h2>
-          {!editMode.description ? (
-            <Button onClick={() => handleEdit('description')} variant="ghost">
-              <PenSquare className="w-4 h-4 mr-2" />
-              Chỉnh sửa
-            </Button>
-          ) : (
-            <Button onClick={() => handleSave('description')} variant="primary">
-              Lưu
-            </Button>
-          )}
+          <Button onClick={() => handleEditDesClick()} variant="ghost">
+            <PenSquare className="w-4 h-4 mr-2" />
+            Chỉnh sửa
+          </Button>
         </div>
-        {editMode.description ? (
-          <textarea
-            className="w-full p-3 border rounded-md"
-            rows="4"
-            value={formData.description}
-            onChange={(e) => setFormData(prev => ({...prev, description: e.target.value}))}
-          />
+        {isEditingDes ? (
+          <div>
+            <textarea
+              name="description"
+              className="w-full p-3 border rounded-md"
+              rows="4"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Nhập mô tả về công ty..."
+            />
+            <div className="mt-2 flex justify-end">
+              <Button onClick={handleSaveClick}>Save</Button>
+            </div>
+          </div>
         ) : (
-          <p className="text-gray-600">{formData.description}</p>
+          <p className="text-gray-600">{companyJwt?.description}</p>
         )}
       </Card>
 
@@ -182,89 +287,124 @@ const CompanyProfile_Management = () => {
       <Card className="mb-6 p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Contact</h2>
-          {!editMode.contact ? (
-            <Button onClick={() => handleEdit('contact')} variant="ghost">
-              <PenSquare className="w-4 h-4 mr-2" />
-              Chỉnh sửa
-            </Button>
-          ) : (
-            <Button onClick={() => handleSave('contact')} variant="primary">
-              Lưu
-            </Button>
-          )}
+          <Button onClick={() => handleEditInfoClick()} variant="ghost">
+            <PenSquare className="w-4 h-4 mr-2" />
+            Chỉnh sửa
+          </Button>
         </div>
-        {editMode.contact ? (
+        {isEditingInfo ? (
           <div className="space-y-4">
             <div>
               <label className="block mb-2">Số điện thoại</label>
               <input
+                name="contact"
                 type="tel"
-                className="w-full p-2 border rounded-md"
+                className={`border p-2 w-full mt-1 ${
+                  errors.contact ? "border-red-500" : ""
+                }`}
                 value={formData.contact}
-                onChange={(e) => setFormData(prev => ({...prev, contact: e.target.value}))}
+                onChange={handleChange}
               />
+              {errors.contact && (
+                <p className="text-red-500 text-xs mt-1">{errors.contact}</p>
+              )}
             </div>
             <div>
               <label className="block mb-2">Email</label>
               <input
+                name="email"
                 type="email"
-                className="w-full p-2 border rounded-md"
+                className={`border p-2 w-full mt-1 ${
+                  errors.email ? "border-red-500" : ""
+                }`}
                 value={formData.email}
-                onChange={(e) => setFormData(prev => ({...prev, email: e.target.value}))}
+                onChange={handleChange}
               />
+              {errors.email && (
+                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+              )}
+            </div>
+            <div className="mt-2 flex justify-end">
+              <Button onClick={handleSaveClick}>Save</Button>
             </div>
           </div>
         ) : (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Phone className="w-4 h-4 text-gray-500" />
-              <span>{formData.contact}</span>
+              <span>{companyJwt?.contact}</span>
             </div>
             <div className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-gray-500" />
-              <span>{formData.email}</span>
+              <span>{companyJwt?.email}</span>
             </div>
           </div>
         )}
       </Card>
 
-      {/* Workspace Images */}
       <Card className="p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Không gian làm việc</h2>
-          {!editMode.workspaceImages ? (
-            <Button onClick={() => handleEdit('workspaceImages')} variant="ghost">
+          {!isEditingImg ? (
+            <Button onClick={() => handleEditImgClick()} variant="ghost">
               <PenSquare className="w-4 h-4 mr-2" />
               Chỉnh sửa
             </Button>
           ) : (
-            <Button onClick={() => handleSave('workspaceImages')} variant="primary">
+            <Button onClick={() => handleSave()} variant="primary">
               Lưu
             </Button>
           )}
         </div>
         <div className="grid grid-cols-3 gap-4">
-          {formData.workspaceImages.map((image, index) => (
-            <div key={index} className="relative aspect-video">
-              <img
-                src={image}
-                alt={`Workspace ${index + 1}`}
-                className="w-full h-full object-cover rounded-lg"
+          {Array.isArray(companyJwt?.images) &&
+            companyJwt?.images.map((image, index) => (
+              <div key={image.imgId} className="relative aspect-video">
+                <img
+                  src={image.pathImg}
+                  alt={`Workspace ${index + 1}`}
+                  className="w-full h-full object-cover rounded-lg"
+                />
+                {isEditingImg && (
+                  <button
+                    className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white"
+                    onClick={() => removeImage(image.imgId)}
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ))}
+          {isEditingImg && (
+            <>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleSelectImage} // Gọi hàm khi chọn file
+                style={{ display: "none" }}
+                id="add-image-input"
               />
-              {editMode.workspaceImages && (
-                <button
-                  className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white"
-                  onClick={() => removeImage(index)}
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
+              <label
+                htmlFor="add-image-input"
+                className="aspect-video border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer"
+              >
+                <Plus className="w-6 h-6 text-gray-400" />
+              </label>
+            </>
+          )}
+          {isEditingImg && (
+            <div className="mt-4">
+              <div className="relative aspect-video">
+                {images.map((image, index) => (
+                  <img
+                    key={index}
+                    src={image}
+                    alt={`Selected ${index}`}
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                ))}
+              </div>
             </div>
-          ))}
-          {editMode.workspaceImages && (
-            <button className="aspect-video border-2 border-dashed rounded-lg flex items-center justify-center">
-              <Plus className="w-6 h-6 text-gray-400" />
-            </button>
           )}
         </div>
       </Card>
@@ -272,4 +412,4 @@ const CompanyProfile_Management = () => {
   );
 };
 
-export default CompanyProfile_Management; 
+export default CompanyProfile_Management;

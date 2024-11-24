@@ -13,19 +13,21 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class JobRecommendationDTO {
+public class ApplicantProfileDTO {
 	private UUID postId;
-	private String title;
+	private UUID userId;
+	private String address;
+	private LocalDate dateOfBirth;
 	private String description;
-	private String location;
-	private Long salary;
-	private String experience;
-	private String typeOfWork;
-	private LocalDate createDate;
-	private LocalDate expireDate;
+	private String emailContact;
+	private String gender;
+	private String phoneNumber;
+	private LocalDateTime applyDate;
+	private String pathCV;
+	private String fullName;
 	private UUID companyId;
-	private String companyName;
-	private String cityName;
+	private String avatar;
+	private String typeOfWork;
+	private String title;
 	private String industryName;
-	private String logo;
 }
