@@ -15,8 +15,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class JobPostDTO {
-	private LocalDateTime createDate;
-	private LocalDateTime expireDate;
+	private LocalDate createDate;
+	private LocalDate expireDate;
 	private String title;
 	private String description;
 	private String benefit;

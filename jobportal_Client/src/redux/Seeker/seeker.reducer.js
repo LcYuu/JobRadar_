@@ -1,6 +1,8 @@
 import {
   FOLLOW_COMPANY_FAILURE,
   FOLLOW_COMPANY_SUCCESS,
+  GET_CANDIDATE_PROFILE_SUCCESS,
+  GET_CANDIDATE_SKILLS_SUCCESS,
   GET_FOLLOWED_COMPANY_SUCCESS,
   GET_SEEKER_BY_USER_FAILURE,
   GET_SEEKER_BY_USER_REQUEST,
@@ -11,6 +13,8 @@ import {
 
 const initialState = {
   seeker: [],
+  profileCandidate: null,
+  skillsCandidate: null,
   loading: false,
   error: null,
   followedCompany: [],
@@ -38,6 +42,20 @@ export const seekerReducer = (state = initialState, action) => {
         followedCompany: action.payload,
         error: null,
       };
+    case GET_CANDIDATE_PROFILE_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        profileCandidate: action.payload,
+        error: null,
+      };
+      case GET_CANDIDATE_SKILLS_SUCCESS:
+        return {
+          ...state,
+          loading: false,
+          skillsCandidate: action.payload,
+          error: null,
+        };
     case FOLLOW_COMPANY_SUCCESS:
       return {
         ...state,

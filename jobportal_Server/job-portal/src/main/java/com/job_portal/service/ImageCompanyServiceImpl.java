@@ -45,17 +45,23 @@ public class ImageCompanyServiceImpl implements IImageCompanyService {
 		}
 	}
 
-	@Override
-	public boolean deleteImg(Integer imgId) throws AllExceptions {
-		Optional<ImageCompany> image = imageRepository.findById(imgId);
+	public boolean deleteImg(Integer imgId) {
+	    Optional<ImageCompany> imageOptional = imageRepository.findById(imgId);
+	    if (imageOptional.isPresent()) {
+	        ImageCompany image = imageOptional.get();
 
-		if (image.isEmpty()) {
-			throw new AllExceptions("Image not exist");
-		}
+	        // Nếu bạn sử dụng orphanRemoval = true, khi xóa ảnh khỏi company sẽ tự động bị xóa khỏi DB
+	        Company company = image.getCompany();
+	        company.getImages().remove(image); // Loại bỏ hình ảnh khỏi công ty
 
-		imageRepository.delete(image.get());
-		return true;
+	        // Lưu lại công ty để thực thi orphan removal (xóa ảnh)
+	        companyRepository.save(company);
+	        
+	        return true;
+	    }
+	    return false; // Trường hợp không tìm thấy ảnh với id đó
 	}
+
 
 	@Override
 	public boolean updateImg(ImageDTO imageDTO, Integer imgId) throws AllExceptions {

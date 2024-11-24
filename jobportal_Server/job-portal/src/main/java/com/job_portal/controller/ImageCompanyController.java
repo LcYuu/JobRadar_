@@ -51,19 +51,30 @@ public class ImageCompanyController {
 	}
 
 	@PostMapping("/create-image")
-	public ResponseEntity<String> createImage(@RequestHeader("Authorization") String jwt,
-			@RequestBody ImageDTO imageDTO) {
-		String email = JwtProvider.getEmailFromJwtToken(jwt);
-		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+	public ResponseEntity<String> createImage(@RequestHeader("Authorization") String jwt, 
+	                                           @RequestBody ImageDTO imageDTO) {
+	    try {
+	        // Lấy email từ JWT
+	        String email = JwtProvider.getEmailFromJwtToken(jwt);
+	        Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 
-		boolean isCreated = imageCompanyService.createImg(imageDTO, user.get().getUserId());
-		if (isCreated) {
-			return new ResponseEntity<>("Thêm hình ảnh thành công", HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>("Thêm hình ảnh thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+	        if (user.isEmpty()) {
+	            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+	        }
+
+	        // Lấy companyId từ user và gán vào imageDTO
+	        imageDTO.setCompanyId(user.get().getCompany().getCompanyId());
+
+	        boolean isCreated = imageCompanyService.createImg(imageDTO, imageDTO.getCompanyId());
+	        if (isCreated) {
+	            return new ResponseEntity<>("Thêm hình ảnh thành công", HttpStatus.CREATED);
+	        } else {
+	            return new ResponseEntity<>("Thêm hình ảnh thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
+	        }
+	    } catch (Exception e) {
+	        return new ResponseEntity<>("Error processing request", HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
 	}
-
 
 	@DeleteMapping("/delete-image/{imgId}")
 	public ResponseEntity<String> deleteImage(@PathVariable("imgId") Integer imgId) {

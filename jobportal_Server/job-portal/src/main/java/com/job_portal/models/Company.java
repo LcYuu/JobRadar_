@@ -52,7 +52,7 @@ public class Company {
 	@Column(name = "address", length = 200)
 	private String address;
 
-	@Column(name = "description", length = 200)
+	@Column(name = "description", columnDefinition = "TEXT")
 	private String description;
 
 	@Column(name = "logo", length = 200)
