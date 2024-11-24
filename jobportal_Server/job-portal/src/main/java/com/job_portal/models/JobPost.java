@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,15 +33,15 @@ public class JobPost {
     private UUID postId;
 
     @Column(name = "create_date", nullable = false)
-    private LocalDateTime createDate;
+    private LocalDate createDate;
 
     @Column(name = "expire_date", nullable = false)
-    private LocalDateTime expireDate;
+    private LocalDate expireDate;
 
     @Column(name = "title", length = 50, nullable = false)
     private String title;
 
-    @Column(name = "description", length = 200, nullable = false)
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Lob

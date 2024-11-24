@@ -15,7 +15,7 @@ root.render(
 
     <Provider store={store}>
       <ErrorBoundary>
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_relativeSplatPath: true }}>
           <App />
         </BrowserRouter>
         <ToastContainer position="top-right"

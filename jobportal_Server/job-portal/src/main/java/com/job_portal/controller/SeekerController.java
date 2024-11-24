@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.job_portal.DTO.ApplicantProfileDTO;
 import com.job_portal.DTO.FollowCompanyDTO;
 import com.job_portal.DTO.SeekerDTO;
 import com.job_portal.config.JwtProvider;
@@ -69,6 +70,17 @@ public class SeekerController {
 		}
 	}
 
+	@GetMapping("/candidate-skills")
+	public ResponseEntity<Seeker> getProfileCandidateById(@RequestParam("userId") UUID userId) throws AllExceptions {
+		try {
+			Seeker seeker = seekerService.findSeekerById(userId);
+			return new ResponseEntity<>(seeker, HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+		}
+	}
+	
+	
 	@GetMapping("/seeker-profile")
 	public ResponseEntity<Seeker> getSeekerById(@RequestHeader("Authorization") String jwt) throws AllExceptions {
 		try {
@@ -124,18 +136,17 @@ public class SeekerController {
 			return new ResponseEntity<>("Cập nhật thông tin thất bại", HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	@PutMapping("/follow/{companyId}")
-	public ResponseEntity<Map<String, Object>> followCompany(
-	        @PathVariable("companyId") UUID companyId,
-	        @RequestHeader("Authorization") String jwt) throws Exception {
+	public ResponseEntity<Map<String, Object>> followCompany(@PathVariable("companyId") UUID companyId,
+			@RequestHeader("Authorization") String jwt) throws Exception {
 
-	    String email = JwtProvider.getEmailFromJwtToken(jwt);
-	    Optional<UserAccount> reqUser = userAccountRepository.findByEmail(email);
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> reqUser = userAccountRepository.findByEmail(email);
 
-	    Map<String, Object> result = companyService.followCompany(companyId, reqUser.get().getUserId());
+		Map<String, Object> result = companyService.followCompany(companyId, reqUser.get().getUserId());
 
-	    return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
+		return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
 	}
 
 	@GetMapping("/followed-companies")
@@ -146,5 +157,19 @@ public class SeekerController {
 		List<FollowCompanyDTO> companies = companyRepository
 				.findCompaniesFollowedBySeeker(user.get().getSeeker().getUserId());
 		return ResponseEntity.ok(companies);
+	}
+
+	@GetMapping("/profile-apply")
+	public ResponseEntity<ApplicantProfileDTO> getCandidateDetails(@RequestParam UUID userId,
+			@RequestParam UUID postId) {
+		try {
+			// Gọi service để lấy dữ liệu
+			ApplicantProfileDTO profile = seekerRepository.findCandidateDetails(userId, postId);
+			return ResponseEntity.ok(profile); // Trả về thông tin ứng viên
+
+		} catch (Exception e) {
+			// Xử lý lỗi nếu có
+			return ResponseEntity.status(500).body(null);
+		}
 	}
 }
