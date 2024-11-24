@@ -16,6 +16,25 @@ import {
   UPDATE_COMPANY_IMAGES_REQUEST,
   UPDATE_COMPANY_IMAGES_SUCCESS,
   UPDATE_COMPANY_IMAGES_FAILURE,
+  GET_ALL_COMPANIES_REQUEST,
+  GET_ALL_COMPANIES_SUCCESS,
+  GET_ALL_COMPANIES_FAILURE,
+  UPDATE_COMPANY_STATUS_REQUEST,
+  UPDATE_COMPANY_STATUS_SUCCESS,
+  UPDATE_COMPANY_STATUS_FAILURE,
+  DELETE_COMPANY_REQUEST,
+  DELETE_COMPANY_SUCCESS,
+  DELETE_COMPANY_FAILURE,
+  GET_JOB_BY_COMPANY_REQUEST,
+  GET_JOB_BY_COMPANY_SUCCESS,
+  GET_JOB_BY_COMPANY_FAILURE,
+  GET_COMPANY_JOB_COUNTS_REQUEST,
+  GET_COMPANY_JOB_COUNTS_SUCCESS,
+  GET_COMPANY_JOB_COUNTS_FAILURE,
+  GET_COMPANY_JOB_STATS_REQUEST,
+  GET_COMPANY_JOB_STATS_SUCCESS,
+  GET_COMPANY_JOB_STATS_FAILURE,
+  
 } from "./company.actionType";
 
 const initialState = {
@@ -28,6 +47,9 @@ const initialState = {
   message: null,
   error: null,
   totalPages: null,
+  totalItems: null,
+  jobCounts: null,
+  jobStats: [],
 };
 
 export const companyReducer = (state = initialState, action) => {
@@ -125,6 +147,121 @@ export const companyReducer = (state = initialState, action) => {
         error: action.payload,
       };
 
+    case GET_ALL_COMPANIES_REQUEST:
+      return {
+        ...state,
+        loading: true,
+        error: null
+      };
+    case GET_ALL_COMPANIES_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        companies: action.payload,
+        totalItems: action.payload.length,
+        error: null
+      };
+    case GET_ALL_COMPANIES_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload
+      };
+    case UPDATE_COMPANY_STATUS_REQUEST:
+    case DELETE_COMPANY_REQUEST:
+      return {
+        ...state,
+        loading: true,
+        error: null,
+      };
+
+    case UPDATE_COMPANY_STATUS_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        message: "Cập nhật trạng thái công ty thành công",
+        error: null,
+      };
+
+    case DELETE_COMPANY_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        companies: state.companies.filter(company => company.companyId !== action.payload),
+        message: "Xóa công ty thành công",
+        error: null,
+      };
+
+    case UPDATE_COMPANY_STATUS_FAILURE:
+    case DELETE_COMPANY_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
+    case GET_JOB_BY_COMPANY_REQUEST:
+      return {
+        ...state,
+        loading: true,
+        error: null
+      };
+
+    case GET_JOB_BY_COMPANY_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        companyJobs: action.payload,
+        error: null
+      };
+
+    case GET_JOB_BY_COMPANY_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload
+      };
+    case GET_COMPANY_JOB_COUNTS_REQUEST:
+      return {
+        ...state,
+        loading: true,
+        error: null
+      };
+
+    case GET_COMPANY_JOB_COUNTS_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        jobCounts: action.payload,
+        error: null
+      };
+
+    case GET_COMPANY_JOB_COUNTS_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload
+      };
+    case GET_COMPANY_JOB_STATS_REQUEST:
+      return {
+        ...state,
+        loading: true,
+        error: null
+      };
+
+    case GET_COMPANY_JOB_STATS_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        jobStats: action.payload,
+        error: null
+      };
+
+    case GET_COMPANY_JOB_STATS_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload
+      };
     default:
       return state;
   }
