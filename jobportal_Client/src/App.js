@@ -82,6 +82,7 @@ const App = () => {
       "/auth/sign-in",
       "/auth/forgot-password",
       "/change-password",
+      "/role-selection",
     ];
     return (
       !noFooterPaths.includes(location.pathname) &&

@@ -117,16 +117,16 @@ export default function SignInForm() {
       sessionStorage.setItem("jwt", jwtToken);
       const emailExists = await axios.post("http://localhost:8080/auth/check-email", { token: googleToken });
       if (emailExists.data) {
-        alert("Đăng nhập thành công!");
         // dispatch(getProfileAction());
         setTimeout(() => {
           // setIsModalOpen(false);
-          window.location.href = "http://localhost:3000/"; // Redirects to home after a few seconds
-        }, 1000); // Adjust the time (in milliseconds) as needed
+          window.location.href = "http://localhost:3000/"; 
+        }, 1000); 
       } else {
-
-        alert("Đăng nhập thành công!");
-        navigate("/role-selection"); 
+        setTimeout(() => {
+          // setIsModalOpen(false);
+          window.location.href = "http://localhost:3000/role-selection";
+        }, 1000);
       }
     } catch (err) {
       // In lỗi và hiển thị thông báo

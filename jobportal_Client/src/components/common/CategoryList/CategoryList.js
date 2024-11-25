@@ -8,12 +8,15 @@ import { getIndustry } from '../../../redux/Industry/industry.action';
 
 
 const iconUrls = [
-  'https://cdn-icons-png.flaticon.com/512/2906/2906273.png', // Công nghệ thông tin
-  'https://cdn-icons-png.flaticon.com/512/2631/2631227.png', // Thương mại điện tử
-  'https://cdn-icons-png.flaticon.com/512/3135/3135715.png', // Marketing
-  'https://cdn-icons-png.flaticon.com/512/1055/1055689.png', // IT phần cứng
-  'https://cdn-icons-png.flaticon.com/512/741/741407.png',   // Công nghệ ô tô
-  'https://cdn-icons-png.flaticon.com/512/2721/2721291.png'  // IT phần mềm
+  "https://cdn-icons-png.flaticon.com/128/3007/3007250.png", // Thương mại điện tử
+  "https://cdn-icons-png.flaticon.com/128/1260/1260235.png", // Marketing
+  "https://cdn-icons-png.flaticon.com/128/3868/3868395.png", // IT phần cứng
+  "https://cdn-icons-png.flaticon.com/128/3085/3085330.png", // Công nghệ ô tô
+  "https://cdn-icons-png.flaticon.com/128/1207/1207220.png", // IT phần mềm
+  "https://cdn-icons-png.flaticon.com/128/1876/1876750.png", // Nhà hàng/Khách sạn
+  "https://cdn-icons-png.flaticon.com/128/2779/2779775.png", // Thiết kế
+  "https://cdn-icons-png.flaticon.com/128/675/675795.png", // Điện - điện tử
+  "https://cdn-icons-png.flaticon.com/128/3135/3135727.png", // Kinh doanh
 ];
 
 const CategoryList = () => {
