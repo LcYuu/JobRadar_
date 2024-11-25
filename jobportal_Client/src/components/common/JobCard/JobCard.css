@@ -1,52 +1,59 @@
 .job-type-badge {
-  background-color: rgba(0, 128, 0, 0.1); 
-  color: green; 
-  border: 1px solid green; /* Thêm viền cho badge */
-  padding: 2px 8px; 
-  border-radius: 8px; 
-  font-size: 12px;
-  font-weight: 600; 
-  text-transform: uppercase; 
+  background-color: rgba(0, 128, 0, 0.1);
+  color: green;
+  border: 1px solid green;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); /* Thay đổi sang cubic-bezier để mượt hơn */
+}
+
+.job-type-badge:hover {
+  background-color: green;
+  color: white;
 }
 
 .location-ellipsis {
   display: inline-block;
-  max-width: 100px; 
+  max-width: 150px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* JobCard.css */
 .card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Thêm hiệu ứng chuyển tiếp */
-  /* Thêm viền trong suốt */
-  border-radius: 8px; /* Bo góc thẻ */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Thêm hiệu ứng đổ bóng ban đầu */
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1); /* Thời gian chuyển đổi mượt mà hơn */
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .card:hover {
-  transform: translateY(-5px); /* Di chuyển nhẹ lên trên */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Tăng hiệu ứng đổ bóng khi hover */
-  border-color: rgba(0, 0, 0, 0.1); /* Đổi màu viền khi hover */
-  border-width: 2px; /* Tăng độ dày viền khi hover */
-  border-style: solid; /* Định nghĩa kiểu viền khi hover */
+  transform: translateY(-10px); /* Di chuyển cao hơn một chút */
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25); /* Đổ bóng nổi bật hơn */
+  border-color: rgba(0, 128, 0, 0.5);
+  border-width: 2px;
+  border-style: solid;
 }
 
 .card-header {
-  transition: background-color 0.3s ease; /* Thay đổi màu nền mượt mà */
-  border: 2px solid rgba(153, 45, 45, 0.1); 
+  transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+              border 0.5s cubic-bezier(0.4, 0, 0.2, 1); /* Hiệu ứng chuyển đổi đồng nhất */
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .card:hover .card-header {
-  background-color: rgba(0, 0, 0, 0.1); /* Đổi màu nền khi hover */
+  background-color: rgba(0, 128, 0, 0.05);
 }
 
-/* Xóa hiệu ứng blur */
 .card-content {
-  transition: color 0.3s ease; /* Thay đổi màu chữ mượt mà */
+  transition: color 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+              transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card:hover .card-content {
-  color: green; /* Đổi màu chữ sang xanh lá cây khi hover */
+  color: green;
+  transform: scale(1.03); /* Phóng chữ thêm một chút */
 }

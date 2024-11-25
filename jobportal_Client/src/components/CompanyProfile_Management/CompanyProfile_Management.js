@@ -232,7 +232,7 @@ const CompanyProfile_Management = () => {
   return (
     <div className="max-w-5xl mx-auto p-6">
       {/* Company Header */}
-      <div className="flex items-center gap-6 mb-8">
+      <div className="flex items-center gap-6 mb-8 bg-white p-6 rounded-lg shadow-md">
         <div className="w-24 h-24 bg-emerald-100 rounded-xl overflow-hidden">
           <img
             src={companyJwt?.logo}
@@ -256,7 +256,11 @@ const CompanyProfile_Management = () => {
               <span>{companyJwt?.industry?.industryName}</span>
             </div>
           </div>
-          <Button variant="outline" onClick={handleOpenProfileModal}>
+          <Button
+            variant="outline"
+            className="mt-4 bg-blue-500 text-white hover:bg-blue-600 hover:text-white border border-blue-500 rounded-lg transition-all"
+            onClick={handleOpenProfileModal}
+          >
             Chỉnh sửa hồ sơ
           </Button>
         </div>
@@ -266,7 +270,7 @@ const CompanyProfile_Management = () => {
       </div>
 
       {/* Company Description */}
-      <Card className="mb-6 p-6">
+      <Card className="mb-6 p-6 bg-white shadow-md rounded-lg">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Hồ sơ công ty</h2>
           <Button onClick={() => handleEditDesClick()} variant="ghost">
@@ -294,7 +298,7 @@ const CompanyProfile_Management = () => {
       </Card>
 
       {/* Contact Information */}
-      <Card className="mb-6 p-6">
+      <Card className="mb-6 p-6  bg-white shadow-md rounded-lg">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Contact</h2>
           <Button onClick={() => handleEditInfoClick()} variant="ghost">
@@ -368,16 +372,16 @@ const CompanyProfile_Management = () => {
               <span>{companyJwt?.taxCode}</span>
             </div>
             <p className="text-sm text-red-500 mt-1">
-              Hãy tự giác cung cấp chính xác mã số thuế, nếu không bạn sẽ không thể
-              tuyển dụng.
+              Hãy tự giác cung cấp chính xác mã số thuế, nếu không bạn sẽ không
+              thể tuyển dụng.
             </p>
           </div>
         )}
       </Card>
 
-      <Card className="p-6">
+      <Card className="p-6  bg-white shadow-md rounded-lg">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Không gian làm việc</h2>
+          <h2 className="text-xl font-semibold">Hình ảnh công ty</h2>
           {!isEditingImg ? (
             <Button onClick={() => handleEditImgClick()} variant="ghost">
               <PenSquare className="w-4 h-4 mr-2" />
