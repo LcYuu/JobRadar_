@@ -51,6 +51,7 @@
     "react-quill": "^2.0.0",
     "react-rating-stars-component": "^2.2.0",
     "react-redux": "^9.1.2",
+    "react-responsive-carousel": "^3.2.23",
     "react-router-dom": "^6.27.0",
     "react-scripts": "^5.0.1",
     "react-slider": "^2.0.6",

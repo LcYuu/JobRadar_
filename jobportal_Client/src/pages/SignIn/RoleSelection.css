@@ -1,0 +1,65 @@
+.role-selection-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+    background: linear-gradient(to bottom, #e3f2fd, #bbdefb);
+    font-family: 'Arial', sans-serif;
+  }
+  
+  h2 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .role-buttons {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .role-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 150px;
+    height: 150px;
+    border: none;
+    border-radius: 10px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .role-button .icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+  }
+  
+  .role-button.candidate {
+    background-color: #c8e6c9;
+    color: #388e3c;
+  }
+  
+  .role-button.employer {
+    background-color: #ffcdd2;
+    color: #d32f2f;
+  }
+  
+  .role-button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  .role-button:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  

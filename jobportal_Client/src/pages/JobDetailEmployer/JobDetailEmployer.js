@@ -161,7 +161,7 @@ const JobDetailEmployer = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header Section */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 mb-6">
         <div className="flex justify-between items-start">
           <div className="flex items-center space-x-4">
             <img
@@ -457,14 +457,16 @@ const JobDetailEmployer = () => {
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold">Kỹ năng yêu cầu</h3>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={handleOpenSkillModal}
-                className="hover:bg-primary/10 transition-colors"
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
+              {detailJob?.approve === false ? (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={handleOpenSkillModal}
+                  className="hover:bg-primary/10 transition-colors"
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              ) : null}
             </div>
             <div className="flex flex-wrap gap-2">
               {detailJob?.skills?.length > 0 ? (

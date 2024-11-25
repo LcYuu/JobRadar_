@@ -15,17 +15,17 @@ const typeOfWorkStyles = {
     color: "rgb(255, 165, 0)",
     border: "1px solid rgb(255, 165, 0)",
   },
-  "Remote": {
+  Remote: {
     backgroundColor: "rgba(138, 43, 226, 0.1)",
     color: "rgb(138, 43, 226)",
     border: "1px solid rgb(138, 43, 226)",
   },
-  "Freelance": {
+  Freelance: {
     backgroundColor: "rgba(0, 191, 255, 0.1)",
     color: "rgb(0, 191, 255)",
     border: "1px solid rgb(0, 191, 255)",
   },
-  "Intern": {
+  Intern: {
     backgroundColor: "rgba(255, 69, 0, 0.1)",
     color: "rgb(255, 69, 0)",
     border: "1px solid rgb(255, 69, 0)",
@@ -43,7 +43,7 @@ const industryStyles = {
     color: "purple",
     border: "1px solid purple",
   },
-  "Marketing": {
+  Marketing: {
     backgroundColor: "rgba(255, 165, 0, 0.1)",
     color: "orange",
     border: "1px solid orange",
@@ -74,11 +74,11 @@ function JobCard_AllJob({ job }) {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    additionalInfo: '',
-    cv: null
+    fullName: "",
+    email: "",
+    phone: "",
+    additionalInfo: "",
+    cv: null,
   });
 
   const handleCardClick = () => {
@@ -93,18 +93,18 @@ function JobCard_AllJob({ job }) {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        cv: file
+        cv: file,
       }));
     }
   };
@@ -125,9 +125,12 @@ function JobCard_AllJob({ job }) {
   };
 
   return (
-    <Card 
-      className="overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 border border-stone-950 hover:border-spacing-y-40 hover:border-orange-800" 
+    <Card
+      className="overflow-hidden cursor-pointer shadow-md hover:shadow-lg transition-all duration-300 bg-white group"
       onClick={handleCardClick}
+      style={{
+        border: "none",
+      }}
     >
       <CardContent className="p-6">
         <div className="flex flex-col">
@@ -135,20 +138,24 @@ function JobCard_AllJob({ job }) {
           <div className="flex justify-between items-start mb-4">
             <div className="flex items-center">
               <div className="w-12 h-12 bg-gray-200 rounded-xl mr-4 flex items-center justify-center text-xl font-bold">
-                <img 
-                  src={job.company.logo || '/placeholder.svg'} 
-                  alt={`${job.company.companyName} logo`} 
-                  className="w-full h-full object-cover rounded-xl" 
+                <img
+                  src={job.company.logo || "/placeholder.svg"}
+                  alt={`${job.company.companyName} logo`}
+                  className="w-full h-full object-cover rounded-xl"
                 />
               </div>
               <div>
-                <h3 className="font-semibold text-lg">{job.title}</h3>
+                <h3
+                  className="font-semibold text-lg group-hover:text-green-600 transition-colors duration-300" // Thay đổi màu chữ khi hover vào card
+                >
+                  {job.title}
+                </h3>
                 <p className="text-sm text-gray-500">
                   {job.company.companyName} • {job.city.cityName}
                 </p>
               </div>
             </div>
-            <span 
+            <span
               className="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
               style={
                 typeOfWorkStyles[job.typeOfWork] || {
@@ -165,9 +172,9 @@ function JobCard_AllJob({ job }) {
           {/* Industry tags and Apply button */}
           <div className="flex justify-between items-center">
             <div className="flex flex-wrap gap-2">
-              {Array.isArray(job.company.industry.industryNames) ? 
-                job.company.industry.industryNames.map((industry, index) => (
-                  <span 
+              {Array.isArray(job.company.industry.industryName) ? (
+                job?.company?.industry?.industryName.map((industry, index) => (
+                  <span
                     key={index}
                     className="px-2 py-1 rounded-full text-xs font-medium"
                     style={
@@ -181,8 +188,8 @@ function JobCard_AllJob({ job }) {
                     {industry}
                   </span>
                 ))
-                :
-                <span 
+              ) : (
+                <span
                   className="px-2 py-1 rounded-full text-xs font-medium"
                   style={
                     industryStyles[job.company.industry.industryName] || {
@@ -194,7 +201,7 @@ function JobCard_AllJob({ job }) {
                 >
                   {job.company.industry.industryName}
                 </span>
-              }
+              )}
             </div>
             {/* <Button 
               className="bg-purple-600 text-white hover:bg-purple-700 ml-2"
@@ -205,7 +212,7 @@ function JobCard_AllJob({ job }) {
           </div>
         </div>
       </CardContent>
-      
+
       {isModalOpen && (
         <ApplyModal
           job={job}
