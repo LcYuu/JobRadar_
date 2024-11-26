@@ -45,9 +45,11 @@ import AdminJobList from './pages/Admin/JobList/JobList';
 
 import JobDetailEmployer from './pages/JobDetailEmployer/JobDetailEmployer';
 import PostJob from './pages/PostJob/PostJob';
+
+import RoleSelection from "./pages/SignIn/RoleSelection";
+
 import CompanyDetail from './pages/Admin/CompanyDetail/CompanyDetail';
 import JobDetailAdmin from './pages/Admin/JobDetail/JobDetailAdmin';
-
 
 const App = () => {
   const location = useLocation();
@@ -86,6 +88,7 @@ const App = () => {
       "/auth/sign-in",
       "/auth/forgot-password",
       "/change-password",
+      "/role-selection",
     ];
     return (
       !noFooterPaths.includes(location.pathname) &&
@@ -118,6 +121,7 @@ const App = () => {
             </PublicRoute>
           }
         />
+        <Route path="/role-selection" element={<RoleSelection />} />
         <Route
           path="/auth/forgot-password"
           element={

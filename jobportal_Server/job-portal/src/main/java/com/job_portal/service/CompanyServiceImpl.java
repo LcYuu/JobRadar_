@@ -82,6 +82,11 @@ public class CompanyServiceImpl implements ICompanyService {
 			oldCompany.setDescription(companyDTO.getDescription());
 			isUpdated = true;
 		}
+		
+		if (companyDTO.getTaxCode() != null) {
+			oldCompany.setTaxCode(companyDTO.getTaxCode());
+			isUpdated = true;
+		}
 
 		if (companyDTO.getLogo() != null) {
 			oldCompany.setLogo(companyDTO.getLogo());

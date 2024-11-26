@@ -25,15 +25,14 @@ import Pagination from "../../components/layout/Pagination";
 import { getCity } from "../../redux/City/city.action";
 import { getIndustryCount } from "../../redux/Industry/industry.action";
 import RangeSlider from "../../components/common/RangeSlider/RangeSlider";
-import { useLocation } from 'react-router-dom';
-
+import { useLocation } from "react-router-dom";
 
 export default function JobSearchPage() {
   const dispatch = useDispatch();
   useEffect(() => {
     window.scrollTo({
       top: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   }, []);
   const {
@@ -51,7 +50,7 @@ export default function JobSearchPage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [size] = useState(7);
 
-  const [searchInput, setSearchInput] = useState(''); // State tạm thời để lưu input
+  const [searchInput, setSearchInput] = useState(""); // State tạm thời để lưu input
 
   const { cities = [] } = useSelector((store) => store.city);
   const { industryCount = [] } = useSelector((store) => store.industry);
@@ -75,9 +74,9 @@ export default function JobSearchPage() {
   useEffect(() => {
     // Kiểm tra xem có state được truyền từ CategoryCard không
     if (location.state?.selectedIndustryIds) {
-      setFilters(prev => ({
+      setFilters((prev) => ({
         ...prev,
-        selectedIndustryIds: location.state.selectedIndustryIds
+        selectedIndustryIds: location.state.selectedIndustryIds,
       }));
     }
   }, [location]);
@@ -93,7 +92,7 @@ export default function JobSearchPage() {
       currentPage,
       size,
       results: isFilterApplied ? searchJob : jobPost,
-      totalPages: isFilterApplied ? totalPagesFromSearch : totalPagesFromAll
+      totalPages: isFilterApplied ? totalPagesFromSearch : totalPagesFromAll,
     });
   }, [filters, currentPage, dispatch]);
 
@@ -114,7 +113,6 @@ export default function JobSearchPage() {
       setCurrentPage(0); // Đặt lại trang về 0 khi bộ lọc thay đổi
     }
   }, [filters]);
-  
 
   const handleSalaryChange = (newValues) => {
     setFilters({
@@ -125,21 +123,19 @@ export default function JobSearchPage() {
   };
   console.log("Filters hiện tại:", currentPage);
 
-
   const results = isFilterApplied ? searchJob : jobPost;
   const totalPages = isFilterApplied ? totalPagesFromSearch : totalPagesFromAll;
 
   return (
     <div className="min-h-screen bg-transparent">
       <main className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-800 text-center my-8">
-      
-            Tìm kiếm{" "}
-            <span className="relative inline-block text-primary text-blue-500">
-              công việc trong mơ của bạn
-              <span className="absolute bottom-0 left-0 w-full h-1 bg-blue-300 opacity-50"></span>
-            </span>
-          </h1>
+        <h1 className="text-3xl font-bold text-gray-800 text-center my-8">
+          Tìm kiếm{" "}
+          <span className="relative inline-block text-primary text-blue-500">
+            công việc trong mơ của bạn
+            <span className="absolute bottom-0 left-0 w-full h-1 bg-blue-300 opacity-50"></span>
+          </span>
+        </h1>
 
         <div className="bg-white rounded-lg shadow-sm p-4 mb-8">
           <div className="flex space-x-2">
@@ -189,7 +185,7 @@ export default function JobSearchPage() {
           </div>
         </div>
 
-        <div className="flex space-x-8 mt-52">
+        <div className="flex space-x-8 mt-20">
           <aside className="w-64 space-y-6">
             {/* Filter Section */}
             <div>
@@ -199,7 +195,7 @@ export default function JobSearchPage() {
               </h3>
               <div className="space-y-2">
                 {jobCountByType
-                  .filter(job => job.count > 0)
+                  .filter((job) => job.count > 0)
                   .map((job) => (
                     <div className="flex items-center" key={job.typeOfWork}>
                       <Checkbox
@@ -263,6 +259,13 @@ export default function JobSearchPage() {
               max={maxSalary}
               onChange={handleSalaryChange} // Truyền hàm để cập nhật mức lương
             />
+            <div className="mt-10">
+              <img
+                src="https://cdn-new.topcv.vn/unsafe/https://static.topcv.vn/img/Banner%202%20(1).png" // Thay đổi đường dẫn ảnh ở đây
+                alt="Banner"
+                className="w-full h-auto rounded-lg shadow-md"
+              />
+            </div>
           </aside>
 
           <div className="flex-grow space-y-4">
@@ -270,8 +273,8 @@ export default function JobSearchPage() {
               <div className="flex items-center space-x-2">
                 <h2 className="text-xl font-semibold">Tất cả công việc</h2>
                 <span className="text-sm text-gray-500">
-                  Tổng số: {isFilterApplied ? searchJob.length : jobPost.length} kết quả
-                  
+                  Tổng số: {isFilterApplied ? searchJob.length : jobPost.length}{" "}
+                  kết quả
                 </span>
               </div>
               <div className="flex items-center space-x-2">

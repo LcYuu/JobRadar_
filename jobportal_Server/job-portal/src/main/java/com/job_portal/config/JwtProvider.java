@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.job_portal.repository.BlackListTokenRepository;
 
 import io.jsonwebtoken.Claims;
@@ -38,6 +40,14 @@ public class JwtProvider {
 		return jwt;
 	}
 
+	public String generateTokenFromEmail(String email) {
+		System.out.println("Email: " + email);
+
+		String jwt = Jwts.builder().setIssuer("GiaThuanSenpai").setIssuedAt(new Date())
+				.setExpiration(new Date(new Date().getTime() + 86400000)).claim("email", email).signWith(key)
+				.compact();
+		return jwt;
+	 }
 	public static String getEmailFromJwtToken(String jwt) {
 		jwt = jwt.substring(7);
 

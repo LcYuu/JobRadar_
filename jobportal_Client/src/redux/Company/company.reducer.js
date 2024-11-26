@@ -16,6 +16,11 @@ import {
   UPDATE_COMPANY_IMAGES_REQUEST,
   UPDATE_COMPANY_IMAGES_SUCCESS,
   UPDATE_COMPANY_IMAGES_FAILURE,
+
+  VALIDATE_TAXCODE_REQUEST,
+  VALIDATE_TAXCODE_SUCCESS,
+  VALIDATE_TAXCODE_FAILURE,
+
   GET_ALL_COMPANIES_REQUEST,
   GET_ALL_COMPANIES_SUCCESS,
   GET_ALL_COMPANIES_FAILURE,
@@ -35,9 +40,11 @@ import {
   GET_COMPANY_JOB_STATS_SUCCESS,
   GET_COMPANY_JOB_STATS_FAILURE,
   
+
 } from "./company.actionType";
 
 const initialState = {
+  isValid: null,
   companies: [],
   companyJwt: null,
   companyByFeature: [],
@@ -102,7 +109,7 @@ export const companyReducer = (state = initialState, action) => {
         ...state,
         loading: true,
         error: null,
-        companyJwt: null
+        companyJwt: null,
       };
     case GET_COMPANY_SUCCESS:
     case UPDATE_COMPANY_PROFILE_SUCCESS:
@@ -110,7 +117,7 @@ export const companyReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         companyJwt: action.payload,
-        error: null
+        error: null,
       };
     case GET_COMPANY_FAILURE:
       return {
@@ -141,6 +148,12 @@ export const companyReducer = (state = initialState, action) => {
         loading: false,
         error: action.payload,
       };
+    case VALIDATE_TAXCODE_REQUEST:
+      return { ...state, loading: true, error: null };
+    case VALIDATE_TAXCODE_SUCCESS:
+      return { ...state, loading: false, isValid: action.payload };
+    case VALIDATE_TAXCODE_FAILURE:
+      return { ...state, loading: false, error: action.error };
 
     case GET_ALL_COMPANIES_REQUEST:
       return {
