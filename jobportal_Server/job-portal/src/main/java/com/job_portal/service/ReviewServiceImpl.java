@@ -36,7 +36,7 @@ public class ReviewServiceImpl implements IReviewService {
 			review.setMessage(req.getMessage());
 			review.setStar(req.getStar());
 			review.setSeeker(seeker);
-			review.setCreateDate(LocalDate.now());
+			review.setCreateDate(LocalDateTime.now());
 
 			Review savedReview = reviewRepository.save(review);
 			company.getReviews().add(savedReview);
