@@ -21,6 +21,7 @@ import {
   GET_TOTAL_JOBS_SUCCESS,
   GET_TOTAL_JOBS_FAILURE,
   GET_RECOMMEND_JOB_SUCCESS,
+
   GET_EMPLOYER_COMPANY_SUCCESS,
   GET_ALL_JOB_POST_SUCCESS,
   GET_JOB_COMPANY_SUCCESS,
@@ -29,6 +30,11 @@ import {
   UPDATE_JOB_SUCCESS,
   CREATE_JOB_SUCCESS,
   GET_TOP_5_LASTEST_COMPANY_SUCCESS,
+
+  GET_ALL_ADMIN_JOBS_REQUEST,
+  GET_ALL_ADMIN_JOBS_SUCCESS,
+  GET_ALL_ADMIN_JOBS_FAILURE,
+
 } from "./jobPost.actionType";
 
 const initialState = {
@@ -249,6 +255,19 @@ export const jobPostReducer = (state = initialState, action) => {
         loading: false,
         error: action.payload,
       };
+    case GET_ALL_ADMIN_JOBS_REQUEST:
+      return { ...state, loading: true, error: null };
+    case GET_ALL_ADMIN_JOBS_SUCCESS:
+      return {
+        ...state,
+        jobPost: action.payload.content,
+        totalPages: action.payload.totalPages,
+        totalItems: action.payload.totalElements,
+        loading: false,
+        error: null
+      };
+    case GET_ALL_ADMIN_JOBS_FAILURE:
+      return { ...state, loading: false, error: action.payload };
     default:
       return state;
   }
