@@ -12,7 +12,10 @@ import {
 } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Link } from "react-router-dom";
-import { findEmployerCompany, getTop5Lastest } from "../../redux/JobPost/jobPost.action";
+import {
+  findEmployerCompany,
+  getTop5Lastest,
+} from "../../redux/JobPost/jobPost.action";
 import { countReviewByCompany } from "../../redux/Review/review.action";
 import { store } from "../../redux/store";
 
@@ -21,9 +24,7 @@ export default function Dashboard_Employer() {
   const [currentDateRange, setCurrentDateRange] = useState("Jul 19 - Jul 25");
 
   const [visibleJobs, setVisibleJobs] = useState([]); // Lưu công việc hiển thị (mặc định 5)
-  const {
-    jobs = [],
-  } = useSelector((store) => store.jobPost);
+  const { jobs = [] } = useSelector((store) => store.jobPost);
   const { countReview } = useSelector((store) => store.review);
   const [totalApplicationCount, setTotalApplicationCount] = useState(0);
 
@@ -38,47 +39,45 @@ export default function Dashboard_Employer() {
   };
 
   useEffect(() => {
-    dispatch(getTop5Lastest())
-    dispatch(countReviewByCompany())
+    dispatch(getTop5Lastest());
+    dispatch(countReviewByCompany());
   }, [dispatch]);
 
   useEffect(() => {
     const fetchAllJobs = async () => {
-        const totalApplication = jobs.reduce(
-          (sum, job) => sum + (job.applicationCount || 0),
-          0
-        );
+      const totalApplication = jobs.reduce(
+        (sum, job) => sum + (job.applicationCount || 0),
+        0
+      );
 
-        setTotalApplicationCount(totalApplication); 
-        setVisibleJobs(jobs.slice(0, 5)); 
+      setTotalApplicationCount(totalApplication);
+      setVisibleJobs(jobs.slice(0, 5));
     };
 
     fetchAllJobs();
   }, [dispatch, jobs]); // Lắng nghe changes của jobs và totalElements
-
 
   return (
     <div className="p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-semibold">Chào mừng trở lại</h1>
-        <div className="flex items-center gap-4">
+        {/* <div className="flex items-center gap-4">
           <span className="text-gray-600">{currentDateRange}</span>
           <Button variant="primary">+ Đăng bài</Button>
-        </div>
+        </div> */}
       </div>
 
-      {/* New Candidates Card */}
       <div className="bg-indigo-600 text-white p-6 rounded-lg mb-8 flex justify-between items-center">
         <div>
-          <h2 className="text-4xl font-bold mb-2">
+          <h2 className="text-4xl font-bold mb-2 text-white">
             {countReview?.totalReviews}
           </h2>
           <p className="text-indigo-100">Tổng số Review</p>
         </div>
         {/* <Button variant="outline" className="text-white border-white hover:bg-indigo-700">
-          View all →
-        </Button> */}
+    View all →
+  </Button> */}
       </div>
 
       {/* Stats Grid */}
@@ -125,12 +124,15 @@ export default function Dashboard_Employer() {
 
         <div className="space-y-4">
           {visibleJobs.map((job) => (
-            <Card key={job.postId} className="p-4">
+            <Card
+              key={job.postId}
+              className="p-4 bg-white shadow-lg rounded-lg"
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   {/* <img src={job.logo} alt="" className="w-12 h-12 rounded-lg" /> */}
                   <div>
-                    <h3 className="font-semibold">{job.title}</h3>
+                    <h3 className="font-semibold text-gray-800">{job.title}</h3>
                     <div className="flex items-center text-sm text-gray-600 space-x-2">
                       <span>{job.location}</span>
                       <span>•</span>

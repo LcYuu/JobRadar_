@@ -69,9 +69,16 @@ export default function JobCard({
   };
 
   return (
-    <Card onClick={handleCardClick} className="card cursor-pointer border-zinc-900">
-      <CardHeader className="card-header ">
-        <JobCardHeader jobType={jobType} companyLogo={companyLogo} className='border-red-900'/>
+    <Card
+      onClick={handleCardClick}
+      className="card cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-500 ease-in-out"
+    >
+      <CardHeader className="card-header">
+        <JobCardHeader
+          jobType={jobType}
+          companyLogo={companyLogo}
+          className="rounded-full"
+        />
         <CardTitle>{jobTitle}</CardTitle>
       </CardHeader>
       <CardContent className="card-content">
