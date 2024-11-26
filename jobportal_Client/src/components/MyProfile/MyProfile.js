@@ -126,6 +126,7 @@ export default function MyProfile() {
     gender: "",
     dateOfBirth: "",
     industryId: "",
+    background: "bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700"
   });
 
   const [errors, setErrors] = useState({
@@ -168,8 +169,10 @@ export default function MyProfile() {
         emailContact: seeker.emailContact || "",
         gender: seeker.gender || "",
         dateOfBirth: seeker.dateOfBirth || "",
-        industryId: seeker.industry ? seeker.industry.industryId : "", // Kiểm tra industry
+        industryId: seeker.industry ? seeker.industry.industryId : "",
+        background: seeker.background || "bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700"
       });
+      setSelectedBackground(seeker.background || "bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700");
     }
   }, [seeker]);
 
@@ -186,7 +189,10 @@ export default function MyProfile() {
       return;
     }
     try {
-      await dispatch(updateSeekerAction(formData));
+      await dispatch(updateSeekerAction({
+        ...formData,
+        background: selectedBackground
+      }));
       setIsEditingDes(false);
       setIsEditingInfo(false);
       dispatch(getSeekerByUser());
@@ -329,18 +335,55 @@ export default function MyProfile() {
     return isValid;
   };
 
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [selectedBackground, setSelectedBackground] = useState(
+    'bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700'
+  );
+
+  const backgroundGradients = [
+    'bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700',
+    'bg-gradient-to-r from-cyan-200 via-blue-300 to-blue-700',
+    'bg-gradient-to-r from-green-200 via-teal-300 to-teal-700',
+    'bg-gradient-to-r from-yellow-200 via-orange-300 to-orange-700',
+    'bg-gradient-to-r from-red-200 via-rose-300 to-rose-700',
+  ];
+
+  const handleBackgroundChange = (gradient) => {
+    setSelectedBackground(gradient);
+    setShowColorPicker(false);
+    setFormData(prev => ({
+      ...prev,
+      background: gradient
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 -ml-8 -mr-8 ">
       <main className="container mx-auto p-6">
         {/* Profile Header Card */}
         <Card className="mb-6">
-          <div className="relative h-48 bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700">
+          <div className={`relative h-48 ${selectedBackground}`}>
             <Button
               size="icon"
               className="absolute right-4 top-4 bg-white/20 hover:bg-white/30"
+              onClick={() => setShowColorPicker(!showColorPicker)}
             >
               <Edit className="h-4 w-4" />
             </Button>
+
+            {showColorPicker && (
+              <div className="absolute right-4 top-16 bg-white p-3 rounded-lg shadow-lg z-10">
+                <div className="grid grid-cols-1 gap-2">
+                  {backgroundGradients.map((gradient, index) => (
+                    <button
+                      key={index}
+                      className={`h-8 w-32 rounded-md ${gradient} hover:opacity-80 transition-opacity`}
+                      onClick={() => handleBackgroundChange(gradient)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           <div className="relative px-6 pb-6">
             <Avatar className="absolute -top-16 h-32 w-32 border-4 border-white">
