@@ -19,5 +19,5 @@ public interface IUserAccountService {
 	public UserAccount findUserByEmail(String email);
 	public UserAccount findUserById(UUID userId) throws AllExceptions;
 	public UserAccount findUserByJwt(String jwt);
-	public List<DailyAccountCount> getDailyAccountCounts(LocalDateTime startDate, LocalDateTime endDate);
+	public List<DailyAccountCount> getDailyAccountCounts(LocalDate startDate, LocalDate endDate);
 }

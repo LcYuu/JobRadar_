@@ -19,57 +19,60 @@ import {
 
 export default function UserList() {
   const dispatch = useDispatch();
-  const { users, loading, error } = useSelector((state) => state.user);
-  const [filteredUsers, setFilteredUsers] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRole, setSelectedRole] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
+  const { users, totalPages, totalElements, loading, error } = useSelector((state) => state.user);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [size, setSize] = useState(5);
+  const [filters, setFilters] = useState({
+    searchTerm: '',
+    role: 'all',
+    status: 'all'
+  });
 
   useEffect(() => {
-    dispatch(getAllUsers());
-  }, [dispatch]);
+    dispatch(getAllUsers(currentPage, size, filters));
+  }, [dispatch, currentPage, size, filters]);
 
-  useEffect(() => {
-    if (users) {
-      let filtered = users;
+  const handleSearch = (e) => {
+    setFilters(prev => ({ ...prev, searchTerm: e.target.value }));
+    setCurrentPage(0);
+  };
 
-      // Filter by search term
-      if (searchTerm) {
-        filtered = filtered.filter(user => 
-          user.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.email.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      }
+  const handleRoleFilter = (e) => {
+    setFilters(prev => ({ ...prev, role: e.target.value }));
+    setCurrentPage(0);
+  };
 
-      // Filter by role
-      if (selectedRole !== 'all') {
-        filtered = filtered.filter(user => 
-          user.userType.userTypeId === parseInt(selectedRole)
-        );
-      }
+  const handleStatusFilter = (e) => {
+    setFilters(prev => ({ ...prev, status: e.target.value }));
+    setCurrentPage(0);
+  };
 
-      // Filter by status
-      if (selectedStatus !== 'all') {
-        filtered = filtered.filter(user => 
-          user.active === (selectedStatus === '1')
-        );
-      }
-
-      setFilteredUsers(filtered);
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      setCurrentPage(newPage);
     }
-  }, [users, searchTerm, selectedRole, selectedStatus]);
+  };
+
+  const handleSizeChange = (e) => {
+    setSize(Number(e.target.value));
+    setCurrentPage(0);
+  };
 
   const handleDeleteUser = (userId) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
-      dispatch(deleteUser(userId));
+      dispatch(deleteUser(userId)).then(() => {
+        dispatch(getAllUsers(currentPage, size, filters));
+      });
     }
   };
 
   const handleToggleStatus = (user) => {
     dispatch(updateUserStatus(user.userId, {
       ...user,
-      isActive: !user.isActive
-    }));
+      active: !user.active
+    })).then(() => {
+      dispatch(getAllUsers(currentPage, size, filters));
+    });
   };
 
   if (loading) return <div className="text-center py-8">Đang tải...</div>;
@@ -78,21 +81,20 @@ export default function UserList() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-4">
-        <div className="text-sm text-gray-600">Tổng số người dùng: {filteredUsers.length}</div>
+        <div className="text-sm text-gray-600">Tổng số người dùng: {totalElements || 0}</div>
         <div className="flex items-center gap-4">
           <div className="relative">
-            <MoreVertical className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
               type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={filters.searchTerm}
+              onChange={handleSearch}
               placeholder="Tìm kiếm theo tên hoặc email..."
               className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-80"
             />
           </div>
           <select
-            value={selectedRole}
-            onChange={(e) => setSelectedRole(e.target.value)}
+            value={filters.role}
+            onChange={handleRoleFilter}
             className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">Tất cả loại tài khoản</option>
@@ -101,8 +103,8 @@ export default function UserList() {
             <option value="3">Employer</option>
           </select>
           <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
+            value={filters.status}
+            onChange={handleStatusFilter}
             className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">Tất cả trạng thái</option>
@@ -127,90 +129,137 @@ export default function UserList() {
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.map((user) => (
-              <tr key={user.userId} className="border-b hover:bg-gray-50">
-                <td className="p-4">
-                  <div className="group relative">
-                    {user.avatar ? (
-                      <img 
-                        src={user.avatar} 
-                        alt={`Avatar của ${user.userName}`}
-                        className="w-10 h-10 rounded-full object-cover cursor-pointer"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer">
-                        <span className="text-gray-500 text-lg uppercase">
-                          {user.userName?.charAt(0)}
-                        </span>
+            {users && users.length > 0 ? (
+              users.map((user) => (
+                <tr key={user.userId} className="border-b hover:bg-gray-50">
+                  <td className="p-4">
+                    <div className="group relative">
+                      {user.avatar ? (
+                        <img 
+                          src={user.avatar} 
+                          alt={`Avatar của ${user.userName}`}
+                          className="w-10 h-10 rounded-full object-cover cursor-pointer"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer">
+                          <span className="text-gray-500 text-lg uppercase">
+                            {user.userName?.charAt(0)}
+                          </span>
+                        </div>
+                      )}
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        {user.userName}
                       </div>
-                    )}
-                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      {user.userName}
                     </div>
-                  </div>
-                </td>
-                <td className="p-4">{user.userName}</td>
-                <td className="p-4">{user.email}</td>
-                <td className="p-4">
-                  <span className="px-2 py-1 rounded-full text-xs">
-                    {user.userType.user_type_name}
-                  </span>
-                </td>
-                <td className="p-4">
-                  <span className={`px-3 py-1 rounded-full text-sm ${
-                    user.active 
-                      ? "bg-emerald-100 text-emerald-600"
-                      : "bg-red-100 text-red-600"
-                  }`}>
-                    {user.active ? "Active" : "Inactive"}
-                  </span>
-                </td>
-                <td className="p-4">
-                  {new Date(user.createDate).toLocaleDateString('vi-VN', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </td>
-                <td className="p-4">
-                  {user.lastLogin ? (
-                    new Date(user.lastLogin).toLocaleDateString('vi-VN', {
+                  </td>
+                  <td className="p-4">{user.userName}</td>
+                  <td className="p-4">{user.email}</td>
+                  <td className="p-4">
+                    <span className="px-2 py-1 rounded-full text-xs">
+                      {user.userType.user_type_name}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <span className={`px-3 py-1 rounded-full text-sm ${
+                      user.active 
+                        ? "bg-emerald-100 text-emerald-600"
+                        : "bg-red-100 text-red-600"
+                    }`}>
+                      {user.active ? "Active" : "Inactive"}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    {new Date(user.createDate).toLocaleDateString('vi-VN', {
                       year: 'numeric',
                       month: '2-digit',
                       day: '2-digit',
                       hour: '2-digit',
                       minute: '2-digit'
-                    })
-                  ) : (
-                    <span className="text-gray-400">Chưa đăng nhập</span>
-                  )}
-                </td>
-                <td className="p-4">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleToggleStatus(user)}>
-                        {user.active ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => handleDeleteUser(user.userId)}
-                        className="text-red-600"
-                      >
-                        Xóa
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    })}
+                  </td>
+                  <td className="p-4">
+                    {user.lastLogin ? (
+                      new Date(user.lastLogin).toLocaleDateString('vi-VN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })
+                    ) : (
+                      <span className="text-gray-400">Chưa đăng nhập</span>
+                    )}
+                  </td>
+                  <td className="p-4">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleToggleStatus(user)}>
+                          {user.active ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleDeleteUser(user.userId)}
+                          className="text-red-600"
+                        >
+                          Xóa
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="8" className="text-center p-4 text-gray-500">
+                  Không có dữ liệu
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
+        
+        <div className="p-4 border-t flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span>Hiển thị</span>
+            <select
+              className="border rounded p-1"
+              value={size}
+              onChange={handleSizeChange}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+            </select>
+            <span>người dùng mỗi trang</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              disabled={currentPage === 0}
+              onClick={() => handlePageChange(currentPage - 1)}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              className="bg-indigo-600 text-white"
+            >
+              {currentPage + 1}
+            </Button>
+            <Button
+              variant="outline"
+              disabled={currentPage >= totalPages - 1}
+              onClick={() => handlePageChange(currentPage + 1)}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );

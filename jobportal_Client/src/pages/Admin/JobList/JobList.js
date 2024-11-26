@@ -16,13 +16,14 @@ import { useNavigate } from 'react-router-dom';
 
 export default function AdminJobList() {
   const dispatch = useDispatch();
-  const { jobPost, totalPages, loading, error } = useSelector((state) => state.jobPost);
+  const { jobPost, totalPages, totalElements, loading, error } = useSelector((state) => state.jobPost);
   const [currentPage, setCurrentPage] = useState(0);
-  const [size] = useState(10);
+  const [size, setSize] = useState(5);
   const [searchTerm, setSearchTerm] = useState('');
+  const [totalJobs, setTotalJobs] = useState(0);
   const [filters, setFilters] = useState({
-    status: 'all', // 'all', 'open', 'closed'
-    approve: 'all', // 'all', 'approved', 'pending'
+    status: 'all',
+    approve: 'all',
   });
   const navigate = useNavigate();
 
@@ -30,10 +31,21 @@ export default function AdminJobList() {
     dispatch(getAllJobsForAdmin(currentPage, size));
   }, [dispatch, currentPage, size]);
 
+  useEffect(() => {
+    if (jobPost && !searchTerm && filters.status === 'all' && filters.approve === 'all') {
+      setTotalJobs(totalElements);
+    }
+  }, [jobPost, totalElements]);
+
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalPages) {
       setCurrentPage(newPage);
     }
+  };
+
+  const handleSizeChange = (e) => {
+    setSize(Number(e.target.value));
+    setCurrentPage(0);
   };
 
   const filteredJobs = jobPost?.filter(job => {
@@ -51,6 +63,14 @@ export default function AdminJobList() {
     return matchesSearch && matchesStatus && matchesApprove;
   });
 
+  useEffect(() => {
+    if (searchTerm || filters.status !== 'all' || filters.approve !== 'all') {
+      setTotalJobs(filteredJobs?.length || 0);
+    } else {
+      setTotalJobs(totalElements);
+    }
+  }, [searchTerm, filters, filteredJobs, totalElements]);
+
   if (loading) return <div className="text-center py-8">Đang tải...</div>;
   if (error) return <div className="text-center py-8 text-red-500">{error}</div>;
 
@@ -58,7 +78,7 @@ export default function AdminJobList() {
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow">
         <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="font-semibold">Danh sách công việc</h2>
+          <h2 className="font-semibold">Danh sách công việc ({totalJobs})</h2>
           <div className="flex items-center gap-4">
             <div className="relative">
               <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -181,28 +201,44 @@ export default function AdminJobList() {
           </tbody>
         </table>
 
-        <div className="flex items-center justify-center mt-6 p-4 border-t">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 0}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          
-          <span className="mx-4 text-sm">
-            Trang {currentPage + 1} / {totalPages}
-          </span>
-          
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage >= totalPages - 1}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+        <div className="p-4 border-t flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span>Hiển thị</span>
+            <select
+              className="border rounded p-1"
+              value={size}
+              onChange={handleSizeChange}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+            </select>
+            <span>bản ghi mỗi trang </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              disabled={currentPage === 0}
+              onClick={() => handlePageChange(currentPage - 1)}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              className="bg-indigo-600 text-white"
+              onClick={() => handlePageChange(currentPage)}
+            >
+              {currentPage + 1}
+            </Button>
+            <Button
+              variant="outline"
+              disabled={currentPage === totalPages - 1}
+              onClick={() => handlePageChange(currentPage + 1)}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       </div>
     </div>
