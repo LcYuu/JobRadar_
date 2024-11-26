@@ -15,9 +15,6 @@ import {
   GET_PROFILE_COMPANY_FAILURE,
   GET_PROFILE_COMPANY_REQUEST,
   GET_PROFILE_COMPANY_SUCCESS,
-  GET_COMPANY_REQUEST,
-  GET_COMPANY_SUCCESS,
-  GET_COMPANY_FAILURE,
   UPDATE_COMPANY_PROFILE_REQUEST,
   UPDATE_COMPANY_PROFILE_SUCCESS,
   UPDATE_COMPANY_PROFILE_FAILURE,
@@ -27,6 +24,29 @@ import {
   VALIDATE_TAXCODE_REQUEST,
   VALIDATE_TAXCODE_FAILURE,
   VALIDATE_TAXCODE_SUCCESS,
+
+  GET_ALL_COMPANIES_REQUEST,
+  GET_ALL_COMPANIES_SUCCESS,
+  GET_ALL_COMPANIES_FAILURE,
+  UPDATE_COMPANY_STATUS_REQUEST,
+  UPDATE_COMPANY_STATUS_SUCCESS,
+  UPDATE_COMPANY_STATUS_FAILURE,
+  DELETE_COMPANY_REQUEST,
+  DELETE_COMPANY_SUCCESS,
+  DELETE_COMPANY_FAILURE,
+  GET_JOB_BY_COMPANY_REQUEST,
+  GET_JOB_BY_COMPANY_SUCCESS,
+  GET_JOB_BY_COMPANY_FAILURE,
+  GET_COMPANY_JOB_COUNTS_REQUEST,
+  GET_COMPANY_JOB_COUNTS_SUCCESS,
+  GET_COMPANY_JOB_COUNTS_FAILURE,
+  GET_COMPANY_JOB_STATS_REQUEST,
+  GET_COMPANY_JOB_STATS_SUCCESS,
+  GET_COMPANY_JOB_STATS_FAILURE,
+  GET_COMPANY_REQUEST,
+  GET_COMPANY_SUCCESS,
+  GET_COMPANY_FAILURE,
+  
 } from "./company.actionType";
 import { api, API_BASE_URL } from "../../configs/api";
 import { CHECK_IF_APPLIED_SUCCESS } from "../ApplyJob/applyJob.actionType";
@@ -242,3 +262,175 @@ export const validateTaxCode = () => {
     }
   };
 };
+
+export const getAllCompanies = () => async (dispatch) => {
+  dispatch({ type: GET_ALL_COMPANIES_REQUEST });
+  try {
+    const companiesResponse = await api.get('/company/find-all');
+    
+    // Get industry names for each company
+    const companiesWithIndustryNames = await Promise.all(
+      companiesResponse.data.map(async (company) => {
+        try {
+          const industryResponse = await api.get(`/company/get-industry-name/${company.industryId}`);
+          return {
+            ...company,
+            industryName: industryResponse.data
+          };
+        } catch (error) {
+          return {
+            ...company,
+            industryName: 'N/A'
+          };
+        }
+      })
+    );
+
+    dispatch({
+      type: GET_ALL_COMPANIES_SUCCESS,
+      payload: companiesWithIndustryNames
+    });
+  } catch (error) {
+    dispatch({
+      type: GET_ALL_COMPANIES_FAILURE,
+      payload: error.message
+    });
+  }
+};
+
+export const updateCompanyStatus = (companyId, status) => async (dispatch) => {
+  try {
+    dispatch({ type: UPDATE_COMPANY_STATUS_REQUEST });
+    
+    const response = await axios.put(
+      `${API_BASE_URL}/admin/companies/${companyId}/status`,
+      { isActive: status }
+    );
+
+    dispatch({
+      type: UPDATE_COMPANY_STATUS_SUCCESS,
+      payload: response.data,
+    });
+
+    return response.data;
+  } catch (error) {
+    dispatch({
+      type: UPDATE_COMPANY_STATUS_FAILURE,
+      payload: error.response?.data || error.message,
+    });
+    throw error;
+  }
+};
+
+export const deleteCompany = (companyId) => async (dispatch) => {
+  try {
+    dispatch({ type: DELETE_COMPANY_REQUEST });
+    
+    await axios.delete(`${API_BASE_URL}/admin/companies/${companyId}`);
+
+    dispatch({
+      type: DELETE_COMPANY_SUCCESS,
+      payload: companyId,
+    });
+  } catch (error) {
+    dispatch({
+      type: DELETE_COMPANY_FAILURE,
+      payload: error.response?.data || error.message,
+    });
+    throw error;
+  }
+};
+
+
+
+export const getJobByCompany = (companyId, currentPage, size) => async (dispatch) => {
+  dispatch({ type: GET_JOB_BY_COMPANY_REQUEST });
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/company/${companyId}/jobs`,
+      {
+        params: {
+          page: currentPage,
+          size: size
+        }
+      }
+    );
+
+    dispatch({
+      type: GET_JOB_BY_COMPANY_SUCCESS,
+      payload: response.data
+    });
+  } catch (error) {
+    dispatch({
+      type: GET_JOB_BY_COMPANY_FAILURE,
+      payload: error.response?.data?.message || "Failed to fetch company jobs"
+    });
+  }
+};
+
+export const getCompanyJobCounts = (companyId) => async (dispatch) => {
+  dispatch({ type: GET_COMPANY_JOB_COUNTS_REQUEST });
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/job-post/count-jobs-by-company/${companyId}`
+    );
+    dispatch({
+      type: GET_COMPANY_JOB_COUNTS_SUCCESS,
+      payload: response.data
+    });
+  } catch (error) {
+    dispatch({
+      type: GET_COMPANY_JOB_COUNTS_FAILURE,
+      payload: error.response?.data?.message || "Failed to fetch job counts"
+    });
+  }
+};
+
+export const getCompanyJobStats = (companyId, startDate, endDate) => async (dispatch) => {
+  dispatch({ type: GET_COMPANY_JOB_STATS_REQUEST });
+  try {
+    const response = await api.get(
+      `${API_BASE_URL}/job-post/company/${companyId}/job-stats`,
+      {
+        params: { startDate, endDate }
+      }
+    );
+    console.log('Job stats response:', response.data); // Add this for debugging
+    dispatch({
+      type: GET_COMPANY_JOB_STATS_SUCCESS,
+      payload: response.data
+    });
+  } catch (error) {
+    console.error('Error fetching job stats:', error); // Add this for debugging
+    dispatch({
+      type: GET_COMPANY_JOB_STATS_FAILURE,
+      payload: error.message
+    });
+  }
+};
+export const getCompanyById = (companyId) => async (dispatch) => {
+  try {
+    dispatch({ type: GET_COMPANY_REQUEST });
+    
+    // Đảm bảo companyId là string hợp lệ
+    const cleanCompanyId = companyId.replace(/[^\w-]/g, '');
+    console.log("Fetching company with ID:", cleanCompanyId);
+    
+    const response = await axios.get(
+      `${API_BASE_URL}/company/profile-company/${cleanCompanyId}`
+    );
+    console.log("Company data received:", response.data);
+
+    dispatch({
+      type: GET_COMPANY_SUCCESS,
+      payload: response.data,
+    });
+  } catch (error) {
+    console.error("Error fetching company:", error);
+    dispatch({
+      type: GET_COMPANY_FAILURE,
+      payload: error.response?.data?.message || "Failed to fetch company details",
+    });
+  }
+};
+

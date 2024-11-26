@@ -1,6 +1,7 @@
 package com.job_portal.service;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -36,4 +37,8 @@ public interface IJobPostService {
 	public Page<JobPost> searchJobsWithPagination(String title, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, Pageable pageable);
 	public Page<JobPost> findByCompanyId(UUID companyId, Pageable pageable);
 	public Page<JobWithApplicationCountDTO> getTop5JobsWithApplications(UUID companyId, int page, int size);
+	public Page<JobPost> findJobsByCompany(UUID companyId, Pageable pageable);
+	public Page<JobPost> findApprovedJobsByCompany(UUID companyId, Pageable pageable);
+	public Map<String, Long> countAllJobsByCompany(UUID companyId);
+	public List<Map<String, Object>> getCompanyJobStats(UUID companyId, LocalDate startDate, LocalDate endDate);
 }
