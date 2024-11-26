@@ -18,6 +18,7 @@ const initialState = {
   loading: false,
   error: null,
   followedCompany: [],
+  action: null,
   follow: [],
   message: "",
 };
@@ -59,6 +60,7 @@ export const seekerReducer = (state = initialState, action) => {
     case FOLLOW_COMPANY_SUCCESS:
       return {
         ...state,
+        action : action.payload.action,
         follow: [...state.follow, action.payload.companyId],
         message: action.payload.message,
         error: null,
@@ -66,6 +68,7 @@ export const seekerReducer = (state = initialState, action) => {
     case UNFOLLOW_COMPANY_SUCCESS:
       return {
         ...state,
+        action : action.payload.action,
         follow: state.follow.filter((id) => id !== action.payload.companyId),
         message: action.payload.message,
         error: null,

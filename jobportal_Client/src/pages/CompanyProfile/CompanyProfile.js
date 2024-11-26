@@ -37,7 +37,10 @@ import {
 import { StarBorder, StarRounded } from "@mui/icons-material";
 import { toast } from "react-toastify";
 
-import { followCompany } from "../../redux/Seeker/seeker.action";
+import {
+  followCompany,
+  getSeekerByUser,
+} from "../../redux/Seeker/seeker.action";
 import "react-toastify/dist/ReactToastify.css";
 
 import { checkIfApplied } from "../../redux/ApplyJob/applyJob.action";
@@ -75,9 +78,10 @@ export default function CompanyProfile() {
   const {
     jobPost = [],
     totalPages,
-    loading,
     error,
   } = useSelector((store) => store.jobPost);
+
+  const [loading, setLoading] = useState(true);
 
   const { checkIfSaved } = useSelector((store) => store.company);
 
@@ -96,7 +100,7 @@ export default function CompanyProfile() {
   const { reviews } = useSelector((store) => store.review);
 
   const { companyProfile } = useSelector((store) => store.company);
-  const { follow, message } = useSelector((store) => store.seeker);
+  const { seeker, message } = useSelector((store) => store.seeker);
 
   const [isFollowing, setIsFollowing] = useState(false); // Trạng thái theo dõi ban đầu
 
@@ -143,6 +147,24 @@ export default function CompanyProfile() {
   };
 
   useEffect(() => {
+    const fetchSeekerAndCheckFollow = async () => {
+      if (loading) {
+        await dispatch(getSeekerByUser()); // Lấy dữ liệu chỉ khi chưa có seeker
+        setLoading(false); // Đánh dấu là đã tải xong dữ liệu
+      }
+
+      if (seeker?.followedCompanies) {
+        const isCurrentlyFollowing = seeker.followedCompanies.some(
+          (company) => company.companyId === companyId
+        );
+        setIsFollowing(isCurrentlyFollowing); // Cập nhật trạng thái
+      }
+    };
+
+    fetchSeekerAndCheckFollow();
+  }, [dispatch, companyId, seeker, loading]); // Cập nhật state loading để kiểm soát việc gọi API
+
+  useEffect(() => {
     window.scrollTo({
       top: 0,
       behavior: "smooth",
@@ -157,23 +179,17 @@ export default function CompanyProfile() {
     dispatch(getCompanyProfile(companyId));
     dispatch(getReviewByCompany(companyId));
     dispatch(checkSaved(companyId));
-    dispatch(followCompany(companyId));
     dispatch(getJobsByCompany(companyId, currentPage, size));
-  }, [dispatch, currentPage, size]);
+  }, [dispatch, currentPage, size, companyId]);
 
   const handleFollowClick = async () => {
     try {
-      // Gửi yêu cầu theo dõi hoặc bỏ theo dõi
       await dispatch(followCompany(companyId));
-
-      // Cập nhật trạng thái theo dõi sau khi gửi yêu cầu thành công
-      setIsFollowing(!isFollowing); // Toggle trạng thái
-
-      // Hiển thị thông báo toast
-      const message = isFollowing
-        ? "Bỏ theo dõi công ty thành công"
-        : "Theo dõi công ty thành công";
-      toast(message); // Hiển thị toast
+      setIsFollowing((prevState) => !prevState); // Đảo trạng thái
+      const mess= isFollowing
+        ? "Bỏ theo dõi thành công!"
+        : "Theo dõi thành công!"
+      toast(mess);
     } catch (error) {
       // Xử lý lỗi nếu có
       console.error("Có lỗi xảy ra khi theo dõi công ty:", error);
@@ -181,7 +197,7 @@ export default function CompanyProfile() {
     }
   };
 
-  console.log(companyProfile?.images);
+  console.log("eqwe" + isFollowing);
 
   const totalStars = reviews.reduce((total, review) => total + review.star, 0);
   // Tính trung bình

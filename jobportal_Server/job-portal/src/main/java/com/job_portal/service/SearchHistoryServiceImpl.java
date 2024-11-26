@@ -12,6 +12,7 @@ import com.job_portal.repository.SearchHistoryRepository;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -41,7 +42,7 @@ public class SearchHistoryServiceImpl implements ISearchHistoryService {
 	            String.valueOf(id++),                  // ID tự động tăng
 	            seekerId != null ? seekerId.toString() : "N/A",  // SeekerID (Nếu có)
 	            searchQuery,                            // Chuỗi tìm kiếm
-	            LocalDateTime.now().toString()          // Thời gian tìm kiếm
+	            LocalDate.now().toString()          // Thời gian tìm kiếm
 	        };
 	        writer.writeNext(data);
 
