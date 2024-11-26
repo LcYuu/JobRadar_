@@ -54,7 +54,7 @@ function JobCardContent({ company, location, category }) {
 }
 
 export default function JobCard({
-  jobId,
+  postId,
   jobTitle,
   company,
   location,
@@ -65,7 +65,7 @@ export default function JobCard({
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    navigate(`jobs/job-detail/${jobId}`);
+    navigate(`/jobs/job-detail/${postId}`);
   };
 
   return (

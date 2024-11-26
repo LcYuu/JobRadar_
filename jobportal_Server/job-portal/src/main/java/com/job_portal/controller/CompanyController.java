@@ -205,6 +205,26 @@ public class CompanyController {
 	    }
 	}
 	
+	@GetMapping("/get-all-companies")
+	public ResponseEntity<Map<String, Object>> getAllCompanies(
+	    @RequestParam(defaultValue = "0") int page,
+	    @RequestParam(defaultValue = "10") int size
+	) {
+	    try {
+	        Pageable paging = PageRequest.of(page, size);
+	        Page<Company> pageCompanies = companyRepository.findAll(paging);
+	        
+	        Map<String, Object> response = new HashMap<>();
+	        response.put("companies", pageCompanies.getContent());
+	        response.put("currentPage", pageCompanies.getNumber());
+	        response.put("totalItems", pageCompanies.getTotalElements());
+	        response.put("totalPages", pageCompanies.getTotalPages());
+	        
+	        return new ResponseEntity<>(response, HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
 	
 
 }

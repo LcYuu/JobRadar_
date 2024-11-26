@@ -2,11 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Card } from "../../../ui/card";
 import { useDispatch, useSelector } from 'react-redux';
 import { Users, Building2, FileText, TrendingUp, Calendar } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { getTotalUsers, getTotalCompanies, getTotalJobs, getActiveJobs, getDailyStats } from '../../../redux/Stats/stats.action';
+import { 
+  GET_DAILY_STATS_FAILURE,
+  GET_DAILY_STATS_REQUEST,
+  GET_DAILY_STATS_SUCCESS 
+} from '../../../redux/Stats/stats.actionType';
+
 export default function AdminDashboard() {
   const dispatch = useDispatch();
-  const { totalUsers, totalCompanies, totalJobs, activeJobs, dailyStats } = useSelector((state) => state.stats);
+  const { totalUsers, totalCompanies, totalJobs, activeJobs, dailyStats, loading, error } = useSelector((state) => state.stats);
   const [chartDateRange, setChartDateRange] = useState(() => {
     const end = new Date();
     const start = new Date();
@@ -18,6 +24,8 @@ export default function AdminDashboard() {
   });
 
   const [activePeriod, setActivePeriod] = useState('week');
+  const [dateError, setDateError] = useState('');
+  const [isMounted, setIsMounted] = useState(true);
 
   const handleChartDateChange = (e) => {
     const { name, value } = e.target;
@@ -25,7 +33,9 @@ export default function AdminDashboard() {
       ...prev,
       [name]: value
     }));
+    setDateError(''); // Clear previous errors
   };
+
   useEffect(() => {
     dispatch(getTotalUsers());
     dispatch(getTotalCompanies());
@@ -35,32 +45,70 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (chartDateRange.startDate && chartDateRange.endDate) {
+      const start = new Date(chartDateRange.startDate);
+      const end = new Date(chartDateRange.endDate);
+      const today = new Date();
+      
+      // Validate dates
+      if (start > end) {
+        setDateError('Ngày bắt đầu không thể sau ngày kết thúc');
+        return;
+      }
+
+      if (end > today) {
+        setDateError('Ngày kết thúc không thể sau ngày hiện tại');
+        return;
+      }
+
+      setDateError('');
       dispatch(getDailyStats(chartDateRange.startDate, chartDateRange.endDate));
     }
-  }, [dispatch, chartDateRange.startDate, chartDateRange.endDate]);
+  }, [dispatch, chartDateRange]);
+
+  useEffect(() => {
+    console.log('Received dailyStats:', dailyStats);
+  }, [dailyStats]);
 
   const chartData = React.useMemo(() => {
     if (!dailyStats || !Array.isArray(dailyStats)) {
+      console.log('Invalid dailyStats:', dailyStats);
       return [];
     }
     
     return dailyStats.map(stat => {
-      const date = new Date(stat.date);
-      return {
-        name: date.toLocaleDateString('vi-VN', { 
-          month: 'numeric',
-          day: 'numeric'
-        }),
-        fullDate: date.toLocaleDateString('vi-VN', {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'numeric',
-          year: 'numeric'
-        }),
-        users: stat.newUsers || 0,
-        jobs: stat.newJobs || 0
-      };
-    });
+      try {
+        if (!stat.date) {
+          console.error('Missing date in stat:', stat);
+          return null;
+        }
+
+        const date = new Date(stat.date);
+        if (isNaN(date.getTime())) {
+          console.error('Invalid date:', stat.date);
+          return null;
+        }
+
+        return {
+          name: date.toLocaleDateString('vi-VN', { 
+            month: 'numeric',
+            day: 'numeric'
+          }),
+          fullDate: date.toLocaleDateString('vi-VN', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'numeric',
+            year: 'numeric'
+          }),
+          users: Number(stat.newUsers) || 0,
+          jobs: Number(stat.newJobs) || 0
+        };
+      } catch (error) {
+        console.error('Error processing stat:', stat, error);
+        return null;
+      }
+    })
+    .filter(Boolean)
+    .sort((a, b) => new Date(a.fullDate) - new Date(b.fullDate));
   }, [dailyStats]);
 
   const handlePeriodFilter = (period) => {
@@ -138,10 +186,9 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        {/* Chart Section */}
-        <Card className="p-6">
+        <Card className="p-6 mt-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold">Thống kê hoạt động</h2>
+            <h2 className="text-lg font-semibold">Thống kê người dùng và bài viết mới</h2>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-gray-500" />
@@ -192,32 +239,75 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
+
+          {dateError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600">
+              {dateError}
+            </div>
+          )}
+
           <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip 
-                  formatter={(value, name) => {
-                    const labels = {
-                      'Người dùng mới': 'Người dùng mới',
-                      'Bài viết mới': 'Bài viết mới'
-                    };
-                    return [value, labels[name]];
-                  }}
-                  labelFormatter={(label, items) => {
-                    if (items && items[0] && items[0].payload) {
-                      return items[0].payload.fullDate;
-                    }
-                    return label;
-                  }}
-                />
-                <Legend />
-                <Bar dataKey="users" name="Người dùng mới" fill="#818cf8" />
-                <Bar dataKey="jobs" name="Bài viết mới" fill="#34d399" />
-              </BarChart>
-            </ResponsiveContainer>
+            {loading && (
+              <div className="flex items-center justify-center h-full">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+              </div>
+            )}
+            
+            {error && !dateError && (
+              <div className="flex items-center justify-center h-full text-red-500">
+                {typeof error === 'string' ? error : error.message || 'Có lỗi xảy ra khi tải thống kê'}
+              </div>
+            )}
+            
+            {!loading && !error && !dateError && chartData.length === 0 && (
+              <div className="flex items-center justify-center h-full text-gray-500">
+                Không có dữ liệu cho khoảng thời gian này
+              </div>
+            )}
+            
+            {!loading && !error && !dateError && chartData.length > 0 && (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis allowDecimals={false} />
+                  <Tooltip 
+                    formatter={(value, name) => {
+                      const labels = {
+                        'users': 'Người dùng mới',
+                        'jobs': 'Bài viết mới'
+                      };
+                      return [value, labels[name] || name];
+                    }}
+                    labelFormatter={(label, items) => {
+                      if (items?.[0]?.payload?.fullDate) {
+                        return items[0].payload.fullDate;
+                      }
+                      return label;
+                    }}
+                  />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey="users" 
+                    name="Người dùng mới" 
+                    stroke="#818cf8" 
+                    strokeWidth={2}
+                    dot={false}
+                    activeDot={{ r: 6 }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="jobs" 
+                    name="Bài viết mới" 
+                    stroke="#34d399" 
+                    strokeWidth={2}
+                    dot={false}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </Card>
       </div>
