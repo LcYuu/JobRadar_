@@ -14,7 +14,6 @@ import {
   findEmployerCompany,
   findJobCompany,
 } from "../../redux/JobPost/jobPost.action";
-import { jwtDecode } from "jwt-decode";
 import { validateTaxCode } from "../../redux/Company/company.action";
 import { toast, ToastContainer } from "react-toastify";
 

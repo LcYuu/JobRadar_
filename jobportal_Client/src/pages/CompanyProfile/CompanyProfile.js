@@ -5,7 +5,6 @@ import "swiper/swiper-bundle.css";
 import { Button } from "../../ui/button";
 import { Card } from "../../ui/card";
 import { Badge } from "../../ui/badge";
-import "react-responsive-carousel/lib/styles/carousel.min.css";
 import {
   Calendar,
   Users,
@@ -48,7 +47,6 @@ import {
   createReview,
   getReviewByCompany,
 } from "../../redux/Review/review.action";
-import { Carousel } from "react-responsive-carousel";
 
 const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
   return (

@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-hot-toast";
+import { 
+  Tooltip, 
+  TooltipContent, 
+  TooltipTrigger 
+} from "../../ui/tooltip";
 import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
 import { Card } from "../../ui/card";
@@ -21,7 +28,6 @@ import {
 import logo from "../../assets/images/common/logo.jpg";
 import ApplyModal from "../../components/common/ApplyModal/ApplyModal";
 import JobCard_AllJob from "../../components/common/JobCard_AllJob/JobCard_AllJob";
-import { useDispatch, useSelector } from "react-redux";
 import { store } from "../../redux/store";
 import { getJobPostByPostId } from "../../redux/JobPost/jobPost.action";
 import {
@@ -34,6 +40,8 @@ export default function JobDetail() {
   const { postId } = useParams();
   const { postByPostId } = useSelector((store) => store.jobPost);
   const { hasApplied, oneApplyJob } = useSelector((store) => store.applyJob);
+  const { user } = useSelector((store) => store.auth);
+
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -42,7 +50,20 @@ export default function JobDetail() {
   }, []);
 
   const [open, setOpen] = useState(false);
-  const handleOpenModal = () => setOpen(true);
+  const handleOpenModal = () => {
+    if (!user) {
+      toast.error("Vui lòng đăng nhập để ứng tuyển công việc", {
+        position: "top-center",
+        duration: 3000,
+        style: {
+          background: "#FF6B6B",
+          color: "white",
+        },
+      });
+      return;
+    }
+    setOpen(true);
+  };
   const handleClose = () => setOpen(false);
 
   useEffect(() => {
@@ -50,6 +71,9 @@ export default function JobDetail() {
     dispatch(checkIfApplied(postId));
     dispatch(getJobPostByPostId(postId));
   }, [dispatch, postId]);
+
+  console.log("hasApplied:", hasApplied);
+  console.log("oneApplyJob:", oneApplyJob);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -78,14 +102,22 @@ export default function JobDetail() {
                 </div>
 
                 {/* Nút Nộp đơn hoặc Cập nhật đơn */}
-                {hasApplied ? (
+                {oneApplyJob?.save ? (
+                  <Button
+                    variant="outline"
+                    className="text-green-600 border-green-600 cursor-not-allowed"
+                    disabled
+                  >
+                    Đã được duyệt
+                  </Button>
+                ) : hasApplied ? (
                   <button
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
-                    onClick={handleOpenModal} // Cho phép người dùng mở modal để cập nhật
+                    onClick={handleOpenModal}
                   >
                     Cập nhật đơn
                   </button>
-                ) : (
+                ) : user ? (
                   <Button
                     variant="default"
                     className="bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer"
@@ -93,6 +125,21 @@ export default function JobDetail() {
                   >
                     Nộp đơn
                   </Button>
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="text-gray-400 cursor-not-allowed"
+                        disabled
+                      >
+                        Nộp đơn
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Vui lòng đăng nhập để ứng tuyển</p>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
 
                 <section>
@@ -100,7 +147,7 @@ export default function JobDetail() {
                     job={postByPostId}
                     open={open}
                     handleClose={handleClose}
-                    oneApplyJob={oneApplyJob} // Truyền dữ liệu đơn đ nộp nếu có
+                    oneApplyJob={oneApplyJob}
                   />
                 </section>
               </div>

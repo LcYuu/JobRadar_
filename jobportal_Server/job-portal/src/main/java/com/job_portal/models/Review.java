@@ -35,7 +35,7 @@ public class Review {
     private UUID reviewId;
 
     @Column(name = "create_date", nullable = false)
-    private LocalDate createDate;
+    private LocalDateTime createDate;
 
     @Lob
     @Column(name = "message", columnDefinition = "MEDIUMTEXT")
