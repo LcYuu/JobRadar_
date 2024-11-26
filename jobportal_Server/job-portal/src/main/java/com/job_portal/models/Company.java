@@ -60,6 +60,9 @@ public class Company {
 
 	@Column(name = "contact", length = 15)
 	private String contact;
+	
+	@Column(name = "tax_code", length = 30)
+	private String taxCode;
 
 	@Column(name = "email", length = 50)
 	private String email;
