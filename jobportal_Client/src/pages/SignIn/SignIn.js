@@ -19,7 +19,6 @@ import { getProfileAction, loginAction } from "../../redux/Auth/auth.action";
 import { isStrongPassword } from "../../utils/passwordValidator";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
 
 export default function SignInForm() {
   const [email, setEmail] = useState("");
@@ -45,22 +44,30 @@ export default function SignInForm() {
 
     try {
       const response = await dispatch(loginAction({ email, password }));
-      if (response.success) {
+      
+      // Explicitly check for success
+      if (response && response.success) {
+        // Ensure modal is open and status is set to success
         setLoginStatus("success");
         setIsModalOpen(true);
-        setTimeout(() => {
-          setIsModalOpen(false);
-          window.location.href = "http://localhost:3000/"; // Redirects to home after a few seconds
-        }, 3000); // Adjust the time (in milliseconds) as needed
+        
+        // Use setTimeout to delay navigation and allow modal to be visible
+        const redirectTimer = setTimeout(() => {
+          navigate("/");
+          clearTimeout(redirectTimer);
+        }, 3000);
       } else {
+        // Handle login failure
         setLoginStatus("failure");
         setIsModalOpen(true);
-        setError(response.error || "Đăng nhập thất bại. Vui lòng thử lại.");
+        setError(response?.error || "Đăng nhập thất bại. Vui lòng thử lại.");
       }
     } catch (error) {
+      // Handle any unexpected errors
       setLoginStatus("failure");
       setIsModalOpen(true);
       setError("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+      console.error("Login error:", error);
     }
   };
   const handleCloseModal = () => {
@@ -69,6 +76,8 @@ export default function SignInForm() {
   };
 
   const renderLoginStatus = () => {
+    if (!isModalOpen) return null;
+
     if (loginStatus === "success") {
       return (
         <motion.div
@@ -96,6 +105,7 @@ export default function SignInForm() {
         </motion.div>
       );
     }
+    
     return null;
   };
 
@@ -223,7 +233,7 @@ export default function SignInForm() {
         </CardContent>
       </Card>
 
-      <Dialog isOpen={isModalOpen} onClose={handleCloseModal}>
+      <Dialog open={isModalOpen} onOpenChange={handleCloseModal}>
         <DialogContent className="sm:max-w-[425px] bg-white shadow-lg rounded-lg p-6">
           <DialogHeader>
             <DialogTitle className="text-lg text-center mb-2 font-semibold text-gray-900">
@@ -232,7 +242,9 @@ export default function SignInForm() {
                 : "Đăng nhập thất bại"}
             </DialogTitle>
           </DialogHeader>
-          <AnimatePresence>{renderLoginStatus()}</AnimatePresence>
+          <AnimatePresence mode="wait">
+            {renderLoginStatus()}
+          </AnimatePresence>
         </DialogContent>
       </Dialog>
     </div>
