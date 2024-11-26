@@ -36,7 +36,7 @@ export const getSeekerByUser = () => async (dispatch) => {
       },
     });
 
-    console.log("Seeker: " + JSON.stringify(response.data, null, 2));
+    // console.log("Seeker: " + JSON.stringify(response.data, null, 2));
 
     dispatch({
       type: GET_SEEKER_BY_USER_SUCCESS,
@@ -97,10 +97,12 @@ export const followCompany = (companyId) => async (dispatch) => {
       const response = await api.put(`/seeker/follow/${companyId}`);
       const { action, message } = response.data;
 
+      console.log("Action: " + action)
+
       if (action === "follow") {
-          dispatch({ type: FOLLOW_COMPANY_SUCCESS, payload: { companyId, message } });
+          dispatch({ type: FOLLOW_COMPANY_SUCCESS, payload: { companyId, message, action } });
       } else if (action === "unfollow") {
-          dispatch({ type: UNFOLLOW_COMPANY_SUCCESS, payload: { companyId, message } });
+          dispatch({ type: UNFOLLOW_COMPANY_SUCCESS, payload: { companyId, message, action } });
       }
   } catch (error) {
       dispatch({ type: FOLLOW_COMPANY_FAILURE, error: error.message });

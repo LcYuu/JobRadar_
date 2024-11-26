@@ -354,7 +354,7 @@ public class JobPostController {
 
 	        // Tạo danh sách JobPost
 	        List<JobRecommendationDTO> jobs = new ArrayList<>();
-
+	        
 	        // Duyệt qua từng đối tượng trong JsonNode và thiết lập từng giá trị cho JobPost
 	        for (JsonNode jobNode : jsonResponse) {
 	        	JobRecommendationDTO job = new JobRecommendationDTO();
@@ -389,6 +389,8 @@ public class JobPostController {
 	            job.setIndustryName(jobNode.get("industryName").asText(null)); 
 	            job.setLogo(jobNode.get("logo").asText(null)); 
 	            jobs.add(job);
+	            
+	           
 	        }
 
 	        return ResponseEntity.ok(jobs); // Trả về danh sách việc làm
