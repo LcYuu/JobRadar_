@@ -21,6 +21,10 @@ import {
   UPDATE_COMPANY_IMAGES_REQUEST,
   UPDATE_COMPANY_IMAGES_SUCCESS,
   UPDATE_COMPANY_IMAGES_FAILURE,
+  VALIDATE_TAXCODE_REQUEST,
+  VALIDATE_TAXCODE_FAILURE,
+  VALIDATE_TAXCODE_SUCCESS,
+
   GET_ALL_COMPANIES_REQUEST,
   GET_ALL_COMPANIES_SUCCESS,
   GET_ALL_COMPANIES_FAILURE,
@@ -236,6 +240,27 @@ export const updateCompanyImages = (images) => async (dispatch) => {
     });
     throw error;
   }
+};
+
+export const validateTaxCode = () => {
+  return async (dispatch) => {
+    dispatch({ type: VALIDATE_TAXCODE_REQUEST }); // Gửi action yêu cầu kiểm tra mã số thuế
+
+    try {
+      const response = await api.get(`/company/validate-tax`);
+      console.log("b"+ response.data)
+        dispatch({
+          type: VALIDATE_TAXCODE_SUCCESS,
+          payload: response.data, // Kết quả trả về true/false
+        });
+
+    } catch (error) {
+      dispatch({
+        type: VALIDATE_TAXCODE_FAILURE,
+        error: error.message || 'Có lỗi xảy ra khi gọi API',
+      });
+    }
+  };
 };
 
 export const getAllCompanies = () => async (dispatch) => {

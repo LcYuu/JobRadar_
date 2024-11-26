@@ -35,12 +35,12 @@ public class AppConfig {
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
 		http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-//		 http
-//	        .headers()
-//	        .addHeaderWriter((request, response) -> {
-//	            response.addHeader("Cross-Origin-Opener-Policy", "same-origin"); // Cho phép tương tác với cùng nguồn gốc
-//	            response.addHeader("Cross-Origin-Embedder-Policy", "require-corp"); // Yêu cầu nguồn tài nguyên từ các nguồn gốc hợp lệ
-//	        });
+		http
+	        .headers()
+	        .addHeaderWriter((request, response) -> {
+	            response.addHeader("Cross-Origin-Opener-Policy", "same-origin"); // Cho phép tương tác với cùng nguồn gốc
+	            response.addHeader("Cross-Origin-Embedder-Policy", "require-corp"); // Yêu cầu nguồn tài nguyên từ các nguồn gốc hợp lệ
+	        });
 
 		http.authorizeHttpRequests(
 				Authorize -> Authorize.requestMatchers("/api/**").authenticated().anyRequest().permitAll())
@@ -51,7 +51,7 @@ public class AppConfig {
 
 		// oauth config
 		http.oauth2Login(oauth -> oauth.loginPage("/auth/login") // Trang login nếu cần thiết
-				.defaultSuccessUrl("/", true) // Đường dẫn sau khi đăng nhập thành công
+				.defaultSuccessUrl("/role-selection", true) // Đường dẫn sau khi đăng nhập thành công
 				.failureUrl("/login?error=true") // Đường dẫn khi lỗi
 				.permitAll() // Cho phép tất cả truy cập
 		);

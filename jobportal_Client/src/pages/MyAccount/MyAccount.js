@@ -48,15 +48,15 @@ export default function Dashboard() {
   }, [location.pathname, navigate, user]);
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <Sidebar selectedSection={selectedSection} setSelectedSection={setSelectedSection} />
-      <main className="flex-1 p-8">
-        <div className="flex justify-between">
-          <h1 className="text-2xl font-bold">{selectedSection}</h1>
-          <Link to="/"><Button variant="outline">Trở về trang chủ</Button></Link>
-        </div>
-        <Outlet />
-      </main>
+    <div className="flex bg-gray-100">
+  <Sidebar selectedSection={selectedSection} setSelectedSection={setSelectedSection} className="h-full" />
+  <main className="flex-1 p-8">
+    <div className="flex justify-between">
+      <h1 className="text-2xl font-bold">{selectedSection}</h1>
+      <Link to="/"><Button variant="outline">Trở về trang chủ</Button></Link>
     </div>
+    <Outlet />
+  </main>
+</div>
   );
 }

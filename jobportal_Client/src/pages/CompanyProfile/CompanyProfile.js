@@ -5,6 +5,7 @@ import "swiper/swiper-bundle.css";
 import { Button } from "../../ui/button";
 import { Card } from "../../ui/card";
 import { Badge } from "../../ui/badge";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
 import {
   Calendar,
   Users,
@@ -22,7 +23,10 @@ import {
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import JobCard_AllJob from "../../components/common/JobCard_AllJob/JobCard_AllJob";
-import { getAllJobAction, getJobsByCompany } from "../../redux/JobPost/jobPost.action";
+import {
+  getAllJobAction,
+  getJobsByCompany,
+} from "../../redux/JobPost/jobPost.action";
 import logo from "../../assets/images/common/logo.jpg";
 import { getProfileAction } from "../../redux/Auth/auth.action";
 import { store } from "../../redux/store";
@@ -34,13 +38,14 @@ import { StarBorder, StarRounded } from "@mui/icons-material";
 import { toast } from "react-toastify";
 
 import { followCompany } from "../../redux/Seeker/seeker.action";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 
 import { checkIfApplied } from "../../redux/ApplyJob/applyJob.action";
 import {
   createReview,
-  getReviewByCompany
+  getReviewByCompany,
 } from "../../redux/Review/review.action";
+import { Carousel } from "react-responsive-carousel";
 
 const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
   return (
@@ -51,11 +56,11 @@ const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
           type="button"
           disabled={readOnly}
           onClick={() => !readOnly && onChange?.(star)}
-          className={`${readOnly ? 'cursor-default' : 'cursor-pointer'}`}
+          className={`${readOnly ? "cursor-default" : "cursor-pointer"}`}
         >
-          <StarRounded 
+          <StarRounded
             className={`w-6 h-6 ${
-              star <= value ? 'text-yellow-500' : 'text-gray-300'
+              star <= value ? "text-yellow-500" : "text-gray-300"
             }`}
           />
         </button>
@@ -64,12 +69,11 @@ const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
   );
 });
 
-
 export default function CompanyProfile() {
   const { companyId } = useParams();
   const dispatch = useDispatch();
   const {
-    jobPost = [], 
+    jobPost = [],
     totalPages,
     loading,
     error,
@@ -77,12 +81,24 @@ export default function CompanyProfile() {
 
   const { checkIfSaved } = useSelector((store) => store.company);
 
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState("");
+
+  const handleImageClick = (imagePath) => {
+    setSelectedImage(imagePath);
+    setIsOpen(true); // Mở modal
+  };
+
+  const closeModal = () => {
+    setIsOpen(false); // Đóng modal
+  };
+
   const { reviews } = useSelector((store) => store.review);
 
   const { companyProfile } = useSelector((store) => store.company);
   const { follow, message } = useSelector((store) => store.seeker);
 
-  const [isFollowing, setIsFollowing] = useState(false);  // Trạng thái theo dõi ban đầu
+  const [isFollowing, setIsFollowing] = useState(false); // Trạng thái theo dõi ban đầu
 
   const [currentPage, setCurrentPage] = useState(0);
   const [size] = useState(6);
@@ -133,7 +149,6 @@ export default function CompanyProfile() {
     });
   }, [companyId]); // Chỉ cuộn khi companyId thay đổi
 
-
   useEffect(() => {
     dispatch(getAllJobAction(currentPage, size, companyId)); // Assuming your action can accept companyId
   }, [dispatch, currentPage, size, companyId]);
@@ -143,29 +158,30 @@ export default function CompanyProfile() {
     dispatch(getReviewByCompany(companyId));
     dispatch(checkSaved(companyId));
     dispatch(followCompany(companyId));
-    dispatch(getJobsByCompany(companyId, currentPage, size))
+    dispatch(getJobsByCompany(companyId, currentPage, size));
   }, [dispatch, currentPage, size]);
 
   const handleFollowClick = async () => {
     try {
       // Gửi yêu cầu theo dõi hoặc bỏ theo dõi
       await dispatch(followCompany(companyId));
-  
+
       // Cập nhật trạng thái theo dõi sau khi gửi yêu cầu thành công
-      setIsFollowing(!isFollowing);  // Toggle trạng thái
-  
+      setIsFollowing(!isFollowing); // Toggle trạng thái
+
       // Hiển thị thông báo toast
-      const message = isFollowing 
+      const message = isFollowing
         ? "Bỏ theo dõi công ty thành công"
         : "Theo dõi công ty thành công";
-      toast(message);  // Hiển thị toast
+      toast(message); // Hiển thị toast
     } catch (error) {
       // Xử lý lỗi nếu có
       console.error("Có lỗi xảy ra khi theo dõi công ty:", error);
       toast("Có lỗi xảy ra, vui lòng thử lại!");
     }
   };
-  
+
+  console.log(companyProfile?.images);
 
   const totalStars = reviews.reduce((total, review) => total + review.star, 0);
   // Tính trung bình
@@ -318,61 +334,82 @@ export default function CompanyProfile() {
           </div>
         </div>
 
-
         {/* Company Images */}
         <h2 className="text-xl font-semibold mb-4">Một số hình ảnh công ty</h2>
         <div className="mb-12">
           {companyProfile?.images && companyProfile?.images.length > 0 ? (
-            <Swiper
-              spaceBetween={10}
-              slidesPerView={1}
-              loop={true}
-              pagination={{ clickable: true }}
-              navigation={true}
-              // modules={[Pagination, Navigation]}
-            >
-              {companyProfile.images.map((image, index) => (
-                <SwiperSlide key={index}>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {companyProfile?.images.map((image, index) => (
+                <div
+                  key={index}
+                  className="flex justify-center items-center cursor-pointer"
+                  onClick={() => handleImageClick(image.pathImg)}
+                >
                   <img
                     src={image.pathImg}
                     alt={`Company image ${index + 1}`}
-                    className="w-full h-[400px] object-cover rounded-lg"
+                    className="w-full h-auto rounded-lg object-cover"
+                    style={{ objectFit: "cover", maxHeight: "300px" }}
                   />
-                </SwiperSlide>
+                </div>
               ))}
-            </Swiper>
+            </div>
           ) : (
             <p className="text-gray-500">Chưa có thông tin về hình ảnh</p>
+          )}
+
+          {/* Modal Zoom Image */}
+          {isOpen && (
+            <div
+              className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50"
+              onClick={closeModal}
+            >
+              <div className="relative">
+                <img
+                  src={selectedImage}
+                  alt="Zoomed Image"
+                  className="max-w-full max-h-full object-contain"
+                  style={{ width: "80vw", height: "80vh" }}
+                />
+                <button
+                  onClick={closeModal}
+                  className="absolute top-0 right-0 p-2 text-white bg-gray-800 rounded-full"
+                >
+                  X
+                </button>
+              </div>
+            </div>
           )}
         </div>
 
         <h2 className="text-xl font-semibold mb-4">Đánh giá</h2>
-        <div className="mt-8 p-4 border rounded-lg bg-gray-100">
+        <div className="mt-8 p-6 border rounded-lg bg-gray-100 shadow-lg">
           <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-4">Các đánh giá khác</h3>
+            <h3 className="text-xl font-semibold mb-6 text-gray-800">
+              Các đánh giá khác
+            </h3>
 
             {reviews.length === 0 ? (
               <p className="text-gray-500">Chưa có đánh giá nào.</p>
             ) : (
-              // Sắp xếp các đánh giá theo thời gian (mới nhất đến cũ nht)
               reviews
                 .sort((a, b) => new Date(b.createDate) - new Date(a.createDate)) // Sắp xếp theo ngày tạo
                 .map((review, index) => (
                   <div
                     key={index}
-                    className="mb-6 p-4 border-b border-gray-300 rounded-md"
+                    className="mb-6 p-4 border-b border-gray-300 rounded-md transition duration-300 ease-in-out hover:bg-blue-100 hover:shadow-lg"
                   >
-                    <div className="flex items-start mb-2">
+                    <div className="flex items-start mb-4">
                       {/* Avatar */}
                       <img
                         src={review?.seeker?.userAccount?.avatar}
                         alt={`${review?.seeker?.userAccount?.userName}'s avatar`}
-                        className="w-10 h-10 rounded-full object-cover mr-4"
+                        className="w-12 h-12 rounded-full object-cover mr-4"
                       />
 
-                      <div>
+                      <div className="flex-1">
                         {/* Name and Date */}
-                        <div className="flex items-center">
+                        <div className="flex items-center justify-between mb-2">
                           <span className="font-semibold text-gray-800">
                             {review?.seeker?.userAccount?.userName
                               ? `${
@@ -387,7 +424,7 @@ export default function CompanyProfile() {
                                 }`
                               : ""}
                           </span>
-                          <span className="ml-2 text-sm text-gray-500">
+                          <span className="text-sm text-gray-500">
                             {new Date(review?.createDate).toLocaleDateString(
                               "vi-VN",
                               {
@@ -401,14 +438,18 @@ export default function CompanyProfile() {
                             )}
                           </span>
                         </div>
+
                         {/* Rating */}
-                        <RatingStars
-                          count={5}
-                          value={review.star}
-                          size={20}
-                          activeColor="#ffd700"
-                          edit={false} // Disable editing for existing reviews
-                        />
+                        <div className="flex items-center mb-2">
+                          <RatingStars
+                            count={5}
+                            value={review.star}
+                            size={20}
+                            activeColor="#ffd700"
+                            edit={false} // Disable editing for existing reviews
+                          />
+                        </div>
+
                         {/* Review Message */}
                         <p className="text-gray-700 mt-2">{review?.message}</p>
                       </div>
@@ -523,9 +564,9 @@ export default function CompanyProfile() {
 
         {/* Open Jobs */}
         <div>
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-6 mt-7">
             <h2 className="text-xl font-semibold">Vị trí đang tuyển</h2>
-            {totalPages > 1 && (
+            {/* {totalPages > 1 && (
               <div className="flex items-center space-x-2">
                 <Button
                   variant="outline"
@@ -549,7 +590,7 @@ export default function CompanyProfile() {
                   Tiếp theo
                 </Button>
               </div>
-            )}
+            )} */}
           </div>
 
           {loading ? (
@@ -565,7 +606,7 @@ export default function CompanyProfile() {
                     ...job,
                     company: {
                       ...job.company,
-                      logo: job.company.logo
+                      logo: job.company.logo,
                     },
                   }}
                 />

@@ -15,9 +15,11 @@ import SuccessIcon from "../../components/common/Icon/Sucess/Sucess";
 import FailureIcon from "../../components/common/Icon/Failed/Failed";
 import googleIcon from "../../assets/icons/google.png";
 import logo1 from "../../assets/images/common/logo1.jpg";
-import { loginAction } from "../../redux/Auth/auth.action";
+import { getProfileAction, loginAction } from "../../redux/Auth/auth.action";
 import { isStrongPassword } from "../../utils/passwordValidator";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 export default function SignInForm() {
   const [email, setEmail] = useState("");
@@ -61,23 +63,6 @@ export default function SignInForm() {
       setError("Đã xảy ra lỗi. Vui lòng thử lại sau.");
     }
   };
-
-
-
-  const handleSuccess = (response) => {
-    // Gửi token lên backend để xác thực
-    fetch("http://localhost:8080/login/oauth2/code/google", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ token: response.credential }),
-    })
-      .then((res) => res.json())
-      .then((data) => console.log(data))
-      .catch((err) => console.error(err));
-  };
-
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setLoginStatus(null);
@@ -113,11 +98,44 @@ export default function SignInForm() {
     }
     return null;
   };
-const redirectToHome = () => {
-  setTimeout(() => {
-    navigate("/"); // Chuyển hướng đến trang chủ
-  }, 3000);
-};
+
+  const handleGoogleLogin = async (response) => {
+    try {
+      const googleToken = response.credential; // Lấy googleToken từ response.credential
+      console.log("Google Token: ", googleToken);
+
+      // Gửi googleToken đến backend để xác thực
+      const res = await axios.post(
+        "http://localhost:8080/auth/login/google",
+        { token: googleToken } 
+      );
+
+      console.log("Response from server: ", res.data.token); 
+      const jwtToken = res?.data?.token;
+      console.log("Response from: ", jwtToken); 
+
+      sessionStorage.setItem("jwt", jwtToken);
+      const emailExists = await axios.post("http://localhost:8080/auth/check-email", { token: googleToken });
+      if (emailExists.data) {
+        // dispatch(getProfileAction());
+        setTimeout(() => {
+          // setIsModalOpen(false);
+          window.location.href = "http://localhost:3000/"; 
+        }, 1000); 
+      } else {
+        setTimeout(() => {
+          // setIsModalOpen(false);
+          window.location.href = "http://localhost:3000/role-selection";
+        }, 1000);
+      }
+    } catch (err) {
+      // In lỗi và hiển thị thông báo
+      console.error("Error during login: ", err.response ? err.response.data : err.message);
+      setError("Đăng nhập thất bại! Vui lòng thử lại.");
+    }
+  };
+  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-white shadow-lg rounded-lg">
@@ -135,12 +153,10 @@ const redirectToHome = () => {
           <form className="space-y-4">
             {/* <GoogleOAuthProvider clientId="223710905248-cdn2agb2sgrv66dtgvo8osfcn3gin9er.apps.googleusercontent.com">
               <div>
-                
                 <GoogleLogin
                   onSuccess={(response) => {
                     console.log(response);
-                    redirectToHome()
-                    // Xử lý thành công, có thể gửi token đến server hoặc lưu trong localStorage
+                    handleGoogleLogin(response);
                   }}
                   onError={(error) => {
                     console.log(error);

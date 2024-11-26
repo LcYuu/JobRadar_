@@ -67,10 +67,10 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 
 	Page<JobPost> findByIsApproveTrue(Specification<JobPost> spec, Pageable pageable);
 
-	@Query("SELECT MIN(j.salary) FROM JobPost j")
+	@Query("SELECT MIN(j.salary) FROM JobPost j WHERE j.isApprove = true AND j.expireDate >= CURRENT_DATE")
 	Long findMinSalary();
 
-	@Query("SELECT MAX(j.salary) FROM JobPost j")
+	@Query("SELECT MAX(j.salary) FROM JobPost j WHERE j.isApprove = true AND j.expireDate >= CURRENT_DATE")
 	Long findMaxSalary();
 
 	default Specification<JobPost> alwaysActiveJobs() {
