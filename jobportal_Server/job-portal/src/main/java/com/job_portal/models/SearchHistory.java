@@ -33,7 +33,7 @@ public class SearchHistory {
 	private String searchQuery;
 	
 	@Column(name = "search_date")
-    private LocalDateTime searchDate;
+    private LocalDate searchDate;
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "user_id")

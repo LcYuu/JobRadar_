@@ -236,7 +236,7 @@ public class JobPostServiceImpl implements IJobPostService {
 				SearchHistory searchHistory = new SearchHistory();
 				searchHistory.setSeeker(seeker);
 				searchHistory.setSearchQuery(title);
-				searchHistory.setSearchDate(LocalDateTime.now());
+				searchHistory.setSearchDate(LocalDate.now());
 				searchHistoryRepository.save(searchHistory);
 			}
 
@@ -326,7 +326,7 @@ public class JobPostServiceImpl implements IJobPostService {
 		if (jobPostOpt.isPresent()) {
 			JobPost jobPost = jobPostOpt.get();
 			jobPost.setApprove(true); // Đặt trường isApprove thành true
-			jobPost.setStatus("Đang mở");
+			jobPost.setStatus("Open");
 			jobPostRepository.save(jobPost); // Lưu công việc đã cập nhật
 			return true;
 		}
@@ -340,7 +340,7 @@ public class JobPostServiceImpl implements IJobPostService {
 
 	}
 
-	public List<DailyJobCount> getDailyJobPostCounts(LocalDateTime startDate, LocalDateTime endDate) {
+	public List<DailyJobCount> getDailyJobPostCounts(LocalDate startDate, LocalDate endDate) {
 		List<Object[]> results = jobPostRepository.countNewJobsPerDay(startDate, endDate);
 		List<DailyJobCount> dailyJobPostCounts = new ArrayList<>();
 
@@ -432,7 +432,7 @@ public class JobPostServiceImpl implements IJobPostService {
 	@Override
 	public Map<String, Long> countAllJobsByCompany(UUID companyId) {
 		Map<String, Long> jobCounts = new HashMap<>();
-		LocalDateTime now = LocalDateTime.now();
+		LocalDate now = LocalDate.now();
 
 		// Đếm tổng số công việc
 		long totalJobs = jobPostRepository.countByCompanyCompanyId(companyId);
@@ -468,14 +468,11 @@ public class JobPostServiceImpl implements IJobPostService {
 		LocalDate currentDate = startDate;
 		
 		while (!currentDate.isAfter(endDate)) {
-			LocalDateTime dayStart = currentDate.atStartOfDay();
-			LocalDateTime dayEnd = currentDate.atTime(23, 59, 59);
-			
 			// Đếm số lượng job theo trạng thái
-			long totalJobs = jobPostRepository.countJobsByCompanyAndDateRange(companyId, dayStart, dayEnd);
-			long activeJobs = jobPostRepository.countActiveJobsByCompanyAndDateRange(companyId, dayStart, dayEnd);
-			long closedJobs = jobPostRepository.countClosedJobsByCompanyAndDateRange(companyId, dayStart, dayEnd);
-			long pendingJobs = jobPostRepository.countPendingJobsByCompanyAndDateRange(companyId, dayStart, dayEnd);
+			long totalJobs = jobPostRepository.countJobsByCompanyAndDateRange(companyId, currentDate, currentDate);
+			long activeJobs = jobPostRepository.countActiveJobsByCompanyAndDateRange(companyId, currentDate, currentDate);
+			long closedJobs = jobPostRepository.countClosedJobsByCompanyAndDateRange(companyId, currentDate, currentDate);
+			long pendingJobs = jobPostRepository.countPendingJobsByCompanyAndDateRange(companyId, currentDate, currentDate);
 			
 			Map<String, Object> dayStat = new HashMap<>();
 			dayStat.put("date", currentDate.toString());

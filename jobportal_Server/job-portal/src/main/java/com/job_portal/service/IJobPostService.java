@@ -29,7 +29,7 @@ public interface IJobPostService {
 //	public List<JobPost> findBySalaryBetween(Long minSalary, Long maxSalary) throws AllExceptions;
 	public boolean approveJob(UUID postId);
 	public JobPost searchJobByPostId(UUID postId) throws AllExceptions;
-	public List<DailyJobCount> getDailyJobPostCounts(LocalDateTime startDate, LocalDateTime endDate);
+	public List<DailyJobCount> getDailyJobPostCounts(LocalDate startDate, LocalDate endDate);
 	public Page<JobPost>findByIsApprove(Pageable pageable);
 	public void exportJobPostToCSV(String filePath) throws IOException;
 	public List<JobPost> getTop8LatestJobPosts();

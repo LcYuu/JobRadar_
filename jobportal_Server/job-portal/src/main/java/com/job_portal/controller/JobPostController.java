@@ -80,11 +80,39 @@ public class JobPostController {
 	private SearchHistoryServiceImpl searchHistoryService;
 	
 	String filePath = "D:\\\\JobRadar_\\\\search_history.csv";
-
 	@GetMapping("/get-all")
 	public ResponseEntity<List<JobPost>> getJob() {
 		List<JobPost> jobs = jobPostRepository.findAll();
 		return new ResponseEntity<>(jobs, HttpStatus.OK);
+	}
+	@GetMapping("/admin-get-all")
+	public ResponseEntity<Map<String, Object>> getAllJobs(
+	    @RequestParam(defaultValue = "0") int page,
+	    @RequestParam(defaultValue = "12") int size,
+	    @RequestParam(required = false) String searchTerm,
+	    @RequestParam(required = false, defaultValue = "Open") String status
+	) {
+	    try {
+	        Pageable paging = PageRequest.of(page, size);
+	        Page<JobPost> pageJobs;
+
+	        if (searchTerm != null && !searchTerm.isEmpty()) {
+	            pageJobs = jobPostRepository.findByTitleContainingAndStatusAndIsApproveTrue(
+	                searchTerm, status, paging);
+	        } else {
+	            pageJobs = jobPostRepository.findByStatusAndIsApproveTrue(status, paging);
+	        }
+
+	        Map<String, Object> response = new HashMap<>();
+	        response.put("content", pageJobs.getContent());
+	        response.put("currentPage", pageJobs.getNumber());
+	        response.put("totalElements", pageJobs.getTotalElements());
+	        response.put("totalPages", pageJobs.getTotalPages());
+
+	        return new ResponseEntity<>(response, HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
 	}
 	
 	@GetMapping("/get-top8-lastest-job")
@@ -276,10 +304,7 @@ public class JobPostController {
 		LocalDate start = LocalDate.parse(startDate);
 		LocalDate end = LocalDate.parse(endDate);
 
-		LocalDateTime startDateTime = start.atStartOfDay();
-		LocalDateTime endDateTime = end.atTime(23, 59, 59);
-
-		return jobPostService.getDailyJobPostCounts(startDateTime, endDateTime);
+		return jobPostService.getDailyJobPostCounts(start, end);
 	}
 
 	@PostMapping("/recommend-jobs")
@@ -426,7 +451,7 @@ public class JobPostController {
 	public ResponseEntity<Long> countJobsByCompany(@PathVariable UUID companyId) {
 	    long totalJobs = jobPostRepository.countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(
 	        companyId,
-	        LocalDateTime.now()
+	        LocalDate.now()
 	    );
 	    return ResponseEntity.ok(totalJobs);
 	}
@@ -492,36 +517,25 @@ public class JobPostController {
 	        
 	        LocalDate current = start;
 	        while (!current.isAfter(end)) {
-	            LocalDateTime dayStart = current.atStartOfDay();
-	            LocalDateTime dayEnd = current.atTime(23, 59, 59);
-	            
-	            // Thêm logging để debug
-	            System.out.println("Checking date: " + current);
-	            System.out.println("Start time: " + dayStart);
-	            System.out.println("End time: " + dayEnd);
-	            
-	            long newUsers = userAccountRepository.countByCreatedAtBetween(dayStart, dayEnd);
-	            long newJobs = jobPostRepository.countByCreatedAtBetween(dayStart, dayEnd);
-	            
-	            System.out.println("New users: " + newUsers);
-	            System.out.println("New jobs: " + newJobs);
-	            
-	            Map<String, Object> dayStat = new HashMap<>();
-	            dayStat.put("date", current.toString());
-	            dayStat.put("newUsers", newUsers);
-	            dayStat.put("newJobs", newJobs);
-	            
-	            dailyStats.add(dayStat);
-	            current = current.plusDays(1);
-	        }
-	        
-	        return ResponseEntity.ok(dailyStats);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	            .body("Error fetching daily stats: " + e.getMessage());
-	    }
-	}
+	            long newUsers = userAccountRepository.countByCreatedAtBetween(current, current.plusDays(1));
+	            long newJobs = jobPostRepository.countByCreatedAtBetween(current, current.plusDays(1));
+            
+            Map<String, Object> dayStat = new HashMap<>();
+            dayStat.put("date", current.toString());
+            dayStat.put("newUsers", newUsers);
+            dayStat.put("newJobs", newJobs);
+            
+            dailyStats.add(dayStat);
+            current = current.plusDays(1);
+        }
+        
+        return ResponseEntity.ok(dailyStats);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Error fetching daily stats: " + e.getMessage());
+    }
+}
 
 	@GetMapping("/company/{companyId}")
 	public ResponseEntity<Page<JobPost>> getJobsByCompany(
@@ -586,7 +600,7 @@ public class JobPostController {
 	@GetMapping("/admin/all-jobs")
 	public ResponseEntity<Page<JobPost>> getAllJobsForAdmin(
 	    @RequestParam(defaultValue = "0") int page,
-	    @RequestParam(defaultValue = "10") int size
+	    @RequestParam(defaultValue = "5") int size
 	) {
 	    Pageable pageable = PageRequest.of(page, size);
 	    Page<JobPost> jobs = jobPostRepository.findAll(pageable);

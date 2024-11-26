@@ -1,12 +1,16 @@
 package com.job_portal.controller;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,11 +40,50 @@ public class UserAccountController {
 
 	@Autowired
 	private IUserAccountService userAccountService;
-
 	@GetMapping("/get-all")
 	public ResponseEntity<List<UserAccount>> getUsers() {
 		List<UserAccount> users = userAccountRepository.findAll();
 		return new ResponseEntity<>(users, HttpStatus.OK);
+	}
+	@GetMapping("/admin-get-all")
+	public ResponseEntity<Map<String, Object>> getUsers(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "5") int size,
+			@RequestParam(required = false) String search,
+			@RequestParam(required = false, defaultValue = "all") String role,
+			@RequestParam(required = false, defaultValue = "all") String status) {
+		try {
+			Pageable paging = PageRequest.of(page, size);
+			Page<UserAccount> pageUsers;
+
+			if (search != null && !search.isEmpty()) {
+				pageUsers = userAccountRepository.findByUserNameContainingOrEmailContainingIgnoreCase(
+					search, search, paging);
+			} else if (!role.equals("all") && !status.equals("all")) {
+				boolean isActive = status.equals("1");
+				pageUsers = userAccountRepository.findByUserType_UserTypeIdAndIsActive(
+					Integer.parseInt(role), isActive, paging);
+			} else if (!role.equals("all")) {
+				pageUsers = userAccountRepository.findByUserType_UserTypeId(
+					Integer.parseInt(role), paging);
+			} else if (!status.equals("all")) {
+				boolean isActive = status.equals("1");
+				pageUsers = userAccountRepository.findByIsActive(isActive, paging);
+			} else {
+				pageUsers = userAccountRepository.findAll(paging);
+			}
+
+			Map<String, Object> response = new HashMap<>();
+			response.put("content", pageUsers.getContent());
+			response.put("currentPage", pageUsers.getNumber());
+			response.put("totalElements", pageUsers.getTotalElements());
+			response.put("totalPages", pageUsers.getTotalPages());
+
+			return new ResponseEntity<>(response, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@GetMapping("/{userId}")
@@ -109,9 +152,6 @@ public class UserAccountController {
 		LocalDate start = LocalDate.parse(startDate);
 		LocalDate end = LocalDate.parse(endDate);
 
-		LocalDateTime startDateTime = start.atStartOfDay();
-		LocalDateTime endDateTime = end.atTime(23, 59, 59); 
-
-		return userAccountService.getDailyAccountCounts(startDateTime, endDateTime);
+		return userAccountService.getDailyAccountCounts(start, end);
 	}
 }
