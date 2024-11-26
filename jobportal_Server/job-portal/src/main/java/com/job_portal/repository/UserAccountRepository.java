@@ -32,4 +32,7 @@ public interface UserAccountRepository extends JpaRepository<UserAccount, UUID> 
 			+ "ORDER BY DATE(u.create_date)", nativeQuery = true)
 	List<Object[]> countNewAccountsPerDay(@Param("startDate") LocalDateTime startDate,
 			@Param("endDate") LocalDateTime endDate);
+
+	@Query("SELECT COUNT(u) FROM UserAccount u WHERE u.createDate BETWEEN :startDate AND :endDate")
+	long countByCreatedAtBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }

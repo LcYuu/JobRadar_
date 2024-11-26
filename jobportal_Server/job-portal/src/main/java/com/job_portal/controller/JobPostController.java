@@ -432,6 +432,7 @@ public class JobPostController {
 	    );
 	    return ResponseEntity.ok(totalJobs);
 	}
+
 	
 	@GetMapping("/top-5-job-lastest")
     public ResponseEntity<List<JobWithApplicationCountDTO>> getTop5JobsWithApplications(@RequestHeader("Authorization") String jwt) {
@@ -479,5 +480,118 @@ public class JobPostController {
 	            pageable
 	    );
 	    return ResponseEntity.ok(jobs);
+	}
+	@GetMapping("/stats/daily")
+	public ResponseEntity<?> getDailyStats(
+	    @RequestParam String startDate,
+	    @RequestParam String endDate
+	) {
+	    try {
+	        LocalDate start = LocalDate.parse(startDate);
+	        LocalDate end = LocalDate.parse(endDate);
+	        
+	        List<Map<String, Object>> dailyStats = new ArrayList<>();
+	        
+	        LocalDate current = start;
+	        while (!current.isAfter(end)) {
+	            LocalDateTime dayStart = current.atStartOfDay();
+	            LocalDateTime dayEnd = current.atTime(23, 59, 59);
+	            
+	            // Thêm logging để debug
+	            System.out.println("Checking date: " + current);
+	            System.out.println("Start time: " + dayStart);
+	            System.out.println("End time: " + dayEnd);
+	            
+	            long newUsers = userAccountRepository.countByCreatedAtBetween(dayStart, dayEnd);
+	            long newJobs = jobPostRepository.countByCreatedAtBetween(dayStart, dayEnd);
+	            
+	            System.out.println("New users: " + newUsers);
+	            System.out.println("New jobs: " + newJobs);
+	            
+	            Map<String, Object> dayStat = new HashMap<>();
+	            dayStat.put("date", current.toString());
+	            dayStat.put("newUsers", newUsers);
+	            dayStat.put("newJobs", newJobs);
+	            
+	            dailyStats.add(dayStat);
+	            current = current.plusDays(1);
+	        }
+	        
+	        return ResponseEntity.ok(dailyStats);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	            .body("Error fetching daily stats: " + e.getMessage());
+	    }
+	}
+
+	@GetMapping("/company/{companyId}")
+	public ResponseEntity<Page<JobPost>> getJobsByCompany(
+	    @PathVariable UUID companyId,
+	    @RequestParam(defaultValue = "0") int page,
+	    @RequestParam(defaultValue = "10") int size
+	) {
+	    try {
+	        Pageable pageable = PageRequest.of(page, size);
+	        Page<JobPost> jobs = jobPostService.findJobsByCompany(companyId, pageable);
+	        return ResponseEntity.ok(jobs);
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	            .body(null);
+	    }
+	}
+
+	@GetMapping("/company/{companyId}/approved")
+	public ResponseEntity<Page<JobPost>> getApprovedJobsByCompany(
+	    @PathVariable UUID companyId,
+	    @RequestParam(defaultValue = "0") int page,
+	    @RequestParam(defaultValue = "10") int size
+	) {
+	    try {
+	        Pageable pageable = PageRequest.of(page, size);
+	        Page<JobPost> jobs = jobPostService.findApprovedJobsByCompany(companyId, pageable);
+	        return ResponseEntity.ok(jobs);
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	            .body(null);
+	    }
+	}
+
+	@GetMapping("/count-jobs-by-company/{companyId}")
+	public ResponseEntity<Map<String, Long>> countJobsByCompanyStatus(
+	    @PathVariable UUID companyId
+	) {
+	    try {
+	        Map<String, Long> jobCounts = jobPostService.countAllJobsByCompany(companyId);
+	        return ResponseEntity.ok(jobCounts);
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+	    }
+	}
+
+	@GetMapping("/company/{companyId}/job-stats")
+	public ResponseEntity<?> getCompanyJobStats(
+	    @PathVariable UUID companyId,
+	    @RequestParam String startDate,
+	    @RequestParam String endDate
+	) {
+	    try {
+	        LocalDate start = LocalDate.parse(startDate);
+	        LocalDate end = LocalDate.parse(endDate);
+	        List<Map<String, Object>> stats = jobPostService.getCompanyJobStats(companyId, start, end);
+	        return ResponseEntity.ok(stats);
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("Error getting job stats: " + e.getMessage());
+	    }
+	}
+	@GetMapping("/admin/all-jobs")
+	public ResponseEntity<Page<JobPost>> getAllJobsForAdmin(
+	    @RequestParam(defaultValue = "0") int page,
+	    @RequestParam(defaultValue = "10") int size
+	) {
+	    Pageable pageable = PageRequest.of(page, size);
+	    Page<JobPost> jobs = jobPostRepository.findAll(pageable);
+	    return new ResponseEntity<>(jobs, HttpStatus.OK);
 	}
 }
