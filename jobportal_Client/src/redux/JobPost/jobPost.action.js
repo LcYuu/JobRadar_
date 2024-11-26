@@ -74,9 +74,46 @@ import {
   GET_ALL_ADMIN_JOBS_REQUEST,
   GET_ALL_ADMIN_JOBS_SUCCESS,
   GET_ALL_ADMIN_JOBS_FAILURE,
-
+  GET_ALL_JOBS_REQUEST,
+  GET_ALL_JOBS_SUCCESS,
+  GET_ALL_JOBS_FAILURE,
+  GET_JOB_DETAILS_REQUEST,
+  GET_JOB_DETAILS_SUCCESS,
+  GET_JOB_DETAILS_FAILURE,
+  UPDATE_JOB_STATUS_REQUEST,
+  UPDATE_JOB_STATUS_SUCCESS,
+  UPDATE_JOB_STATUS_FAILURE,
+  SET_CURRENT_PAGE,
+  SET_PAGE_SIZE
 } from "./jobPost.actionType";
 
+// export const getAllJobActionForAdmin = (currentPage, size, filters = {}) => async (dispatch) => {
+//   dispatch({ type: GET_ALL_JOB_REQUEST });
+//   try {
+//     const params = {
+//       page: currentPage,
+//       size,
+//       ...filters
+//     };
+    
+//     const response = await api.get('/job-post/admin-get-all', { params });
+    
+//     dispatch({
+//       type: GET_ALL_JOB_SUCCESS,
+//       payload: {
+//         content: response.data.content,
+//         totalPages: response.data.totalPages,
+//         totalElements: response.data.totalElements,
+//         currentPage: response.data.currentPage
+//       }
+//     });
+//   } catch (error) {
+//     dispatch({
+//       type: GET_ALL_JOB_FAILURE,
+//       payload: error.message
+//     });
+//   }
+// };
 export const getAllJobAction = (currentPage, size) => async (dispatch) => {
   dispatch({ type: GET_ALL_JOB_REQUEST });
   try {
@@ -94,7 +131,6 @@ export const getAllJobAction = (currentPage, size) => async (dispatch) => {
     });
   }
 };
-
 export const getTop8LastestJob = () => async (dispatch) => {
   dispatch({ type: GET_TOP8_JOB_REQUEST });
   try {
@@ -400,9 +436,15 @@ export const getAllJobsForAdmin = (page, size) => async (dispatch) => {
         size
       }
     });
+    
     dispatch({
       type: GET_ALL_ADMIN_JOBS_SUCCESS,
-      payload: response.data
+      payload: {
+        jobPost: response.data.content,
+        totalPages: response.data.page.totalPages,
+        totalElements: response.data.page.totalElements,
+        currentPage: response.data.page.number
+      }
     });
   } catch (error) {
     dispatch({
@@ -421,3 +463,13 @@ export const approveJob = (postId) => async (dispatch) => {
     console.error('Error approving job:', error);
   }
 };
+
+export const setCurrentPage = (page) => ({
+  type: SET_CURRENT_PAGE,
+  payload: page
+});
+
+export const setPageSize = (size) => ({
+  type: SET_PAGE_SIZE,
+  payload: size
+});
