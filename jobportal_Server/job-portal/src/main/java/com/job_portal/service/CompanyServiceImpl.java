@@ -195,20 +195,19 @@ public class CompanyServiceImpl implements ICompanyService {
 
 	    Map<String, Object> result = new HashMap<>();
 	    
-	    if (company.getFollows().contains(seeker)) {
-	        company.getFollows().remove(seeker);
+	    if(seeker.getFollowedCompanies().contains(company)) {
+	    	seeker.getFollowedCompanies().remove(company);
+	    	company.getFollows().remove(seeker);
 	        result.put("action", "unfollow");
 	        result.put("message", "Bỏ theo dõi công ty thành công");
 	    } else {
-	        company.getFollows().add(seeker);
+	    	seeker.getFollowedCompanies().add(company);
+	    	company.getFollows().add(seeker);
 	        result.put("action", "follow");
 	        result.put("message", "Theo dõi công ty thành công");
 	    }
-
 	    companyRepository.save(company);
 	    seekerRepository.save(seeker);
 	    return result;
 	}
-
-
 }
