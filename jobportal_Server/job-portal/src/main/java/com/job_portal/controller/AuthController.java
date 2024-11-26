@@ -3,9 +3,11 @@ package com.job_portal.controller;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -309,6 +311,7 @@ public class AuthController {
 		}
 	}
 
+
 	@PostMapping("/login/google")
 	public AuthResponse loginWithGoogle(@RequestBody Map<String, String> requestBody) {
 		String googleToken = requestBody.get("token"); // Lấy googleToken từ frontend
@@ -375,6 +378,5 @@ public class AuthController {
 	        return ResponseEntity.ok(false); // Người dùng chưa tồn tại
 	    }
 	}
-
 
 }
