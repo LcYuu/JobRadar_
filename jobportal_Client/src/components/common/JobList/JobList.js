@@ -33,9 +33,7 @@ export default function JobList() {
     <section className="py-12">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Các công việc nổi bật</h2>
-        <a href="#" className="text-primary">
-          Xem tất cả
-        </a>
+        
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {jobPost.length > 0 ? (
@@ -54,7 +52,6 @@ export default function JobList() {
           <p>Không có công việc nào để hiển thị.</p>
         )}
       </div>
-
       <div className="flex items-center justify-center mt-6">
         <button
           onClick={() => handlePageChange(currentPage - 1)}
