@@ -99,7 +99,7 @@ public class UserAccountServiceImpl implements IUserAccountService {
 
 
 	@Override
-	public List<DailyAccountCount> getDailyAccountCounts(LocalDateTime startDate, LocalDateTime endDate) {
+	public List<DailyAccountCount> getDailyAccountCounts(LocalDate startDate, LocalDate endDate) {
         List<Object[]> results = userAccountRepository.countNewAccountsPerDay(startDate, endDate);
         List<DailyAccountCount> dailyAccountCounts = new ArrayList<>();
 

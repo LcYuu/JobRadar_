@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
+import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +36,7 @@ public class ReviewServiceImpl implements IReviewService {
 			review.setMessage(req.getMessage());
 			review.setStar(req.getStar());
 			review.setSeeker(seeker);
-			review.setCreateDate(LocalDateTime.now());
+			review.setCreateDate(LocalDate.now());
 
 			Review savedReview = reviewRepository.save(review);
 			company.getReviews().add(savedReview);

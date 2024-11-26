@@ -217,7 +217,7 @@ export default function JobSearchPage() {
                         }}
                       />
                       <label className="ml-2 text-sm">
-                        {job.typeOfWork} ({job.count})
+                        {job.typeOfWork} ({job.count} việc làm )
                       </label>
                     </div>
                   ))}
@@ -229,28 +229,30 @@ export default function JobSearchPage() {
                 <ChevronDown size={20} />
               </h3>
               <div className="space-y-2">
-                {industryCount.map((industry) => (
-                  <div className="flex items-center" key={industry.industryId}>
-                    <Checkbox
-                      checked={filters.selectedIndustryIds.includes(industry.industryId)}
-                      onCheckedChange={(checked) => {
-                        const updatedIndustryIds = checked
-                          ? [...filters.selectedIndustryIds, industry.industryId]
-                          : filters.selectedIndustryIds.filter(
-                              (id) => id !== industry.industryId
-                            );
+                {industryCount
+                  .filter(industry => industry.jobCount > 0)
+                  .map((industry) => (
+                    <div className="flex items-center" key={industry.industryId}>
+                      <Checkbox
+                        checked={filters.selectedIndustryIds.includes(industry.industryId)}
+                        onCheckedChange={(checked) => {
+                          const updatedIndustryIds = checked
+                            ? [...filters.selectedIndustryIds, industry.industryId]
+                            : filters.selectedIndustryIds.filter(
+                                (id) => id !== industry.industryId
+                              );
 
-                        setFilters({
-                          ...filters,
-                          selectedIndustryIds: updatedIndustryIds,
-                        });
-                      }}
-                    />
-                    <label className="ml-2 text-sm">
-                      {industry.industryName} ({industry.jobCount})
-                    </label>
-                  </div>
-                ))}
+                          setFilters({
+                            ...filters,
+                            selectedIndustryIds: updatedIndustryIds,
+                          });
+                        }}
+                      />
+                      <label className="ml-2 text-sm">
+                        {industry.industryName} ({industry.jobCount} việc làm)
+                      </label>
+                    </div>
+                  ))}
               </div>
             </div>
             <h3 className="font-semibold mb-2 flex justify-between items-center">
