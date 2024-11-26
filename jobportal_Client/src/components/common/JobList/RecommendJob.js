@@ -25,6 +25,7 @@ const RecommendJob = () => {
             recommendJob.map((job) => (
               <JobCard
                 key={job.postId}
+                postId={job.postId}
                 jobTitle={job.title}
                 company={job.companyName}
                 location={job.cityName}
