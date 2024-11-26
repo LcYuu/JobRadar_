@@ -144,12 +144,16 @@ export default function JobDetail() {
               <section className="space-y-4">
                 <h2 className="text-lg font-semibold">Trách nhiệm công việc</h2>
                 <ul className="space-y-2 text-sm text-gray-600">
-                  {postByPostId?.niceToHaves?.split(",").map((item, index) => (
-                    <li key={index} className="flex items-start">
-                      <CheckCircle2 className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
-                      <span>{item.trim()}</span>
-                    </li>
-                  )) || <li>Chưa có thông tin</li>}
+                  {postByPostId?.requirement ? (
+                    postByPostId.requirement.split(";").map((item, index) => (
+                      <li key={index} className="flex items-start">
+                        <CheckCircle2 className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
+                        <span>{item.trim()}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-gray-500 italic">Chưa có thông tin</li>
+                  )}
                 </ul>
               </section>
 
@@ -159,12 +163,16 @@ export default function JobDetail() {
                   Bạn là người phù hợp nếu
                 </h2>
                 <ul className="space-y-2 text-sm text-gray-600">
-                  {postByPostId?.requirement.split(",").map((item, index) => (
-                    <li key={index} className="flex items-start">
-                      <CheckCircle2 className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
-                      <span>{item.trim()}</span>
-                    </li>
-                  ))}
+                  {postByPostId?.niceToHaves ? (
+                    postByPostId.niceToHaves.split(";").map((item, index) => (
+                      <li key={index} className="flex items-start">
+                        <CheckCircle2 className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
+                        <span>{item.trim()}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-gray-500 italic">Chưa có thông tin</li>
+                  )}
                 </ul>
               </section>
 
@@ -172,12 +180,16 @@ export default function JobDetail() {
               <section className="space-y-4">
                 <h2 className="text-lg font-semibold">Quyền lợi</h2>
                 <ul className="space-y-2 text-sm text-gray-600">
-                  {postByPostId?.benefit.split(",").map((item, index) => (
-                    <li key={index} className="flex items-start">
-                      <CheckCircle2 className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
-                      <span>{item.trim()}</span>
-                    </li>
-                  ))}
+                  {postByPostId?.benefit ? (
+                    postByPostId.benefit.split(";").map((item, index) => (
+                      <li key={index} className="flex items-start">
+                        <CheckCircle2 className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
+                        <span>{item.trim()}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-gray-500 italic">Chưa có thông tin</li>
+                  )}
                 </ul>
               </section>
 
