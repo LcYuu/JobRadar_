@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
+import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,25 +25,26 @@ public class ReviewServiceImpl implements IReviewService {
 	CompanyRepository companyRepository;
 
 	@Override
-	public boolean createReview(Seeker seeker, UUID companyId, Review req) throws AllExceptions {
-
-		Review review = new Review();
-		Optional<Company> companyOptional = companyRepository.findById(companyId);
-		
-		if (companyOptional.isPresent()) {
-			Company company = companyOptional.get();
-			review.setCompany(company);
-			review.setMessage(req.getMessage());
-			review.setStar(req.getStar());
-			review.setSeeker(seeker);
+	public boolean createReview(Seeker seeker, UUID companyId, Review reviewRequest) throws AllExceptions {
+		try {
+			Review review = new Review();
+			review.setStar(reviewRequest.getStar());
+			review.setMessage(reviewRequest.getMessage());
+			review.setAnonymous(reviewRequest.isAnonymous());
 			review.setCreateDate(LocalDateTime.now());
-
-			Review savedReview = reviewRepository.save(review);
-			company.getReviews().add(savedReview);
-			companyRepository.save(company);
+			review.setSeeker(seeker);
+			
+			Optional<Company> company = companyRepository.findById(companyId);
+			if (company.isEmpty()) {
+				throw new AllExceptions("Company not found");
+			}
+			review.setCompany(company.get());
+			
+			reviewRepository.save(review);
 			return true;
+		} catch (Exception e) {
+			throw new AllExceptions("Error creating review: " + e.getMessage());
 		}
-		return false;
 	}
 
 	@Override
@@ -53,6 +54,27 @@ public class ReviewServiceImpl implements IReviewService {
 			return reviews;
 		} catch (Exception e) {
 			throw new AllExceptions(e.getMessage());
+		}
+	}
+
+	@Override
+	public boolean deleteReview(UUID reviewId) throws AllExceptions {
+		Optional<Review> review = reviewRepository.findById(reviewId);
+		
+		if (review.isEmpty()) {
+			throw new AllExceptions("Review not found with id: " + reviewId);
+		}
+		
+		try {
+			Company company = review.get().getCompany();
+			
+			company.getReviews().remove(review.get());
+			companyRepository.save(company);
+			
+			reviewRepository.delete(review.get());
+			return true;
+		} catch (Exception e) {
+			throw new AllExceptions("Error deleting review: " + e.getMessage());
 		}
 	}
 

@@ -26,6 +26,7 @@ export default function Top8Job() {
           top8Job.map((job) => (
             <JobCard
               key={job.postId}
+              postId={job.postId}
               jobTitle={job.title}
               company={job.company.companyName}
               location={job.city.cityName}
