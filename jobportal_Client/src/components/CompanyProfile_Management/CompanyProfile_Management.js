@@ -29,6 +29,7 @@ import {
   createImageCompany,
   deleteImageCompany,
 } from "../../redux/ImageCompany/imageCompany.action";
+import { Avatar } from "@mui/material";
 
 const CompanyProfile_Management = () => {
   const dispatch = useDispatch();
@@ -233,26 +234,24 @@ const CompanyProfile_Management = () => {
     <div className="max-w-5xl mx-auto p-6">
       {/* Company Header */}
       <div className="flex items-center gap-6 mb-8 bg-white p-6 rounded-lg shadow-md">
-        <div className="w-24 h-24 bg-emerald-100 rounded-xl overflow-hidden">
-          <img
-            src={companyJwt?.logo}
-            alt="Company Logo"
-            className="w-full h-full object-cover"
-          />
-        </div>
+        <Avatar
+          className="transform mb-2"
+          sx={{ width: "8rem", height: "8rem" }}
+          src={companyJwt?.logo}
+        />
         <div>
           <h1 className="text-2xl font-bold">{companyJwt?.companyName}</h1>
           <div className="flex gap-4 mt-2 text-gray-600">
             <div className="flex items-center gap-1">
-              <Calendar className="w-4 h-4" />
+              <Calendar className="w-6 h-6" />
               <span>Thành lập: {companyJwt?.establishedTime}</span>
             </div>
             <div className="flex items-center gap-1">
-              <MapPin className="w-4 h-4" />
+              <MapPin className="w-6 h-6" />
               <span>{companyJwt?.address}</span>
             </div>
             <div className="flex items-center gap-1">
-              <Building2 className="w-4 h-4" />
+              <Building2 className="w-6 h-6" />
               <span>{companyJwt?.industry?.industryName}</span>
             </div>
           </div>

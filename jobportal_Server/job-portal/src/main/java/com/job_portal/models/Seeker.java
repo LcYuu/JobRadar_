@@ -50,8 +50,8 @@ public class Seeker {
     @Column(name = "phone_number", length = 10)
     private String phoneNumber;
 
-    @Column(name = "description", length = 100)
-    private String description;
+    @Column(name = "description", columnDefinition = "TEXT")
+	private String description;
 
     @Column(name = "email_contact", length = 50)
     private String emailContact;

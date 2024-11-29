@@ -35,7 +35,7 @@ public class UserAccount {
     @Column(name = "is_active", columnDefinition = "BIT(1)")
     private boolean isActive;
 
-    @Column(name = "user_name", length = 100, nullable = false)
+    @Column(name = "user_name", length = 200, nullable = false)
     private String userName;
 
     @Column(name = "avatar", length = 200)
