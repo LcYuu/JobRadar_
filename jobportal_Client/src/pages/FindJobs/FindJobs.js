@@ -72,7 +72,7 @@ export default function JobSearchPage() {
   const location = useLocation();
 
   useEffect(() => {
-    // Kiểm tra xem có state được truyền từ CategoryCard không
+    // Check if there are selected industry IDs in the state
     if (location.state?.selectedIndustryIds) {
       setFilters((prev) => ({
         ...prev,

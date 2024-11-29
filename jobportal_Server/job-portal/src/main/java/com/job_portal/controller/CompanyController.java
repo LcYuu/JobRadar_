@@ -257,28 +257,14 @@ public class CompanyController {
 	@GetMapping("/get-all-companies")
 	public ResponseEntity<Map<String, Object>> getAllCompanies(
 	    @RequestParam(defaultValue = "0") int page,
-	    @RequestParam(defaultValue = "5") int size
+	    @RequestParam(defaultValue = "10") int size
 	) {
 	    try {
-	        List<Company> companies = companyService.getAllCompanies(page, size);
-	        
-	        // Tính rating trung bình cho mỗi công ty
-	        companies.forEach(company -> {
-	            List<Review> reviews = reviewRepository.findByCompanyId(company.getCompanyId());
-	            double averageRating = 0.0;
-	            if (!reviews.isEmpty()) {
-	                averageRating = reviews.stream()
-	                    .mapToInt(Review::getStar)
-	                    .average()
-	                    .orElse(0.0);
-	            }
-	            company.setAverageRating(averageRating);
-	        });
-
-	        Page<Company> pageCompanies = new PageImpl<>(companies);
+	        Pageable paging = PageRequest.of(page, size);
+	        Page<Company> pageCompanies = companyRepository.findAll(paging);
 	        
 	        Map<String, Object> response = new HashMap<>();
-	        response.put("companies", companies);
+	        response.put("companies", pageCompanies.getContent());
 	        response.put("currentPage", pageCompanies.getNumber());
 	        response.put("totalItems", pageCompanies.getTotalElements());
 	        response.put("totalPages", pageCompanies.getTotalPages());

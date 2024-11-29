@@ -66,6 +66,14 @@ const PostJob = () => {
   const [benefit, setBenefit] = useState(() => EditorState.createEmpty());
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
+  const [selectedProvince, setSelectedProvince] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [selectedWard, setSelectedWard] = useState('');
+  const [specificAddress, setSpecificAddress] = useState('');
+
   useEffect(() => {
     dispatch(getAllSkill());
     dispatch(getCity());
@@ -74,6 +82,52 @@ const PostJob = () => {
     setNiceToHavesState(EditorState.createEmpty());
     setBenefit(EditorState.createEmpty());
   }, [dispatch]);
+
+  useEffect(() => {
+    const fetchProvinces = async () => {
+      try {
+        const response = await fetch('https://provinces.open-api.vn/api/p/');
+        const data = await response.json();
+        setProvinces(data);
+      } catch (error) {
+        console.error('Error fetching provinces:', error);
+      }
+    };
+    fetchProvinces();
+  }, []);
+
+  useEffect(() => {
+    const fetchDistricts = async () => {
+      if (selectedProvince) {
+        try {
+          const response = await fetch(`https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`);
+          const data = await response.json();
+          setDistricts(data.districts);
+          setSelectedDistrict('');
+          setSelectedWard('');
+        } catch (error) {
+          console.error('Error fetching districts:', error);
+        }
+      }
+    };
+    fetchDistricts();
+  }, [selectedProvince]);
+
+  useEffect(() => {
+    const fetchWards = async () => {
+      if (selectedDistrict) {
+        try {
+          const response = await fetch(`https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`);
+          const data = await response.json();
+          setWards(data.wards);
+          setSelectedWard('');
+        } catch (error) {
+          console.error('Error fetching wards:', error);
+        }
+      }
+    };
+    fetchWards();
+  }, [selectedDistrict]);
 
   const handleAddSkill = (skill) => {
     if (skill && !jobData.skillIds.includes(skill)) {
@@ -212,15 +266,51 @@ const PostJob = () => {
     return { isValid, errors: tempErrors };
   };
 
-  const handleSubmitJob = async () => {
-    if (!validateJobData(currentStep, jobData)) {
-      return;
+  const formatFullAddress = () => {
+    const province = provinces.find(p => p.code === selectedProvince)?.name || '';
+    const district = districts.find(d => d.code === selectedDistrict)?.name || '';
+    const ward = wards.find(w => w.code === selectedWard)?.name || '';
+    
+    return `${ward}, ${district}, ${province}`.replace(/^,\s+/, '');
+  };
+
+  // Add form validation
+  const validateForm = () => {
+    if (!selectedProvince || !selectedDistrict || !selectedWard) {
+      return false;
     }
+    return true;
+  };
+
+  // Update handleSubmitJob
+  const handleSubmitJob = async () => {
     try {
-      dispatch(createJobPost(jobData));
-      setShowSuccessModal(true);
+      const province = provinces.find(p => p.code === selectedProvince)?.name || '';
+      const district = districts.find(d => d.code === selectedDistrict)?.name || '';
+      const ward = wards.find(w => w.code === selectedWard)?.name || '';
+      const formattedLocation = `${ward}, ${district}, ${province}`.replace(/^,\s+/, '').trim();
+      if (!formattedLocation) {
+        throw new Error('Địa chỉ không hợp lệ. Vui lòng kiểm tra lại.');
+      }
+      const finalJobData = {
+        ...jobData,
+        cityId: parseInt(selectedProvince),
+        location: formattedLocation,
+      };
+  
+      const response = await dispatch(createJobPost(finalJobData));
+      
+      // Log the response for debugging
+      console.log('Create Job Post Response:', response);
+
+      if (response?.payload?.status === 'success') {
+        setShowSuccessModal(true);
+      } else {
+        throw new Error(response?.payload?.message || 'Tạo tin tuyển dụng thất bại');
+      }
     } catch (error) {
-      console.error("Error submitting job:", error);
+      console.error('Error creating job post:', error);
+      alert(error.message || 'Có lỗi xảy ra khi tạo tin tuyển dụng');
     }
   };
 
@@ -247,7 +337,7 @@ const PostJob = () => {
         return (
           <div className="space-y-6">
             <div>
-              <Label>Job Title</Label>
+              <Label>Tiêu đề công việc</Label>
               <Input
                 placeholder="Ví dụ: Kỹ sư"
                 value={jobData?.title}
@@ -261,7 +351,7 @@ const PostJob = () => {
             </div>
 
             <div>
-              <Label>Type of Employment</Label>
+              <Label>Hình thức làm việc</Label>
               <div className="grid grid-cols-1 gap-3 mt-2">
                 {typeOfWork.map((type) => (
                   <label key={type.id} className="flex items-center gap-2">
@@ -288,7 +378,7 @@ const PostJob = () => {
             </div>
 
             <div>
-              <Label>Salary</Label>
+              <Label>Lương</Label>
               <div className="mt-2">
                 <Input
                   type="number"
@@ -302,7 +392,7 @@ const PostJob = () => {
                 />
               </div>
               <p className="text-sm text-gray-500 mt-1">
-                Enter a single salary value.
+              Nhập một giá trị lương duy nhất.
               </p>
               {errors.salary && (
                 <p className="text-red-500 text-sm">{errors.salary}</p>
@@ -310,7 +400,7 @@ const PostJob = () => {
             </div>
 
             <div>
-              <Label>Position</Label>
+              <Label>Vị trí</Label>
               <Input
                 type="text"
                 placeholder="e.g. Software Engineer"
@@ -321,7 +411,7 @@ const PostJob = () => {
                 className="w-full mt-2 p-2 border border-gray-300 rounded-md"
               />
               <p className="text-sm text-gray-500 mt-1">
-                Enter the job position.
+                Nhập ví trí công việc.
               </p>
               {errors.position && (
                 <p className="text-red-500 text-sm">{errors.position}</p>
@@ -329,7 +419,7 @@ const PostJob = () => {
             </div>
 
             <div className="mt-4">
-              <Label>Expire Date</Label>
+              <Label>Ngày hết hạn</Label>
               <Input
                 type="date"
                 value={jobData.expireDate} // Giá trị ngày hết hạn
@@ -339,7 +429,7 @@ const PostJob = () => {
                 className="w-full mt-2 p-2 border border-gray-300 rounded-md"
               />
               <p className="text-sm text-gray-500 mt-1">
-                Select the expiration date for this job posting.
+              Chọn ngày hết hạn cho tin tuyển dụng này.
               </p>
               {errors.expireDate && (
                 <p className="text-red-500 text-sm">{errors.expireDate}</p>
@@ -347,21 +437,22 @@ const PostJob = () => {
             </div>
 
             <div>
-              <Label>Required Skills</Label>
+              <Label>Các kỹ năng cần thiết</Label>
               <div className="flex flex-wrap gap-2 mt-2">
-                {jobData.skillIds.map((skill, index) => (
-                  <Badge
-                    key={index}
-                    variant="secondary"
-                    className="flex items-center gap-1"
-                  >
-                    {skill}
-                    <X
-                      className="w-3 h-3 cursor-pointer"
-                      onClick={() => handleRemoveSkill(skill)}
-                    />
-                  </Badge>
-                ))}
+                {jobData.skillIds.map((skillId) => {
+                  const skill = skills.find((s) => s.skillId === skillId);
+                  return (
+                    skill && (
+                      <Badge key={skillId} variant="secondary" className="flex items-center gap-1">
+                        {skill.skillName}
+                        <X
+                          className="w-3 h-3 cursor-pointer"
+                          onClick={() => handleRemoveSkill(skillId)}
+                        />
+                      </Badge>
+                    )
+                  );
+                })}
               </div>
               <div className="relative mt-2">
                 <Button
@@ -370,7 +461,7 @@ const PostJob = () => {
                   className="w-full text-left flex justify-between items-center"
                   onClick={() => setIsSkillDropdownOpen(!isSkillDropdownOpen)}
                 >
-                  <span>Add Skills</span>
+                  <span>Thêm</span>
                   <ChevronDown
                     className={`w-4 h-4 transition-transform ${
                       isSkillDropdownOpen ? "transform rotate-180" : ""
@@ -381,10 +472,7 @@ const PostJob = () => {
                 {isSkillDropdownOpen && (
                   <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
                     {skills.map((skill) => (
-                      <label
-                        key={skill.skillId}
-                        className="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer"
-                      >
+                      <label key={skill.skillId} className="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
                         <input
                           type="checkbox"
                           className="w-4 h-4 rounded border-gray-300 mr-3"
@@ -413,17 +501,16 @@ const PostJob = () => {
         return (
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-semibold mb-2">Details</h2>
+              <h2 className="text-lg font-semibold mb-2">Chi tiết</h2>
               <p className="text-sm text-gray-500 mb-4">
-                Add the description of the job, responsibilities, who you are,
-                and nice-to-haves.
+              Thêm mô tả, trách nhiệm về công việc, thế nào là ứng viên phù hợp và cần có những kỹ năng gì..
               </p>
 
               {/* Job Description */}
               <div className="mb-6">
-                <Label>Job Descriptions</Label>
+                <Label>Mô tả công việc</Label>
                 <p className="text-sm text-gray-500 mb-2">
-                  Job titles must be described in one position
+                  Thêm những mô tả công việc vào khung văn bản dưới đây
                 </p>
                 <div className="border rounded-md">
                   <Editor
@@ -460,9 +547,9 @@ const PostJob = () => {
 
               {/* Responsibilities */}
               <div className="mb-6">
-                <Label>Requirements</Label>
+                <Label>Trách nhiệm công việc</Label>
                 <p className="text-sm text-gray-500 mb-2">
-                  List the requirements for this position
+                  Danh sách các trách nhiệm cho vị trí công việc này (**Chú ý: Mỗi trách nhiệm cách nhau bởi dấu ";")
                 </p>
                 <div className="border rounded-md">
                   <Editor
@@ -498,9 +585,9 @@ const PostJob = () => {
               </div>
 
               <div className="mb-6">
-                <Label>Experience</Label>
+                <Label>Kinh nghiệm</Label>
                 <p className="text-sm text-gray-500 mb-2">
-                  Enter the required years of experience for this position
+                  Nhập số năm kinh nghiệm cần thiết cho vị trí này
                 </p>
                 <div className="flex items-center gap-2">
                   <Input
@@ -527,10 +614,10 @@ const PostJob = () => {
 
               {/* Nice-To-Haves */}
               <div className="mb-6">
-                <Label>Nice-To-Haves</Label>
+                <Label>Các yêu cầu cần có</Label>
                 <p className="text-sm text-gray-500 mb-2">
-                  Add nice-to-have skills and qualifications for the role to
-                  encourage a more diverse set of candidates to apply
+                Thêm các kỹ năng và trình độ cần có cho vai trò này để
+                khuyến khích nhiều ứng viên đa dạng hơn nộp đơn (**Chú ý: Mỗi yêu cầu cách nhau bởi dấu ";")
                 </p>
                 <div className="border rounded-md">
                   <Editor
@@ -571,16 +658,16 @@ const PostJob = () => {
         return (
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-semibold mb-2">Basic Information</h2>
+              <h2 className="text-lg font-semibold mb-2">Thông tin cơ bản</h2>
               <p className="text-sm text-gray-500 mb-4">
-                List out your top perks and benefits.
+              Liệt kê các đặc quyền và lợi ích hàng đầu của công ty 
               </p>
 
               <div className="mb-6">
-                <Label>Benefits</Label>
+                <Label>Phúc lợi</Label>
                 <p className="text-sm text-gray-500 mb-2">
-                  Add benefits offered by the company to encourage candidates to
-                  apply.
+                Thêm các phúc lợi mà công ty cung cấp để khuyến khích ứng viên
+                nộp đơn (**Chú ý: Mỗi đặc quyền hoặc lợi ích cách nhau bởi dấu ";")
                 </p>
                 <div className="border rounded-md">
                   <Editor
@@ -614,50 +701,78 @@ const PostJob = () => {
                   <p className="text-red-500 text-sm">{errors.benefit}</p>
                 )}
               </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Tỉnh/Thành phố
+                  </label>
+                  <select
+                    required
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    value={selectedProvince}
+                    onChange={(e) => setSelectedProvince(e.target.value)}
+                  >
+                    <option value="">Chọn tỉnh/thành phố</option>
+                    {provinces.map((province) => (
+                      <option key={province.code} value={province.code}>
+                        {province.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              <div>
-                <Label>City</Label>
-                <select
-                  value={jobData.cityId} // Giá trị của city sẽ được lưu trong jobData
-                  onChange={
-                    (e) => setJobData({ ...jobData, cityId: e.target.value }) // Cập nhật giá trị city
-                  }
-                  className="w-full mt-2 p-2 border border-gray-300 rounded-md"
-                >
-                  <option value="" disabled>
-                    Select a city
-                  </option>
-                  {cities.map((city) => (
-                    <option key={city.cityId} value={city.cityId}>
-                      {city.cityName}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-sm text-gray-500 mt-1">
-                  Select the city for the job position.
-                </p>
-                {errors.cityId && (
-                  <p className="text-red-500 text-sm">{errors.cityId}</p>
-                )}
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Quận/Huyện
+                  </label>
+                  <select
+                    required
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    value={selectedDistrict}
+                    onChange={(e) => setSelectedDistrict(e.target.value)}
+                    disabled={!selectedProvince}
+                  >
+                    <option value="">Chọn quận/huyện</option>
+                    {districts.map((district) => (
+                      <option key={district.code} value={district.code}>
+                        {district.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Phường/Xã
+                  </label>
+                  <select
+                    required
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    value={selectedWard}
+                    onChange={(e) => setSelectedWard(e.target.value)}
+                    disabled={!selectedDistrict}
+                  >
+                    <option value="">Chọn phường/xã</option>
+                    {wards.map((ward) => (
+                      <option key={ward.code} value={ward.code}>
+                        {ward.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              <div>
-                <Label>Location</Label>
-                <Input
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Số nhà, tên đường
+                </label>
+                <input
                   type="text"
-                  placeholder="e.g. New York, San Francisco"
-                  value={jobData.location}
-                  onChange={
-                    (e) => setJobData({ ...jobData, location: e.target.value }) // Cập nhật giá trị location
-                  }
-                  className="w-full mt-2 p-2 border border-gray-300 rounded-md"
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  value={specificAddress}
+                  onChange={(e) => setSpecificAddress(e.target.value)}
+                  placeholder="Nhập địa chỉ cụ thể"
                 />
-                <p className="text-sm text-gray-500 mt-1">
-                  Enter the location for the job position.
-                </p>
-                {errors.location && (
-                  <p className="text-red-500 text-sm">{errors.location}</p>
-                )}
               </div>
             </div>
           </div>
@@ -674,12 +789,12 @@ const PostJob = () => {
         <button onClick={() => navigate(-1)} className="text-gray-500">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-xl font-semibold">Post a Job</h1>
+        <h1 className="text-xl font-semibold">Đăng việc làm</h1>
       </div>
 
       {/* Progress Steps */}
       <div className="flex items-center justify-between mb-8">
-        {["Job Information", "Job Description", "Perks & Benefit"].map(
+        {["Thông tin công việc", "Mô tả công việc", "Phúc lợi và đặc quyền"].map(
           (step, index) => (
             <React.Fragment key={index}>
               <div className="flex items-center gap-2">
@@ -713,7 +828,7 @@ const PostJob = () => {
             className="text-gray-600"
             onClick={() => setCurrentStep(currentStep - 1)}
           >
-            Previous Step
+            Bước trước
           </Button>
         )}
         <div className="flex-1" />
@@ -722,7 +837,7 @@ const PostJob = () => {
           className="bg-indigo-600"
           onClick={currentStep === 3 ? handleSubmitJob : handleNextStep}
         >
-          {currentStep === 3 ? "Post" : "Next Step"}
+          {currentStep === 3 ? "Đăng" : "Bước tiếp theo"}
         </Button>
       </div>
 

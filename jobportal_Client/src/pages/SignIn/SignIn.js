@@ -161,7 +161,7 @@ export default function SignInForm() {
         </CardHeader>
         <CardContent className="p-6">
           <form className="space-y-4">
-            {/* <GoogleOAuthProvider clientId="223710905248-cdn2agb2sgrv66dtgvo8osfcn3gin9er.apps.googleusercontent.com">
+            <GoogleOAuthProvider clientId="223710905248-cdn2agb2sgrv66dtgvo8osfcn3gin9er.apps.googleusercontent.com">
               <div>
                 <GoogleLogin
                   onSuccess={(response) => {
@@ -174,7 +174,7 @@ export default function SignInForm() {
                   }}
                 />
               </div>
-            </GoogleOAuthProvider> */}
+            </GoogleOAuthProvider>
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-gray-300" />

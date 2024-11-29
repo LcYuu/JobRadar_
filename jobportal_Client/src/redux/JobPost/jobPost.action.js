@@ -473,3 +473,23 @@ export const setPageSize = (size) => ({
   type: SET_PAGE_SIZE,
   payload: size
 });
+
+export const getSimilarJobs = (companyId, excludePostId) => async (dispatch) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/job-post/similar-jobs`, {
+      params: {
+        companyId,
+        excludePostId,
+      }
+    });
+    dispatch({
+      type: "GET_SIMILAR_JOBS_SUCCESS",
+      payload: response.data
+    });
+  } catch (error) {
+    dispatch({
+      type: "GET_SIMILAR_JOBS_FAILURE",
+      payload: error.message
+    });
+  }
+};
