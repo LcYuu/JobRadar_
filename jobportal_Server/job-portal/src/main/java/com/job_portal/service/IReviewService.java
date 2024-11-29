@@ -10,4 +10,5 @@ import com.social.exceptions.AllExceptions;
 public interface IReviewService {
 	public boolean createReview(Seeker seeker, UUID companyId, Review req) throws AllExceptions;
 	public List<Review> findReviewByCompanyId(UUID companyId) throws AllExceptions;
+	public boolean deleteReview(UUID reviewId) throws AllExceptions;
 }

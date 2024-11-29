@@ -53,7 +53,7 @@ export default function AdminJobList() {
                          job.company?.companyName.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = filters.status === 'all' ? true :
-      filters.status === 'open' ? new Date(job.expireDate) > new Date() :
+      filters.status === 'Đang mở' ? new Date(job.expireDate) > new Date() :
       new Date(job.expireDate) <= new Date();
 
     const matchesApprove = filters.approve === 'all' ? true :
@@ -115,17 +115,17 @@ export default function AdminJobList() {
                 <Button variant="outline" className="flex items-center gap-2">
                   <Filter className="w-4 h-4" />
                   {filters.status === 'all' ? 'Tình trạng tuyển' :
-                   filters.status === 'open' ? 'Còn tuyển' : 'Hết hạn'}
+                   filters.status === 'Đang mở' ? 'Còn tuyển' : 'Đã đóng'}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={() => setFilters(f => ({ ...f, status: 'all' }))}>
                   Tất cả
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilters(f => ({ ...f, status: 'open' }))}>
+                <DropdownMenuItem onClick={() => setFilters(f => ({ ...f, status: 'Đang mở' }))}>
                   Còn tuyển
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setFilters(f => ({ ...f, status: 'closed' }))}>
+                <DropdownMenuItem onClick={() => setFilters(f => ({ ...f, status: 'Đã đóng' }))}>
                   Hết hạn
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -161,11 +161,11 @@ export default function AdminJobList() {
                 </td>
                 <td className="p-4">
                   <span className={`px-2 py-1 rounded-full text-xs ${
-                    job.status === 'Open' 
+                    job.status === 'Đang mở' 
                       ? 'bg-blue-100 text-blue-800' 
                       : 'bg-red-100 text-red-800'
                   }`}>
-                    {job.status === 'Open' ? 'Còn tuyển' : 'Hết hạn'}
+                    {job.status === 'Đang mở' ? 'Còn tuyển' : 'Hết hạn'}
                   </span>
                 </td>
                 <td className="p-4">

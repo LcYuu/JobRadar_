@@ -36,7 +36,10 @@ public class Review {
 
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createDate;
-
+    
+    @Column(name ="is_anonymous", nullable = false)
+    private boolean isAnonymous;
+    
     @Lob
     @Column(name = "message", columnDefinition = "MEDIUMTEXT")
     private String message;
@@ -52,4 +55,16 @@ public class Review {
 	@ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "company_id")
 	private Company company;
+
+	public boolean isAnonymous() {
+		return isAnonymous;
+	}
+
+	public void setAnonymous(boolean anonymous) {
+		this.isAnonymous = anonymous;
+	}
+
+	
+
+	
 }
