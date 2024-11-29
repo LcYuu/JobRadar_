@@ -71,6 +71,8 @@ public class JobPostController {
 	IJobPostService jobPostService;
 
 	@Autowired
+	ICompanyService companyService;
+	@Autowired
 	private CompanyRepository companyRepository;
 
 	@Autowired
@@ -608,4 +610,21 @@ public class JobPostController {
 	    Page<JobPost> jobs = jobPostRepository.findAll(pageable);
 	    return new ResponseEntity<>(jobs, HttpStatus.OK);
 	}
+
+	@GetMapping("/similar-jobs")
+	public ResponseEntity<Object> getSimilarJobs(
+	    @RequestParam UUID companyId,
+	    @RequestParam(required = false) UUID excludePostId
+	) {
+	    try {
+	        // Fetch the industryId based on the companyId
+	        Integer industryId = companyService.getIndustryIdByCompanyId(companyId);
+	        List<JobPost> similarJobs = jobPostService.getSimilarJobsByIndustry(industryId, excludePostId);
+	        return ResponseEntity.ok(similarJobs);
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
+	    }
+	}
+
 }
