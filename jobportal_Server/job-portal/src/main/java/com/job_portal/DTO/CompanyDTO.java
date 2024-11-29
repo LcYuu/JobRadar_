@@ -2,6 +2,8 @@ package com.job_portal.DTO;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,6 +25,7 @@ public class CompanyDTO {
     private String logo;
     private String contact;
     private String email;
-    private LocalDate establishedDate;
+    @JsonFormat(pattern = "yyyy-MM-dd") // Định dạng giống với Postman
+    private LocalDate establishedTime;
     private String taxCode;
 }

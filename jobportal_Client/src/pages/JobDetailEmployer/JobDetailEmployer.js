@@ -297,7 +297,18 @@ const JobDetailEmployer = () => {
                 name="description"
               />
             ) : (
-              <p className="text-gray-600">{detailJob?.description}</p>
+              <div className="text-gray-600">
+                {detailJob?.description ? (
+                  detailJob.description.split("\n").map((line, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5" />
+                      <span className="flex-1">{line.trim()}</span>
+                    </li>
+                  ))
+                ) : (
+                  <p>Không có mô tả nào được cung cấp.</p>
+                )}
+              </div>
             )}
           </Card>
 
@@ -313,7 +324,7 @@ const JobDetailEmployer = () => {
                   name="requirement"
                 />
               ) : detailJob?.requirement ? (
-                detailJob.requirement.split(", ").map((req, index) => (
+                detailJob.requirement.split("\n").map((req, index) => (
                   <li key={index} className="flex items-start gap-2">
                     <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5" />
                     <span>
@@ -339,7 +350,7 @@ const JobDetailEmployer = () => {
                   name="niceToHaves"
                 />
               ) : detailJob?.niceToHaves ? (
-                detailJob.niceToHaves.split(", ").map((nt, index) => (
+                detailJob.niceToHaves.split("\n").map((nt, index) => (
                   <li key={index} className="flex items-start gap-2">
                     <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5" />
                     <span>
@@ -363,7 +374,7 @@ const JobDetailEmployer = () => {
                   name="benefit"
                 />
               ) : detailJob?.benefit ? (
-                detailJob.benefit.split(", ").map((be, index) => (
+                detailJob.benefit.split("\n").map((be, index) => (
                   <li key={index} className="flex items-start gap-2">
                     <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5" />
                     <span>

@@ -105,8 +105,8 @@ public class CompanyServiceImpl implements ICompanyService {
 			isUpdated = true;
 		}
 		
-		if (companyDTO.getEstablishedDate() != null) {
-			oldCompany.setEstablishedTime(companyDTO.getEstablishedDate());
+		if (companyDTO.getEstablishedTime() != null) {
+			oldCompany.setEstablishedTime(companyDTO.getEstablishedTime());
 			isUpdated = true;
 		}
 
