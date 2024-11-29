@@ -54,8 +54,10 @@ export const userReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: false,
-        users: action.payload,
-        error: null,
+        users: action.payload.content,
+        totalPages: action.payload.totalPages,
+        totalElements: action.payload.totalElements,
+        error: null
       };
 
     case DELETE_USER_SUCCESS:

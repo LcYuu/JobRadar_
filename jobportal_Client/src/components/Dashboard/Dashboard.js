@@ -59,85 +59,98 @@ export default function Dashboard_Seeker() {
           <h2 className="text-lg font-semibold mb-4">Lịch sử ứng tuyển</h2>
           <div className="space-y-4">
             {applyJobByUser.map((app) => {
-              const applyDate = new Date(app.applyDate); // Chuyển đổi thành đối tượng Date
-              const formattedDate = applyDate.toLocaleDateString("en-GB"); // Định dạng ngày (ngày/tháng/năm)
+              const applyDate = new Date(app.applyDate);
+              const formattedDate = applyDate.toLocaleDateString("en-GB");
               const formattedTime = applyDate.toLocaleTimeString("en-GB", {
                 hour: "2-digit",
                 minute: "2-digit",
-              }); // Định dạng giờ và phút
+              });
+
+              console.log("Application status:", app);
 
               return (
-                <div
+                <Link 
+                  to={`/jobs/job-detail/${app.postId}`} 
                   key={app.postId}
-                  className="flex items-start justify-between p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200"
+                  className="block"
                 >
-                  <div className="flex items-start">
-                    <div className="w-12 h-12 rounded-full flex items-center justify-center mr-4 border border-gray-300">
-                      <img
-                        src={app.logo}
-                        alt="Logo"
-                        className="w-full h-full rounded-full object-cover"
-                      />
+                  <div className="flex items-start justify-between p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
+                    <div className="flex items-start">
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center mr-4 border border-gray-300">
+                        <img
+                          src={app.logo}
+                          alt="Logo"
+                          className="w-full h-full rounded-full object-cover"
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-bold text-xl text-indigo-800">
+                            {app.title}
+                          </h3>
+                          <span
+                            className={`px-3 py-1 rounded-full text-sm ${
+                              app.isSave
+                                ? "bg-green-100 text-green-600"
+                                : "bg-yellow-100 text-yellow-600"
+                            }`}
+                          >
+                            {app.isSave ? "Đã duyệt" : "Chờ duyệt"}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-700 mb-1">
+                          {app.companyName} • {app.location} • {app.typeOfWork}
+                        </p>
+                        <span className="text-sm text-gray-500 mb-1">
+                          Thời gian ứng tuyển: {formattedDate} {formattedTime}
+                        </span>
+                        <p className="text-sm text-gray-600">
+                          CV tải lên:{" "}
+                          <a
+                            href={app.pathCV}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-blue-600 hover:underline"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            CV tải lên
+                          </a>
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex flex-col">
-                      <h3 className="font-bold text-xl text-indigo-800 mb-1">
-                        {app.title}
-                      </h3>
-                      <p className="text-sm text-gray-700 mb-1">
-                        {app.companyName} • {app.location} • {app.typeOfWork}
-                      </p>
-                      <span className="text-sm text-gray-500 mb-1">
-                        Thời gian ứng tuyển: {formattedDate} {formattedTime}
-                      </span>
-                      <p className="text-sm text-gray-600">
-                        CV tải lên:{" "}
-                        <a
-                          href={app.pathCV} // Đường dẫn đến CV
-                          target="_blank" // Mở liên kết trong tab mới
-                          rel="noopener noreferrer" // Tăng cường bảo mật
-                          className="font-medium text-blue-600 hover:underline"
-                        >
-                          CV tải lên
-                        </a>
-                      </p>
+
+                    <div className="flex items-center">
+                      {app.pinned && (
+                        <Pin className="text-yellow-500 h-5 w-5 mr-2" />
+                      )}
+                      <DropdownMenu.Root>
+                        <DropdownMenu.Trigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <MoreVertical className="h-5 w-5" />
+                          </Button>
+                        </DropdownMenu.Trigger>
+                        <DropdownMenu.Portal>
+                          <DropdownMenu.Content className="min-w-[120px] bg-white rounded-md shadow-md">
+                            <DropdownMenu.Item
+                              className="cursor-pointer p-2 hover:bg-gray-200"
+                            >
+                              Xóa
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item
+                              className="cursor-pointer p-2 hover:bg-gray-200"
+                            >
+                              {app.pinned ? "Bỏ ghim" : "Ghim"}
+                            </DropdownMenu.Item>
+                          </DropdownMenu.Content>
+                        </DropdownMenu.Portal>
+                      </DropdownMenu.Root>
                     </div>
                   </div>
-
-                  {/* <div className="flex flex-col items-end">
-                    <p className="text-lg font-semibold text-green-600">
-                      {app.salary} VNĐ
-                    </p>
-                  </div> */}
-                  <div className="flex items-center">
-                    {app.pinned && (
-                      <Pin className="text-yellow-500 h-5 w-5 mr-2" />
-                    )}
-                    <DropdownMenu.Root>
-                      <DropdownMenu.Trigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical className="h-5 w-5" />
-                        </Button>
-                      </DropdownMenu.Trigger>
-
-                      <DropdownMenu.Portal>
-                        <DropdownMenu.Content className="min-w-[120px] bg-white rounded-md shadow-md">
-                          <DropdownMenu.Item
-                            className="cursor-pointer p-2 hover:bg-gray-200"
-                            // onClick={() => handleDelete(app.id)}
-                          >
-                            Xóa
-                          </DropdownMenu.Item>
-                          <DropdownMenu.Item
-                            className="cursor-pointer p-2 hover:bg-gray-200"
-                            // onClick={() => handlePin(app.id)}
-                          >
-                            {app.pinned ? "Bỏ ghim" : "Ghim"}
-                          </DropdownMenu.Item>
-                        </DropdownMenu.Content>
-                      </DropdownMenu.Portal>
-                    </DropdownMenu.Root>
-                  </div>
-                </div>
+                </Link>
               );
             })}
           </div>
@@ -146,8 +159,8 @@ export default function Dashboard_Seeker() {
               <Pagination
                 currentPage={currentPage}
                 size={size}
-                totalPages={totalPages} // Cập nhật totalPages
-                onPageChange={handlePageChange} // Gọi hàm xử lý khi trang thay đổi
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
               />
             )}
           </div>
