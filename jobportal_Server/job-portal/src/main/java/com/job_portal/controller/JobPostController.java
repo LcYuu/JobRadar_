@@ -501,7 +501,7 @@ public class JobPostController {
 	            System.out.println("End time: " + dayEnd);
 	            
 	            long newUsers = userAccountRepository.countByCreatedAtBetween(dayStart, dayEnd);
-	            long newJobs = jobPostRepository.countByCreatedAtBetween(dayStart, dayEnd);
+	            long newJobs = jobPostRepository.countByCreatedAtBetween(start, end);
 	            
 	            System.out.println("New users: " + newUsers);
 	            System.out.println("New jobs: " + newJobs);
