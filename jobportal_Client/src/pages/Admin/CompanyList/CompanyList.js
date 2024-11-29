@@ -164,10 +164,10 @@ export default function CompanyList() {
                   <td className="p-4 text-gray-500">{company.address}</td>
                   <td className="p-4">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {getIndustryName(company.industry?.industryName)}
+                      {getIndustryName(company.industry?.industryId)}
                     </span>
                   </td>
-                  <td className="p-4 text-gray-500">{formatDate(company.establishedDate)}</td>
+                  <td className="p-4 text-gray-500">{formatDate(company.establishedTime)}</td>
                   <td className="p-4 text-gray-500">{company.contact}</td>
                   <td className="p-4">
                     <DropdownMenu>

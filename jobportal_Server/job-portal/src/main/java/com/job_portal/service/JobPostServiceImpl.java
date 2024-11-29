@@ -487,4 +487,8 @@ public class JobPostServiceImpl implements IJobPostService {
 		
 		return stats;
 	}
+	@Override
+	public List<JobPost> getSimilarJobsByIndustry(Integer industryId, UUID excludePostId) {
+	    return jobPostRepository.findSimilarJobsByIndustry(industryId, excludePostId);
+	}
 }

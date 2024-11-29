@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { MoreVertical, Search, Filter } from "lucide-react";
@@ -212,7 +212,9 @@ const CandidateManagement = () => {
                       second: "2-digit",
                     })}
                   </td>
-                  <td className="p-4">{candidate?.title}</td>
+                  <Link to={`/employer/jobs/${candidate?.postId}`} className="border-l-indigo-950 hover:underline p-4">
+      {candidate?.title}
+    </Link>
                   <td className="p-4">
                     <div className="flex items-center gap-2">
                       <Button
