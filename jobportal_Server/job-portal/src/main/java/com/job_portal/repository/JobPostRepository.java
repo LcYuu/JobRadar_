@@ -208,4 +208,10 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 		@Param("status") String status,
 		Pageable pageable
 	);
+
+	@Query("SELECT j FROM JobPost j JOIN j.company c WHERE c.industry.industryId = :industryId AND j.isApprove = true AND j.expireDate > CURRENT_DATE AND j.postId != :excludePostId")
+	List<JobPost> findSimilarJobsByIndustry(
+	    @Param("industryId") Integer industryId,
+	    @Param("excludePostId") UUID excludePostId
+	);
 }

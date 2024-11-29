@@ -41,4 +41,5 @@ public interface IJobPostService {
 	public Page<JobPost> findApprovedJobsByCompany(UUID companyId, Pageable pageable);
 	public Map<String, Long> countAllJobsByCompany(UUID companyId);
 	public List<Map<String, Object>> getCompanyJobStats(UUID companyId, LocalDate startDate, LocalDate endDate);
+	List<JobPost> getSimilarJobsByIndustry(Integer industryId, UUID jobPostId);
 }

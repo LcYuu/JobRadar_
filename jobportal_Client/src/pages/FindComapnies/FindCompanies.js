@@ -69,24 +69,24 @@ export default function FindCompanies() {
   const uniqueCompanies = [...new Map(companyByFeature.map(company => [company.industryId, company])).values()];
 
   return (
-    <div className="min-h-screen bg-transparent p-6">
+    <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto space-y-12">
         <div className="text-center my-8">
-          <h1 className="text-3xl font-bold text-gray-800">
+          <h1 className="text-4xl font-extrabold text-gray-800">
             Tìm kiếm{" "}
             <span className="relative inline-block text-primary text-blue-500">
               công ty yêu thích của bạn
               <span className="absolute bottom-0 left-0 w-full h-1 bg-blue-300 opacity-50"></span>
             </span>
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-gray-600 mt-2">
             Tìm công ty mơ ước mà bạn muốn làm việc
           </p>
         </div>
 
         <div className="flex gap-4 items-center">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Input
               placeholder="Nhập tên công ty hoặc từ khóa mong muốn"
               className="pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500"
@@ -128,7 +128,7 @@ export default function FindCompanies() {
             <Button
               variant={selectedCategory === null ? "default" : "outline"}
               onClick={() => handleCategoryChange(null)}
-              className="hover:bg-gray-200 transition duration-200"
+              className={`hover:bg-gray-200 transition duration-200 ${selectedCategory === null ? 'bg-blue-500 text-white' : ''}`}
             >
               Tất cả ngành nghề
             </Button>
@@ -137,7 +137,7 @@ export default function FindCompanies() {
                 key={industry.industryId}
                 variant={selectedCategory === industry.industryId ? "default" : "outline"}
                 onClick={() => handleCategoryChange(industry.industryId)}
-                className="hover:bg-gray-200 transition duration-200"
+                className={`hover:bg-gray-200 transition duration-200 ${selectedCategory === industry.industryId ? 'bg-blue-500 text-white' : ''}`}
               >
                 {industry.industryName}
               </Button>
@@ -159,7 +159,7 @@ export default function FindCompanies() {
                 </>
               )}
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-gray-500">
               {hasFilteredCompanies ? filteredCompanies.length : 0} kết quả
             </p>
           </div>
@@ -183,7 +183,7 @@ export default function FindCompanies() {
                         <p className="text-sm text-primary">{company.countJob} công việc đang mở</p>
                       </div>
                     </div>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{company.description}</p>
+                    <p className="text-sm text-gray-500 line-clamp-2">{company.description}</p>
                     <div className="flex flex-wrap gap-2">
                       <Badge className="text-xs">{company.industryName}</Badge>
                     </div>

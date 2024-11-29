@@ -313,6 +313,25 @@ export const jobPostReducer = (state = initialState, action) => {
         error: action.payload
       };
 
+    case "GET_SIMILAR_JOBS_REQUEST":
+      return {
+        ...state,
+        loading: true,
+        error: null
+      };
+    case "GET_SIMILAR_JOBS_SUCCESS":
+      return {
+        ...state,
+        loading: false,
+        similarJobs: action.payload
+      };
+    case "GET_SIMILAR_JOBS_FAILURE":
+      return {
+        ...state,
+        loading: false,
+        error: action.payload
+      };
+
     default:
       return state;
   }
