@@ -193,9 +193,11 @@ export default function JobDetail() {
               {/* Job Description */}
               <section className="space-y-4">
                 <h2 className="text-lg font-semibold">Mô tả</h2>
-                <p className="text-sm text-gray-600">
-                  {postByPostId?.description}
-                </p>
+                <div className="text-sm text-gray-600">
+                  {postByPostId?.description?.split("\n").map((line, index) => (
+                    <p key={index}>{line.trim()}</p>
+                  ))}
+                </div>
               </section>
 
               {/* Nicetohaves */}
@@ -203,7 +205,7 @@ export default function JobDetail() {
                 <h2 className="text-lg font-semibold">Trách nhiệm công việc</h2>
                 <ul className="space-y-2 text-sm text-gray-600">
                   {postByPostId?.requirement ? (
-                    postByPostId.requirement.split(";").map((item, index) => (
+                    postByPostId.requirement.split("\n").map((item, index) => (
                       <li key={index} className="flex items-start">
                         <CheckCircle2 className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
                         <span>{item.trim()}</span>
@@ -222,7 +224,7 @@ export default function JobDetail() {
                 </h2>
                 <ul className="space-y-2 text-sm text-gray-600">
                   {postByPostId?.niceToHaves ? (
-                    postByPostId.niceToHaves.split(";").map((item, index) => (
+                    postByPostId.niceToHaves.split("\n").map((item, index) => (
                       <li key={index} className="flex items-start">
                         <CheckCircle2 className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
                         <span>{item.trim()}</span>
@@ -233,7 +235,22 @@ export default function JobDetail() {
                   )}
                 </ul>
               </section>
-
+              {/* Benefits */}
+              <section className="space-y-4">
+                <h2 className="text-lg font-semibold">Quyền lợi</h2>
+                <ul className="space-y-2 text-sm text-gray-600">
+                  {postByPostId?.benefit ? (
+                    postByPostId.benefit.split("\n").map((item, index) => (
+                      <li key={index} className="flex items-start">
+                        <CheckCircle2 className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
+                        <span>{item.trim()}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-gray-500 italic">Chưa có thông tin</li>
+                  )}
+                </ul>
+              </section>
               {/* Company Info */}
               <section className="relative w-full -mx-4 lg:-mx-8 bg-white shadow-md">
                 <div className="container mx-auto px-4 py-8">

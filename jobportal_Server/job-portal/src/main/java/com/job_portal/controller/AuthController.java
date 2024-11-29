@@ -336,8 +336,33 @@ public class AuthController {
 		Optional<UserType> userType = userTypeRepository.findById(role);
 		
 		UserAccount newUser = user.get();
-		newUser.setUserType(userType.orElse(null)); // Xử lý trường hợp userType không tìm thấy
-		userAccountRepository.save(newUser);
+		newUser.setUserType(userType.orElse(null));
+		if (newUser.getUserType().getUserTypeId() == 2) {
+			Integer defaultIndustryId = 0;
+			Optional<Industry> defaultIndustryOpt = industryRepository.findById(defaultIndustryId);
+
+			Industry defaultIndustry = defaultIndustryOpt.get();
+			Seeker seeker = new Seeker();
+			seeker.setUserAccount(newUser);
+			seeker.setIndustry(defaultIndustry);
+			user.get().setSeeker(seeker);
+			userAccountRepository.save(newUser);
+		} else if (newUser.getUserType().getUserTypeId() == 3) {
+			Integer defaultIndustryId = 0;
+			Optional<Industry> defaultIndustryOpt = industryRepository.findById(defaultIndustryId);
+
+			Integer defaultCityId = 0;
+			Optional<City> defaultCityOpt = cityRepository.findById(defaultCityId);
+
+			Industry defaultIndustry = defaultIndustryOpt.get();
+			City defaultCity = defaultCityOpt.get();
+			Company company = new Company();
+			company.setUserAccount(newUser);
+			company.setIndustry(defaultIndustry);
+			company.setCity(defaultCity);
+			user.get().setCompany(company);
+			userAccountRepository.save(newUser);
+		}
 		AuthResponse response = new AuthResponse(String.valueOf(role), "Cập nhật vai trò thành công");
 		return ResponseEntity.ok(response);
 	}
