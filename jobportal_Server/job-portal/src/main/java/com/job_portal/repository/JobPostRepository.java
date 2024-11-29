@@ -126,7 +126,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	// 		LocalDateTime currentDate);
 
 	@Query("SELECT COUNT(j) FROM JobPost j WHERE j.createDate BETWEEN :startDate AND :endDate")
-	long countByCreatedAtBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+	long countByCreatedAtBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
 	Page<JobPost> findByCompanyCompanyId(UUID companyId, Pageable pageable);
 
