@@ -17,7 +17,7 @@ import {
   GET_USER_ROLES_FAILURE,
 } from "./user.actionType";
 import { API_BASE_URL } from '../../configs/api';
-export const getAllUsers = () => async (dispatch) => {
+export const getAllUsers = (page = 0, size = 5, filters = {}) => async (dispatch) => {
   dispatch({ type: GET_ALL_USERS_REQUEST });
   try {
     const jwt = sessionStorage.getItem('jwt');
@@ -25,12 +25,21 @@ export const getAllUsers = () => async (dispatch) => {
       throw new Error('No token found');
     }
 
-    const response = await api.get("/users/get-all", {
+    const { searchTerm, role, status } = filters;
+    const queryParams = new URLSearchParams({
+      page: page.toString(),
+      size: size.toString(),
+      ...(searchTerm && { search: searchTerm }),
+      ...(role !== 'all' && { role }),
+      ...(status !== 'all' && { status })
+    });
+
+    const response = await api.get(`/users/admin-get-all?${queryParams}`, {
       headers: {
         Authorization: `Bearer ${jwt}`,
       }
     });
-    
+
     dispatch({
       type: GET_ALL_USERS_SUCCESS,
       payload: response.data

@@ -35,6 +35,10 @@ import {
   GET_ALL_ADMIN_JOBS_SUCCESS,
   GET_ALL_ADMIN_JOBS_FAILURE,
 
+  GET_ALL_JOBS_REQUEST,
+  GET_ALL_JOBS_SUCCESS,
+  GET_ALL_JOBS_FAILURE,
+
 } from "./jobPost.actionType";
 
 const initialState = {
@@ -57,6 +61,8 @@ const initialState = {
   positions: [],
   jobs: [],
   detailJob: null,
+  totalElements: 0,
+  currentPage: 0
 };
 
 export const jobPostReducer = (state = initialState, action) => {
@@ -260,14 +266,72 @@ export const jobPostReducer = (state = initialState, action) => {
     case GET_ALL_ADMIN_JOBS_SUCCESS:
       return {
         ...state,
-        jobPost: action.payload.content,
+        jobPost: action.payload.jobPost,
         totalPages: action.payload.totalPages,
-        totalItems: action.payload.totalElements,
+        totalElements: action.payload.totalElements,
+        currentPage: action.payload.currentPage,
         loading: false,
         error: null
       };
     case GET_ALL_ADMIN_JOBS_FAILURE:
       return { ...state, loading: false, error: action.payload };
+    case GET_ALL_JOBS_REQUEST:
+    case SEARCH_JOBS_REQUEST:
+      return {
+        ...state,
+        loading: true,
+        error: null
+      };
+
+    case GET_ALL_JOBS_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        jobPost: action.payload.content,
+        totalPages: action.payload.totalPages,
+        totalElements: action.payload.totalElements,
+        currentPage: action.payload.currentPage,
+        error: null
+      };
+
+    case SEARCH_JOBS_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        searchJob: action.payload.content,
+        totalPages: action.payload.totalPages,
+        totalElements: action.payload.totalElements,
+        currentPage: action.payload.currentPage,
+        error: null
+      };
+
+    case GET_ALL_JOBS_FAILURE:
+    case SEARCH_JOBS_FAILURE:
+      return {
+        ...state,
+        loading: false,
+        error: action.payload
+      };
+
+    case "GET_SIMILAR_JOBS_REQUEST":
+      return {
+        ...state,
+        loading: true,
+        error: null
+      };
+    case "GET_SIMILAR_JOBS_SUCCESS":
+      return {
+        ...state,
+        loading: false,
+        similarJobs: action.payload
+      };
+    case "GET_SIMILAR_JOBS_FAILURE":
+      return {
+        ...state,
+        loading: false,
+        error: action.payload
+      };
+
     default:
       return state;
   }
