@@ -5,7 +5,6 @@ import "swiper/swiper-bundle.css";
 import { Button } from "../../ui/button";
 import { Card } from "../../ui/card";
 import { Badge } from "../../ui/badge";
-import "react-responsive-carousel/lib/styles/carousel.min.css";
 import {
   Calendar,
   Users,
@@ -47,9 +46,9 @@ import { checkIfApplied } from "../../redux/ApplyJob/applyJob.action";
 import {
   createReview,
   getReviewByCompany,
+  deleteReview,
 } from "../../redux/Review/review.action";
-import { Carousel } from "react-responsive-carousel";
-
+import anonymousIcon from "../../assets/icons/anonymous.png"
 const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
   return (
     <div className="flex">
@@ -107,7 +106,11 @@ export default function CompanyProfile() {
   const [currentPage, setCurrentPage] = useState(0);
   const [size] = useState(6);
 
-  const [feedback, setFeedback] = useState({ star: 0, message: "" });
+  const [feedback, setFeedback] = useState({
+    star: 0,
+    message: "",
+    isAnonymous: false
+  });
 
   const handleRatingChange = (newRating) => {
     setFeedback((prevFeedback) => ({ ...prevFeedback, star: newRating }));
@@ -120,29 +123,76 @@ export default function CompanyProfile() {
     }));
   };
 
+  const [hasReviewed, setHasReviewed] = useState(false);
+  const [existingReview, setExistingReview] = useState(null);
+  const { user } = useSelector((store) => store.auth);
+
+  useEffect(() => {
+    if (reviews && user) {
+      const userReview = reviews.find(
+        review => review.seeker?.userAccount?.userId === user.userId
+      );
+      if (userReview) {
+        setHasReviewed(true);
+        setExistingReview(userReview);
+        setFeedback({
+          star: userReview.star,
+          message: userReview.message,
+          isAnonymous: userReview.anonymous
+        });
+      } else {
+        setHasReviewed(false);
+        setExistingReview(null);
+      }
+    }
+  }, [reviews, user]);
+
   const handleSubmitReview = async () => {
-    // Kiểm tra nếu rating không có giá trị
     if (!feedback.star) {
-      toast("Đánh giá sao không được để trống!");
+      toast.warning("Đánh giá sao không được để trống!");
       return;
     }
 
-    // Kiểm tra nếu review trống
     if (feedback.message.trim() === "") {
-      toast("Vui lòng nhập nội dung đánh giá");
+      toast.warning("Vui lòng nhập nội dung đánh giá");
       return;
     }
 
     try {
-      await dispatch(createReview(feedback, companyId));
-      toast("Gửi đánh giá thành công");
-      dispatch(getReviewByCompany(companyId));
-      console.log("Đánh giá:", feedback.star, "Nội dung:", feedback.message);
-      setFeedback({ star: 0, message: "" });
+      if (hasReviewed && existingReview) {
+        const confirmMessage = `Bạn đã đánh giá công ty này trước đó:
+- Đánh giá cũ: ${existingReview.star}⭐ - "${existingReview.message}"
+- Đánh giá mới: ${feedback.star}⭐ - "${feedback.message}"
+${feedback.isAnonymous ? "\n(Đánh giá này sẽ được đăng ẩn danh)" : ""}
+
+Bạn có chắc chắn muốn thay đổi đánh giá không?`;
+
+        if (!window.confirm(confirmMessage)) {
+          return;
+        }
+
+        await dispatch(deleteReview(existingReview.reviewId));
+      }
+
+      await dispatch(createReview({
+        star: feedback.star,
+        message: feedback.message,
+        isAnonymous: feedback.isAnonymous
+      }, companyId));
+
+      await dispatch(getReviewByCompany(companyId));
+
+      toast.success("Gửi đánh giá thành công");
+      
+      setFeedback({ 
+        star: 0, 
+        message: "", 
+        isAnonymous: false 
+      });
+
     } catch (error) {
-      // Nếu có lỗi khi gửi đánh giá
-      toast("Có lỗi xảy ra khi gửi đánh giá");
-      console.error("Error submitting review:", error);
+      console.error("Error in review process:", error);
+      toast.error(error.response?.data || "Có lỗi xảy ra trong quá trình xử lý");
     }
   };
 
@@ -204,6 +254,23 @@ export default function CompanyProfile() {
   const averageStars = reviews.length > 0 ? totalStars / reviews.length : 0;
 
   console.log(checkIfSaved);
+
+  const handleDeleteReview = async (reviewId) => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa đánh giá này không?")) {
+      try {
+        await dispatch(deleteReview(reviewId));
+        toast.success("Xóa đánh giá thành công");
+        dispatch(getReviewByCompany(companyId));
+        setHasReviewed(false);
+        setExistingReview(null);
+        setFeedback({ star: 0, message: "", isAnonymous: false });
+      } catch (error) {
+        console.error("Error deleting review:", error);
+        toast.error("Có lỗi xảy ra khi xóa đánh giá");
+      }
+    }
+  };
+
   return (
     <main className="min-h-screen bg-background">
       <div className="container px-4 py-8 mx-auto">
@@ -409,64 +476,59 @@ export default function CompanyProfile() {
               <p className="text-gray-500">Chưa có đánh giá nào.</p>
             ) : (
               reviews
-                .sort((a, b) => new Date(b.createDate) - new Date(a.createDate)) // Sắp xếp theo ngày tạo
+                .sort((a, b) => new Date(b.createDate) - new Date(a.createDate))
                 .map((review, index) => (
-                  <div
-                    key={index}
-                    className="mb-6 p-4 border-b border-gray-300 rounded-md transition duration-300 ease-in-out hover:bg-blue-100 hover:shadow-lg"
-                  >
+                  <div key={index} className="mb-6 p-4 border-b border-gray-300 rounded-md hover:bg-blue-100 hover:shadow-lg">
                     <div className="flex items-start mb-4">
-                      {/* Avatar */}
                       <img
-                        src={review?.seeker?.userAccount?.avatar}
-                        alt={`${review?.seeker?.userAccount?.userName}'s avatar`}
+                        src={review.anonymous ? anonymousIcon : review?.seeker?.userAccount?.avatar}
+                        alt="Avatar"
                         className="w-12 h-12 rounded-full object-cover mr-4"
                       />
-
                       <div className="flex-1">
-                        {/* Name and Date */}
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-semibold text-gray-800">
-                            {review?.seeker?.userAccount?.userName
-                              ? `${
-                                  review.seeker.userAccount.userName[0]
-                                }${"*".repeat(
-                                  review.seeker.userAccount.userName.length - 2
-                                )}${
-                                  review.seeker.userAccount.userName[
-                                    review.seeker.userAccount.userName.length -
-                                      1
-                                  ]
-                                }`
-                              : ""}
+                            {review.anonymous
+                              ? "Người dùng ẩn danh"
+                              : review?.seeker?.userAccount?.userName
+                                ? `${review.seeker.userAccount.userName[0]}${"*".repeat(
+                                    review.seeker.userAccount.userName.length - 2
+                                  )}${
+                                    review.seeker.userAccount.userName[
+                                      review.seeker.userAccount.userName.length - 1
+                                    ]
+                                  }`
+                                : ""}
                           </span>
-                          <span className="text-sm text-gray-500">
-                            {new Date(review?.createDate).toLocaleDateString(
-                              "vi-VN",
-                              {
+                          <div className="flex items-center gap-4">
+                            <span className="text-sm text-gray-500">
+                              {new Date(review?.createDate).toLocaleDateString("vi-VN", {
                                 year: "numeric",
                                 month: "long",
                                 day: "numeric",
                                 hour: "2-digit",
-                                minute: "2-digit",
-                                second: "2-digit",
-                              }
+                                minute: "2-digit"
+                              })}
+                            </span>
+                            {review?.seeker?.userAccount?.userId === user?.userId && (
+                              <button
+                                onClick={() => handleDeleteReview(review.reviewId)}
+                                className="text-red-600 hover:text-red-800 text-sm font-medium"
+                              >
+                                Xóa
+                              </button>
                             )}
-                          </span>
+                          </div>
                         </div>
-
-                        {/* Rating */}
                         <div className="flex items-center mb-2">
                           <RatingStars
                             count={5}
                             value={review.star}
                             size={20}
                             activeColor="#ffd700"
-                            edit={false} // Disable editing for existing reviews
+                            edit={false}
                           />
                         </div>
-
-                        {/* Review Message */}
                         <p className="text-gray-700 mt-2">{review?.message}</p>
                       </div>
                     </div>
@@ -479,35 +541,62 @@ export default function CompanyProfile() {
         {checkIfSaved === true && (
           <div className="mt-5 p-6 bg-white rounded-lg shadow-lg border border-gray-300">
             <h2 className="text-xl font-semibold mb-4 text-gray-800">
-              Đánh giá của bạn
+              {hasReviewed ? "Cập nhật đánh giá của bạn" : "Đánh giá của bạn"}
             </h2>
 
-            {/* Đánh giá sao */}
-            <div className="mb-4">
-              <RatingStars
-                value={feedback.star}
-                onChange={handleRatingChange}
-                readOnly={false}
+            {/* Hiển thị đánh giá hiện tại */}
+            {hasReviewed && (
+              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-sm text-blue-600 mb-2">Đánh giá hiện tại của bạn:</p>
+                <div className="flex items-center mb-2">
+                  <RatingStars value={existingReview.star} readOnly={true} />
+                </div>
+                <p className="text-gray-600">{existingReview.message}</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  {existingReview.isAnonymous ? "(Đánh giá ẩn danh)" : ""}
+                </p>
+              </div>
+            )}
+
+            {/* Form đánh giá */}
+            <div className="space-y-4">
+              <div className="mb-4">
+                <RatingStars
+                  value={feedback.star}
+                  onChange={handleRatingChange}
+                  readOnly={false}
+                />
+              </div>
+
+              <textarea
+                placeholder="Nhập đánh giá của bạn..."
+                value={feedback.message}
+                onChange={handleReviewChange}
+                rows={4}
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="anonymous"
+                  checked={feedback.isAnonymous}
+                  onChange={(e) => setFeedback(prev => ({ ...prev, isAnonymous: e.target.checked }))}
+                  className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <label htmlFor="anonymous" className="text-sm text-gray-600">
+                  Đăng đánh giá ẩn danh
+                </label>
+              </div>
+
+              <button
+                type="button"
+                className="w-full px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onClick={handleSubmitReview}
+              >
+                {hasReviewed ? "Cập nhật đánh giá" : "Gửi đánh giá"}
+              </button>
             </div>
-
-            {/* Viết review */}
-            <textarea
-              placeholder="Nhập đánh giá ca bạn..."
-              value={feedback.message}
-              onChange={handleReviewChange}
-              rows={4}
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-
-            {/* Nút gửi */}
-            <button
-              type="button"
-              className="mt-4 px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              onClick={handleSubmitReview}
-            >
-              Gửi đánh giá
-            </button>
           </div>
         )}
 

@@ -3,10 +3,12 @@ package com.job_portal.controller;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -59,19 +61,30 @@ public class ReviewController {
 	}
 
 	@PostMapping("/create-review/{companyId}")
-	public ResponseEntity<String> createReview(
-			@RequestHeader("Authorization") String jwt,
-			@RequestBody Review req,
-			@PathVariable("companyId") UUID companyId) throws AllExceptions {
-		String email = JwtProvider.getEmailFromJwtToken(jwt);
-		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-		Optional<Seeker> seeker = seekerRepository.findById(user.get().getUserId());
-		
-		boolean isCreated = reviewService.createReview(seeker.get(),companyId, req);
-		if (isCreated) {
-			return new ResponseEntity<>("Đánh giá thành công", HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>("Đánh giá thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
+	public ResponseEntity<?> createReview(@RequestBody Review req, @PathVariable UUID companyId, @RequestHeader("Authorization") String jwt) {
+		try {
+			String email = JwtProvider.getEmailFromJwtToken(jwt);
+			Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+			Optional<Seeker> seeker = seekerRepository.findById(user.get().getUserId());
+			
+			// Set các giá trị cho review
+			Review review = new Review();
+			review.setStar(req.getStar());
+			review.setMessage(req.getMessage());
+			review.setAnonymous(req.isAnonymous());
+			review.setCreateDate(LocalDateTime.now());
+			
+			System.out.println("Is Anonymous value: " + req.isAnonymous()); // Debug log
+			
+			boolean isCreated = reviewService.createReview(seeker.get(), companyId, review);
+			if (isCreated) {
+				return new ResponseEntity<>("Đánh giá thành công", HttpStatus.CREATED);
+			} else {
+				return new ResponseEntity<>("Đánh giá thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		} catch (Exception e) {
+			e.printStackTrace(); // In ra stack trace để debug
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
@@ -99,5 +112,20 @@ public class ReviewController {
 		
 	}
 	
+	@DeleteMapping("/delete/{reviewId}")
+	public ResponseEntity<?> deleteReview(@PathVariable UUID reviewId) {
+		try {
+			boolean isDeleted = reviewService.deleteReview(reviewId);
+			if (isDeleted) {
+				return new ResponseEntity<>("Xóa đánh giá thành công", HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>("Xóa đánh giá thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		} catch (AllExceptions e) {
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+		} catch (Exception e) {
+			return new ResponseEntity<>("Có lỗi xảy ra khi xóa đánh giá", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 	
 }

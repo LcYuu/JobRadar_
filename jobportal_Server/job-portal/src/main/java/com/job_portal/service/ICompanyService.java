@@ -18,4 +18,6 @@ public interface ICompanyService {
 	public List<Company> searchCompaniesByIndustry(String industryName) throws AllExceptions;
 	public Company findCompanyById(UUID companyId) throws AllExceptions;
 	public Map<String, Object> followCompany(UUID companyId, UUID userId) throws AllExceptions;
+	public Integer getIndustryIdByCompanyId(UUID companyId);
+	
 }

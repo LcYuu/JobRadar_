@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-hot-toast";
+import { 
+  Tooltip, 
+  TooltipContent, 
+  TooltipTrigger 
+} from "../../ui/tooltip";
 import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
 import { Card } from "../../ui/card";
@@ -21,9 +28,8 @@ import {
 import logo from "../../assets/images/common/logo.jpg";
 import ApplyModal from "../../components/common/ApplyModal/ApplyModal";
 import JobCard_AllJob from "../../components/common/JobCard_AllJob/JobCard_AllJob";
-import { useDispatch, useSelector } from "react-redux";
 import { store } from "../../redux/store";
-import { getJobPostByPostId } from "../../redux/JobPost/jobPost.action";
+import { getJobPostByPostId, getSimilarJobs } from "../../redux/JobPost/jobPost.action";
 import {
   checkIfApplied,
   getOneApplyJob,
@@ -32,8 +38,11 @@ import {
 export default function JobDetail() {
   const dispatch = useDispatch();
   const { postId } = useParams();
-  const { postByPostId } = useSelector((store) => store.jobPost);
+  const { postByPostId, similarJobs } = useSelector((store) => store.jobPost);
   const { hasApplied, oneApplyJob } = useSelector((store) => store.applyJob);
+  const { user } = useSelector((store) => store.auth);
+  const navigate = useNavigate();
+
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -42,7 +51,20 @@ export default function JobDetail() {
   }, []);
 
   const [open, setOpen] = useState(false);
-  const handleOpenModal = () => setOpen(true);
+  const handleOpenModal = () => {
+    if (!user) {
+      toast.error("Vui lòng đăng nhập để ứng tuyển công việc", {
+        position: "top-center",
+        duration: 3000,
+        style: {
+          background: "#FF6B6B",
+          color: "white",
+        },
+      });
+      return;
+    }
+    setOpen(true);
+  };
   const handleClose = () => setOpen(false);
 
   useEffect(() => {
@@ -50,6 +72,19 @@ export default function JobDetail() {
     dispatch(checkIfApplied(postId));
     dispatch(getJobPostByPostId(postId));
   }, [dispatch, postId]);
+
+  useEffect(() => {
+    if (postByPostId?.company?.companyId) {
+      dispatch(getSimilarJobs(postByPostId.company.companyId, postId));
+    }
+  }, [dispatch, postByPostId, postId]);
+
+  const handleJobCardClick = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  console.log("hasApplied:", hasApplied);
+  console.log("oneApplyJob:", oneApplyJob);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -78,14 +113,22 @@ export default function JobDetail() {
                 </div>
 
                 {/* Nút Nộp đơn hoặc Cập nhật đơn */}
-                {hasApplied ? (
+                {oneApplyJob?.save ? (
+                  <Button
+                    variant="outline"
+                    className="text-green-600 border-green-600 cursor-not-allowed"
+                    disabled
+                  >
+                    Đã được duyệt
+                  </Button>
+                ) : hasApplied ? (
                   <button
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
-                    onClick={handleOpenModal} // Cho phép người dùng mở modal để cập nhật
+                    onClick={handleOpenModal}
                   >
                     Cập nhật đơn
                   </button>
-                ) : (
+                ) : user ? (
                   <Button
                     variant="default"
                     className="bg-indigo-600 hover:bg-indigo-700 text-white cursor-pointer"
@@ -93,6 +136,21 @@ export default function JobDetail() {
                   >
                     Nộp đơn
                   </Button>
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="text-gray-400 cursor-not-allowed"
+                        disabled
+                      >
+                        Nộp đơn
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Vui lòng đăng nhập để ứng tuyển</p>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
 
                 <section>
@@ -100,7 +158,7 @@ export default function JobDetail() {
                     job={postByPostId}
                     open={open}
                     handleClose={handleClose}
-                    oneApplyJob={oneApplyJob} // Truyền dữ liệu đơn đ nộp nếu có
+                    oneApplyJob={oneApplyJob}
                   />
                 </section>
               </div>
@@ -177,7 +235,6 @@ export default function JobDetail() {
                   )}
                 </ul>
               </section>
-
               {/* Benefits */}
               <section className="space-y-4">
                 <h2 className="text-lg font-semibold">Quyền lợi</h2>
@@ -194,7 +251,6 @@ export default function JobDetail() {
                   )}
                 </ul>
               </section>
-
               {/* Company Info */}
               <section className="relative w-full -mx-4 lg:-mx-8 bg-white shadow-md">
                 <div className="container mx-auto px-4 py-8">
@@ -225,55 +281,49 @@ export default function JobDetail() {
                         </p>
                       </div>
                     </div>
-
-                    {/* Company Images Right Side */}
-                    {/* <div className="lg:w-1/3 space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <img
-                          src={logo}
-                          alt="Main office"
-                          className="h-48 w-full rounded-lg object-cover"
-                        />
-                        <div className="grid grid-rows-2 gap-4">
-                          <img
-                            src={logo}
-                            alt="Team meeting"
-                            className="h-[112px] w-full rounded-lg object-cover"
-                          />
-                          <img
-                            src={logo}
-                            alt="Office workspace"
-                            className="h-[112px] w-full rounded-lg object-cover"
-                          />
-                        </div>
-                      </div> */}
-
-                    {/* Quick Stats
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <h3 className="text-sm font-semibold mb-3">Thống kê nhanh</h3>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="text-center p-3 bg-white rounded-lg">
-                            <p className="text-2xl font-bold text-indigo-600">95%</p>
-                            <p className="text-xs text-gray-500">Tỷ lệ hài lòng</p>
-                          </div>
-                          <div className="text-center p-3 bg-white rounded-lg">
-                            <p className="text-2xl font-bold text-indigo-600">4.8</p>
-                            <p className="text-xs text-gray-500">Đánh giá trung bình</p>
-                          </div>
-                          <div className="text-center p-3 bg-white rounded-lg">
-                            <p className="text-2xl font-bold text-indigo-600">200+</p>
-                            <p className="text-xs text-gray-500">Dự án đã hoàn thành</p>
-                          </div>
-                          <div className="text-center p-3 bg-white rounded-lg">
-                            <p className="text-2xl font-bold text-indigo-600">50+</p>
-                            <p className="text-xs text-gray-500">Khách hàng</p>
-                          </div>
-                        </div>
-                      </div> */}
-                    {/* </div> */}
                   </div>
                 </div>
               </section>
+
+              {/* Similar Jobs Section */}
+              {similarJobs && similarJobs.length > 0 && (
+                <section className="mt-12 bg-white rounded-lg shadow-sm p-4 w-full">
+                  <div className="mb-6 flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900">Công việc tương tự</h2>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Các công việc trong công ty {postByPostId?.company?.name}
+                      </p>
+                    </div>
+                    <Button
+                      onClick={() => {
+                        navigate(`/find-jobs`, {
+                          state: { selectedIndustryIds: [postByPostId?.company?.industryId] },
+                        });
+                      }}
+                      className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                    >
+                      Xem tất cả →
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    {similarJobs.slice(0, 4).map((job) => (
+                      <div key={job.postId} onClick={handleJobCardClick}>
+                        <JobCard_AllJob
+                          job={{
+                            ...job,
+                            company: {
+                              ...job.company,
+                              logo: job.company.logo || '/default-company-logo.png',
+                            },
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
             </div>
 
             {/* Right column (Sidebar) */}
@@ -348,11 +398,9 @@ export default function JobDetail() {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Lĩnh vực</h3>
                 <div className="flex flex-wrap gap-2">
-                  {/* {job.categories.map((category, index) => ( */}
                   <Badge variant="secondary">
                     {postByPostId?.company.industry.industryName}
                   </Badge>
-                  {/* ))} */}
                 </div>
               </div>
 
@@ -369,42 +417,6 @@ export default function JobDetail() {
             </div>
           </div>
         </div>
-
-        {/* Similar Jobs */}
-        {/* <section className="mt-12">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-bold">Công việc tương tự</h2>
-            <Link
-              to="#"
-              className="text-sm font-medium text-indigo-600 hover:underline"
-            >
-              Hiển thị tất cả
-            </Link>
-          </div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {similarJobs.map((job) => (
-              <JobCard_AllJob
-                key={job.id}
-                job={{
-                  postId: job.id,
-                  title: job.title,
-                  company: {
-                    companyName: job.company,
-                    logo: logo,
-                    industry: {
-                      industryNames: job.categories,
-                    },
-                  },
-                  city: {
-                    cityName: job.location,
-                  },
-                  typeOfWork: job.type,
-                  categories: job.categories,
-                }}
-              />
-            ))}
-          </div>
-        </section> */}
       </main>
     </div>
   );

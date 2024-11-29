@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -34,11 +35,13 @@ import com.job_portal.models.City;
 import com.job_portal.models.Company;
 import com.job_portal.models.Industry;
 import com.job_portal.models.JobPost;
+import com.job_portal.models.Review;
 import com.job_portal.models.UserAccount;
 import com.job_portal.repository.ApplyJobRepository;
 import com.job_portal.repository.CompanyRepository;
 import com.job_portal.repository.IndustryRepository;
 import com.job_portal.repository.JobPostRepository;
+import com.job_portal.repository.ReviewRepository;
 import com.job_portal.repository.UserAccountRepository;
 import com.job_portal.service.IApplyJobService;
 import com.job_portal.service.ICompanyService;
@@ -64,6 +67,9 @@ public class CompanyController {
 	private IApplyJobService applyJobService;
 	@Autowired
 	private TaxCodeValidation taxCodeValidation;
+	
+	@Autowired
+	private ReviewRepository reviewRepository;
 	
 	@GetMapping("/validate")
 	public ResponseEntity<Boolean> validateTaxCode(@RequestParam UUID companyId) {
@@ -248,6 +254,26 @@ public class CompanyController {
 	    }
 	}
 	
+	@GetMapping("/get-all-companies")
+	public ResponseEntity<Map<String, Object>> getAllCompanies(
+	    @RequestParam(defaultValue = "0") int page,
+	    @RequestParam(defaultValue = "10") int size
+	) {
+	    try {
+	        Pageable paging = PageRequest.of(page, size);
+	        Page<Company> pageCompanies = companyRepository.findAll(paging);
+	        
+	        Map<String, Object> response = new HashMap<>();
+	        response.put("companies", pageCompanies.getContent());
+	        response.put("currentPage", pageCompanies.getNumber());
+	        response.put("totalItems", pageCompanies.getTotalElements());
+	        response.put("totalPages", pageCompanies.getTotalPages());
+	        
+	        return new ResponseEntity<>(response, HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
 	
 
 }

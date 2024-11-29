@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
+import java.time.LocalDate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -30,9 +32,24 @@ public interface UserAccountRepository extends JpaRepository<UserAccount, UUID> 
 	@Query(value = "SELECT DATE(u.create_date) AS date, COUNT(u.user_id) AS count " + "FROM user_account u "
 			+ "WHERE u.create_date BETWEEN :startDate AND :endDate " + "GROUP BY DATE(u.create_date) "
 			+ "ORDER BY DATE(u.create_date)", nativeQuery = true)
-	List<Object[]> countNewAccountsPerDay(@Param("startDate") LocalDateTime startDate,
-			@Param("endDate") LocalDateTime endDate);
+	List<Object[]> countNewAccountsPerDay(@Param("startDate") LocalDate startDate,
+			@Param("endDate") LocalDate endDate);
 
 	@Query("SELECT COUNT(u) FROM UserAccount u WHERE u.createDate BETWEEN :startDate AND :endDate")
-	long countByCreatedAtBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+	long countByCreatedAtBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+	
+	@Query("SELECT COUNT(u) FROM UserAccount u WHERE DATE(u.createDate) BETWEEN :startDate AND :endDate")
+    long countByCreatedDateBetween(
+        @Param("startDate") LocalDate startDate,
+        @Param("endDate") LocalDate endDate
+    );
+
+	Page<UserAccount> findByUserNameContainingOrEmailContainingIgnoreCase(
+        String userName, String email, Pageable pageable);
+    
+    Page<UserAccount> findByUserType_UserTypeId(Integer userTypeId, Pageable pageable);
+    
+    Page<UserAccount> findByIsActive(boolean isActive, Pageable pageable);
+    
+    Page<UserAccount> findByUserType_UserTypeIdAndIsActive(Integer userTypeId, boolean isActive, Pageable pageable);
 }
