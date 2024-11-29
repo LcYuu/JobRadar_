@@ -51,18 +51,29 @@ export const countReviewByCompany = () => async (dispatch) => {
 };
 
 export const createReview = (reviewData, companyId) => async (dispatch) => {
-  dispatch({ type: CREATE_REVIEW_REQUEST });
   try {
-    const response = await api.post(`/review/create-review/${companyId}`, reviewData);
-    dispatch({
-      type: CREATE_REVIEW_SUCCESS,
-      payload: response.data,
+    console.log("Sending review data:", reviewData);
+    const response = await api.post(`/review/create-review/${companyId}`, {
+      star: reviewData.star,
+      message: reviewData.message,
+      anonymous: Boolean(reviewData.isAnonymous),
+      createDate: new Date().toISOString()
     });
+    console.log("Review response:", response.data);
     return response.data;
   } catch (error) {
-    dispatch({
-      type: CREATE_REVIEW_FAILURE,
-      payload: error.response ? error.response.data : error.message,
-    });
+    console.error("Create review error:", error);
+    throw error;
+  }
+};
+
+export const deleteReview = (reviewId) => async (dispatch) => {
+  try {
+    const response = await api.delete(`/review/delete/${reviewId}`);
+    console.log("Delete review response:", response); // Debug log
+    return response.data;
+  } catch (error) {
+    console.error("Delete review error:", error); // Debug log
+    throw error;
   }
 };

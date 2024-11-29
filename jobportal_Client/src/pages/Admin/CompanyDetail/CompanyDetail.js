@@ -24,7 +24,7 @@ import {
 import { getCompanyById, updateCompanyStatus, deleteCompany, getCompanyJobCounts ,getCompanyJobStats } from '../../../redux/Company/company.action';
 import { toast } from 'react-toastify';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "../../../ui/dialog";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
 
 export default function CompanyDetail() {
@@ -44,15 +44,47 @@ export default function CompanyDetail() {
   });
   const [activePeriod, setActivePeriod] = useState('week');
   const chartRef = useRef(null);
+  const [isChartLoading, setIsChartLoading] = useState(false);
+  const [dateError, setDateError] = useState('');
+  const [error, setError] = useState(null);
+  const [isMounted, setIsMounted] = useState(true);
 
   useEffect(() => {
     dispatch(getCompanyById(companyId));
     dispatch(getCompanyJobCounts(companyId));
+    return () => {
+      setIsMounted(false);
+    };
   }, [dispatch, companyId]);
 
   useEffect(() => {
     if (chartDateRange.startDate && chartDateRange.endDate) {
-      dispatch(getCompanyJobStats(companyId, chartDateRange.startDate, chartDateRange.endDate));
+      const start = new Date(chartDateRange.startDate);
+      const end = new Date(chartDateRange.endDate);
+      const today = new Date();
+      
+      if (start > end) {
+        setDateError('Ngày bắt đầu không thể sau ngày kết thúc');
+        return;
+      }
+
+      if (end > today) {
+        setDateError('Ngày kết thúc không thể sau ngày hiện tại');
+        return;
+      }
+
+      setDateError('');
+      setIsChartLoading(true);
+      setError(null);
+
+      dispatch(getCompanyJobStats(companyId, chartDateRange.startDate, chartDateRange.endDate))
+        .then(() => {
+          setIsChartLoading(false);
+        })
+        .catch((err) => {
+          setError(err.message || 'Có lỗi xảy ra khi tải dữ liệu');
+          setIsChartLoading(false);
+        });
     }
   }, [dispatch, companyId, chartDateRange]);
 
@@ -81,7 +113,7 @@ export default function CompanyDetail() {
       ...prev,
       [name]: value
     }));
-    scrollToChart();
+    setDateError('');
   };
 
   const handlePeriodFilter = (period) => {
@@ -370,38 +402,107 @@ export default function CompanyDetail() {
             </div>
           </div>
         </div>
+
+        {dateError && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600">
+            {dateError}
+          </div>
+        )}
+
         <div ref={chartRef} className="h-[300px]">
-          {loading ? (
-            <ChartSkeleton />
-          ) : (
+          {isChartLoading && (
+            <div className="flex items-center justify-center h-full">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            </div>
+          )}
+          
+          {error && !dateError && (
+            <div className="flex items-center justify-center h-full text-red-500">
+              {error}
+            </div>
+          )}
+          
+          {!isChartLoading && !error && !dateError && chartData.length === 0 && (
+            <div className="flex items-center justify-center h-full text-gray-500">
+              Không có dữ liệu cho khoảng thời gian này
+            </div>
+          )}
+          
+          {!isChartLoading && !error && !dateError && chartData.length > 0 && (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
+              <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis allowDecimals={false} />
-                <Tooltip 
+                <XAxis 
+                  dataKey="name"
+                  tick={{ fill: '#666' }}
+                  tickLine={{ stroke: '#666' }}
+                />
+                <YAxis 
+                  allowDecimals={false}
+                  tick={{ fill: '#666' }}
+                  tickLine={{ stroke: '#666' }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                  }}
                   formatter={(value, name) => {
                     const labels = {
-                      'Tổng tin': 'Tổng tin',
-                      'Đang tuyển': 'Đang tuyển',
-                      'Đã đóng': 'Đã đóng',
-                      'Chờ duyệt': 'Chờ duyệt'
+                      totalJobs: 'Tổng tin',
+                      activeJobs: 'Đang tuyển',
+                      closedJobs: 'Đã đóng',
+                      pendingJobs: 'Chờ duyệt'
                     };
-                    return [value, labels[name]];
+                    return [value, labels[name] || name];
                   }}
                   labelFormatter={(label, items) => {
-                    if (items && items[0] && items[0].payload) {
+                    if (items?.[0]?.payload?.fullDate) {
                       return items[0].payload.fullDate;
                     }
                     return label;
                   }}
                 />
                 <Legend />
-                <Bar dataKey="totalJobs" name="Tổng tin" fill="#818cf8" />
-                <Bar dataKey="activeJobs" name="Đang tuyển" fill="#34d399" />
-                <Bar dataKey="closedJobs" name="Đã đóng" fill="#f87171" />
-                <Bar dataKey="pendingJobs" name="Chờ duyệt" fill="#facc15" />
-              </BarChart>
+                <Line
+                  type="monotone"
+                  dataKey="totalJobs"
+                  name="Tổng tin"
+                  stroke="#818cf8"
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 6 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="activeJobs"
+                  name="Đang tuyển"
+                  stroke="#34d399"
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 6 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="closedJobs"
+                  name="Đã đóng"
+                  stroke="#f87171"
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 6 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="pendingJobs"
+                  name="Chờ duyệt"
+                  stroke="#facc15"
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
             </ResponsiveContainer>
           )}
         </div>

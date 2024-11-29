@@ -109,9 +109,10 @@ export const getActiveJobs = () => async (dispatch) => {
   }
 };
 export const getDailyStats = (startDate, endDate) => async (dispatch) => {
-  dispatch({ type: GET_DAILY_STATS_REQUEST });
   try {
-    const response = await axios.get(`${API_BASE_URL}/job-post/stats/daily`, {
+    dispatch({ type: GET_DAILY_STATS_REQUEST });
+    
+    const response = await axios.get(`${API_BASE_URL}/stats/daily`, {
       params: {
         startDate,
         endDate
@@ -123,10 +124,9 @@ export const getDailyStats = (startDate, endDate) => async (dispatch) => {
       payload: response.data
     });
   } catch (error) {
-    console.error('Error fetching daily stats:', error);
     dispatch({
       type: GET_DAILY_STATS_FAILURE,
-      payload: error.message
+      payload: error.response?.data?.message || 'Có lỗi xảy ra khi tải thống kê'
     });
   }
 };
