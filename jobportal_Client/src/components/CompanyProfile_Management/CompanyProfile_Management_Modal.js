@@ -21,7 +21,7 @@ import {
   getCompanyByJWT,
   updateCompanyProfile,
 } from "../../redux/Company/company.action";
-import { getIndustry } from "../../redux/Industry/industry.action";
+import { getAllIndustries, getIndustry } from "../../redux/Industry/industry.action";
 
 const style = {
   position: "absolute",
@@ -53,21 +53,22 @@ export default function CompanyProfileModal({ open, handleClose }) {
   const dispatch = useDispatch();
 
   const { companyJwt } = useSelector((store) => store.company);
-  const { industries } = useSelector((store) => store.industry);
+  const { allIndustries } = useSelector((store) => store.industry);
 
   useEffect(() => {
-    dispatch(getIndustry());
+    dispatch(getAllIndustries());
   }, [dispatch]);
-
-
 
   const formik = useFormik({
     initialValues: {
       logo: companyJwt?.logo || "",
       companyName: companyJwt?.companyName || "",
-      establishedTime: companyJwt?.establishedTime
-        ? new Date(companyJwt.establishedTime).toISOString().split("T")[0] // Chuyển sang định dạng YYYY-MM-DD
-        : "",
+      establishedTime:
+        companyJwt?.establishedTime &&
+        !isNaN(new Date(companyJwt?.establishedTime).getTime())
+          ? new Date(companyJwt?.establishedTime).toISOString().split("T")[0] // Chuyển sang định dạng YYYY-MM-DD
+          : "",
+
       address: companyJwt?.address || "",
       industryId: companyJwt?.industry?.industryId || "",
     },
@@ -86,6 +87,8 @@ export default function CompanyProfileModal({ open, handleClose }) {
       }
     },
   });
+
+  console.log("asdasda" + companyJwt?.establishedTime);
 
   const handleSelectImage = async (event) => {
     setIsLoading(true);
@@ -169,15 +172,16 @@ export default function CompanyProfileModal({ open, handleClose }) {
                 formik.touched.companyName && formik.errors.companyName
               }
             />
+            
             <TextField
               fullWidth
               id="establishedTime"
               name="establishedTime"
-              label="EstablishedTime"
+              label="Established Time"
               variant="outlined"
-              type="date" // Sử dụng loại date
+              type="date"
               InputLabelProps={{
-                shrink: true, // Giữ nhãn luôn thu nhỏ
+                shrink: true,
               }}
               value={formik.values.establishedTime}
               onChange={formik.handleChange}
@@ -189,6 +193,7 @@ export default function CompanyProfileModal({ open, handleClose }) {
                 formik.touched.establishedTime && formik.errors.establishedTime
               }
             />
+
             <TextField
               fullWidth
               id="address"
@@ -215,7 +220,7 @@ export default function CompanyProfileModal({ open, handleClose }) {
               helperText={formik.touched.industryId && formik.errors.industryId}
             >
               <MenuItem value="">Chọn chuyên ngành</MenuItem>
-              {industries.slice(1).map((industry) => (
+              {allIndustries?.map((industry) => (
                 <MenuItem key={industry.industryId} value={industry.industryId}>
                   {industry.industryName}
                 </MenuItem>
@@ -224,7 +229,6 @@ export default function CompanyProfileModal({ open, handleClose }) {
           </div>
         </form>
       </Box>
-      
     </Modal>
   );
 }
