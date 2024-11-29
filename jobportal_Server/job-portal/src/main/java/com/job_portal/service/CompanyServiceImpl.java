@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.job_portal.DTO.CompanyDTO;
@@ -23,6 +25,8 @@ import com.job_portal.repository.IndustryRepository;
 import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.SeekerRepository;
 import com.social.exceptions.AllExceptions;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class CompanyServiceImpl implements ICompanyService {
@@ -216,4 +220,9 @@ public class CompanyServiceImpl implements ICompanyService {
 	    seekerRepository.save(seeker);
 	    return result;
 	}
+	   public Integer getIndustryIdByCompanyId(UUID companyId) {
+	       Company company = companyRepository.findById(companyId)
+	           .orElseThrow(() -> new EntityNotFoundException("Company not found"));
+	       return company.getIndustry().getIndustryId(); // Assuming you have a method to get the industry
+	   }
 }
