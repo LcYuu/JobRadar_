@@ -38,7 +38,7 @@ public class JobPost {
     @Column(name = "expire_date", nullable = false)
     private LocalDate expireDate;
 
-    @Column(name = "title", length = 50, nullable = false)
+    @Column(name = "title", length = 100, nullable = false)
     private String title;
 
     @Column(name = "description", columnDefinition = "TEXT")

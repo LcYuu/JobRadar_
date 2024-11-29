@@ -71,13 +71,10 @@ export default function Dashboard_Employer() {
       <div className="bg-indigo-600 text-white p-6 rounded-lg mb-8 flex justify-between items-center">
         <div>
           <h2 className="text-4xl font-bold mb-2 text-white">
-            {countReview?.totalReviews}
+            {countReview?.totalReviews ?? 0}
           </h2>
           <p className="text-indigo-100">Tổng số Review</p>
         </div>
-        {/* <Button variant="outline" className="text-white border-white hover:bg-indigo-700">
-    View all →
-  </Button> */}
       </div>
 
       {/* Stats Grid */}

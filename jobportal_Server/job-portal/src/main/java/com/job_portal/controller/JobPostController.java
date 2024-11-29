@@ -364,8 +364,6 @@ public class JobPostController {
 	            job.setIndustryName(jobNode.get("industryName").asText(null)); 
 	            job.setLogo(jobNode.get("logo").asText(null)); 
 	            jobs.add(job);
-	            
-	           
 	        }
 
 	        return ResponseEntity.ok(jobs); // Trả về danh sách việc làm
