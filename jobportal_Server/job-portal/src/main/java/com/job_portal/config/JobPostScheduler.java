@@ -23,4 +23,13 @@ public class JobPostScheduler {
             e.printStackTrace();
         }
     }
+    
+    @Scheduled(cron = "0 0 0 * * ?") // Chạy lúc 12:00 AM mỗi ngày
+    public void updateExpiredJobPosts() {
+        try {
+            jobPostService.updateExpiredJobs();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

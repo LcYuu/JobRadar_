@@ -16,6 +16,7 @@ import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { ContentState, EditorState } from "draft-js";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  checkIfApplied,
   createApply,
   updateApply,
 } from "../../../redux/ApplyJob/applyJob.action";
@@ -114,7 +115,8 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
               ...formData,
               pathCV: uploadedFile, // Gán URL file đã upload vào formData
             };
-            dispatch(createApply(updatedFormData, postId));
+            await dispatch(createApply(updatedFormData, postId));
+            await dispatch(checkIfApplied(postId))
             toast.success("Ứng tuyển thành công!");
           } else {
             toast.error("Đã có lỗi khi tải lên CV");

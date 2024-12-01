@@ -59,7 +59,7 @@ public class JobPost {
     @Column(name = "requirement", columnDefinition = "MEDIUMTEXT")
     private String requirement;
 
-    @Column(name = "location", length = 200, nullable = false)
+    @Column(name = "location", columnDefinition = "TEXT")
     private String location;
 
     @Column(name = "type_of_work", length = 50, nullable = false)
