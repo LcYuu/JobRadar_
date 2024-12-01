@@ -32,9 +32,16 @@ export default function FindCompanies() {
 
   const [selectedCategoryName, setSelectedCategoryName] = useState("Tất cả công ty");
 
+  // Add new state for temporary filters
+  const [tempFilters, setTempFilters] = useState({
+    title: "",
+    cityId: "",
+    industryId: "",
+  });
+
   useEffect(() => {
     dispatch(searhCompanies(filters, currentPage, size));
-  }, [filters, currentPage, dispatch]);
+  }, [filters, currentPage, size, dispatch]);
 
   useEffect(() => {
     dispatch(getCity());
@@ -45,6 +52,12 @@ export default function FindCompanies() {
     dispatch(getAllIndustries());
   }, [dispatch]);
 
+  // Replace current filter change handlers with:
+  const handleSearch = () => {
+    setFilters(tempFilters); // Update main filters with temp values
+    setCurrentPage(0); // Reset to first page when searching
+  };
+
   const handleCategoryChange = (industryId) => {
     setSelectedCategory(industryId);
     if (industryId === null) {
@@ -53,7 +66,7 @@ export default function FindCompanies() {
       const selectedIndustry = allIndustries.find(industry => industry.industryId === industryId);
       setSelectedCategoryName(selectedIndustry?.industryName || "Tất cả công ty");
     }
-    setFilters(prev => ({
+    setTempFilters(prev => ({
       ...prev,
       industryId: industryId || ''
     }));
@@ -90,16 +103,16 @@ export default function FindCompanies() {
             <Input
               placeholder="Nhập tên công ty hoặc từ khóa mong muốn"
               className="pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500"
-              value={filters.title}
+              value={tempFilters.title}
               onChange={(e) => {
-                setFilters({ ...filters, title: e.target.value });
+                setTempFilters({ ...tempFilters, title: e.target.value });
               }}
             />
           </div>
           <div className="relative w-64">
             <Select
               onValueChange={(value) => {
-                setFilters({ ...filters, cityId: value });
+                setTempFilters({ ...tempFilters, cityId: value });
               }}
             >
               <SelectTrigger className="w-full">
@@ -117,7 +130,10 @@ export default function FindCompanies() {
             </Select>
           </div>
 
-          <Button className="bg-purple-600 text-white px-6 py-3 rounded-lg shadow hover:bg-purple-700 transition duration-200">
+          <Button 
+            className="bg-purple-600 text-white px-6 py-3 rounded-lg shadow hover:bg-purple-700 transition duration-200"
+            onClick={handleSearch}
+          >
             Tìm kiếm
           </Button>
         </div>
