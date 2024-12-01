@@ -29,7 +29,7 @@ public class SearchHistory {
 	@Column(name = "history_id")
 	private Integer historyId;
 
-	@Column(name = "search_query", nullable = false, length = 100)
+	@Column(name = "search_query", nullable = false, length = 500)
 	private String searchQuery;
 	
 	@Column(name = "search_date")

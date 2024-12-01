@@ -114,7 +114,7 @@ public class CompanyController {
 
 	@GetMapping("/get-all")
 	public ResponseEntity<List<CompanyDTO>> getAllCompanies() {
-	    List<CompanyDTO> res = companyRepository.findCompaniesWithSavedApplications();
+	    List<CompanyDTO> res = companyRepository.findCompaniesWithSavedApplications().stream().limit(6).collect(Collectors.toList());
 	    return new ResponseEntity<>(res, HttpStatus.OK);
 	}
 	
