@@ -349,7 +349,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                             className="cursor-pointer flex items-center justify-center space-x-2 text-indigo-600"
                           >
                             <LinkIcon className="h-5 w-5" />
-                            <span>Attach CV</span>
+                            <span>Đính kèm CV</span>
                           </label>
                         ) : (
                           <div className="space-y-2">
@@ -365,7 +365,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                               onClick={handleRemove}
                               className="text-sm text-red-600"
                             >
-                              Remove
+                              Xóa
                             </button>
                           </div>
                         )}
