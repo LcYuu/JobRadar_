@@ -411,11 +411,18 @@ export const createJobPost = (jobPostData) => async (dispatch) => {
           type: CREATE_JOB_SUCCESS,
           payload: response.data, // Thông báo thành công từ backend
       });
+      return {
+        success: true
+      };
   } catch (error) {
       dispatch({
           type: CREATE_JOB_FAILURE,
           payload: error.response?.data || "Lỗi khi tạo công việc",
       });
+      return {
+        success: false,
+        error: error.response?.data || "Lỗi khi tạo công việc" 
+      };
   }
 };
 export const getAllJobsForAdmin = (page, size) => async (dispatch) => {
