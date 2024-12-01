@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
@@ -15,7 +15,7 @@ import SuccessIcon from "../../components/common/Icon/Sucess/Sucess";
 import FailureIcon from "../../components/common/Icon/Failed/Failed";
 import googleIcon from "../../assets/icons/google.png";
 import logo1 from "../../assets/images/common/logo1.jpg";
-import { getProfileAction, loginAction } from "../../redux/Auth/auth.action";
+import {  loginAction } from "../../redux/Auth/auth.action";
 import { isStrongPassword } from "../../utils/passwordValidator";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import axios from "axios";
@@ -51,46 +51,35 @@ export default function SignInForm() {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
 
-  // Update handleSubmit function
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
-    setError("");
-    if (!isStrongPassword(password)) {
-      setLoginStatus("failure");
-      setIsModalOpen(true);
-      setError(
-        "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt."
-      );
-      setIsLoading(false);
-      return;
-    }
-
     try {
       const response = await dispatch(loginAction({ email, password }));
-      
+      console.log("Login response:", response);
       if (response && response.success) {
+        const user = response.user;
         setLoginStatus("success");
         setIsModalOpen(true);
-        setIsLoading(false);
-        
-        // Wait for 2 seconds then redirect
-        setTimeout(() => {
-          setIsModalOpen(false);
-          navigate("/");
-        }, 500);
+        // Redirect based on user role
+        if (user?.userType?.userTypeId === 3) { 
+          navigate('/employer/account-management/dashboard');
+      } else if (user?.userType?.userTypeId === 1) { 
+          navigate('/admin/dashboard');
+      } 
       } else {
         setLoginStatus("failure");
         setIsModalOpen(true);
         setError(response?.error || "Đăng nhập thất bại");
-        setIsLoading(false);
       }
     } catch (error) {
       setLoginStatus("failure");
       setIsModalOpen(true);
       setError("Đã xảy ra lỗi, vui lòng thử lại");
+    } finally {
       setIsLoading(false);
     }
   };

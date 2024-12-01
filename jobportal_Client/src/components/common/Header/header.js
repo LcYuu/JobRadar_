@@ -27,6 +27,12 @@ export default function Header() {
   const handleProfileClick = () => {
     navigate('user/account-management');
   };
+  const isEmployerOrAdmin = user?.userType?.userTypeId === 3 || user?.userType?.userTypeId === 1;
+
+  // Render nothing if the user is an employer or admin
+  if (isEmployerOrAdmin) {
+    return null;
+  }
 
   return (
     <header className="bg-gradient-to-r from-gray-900 to-purple-900 px-4 py-3 flex justify-between items-center">
