@@ -80,7 +80,7 @@ export default function SignInForm() {
         setTimeout(() => {
           setIsModalOpen(false);
           navigate("/");
-        }, 5000);
+        }, 500);
       } else {
         setLoginStatus("failure");
         setIsModalOpen(true);
