@@ -349,24 +349,6 @@ export default function SignUpForm() {
         </CardHeader>
         <CardContent className="p-6">
           <form className="space-y-4">
-            <Button
-              variant="outline"
-              onClick={handleGoogleSignUp}
-              className="w-full flex items-center justify-center gap-2 border border-gray-300 hover:bg-gray-50"
-            >
-              <img src={googleIcon} className="w-5 h-5" alt="Google Icon" />
-              <span>Sign Up with Google</span>
-            </Button>
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-gray-500">
-                  Or sign up with email
-                </span>
-              </div>
-            </div>
             <div className="space-y-2">
               {fields.map((field) => (
                 <Input
@@ -406,16 +388,16 @@ export default function SignUpForm() {
             </Link>
           </p>
           <p className="mt-4 text-center text-xs text-gray-500">
-            By clicking 'Đăng kí', you acknowledge that you have read and accept
-            the{" "}
+          Bằng cách nhấp vào 'Đăng ký', bạn xác nhận rằng bạn đã đọc và chấp nhận
+            {" "}
             <a href="#" className="underline text-indigo-600">
-              Terms of Service
+            Điều khoản dịch vụ
             </a>{" "}
-            and{" "}
+            và{" "}
             <a href="#" className="underline text-indigo-600">
-              Privacy Policy
+            Chính sách bảo mật
             </a>
-            .
+            {" "}của chúng tôi.
           </p>
         </CardContent>
       </Card>
