@@ -47,7 +47,6 @@ import JobDetailEmployer from './pages/JobDetailEmployer/JobDetailEmployer';
 import PostJob from './pages/PostJob/PostJob';
 
 import RoleSelection from "./pages/SignIn/RoleSelection";
-
 import CompanyDetail from './pages/Admin/CompanyDetail/CompanyDetail';
 import JobDetailAdmin from './pages/Admin/JobDetail/JobDetailAdmin';
 
