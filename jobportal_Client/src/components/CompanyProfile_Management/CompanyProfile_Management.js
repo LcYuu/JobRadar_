@@ -57,7 +57,7 @@ const CompanyProfile_Management = () => {
     imgPath: [],
   });
 
-  const [image, setImage] = useState(companyJwt?.images || []);
+  // const [image, setImage] = useState(companyJwt?.images || []);
   const [images, setImages] = useState([]); // Lưu trữ nhiều hình ảnh
 
   const handleSelectImage = (event) => {
@@ -171,11 +171,11 @@ const CompanyProfile_Management = () => {
       try {
         await dispatch(deleteImageCompany(imgId));
         dispatch(getCompanyByJWT());
-        showSuccessToast("Xóa kinh nghiệm thành công!");
+        showSuccessToast("Xóa hình ảnh thành công!");
       } catch (error) {
-        console.error("Có lỗi xảy ra khi xóa kinh nghiệm:", error);
+        console.error("Có lỗi xảy ra khi xóa hình ảnh:", error);
         showSuccessToast(
-          "Xóa kinh nghiệm thất bại. Vui lòng thử lại!",
+          "Xóa hình ảnh thất bại. Vui lòng thử lại!",
           "error"
         );
       }
@@ -387,8 +387,12 @@ const CompanyProfile_Management = () => {
               Chỉnh sửa
             </Button>
           ) : (
-            <Button onClick={() => handleSave()} variant="primary">
-              Lưu
+            <Button
+              onClick={() => handleSave()}
+              variant="primary"
+              disabled={isLoading} // Vô hiệu hóa nút khi đang lưu
+            >
+              {isLoading ? "Đang lưu..." : "Lưu"}
             </Button>
           )}
         </div>
@@ -444,6 +448,9 @@ const CompanyProfile_Management = () => {
           )}
         </div>
       </Card>
+      {showToast && (
+        <Toast message={toastMessage} onClose={() => setShowToast(false)} />
+      )}
     </div>
   );
 };

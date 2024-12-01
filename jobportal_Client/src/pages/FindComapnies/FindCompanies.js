@@ -27,7 +27,7 @@ export default function FindCompanies() {
   
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [size] = useState(6);
+  const [size] = useState(20);
   const isFilterApplied = filters.title || filters.cityId || filters.industryId;
 
   const [selectedCategoryName, setSelectedCategoryName] = useState("Tất cả công ty");

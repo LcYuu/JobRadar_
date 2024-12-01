@@ -39,20 +39,28 @@ const CandidateManagement = () => {
   const [filteredCandidates, setFilteredCandidates] = useState([]); // Kết quả sau lọc
 
   useEffect(() => {
-    dispatch(getApplyJobByCompany(currentPage, size, searchTerm, filterStatus, filterPosition));
+    dispatch(
+      getApplyJobByCompany(
+        currentPage,
+        size,
+        searchTerm,
+        filterStatus,
+        filterPosition
+      )
+    );
   }, [dispatch, currentPage, size]); // Thêm các tham số lọc vào dependency array
 
-  useEffect(() =>{
+  useEffect(() => {
     dispatch(getAllJobPost());
-  }, [dispatch])
+  }, [dispatch]);
 
   const handleUpdate = async (postId, userId) => {
     try {
       // Gọi hành động cập nhật và chờ nó thực hiện
       await dispatch(updateApprove(postId, userId));
-  
+
       toast.success("Đơn ứng tuyển đã được chấp thuận!");
-  
+
       dispatch(getApplyJobByCompany(currentPage, size));
     } catch (error) {
       // Hiển thị thông báo lỗi nếu có lỗi xảy ra
@@ -60,12 +68,20 @@ const CandidateManagement = () => {
     }
   };
   const applyFilters = () => {
-    setCurrentPage(0)
-    dispatch(getApplyJobByCompany(currentPage, size, searchTerm,filterStatus, filterPosition));
+    setCurrentPage(0);
+    dispatch(
+      getApplyJobByCompany(
+        currentPage,
+        size,
+        searchTerm,
+        filterStatus,
+        filterPosition
+      )
+    );
   };
 
-  const displayData = filteredCandidates.length > 0 ? filteredCandidates : applyJobByCompany;
-
+  const displayData =
+    filteredCandidates.length > 0 ? filteredCandidates : applyJobByCompany;
 
   // State cho phân trang
 
@@ -212,9 +228,15 @@ const CandidateManagement = () => {
                       second: "2-digit",
                     })}
                   </td>
-                  <Link to={`/employer/jobs/${candidate?.postId}`} className="border-l-indigo-950 hover:underline p-4">
-      {candidate?.title}
-    </Link>
+                  <td>
+                    <Link
+                      to={`/employer/jobs/${candidate?.postId}`}
+                      className="border-l-indigo-950 hover:underline"
+                    >
+                      {candidate?.title}
+                    </Link>
+                  </td>
+
                   <td className="p-4">
                     <div className="flex items-center gap-2">
                       <Button
@@ -244,25 +266,19 @@ const CandidateManagement = () => {
                           >
                             Xem chi tiết
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className={`hover:bg-gray-100 cursor-pointer ${
-                              candidate?.isSave
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
-                            }`}
-                            onClick={
-                              candidate?.isSave
-                                ? null
-                                : () =>
-                                    handleUpdate(
-                                      candidate?.postId,
-                                      candidate?.userId
-                                    )
-                            } // Ngăn click nếu isSave là true
-                            disabled={candidate?.isSave} // Vô hiệu hóa nếu isSave là true
-                          >
-                            Chấp thuận đơn
-                          </DropdownMenuItem>
+                          {!candidate?.isSave && (
+                            <DropdownMenuItem
+                              className="hover:bg-gray-100 cursor-pointer"
+                              onClick={() =>
+                                handleUpdate(
+                                  candidate?.postId,
+                                  candidate?.userId
+                                )
+                              }
+                            >
+                              Chấp thuận đơn
+                            </DropdownMenuItem>
+                          )}
                           {/* <DropdownMenuItem className="text-red-600 hover:bg-red-50 cursor-pointer">
                             Xóa
                           </DropdownMenuItem> */}
