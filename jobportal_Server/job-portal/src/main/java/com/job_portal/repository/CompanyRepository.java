@@ -36,6 +36,7 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 	List<Company> findTop6CompaniesByIndustryId(@Param("industryId") Integer industryId);
 
 	@Query("SELECT new com.job_portal.DTO.CompanyDTO(" + 
+				"c.companyId, " + 
 		       "c.companyName, " + 
 		       "COUNT(a.postId), " + 
 		       "c.industry.industryId, " + 
@@ -51,7 +52,7 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 		       "LEFT JOIN ApplyJob a ON jp.postId = a.jobPost.postId " + 
 		       "WHERE (a.isSave = true OR a.postId IS NULL) " + 
 		       "AND (jp.isApprove = true AND jp.expireDate >= CURRENT_DATE) " + 
-		       "GROUP BY c.companyName, " + 
+		       "GROUP BY c.companyId, c.companyName, " + 
 		       "c.industry.industryId, " + 
 		       "c.city.cityId, " + 
 		       "c.address, " + 

@@ -110,7 +110,7 @@ export default function ProfileModal({ open, handleClose }) {
               sx={{ width: "10rem", height: "10rem" }}
               src={selectedAvatar || user?.avatar}
             />
-            <div>
+            <div className="mt-3">
               <input
                 type="file"
                 accept="image/*"
@@ -120,7 +120,7 @@ export default function ProfileModal({ open, handleClose }) {
               />
               <label 
                 htmlFor="image-input"
-                className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-md cursor-pointer hover:bg-gray-50"
+                 className="p-2 bg-white rounded-full shadow-md cursor-pointer hover:bg-gray-50"
               >
                 {imageLoading ? (
                   <div className="animate-spin">⌛</div>

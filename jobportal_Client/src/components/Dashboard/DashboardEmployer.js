@@ -121,6 +121,11 @@ export default function Dashboard_Employer() {
 
         <div className="space-y-4">
           {visibleJobs.map((job) => (
+            <Link
+             key={job.postId}
+             to={`/employer/jobs/${job.postId}`}  // Dẫn tới trang chi tiết công việc
+            className="block"  // Làm cho toàn bộ Card có thể click
+           >
             <Card
               key={job.postId}
               className="p-4 bg-white shadow-lg rounded-lg"
@@ -149,6 +154,7 @@ export default function Dashboard_Employer() {
                 </div>
               </div>
             </Card>
+            </Link>
           ))}
         </div>
       </div>

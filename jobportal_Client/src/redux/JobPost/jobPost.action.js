@@ -5,24 +5,12 @@ import { api, API_BASE_URL } from "../../configs/api"
 
 
 import {
-  CREATE_COMMENT_FAILURE,
+
   GET_ALL_JOB_REQUEST,
   GET_ALL_JOB_FAILURE,
-  CREATE_COMMENT_REQUEST,
-  CREATE_COMMENT_SUCCESS,
-  CREATE_POST_FAILURE,
-  CREATE_POST_REQUEST,
-  CREATE_POST_SUCCESS,
+
   GET_ALL_JOB_SUCCESS,
-  GET_ALL_POST_FAILURE,
-  GET_ALL_POST_REQUEST,
-  GET_ALL_POST_SUCCESS,
-  GET_USERS_POST_FAILURE,
-  GET_USERS_POST_REQUEST,
-  GET_USERS_POST_SUCCESS,
-  LIKE_POST_FAILURE,
-  LIKE_POST_REQUEST,
-  LIKE_POST_SUCCESS,
+
   GET_TOP8_JOB_REQUEST,
   GET_TOP8_JOB_FAILURE,
   GET_TOP8_JOB_SUCCESS,
@@ -84,7 +72,10 @@ import {
   UPDATE_JOB_STATUS_SUCCESS,
   UPDATE_JOB_STATUS_FAILURE,
   SET_CURRENT_PAGE,
-  SET_PAGE_SIZE
+  SET_PAGE_SIZE,
+  UPDATE_JOB_EXPIRE_REQUEST,
+  UPDATE_JOB_EXPIRE_SUCCESS,
+  UPDATE_JOB_EXPIRE_FAILURE
 } from "./jobPost.actionType";
 
 // export const getAllJobActionForAdmin = (currentPage, size, filters = {}) => async (dispatch) => {
@@ -498,5 +489,20 @@ export const getSimilarJobs = (companyId, excludePostId) => async (dispatch) => 
       type: "GET_SIMILAR_JOBS_FAILURE",
       payload: error.message
     });
+  }
+};
+
+
+export const updateExpireJob = (postId) => async (dispatch) => {
+  dispatch({ type: UPDATE_JOB_EXPIRE_REQUEST });
+  try {
+    const { data } = await api.put(`job-post/set-expire/${postId}`
+    );
+    dispatch({ type: UPDATE_JOB_EXPIRE_SUCCESS, payload: data });
+    return data;
+  } catch (error) {
+    console.error("Post Update Error: ", error);
+    dispatch({ type: UPDATE_JOB_EXPIRE_FAILURE, payload: error });
+    throw error;
   }
 };

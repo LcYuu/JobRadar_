@@ -21,7 +21,6 @@ import {
   GET_TOTAL_JOBS_SUCCESS,
   GET_TOTAL_JOBS_FAILURE,
   GET_RECOMMEND_JOB_SUCCESS,
-
   GET_EMPLOYER_COMPANY_SUCCESS,
   GET_ALL_JOB_POST_SUCCESS,
   GET_JOB_COMPANY_SUCCESS,
@@ -30,15 +29,13 @@ import {
   UPDATE_JOB_SUCCESS,
   CREATE_JOB_SUCCESS,
   GET_TOP_5_LASTEST_COMPANY_SUCCESS,
-
   GET_ALL_ADMIN_JOBS_REQUEST,
   GET_ALL_ADMIN_JOBS_SUCCESS,
   GET_ALL_ADMIN_JOBS_FAILURE,
-
   GET_ALL_JOBS_REQUEST,
   GET_ALL_JOBS_SUCCESS,
   GET_ALL_JOBS_FAILURE,
-
+  UPDATE_JOB_EXPIRE_SUCCESS,
 } from "./jobPost.actionType";
 
 const initialState = {
@@ -62,7 +59,8 @@ const initialState = {
   jobs: [],
   detailJob: null,
   totalElements: 0,
-  currentPage: 0
+  currentPage: 0,
+  expireJob: null,
 };
 
 export const jobPostReducer = (state = initialState, action) => {
@@ -91,6 +89,13 @@ export const jobPostReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         detailJob: action.payload,
+        error: null,
+      };
+    case UPDATE_JOB_EXPIRE_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        expireJob: action.payload,
         error: null,
       };
     case GET_TOP8_JOB_SUCCESS:
@@ -158,7 +163,7 @@ export const jobPostReducer = (state = initialState, action) => {
       return {
         ...state,
         isLoading: false,
-        jobs: action.payload
+        jobs: action.payload,
       };
 
     case GET_RECOMMEND_JOB_SUCCESS:
@@ -271,7 +276,7 @@ export const jobPostReducer = (state = initialState, action) => {
         totalElements: action.payload.totalElements,
         currentPage: action.payload.currentPage,
         loading: false,
-        error: null
+        error: null,
       };
     case GET_ALL_ADMIN_JOBS_FAILURE:
       return { ...state, loading: false, error: action.payload };
@@ -280,7 +285,7 @@ export const jobPostReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: true,
-        error: null
+        error: null,
       };
 
     case GET_ALL_JOBS_SUCCESS:
@@ -291,7 +296,7 @@ export const jobPostReducer = (state = initialState, action) => {
         totalPages: action.payload.totalPages,
         totalElements: action.payload.totalElements,
         currentPage: action.payload.currentPage,
-        error: null
+        error: null,
       };
 
     case SEARCH_JOBS_SUCCESS:
@@ -302,7 +307,7 @@ export const jobPostReducer = (state = initialState, action) => {
         totalPages: action.payload.totalPages,
         totalElements: action.payload.totalElements,
         currentPage: action.payload.currentPage,
-        error: null
+        error: null,
       };
 
     case GET_ALL_JOBS_FAILURE:
@@ -310,26 +315,26 @@ export const jobPostReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: false,
-        error: action.payload
+        error: action.payload,
       };
 
     case "GET_SIMILAR_JOBS_REQUEST":
       return {
         ...state,
         loading: true,
-        error: null
+        error: null,
       };
     case "GET_SIMILAR_JOBS_SUCCESS":
       return {
         ...state,
         loading: false,
-        similarJobs: action.payload
+        similarJobs: action.payload,
       };
     case "GET_SIMILAR_JOBS_FAILURE":
       return {
         ...state,
         loading: false,
-        error: action.payload
+        error: action.payload,
       };
 
     default:
