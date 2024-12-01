@@ -13,6 +13,7 @@ import { store } from "../../redux/store";
 import {
   findEmployerCompany,
   findJobCompany,
+  updateExpireJob,
 } from "../../redux/JobPost/jobPost.action";
 import { validateTaxCode } from "../../redux/Company/company.action";
 import { toast, ToastContainer } from "react-toastify";
@@ -27,11 +28,12 @@ const JobManagement = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [selectedDate, setSelectedDate] = useState("Jul 19 - Jul 25");
+  // const [selectedDate, setSelectedDate] = useState("Jul 19 - Jul 25");
   const {
     jobs = [],
     totalPages,
     totalElements,
+    expireJob,
   } = useSelector((store) => store.jobPost);
 
   const { isValid, loading, error } = useSelector((store) => store.company);
@@ -42,12 +44,44 @@ const JobManagement = () => {
   const [typeOfWork, setTypeOfWork] = useState("");
   const [sortBy, setSortBy] = useState({
     createDate: "DESC",
-    expireDate: "null",
-    count: "null",
+    expireDate: "",
+    count: "",
   });
   const [filtered, setFiltered] = useState([]); // Kết quả sau lọc;
   const handleViewDetails = (postId) => {
     navigate(`/employer/jobs/${postId}`);
+  };
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState(null);
+
+  const handleOpenModal = (postId) => {
+    setSelectedJobId(postId); // Lưu postId vào state
+    setIsModalOpen(true); // Mở modal
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false); // Đóng modal
+    setSelectedJobId(null); // Reset selectedJobId
+  };
+
+  const handleConfirmExpire = async () => {
+    if (selectedJobId) {
+      dispatch(updateExpireJob(selectedJobId)); // Gọi action để đánh dấu hết hạn
+    }
+    await dispatch(
+      findEmployerCompany(
+        status,
+        typeOfWork,
+        sortBy.createDate, // Lấy giá trị từ state sortBy
+        sortBy.expireDate,
+        sortBy.count,
+        currentPage,
+        size
+      )
+    );
+    handleCloseModal(); // Đóng modal sau khi thực hiện
+    toast.success("Dừng tuyển dụng công việc thành công");
   };
 
   useEffect(() => {
@@ -98,9 +132,10 @@ const JobManagement = () => {
       // Đặt các cột còn lại thành null
       Object.keys(prevState).forEach((key) => {
         if (key !== column) {
-          newState[key] = null;
+          newState[key] = "";
         }
       });
+      setCurrentPage(0);
 
       return newState;
     });
@@ -158,6 +193,7 @@ const JobManagement = () => {
               <option value="">Tất cả trạng thái</option>
               <option value="Đang mở">Đang mở</option> {/* isSave = 1 */}
               <option value="Chưa duyệt">Chưa duyệt</option> {/* isSave = 0 */}
+              <option value="Hết hạn">Hết hạn</option> {/* isSave = 0 */}
             </select>
 
             {/* Lọc theo vị trí công việc */}
@@ -257,7 +293,39 @@ const JobManagement = () => {
                         align="end"
                         className="bg-white border border-gray-300 shadow-lg rounded-md p-2"
                       >
-                        <DropdownMenuItem>Chỉnh sửa</DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="hover:bg-gray-100 cursor-pointer"
+                          onClick={() => handleOpenModal(job.postId)}
+                        >
+                          Dừng tuyển dụng
+                        </DropdownMenuItem>
+                        {isModalOpen && (
+                          <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50">
+                            <div className="bg-white p-6 rounded-lg w-1/3">
+                              <h3 className="text-lg font-semibold">
+                                Xác nhận
+                              </h3>
+                              <p className="mt-2">
+                                Bạn có chắc chắn muốn dừng tuyển dụng công việc
+                                này?
+                              </p>
+                              <div className="mt-4 flex justify-end space-x-4">
+                                <button
+                                  onClick={handleConfirmExpire} // Xác nhận và gọi action
+                                  className="px-4 py-2 bg-green-500 text-white rounded-lg"
+                                >
+                                  Có
+                                </button>
+                                <button
+                                  onClick={handleCloseModal} // Đóng modal mà không thực hiện hành động
+                                  className="px-4 py-2 bg-red-500 text-white rounded-lg"
+                                >
+                                  Không
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                         <DropdownMenuItem
                           className="hover:bg-gray-100 cursor-pointer"
                           onClick={() => handleViewDetails(job.postId)}
@@ -325,6 +393,30 @@ const JobManagement = () => {
         autoClose={5000}
         hideProgressBar={true}
       />
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg w-1/3">
+            <h3 className="text-lg font-semibold">Xác nhận</h3>
+            <p className="mt-2">
+              Bạn có chắc chắn muốn dừng tuyển dụng công việc này?
+            </p>
+            <div className="mt-4 flex justify-end space-x-4">
+              <button
+                onClick={handleConfirmExpire} // Xác nhận và gọi action
+                className="px-4 py-2 bg-green-500 text-white rounded-lg"
+              >
+                Có
+              </button>
+              <button
+                onClick={handleCloseModal} // Đóng modal mà không thực hiện hành động
+                className="px-4 py-2 bg-red-500 text-white rounded-lg"
+              >
+                Không
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

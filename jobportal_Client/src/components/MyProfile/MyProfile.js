@@ -38,7 +38,7 @@ import SkillModal from "./SkillModal";
 import ExpModal from "./ExpModal";
 import EduModal from "./EduModal";
 import { getIndustry } from "../../redux/Industry/industry.action";
-import { formatDate, formatDateForInput } from '../../utils/dateUtils';
+import { formatDate, formatDateForInput } from "../../utils/dateUtils";
 
 export default function MyProfile() {
   const colors = [
@@ -69,7 +69,7 @@ export default function MyProfile() {
   };
 
   const dispatch = useDispatch();
-  const { industries} = useSelector(store => store.industry);
+  const { industries } = useSelector((store) => store.industry);
 
   useEffect(() => {
     dispatch(getIndustry());
@@ -126,12 +126,12 @@ export default function MyProfile() {
     gender: "",
     dateOfBirth: "",
     industryId: "",
-    background: "bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700"
+    background: "bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700",
   });
 
   const [errors, setErrors] = useState({
     emailContact: "",
-    phoneNumber: ""
+    phoneNumber: "",
   });
 
   const handleDeleteExp = async (experienceId) => {
@@ -139,10 +139,13 @@ export default function MyProfile() {
       try {
         await dispatch(deleteExperience(experienceId));
         dispatch(getExpByUser());
-        showSuccessToast('Xóa kinh nghiệm thành công!');
+        showSuccessToast("Xóa kinh nghiệm thành công!");
       } catch (error) {
         console.error("Có lỗi xảy ra khi xóa kinh nghiệm:", error);
-        showSuccessToast('Xóa kinh nghiệm thất bại. Vui lòng thử lại!', 'error');
+        showSuccessToast(
+          "Xóa kinh nghiệm thất bại. Vui lòng thử lại!",
+          "error"
+        );
       }
     }
   };
@@ -152,10 +155,10 @@ export default function MyProfile() {
       try {
         await dispatch(deleteEducation(educationId));
         dispatch(getEduByUser());
-        showSuccessToast('Xóa học vấn thành công!');
+        showSuccessToast("Xóa học vấn thành công!");
       } catch (error) {
         console.error("Có lỗi xảy ra khi xóa học vấn:", error);
-        showSuccessToast('Xóa học vấn thất bại. Vui lòng thử lại!', 'error');
+        showSuccessToast("Xóa học vấn thất bại. Vui lòng thử lại!", "error");
       }
     }
   };
@@ -170,9 +173,14 @@ export default function MyProfile() {
         gender: seeker.gender || "",
         dateOfBirth: seeker.dateOfBirth || "",
         industryId: seeker.industry ? seeker.industry.industryId : "",
-        background: seeker.background || "bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700"
+        background:
+          seeker.background ||
+          "bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700",
       });
-      setSelectedBackground(seeker.background || "bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700");
+      setSelectedBackground(
+        seeker.background ||
+          "bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700"
+      );
     }
   }, [seeker]);
 
@@ -189,14 +197,16 @@ export default function MyProfile() {
       return;
     }
     try {
-      await dispatch(updateSeekerAction({
-        ...formData,
-        background: selectedBackground
-      }));
+      await dispatch(
+        updateSeekerAction({
+          ...formData,
+          background: selectedBackground,
+        })
+      );
       setIsEditingDes(false);
       setIsEditingInfo(false);
       dispatch(getSeekerByUser());
-      showSuccessToast('Cập nhật thông tin thành công!');
+      showSuccessToast("Cập nhật thông tin thành công!");
     } catch (error) {
       console.error("Update failed: ", error);
     }
@@ -222,7 +232,7 @@ export default function MyProfile() {
       universityName: education.universityName,
       startDate: formatDateForInput(education.startDate),
       endDate: formatDateForInput(education.endDate),
-      gpa: education.gpa
+      gpa: education.gpa,
     });
     handleOpenEduModal();
   };
@@ -240,7 +250,7 @@ export default function MyProfile() {
   };
 
   const handleDeleteExperience = (experienceId) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa kinh nghiệm này?')) {
+    if (window.confirm("Bạn có chắc chắn muốn xóa kinh nghiệm này?")) {
       dispatch(deleteExperience(experienceId))
         .then(() => {
           setRefreshData(true);
@@ -252,7 +262,7 @@ export default function MyProfile() {
   };
 
   const handleDeleteEducation = (educationId) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa thông tin giáo dục này?')) {
+    if (window.confirm("Bạn có chắc chắn muốn xóa thông tin giáo dục này?")) {
       dispatch(deleteEducation(educationId))
         .then(() => {
           setRefreshData(true);
@@ -278,7 +288,7 @@ export default function MyProfile() {
   }, [openExp]);
 
   const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
+  const [toastMessage, setToastMessage] = useState("");
 
   const Toast = ({ message, onClose }) => (
     <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded shadow-lg flex items-center gap-2 animate-fade-in-down z-50">
@@ -305,7 +315,7 @@ export default function MyProfile() {
         universityName: "",
         startDate: "",
         endDate: "",
-        gpa: ""
+        gpa: "",
       });
     }
   }, [openEdu]);
@@ -313,7 +323,7 @@ export default function MyProfile() {
   const validateForm = () => {
     let tempErrors = {
       emailContact: "",
-      phoneNumber: ""
+      phoneNumber: "",
     };
     let isValid = true;
 
@@ -337,23 +347,23 @@ export default function MyProfile() {
 
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [selectedBackground, setSelectedBackground] = useState(
-    'bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700'
+    "bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700"
   );
 
   const backgroundGradients = [
-    'bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700',
-    'bg-gradient-to-r from-cyan-200 via-blue-300 to-blue-700',
-    'bg-gradient-to-r from-green-200 via-teal-300 to-teal-700',
-    'bg-gradient-to-r from-yellow-200 via-orange-300 to-orange-700',
-    'bg-gradient-to-r from-red-200 via-rose-300 to-rose-700',
+    "bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700",
+    "bg-gradient-to-r from-cyan-200 via-blue-300 to-blue-700",
+    "bg-gradient-to-r from-green-200 via-teal-300 to-teal-700",
+    "bg-gradient-to-r from-yellow-200 via-orange-300 to-orange-700",
+    "bg-gradient-to-r from-red-200 via-rose-300 to-rose-700",
   ];
 
   const handleBackgroundChange = (gradient) => {
     setSelectedBackground(gradient);
     setShowColorPicker(false);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      background: gradient
+      background: gradient,
     }));
   };
 
@@ -429,7 +439,7 @@ export default function MyProfile() {
                       value={formData.description || ""}
                       onChange={handleChange}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
+                        if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault();
                           handleSaveClick();
                         }
@@ -491,14 +501,19 @@ export default function MyProfile() {
                             size="icon"
                             variant="ghost"
                             className="hover:bg-red-100 transition-colors duration-200"
-                            onClick={() => handleDeleteExp(experience.experienceId)}
+                            onClick={() =>
+                              handleDeleteExp(experience.experienceId)
+                            }
                           >
                             <Delete className="h-4 w-4 text-red-600" />
                           </Button>
                         </div>
                       </div>
                       <p className="mt-2 text-sm text-gray-600">
-                        {formatDate(experience.startDate)} - {experience.endDate ? formatDate(experience.endDate) : "Present"}
+                        {formatDate(experience.startDate)} -{" "}
+                        {experience.endDate
+                          ? formatDate(experience.endDate)
+                          : "Present"}
                       </p>
                       <p className="mt-2 text-sm text-gray-500">
                         {experience.description}
@@ -508,7 +523,7 @@ export default function MyProfile() {
                 ))}
               </CardContent>
               <section>
-                <ExpModal 
+                <ExpModal
                   open={openExp}
                   handleClose={handleCloseExp}
                   editingExperienceId={editingExperienceId}
@@ -563,14 +578,19 @@ export default function MyProfile() {
                               size="icon"
                               variant="ghost"
                               className="hover:bg-red-100 transition-colors duration-200"
-                              onClick={() => handleDeleteEdu(education.educationId)}
+                              onClick={() =>
+                                handleDeleteEdu(education.educationId)
+                              }
                             >
                               <Delete className="h-4 w-4 text-red-600" />
                             </Button>
                           </div>
                         </div>
                         <p className="mt-2 text-sm text-gray-600">
-                          {formatDate(education.startDate)} - {education.endDate ? formatDate(education.endDate) : "Present"}
+                          {formatDate(education.startDate)} -{" "}
+                          {education.endDate
+                            ? formatDate(education.endDate)
+                            : "Present"}
                         </p>
                         <p className="mt-2 text-sm text-gray-500">
                           {education.major}
@@ -588,7 +608,7 @@ export default function MyProfile() {
                 )}
               </CardContent>
               <section>
-                <EduModal 
+                <EduModal
                   open={openEdu}
                   handleClose={handleCloseEdu}
                   editingEducationId={editingEducationId}
@@ -615,16 +635,28 @@ export default function MyProfile() {
                 </Button>
               </CardHeader>
               <CardContent>
-                {seeker.skills && Array.isArray(seeker.skills) && seeker.skills.length > 0 ? (
+                {seeker.skills &&
+                Array.isArray(seeker.skills) &&
+                seeker.skills.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {seeker.skills.map((skill, index) => (
                       <div
                         key={skill.skillId}
-                        className={`${getColorByIndex(index)} bg-opacity-15 rounded-full px-4 py-2 text-sm 
+                        className={`${getColorByIndex(
+                          index
+                        )} bg-opacity-15 rounded-full px-4 py-2 text-sm 
                           flex items-center gap-2 transition-all duration-200 hover:bg-opacity-25`}
                       >
-                        <span className={`w-2 h-2 rounded-full ${getColorByIndex(index)}`}></span>
-                        <span className={`font-medium text-${getColorByIndex(index).replace('bg-', '')}`}>
+                        <span
+                          className={`w-2 h-2 rounded-full ${getColorByIndex(
+                            index
+                          )}`}
+                        ></span>
+                        <span
+                          className={`font-medium text-${getColorByIndex(
+                            index
+                          ).replace("bg-", "")}`}
+                        >
                           {skill.skillName}
                         </span>
                       </div>
@@ -636,7 +668,9 @@ export default function MyProfile() {
                       <Plus className="h-12 w-12 mx-auto text-gray-400" />
                     </div>
                     <p className="text-sm">Chưa có kỹ năng nào được thêm</p>
-                    <p className="text-xs mt-1">Nhấn vào nút chỉnh sửa để thêm kỹ năng của bạn</p>
+                    <p className="text-xs mt-1">
+                      Nhấn vào nút chỉnh sửa để thêm kỹ năng của bạn
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -663,23 +697,32 @@ export default function MyProfile() {
               <CardContent className="space-y-4">
                 {isEditingInfo ? (
                   <div>
-                    <Label className="text-sm font-medium whitespace-nowrap">Email</Label>
+                    <Label className="text-sm font-medium whitespace-nowrap">
+                      Email
+                    </Label>
                     <input
                       name="emailContact"
                       value={formData.emailContact}
                       onChange={handleChange}
                       className={`border p-2 w-full mt-1 ${
-                        errors.emailContact ? 'border-red-500' : ''
+                        errors.emailContact ? "border-red-500" : ""
                       }`}
                     />
                     {errors.emailContact && (
-                      <p className="text-red-500 text-xs mt-1">{errors.emailContact}</p>
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.emailContact}
+                      </p>
                     )}
                   </div>
                 ) : (
                   seeker?.emailContact && (
                     <div>
-                      <Label className="text-sm font-medium whitespace-nowrap">Email</Label>
+                      <Label
+                        className="text-sm font-medium"
+                        style={{ whiteSpace: "nowrap" }}
+                      >
+                        Email
+                      </Label>
                       <div className="mt-1 flex items-center gap-2">
                         <Mail className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">{seeker.emailContact}</span>
@@ -687,26 +730,34 @@ export default function MyProfile() {
                     </div>
                   )
                 )}
-
                 {isEditingInfo ? (
-                  <div>
-                    <Label className="text-sm font-medium whitespace-nowrap">Số điện thoại</Label>
+                  <div className="mb-4">
+                    <Label
+                      className="text-sm font-medium block mb-1"
+                      style={{ whiteSpace: "nowrap" }}
+                    >
+                      Số điện thoại
+                    </Label>
                     <input
                       name="phoneNumber"
                       value={formData.phoneNumber}
                       onChange={handleChange}
-                      className={`border p-2 w-full mt-1 ${
-                        errors.phoneNumber ? 'border-red-500' : ''
+                      className={`border p-2 w-full ${
+                        errors.phoneNumber ? "border-red-500" : ""
                       }`}
                     />
                     {errors.phoneNumber && (
-                      <p className="text-red-500 text-xs mt-1">{errors.phoneNumber}</p>
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.phoneNumber}
+                      </p>
                     )}
                   </div>
                 ) : (
                   seeker?.phoneNumber && (
                     <div>
-                      <Label className="text-sm font-medium">Số điện thoại</Label>
+                      <Label className="text-sm font-medium">
+                        Số điện thoại
+                      </Label>
                       <div className="mt-1 flex items-center gap-2">
                         <Phone className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">{seeker.phoneNumber}</span>
@@ -716,13 +767,15 @@ export default function MyProfile() {
                 )}
 
                 {isEditingInfo ? (
-                  <div>
-                    <Label className="text-sm font-medium whitespace-nowrap">Giới tính</Label>
+                  <div className="mb-4">
+                    <Label className="text-sm font-medium block mb-1 whitespace-nowrap">
+                      Giới tính
+                    </Label>
                     <select
                       name="gender"
                       value={formData.gender}
                       onChange={handleChange}
-                      className="border p-2 w-full mt-1"
+                      className="border p-2 w-full"
                     >
                       <option value="">Chọn giới tính</option>
                       <option value="Nam">Nam</option>
@@ -732,7 +785,9 @@ export default function MyProfile() {
                 ) : (
                   seeker?.gender && (
                     <div>
-                      <Label className="text-sm font-medium whitespace-nowrap">Giới tính</Label>
+                      <Label className="text-sm font-medium whitespace-nowrap">
+                        Giới tính
+                      </Label>
                       <div className="mt-1 flex items-center gap-2">
                         {seeker.gender === "Nam" && (
                           <FontAwesomeIcon
@@ -751,41 +806,51 @@ export default function MyProfile() {
                     </div>
                   )
                 )}
-
                 {isEditingInfo ? (
-                  <div>
-                    <Label className="text-sm font-medium whitespace-nowrap">Ngày sinh</Label>
+                  <div className="mb-4">
+                    <Label className="text-sm font-medium block mb-1 whitespace-nowrap">
+                      Ngày sinh
+                    </Label>
                     <input
                       type="date"
                       name="dateOfBirth"
                       value={formData.dateOfBirth}
                       onChange={handleChange}
-                      className="border p-2 w-full mt-1"
+                      className="border p-2 w-full"
                     />
                   </div>
                 ) : (
                   seeker?.dateOfBirth && (
                     <div>
-                      <Label className="text-sm font-medium whitespace-nowrap">Ngày sinh</Label>
+                      <Label className="text-sm font-medium whitespace-nowrap">
+                        Ngày sinh
+                      </Label>
                       <div className="mt-1 flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{formatDate(seeker.dateOfBirth)}</span>
+                        <span className="text-sm">
+                          {formatDate(seeker.dateOfBirth)}
+                        </span>
                       </div>
                     </div>
                   )
                 )}
                 {isEditingInfo ? (
-                  <div>
-                    <Label className="text-sm font-medium whitespace-nowrap">Chuyên ngành</Label>
+                  <div className="mb-4">
+                    <Label className="text-sm font-medium block mb-1 whitespace-nowrap">
+                      Chuyên ngành
+                    </Label>
                     <select
                       name="industryId"
                       value={formData.industryId}
                       onChange={handleChange}
-                      className="border p-2 w-full mt-1"
+                      className="border p-2 w-full"
                     >
                       <option value="">Chọn chuyên ngành</option>
                       {industries.slice(1).map((industry) => (
-                        <option key={industry.industryId} value={industry.industryId}>
+                        <option
+                          key={industry.industryId}
+                          value={industry.industryId}
+                        >
                           {industry.industryName}
                         </option>
                       ))}
@@ -794,7 +859,9 @@ export default function MyProfile() {
                 ) : (
                   seeker?.industry && (
                     <div>
-                      <Label className="text-sm font-medium whitespace-nowrap">Major</Label>
+                      <Label className="text-sm font-medium whitespace-nowrap">
+                        Major
+                      </Label>
                       <div className="mt-1 flex items-center gap-2">
                         <Book className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">
@@ -849,10 +916,7 @@ export default function MyProfile() {
         </div>
       </main>
       {showToast && (
-        <Toast 
-          message={toastMessage} 
-          onClose={() => setShowToast(false)} 
-        />
+        <Toast message={toastMessage} onClose={() => setShowToast(false)} />
       )}
     </div>
   );
