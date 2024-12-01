@@ -19,6 +19,8 @@ import {
 import { Editor } from "react-draft-wysiwyg";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { EditorState, convertToRaw, ContentState } from "draft-js";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { getAllSkill } from "../../redux/Skills/skill.action";
 import { useDispatch, useSelector } from "react-redux";
 import { createJobPost } from "../../redux/JobPost/jobPost.action";
@@ -73,6 +75,11 @@ const PostJob = () => {
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedWard, setSelectedWard] = useState('');
   const [specificAddress, setSpecificAddress] = useState('');
+  const [location, setLocation] = useState({
+    province: '',
+    district: '',
+    ward: ''
+  });
 
   useEffect(() => {
     dispatch(getAllSkill());
@@ -102,7 +109,18 @@ const PostJob = () => {
         try {
           const response = await fetch(`https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`);
           const data = await response.json();
+          
+          // Store districts data
           setDistricts(data.districts);
+          
+          // Store full location string
+          const provinceName = data.name;
+          setLocation(prevLocation => ({
+            ...prevLocation,
+            province: provinceName
+          }));
+  
+          // Reset child selections
           setSelectedDistrict('');
           setSelectedWard('');
         } catch (error) {
@@ -112,14 +130,24 @@ const PostJob = () => {
     };
     fetchDistricts();
   }, [selectedProvince]);
-
+  
   useEffect(() => {
     const fetchWards = async () => {
       if (selectedDistrict) {
         try {
           const response = await fetch(`https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`);
           const data = await response.json();
+          
+          // Store wards data
           setWards(data.wards);
+          
+          // Update location with district name
+          setLocation(prevLocation => ({
+            ...prevLocation,
+            district: data.name
+          }));
+  
+          // Reset ward selection
           setSelectedWard('');
         } catch (error) {
           console.error('Error fetching wards:', error);
@@ -128,6 +156,19 @@ const PostJob = () => {
     };
     fetchWards();
   }, [selectedDistrict]);
+  
+  // Add this effect to handle ward selection
+  useEffect(() => {
+    if (selectedWard && wards.length > 0) {
+      const selectedWardData = wards.find(ward => ward.code === parseInt(selectedWard));
+      if (selectedWardData) {
+        setLocation(prevLocation => ({
+          ...prevLocation,
+          ward: selectedWardData.name
+        }));
+      }
+    }
+  }, [selectedWard, wards]);
 
   const handleAddSkill = (skill) => {
     if (skill && !jobData.skillIds.includes(skill)) {
@@ -266,51 +307,35 @@ const PostJob = () => {
     return { isValid, errors: tempErrors };
   };
 
-  const formatFullAddress = () => {
-    const province = provinces.find(p => p.code === selectedProvince)?.name || '';
-    const district = districts.find(d => d.code === selectedDistrict)?.name || '';
-    const ward = wards.find(w => w.code === selectedWard)?.name || '';
-    
-    return `${ward}, ${district}, ${province}`.replace(/^,\s+/, '');
-  };
+  
 
   // Add form validation
-  const validateForm = () => {
-    if (!selectedProvince || !selectedDistrict || !selectedWard) {
-      return false;
-    }
-    return true;
-  };
-
+  
   // Update handleSubmitJob
-  const handleSubmitJob = async () => {
+  const handleSubmitJob = async (e) => {
+    e.preventDefault();
+    
     try {
-      const province = provinces.find(p => p.code === selectedProvince)?.name || '';
-      const district = districts.find(d => d.code === selectedDistrict)?.name || '';
-      const ward = wards.find(w => w.code === selectedWard)?.name || '';
-      const formattedLocation = `${ward}, ${district}, ${province}`.replace(/^,\s+/, '').trim();
-      if (!formattedLocation) {
-        throw new Error('Địa chỉ không hợp lệ. Vui lòng kiểm tra lại.');
-      }
+      const fullAddress = specificAddress + ", " + `${location.ward}, ${location.district}, ${location.province}`;
+  
       const finalJobData = {
         ...jobData,
         cityId: parseInt(selectedProvince),
-        location: formattedLocation,
+        location: fullAddress,
       };
   
-      const response = await dispatch(createJobPost(finalJobData));
-      
-      // Log the response for debugging
-      console.log('Create Job Post Response:', response);
-
-      if (response?.payload?.status === 'success') {
+      const result = await dispatch(createJobPost(finalJobData));
+  
+      if (result.success) {
+        toast.success('Tạo tin tuyển dụng thành công!');
         setShowSuccessModal(true);
       } else {
-        throw new Error(response?.payload?.message || 'Tạo tin tuyển dụng thất bại');
+        toast.error(result.error || 'Có lỗi xảy ra');
       }
+  
     } catch (error) {
-      console.error('Error creating job post:', error);
-      alert(error.message || 'Có lỗi xảy ra khi tạo tin tuyển dụng');
+      console.error('Error:', error);
+      toast.error('Có lỗi xảy ra khi tạo tin tuyển dụng');
     }
   };
 
