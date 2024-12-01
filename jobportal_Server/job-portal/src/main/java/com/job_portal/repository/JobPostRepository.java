@@ -67,10 +67,10 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 
 	Page<JobPost> findByIsApproveTrue(Specification<JobPost> spec, Pageable pageable);
 
-	@Query("SELECT MIN(j.salary) FROM JobPost j WHERE j.isApprove = true AND j.expireDate >= CURRENT_DATE")
+	@Query("SELECT MIN(j.salary) FROM JobPost j WHERE j.isApprove = true AND j.expireDate > CURRENT_DATE")
 	Long findMinSalary();
 
-	@Query("SELECT MAX(j.salary) FROM JobPost j WHERE j.isApprove = true AND j.expireDate >= CURRENT_DATE")
+	@Query("SELECT MAX(j.salary) FROM JobPost j WHERE j.isApprove = true AND j.expireDate > CURRENT_DATE")
 	Long findMaxSalary();
 
 	default Specification<JobPost> alwaysActiveJobs() {
@@ -100,25 +100,34 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName " + "ORDER BY jp.createDate DESC")
 	List<JobWithApplicationCountDTO> findJobsByCompanyIdSortedByCreateDateDesc(@Param("companyId") UUID companyId);
 
-	@Query(value = "SELECT new com.job_portal.DTO.JobWithApplicationCountDTO("
-			+ "jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
-			+ "jp.typeOfWork, jp.createDate, jp.expireDate, " + "COUNT(a.postId), jp.status, i.industryName) "
-			+ "FROM JobPost jp " + "LEFT JOIN ApplyJob a ON jp.postId = a.postId "
-			+ "JOIN Company c ON jp.company.companyId = c.companyId "
-			+ "JOIN Industry i ON c.industry.industryId = i.industryId " + "WHERE jp.company.companyId = :companyId "
-			+ "AND jp.expireDate >= CURRENT_DATE " + "AND (:status IS NULL OR jp.status = :status) "
-			+ "AND (:typeOfWork IS NULL OR jp.typeOfWork = :typeOfWork) "
-			+ "GROUP BY jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
-			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName " + "ORDER BY "
-			+ "CASE WHEN :sortOrder LIKE 'createDate ASC' THEN jp.createDate END ASC, "
-			+ "CASE WHEN :sortOrder LIKE 'createDate DESC' THEN jp.createDate END DESC, "
-			+ "CASE WHEN :sortOrder LIKE 'expireDate ASC' THEN jp.expireDate END ASC, "
-			+ "CASE WHEN :sortOrder LIKE 'expireDate DESC' THEN jp.expireDate END DESC, "
-			+ "CASE WHEN :sortOrder LIKE 'applicationCount ASC' THEN COUNT(a.postId) END ASC, "
-			+ "CASE WHEN :sortOrder LIKE 'applicationCount DESC' THEN COUNT(a.postId) END DESC", nativeQuery = false)
-	Page<JobWithApplicationCountDTO> findJobsWithFiltersAndSorting(@Param("companyId") UUID companyId,
-			@Param("status") String status, @Param("typeOfWork") String typeOfWork,
-			@Param("sortOrder") String sortOrder, Pageable pageable);
+	@Query(value = "SELECT DISTINCT new com.job_portal.DTO.JobWithApplicationCountDTO("
+            + "jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
+            + "jp.typeOfWork, jp.createDate, jp.expireDate, "
+            + "COUNT(a.postId), jp.status, i.industryName) "
+            + "FROM JobPost jp "
+            + "LEFT JOIN ApplyJob a ON jp.postId = a.postId "
+            + "JOIN Company c ON jp.company.companyId = c.companyId "
+            + "JOIN Industry i ON c.industry.industryId = i.industryId "
+            + "WHERE jp.company.companyId = :companyId "
+            + "AND jp.expireDate >= CURRENT_DATE "
+            + "AND (:status IS NULL OR jp.status = :status) "
+            + "AND (:typeOfWork IS NULL OR jp.typeOfWork = :typeOfWork) "
+            + "GROUP BY jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
+            + "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName "
+            + "ORDER BY "
+            + "CASE WHEN :sortOrder LIKE 'createDate ASC' THEN jp.createDate END ASC, "
+            + "CASE WHEN :sortOrder LIKE 'createDate DESC' THEN jp.createDate END DESC, "
+            + "CASE WHEN :sortOrder LIKE 'expireDate ASC' THEN jp.expireDate END ASC, "
+            + "CASE WHEN :sortOrder LIKE 'expireDate DESC' THEN jp.expireDate END DESC, "
+            + "CASE WHEN :sortOrder LIKE 'applicationCount ASC' THEN COUNT(jp.postId) END ASC, "
+            + "CASE WHEN :sortOrder LIKE 'applicationCount DESC' THEN COUNT(a.postId) END DESC, "
+            + "jp.postId ASC", nativeQuery = false)
+Page<JobWithApplicationCountDTO> findJobsWithFiltersAndSorting(@Param("companyId") UUID companyId,
+        @Param("status") String status, @Param("typeOfWork") String typeOfWork,
+        @Param("sortOrder") String sortOrder, Pageable pageable);
+
+	
+	List<JobPost> findAllByExpireDateBeforeAndStatus(LocalDate date, String status);
 
 	// long countByCompanyCompanyIdAndIsApproveTrue(UUID companyId);
 
@@ -214,4 +223,6 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	    @Param("industryId") Integer industryId,
 	    @Param("excludePostId") UUID excludePostId
 	);
+	
+	 
 }
