@@ -251,70 +251,72 @@ export default function CompanyDetail() {
 
       {/* Thống kê */}
       <div className="grid grid-cols-4 gap-6 mb-6">
-        <Card className="p-6">
+        <Card className="p-6 bg-gradient-to-r from-[#3cc99c] to-[#185a9d]">
           <div className="flex items-center gap-4">
-            <FileText className="w-8 h-8 text-blue-500" />
+            <FileText className="w-8 h-8 text-white" />
             <div>
-              <p className="text-sm text-gray-600">Tổng bài đăng</p>
-              <h3 className="text-xl font-bold">{jobCounts?.totalJobs || 0}</h3>
+              <p className="text-sm text-white">Tổng bài đăng</p>
+              <h3 className="text-xl font-bold text-white">
+                {jobCounts?.totalJobs || 0}
+              </h3>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 bg-gradient-to-r from-[#FFA17F] to-[#00223E]">
           <div className="flex items-center gap-4">
-            <UserCheck className="w-8 h-8 text-green-500" />
+            <UserCheck className="w-8 h-8 text-white" />
             <div>
-              <p className="text-sm text-gray-600">Tin đang tuyển</p>
-              <h3 className="text-xl font-bold">
+              <p className="text-sm text-white">Tin đang tuyển</p>
+              <h3 className="text-xl font-bold text-white">
                 {jobCounts?.activeJobs || 0}
               </h3>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 bg-gradient-to-r from-[#649173] to-[#dbd5a4]">
           <div className="flex items-center gap-4">
-            <Clock className="w-8 h-8 text-orange-500" />
+            <Clock className="w-8 h-8 text-white" />
             <div>
-              <p className="text-sm text-gray-600">Tin đã đóng</p>
-              <h3 className="text-xl font-bold">
+              <p className="text-sm text-white">Tin đã đóng</p>
+              <h3 className="text-xl font-bold text-white">
                 {jobCounts?.closedJobs || 0}
               </h3>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 bg-gradient-to-r from-[#43cea2] to-[#185a9d]">
           <div className="flex items-center gap-4">
-            <AlertTriangle className="w-8 h-8 text-yellow-500" />
+            <AlertTriangle className="w-8 h-8 text-white" />
             <div>
-              <p className="text-sm text-gray-600">Tin chờ duyệt</p>
-              <h3 className="text-xl font-bold">
+              <p className="text-sm text-white">Tin chờ duyệt</p>
+              <h3 className="text-xl font-bold text-white">
                 {jobCounts?.pendingJobs || 0}
               </h3>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 bg-gradient-to-r from-[#606c88] to-[#3f4c6b]">
           <div className="flex items-center gap-4">
-            <Users className="w-8 h-8 text-purple-500" />
+            <Users className="w-8 h-8 text-white" />
             <div>
-              <p className="text-sm text-gray-600">Ứng viên đã ứng tuyển</p>
-              <h3 className="text-xl font-bold">
+              <p className="text-sm text-white">Ứng viên đã ứng tuyển</p>
+              <h3 className="text-xl font-bold text-white">
                 {companyProfile?.totalApplications || 0}
               </h3>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 bg-gradient-to-r from-[#fc96ce] to-[#8f215c]">
           <div className="flex items-center gap-4">
-            <Calendar className="w-8 h-8 text-orange-500" />
+            <Calendar className="w-8 h-8 text-white" />
             <div>
-              <p className="text-sm text-gray-600">Ngày tạo tài khoản</p>
-              <h3 className="text-sm font-medium">
+              <p className="text-sm text-white">Ngày tạo tài khoản</p>
+              <h3 className="text-sm font-medium text-white">
                 {new Date(
                   companyProfile?.userAccount?.createDate
                 ).toLocaleDateString("vi-VN")}
@@ -326,7 +328,7 @@ export default function CompanyDetail() {
 
       {/* Thông tin chi tiết */}
       <div className="grid grid-cols-1 gap-6">
-        <Card className="p-6">
+        <Card className="p-6 bg-white shadow-md">
           <h2 className="text-lg font-semibold mb-4">Thông tin cơ bản</h2>
           <div className="space-y-4">
             <div className="flex items-center gap-4">
@@ -396,7 +398,7 @@ export default function CompanyDetail() {
         </Card>
       </div>
 
-      <Card className="p-6 mt-6">
+      <Card className="p-6 mt-6 bg-white shadow-md">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold">Thống kê tin tuyển dụng</h2>
           <div className="flex items-center gap-4">

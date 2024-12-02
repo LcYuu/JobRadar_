@@ -5,68 +5,74 @@ import { useState } from "react";
 import ApplyModal from "../ApplyModal/ApplyModal";
 
 const typeOfWorkStyles = {
-  "Full-time": {
+  "Toàn thời gian": {
     backgroundColor: "rgba(0, 128, 0, 0.1)",
     color: "rgb(0, 128, 0)",
     border: "1px solid rgb(0, 128, 0)",
   },
-  "Part-time": {
+  "Bán thời gian": {
     backgroundColor: "rgba(255, 165, 0, 0.1)",
     color: "rgb(255, 165, 0)",
     border: "1px solid rgb(255, 165, 0)",
   },
-  Remote: {
+  "Từ xa": {
     backgroundColor: "rgba(138, 43, 226, 0.1)",
     color: "rgb(138, 43, 226)",
     border: "1px solid rgb(138, 43, 226)",
   },
-  Freelance: {
+  "Thực tập sinh": {
     backgroundColor: "rgba(0, 191, 255, 0.1)",
     color: "rgb(0, 191, 255)",
     border: "1px solid rgb(0, 191, 255)",
-  },
-  Intern: {
-    backgroundColor: "rgba(255, 69, 0, 0.1)",
-    color: "rgb(255, 69, 0)",
-    border: "1px solid rgb(255, 69, 0)",
   },
 };
 
 const industryStyles = {
   "Thiết kế": {
-    backgroundColor: "rgba(0, 128, 0, 0.1)",
-    color: "green",
-    border: "1px solid green",
+    backgroundColor: "rgba(255, 99, 71, 0.1)", // Màu đỏ san hô nhạt
+    color: "#FF6347", // Màu đỏ san hô
+    border: "1px solid #FF6347", // Viền màu đỏ san hô
   },
   "Kinh doanh": {
-    backgroundColor: "rgba(128, 0, 128, 0.1)",
-    color: "purple",
-    border: "1px solid purple",
+    backgroundColor: "rgba(138, 43, 226, 0.1)", // Màu tím nhạt
+    color: "#8A2BE2", // Màu tím
+    border: "1px solid #8A2BE2", // Viền màu tím
   },
   Marketing: {
-    backgroundColor: "rgba(255, 165, 0, 0.1)",
-    color: "orange",
-    border: "1px solid orange",
+    backgroundColor: "rgba(255, 140, 0, 0.1)", // Màu cam nhạt
+    color: "#FF8C00", // Màu cam
+    border: "1px solid #FF8C00", // Viền màu cam
   },
-  "Công nghệ": {
-    backgroundColor: "rgba(0, 0, 255, 0.1)",
-    color: "blue",
-    border: "1px solid blue",
+  "Thương mại điện tử": {
+    backgroundColor: "rgba(30, 144, 255, 0.1)", // Màu xanh dương đậm nhạt
+    color: "#1E90FF", // Màu xanh dương đậm
+    border: "1px solid #1E90FF", // Viền màu xanh dương đậm
   },
   "IT phần cứng": {
-    backgroundColor: "rgba(0, 0, 255, 0.1)",
-    color: "blue",
-    border: "1px solid blue",
+    backgroundColor: "rgba(0, 0, 255, 0.1)", // Màu xanh dương nhạt
+    color: "#0000FF", // Màu xanh dương
+    border: "1px solid #0000FF", // Viền màu xanh dương
   },
   "IT phần mềm": {
-    backgroundColor: "rgba(0, 191, 255, 0.1)",
-    color: "rgb(0, 191, 255)",
-    border: "1px solid rgb(0, 191, 255)",
+    backgroundColor: "rgba(0, 255, 255, 0.1)", // Màu xanh dương ngọc nhạt
+    color: "#00FFFF", // Màu xanh dương ngọc
+    border: "1px solid #00FFFF", // Viền màu xanh dương ngọc
   },
-  "Truyền thông": {
-    backgroundColor: "rgba(255, 69, 0, 0.1)",
-    color: "rgb(255, 69, 0)",
-    border: "1px solid rgb(255, 69, 0)",
+  "Công nghệ ô tô": {
+    backgroundColor: "rgba(255, 99, 71, 0.1)", // Màu cam đỏ nhạt
+    color: "#FF4500", // Màu cam đỏ
+    border: "1px solid #FF4500", // Viền màu cam đỏ
+  },
+  "Nhà hàng/Khách sạn": {
+    backgroundColor: "rgba(255, 105, 180, 0.1)", // Màu hồng nhạt
+    color: "#FF69B4", // Màu hồng đậm
+    border: "1px solid #FF69B4", // Viền màu hồng đậm
+  },
+
+  "Điện - điện tử": {
+    backgroundColor: "rgba(70, 130, 180, 0.1)", // Màu xanh thép nhạt
+    color: "#4682B4", // Màu xanh thép
+    border: "1px solid #4682B4", // Viền màu xanh thép
   },
 };
 
@@ -146,7 +152,7 @@ function JobCard_AllJob({ job }) {
               </div>
               <div>
                 <h3
-                  className="font-semibold text-lg group-hover:text-green-600 transition-colors duration-300" // Thay đổi màu chữ khi hover vào card
+                  className="font-semibold text-lg group-hover:text-purple-600 transition-colors duration-300" // Thay đổi màu chữ khi hover vào card
                 >
                   {job.title}
                 </h3>
@@ -204,11 +210,11 @@ function JobCard_AllJob({ job }) {
               )}
             </div>
             {/* <Button 
-              className="bg-purple-600 text-white hover:bg-purple-700 ml-2"
-              onClick={handleApplyClick}
-            >
-              Apply
-            </Button> */}
+        className="bg-purple-600 text-white hover:bg-purple-700 ml-2"
+        onClick={handleApplyClick}
+      >
+        Apply
+      </Button> */}
           </div>
         </div>
       </CardContent>

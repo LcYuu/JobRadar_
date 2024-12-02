@@ -257,7 +257,7 @@ public class CompanyController {
 	@GetMapping("/get-all-companies")
 	public ResponseEntity<Map<String, Object>> getAllCompanies(
 	    @RequestParam(defaultValue = "0") int page,
-	    @RequestParam(defaultValue = "10") int size
+	    @RequestParam(defaultValue = "5") int size
 	) {
 	    try {
 	        Pageable paging = PageRequest.of(page, size);

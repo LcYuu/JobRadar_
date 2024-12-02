@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  BrowserRouter as Router,
   Routes,
   Route,
   useLocation,
@@ -19,7 +18,7 @@ import { useEffect, useMemo } from "react";
 import { getProfileAction } from "./redux/Auth/auth.action";
 import ChangePassword from "./pages/ForgotPassword/ChangePassword";
 import MyAccount from "./pages/MyAccount/MyAccount";
-import FindCompanies from "./pages/FindComapnies/FindCompanies";
+import FindCompanies from "./pages/FindCompanies/FindCompanies";
 import CompanyProfile from "./pages/CompanyProfile/CompanyProfile";
 import { useNavigate } from "react-router-dom";
 
@@ -31,8 +30,7 @@ import FavoriteCompanies from "./components/FollowingCompanies/FollowingCompanie
 import MyProfile from "./components/MyProfile/MyProfile";
 import JobDetail from "./pages/JobDetail/JobDetail";
 import Settings from "./components/Settings/settings";
-import Banner from "./components/common/Banner/banner";
-import Background from "./components/common/Background/background";
+
 import Dashboard_Employer from "./components/Dashboard/DashboardEmployer";
 import CompanyProfile_Management from "./components/CompanyProfile_Management/CompanyProfile_Management";
 import JobManagement from "./components/JobManagement/JobManagement";
@@ -52,7 +50,7 @@ import JobDetailAdmin from "./pages/Admin/JobDetail/JobDetailAdmin";
 
 const App = () => {
   const location = useLocation();
-  const { user, jwt, isAuthenticated } = useSelector((state) => state.auth);
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 

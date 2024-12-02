@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -79,7 +80,7 @@ public class JobPostServiceImpl implements IJobPostService {
 		}
 		// Build the JobPost entity
 		JobPost jobPost = new JobPost();
-		jobPost.setCreateDate(LocalDate.now());
+		jobPost.setCreateDate(LocalDateTime.now());
 		jobPost.setExpireDate(jobPostDTO.getExpireDate());
 		jobPost.setTitle(jobPostDTO.getTitle());
 		jobPost.setDescription(jobPostDTO.getDescription());
@@ -361,7 +362,7 @@ public class JobPostServiceImpl implements IJobPostService {
 	@Override
 	public Page<JobPost> findByIsApprove(Pageable pageable) {
 		Page<JobPost> jobPost = jobPostRepository.findByIsApproveTrueAndExpireDateGreaterThanEqual(pageable,
-				LocalDate.now());
+				LocalDateTime.now());
 		return jobPost;
 
 	}
@@ -432,7 +433,7 @@ public class JobPostServiceImpl implements IJobPostService {
 	@Override
 	public Map<String, Long> countAllJobsByCompany(UUID companyId) {
 		Map<String, Long> jobCounts = new HashMap<>();
-		LocalDate now = LocalDate.now();
+		LocalDateTime now = LocalDateTime.now();
 
 		// Đếm tổng số công việc
 		long totalJobs = jobPostRepository.countByCompanyCompanyId(companyId);
@@ -499,5 +500,16 @@ public class JobPostServiceImpl implements IJobPostService {
 
 		// Lưu các thay đổi vào cơ sở dữ liệu
 		jobPostRepository.saveAll(expiredJobs);
+	}
+
+	@Override
+	public boolean canPostJob(UUID companyId) {
+		Optional<JobPost> latestJob = jobPostRepository.findTopByCompanyCompanyIdOrderByCreateDateDesc(companyId);
+		if (latestJob.isPresent()) {
+			LocalDateTime now = LocalDateTime.now();
+			LocalDateTime lastPosted = latestJob.get().getCreateDate();
+			return Duration.between(lastPosted, now).toHours() >= 1;
+		}
+		return true; // Nếu chưa có bài đăng nào, cho phép tạo bài
 	}
 }

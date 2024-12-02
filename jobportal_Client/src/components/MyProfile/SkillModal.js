@@ -1,6 +1,6 @@
 import { Button, Modal } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import {  IconButton } from "@mui/material";
+import { IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllSkill } from "../../redux/Skills/skill.action";
@@ -16,7 +16,6 @@ const SkillModal = ({ open, handleClose }) => {
   const { seeker } = useSelector((store) => store.seeker);
   const [selectedSkills, setSelectedSkills] = useState(seeker.skills || []);
   const [isLoading, setIsLoading] = useState(false);
-
 
   useEffect(() => {
     if (open && seeker.skills) {
@@ -50,20 +49,16 @@ const SkillModal = ({ open, handleClose }) => {
   console.log("Selected skills:", selectedSkills); // Kiểm tra danh sách skill đã chọn
 
   return (
-    <Modal 
-      open={open} 
-      onClose={handleClose}
-      className="animate-fadeIn"
-    >
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-xl shadow-2xl p-6">
+    <Modal open={open} onClose={handleClose} className="animate-fadeIn">
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-xl shadow-xl p-6">
         <div className="flex items-center justify-between border-b pb-4 mb-4">
-          <h2 className="text-xl font-semibold">Select Skills</h2>
+          <h2 className="text-xl mt-5 font-semibold text-gray-800">Chọn kĩ năng</h2>
           <IconButton onClick={handleClose} className="hover:bg-gray-100">
             <CloseIcon />
           </IconButton>
         </div>
 
-        <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto custom-scrollbar">
+        <div className="flex flex-col gap-3 max-h-[400px] overflow-y-auto custom-scrollbar">
           {skills.map((skill) => (
             <div
               key={skill.skillId}
@@ -77,7 +72,8 @@ const SkillModal = ({ open, handleClose }) => {
                   const update = checked
                     ? [...selectedSkills, skill]
                     : selectedSkills.filter(
-                        (selectedSkill) => selectedSkill.skillId !== skill.skillId
+                        (selectedSkill) =>
+                          selectedSkill.skillId !== skill.skillId
                       );
                   setSelectedSkills(update);
                 }}
@@ -92,17 +88,36 @@ const SkillModal = ({ open, handleClose }) => {
           <Button
             variant="outlined"
             onClick={handleClose}
-            className="hover:bg-gray-50"
+            sx={{
+              color: "#8B5CF6", // Màu chữ tím
+              borderColor: "#8B5CF6", // Màu viền tím
+              "&:hover": {
+                backgroundColor: "#E0D9F9", // Màu nền khi hover
+                borderColor: "#7C3AED", // Màu viền đậm khi hover
+              },
+            }}
           >
             Cancel
           </Button>
           <Button
             variant="contained"
             onClick={handleSaveSkills}
-            className="bg-blue-600 hover:bg-blue-700"
+            sx={{
+              backgroundColor: "#8B5CF6", // Màu tím
+              "&:hover": {
+                backgroundColor: "#7C3AED", // Màu tím đậm khi hover
+              },
+            }}
             disabled={isLoading}
           >
-            {isLoading ? 'Saving...' : 'Save Changes'}
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <span className="animate-spin">⏳</span>
+                <span>Saving...</span>
+              </div>
+            ) : (
+              "Save Changes"
+            )}
           </Button>
         </div>
       </div>

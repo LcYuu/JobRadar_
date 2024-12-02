@@ -10,7 +10,7 @@ import {
   UPDATE_USER_STATUS_FAILURE,
   GET_USER_TYPES_REQUEST,
   GET_USER_TYPES_SUCCESS,
-  GET_USER_TYPES_FAILURE,
+  // GET_USER_TYPES_FAILURE,
 } from "./user.actionType";
 
 const initialState = {

@@ -1,41 +1,97 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Button } from "../../../ui/button";
-import { MoreVertical, Filter, Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import { getAllCompaniesForAdmin } from '../../../redux/Company/company.action';
-import { getAllIndustries } from '../../../redux/Industry/industry.action';
+import {
+  MoreVertical,
+  Filter,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { getAllCompaniesForAdmin } from "../../../redux/Company/company.action";
+import { getAllIndustries } from "../../../redux/Industry/industry.action";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../ui/dropdown-menu";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 const formatDate = (dateString) => {
-  if (!dateString) return 'N/A';
+  if (!dateString) return "N/A";
   try {
     const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'N/A';
-    
-    return new Intl.DateTimeFormat('vi-VN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
+    if (isNaN(date.getTime())) return "N/A";
+
+    return new Intl.DateTimeFormat("vi-VN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
     }).format(date);
   } catch (error) {
-    return 'N/A';
+    return "N/A";
   }
 };
 
 export default function CompanyList() {
+  const industryStyles = {
+    "Thiết kế": {
+      backgroundColor: "rgba(255, 99, 71, 0.1)", // Màu đỏ san hô nhạt
+      color: "#FF6347", // Màu đỏ san hô
+      border: "1px solid #FF6347", // Viền màu đỏ san hô
+    },
+    "Kinh doanh": {
+      backgroundColor: "rgba(138, 43, 226, 0.1)", // Màu tím nhạt
+      color: "#8A2BE2", // Màu tím
+      border: "1px solid #8A2BE2", // Viền màu tím
+    },
+    "Marketing": {
+      backgroundColor: "rgba(255, 140, 0, 0.1)", // Màu cam nhạt
+      color: "#FF8C00", // Màu cam
+      border: "1px solid #FF8C00", // Viền màu cam
+    },
+    "Thương mại điện tử": {
+      backgroundColor: "rgba(30, 144, 255, 0.1)", // Màu xanh dương đậm nhạt
+      color: "#1E90FF", // Màu xanh dương đậm
+      border: "1px solid #1E90FF", // Viền màu xanh dương đậm
+    },
+    "IT phần cứng": {
+      backgroundColor: "rgba(0, 0, 255, 0.1)", // Màu xanh dương nhạt
+      color: "#0000FF", // Màu xanh dương
+      border: "1px solid #0000FF", // Viền màu xanh dương
+    },
+    "IT phần mềm": {
+      backgroundColor: "rgba(0, 255, 255, 0.1)", // Màu xanh dương ngọc nhạt
+      color: "#00FFFF", // Màu xanh dương ngọc
+      border: "1px solid #00FFFF", // Viền màu xanh dương ngọc
+    },
+    "Công nghệ ô tô": {
+      backgroundColor: "rgba(255, 99, 71, 0.1)", // Màu cam đỏ nhạt
+      color: "#FF4500", // Màu cam đỏ
+      border: "1px solid #FF4500", // Viền màu cam đỏ
+    },
+    "Nhà hàng/Khách sạn": {
+      backgroundColor: "rgba(255, 105, 180, 0.1)", // Màu hồng nhạt
+      color: "#FF69B4", // Màu hồng đậm
+      border: "1px solid #FF69B4", // Viền màu hồng đậm
+    },
+
+    "Điện - điện tử": {
+      backgroundColor: "rgba(70, 130, 180, 0.1)", // Màu xanh thép nhạt
+      color: "#4682B4", // Màu xanh thép
+      border: "1px solid #4682B4", // Viền màu xanh thép
+    },
+  };
   const dispatch = useDispatch();
-  const { companies, loading, totalItems, totalPages } = useSelector((state) => state.company);
+  const { companies, loading, totalItems, totalPages } = useSelector(
+    (state) => state.company
+  );
   const { allIndustries } = useSelector((state) => state.industry);
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(5);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedIndustry, setSelectedIndustry] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedIndustry, setSelectedIndustry] = useState("all");
   const navigate = useNavigate();
 
   // Thêm state cho filtered companies
@@ -49,20 +105,24 @@ export default function CompanyList() {
   // Xử lý tìm kiếm và lọc
   useEffect(() => {
     let result = [...companies];
-    
+
     // Tìm kiếm
     if (searchTerm) {
-      result = result.filter(company => 
-        company.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        company.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        company.contact.toLowerCase().includes(searchTerm.toLowerCase())
+      result = result.filter(
+        (company) =>
+          company.companyName
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          company.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          company.contact.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     // Lọc theo ngành
-    if (selectedIndustry !== 'all') {
-      result = result.filter(company => 
-        company.industry?.industryId.toString() === selectedIndustry
+    if (selectedIndustry !== "all") {
+      result = result.filter(
+        (company) =>
+          company.industry?.industryId.toString() === selectedIndustry
       );
     }
 
@@ -81,19 +141,20 @@ export default function CompanyList() {
 
   // Function to get industry name by ID
   const getIndustryName = (industryId) => {
-    if (!allIndustries || !industryId) return 'N/A';
-    const industry = allIndustries.find(ind => ind.industryId === industryId);
-    return industry ? industry.industryName : 'N/A';
+    if (!allIndustries || !industryId) return "N/A";
+    const industry = allIndustries.find((ind) => ind.industryId === industryId);
+    return industry ? industry.industryName : "N/A";
   };
 
   const handlePageChange = (newPage) => {
-    dispatch(getAllCompaniesForAdmin(newPage, pageSize));
+    if (newPage >= 0 && newPage < totalPages) {
+      setCurrentPage(newPage);
+    }
   };
 
-  const handlePageSizeChange = (event) => {
-    const newSize = Number(event.target.value);
-    setPageSize(newSize);
-    dispatch(getAllCompaniesForAdmin(0, newSize));
+  const handlePageSizeChange = (e) => {
+    setPageSize(Number(e.target.value));
+    setCurrentPage(0); // Reset về trang đầu khi thay đổi số lượng bản ghi mỗi trang
   };
 
   return (
@@ -117,7 +178,10 @@ export default function CompanyList() {
           >
             <option value="all">Tất cả lĩnh vực</option>
             {allIndustries?.map((industry) => (
-              <option key={industry.industryId} value={industry.industryId.toString()}>
+              <option
+                key={industry.industryId}
+                value={industry.industryId.toString()}
+              >
                 {industry.industryName}
               </option>
             ))}
@@ -133,20 +197,32 @@ export default function CompanyList() {
         </div>
 
         <table className="w-full">
-          <thead className="bg-gray-50">
+          <thead className="bg-purple-600 text-white">
             <tr>
-              <th className="text-left p-4 text-sm font-medium text-gray-500">Tên công ty</th>
-              <th className="text-left p-4 text-sm font-medium text-gray-500">Địa chỉ</th>
-              <th className="text-left p-4 text-sm font-medium text-gray-500">Lĩnh vực</th>
-              <th className="text-left p-4 text-sm font-medium text-gray-500">Ngày thành lập</th>
-              <th className="text-left p-4 text-sm font-medium text-gray-500">Số điện thoại</th>
+              <th className="text-left p-4 text-sm font-medium text-white">
+                Tên công ty
+              </th>
+              <th className="text-left p-4 text-sm font-medium text-white">
+                Địa chỉ
+              </th>
+              <th className="text-left p-4 text-sm font-medium text-white">
+                Lĩnh vực
+              </th>
+              <th className="text-left p-4 text-sm font-medium text-white">
+                Ngày thành lập
+              </th>
+              <th className="text-left p-4 text-sm font-medium text-white">
+                Số điện thoại
+              </th>
               <th className="w-20"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {loading ? (
               <tr>
-                <td colSpan="6" className="text-center py-4">Đang tải...</td>
+                <td colSpan="6" className="text-center py-4">
+                  Đang tải...
+                </td>
               </tr>
             ) : (
               filteredCompanies.map((company) => (
@@ -154,7 +230,7 @@ export default function CompanyList() {
                   <td className="p-4">
                     <div className="flex items-center">
                       <img
-                        src={company.logo || '/default-logo.png'}
+                        src={company.logo || "/default-logo.png"}
                         alt=""
                         className="h-10 w-10 rounded-full mr-3"
                       />
@@ -163,11 +239,20 @@ export default function CompanyList() {
                   </td>
                   <td className="p-4 text-gray-500">{company.address}</td>
                   <td className="p-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium`}
+                      style={{
+                        backgroundColor: industryStyles[getIndustryName(company.industry?.industryId)]?.backgroundColor,
+                        color: industryStyles[getIndustryName(company.industry?.industryId)]?.color,
+                        border: industryStyles[getIndustryName(company.industry?.industryId)]?.border,
+                      }}
+                    >
                       {getIndustryName(company.industry?.industryId)}
                     </span>
                   </td>
-                  <td className="p-4 text-gray-500">{formatDate(company.establishedTime)}</td>
+                  <td className="p-4 text-gray-500">
+                    {formatDate(company.establishedTime)}
+                  </td>
                   <td className="p-4 text-gray-500">{company.contact}</td>
                   <td className="p-4">
                     <DropdownMenu>
@@ -177,11 +262,17 @@ export default function CompanyList() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => navigate(`/admin/companies/${company.companyId}`)}>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            navigate(`/admin/companies/${company.companyId}`)
+                          }
+                        >
                           Chi tiết
                         </DropdownMenuItem>
                         <DropdownMenuItem>Chỉnh sửa</DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">Xóa</DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600">
+                          Xóa
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </td>
@@ -191,97 +282,46 @@ export default function CompanyList() {
           </tbody>
         </table>
 
-        <div className="mt-6 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
-          <div className="flex flex-1 justify-between sm:hidden">
-            <Button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 0}
-              className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        <div className="p-4 border-t flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span>Hiển thị</span>
+            <select
+              className="border rounded p-1"
+              value={pageSize}
+              onChange={handlePageSizeChange}
             >
-              Trước
-            </Button>
-            <Button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage >= totalPages - 1}
-              className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Sau
-            </Button>
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+            </select>
+            <span>ứng viên mỗi trang</span>
           </div>
-          
-          <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-700">Hiển thị</span>
-              <select
-                value={pageSize}
-                onChange={handlePageSizeChange}
-                className="border rounded px-2 py-1 text-sm"
-              >
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-              </select>
-              <span className="text-sm text-gray-700">bản ghi mỗi trang</span>
-            </div>
-            
-            <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm">
-              <Button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 0}
-                className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
-              >
-                <span className="sr-only">Trang trước</span>
-                <ChevronLeft className="h-5 w-5" />
-              </Button>
-              
-              {[...Array(totalPages)].map((_, index) => {
-                if (
-                  index === 0 ||
-                  index === totalPages - 1 ||
-                  (index >= currentPage - 1 && index <= currentPage + 1)
-                ) {
-                  return (
-                    <Button
-                      key={index}
-                      onClick={() => handlePageChange(index)}
-                      className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
-                        currentPage === index
-                          ? 'z-10 bg-indigo-600 text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-                          : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
-                      }`}
-                    >
-                      {index + 1}
-                    </Button>
-                  );
-                } else if (
-                  (index === currentPage - 2 && currentPage > 2) ||
-                  (index === currentPage + 2 && currentPage < totalPages - 3)
-                ) {
-                  return (
-                    <span
-                      key={index}
-                      className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-inset ring-gray-300 focus:outline-offset-0"
-                    >
-                      ...
-                    </span>
-                  );
-                }
-                return null;
-              })}
 
-              <Button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage >= totalPages - 1}
-                className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
-              >
-                <span className="sr-only">Trang sau</span>
-                <ChevronRight className="h-5 w-5" />
-              </Button>
-            </nav>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              disabled={currentPage === 0}
+              onClick={() => handlePageChange(currentPage - 1)}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              className="bg-indigo-600 text-white"
+              onClick={() => handlePageChange(currentPage)}
+            >
+              {currentPage + 1}
+            </Button>
+            <Button
+              variant="outline"
+              disabled={currentPage === totalPages - 1}
+              onClick={() => handlePageChange(currentPage + 1)}
+            >
+              Next
+            </Button>
           </div>
         </div>
       </div>
     </div>
   );
-} 
+}

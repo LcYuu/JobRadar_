@@ -17,6 +17,7 @@ import {
 } from "../../redux/JobPost/jobPost.action";
 import { validateTaxCode } from "../../redux/Company/company.action";
 import { toast, ToastContainer } from "react-toastify";
+import Swal from "sweetalert2";
 
 const JobManagement = () => {
   const work = [
@@ -58,6 +59,24 @@ const JobManagement = () => {
   const handleOpenModal = (postId) => {
     setSelectedJobId(postId); // Lưu postId vào state
     setIsModalOpen(true); // Mở modal
+  };
+
+  const handleOpenExpireConfirmation = () => {
+    Swal.fire({
+      title: 'Xác nhận',
+      text: 'Bạn có chắc chắn muốn dừng tuyển dụng công việc này?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#28a745', // Màu nút "Có"
+      cancelButtonColor: '#dc3545', // Màu nút "Không"
+      confirmButtonText: 'Có',
+      cancelButtonText: 'Không',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Nếu người dùng xác nhận
+        handleConfirmExpire(); // Thực hiện hành động dừng tuyển dụng
+      }
+    });
   };
 
   const handleCloseModal = () => {
@@ -298,7 +317,7 @@ const JobManagement = () => {
                       >
                         <DropdownMenuItem
                           className="hover:bg-gray-100 cursor-pointer"
-                          onClick={() => handleOpenModal(job.postId)}
+                          onClick={handleOpenExpireConfirmation}
                         >
                           Dừng tuyển dụng
                         </DropdownMenuItem>
@@ -396,7 +415,7 @@ const JobManagement = () => {
         autoClose={5000}
         hideProgressBar={true}
       />
-      {isModalOpen && (
+      {/* {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50">
           <div className="bg-white p-6 rounded-lg w-1/3">
             <h3 className="text-lg font-semibold">Xác nhận</h3>
@@ -419,7 +438,7 @@ const JobManagement = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

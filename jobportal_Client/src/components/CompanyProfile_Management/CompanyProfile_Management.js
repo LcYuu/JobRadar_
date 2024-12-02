@@ -30,6 +30,7 @@ import {
   deleteImageCompany,
 } from "../../redux/ImageCompany/imageCompany.action";
 import { Avatar } from "@mui/material";
+import Swal from "sweetalert2";
 
 const CompanyProfile_Management = () => {
   const dispatch = useDispatch();
@@ -167,17 +168,27 @@ const CompanyProfile_Management = () => {
 
   const removeImage = async (imgId) => {
     console.log(imgId);
-    if (window.confirm("Bạn có chắc chắn muốn xóa hình ảnh này?")) {
+
+    // Sử dụng swal thay vì window.confirm
+    const result = await Swal.fire({
+      title: "Bạn có chắc chắn muốn xóa hình ảnh này?",
+      text: "Hành động này không thể hoàn tác!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+    });
+
+    if (result.isConfirmed) {
       try {
         await dispatch(deleteImageCompany(imgId));
         dispatch(getCompanyByJWT());
         showSuccessToast("Xóa hình ảnh thành công!");
       } catch (error) {
         console.error("Có lỗi xảy ra khi xóa hình ảnh:", error);
-        showSuccessToast(
-          "Xóa hình ảnh thất bại. Vui lòng thử lại!",
-          "error"
-        );
+        showSuccessToast("Xóa hình ảnh thất bại. Vui lòng thử lại!", "error");
       }
     }
   };
