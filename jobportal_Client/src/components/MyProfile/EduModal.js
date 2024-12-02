@@ -14,7 +14,7 @@ import {
   getEduByUser,
   updateEducation,
 } from "../../redux/Education/edu.action";
-import { formatDateForInput } from '../../utils/dateUtils';
+import { formatDateForInput } from "../../utils/dateUtils";
 
 const style = {
   position: "absolute",
@@ -33,7 +33,14 @@ const style = {
   border: "none",
 };
 
-export default function EduModal({ open, handleClose, editingEducationId, setEditingEducationId, initialData, showSuccessToast }) {
+export default function EduModal({
+  open,
+  handleClose,
+  editingEducationId,
+  setEditingEducationId,
+  initialData,
+  showSuccessToast,
+}) {
   const validationSchema = Yup.object({
     certificateDegreeName: Yup.string().required("Bằng cấp là bắt buộc."),
     major: Yup.string().required("Chuyên ngành là bắt buộc."),
@@ -59,7 +66,9 @@ export default function EduModal({ open, handleClose, editingEducationId, setEdi
   // Formik initialization
   const formik = useFormik({
     initialValues: {
-      certificateDegreeName: editingEducationId ? initialData.certificateDegreeName : "",
+      certificateDegreeName: editingEducationId
+        ? initialData.certificateDegreeName
+        : "",
       major: editingEducationId ? initialData.major : "",
       universityName: editingEducationId ? initialData.universityName : "",
       startDate: editingEducationId ? initialData.startDate : "",
@@ -74,10 +83,10 @@ export default function EduModal({ open, handleClose, editingEducationId, setEdi
         if (editingEducationId) {
           await dispatch(updateEducation(editingEducationId, values));
           setEditingEducationId(null);
-          showSuccessToast('Cập nhật học vấn thành công!');
+          showSuccessToast("Cập nhật học vấn thành công!");
         } else {
           await dispatch(createEducation(values));
-          showSuccessToast('Cập nhật học vấn thành công!');
+          showSuccessToast("Cập nhật học vấn thành công!");
         }
         handleClose();
         dispatch(getEduByUser()); // Refresh the education list
@@ -90,11 +99,7 @@ export default function EduModal({ open, handleClose, editingEducationId, setEdi
   });
 
   return (
-    <Modal
-      open={open}
-      onClose={handleClose}
-      className="animate-fadeIn"
-    >
+    <Modal open={open} onClose={handleClose} className="animate-fadeIn">
       <Box sx={style}>
         <form onSubmit={formik.handleSubmit} className="space-y-6">
           <div className="flex items-center justify-between border-b pb-4">
@@ -102,18 +107,18 @@ export default function EduModal({ open, handleClose, editingEducationId, setEdi
               <IconButton onClick={handleClose} className="hover:bg-gray-100">
                 <CloseIcon />
               </IconButton>
-              <h2 className="text-xl font-semibold">
-                {editingEducationId ? 'Edit Education' : 'Add Education'}
+              <h2 className="text-xl mt-6 font-semibold">
+                {editingEducationId ? "Chỉnh sửa học vấn" : "Tạo học vấn"}
               </h2>
             </div>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               variant="contained"
               disabled={isLoading}
               sx={{
-                backgroundColor: '#2563eb',
-                '&:hover': {
-                  backgroundColor: '#1d4ed8',
+                backgroundColor: "#8B5CF6", // Màu tím
+                "&:hover": {
+                  backgroundColor: "#7C3AED", // Màu tím đậm khi hover
                 },
               }}
             >
@@ -122,7 +127,11 @@ export default function EduModal({ open, handleClose, editingEducationId, setEdi
                   <span className="animate-spin">⏳</span>
                   <span>Saving...</span>
                 </div>
-              ) : editingEducationId ? 'Update' : 'Create'}
+              ) : editingEducationId ? (
+                "Update"
+              ) : (
+                "Create"
+              )}
             </Button>
           </div>
 
@@ -132,14 +141,16 @@ export default function EduModal({ open, handleClose, editingEducationId, setEdi
               fullWidth
               id="startDate"
               name="startDate"
-              InputLabelProps={{ 
+              InputLabelProps={{
                 shrink: true,
-                className: "font-semibold"
+                className: "font-semibold",
               }}
               label="Start Date"
               value={formik.values.startDate}
               onChange={formik.handleChange}
-              error={formik.touched.startDate && Boolean(formik.errors.startDate)}
+              error={
+                formik.touched.startDate && Boolean(formik.errors.startDate)
+              }
               helperText={formik.touched.startDate && formik.errors.startDate}
               className="bg-white rounded-lg"
             />
@@ -148,9 +159,9 @@ export default function EduModal({ open, handleClose, editingEducationId, setEdi
               fullWidth
               id="endDate"
               name="endDate"
-              InputLabelProps={{ 
+              InputLabelProps={{
                 shrink: true,
-                className: "font-semibold"
+                className: "font-semibold",
               }}
               label="End Date"
               value={formik.values.endDate}
@@ -169,8 +180,14 @@ export default function EduModal({ open, handleClose, editingEducationId, setEdi
               label="Certificate/Degree Name"
               value={formik.values.certificateDegreeName}
               onChange={formik.handleChange}
-              error={formik.touched.certificateDegreeName && Boolean(formik.errors.certificateDegreeName)}
-              helperText={formik.touched.certificateDegreeName && formik.errors.certificateDegreeName}
+              error={
+                formik.touched.certificateDegreeName &&
+                Boolean(formik.errors.certificateDegreeName)
+              }
+              helperText={
+                formik.touched.certificateDegreeName &&
+                formik.errors.certificateDegreeName
+              }
               className="bg-white rounded-lg"
             />
             <TextField
@@ -191,8 +208,13 @@ export default function EduModal({ open, handleClose, editingEducationId, setEdi
               label="Organization Name"
               value={formik.values.universityName}
               onChange={formik.handleChange}
-              error={formik.touched.universityName && Boolean(formik.errors.universityName)}
-              helperText={formik.touched.universityName && formik.errors.universityName}
+              error={
+                formik.touched.universityName &&
+                Boolean(formik.errors.universityName)
+              }
+              helperText={
+                formik.touched.universityName && formik.errors.universityName
+              }
               className="bg-white rounded-lg"
             />
             <TextField

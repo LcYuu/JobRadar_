@@ -8,11 +8,8 @@ import {
   Clock,
   MapPin,
   DollarSign,
-  Users,
   CheckCircle2,
-  Building,
   Calendar,
-  Eye,
   User,
   Hourglass,
   Edit,
@@ -21,7 +18,7 @@ import {
   getDetailJobById,
   updateJob,
 } from "../../redux/JobPost/jobPost.action";
-import { store } from "../../redux/store";
+// import { store } from "../../redux/store";
 import SkillJobPostModal from "./SkillJobPostModal";
 import { Badge } from "@mui/material";
 

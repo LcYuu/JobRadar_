@@ -412,7 +412,8 @@ export const createJobPost = (jobPostData) => async (dispatch) => {
           payload: response.data, // Thông báo thành công từ backend
       });
       return {
-        success: true
+        success: true,
+        message: response.data // Thông báo thành công từ backend
       };
   } catch (error) {
       dispatch({
