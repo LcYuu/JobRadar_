@@ -71,7 +71,7 @@ export const loginAction = (loginData) => async (dispatch) => {
       });
       
       // Đảm bảo trả về object với success: true
-      return { success: true };
+      return { success: true, user: { ...profileResponse.data, role: roleResponse.data.role } };
     } else {
       throw new Error('Token not received');
     }

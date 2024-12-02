@@ -49,14 +49,28 @@ export default function Dashboard() {
 
   return (
     <div className="flex bg-gray-100">
-  <Sidebar selectedSection={selectedSection} setSelectedSection={setSelectedSection} className="h-full" />
-  <main className="flex-1 p-8">
-    <div className="flex justify-between">
-      <h1 className="text-2xl font-bold">{selectedSection}</h1>
-      <Link to="/"><Button variant="outline">Trở về trang chủ</Button></Link>
+      <Sidebar selectedSection={selectedSection} setSelectedSection={setSelectedSection} className="h-full" />
+      <main className="flex-1 p-8">
+        <div className="flex justify-between">
+          {user?.userType?.userTypeId === 2 && (
+            <>
+              <Link to="/">
+                <Button variant="outline">Trở về trang chủ</Button>
+              </Link>
+              <h1 className="text-2xl font-bold">{selectedSection}</h1>
+            </>
+          )}
+          {user?.userType?.userTypeId === 2 && (
+            <Link to="/">
+              <h1 className="text-xl font-bold text-white">.</h1>
+            </Link>
+          )}
+          {user?.userType?.userTypeId !== 2 && (
+            <h1 className="text-2xl font-bold">{selectedSection}</h1>
+          )}
+        </div>
+        <Outlet />
+      </main>
     </div>
-    <Outlet />
-  </main>
-</div>
   );
 }
