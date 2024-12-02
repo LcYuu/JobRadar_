@@ -330,9 +330,9 @@ export const getTop5Lastest = () => async (dispatch) => {
 export const findEmployerCompany = (
   status,
   typeOfWork,
-  sortByCreateDate,
-  sortByExpireDate,
-  sortByCount,
+  // sortByCreateDate,
+  // sortByExpireDate,
+  // sortByCount,
   currentPage,
   size
 ) => async (dispatch) => {
@@ -340,9 +340,9 @@ export const findEmployerCompany = (
   const params = {
     ...(status && { status }), // Chỉ thêm status nếu có giá trị
     ...(typeOfWork && { typeOfWork }), // Chỉ thêm typeOfWork nếu có giá trị
-    sortByCount: sortByCount,
-    sortByExpireDate: sortByExpireDate,
-    sortByCreateDate: sortByCreateDate,
+    // sortByCreateDate: sortByCreateDate,
+    // sortByExpireDate: sortByExpireDate,
+    // sortByCount: sortByCount,
     page: currentPage,
     size: size,
   };
