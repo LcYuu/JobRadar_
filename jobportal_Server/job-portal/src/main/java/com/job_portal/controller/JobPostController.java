@@ -527,9 +527,9 @@ public class JobPostController {
 	public ResponseEntity<Page<JobWithApplicationCountDTO>> getFilteredJobs(@RequestHeader("Authorization") String jwt,
 	                                                                        @RequestParam(required = false) String status, 
 	                                                                        @RequestParam(required = false) String typeOfWork,
-	                                                                        @RequestParam(required = false) String sortByCreateDate,
-	                                                                        @RequestParam(required = false) String sortByExpireDate, 
-	                                                                        @RequestParam(required = false) String sortByCount,
+//	                                                                        @RequestParam(required = false) String sortByCreateDate,
+//	                                                                        @RequestParam(required = false) String sortByExpireDate, 
+//	                                                                        @RequestParam(required = false) String sortByCount,
 	                                                                        @RequestParam(defaultValue = "0") int page, 
 	                                                                        @RequestParam(defaultValue = "5") int size) {
 	    String email = JwtProvider.getEmailFromJwtToken(jwt);
@@ -539,25 +539,27 @@ public class JobPostController {
 	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
 	    }
 
-	    String sortOrder = null;
-
-	    // Xử lý sắp xếp theo các tham số
-	    if (sortByCreateDate != null) {
-	        sortOrder = "createDate " + (sortByCreateDate.equalsIgnoreCase("ASC") ? "ASC" : "DESC");
-	    } else if (sortByExpireDate != null) {
-	        sortOrder = "expireDate " + (sortByExpireDate.equalsIgnoreCase("ASC") ? "ASC" : "DESC");
-	    } else if (sortByCount != null) {
-	        sortOrder = "applicationCount " + (sortByCount.equalsIgnoreCase("ASC") ? "ASC" : "DESC");
-	    }
-
-	    // Mặc định sắp xếp theo createDate DESC
-	    if (sortOrder == null) {
-	        sortOrder = "createDate DESC";
-	    }
+//	    String sortOrder = null;
+//
+//	    // Xử lý sắp xếp theo các tham số
+//	    if (sortByCreateDate != null) {
+//	        sortOrder = "createDate " + (sortByCreateDate.equalsIgnoreCase("ASC") ? "ASC" : "DESC");
+//	    } else if (sortByExpireDate != null) {
+//	        sortOrder = "expireDate " + (sortByExpireDate.equalsIgnoreCase("ASC") ? "ASC" : "DESC");
+//	    } else if (sortByCount != null) {
+//	        sortOrder = "applicationCount " + (sortByCount.equalsIgnoreCase("ASC") ? "ASC" : "DESC");
+//	    }
+//
+//	    // Mặc định sắp xếp theo createDate DESC
+//	    if (sortOrder == null) {
+//	        sortOrder = "createDate DESC";
+//	    }
 
 	    Pageable pageable = PageRequest.of(page, size);
 	    Page<JobWithApplicationCountDTO> jobs = jobPostRepository.findJobsWithFiltersAndSorting(
-	            user.get().getCompany().getCompanyId(), status, typeOfWork, sortOrder, pageable);
+	            user.get().getCompany().getCompanyId(), status, typeOfWork, 
+//	            sortByCreateDate, sortByExpireDate, sortByCount
+	            pageable);
 
 	    return ResponseEntity.ok(jobs);
 	}
