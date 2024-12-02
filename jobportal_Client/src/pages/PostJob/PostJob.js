@@ -27,6 +27,76 @@ import { createJobPost } from "../../redux/JobPost/jobPost.action";
 import { store } from "../../redux/store";
 import { getCity } from "../../redux/City/city.action";
 
+const cityCodeMapping = {
+  1: 16,    // Hà Nội
+  2: 1,     // Hà Giang 
+  4: 2,     // Cao Bằng
+  6: 6,     // Bắc Kạn
+  8: 8,     // Tuyên Quang
+  10: 3,    // Lào Cai
+  11: 11,   // Điện Biên
+  12: 5,    // Lai Châu
+  14: 4,    // Sơn La
+  15: 9,    // Yên Bái
+  17: 20,   // Hoà Bình
+  19: 10,   // Thái Nguyên
+  20: 7,    // Lạng Sơn
+  22: 17,   // Quảng Ninh
+  24: 14,   // Bắc Giang
+  25: 12,   // Phú Thọ
+  26: 13,   // Vĩnh Phúc
+  27: 15,   // Bắc Ninh
+  30: 18,   // Hải Dương
+  31: 19,   // Hải Phòng
+  33: 21,   // Hưng Yên
+  34: 23,   // Thái Bình
+  35: 22,   // Hà Nam
+  36: 24,   // Nam Định
+  37: 25,   // Ninh Bình
+  38: 26,   // Thanh Hóa
+  40: 27,   // Nghệ An
+  42: 28,   // Hà Tĩnh
+  44: 29,   // Quảng Bình
+  45: 30,   // Quảng Trị
+  46: 31,   // Thừa Thiên Huế
+  48: 32,   // Đà Nẵng
+  49: 33,   // Quảng Nam
+  51: 34,   // Quảng Ngãi
+  52: 37,   // Bình Định
+  54: 38,   // Phú Yên
+  56: 40,   // Khánh Hòa
+  58: 43,   // Ninh Thuận
+  60: 48,   // Bình Thuận
+  62: 35,   // Kon Tum
+  64: 36,   // Gia Lai
+  66: 39,   // Đắk Lắk
+  67: 41,   // Đắk Nông
+  68: 42,   // Lâm Đồng
+  70: 44,   // Bình Phước
+  72: 45,   // Tây Ninh
+  74: 46,   // Bình Dương
+  75: 47,   // Đồng Nai
+  77: 51,   // Bà Rịa - Vũng Tàu
+  79: 49,   // TP Hồ Chí Minh
+  80: 50,   // Long An
+  82: 54,   // Tiền Giang
+  83: 56,   // Bến Tre
+  84: 59,   // Trà Vinh
+  86: 55,   // Vĩnh Long
+  87: 52,   // Đồng Tháp
+  89: 53,   // An Giang
+  91: 58,   // Kiên Giang
+  92: 57,   // Cần Thơ
+  93: 60,   // Hậu Giang
+  94: 61,   // Sóc Trăng
+  95: 62,   // Bạc Liêu
+  96: 63    // Cà Mau
+};
+
+function mapApiCodeToCityId(apiCode) {
+  return cityCodeMapping[apiCode] || null;
+}
+
 const PostJob = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -320,7 +390,7 @@ const PostJob = () => {
   
       const finalJobData = {
         ...jobData,
-        cityId: parseInt(selectedProvince),
+        cityId: cityCodeMapping[selectedProvince],
         location: fullAddress,
       };
   
@@ -337,6 +407,10 @@ const PostJob = () => {
       console.error('Error:', error);
       toast.error('Có lỗi xảy ra khi tạo tin tuyển dụng');
     }
+  };
+
+  const handleProvinceSelection = (provinceCode) => {
+    setSelectedProvince(provinceCode);
   };
 
   const handleNextStep = () => {
@@ -735,7 +809,7 @@ const PostJob = () => {
                     required
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     value={selectedProvince}
-                    onChange={(e) => setSelectedProvince(e.target.value)}
+                    onChange={(e) => handleProvinceSelection(e.target.value)}
                   >
                     <option value="">Chọn tỉnh/thành phố</option>
                     {provinces.map((province) => (
