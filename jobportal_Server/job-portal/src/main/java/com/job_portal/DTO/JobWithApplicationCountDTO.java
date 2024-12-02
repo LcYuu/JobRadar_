@@ -21,8 +21,8 @@ public class JobWithApplicationCountDTO {
 	private Long salary;
 	private String experience;
 	private String typeOfWork;
-	private LocalDate createDate;
-	private LocalDate expireDate;
+	private LocalDateTime createDate;
+	private LocalDateTime expireDate;
 	private Long applicationCount;
 	private String status;
 	private String industryName; 

@@ -93,14 +93,25 @@ export default function JobCard({
 }
 
 function JobCardHeader({ jobType, companyLogo }) {
+  // Xác định màu sắc cho từng loại công việc bằng mã màu hex
+  const jobTypeColors = {
+    "Toàn thời gian": "#e68b0b", // Màu cho "Toàn thời gian" (mã hex)
+    "Bán thời gian": "#fbbf24", // Màu cho "Bán thời gian" (mã hex)
+    "Từ xa": "#3b82f6", // Màu cho "Từ xa" (mã hex)
+    "Thực tập sinh": "#7c3aed", // Màu cho "Thực tập sinh" (mã hex)
+  };
+
   return (
-    <div className="flex justify-between items-start mb-4 ">
+    <div className="flex justify-between items-start mb-4">
       <img
         src={companyLogo}
         alt="Company Logo"
         className="w-12 h-12 rounded-lg"
       />
-      <div className="bg-indigo-600 text-white border border-blue-500 px-2 py-1 rounded-md text-xs font-semibold uppercase">
+      <div
+        className={`text-white border px-2 py-1 rounded-md text-xs font-semibold uppercase`}
+        style={{ backgroundColor: jobTypeColors[jobType] || "#6b7280" }} // Màu mặc định là #6b7280 (xám)
+      >
         {jobType}
       </div>
     </div>

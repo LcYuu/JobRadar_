@@ -24,6 +24,7 @@ import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { uploadToCloudinary } from "../../../utils/uploadToCloudinary";
 import { getCVBySeeker } from "../../../redux/CV/cv.action";
+import { FaCheckCircle } from "react-icons/fa";
 
 const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
   const dispatch = useDispatch();
@@ -82,7 +83,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
       toast.error("Vui lòng chọn file CV hoặc chọn CV có sẵn");
       return; // Dừng quá trình submit nếu không có file
     }
-    
+
     try {
       // Nếu có thông tin ứng tuyển trước đó (update)
       if (oneApplyJob) {
@@ -104,10 +105,10 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
           // Nếu không chọn file mới, chỉ gửi formData có sẵn
           dispatch(updateApply(formData, postId));
           toast.success("Cập nhật ứng tuyển thành công!");
-        } 
+        }
       } else {
         // Nếu là create mới (không có ứng tuyển trước đó)
-        if (selectedFile) { 
+        if (selectedFile) {
           // Nếu có chọn file mới, cần upload lên Cloudinary
           const uploadedFile = await uploadToCloudinary(selectedFile);
           if (uploadedFile) {
@@ -116,7 +117,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
               pathCV: uploadedFile, // Gán URL file đã upload vào formData
             };
             await dispatch(createApply(updatedFormData, postId));
-            await dispatch(checkIfApplied(postId))
+            await dispatch(checkIfApplied(postId));
             toast.success("Ứng tuyển thành công!");
           } else {
             toast.error("Đã có lỗi khi tải lên CV");
@@ -133,7 +134,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
       toast.error("Lỗiiiii");
       return; // Nếu có lỗi, dừng quá trình submit
     }
-};
+  };
 
   // Hàm xử lý thay đổi input
   const handleInputChange = (e) => {
@@ -173,8 +174,8 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
     document.getElementById("cv-upload").value = "";
   };
 
-  console.log("a"+ formData)
-  console.log("b" + selectedFile)
+  console.log("a" + formData);
+  console.log("b" + selectedFile);
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -278,40 +279,51 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                 </div>
               </div>
 
-              <div>
+              <div className="space-y-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Đính kèm CV của bạn tại đây
                 </label>
 
-                <div className="border p-4 rounded-lg">
+                <div className="border p-6 rounded-lg shadow-sm bg-white">
                   {/* Chọn CV từ thư viện nếu có */}
                   {cvs.length > 0 && (
-                    <div className="mb-4">
-                      <label className="text-gray-700 font-medium">
+                    <div className="mb-6">
+                      <label className="text-gray-700 font-semibold">
                         Chọn CV từ thư viện của bạn:
                       </label>
-                      <ul className="mt-2 space-y-1">
+                      <ul className="mt-3 space-y-2">
                         {cvs.map((cv) => (
                           <li
                             key={cv.cvId}
-                            className="flex items-center space-x-2 cursor-pointer"
+                            className="flex items-center space-x-4 p-2 hover:bg-gray-100 rounded-md cursor-pointer"
                           >
                             <input
                               type="radio"
                               name="cvOption"
-                              onChange={() => handleCVSelection(cv)}
+                              onChange={(e) => {
+                                setUploadOption("existing"); // Chọn tùy chọn radio
+                                handleCVSelection(cv); // Gọi hàm xử lý
+                              }}
                               checked={
-                                uploadOption === "existing"
-                                && formData.pathCV === cv.pathCV
+                                (uploadOption === "existing" &&
+                                  formData.pathCV === cv.pathCV) ||
+                                cv.isMain
                               }
                               className="form-radio text-indigo-600"
                             />
-                            <span>{cv.cvName}</span>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-gray-800">{cv.cvName}</span>
+                              {cv.isMain && (
+                                <span className="text-sm text-white bg-green-500 px-2 py-1 rounded-md flex items-center space-x-1">
+                                  <FaCheckCircle className="text-white text-xs" />
+                                </span>
+                              )}
+                            </div>
                             <a
                               href={cv.pathCV}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-600 ml-2"
+                              className="text-blue-600 hover:underline"
                             >
                               Xem
                             </a>
@@ -334,10 +346,12 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                         checked={uploadOption === "new"}
                         className="form-radio text-indigo-600"
                       />
-                      <span>Tải lên CV từ máy tính</span>
+                      <span className="font-semibold text-gray-800">
+                        Tải lên CV từ máy tính
+                      </span>
                     </label>
                     {uploadOption === "new" && (
-                      <div className="border-2 border-dashed rounded-lg p-4 mt-2 text-center">
+                      <div className="border-2 border-dashed rounded-lg p-6 mt-4 text-center bg-gray-50">
                         <input
                           type="file"
                           accept=".pdf"
@@ -348,24 +362,28 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                         {!selectedFile ? (
                           <label
                             htmlFor="cv-upload"
-                            className="cursor-pointer flex items-center justify-center space-x-2 text-indigo-600"
+                            className="cursor-pointer flex flex-col items-center justify-center space-y-2 text-purple-500"
                           >
-                            <LinkIcon className="h-5 w-5" />
-                            <span>Đính kèm CV</span>
+                            <LinkIcon className="h-6 w-6" />
+                            <span className="font-medium">
+                              Nhấp vào đây để đính kèm CV
+                            </span>
                           </label>
                         ) : (
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-center space-x-2 text-gray-700">
-                              <LinkIcon className="h-5 w-5" />
-                              <span>{selectedFile.name}</span>
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-center space-x-4">
+                              <LinkIcon className="h-6 w-6 text-gray-700" />
+                              <span className="text-gray-700 font-medium">
+                                {selectedFile.name}
+                              </span>
                             </div>
                             <div className="text-sm text-gray-500">
-                              {selectedFile.size || "N/A"} MB
+                              Kích thước: {selectedFile.size || "N/A"} MB
                             </div>
                             <button
                               type="button"
                               onClick={handleRemove}
-                              className="text-sm text-red-600"
+                              className="text-sm text-red-600 hover:underline"
                             >
                               Xóa
                             </button>
@@ -379,7 +397,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
 
               <Button
                 type="submit"
-                className="w-full bg-indigo-600 text-white py-3 rounded-lg"
+                className="w-full bg-purple-600 text-white py-3 rounded-lg"
               >
                 Gửi
               </Button>

@@ -433,7 +433,7 @@ export const getCompanyById = (companyId) => async (dispatch) => {
     });
   }
 };
-export const getAllCompaniesForAdmin = (page = 0, size = 10) => async (dispatch) => {
+export const getAllCompaniesForAdmin = (page, size) => async (dispatch) => {
   dispatch({ type: GET_ALL_COMPANIES_REQUEST });
   try {
     const response = await axios.get(`http://localhost:8080/company/get-all-companies`, {

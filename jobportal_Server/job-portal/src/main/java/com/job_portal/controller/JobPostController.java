@@ -141,6 +141,9 @@ public class JobPostController {
 			String email = JwtProvider.getEmailFromJwtToken(jwt);
 			Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 
+			if (!jobPostService.canPostJob(user.get().getCompany().getCompanyId())) {
+				return new ResponseEntity<>("Công ty chỉ được đăng 1 bài trong vòng 1 giờ.", HttpStatus.FORBIDDEN);
+			}
 			boolean isCreated = jobPostService.createJob(jobPostDTO, user.get().getCompany().getCompanyId());
 			if (isCreated) {
 				return new ResponseEntity<>("Công việc được tạo thành công. Chờ Admin phê duyệt", HttpStatus.CREATED);
@@ -182,21 +185,20 @@ public class JobPostController {
 
 	@PutMapping("/set-expire/{postId}")
 	public ResponseEntity<Boolean> updateExpireJobPost(@PathVariable("postId") UUID postId) throws AllExceptions {
-	    Optional<JobPost> oldJobPostOptional = jobPostRepository.findById(postId);
-	    
-	    if (oldJobPostOptional.isEmpty()) {
-	        return new ResponseEntity<>(false, HttpStatus.NOT_FOUND); // Trả về false nếu công việc không tồn tại
-	    }
-	    
-	    JobPost oldJobPost = oldJobPostOptional.get();
-	    oldJobPost.setExpireDate(LocalDate.now());  // Cập nhật ngày hết hạn
-	    oldJobPost.setStatus("Hết hạn"); // Đặt trạng thái công việc thành "Hết hạn"
-	    
-	    jobPostRepository.save(oldJobPost); // Lưu công việc đã cập nhật
-	    
-	    return new ResponseEntity<>(true, HttpStatus.OK); // Trả về true khi cập nhật thành công
-	}
+		Optional<JobPost> oldJobPostOptional = jobPostRepository.findById(postId);
 
+		if (oldJobPostOptional.isEmpty()) {
+			return new ResponseEntity<>(false, HttpStatus.NOT_FOUND); // Trả về false nếu công việc không tồn tại
+		}
+
+		JobPost oldJobPost = oldJobPostOptional.get();
+		oldJobPost.setExpireDate(LocalDateTime.now()); // Cập nhật ngày hết hạn
+		oldJobPost.setStatus("Hết hạn"); // Đặt trạng thái công việc thành "Hết hạn"
+
+		jobPostRepository.save(oldJobPost); // Lưu công việc đã cập nhật
+
+		return new ResponseEntity<>(true, HttpStatus.OK); // Trả về true khi cập nhật thành công
+	}
 
 	@DeleteMapping("/delete-job/{postId}")
 	public ResponseEntity<String> deleteJob(@PathVariable("postId") UUID postId) {
@@ -386,7 +388,7 @@ public class JobPostController {
 				String createDateStr = jobNode.get("createDate").asText(null);
 				if (createDateStr != null && !createDateStr.isEmpty()) {
 					try {
-						job.setCreateDate(LocalDate.parse(createDateStr, formatter));
+						job.setCreateDate(LocalDateTime.parse(createDateStr, formatter));
 					} catch (Exception e) {
 						System.out.println("Error parsing createDate: " + createDateStr + " - " + e.getMessage());
 					}
@@ -396,7 +398,7 @@ public class JobPostController {
 				String expireDateStr = jobNode.get("expireDate").asText(null);
 				if (expireDateStr != null && !expireDateStr.isEmpty()) {
 					try {
-						job.setExpireDate(LocalDate.parse(expireDateStr, formatter));
+						job.setExpireDate(LocalDateTime.parse(expireDateStr, formatter));
 					} catch (Exception e) {
 						System.out.println("Error parsing expireDate: " + expireDateStr + " - " + e.getMessage());
 					}
@@ -509,7 +511,7 @@ public class JobPostController {
 	@GetMapping("/count-by-company/{companyId}")
 	public ResponseEntity<Long> countJobsByCompany(@PathVariable UUID companyId) {
 		long totalJobs = jobPostRepository
-				.countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(companyId, LocalDate.now());
+				.countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(companyId, LocalDateTime.now());
 		return ResponseEntity.ok(totalJobs);
 	}
 
@@ -525,19 +527,17 @@ public class JobPostController {
 
 	@GetMapping("/employer-company")
 	public ResponseEntity<Page<JobWithApplicationCountDTO>> getFilteredJobs(@RequestHeader("Authorization") String jwt,
-	                                                                        @RequestParam(required = false) String status, 
-	                                                                        @RequestParam(required = false) String typeOfWork,
+			@RequestParam(required = false) String status, @RequestParam(required = false) String typeOfWork,
 //	                                                                        @RequestParam(required = false) String sortByCreateDate,
 //	                                                                        @RequestParam(required = false) String sortByExpireDate, 
 //	                                                                        @RequestParam(required = false) String sortByCount,
-	                                                                        @RequestParam(defaultValue = "0") int page, 
-	                                                                        @RequestParam(defaultValue = "5") int size) {
-	    String email = JwtProvider.getEmailFromJwtToken(jwt);
-	    Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 
-	    if (user.isEmpty()) {
-	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-	    }
+		if (user.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+		}
 
 //	    String sortOrder = null;
 //
@@ -555,16 +555,14 @@ public class JobPostController {
 //	        sortOrder = "createDate DESC";
 //	    }
 
-	    Pageable pageable = PageRequest.of(page, size);
-	    Page<JobWithApplicationCountDTO> jobs = jobPostRepository.findJobsWithFiltersAndSorting(
-	            user.get().getCompany().getCompanyId(), status, typeOfWork, 
+		Pageable pageable = PageRequest.of(page, size);
+		Page<JobWithApplicationCountDTO> jobs = jobPostRepository
+				.findJobsWithFiltersAndSorting(user.get().getCompany().getCompanyId(), status, typeOfWork,
 //	            sortByCreateDate, sortByExpireDate, sortByCount
-	            pageable);
+						pageable);
 
-	    return ResponseEntity.ok(jobs);
+		return ResponseEntity.ok(jobs);
 	}
-
-
 
 	@GetMapping("/stats/daily")
 	public ResponseEntity<?> getDailyStats(@RequestParam String startDate, @RequestParam String endDate) {

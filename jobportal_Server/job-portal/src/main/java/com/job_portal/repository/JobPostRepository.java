@@ -3,6 +3,7 @@ package com.job_portal.repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -53,7 +54,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 			+ "FROM JobPost j WHERE j.isApprove = true AND j.expireDate >= CURRENT_DATE")
 	List<JobRecommendationDTO> findApprovedAndActiveJobs();
 
-	Page<JobPost> findByIsApproveTrueAndExpireDateGreaterThanEqual(Pageable pageable, LocalDate currentTime);
+	Page<JobPost> findByIsApproveTrueAndExpireDateGreaterThanEqual(Pageable pageable, LocalDateTime currentTime);
 
 	@Query("SELECT j FROM JobPost j WHERE j.isApprove = true ORDER BY j.createDate DESC")
 	List<JobPost> findTop8LatestJobPosts();
@@ -82,7 +83,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 
 	long countByCompanyCompanyIdAndIsApproveTrue(UUID companyId);
 
-	long countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(UUID companyId, LocalDate currentDate);
+	long countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(UUID companyId, LocalDateTime currentDate);
 
 	@Query(value = "SELECT new com.job_portal.DTO.JobWithApplicationCountDTO("
 			+ "jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
@@ -159,7 +160,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	long countClosedJobsByCompanyAndDateRange(@Param("companyId") UUID companyId,
 			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
-	long countByCompanyCompanyIdAndExpireDateLessThan(UUID companyId, LocalDate date);
+	long countByCompanyCompanyIdAndExpireDateLessThan(UUID companyId, LocalDateTime date);
 
 	long countByCompanyCompanyIdAndIsApproveFalse(UUID companyId);
 
@@ -182,5 +183,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	@Query("SELECT j FROM JobPost j JOIN j.company c WHERE c.industry.industryId = :industryId AND j.isApprove = true AND j.expireDate > CURRENT_DATE AND j.postId != :excludePostId")
 	List<JobPost> findSimilarJobsByIndustry(@Param("industryId") Integer industryId,
 			@Param("excludePostId") UUID excludePostId);
+	
+	Optional<JobPost> findTopByCompanyCompanyIdOrderByCreateDateDesc(UUID companyId);
 
 }

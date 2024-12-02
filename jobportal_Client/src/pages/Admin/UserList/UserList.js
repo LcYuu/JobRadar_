@@ -1,8 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { getAllUsers, deleteUser, updateUserStatus } from '../../../redux/User/user.action';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getAllUsers,
+  deleteUser,
+  updateUserStatus,
+} from "../../../redux/User/user.action";
 import { Button } from "../../../ui/button";
-import { MoreVertical } from 'lucide-react';
+import { MoreVertical } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,13 +23,15 @@ import {
 
 export default function UserList() {
   const dispatch = useDispatch();
-  const { users, totalPages, totalElements, loading, error } = useSelector((state) => state.user);
+  const { users, totalPages, totalElements, loading, error } = useSelector(
+    (state) => state.user
+  );
   const [currentPage, setCurrentPage] = useState(0);
   const [size, setSize] = useState(5);
   const [filters, setFilters] = useState({
-    searchTerm: '',
-    role: 'all',
-    status: 'all'
+    searchTerm: "",
+    role: "all",
+    status: "all",
   });
 
   useEffect(() => {
@@ -33,17 +39,17 @@ export default function UserList() {
   }, [dispatch, currentPage, size, filters]);
 
   const handleSearch = (e) => {
-    setFilters(prev => ({ ...prev, searchTerm: e.target.value }));
+    setFilters((prev) => ({ ...prev, searchTerm: e.target.value }));
     setCurrentPage(0);
   };
 
   const handleRoleFilter = (e) => {
-    setFilters(prev => ({ ...prev, role: e.target.value }));
+    setFilters((prev) => ({ ...prev, role: e.target.value }));
     setCurrentPage(0);
   };
 
   const handleStatusFilter = (e) => {
-    setFilters(prev => ({ ...prev, status: e.target.value }));
+    setFilters((prev) => ({ ...prev, status: e.target.value }));
     setCurrentPage(0);
   };
 
@@ -59,7 +65,7 @@ export default function UserList() {
   };
 
   const handleDeleteUser = (userId) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
+    if (window.confirm("Bạn có chắc chắn muốn xóa người dùng này?")) {
       dispatch(deleteUser(userId)).then(() => {
         dispatch(getAllUsers(currentPage, size, filters));
       });
@@ -67,21 +73,26 @@ export default function UserList() {
   };
 
   const handleToggleStatus = (user) => {
-    dispatch(updateUserStatus(user.userId, {
-      ...user,
-      active: !user.active
-    })).then(() => {
+    dispatch(
+      updateUserStatus(user.userId, {
+        ...user,
+        active: !user.active,
+      })
+    ).then(() => {
       dispatch(getAllUsers(currentPage, size, filters));
     });
   };
 
   if (loading) return <div className="text-center py-8">Đang tải...</div>;
-  if (error) return <div className="text-center py-8 text-red-500">{error}</div>;
+  if (error)
+    return <div className="text-center py-8 text-red-500">{error}</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-4">
-        <div className="text-sm text-gray-600">Tổng số người dùng: {totalElements || 0}</div>
+        <div className="text-sm text-gray-600">
+          Tổng số người dùng: {totalElements || 0}
+        </div>
         <div className="flex items-center gap-4">
           <div className="relative">
             <input
@@ -116,7 +127,7 @@ export default function UserList() {
 
       <div className="bg-white rounded-lg shadow">
         <table className="w-full">
-          <thead className="bg-gray-50 text-sm text-gray-500">
+          <thead className="bg-purple-600 text-white text-sm">
             <tr>
               <th className="text-left p-4">Avatar</th>
               <th className="text-left p-4">Tên</th>
@@ -128,6 +139,7 @@ export default function UserList() {
               <th className="text-left p-4"></th>
             </tr>
           </thead>
+
           <tbody>
             {users && users.length > 0 ? (
               users.map((user) => (
@@ -135,8 +147,8 @@ export default function UserList() {
                   <td className="p-4">
                     <div className="group relative">
                       {user.avatar ? (
-                        <img 
-                          src={user.avatar} 
+                        <img
+                          src={user.avatar}
                           alt={`Avatar của ${user.userName}`}
                           className="w-10 h-10 rounded-full object-cover cursor-pointer"
                         />
@@ -160,31 +172,33 @@ export default function UserList() {
                     </span>
                   </td>
                   <td className="p-4">
-                    <span className={`px-3 py-1 rounded-full text-sm ${
-                      user.active 
-                        ? "bg-emerald-100 text-emerald-600"
-                        : "bg-red-100 text-red-600"
-                    }`}>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm ${
+                        user.active
+                          ? "bg-emerald-100 text-emerald-600"
+                          : "bg-red-100 text-red-600"
+                      }`}
+                    >
                       {user.active ? "Active" : "Inactive"}
                     </span>
                   </td>
                   <td className="p-4">
-                    {new Date(user.createDate).toLocaleDateString('vi-VN', {
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit'
+                    {new Date(user.createDate).toLocaleDateString("vi-VN", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
                     })}
                   </td>
                   <td className="p-4">
                     {user.lastLogin ? (
-                      new Date(user.lastLogin).toLocaleDateString('vi-VN', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit'
+                      new Date(user.lastLogin).toLocaleDateString("vi-VN", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
                       })
                     ) : (
                       <span className="text-gray-400">Chưa đăng nhập</span>
@@ -198,10 +212,12 @@ export default function UserList() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleToggleStatus(user)}>
-                          {user.active ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
+                        <DropdownMenuItem
+                          onClick={() => handleToggleStatus(user)}
+                        >
+                          {user.active ? "Khóa tài khoản" : "Mở khóa tài khoản"}
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => handleDeleteUser(user.userId)}
                           className="text-red-600"
                         >
@@ -221,7 +237,7 @@ export default function UserList() {
             )}
           </tbody>
         </table>
-        
+
         <div className="p-4 border-t flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span>Hiển thị</span>
@@ -245,10 +261,7 @@ export default function UserList() {
             >
               Previous
             </Button>
-            <Button
-              variant="outline"
-              className="bg-indigo-600 text-white"
-            >
+            <Button variant="outline" className="bg-indigo-600 text-white">
               {currentPage + 1}
             </Button>
             <Button
@@ -263,4 +276,4 @@ export default function UserList() {
       </div>
     </div>
   );
-} 
+}
