@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useMemo, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "../../../ui/button";
 import { Card } from "../../../ui/card";
-import { 
-  Building2, 
-  Users, 
+import {
+  Building2,
+  Users,
   Calendar,
   Lock,
   Unlock,
@@ -19,70 +19,102 @@ import {
   Users2,
   Phone,
   Mail,
-  Clock
-} from 'lucide-react';
-import { getCompanyById, updateCompanyStatus, deleteCompany, getCompanyJobCounts ,getCompanyJobStats } from '../../../redux/Company/company.action';
-import { toast } from 'react-toastify';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "../../../ui/dialog";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { format } from 'date-fns';
+  Clock,
+} from "lucide-react";
+import {
+  getCompanyById,
+  updateCompanyStatus,
+  deleteCompany,
+  getCompanyJobCounts,
+  getCompanyJobStats,
+  getCompanyProfile,
+} from "../../../redux/Company/company.action";
+import { toast } from "react-toastify";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "../../../ui/dialog";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import { format } from "date-fns";
+import { store } from "../../../redux/store";
 
 export default function CompanyDetail() {
-  const navigate= useNavigate();
+  const navigate = useNavigate();
   const { companyId } = useParams();
   const dispatch = useDispatch();
-  const { companyProfile, jobCounts, jobStats, loading } = useSelector((state) => state.company);
+  const { companyProfile, jobCounts, jobStats, loading } = useSelector(
+    (store) => store.company
+  );
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [chartDateRange, setChartDateRange] = useState(() => {
     const end = new Date();
     const start = new Date();
     start.setDate(start.getDate() - 7);
     return {
-      startDate: start.toISOString().split('T')[0],
-      endDate: end.toISOString().split('T')[0]
+      startDate: start.toISOString().split("T")[0],
+      endDate: end.toISOString().split("T")[0],
     };
   });
-  const [activePeriod, setActivePeriod] = useState('week');
+  const [activePeriod, setActivePeriod] = useState("week");
   const chartRef = useRef(null);
   const [isChartLoading, setIsChartLoading] = useState(false);
-  const [dateError, setDateError] = useState('');
+  const [dateError, setDateError] = useState("");
   const [error, setError] = useState(null);
   const [isMounted, setIsMounted] = useState(true);
 
   useEffect(() => {
-    dispatch(getCompanyById(companyId));
+    dispatch(getCompanyProfile(companyId));
     dispatch(getCompanyJobCounts(companyId));
     return () => {
       setIsMounted(false);
     };
-  }, [dispatch, companyId]);
+  }, [dispatch]);
 
   useEffect(() => {
     if (chartDateRange.startDate && chartDateRange.endDate) {
       const start = new Date(chartDateRange.startDate);
       const end = new Date(chartDateRange.endDate);
       const today = new Date();
-      
+
       if (start > end) {
-        setDateError('Ngày bắt đầu không thể sau ngày kết thúc');
+        setDateError("Ngày bắt đầu không thể sau ngày kết thúc");
         return;
       }
 
       if (end > today) {
-        setDateError('Ngày kết thúc không thể sau ngày hiện tại');
+        setDateError("Ngày kết thúc không thể sau ngày hiện tại");
         return;
       }
 
-      setDateError('');
+      setDateError("");
       setIsChartLoading(true);
       setError(null);
 
-      dispatch(getCompanyJobStats(companyId, chartDateRange.startDate, chartDateRange.endDate))
+      dispatch(
+        getCompanyJobStats(
+          companyId,
+          chartDateRange.startDate,
+          chartDateRange.endDate
+        )
+      )
         .then(() => {
           setIsChartLoading(false);
         })
         .catch((err) => {
-          setError(err.message || 'Có lỗi xảy ra khi tải dữ liệu');
+          setError(err.message || "Có lỗi xảy ra khi tải dữ liệu");
           setIsChartLoading(false);
         });
     }
@@ -93,59 +125,59 @@ export default function CompanyDetail() {
       await dispatch(updateCompanyStatus(companyId, !companyProfile.isActive));
       dispatch(getCompanyById(companyId));
     } catch (error) {
-      toast.error('Không thể cập nhật trạng thái công ty');
+      toast.error("Không thể cập nhật trạng thái công ty");
     }
   };
 
   const handleDelete = async () => {
     try {
       await dispatch(deleteCompany(companyId));
-      navigate('/admin/companies');
-      toast.success('Xóa công ty thành công');
+      navigate("/admin/companies");
+      toast.success("Xóa công ty thành công");
     } catch (error) {
-      toast.error('Không thể xóa công ty');
+      toast.error("Không thể xóa công ty");
     }
   };
 
   const handleChartDateChange = (e) => {
     const { name, value } = e.target;
-    setChartDateRange(prev => ({
+    setChartDateRange((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    setDateError('');
+    setDateError("");
   };
 
   const handlePeriodFilter = (period) => {
     const end = new Date();
     const start = new Date();
-    
-    switch(period) {
-      case 'week':
+
+    switch (period) {
+      case "week":
         start.setDate(end.getDate() - 7);
         break;
-      case 'month':
+      case "month":
         start.setMonth(end.getMonth() - 1);
         break;
-      case 'year':
+      case "year":
         start.setFullYear(end.getFullYear() - 1);
         break;
       default:
         break;
     }
-    
+
     setActivePeriod(period);
     setChartDateRange({
-      startDate: start.toISOString().split('T')[0],
-      endDate: end.toISOString().split('T')[0]
+      startDate: start.toISOString().split("T")[0],
+      endDate: end.toISOString().split("T")[0],
     });
     scrollToChart();
   };
 
   const scrollToChart = () => {
-    chartRef.current?.scrollIntoView({ 
-      behavior: 'smooth',
-      block: 'center'
+    chartRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
     });
   };
 
@@ -153,24 +185,24 @@ export default function CompanyDetail() {
     if (!jobStats || !Array.isArray(jobStats)) {
       return [];
     }
-    
-    return jobStats.map(stat => {
+
+    return jobStats.map((stat) => {
       const date = new Date(stat.date);
       return {
-        name: date.toLocaleDateString('vi-VN', { 
-          month: 'numeric',
-          day: 'numeric'
+        name: date.toLocaleDateString("vi-VN", {
+          month: "numeric",
+          day: "numeric",
         }),
-        fullDate: date.toLocaleDateString('vi-VN', {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'numeric',
-          year: 'numeric'
+        fullDate: date.toLocaleDateString("vi-VN", {
+          weekday: "long",
+          day: "numeric",
+          month: "numeric",
+          year: "numeric",
         }),
         totalJobs: stat.totalJobs || 0,
         activeJobs: stat.activeJobs || 0,
         closedJobs: stat.closedJobs || 0,
-        pendingJobs: stat.pendingJobs || 0
+        pendingJobs: stat.pendingJobs || 0,
       };
     });
   }, [jobStats]);
@@ -188,8 +220,8 @@ export default function CompanyDetail() {
       {/* Header với các nút hành động */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold ">{companyProfile?.companyName}</h1>
-        <br/>
-        
+        <br />
+
         <div className="flex gap-3">
           <Button
             variant={companyProfile?.isActive ? "destructive" : "success"}
@@ -208,7 +240,10 @@ export default function CompanyDetail() {
               </>
             )}
           </Button>
-          <Button variant="destructive" onClick={() => setShowDeleteModal(true)}>
+          <Button
+            variant="destructive"
+            onClick={() => setShowDeleteModal(true)}
+          >
             Xóa công ty
           </Button>
         </div>
@@ -221,9 +256,7 @@ export default function CompanyDetail() {
             <FileText className="w-8 h-8 text-blue-500" />
             <div>
               <p className="text-sm text-gray-600">Tổng bài đăng</p>
-              <h3 className="text-xl font-bold">
-                {jobCounts?.totalJobs || 0}
-              </h3>
+              <h3 className="text-xl font-bold">{jobCounts?.totalJobs || 0}</h3>
             </div>
           </div>
         </Card>
@@ -269,7 +302,9 @@ export default function CompanyDetail() {
             <Users className="w-8 h-8 text-purple-500" />
             <div>
               <p className="text-sm text-gray-600">Ứng viên đã ứng tuyển</p>
-              <h3 className="text-xl font-bold">{companyProfile?.totalApplications || 0}</h3>
+              <h3 className="text-xl font-bold">
+                {companyProfile?.totalApplications || 0}
+              </h3>
             </div>
           </div>
         </Card>
@@ -280,7 +315,9 @@ export default function CompanyDetail() {
             <div>
               <p className="text-sm text-gray-600">Ngày tạo tài khoản</p>
               <h3 className="text-sm font-medium">
-                {new Date(companyProfile?.createdAt).toLocaleDateString('vi-VN')}
+                {new Date(
+                  companyProfile?.userAccount?.createDate
+                ).toLocaleDateString("vi-VN")}
               </h3>
             </div>
           </div>
@@ -293,18 +330,22 @@ export default function CompanyDetail() {
           <h2 className="text-lg font-semibold mb-4">Thông tin cơ bản</h2>
           <div className="space-y-4">
             <div className="flex items-center gap-4">
-            
-              <Users2 className="w-5 h-5 text-gray-500" />
+              <Users2 className="w-5 h-5 text-gray-500 flex-shrink-0" />
               <div>
                 <p className="text-sm text-gray-600">Giới thiệu công ty</p>
-                <p className="font-medium">{companyProfile?.description || 'Chưa cập nhật'}</p>
+                <p className="font-medium">
+                  {companyProfile?.description || "Chưa cập nhật"}
+                </p>
               </div>
             </div>
+
             <div className="flex items-center gap-4">
               <MapPin className="w-5 h-5 text-gray-500" />
               <div>
                 <p className="text-sm text-gray-600">Địa chỉ</p>
-                <p className="font-medium">{companyProfile?.address || 'Chưa cập nhật'}</p>
+                <p className="font-medium">
+                  {companyProfile?.address || "Chưa cập nhật"}
+                </p>
               </div>
             </div>
 
@@ -312,17 +353,19 @@ export default function CompanyDetail() {
               <Briefcase className="w-5 h-5 text-gray-500" />
               <div>
                 <p className="text-sm text-gray-600">Ngành nghề</p>
-                <p className="font-medium">{companyProfile?.industry?.industryName || 'Chưa cập nhật'}</p>
+                <p className="font-medium">
+                  {companyProfile?.industry?.industryName || "Chưa cập nhật"}
+                </p>
               </div>
             </div>
-
-            
 
             <div className="flex items-center gap-4">
               <Phone className="w-5 h-5 text-gray-500" />
               <div>
                 <p className="text-sm text-gray-600">Liên hệ</p>
-                <p className="font-medium">{companyProfile?.contact || 'Chưa cập nhật'}</p>
+                <p className="font-medium">
+                  {companyProfile?.contact || "Chưa cập nhật"}
+                </p>
               </div>
             </div>
 
@@ -330,7 +373,9 @@ export default function CompanyDetail() {
               <Mail className="w-5 h-5 text-gray-500" />
               <div>
                 <p className="text-sm text-gray-600">Email</p>
-                <p className="font-medium">{companyProfile?.email || 'Chưa cập nhật'}</p>
+                <p className="font-medium">
+                  {companyProfile?.email || "Chưa cập nhật"}
+                </p>
               </div>
             </div>
 
@@ -339,9 +384,11 @@ export default function CompanyDetail() {
               <div>
                 <p className="text-sm text-gray-600">Ngày thành lập</p>
                 <p className="font-medium">
-                  {companyProfile?.establishedTime 
-                    ? new Date(companyProfile.establishedTime).toLocaleDateString('vi-VN')
-                    : 'Chưa cập nhật'}
+                  {companyProfile?.establishedTime
+                    ? new Date(
+                        companyProfile.establishedTime
+                      ).toLocaleDateString("vi-VN")
+                    : "Chưa cập nhật"}
                 </p>
               </div>
             </div>
@@ -372,31 +419,34 @@ export default function CompanyDetail() {
               />
             </div>
             <div className="flex gap-2">
-              <button 
-                onClick={() => handlePeriodFilter('week')}
+              <button
+                onClick={() => handlePeriodFilter("week")}
                 className={`px-3 py-1 rounded transition-colors ${
-                  activePeriod === 'week' 
-                    ? 'bg-indigo-100 text-indigo-600' 
-                    : 'hover:bg-gray-100'
-                }`}>
+                  activePeriod === "week"
+                    ? "bg-indigo-100 text-indigo-600"
+                    : "hover:bg-gray-100"
+                }`}
+              >
                 Tuần
               </button>
-              <button 
-                onClick={() => handlePeriodFilter('month')}
+              <button
+                onClick={() => handlePeriodFilter("month")}
                 className={`px-3 py-1 rounded transition-colors ${
-                  activePeriod === 'month' 
-                    ? 'bg-indigo-100 text-indigo-600' 
-                    : 'hover:bg-gray-100'
-                }`}>
+                  activePeriod === "month"
+                    ? "bg-indigo-100 text-indigo-600"
+                    : "hover:bg-gray-100"
+                }`}
+              >
                 Tháng
               </button>
-              <button 
-                onClick={() => handlePeriodFilter('year')}
+              <button
+                onClick={() => handlePeriodFilter("year")}
                 className={`px-3 py-1 rounded transition-colors ${
-                  activePeriod === 'year' 
-                    ? 'bg-indigo-100 text-indigo-600' 
-                    : 'hover:bg-gray-100'
-                }`}>
+                  activePeriod === "year"
+                    ? "bg-indigo-100 text-indigo-600"
+                    : "hover:bg-gray-100"
+                }`}
+              >
                 Năm
               </button>
             </div>
@@ -415,46 +465,49 @@ export default function CompanyDetail() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
             </div>
           )}
-          
+
           {error && !dateError && (
             <div className="flex items-center justify-center h-full text-red-500">
               {error}
             </div>
           )}
-          
-          {!isChartLoading && !error && !dateError && chartData.length === 0 && (
-            <div className="flex items-center justify-center h-full text-gray-500">
-              Không có dữ liệu cho khoảng thời gian này
-            </div>
-          )}
-          
+
+          {!isChartLoading &&
+            !error &&
+            !dateError &&
+            chartData.length === 0 && (
+              <div className="flex items-center justify-center h-full text-gray-500">
+                Không có dữ liệu cho khoảng thời gian này
+              </div>
+            )}
+
           {!isChartLoading && !error && !dateError && chartData.length > 0 && (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
+                <XAxis
                   dataKey="name"
-                  tick={{ fill: '#666' }}
-                  tickLine={{ stroke: '#666' }}
+                  tick={{ fill: "#666" }}
+                  tickLine={{ stroke: "#666" }}
                 />
-                <YAxis 
+                <YAxis
                   allowDecimals={false}
-                  tick={{ fill: '#666' }}
-                  tickLine={{ stroke: '#666' }}
+                  tick={{ fill: "#666" }}
+                  tickLine={{ stroke: "#666" }}
                 />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                    border: 'none',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                    backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    border: "none",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                   }}
                   formatter={(value, name) => {
                     const labels = {
-                      totalJobs: 'Tổng tin',
-                      activeJobs: 'Đang tuyển',
-                      closedJobs: 'Đã đóng',
-                      pendingJobs: 'Chờ duyệt'
+                      totalJobs: "Tổng tin",
+                      activeJobs: "Đang tuyển",
+                      closedJobs: "Đã đóng",
+                      pendingJobs: "Chờ duyệt",
                     };
                     return [value, labels[name] || name];
                   }}
@@ -510,7 +563,7 @@ export default function CompanyDetail() {
 
       {/* Modal xác nhận xóa */}
       {showDeleteModal && (
-        <DeleteConfirmationModal 
+        <DeleteConfirmationModal
           isOpen={showDeleteModal}
           onClose={() => setShowDeleteModal(false)}
           onConfirm={handleDelete}
@@ -519,17 +572,22 @@ export default function CompanyDetail() {
       )}
     </div>
   );
-} 
+}
 
-const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, companyName }) => {
+const DeleteConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  companyName,
+}) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Xác nhận xóa công ty</DialogTitle>
           <DialogDescription>
-            Bạn có chắc chắn muốn xóa công ty "{companyName}"? 
-            Hành động này không thể hoàn tác.
+            Bạn có chắc chắn muốn xóa công ty "{companyName}"? Hành động này
+            không thể hoàn tác.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -543,4 +601,4 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, companyName }) =>
       </DialogContent>
     </Dialog>
   );
-}; 
+};
