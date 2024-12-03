@@ -299,7 +299,14 @@ public class AuthController {
 			}
 
 			UserAccount user = userOpt.get();
-			String role = user.getUserType().getUserTypeId() == 2 ? "ROLE_USER" : "ROLE_EMPLOYER";
+			String role;
+if (user.getUserType().getUserTypeId() == 1) {
+    role = "ROLE_ADMIN";
+} else if (user.getUserType().getUserTypeId() == 2) {
+    role = "ROLE_USER";
+} else {
+    role = "ROLE_EMPLOYER"; // Giả sử rằng nếu không phải là ADMIN hoặc USER thì sẽ là EMPLOYER
+}
 
 			Map<String, String> response = new HashMap<>();
 			response.put("role", role);
@@ -321,6 +328,8 @@ public class AuthController {
 		String email = decodedJWT.getClaim("email").asString();
 		
 		String jwtToken = jwtProvider.generateTokenFromEmail(email); // Sử dụng auth trực tiếp
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+		user.get().setLastLogin(LocalDateTime.now());
 
 		// Trả về JWT token cho người dùng
 		System.out.println("a" + jwtToken);
@@ -396,6 +405,7 @@ public class AuthController {
 				newUser.setOtp(null);
 				newUser.setOtpGeneratedTime(null);
 				newUser.setProvider("Google");
+				newUser.setLastLogin(LocalDateTime.now());
 				userAccountRepository.save(newUser);
 
 			}

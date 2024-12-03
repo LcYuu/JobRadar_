@@ -48,7 +48,8 @@ import {
   getReviewByCompany,
   deleteReview,
 } from "../../redux/Review/review.action";
-import anonymousIcon from "../../assets/icons/anonymous.png"
+import anonymousIcon from "../../assets/icons/anonymous.png";
+import Swal from "sweetalert2";
 const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
   return (
     <div className="flex">
@@ -109,7 +110,7 @@ export default function CompanyProfile() {
   const [feedback, setFeedback] = useState({
     star: 0,
     message: "",
-    isAnonymous: false
+    isAnonymous: false,
   });
 
   const handleRatingChange = (newRating) => {
@@ -130,7 +131,7 @@ export default function CompanyProfile() {
   useEffect(() => {
     if (reviews && user) {
       const userReview = reviews.find(
-        review => review.seeker?.userAccount?.userId === user.userId
+        (review) => review.seeker?.userAccount?.userId === user.userId
       );
       if (userReview) {
         setHasReviewed(true);
@@ -138,7 +139,7 @@ export default function CompanyProfile() {
         setFeedback({
           star: userReview.star,
           message: userReview.message,
-          isAnonymous: userReview.anonymous
+          isAnonymous: userReview.anonymous,
         });
       } else {
         setHasReviewed(false);
@@ -167,32 +168,50 @@ ${feedback.isAnonymous ? "\n(Đánh giá này sẽ được đăng ẩn danh)" :
 
 Bạn có chắc chắn muốn thay đổi đánh giá không?`;
 
-        if (!window.confirm(confirmMessage)) {
+        // Sử dụng Swal để thay thế window.confirm
+        const result = await Swal.fire({
+          title: "Xác nhận thay đổi đánh giá",
+          text: confirmMessage,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Đồng ý",
+          cancelButtonText: "Hủy",
+        });
+
+        if (!result.isConfirmed) {
           return;
         }
 
         await dispatch(deleteReview(existingReview.reviewId));
       }
 
-      await dispatch(createReview({
-        star: feedback.star,
-        message: feedback.message,
-        isAnonymous: feedback.isAnonymous
-      }, companyId));
+      await dispatch(
+        createReview(
+          {
+            star: feedback.star,
+            message: feedback.message,
+            isAnonymous: feedback.isAnonymous,
+          },
+          companyId
+        )
+      );
 
       await dispatch(getReviewByCompany(companyId));
 
       toast.success("Gửi đánh giá thành công");
-      
-      setFeedback({ 
-        star: 0, 
-        message: "", 
-        isAnonymous: false 
-      });
 
+      setFeedback({
+        star: 0,
+        message: "",
+        isAnonymous: false,
+      });
     } catch (error) {
       console.error("Error in review process:", error);
-      toast.error(error.response?.data || "Có lỗi xảy ra trong quá trình xử lý");
+      toast.error(
+        error.response?.data || "Có lỗi xảy ra trong quá trình xử lý"
+      );
     }
   };
 
@@ -236,9 +255,9 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
     try {
       await dispatch(followCompany(companyId));
       setIsFollowing((prevState) => !prevState); // Đảo trạng thái
-      const mess= isFollowing
+      const mess = isFollowing
         ? "Bỏ theo dõi thành công!"
-        : "Theo dõi thành công!"
+        : "Theo dõi thành công!";
       toast(mess);
     } catch (error) {
       // Xử lý lỗi nếu có
@@ -256,7 +275,19 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
   console.log(checkIfSaved);
 
   const handleDeleteReview = async (reviewId) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa đánh giá này không?")) {
+    // Sử dụng Swal để xác nhận
+    const result = await Swal.fire({
+      title: "Bạn có chắc chắn muốn xóa đánh giá này không?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+    });
+
+    // Kiểm tra nếu người dùng chọn "Xóa"
+    if (result.isConfirmed) {
       try {
         await dispatch(deleteReview(reviewId));
         toast.success("Xóa đánh giá thành công");
@@ -367,7 +398,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
             </div>
             <Button
               onClick={handleFollowClick}
-              className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="mt-6 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-700"
             >
               {isFollowing ? "Bỏ theo dõi" : "Theo dõi"}
             </Button>
@@ -376,7 +407,9 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         {/* Company Profile, Tech Stack, and Office Location Grid */}
         <div className="grid grid-cols-3 gap-8 mb-12">
           <div className="col-span-2">
-            <h2 className="text-xl font-semibold mb-4">Giới thiệu</h2>
+            <h2 className="text-xl text-purple-600 font-semibold mb-4">
+              Giới thiệu
+            </h2>
             <p className="text-gray-600 leading-relaxed">
               {companyProfile?.description}
             </p>
@@ -404,7 +437,9 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         </div>
         {/* Contact Section */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Liên hệ</h2>
+          <h2 className="text-xl text-purple-600 font-semibold mb-4">
+            Liên hệ
+          </h2>
           <div className="space-y-2">
             <div className="flex items-center space-x-2 px-4 py-2 bg-gray-100 rounded-md">
               <Mail className="h-4 w-4 text-muted-foreground" />
@@ -418,7 +453,9 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         </div>
 
         {/* Company Images */}
-        <h2 className="text-xl font-semibold mb-4">Một số hình ảnh công ty</h2>
+        <h2 className="text-xl text-purple-600 font-semibold mb-4">
+          Một số hình ảnh công ty
+        </h2>
         <div className="mb-12">
           {companyProfile?.images && companyProfile?.images.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -465,7 +502,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
           )}
         </div>
 
-        <h2 className="text-xl font-semibold mb-4">Đánh giá</h2>
+        <h2 className="text-xl text-purple-600 font-semibold mb-4">Đánh giá</h2>
         <div className="mt-8 p-6 border rounded-lg bg-gray-100 shadow-lg">
           <div className="mb-8">
             <h3 className="text-xl font-semibold mb-6 text-gray-800">
@@ -478,10 +515,17 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
               reviews
                 .sort((a, b) => new Date(b.createDate) - new Date(a.createDate))
                 .map((review, index) => (
-                  <div key={index} className="mb-6 p-4 border-b border-gray-300 rounded-md hover:bg-blue-100 hover:shadow-lg">
+                  <div
+                    key={index}
+                    className="mb-6 p-4 border-b border-gray-300 rounded-md hover:bg-purple-100 hover:shadow-lg"
+                  >
                     <div className="flex items-start mb-4">
                       <img
-                        src={review.anonymous ? anonymousIcon : review?.seeker?.userAccount?.avatar}
+                        src={
+                          review.anonymous
+                            ? anonymousIcon
+                            : review?.seeker?.userAccount?.avatar
+                        }
                         alt="Avatar"
                         className="w-12 h-12 rounded-full object-cover mr-4"
                       />
@@ -491,28 +535,37 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                             {review.anonymous
                               ? "Người dùng ẩn danh"
                               : review?.seeker?.userAccount?.userName
-                                ? `${review.seeker.userAccount.userName[0]}${"*".repeat(
-                                    review.seeker.userAccount.userName.length - 2
-                                  )}${
-                                    review.seeker.userAccount.userName[
-                                      review.seeker.userAccount.userName.length - 1
-                                    ]
-                                  }`
-                                : ""}
+                              ? `${
+                                  review.seeker.userAccount.userName[0]
+                                }${"*".repeat(
+                                  review.seeker.userAccount.userName.length - 2
+                                )}${
+                                  review.seeker.userAccount.userName[
+                                    review.seeker.userAccount.userName.length -
+                                      1
+                                  ]
+                                }`
+                              : ""}
                           </span>
                           <div className="flex items-center gap-4">
                             <span className="text-sm text-gray-500">
-                              {new Date(review?.createDate).toLocaleDateString("vi-VN", {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit"
-                              })}
+                              {new Date(review?.createDate).toLocaleDateString(
+                                "vi-VN",
+                                {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )}
                             </span>
-                            {review?.seeker?.userAccount?.userId === user?.userId && (
+                            {review?.seeker?.userAccount?.userId ===
+                              user?.userId && (
                               <button
-                                onClick={() => handleDeleteReview(review.reviewId)}
+                                onClick={() =>
+                                  handleDeleteReview(review.reviewId)
+                                }
                                 className="text-red-600 hover:text-red-800 text-sm font-medium"
                               >
                                 Xóa
@@ -546,12 +599,16 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
 
             {/* Hiển thị đánh giá hiện tại */}
             {hasReviewed && (
-              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
-                <p className="text-sm text-blue-600 mb-2">Đánh giá hiện tại của bạn:</p>
+              <div className="mb-4 p-4 bg-blue-50 border border-purple-200 rounded-md">
+                <p className="text-sm text-purple-600 mb-2">
+                  Đánh giá hiện tại của bạn:
+                </p>
                 <div className="flex items-center mb-2">
                   <RatingStars value={existingReview.star} readOnly={true} />
                 </div>
-                <p className="text-gray-600">{existingReview.message}</p>
+                <p className="font-bold text-purple-600">
+                  {existingReview.message}
+                </p>
                 <p className="text-sm text-gray-500 mt-2">
                   {existingReview.isAnonymous ? "(Đánh giá ẩn danh)" : ""}
                 </p>
@@ -573,7 +630,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                 value={feedback.message}
                 onChange={handleReviewChange}
                 rows={4}
-                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
 
               <div className="flex items-center gap-2">
@@ -581,17 +638,22 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                   type="checkbox"
                   id="anonymous"
                   checked={feedback.isAnonymous}
-                  onChange={(e) => setFeedback(prev => ({ ...prev, isAnonymous: e.target.checked }))}
-                  className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  onChange={(e) =>
+                    setFeedback((prev) => ({
+                      ...prev,
+                      isAnonymous: e.target.checked,
+                    }))
+                  }
+                  className="w-4 h-4 rounded border-purple-300 text-purple-600 focus:ring-purple-500"
                 />
-                <label htmlFor="anonymous" className="text-sm text-gray-600">
+                <label htmlFor="anonymous" className="text-sm text-purple-600">
                   Đăng đánh giá ẩn danh
                 </label>
               </div>
 
               <button
                 type="button"
-                className="w-full px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-6 py-3 bg-purple-500 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 onClick={handleSubmitReview}
               >
                 {hasReviewed ? "Cập nhật đánh giá" : "Gửi đánh giá"}
@@ -670,7 +732,9 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         {/* Open Jobs */}
         <div>
           <div className="flex items-center justify-between mb-6 mt-7">
-            <h2 className="text-xl font-semibold">Vị trí đang tuyển</h2>
+            <h2 className="text-xl text-purple-600 font-semibold">
+              Vị trí đang tuyển
+            </h2>
             {/* {totalPages > 1 && (
               <div className="flex items-center space-x-2">
                 <Button

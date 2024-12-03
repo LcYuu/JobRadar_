@@ -15,7 +15,7 @@ const SkillJobPostModal = ({ open, handleClose, postId }) => {
   const { skills } = useSelector((store) => store.skill);
   const { detailJob } = useSelector((store) => store.jobPost);
   const [selectedSkills, setSelectedSkills] = useState(detailJob?.skills || []);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
 
   useEffect(() => {
     if (open && detailJob.skills) {

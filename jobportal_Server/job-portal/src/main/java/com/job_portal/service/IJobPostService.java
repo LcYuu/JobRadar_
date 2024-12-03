@@ -43,4 +43,5 @@ public interface IJobPostService {
 	public List<Map<String, Object>> getCompanyJobStats(UUID companyId, LocalDate startDate, LocalDate endDate);
 	List<JobPost> getSimilarJobsByIndustry(Integer industryId, UUID jobPostId);
 	public void updateExpiredJobs();
+	public boolean canPostJob(UUID companyId);
 }

@@ -17,6 +17,7 @@ import {
 } from "../../redux/JobPost/jobPost.action";
 import { validateTaxCode } from "../../redux/Company/company.action";
 import { toast, ToastContainer } from "react-toastify";
+import Swal from "sweetalert2";
 
 const JobManagement = () => {
   const work = [
@@ -42,11 +43,11 @@ const JobManagement = () => {
   const [size, setSize] = useState(5);
   const [status, setStatus] = useState("");
   const [typeOfWork, setTypeOfWork] = useState("");
-  const [sortBy, setSortBy] = useState({
-    createDate: "DESC",
-    expireDate: "",
-    count: "",
-  });
+  // const [sortBy, setSortBy] = useState({
+  //   createDate: "",
+  //   expireDate: "",
+  //   count: "",
+  // });
   const [filtered, setFiltered] = useState([]); // Kết quả sau lọc;
   const handleViewDetails = (postId) => {
     navigate(`/employer/jobs/${postId}`);
@@ -58,6 +59,24 @@ const JobManagement = () => {
   const handleOpenModal = (postId) => {
     setSelectedJobId(postId); // Lưu postId vào state
     setIsModalOpen(true); // Mở modal
+  };
+
+  const handleOpenExpireConfirmation = () => {
+    Swal.fire({
+      title: 'Xác nhận',
+      text: 'Bạn có chắc chắn muốn dừng tuyển dụng công việc này?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#28a745', // Màu nút "Có"
+      cancelButtonColor: '#dc3545', // Màu nút "Không"
+      confirmButtonText: 'Có',
+      cancelButtonText: 'Không',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Nếu người dùng xác nhận
+        handleConfirmExpire(); // Thực hiện hành động dừng tuyển dụng
+      }
+    });
   };
 
   const handleCloseModal = () => {
@@ -73,9 +92,9 @@ const JobManagement = () => {
       findEmployerCompany(
         status,
         typeOfWork,
-        sortBy.createDate, // Lấy giá trị từ state sortBy
-        sortBy.expireDate,
-        sortBy.count,
+        // sortBy.createDate, // Lấy giá trị từ state sortBy
+        // sortBy.expireDate,
+        // sortBy.count,
         currentPage,
         size
       )
@@ -90,18 +109,18 @@ const JobManagement = () => {
       findEmployerCompany(
         status,
         typeOfWork,
-        sortBy.createDate, // Lấy giá trị từ state sortBy
-        sortBy.expireDate,
-        sortBy.count,
+        // sortBy.createDate, // Lấy giá trị từ state sortBy
+        // sortBy.expireDate,
+        // sortBy.count,
         currentPage,
         size
       )
     );
   }, [
     dispatch,
-    sortBy.createDate, // Chỉ theo dõi sự thay đổi của sortBy
-    sortBy.expireDate,
-    sortBy.count,
+    // sortBy.createDate, // Chỉ theo dõi sự thay đổi của sortBy
+    // sortBy.expireDate,
+    // sortBy.count,
     currentPage,
     size,
   ]);
@@ -121,25 +140,25 @@ const JobManagement = () => {
     setCurrentPage(0); // Reset về trang đầu khi thay đổi số lượng bản ghi mỗi trang
   };
 
-  const handleSort = (column) => {
-    setSortBy((prevState) => {
-      // Tạo một đối tượng mới với tất cả các cột đã được đặt lại thành null
-      const newSort = prevState[column] === "ASC" ? "DESC" : "ASC";
-      const newState = {
-        [column]: newSort, // Cập nhật giá trị của cột hiện tại
-      };
+  // const handleSort = (column) => {
+  //   setSortBy((prevState) => {
+  //     // Tạo một đối tượng mới với tất cả các cột đã được đặt lại thành null
+  //     const newSort = prevState[column] === "ASC" ? "DESC" : "ASC";
+  //     const newState = {
+  //       [column]: newSort, // Cập nhật giá trị của cột hiện tại
+  //     };
 
-      // Đặt các cột còn lại thành null
-      Object.keys(prevState).forEach((key) => {
-        if (key !== column) {
-          newState[key] = "";
-        }
-      });
-      setCurrentPage(0);
+  //     // Đặt các cột còn lại thành null
+  //     Object.keys(prevState).forEach((key) => {
+  //       if (key !== column) {
+  //         newState[key] = "";
+  //       }
+  //     });
+  //     setCurrentPage(0);
 
-      return newState;
-    });
-  };
+  //     return newState;
+  //   });
+  // };
 
   const applyFilters = () => {
     setCurrentPage(0);
@@ -227,22 +246,25 @@ const JobManagement = () => {
               <th className="text-left p-4">Trạng thái</th>
               <th
                 className="text-left p-4 cursor-pointer"
-                onClick={() => handleSort("createDate")}
+                // onClick={() => handleSort("createDate")}
               >
-                Ngày bắt đầu {sortBy.createDate === "ASC" ? "↑" : "↓"}
+                Ngày bắt đầu 
+                {/* {sortBy.createDate === "ASC" ? "↑" : "↓"} */}
               </th>
               <th
                 className="text-left p-4 cursor-pointer"
-                onClick={() => handleSort("expireDate")}
+                // onClick={() => handleSort("expireDate")}
               >
-                Ngày kết thúc {sortBy.expireDate === "ASC" ? "↑" : "↓"}
+                Ngày kết thúc 
+                {/* {sortBy.expireDate === "ASC" ? "↑" : "↓"} */}
               </th>
               <th className="text-left p-4">Loại công việc</th>
               <th
                 className="text-left p-4 cursor-pointer"
-                onClick={() => handleSort("count")}
+                // onClick={() => handleSort("count")}
               >
-                Số lượng ứng viên {sortBy.count === "ASC" ? "↑" : "↓"}
+                Số lượng ứng viên 
+                {/* {sortBy.count === "ASC" ? "↑" : "↓"} */}
               </th>
             </tr>
           </thead>
@@ -295,7 +317,7 @@ const JobManagement = () => {
                       >
                         <DropdownMenuItem
                           className="hover:bg-gray-100 cursor-pointer"
-                          onClick={() => handleOpenModal(job.postId)}
+                          onClick={handleOpenExpireConfirmation}
                         >
                           Dừng tuyển dụng
                         </DropdownMenuItem>
@@ -393,7 +415,7 @@ const JobManagement = () => {
         autoClose={5000}
         hideProgressBar={true}
       />
-      {isModalOpen && (
+      {/* {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50">
           <div className="bg-white p-6 rounded-lg w-1/3">
             <h3 className="text-lg font-semibold">Xác nhận</h3>
@@ -416,7 +438,7 @@ const JobManagement = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

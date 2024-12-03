@@ -7,9 +7,12 @@ import CloseIcon from "@mui/icons-material/Close";
 
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
-import * as Yup from 'yup';
-import { createExperience, getExpByUser, updateExperience } from "../../redux/Experience/exp.action";
-
+import * as Yup from "yup";
+import {
+  createExperience,
+  getExpByUser,
+  updateExperience,
+} from "../../redux/Experience/exp.action";
 
 const style = {
   position: "absolute",
@@ -28,7 +31,14 @@ const style = {
   border: "none",
 };
 
-export default function ExpModal({ open, handleClose, editingExperienceId, setEditingExperienceId, initialData, showSuccessToast }) {
+export default function ExpModal({
+  open,
+  handleClose,
+  editingExperienceId,
+  setEditingExperienceId,
+  initialData,
+  showSuccessToast,
+}) {
   const validationSchema = Yup.object({
     jobTitle: Yup.string().required("Vui lòng nhập tiêu đề công việc"),
     companyName: Yup.string().required("Vui lòng nhập tên công ty"),
@@ -62,10 +72,10 @@ export default function ExpModal({ open, handleClose, editingExperienceId, setEd
         if (editingExperienceId) {
           await dispatch(updateExperience(editingExperienceId, values));
           setEditingExperienceId(null);
-          showSuccessToast('Cập nhật kinh nghiệm thành công!');
+          showSuccessToast("Cập nhật kinh nghiệm thành công!");
         } else {
           await dispatch(createExperience(values));
-          showSuccessToast('Cập nhật kinh nghiệm thành công!');
+          showSuccessToast("Cập nhật kinh nghiệm thành công!");
         }
         handleClose();
         dispatch(getExpByUser()); // Refresh the experience list
@@ -78,39 +88,41 @@ export default function ExpModal({ open, handleClose, editingExperienceId, setEd
   });
 
   return (
-    <Modal
-      open={open}
-      onClose={handleClose}
-      className="animate-fadeIn"
-    >
-      <Box sx={style}>
+    <Modal open={open} onClose={handleClose} className="animate-fadeIn">
+      <Box sx={style} className="bg-white rounded-lg p-6 shadow-lg">
         <form onSubmit={formik.handleSubmit} className="space-y-6">
           <div className="flex items-center justify-between border-b pb-4">
             <div className="flex items-center space-x-3">
               <IconButton onClick={handleClose} className="hover:bg-gray-100">
                 <CloseIcon />
               </IconButton>
-              <h2 className="text-xl font-semibold">
-                {editingExperienceId ? 'Edit Experience' : 'Add Experience'}
+              <h2 className="text-xl mt-6 font-semibold text-gray-800">
+                {editingExperienceId ? "Chỉnh sửa kinh nghiệm" : "Tạo kinh nghiệm"}
               </h2>
             </div>
-            <Button 
-              type="submit" 
+
+            <Button
+              type="submit"
               variant="contained"
               disabled={isLoading}
               sx={{
-                backgroundColor: '#2563eb',
-                '&:hover': {
-                  backgroundColor: '#1d4ed8',
+                backgroundColor: "#7c3aed", // Màu tím
+                "&:hover": {
+                  backgroundColor: "#6d28d9", // Màu tím đậm khi hover
                 },
               }}
+              className="text-white"
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">
                   <span className="animate-spin">⏳</span>
                   <span>Saving...</span>
                 </div>
-              ) : editingExperienceId ? 'Update' : 'Create'}
+              ) : editingExperienceId ? (
+                "Update"
+              ) : (
+                "Create"
+              )}
             </Button>
           </div>
 
@@ -120,32 +132,34 @@ export default function ExpModal({ open, handleClose, editingExperienceId, setEd
               fullWidth
               id="startDate"
               name="startDate"
-              InputLabelProps={{ 
+              InputLabelProps={{
                 shrink: true,
-                className: "font-semibold"
+                className: "font-semibold",
               }}
               label="Start Date"
               value={formik.values.startDate}
               onChange={formik.handleChange}
-              error={formik.touched.startDate && Boolean(formik.errors.startDate)}
+              error={
+                formik.touched.startDate && Boolean(formik.errors.startDate)
+              }
               helperText={formik.touched.startDate && formik.errors.startDate}
-              className="bg-white rounded-lg"
+              className="bg-white rounded-lg shadow-sm"
             />
             <TextField
               type="date"
               fullWidth
               id="endDate"
               name="endDate"
-              InputLabelProps={{ 
+              InputLabelProps={{
                 shrink: true,
-                className: "font-semibold"
+                className: "font-semibold",
               }}
               label="End Date"
               value={formik.values.endDate}
               onChange={formik.handleChange}
               error={formik.touched.endDate && Boolean(formik.errors.endDate)}
               helperText={formik.touched.endDate && formik.errors.endDate}
-              className="bg-white rounded-lg"
+              className="bg-white rounded-lg shadow-sm"
             />
           </div>
 
@@ -159,7 +173,7 @@ export default function ExpModal({ open, handleClose, editingExperienceId, setEd
               onChange={formik.handleChange}
               error={formik.touched.jobTitle && Boolean(formik.errors.jobTitle)}
               helperText={formik.touched.jobTitle && formik.errors.jobTitle}
-              className="bg-white rounded-lg"
+              className="bg-white rounded-lg shadow-sm"
             />
             <TextField
               fullWidth
@@ -168,9 +182,13 @@ export default function ExpModal({ open, handleClose, editingExperienceId, setEd
               label="Company Name"
               value={formik.values.companyName}
               onChange={formik.handleChange}
-              error={formik.touched.companyName && Boolean(formik.errors.companyName)}
-              helperText={formik.touched.companyName && formik.errors.companyName}
-              className="bg-white rounded-lg"
+              error={
+                formik.touched.companyName && Boolean(formik.errors.companyName)
+              }
+              helperText={
+                formik.touched.companyName && formik.errors.companyName
+              }
+              className="bg-white rounded-lg shadow-sm"
             />
             <TextField
               fullWidth
@@ -181,9 +199,13 @@ export default function ExpModal({ open, handleClose, editingExperienceId, setEd
               rows={4}
               value={formik.values.description}
               onChange={formik.handleChange}
-              error={formik.touched.description && Boolean(formik.errors.description)}
-              helperText={formik.touched.description && formik.errors.description}
-              className="bg-white rounded-lg"
+              error={
+                formik.touched.description && Boolean(formik.errors.description)
+              }
+              helperText={
+                formik.touched.description && formik.errors.description
+              }
+              className="bg-white rounded-lg shadow-sm"
             />
           </div>
         </form>

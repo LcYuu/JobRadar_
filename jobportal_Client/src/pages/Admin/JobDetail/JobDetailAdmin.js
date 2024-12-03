@@ -107,7 +107,7 @@ export default function JobDetailAdmin() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <Card className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex justify-between items-center mb-6">
             <Button
               variant="ghost"
@@ -164,13 +164,13 @@ export default function JobDetailAdmin() {
               )}
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-3 gap-6">
           {/* Left Column - 2/3 width */}
           <div className="col-span-2 space-y-6">
-            <Card>
+            <Card className="bg-white rounded-lg shadow-md">
               <CardHeader>
                 <h2 className="text-xl font-semibold">Thông tin chi tiết</h2>
               </CardHeader>
@@ -263,7 +263,7 @@ export default function JobDetailAdmin() {
             </Card>
 
             {/* Description Card */}
-            <Card>
+            <Card className="bg-white rounded-lg shadow-md">
               <CardContent className="space-y-6 pt-6">
                 <section className="prose max-w-none">
                   <h2 className="text-xl font-semibold mb-4">Mô tả công việc</h2>
@@ -315,7 +315,7 @@ export default function JobDetailAdmin() {
 
           {/* Right Column - 1/3 width */}
           <div className="space-y-6">
-            <Card className="hover:shadow-lg transition-shadow cursor-pointer" 
+            <Card className="hover:shadow-lg bg-white rounded-lg shadow-md transition-shadow cursor-pointer" 
                   onClick={() => navigate(`/admin/companies/${job.company?.companyId}`)}>
               <CardHeader>
                 <h2 className="text-xl font-semibold">Thông tin công ty</h2>
