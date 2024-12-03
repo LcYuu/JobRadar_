@@ -33,10 +33,10 @@ public class JobPost {
     private UUID postId;
 
     @Column(name = "create_date", nullable = false)
-    private LocalDate createDate;
+    private LocalDateTime createDate;
 
     @Column(name = "expire_date", nullable = false)
-    private LocalDate expireDate;
+    private LocalDateTime expireDate;
 
     @Column(name = "title", length = 100, nullable = false)
     private String title;
