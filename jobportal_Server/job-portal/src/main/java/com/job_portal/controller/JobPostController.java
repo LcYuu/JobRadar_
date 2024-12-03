@@ -643,11 +643,14 @@ public class JobPostController {
 	}
 
 	@GetMapping("/admin/all-jobs")
-	public ResponseEntity<Page<JobPost>> getAllJobsForAdmin(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "5") int size) {
+	public ResponseEntity<Page<JobPost>> getAllJobsForAdmin(
+			@RequestParam(required = false, defaultValue = "") String title,
+			@RequestParam(required = false, defaultValue = "") String status,
+			@RequestParam(required = false, defaultValue = "") Boolean isApprove,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
 		Pageable pageable = PageRequest.of(page, size);
-		Page<JobPost> jobs = jobPostRepository.findAll(pageable);
-		return new ResponseEntity<>(jobs, HttpStatus.OK);
+		Page<JobPost> jobPosts = jobPostRepository.searchJobPosts(title, status, isApprove, pageable);
+		return ResponseEntity.ok(jobPosts);
 	}
 
 	@GetMapping("/similar-jobs")

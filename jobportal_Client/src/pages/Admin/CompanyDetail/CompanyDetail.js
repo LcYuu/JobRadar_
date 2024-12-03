@@ -20,6 +20,8 @@ import {
   Phone,
   Mail,
   Clock,
+  Code2,
+  Banknote,
 } from "lucide-react";
 import {
   getCompanyById,
@@ -391,6 +393,16 @@ export default function CompanyDetail() {
                         companyProfile.establishedTime
                       ).toLocaleDateString("vi-VN")
                     : "Chưa cập nhật"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <Banknote className="w-5 h-5 text-gray-500" />
+              <div>
+                <p className="text-sm text-gray-600">Mã số thuế</p>
+                <p className="font-medium">
+                  {companyProfile?.taxCode || "Chưa cập nhật"}
                 </p>
               </div>
             </div>
