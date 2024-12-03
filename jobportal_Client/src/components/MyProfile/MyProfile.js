@@ -39,6 +39,7 @@ import ExpModal from "./ExpModal";
 import EduModal from "./EduModal";
 import { getIndustry } from "../../redux/Industry/industry.action";
 import { formatDate, formatDateForInput } from "../../utils/dateUtils";
+import Swal from "sweetalert2";
 
 export default function MyProfile() {
   const colors = [
@@ -135,7 +136,16 @@ export default function MyProfile() {
   });
 
   const handleDeleteExp = async (experienceId) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa kinh nghiệm này?")) {
+    const result = await Swal.fire({
+      title: "Xác nhận xóa kinh nghiệm",
+      text: "Bạn có chắc chắn muốn xóa kinh nghiệm này?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Có",
+      cancelButtonText: "Không",
+    });
+
+    if (result.isConfirmed) {
       try {
         await dispatch(deleteExperience(experienceId));
         dispatch(getExpByUser());
@@ -151,7 +161,16 @@ export default function MyProfile() {
   };
 
   const handleDeleteEdu = async (educationId) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa học vấn này?")) {
+    const result = await Swal.fire({
+      title: "Xác nhận xóa học vấn",
+      text: "Bạn có chắc chắn muốn xóa học vấn này?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Có",
+      cancelButtonText: "Không",
+    });
+
+    if (result.isConfirmed) {
       try {
         await dispatch(deleteEducation(educationId));
         dispatch(getEduByUser());
@@ -250,27 +269,49 @@ export default function MyProfile() {
   };
 
   const handleDeleteExperience = (experienceId) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa kinh nghiệm này?")) {
-      dispatch(deleteExperience(experienceId))
-        .then(() => {
-          setRefreshData(true);
-        })
-        .catch((error) => {
-          console.error("Error deleting experience:", error);
-        });
-    }
+    Swal.fire({
+      title: "Bạn có chắc chắn muốn xóa kinh nghiệm này?",
+      text: "Hành động này không thể hoàn tác!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(deleteExperience(experienceId))
+          .then(() => {
+            setRefreshData(true);
+          })
+          .catch((error) => {
+            console.error("Error deleting experience:", error);
+          });
+      }
+    });
   };
 
   const handleDeleteEducation = (educationId) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa thông tin giáo dục này?")) {
-      dispatch(deleteEducation(educationId))
-        .then(() => {
-          setRefreshData(true);
-        })
-        .catch((error) => {
-          console.error("Error deleting education:", error);
-        });
-    }
+    Swal.fire({
+      title: "Bạn có chắc chắn muốn xóa thông tin giáo dục này?",
+      text: "Hành động này không thể hoàn tác!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(deleteEducation(educationId))
+          .then(() => {
+            setRefreshData(true);
+          })
+          .catch((error) => {
+            console.error("Error deleting education:", error);
+          });
+      }
+    });
   };
 
   useEffect(() => {
@@ -371,7 +412,7 @@ export default function MyProfile() {
     <div className="min-h-screen bg-gray-50 -ml-8 -mr-8 ">
       <main className="container mx-auto p-6">
         {/* Profile Header Card */}
-        <Card className="mb-6">
+        <Card className="bg-white shadow-lg rounded-lg mb-6">
           <div className={`relative h-48 ${selectedBackground}`}>
             <Button
               size="icon"
@@ -395,6 +436,7 @@ export default function MyProfile() {
               </div>
             )}
           </div>
+
           <div className="relative px-6 pb-6">
             <Avatar className="absolute -top-16 h-32 w-32 border-4 border-white">
               <AvatarImage src={user?.avatar} />
@@ -405,11 +447,16 @@ export default function MyProfile() {
                 <h2 className="text-2xl font-semibold">{user?.userName}</h2>
                 <p className="text-muted-foreground">{seeker.address}</p>
               </div>
-              <Button variant="outline" onClick={handleOpenProfileModal}>
+              <Button
+                variant="outline"
+                onClick={handleOpenProfileModal}
+                className="bg-[#6441a5] text-white hover:bg-[#7f58af] transition-all duration-300 ease-in-out transform hover:scale-105"
+              >
                 Chỉnh sửa hồ sơ
               </Button>
             </div>
           </div>
+
           <section>
             <ProfileModal open={open} handleClose={handleClose} />
           </section>
@@ -420,9 +467,11 @@ export default function MyProfile() {
           {/* Left Column - 2/3 width */}
           <div className="md:col-span-2 space-y-6">
             {/* About Me */}
-            <Card>
+            <Card className="bg-white shadow-lg rounded-lg mb-6">
               <CardHeader className="flex flex-row items-center justify-between">
-                <h3 className="text-lg font-semibold">About Me</h3>
+                <h3 className="text-lg text-purple-600 font-semibold">
+                  About Me
+                </h3>
                 <Button
                   size="icon"
                   variant="ghost"
@@ -431,6 +480,7 @@ export default function MyProfile() {
                   <Edit className="h-4 w-4" />
                 </Button>
               </CardHeader>
+
               <CardContent>
                 {isEditingDes ? (
                   <div>
@@ -460,9 +510,11 @@ export default function MyProfile() {
             </Card>
 
             {/* Experience */}
-            <Card>
+            <Card className="bg-white shadow-lg rounded-lg mb-6">
               <CardHeader className="flex flex-row items-center justify-between">
-                <h3 className="text-lg font-semibold">Experiences</h3>
+                <h3 className="text-lg text-purple-600 font-semibold">
+                  Kinh nghiệm
+                </h3>
                 <Button size="icon" variant="ghost">
                   <Plus className="h-4 w-4" onClick={handleOpenExpModal} />
                 </Button>
@@ -535,10 +587,11 @@ export default function MyProfile() {
             </Card>
 
             {/* Education */}
-            {/* Education */}
-            <Card>
+            <Card className="bg-white shadow-lg rounded-lg mb-6">
               <CardHeader className="flex flex-row items-center justify-between">
-                <h3 className="text-lg font-semibold">Education</h3>
+                <h3 className="text-lg  text-purple-600 font-semibold">
+                  Học vấn
+                </h3>
                 <Button size="icon" variant="ghost">
                   <Plus className="h-4 w-4" onClick={handleOpenEduModal} />
                 </Button>
@@ -620,10 +673,12 @@ export default function MyProfile() {
             </Card>
 
             {/* Skills */}
-            <Card>
+            <Card className="bg-white shadow-lg rounded-lg">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-semibold">Skills</h3>
+                  <h3 className="text-lg  text-purple-600 font-semibold">
+                    Kỹ năng
+                  </h3>
                 </div>
                 <Button
                   size="icon"
@@ -634,7 +689,7 @@ export default function MyProfile() {
                   <Edit className="h-4 w-4" />
                 </Button>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 {seeker.skills &&
                 Array.isArray(seeker.skills) &&
                 seeker.skills.length > 0 ? (
@@ -645,7 +700,7 @@ export default function MyProfile() {
                         className={`${getColorByIndex(
                           index
                         )} bg-opacity-15 rounded-full px-4 py-2 text-sm 
-                          flex items-center gap-2 transition-all duration-200 hover:bg-opacity-25`}
+              flex items-center gap-2 transition-all duration-200 hover:bg-opacity-25`}
                       >
                         <span
                           className={`w-2 h-2 rounded-full ${getColorByIndex(
@@ -683,9 +738,11 @@ export default function MyProfile() {
           {/* Right Column - 1/3 width */}
           <div className="space-y-6">
             {/* Contact Info */}
-            <Card>
+            <Card className="bg-white shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between">
-                <h3 className="text-lg font-semibold">Thông tin khác</h3>
+                <h3 className="text-lg text-purple-600 font-semibold">
+                  Thông tin khác
+                </h3>
                 <Button
                   size="icon"
                   variant="ghost"
@@ -880,9 +937,11 @@ export default function MyProfile() {
             </Card>
 
             {/* Social Links */}
-            <Card>
+            <Card className="bg-white shadow-md">
               <CardHeader className="flex flex-row items-center justify-between">
-                <h3 className="text-lg font-semibold">Social Links</h3>
+                <h3 className="text-lg  text-purple-600 font-semibold">
+                  Liên kết xã hội
+                </h3>
                 <Button size="icon" variant="ghost">
                   <Edit className="h-4 w-4" />
                 </Button>

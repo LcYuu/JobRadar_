@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
-import { Card, CardContent } from "../../ui/card";
+
 import { Checkbox } from "../../ui/checkbox";
 import JobList_AllJob from "../../components/common/JobList_AllJob/JobList_AllJob";
 import {
@@ -9,11 +9,11 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
+
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
-import { Search, MapPin, ChevronDown, Grid, List, Star } from "lucide-react";
+import { Search, ChevronDown} from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   countJobByType,
@@ -21,7 +21,7 @@ import {
   getAllJobAction,
   searchJobs,
 } from "../../redux/JobPost/jobPost.action";
-import Pagination from "../../components/layout/Pagination";
+// import Pagination from "../../components/layout/Pagination";
 import { getCity } from "../../redux/City/city.action";
 import { getIndustryCount } from "../../redux/Industry/industry.action";
 import RangeSlider from "../../components/common/RangeSlider/RangeSlider";
@@ -186,18 +186,21 @@ export default function JobSearchPage() {
         </div>
 
         <div className="flex space-x-8 mt-20">
-          <aside className="w-64 space-y-6">
+          <aside className="w-80 space-y-6 bg-white p-6 rounded-lg shadow-lg">
             {/* Filter Section */}
             <div>
-              <h3 className="font-semibold mb-2 flex justify-between items-center">
+              <h3 className="font-semibold mb-2 flex justify-between items-center text-gray-800 tracking-tight">
                 Loại công việc
-                <ChevronDown size={20} />
+                <ChevronDown size={20} className="text-gray-500" />
               </h3>
               <div className="space-y-2">
                 {jobCountByType
                   .filter((job) => job.count > 0)
                   .map((job) => (
-                    <div className="flex items-center" key={job.typeOfWork}>
+                    <div
+                      className="flex items-center hover:bg-purple-100 p-2 rounded-lg"
+                      key={job.typeOfWork}
+                    >
                       <Checkbox
                         onCheckedChange={(checked) => {
                           const updatedTypesOfWork = checked
@@ -212,28 +215,38 @@ export default function JobSearchPage() {
                           });
                         }}
                       />
-                      <label className="ml-2 text-sm">
-                        {job.typeOfWork} ({job.count} việc làm )
+                      <label className="ml-2 text-sm text-gray-700 tracking-tight">
+                        {job.typeOfWork} ({job.count} việc làm)
                       </label>
                     </div>
                   ))}
               </div>
             </div>
+
+            {/* Industry Section */}
             <div>
-              <h3 className="font-semibold mb-2 flex justify-between items-center">
+              <h3 className="font-semibold mb-2 flex justify-between items-center text-gray-800 tracking-tight">
                 Danh mục
-                <ChevronDown size={20} />
+                <ChevronDown size={20} className="text-gray-500" />
               </h3>
               <div className="space-y-2">
                 {industryCount
-                  .filter(industry => industry.jobCount > 0)
+                  .filter((industry) => industry.jobCount > 0)
                   .map((industry) => (
-                    <div className="flex items-center" key={industry.industryId}>
+                    <div
+                      className="flex items-center hover:bg-purple-100 p-2 rounded-lg"
+                      key={industry.industryId}
+                    >
                       <Checkbox
-                        checked={filters.selectedIndustryIds.includes(industry.industryId)}
+                        checked={filters.selectedIndustryIds.includes(
+                          industry.industryId
+                        )}
                         onCheckedChange={(checked) => {
                           const updatedIndustryIds = checked
-                            ? [...filters.selectedIndustryIds, industry.industryId]
+                            ? [
+                                ...filters.selectedIndustryIds,
+                                industry.industryId,
+                              ]
                             : filters.selectedIndustryIds.filter(
                                 (id) => id !== industry.industryId
                               );
@@ -244,40 +257,48 @@ export default function JobSearchPage() {
                           });
                         }}
                       />
-                      <label className="ml-2 text-sm">
+                      <label className="ml-2 text-sm text-gray-700 tracking-tight">
                         {industry.industryName} ({industry.jobCount} việc làm)
                       </label>
                     </div>
                   ))}
               </div>
             </div>
-            <h3 className="font-semibold mb-2 flex justify-between items-center">
-              Bộ lọc theo mức lương
-            </h3>
-            <RangeSlider
-              min={minSalary}
-              max={maxSalary}
-              onChange={handleSalaryChange} // Truyền hàm để cập nhật mức lương
-            />
+
+            {/* Salary Range Filter */}
+            <div>
+              <h3 className="font-semibold mb-2 text-gray-800 tracking-tight">
+                Bộ lọc theo mức lương
+              </h3>
+              <RangeSlider
+                min={minSalary}
+                max={maxSalary}
+                onChange={handleSalaryChange}
+                className="w-full"
+              />
+            </div>
+
+            {/* Banner Section */}
             <div className="mt-10">
               <img
                 src="https://cdn-new.topcv.vn/unsafe/https://static.topcv.vn/img/Banner%202%20(1).png" // Thay đổi đường dẫn ảnh ở đây
                 alt="Banner"
-                className="w-full h-auto rounded-lg shadow-md"
+                className="w-full h-auto rounded-lg shadow-md transition-transform transform hover:scale-105"
               />
             </div>
           </aside>
 
           <div className="flex-grow space-y-4">
             <div className="flex justify-between items-center">
-              <div className="flex items-center space-x-2">
+              <div>
                 <h2 className="text-xl font-semibold">Tất cả công việc</h2>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm font-bold text-gray-500">
                   Tổng số: {isFilterApplied ? searchJob.length : jobPost.length}{" "}
                   kết quả
                 </span>
               </div>
-              <div className="flex items-center space-x-2">
+
+              {/* <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-500">Sắp xếp theo:</span>
                 <Select>
                   <SelectTrigger className="w-full">
@@ -311,7 +332,7 @@ export default function JobSearchPage() {
                     <List size={20} />
                   </Button>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             {results.length === 0 && isFilterApplied ? (
