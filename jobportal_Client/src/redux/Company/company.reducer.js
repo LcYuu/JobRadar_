@@ -55,7 +55,7 @@ const initialState = {
   message: null,
   error: null,
   totalPages: 0,
-  totalItems: 0,
+  totalElements: 0,
   jobCounts: null,
   jobStats: [],
   currentPage: 0
@@ -164,10 +164,9 @@ export const companyReducer = (state = initialState, action) => {
       return {
         ...state,
         loading: false,
-        companies: action.payload.companies,
-        currentPage: action.payload.currentPage,
-        totalItems: action.payload.totalItems,
-        totalPages: action.payload.totalPages,
+        companies: action.payload.content,
+        totalPages: action.payload.page.totalPages,
+        totalElements: action.payload.page.totalElements,
         error: null
       };
     case GET_ALL_COMPANIES_FAILURE:
