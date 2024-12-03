@@ -83,13 +83,13 @@ export default function JobList() {
             variant="outline"
             disabled={currentPage === 0}
             onClick={() => handlePageChange(currentPage - 1)}
-            className="border-[#6441a5] text-[#6441a5] hover:bg-[#6441a5] hover:text-white"
+            className="bg-white text-black"
           >
             Previous
           </Button>
           <Button
             variant="outline"
-            className="bg-[#6441a5] text-white hover:bg-[#5e3d9b]"
+            className="bg-purple-600 text-white"
             onClick={() => handlePageChange(currentPage)}
           >
             {currentPage + 1}
@@ -98,7 +98,7 @@ export default function JobList() {
             variant="outline"
             disabled={currentPage === totalPages - 1}
             onClick={() => handlePageChange(currentPage + 1)}
-            className="border-[#6441a5] text-[#6441a5] hover:bg-[#6441a5] hover:text-white"
+            className="bg-white text-black"
           >
             Next
           </Button>

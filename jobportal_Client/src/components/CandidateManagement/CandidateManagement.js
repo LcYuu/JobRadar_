@@ -159,6 +159,7 @@ const CandidateManagement = () => {
           <Button
             variant="outline"
             onClick={applyFilters} // Gọi hàm áp dụng lọc
+            className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-500 transition-colors"
           >
             <Filter className="w-4 h-4 mr-2" />
             Áp dụng
@@ -168,7 +169,7 @@ const CandidateManagement = () => {
 
       <div className="bg-white rounded-lg shadow">
         <table className="w-full">
-          <thead className="bg-gray-50">
+          <thead className="bg-purple-600 text-white">
             <tr>
               {/* <th className="p-4 text-left">
                 <input
@@ -241,7 +242,7 @@ const CandidateManagement = () => {
                     <div className="flex items-center gap-2">
                       <Button
                         variant="outline"
-                        className="text-indigo-600"
+                        className="text-purple-600"
                         onClick={() => window.open(candidate?.pathCV, "_blank")}
                       >
                         Xem CV
@@ -324,7 +325,7 @@ const CandidateManagement = () => {
             </Button>
             <Button
               variant="outline"
-              className="bg-indigo-600 text-white"
+              className="bg-purple-600 text-white"
               onClick={() => handlePageChange(currentPage)}
             >
               {currentPage + 1}

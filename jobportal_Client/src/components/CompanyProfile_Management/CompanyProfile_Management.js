@@ -268,7 +268,7 @@ const CompanyProfile_Management = () => {
           </div>
           <Button
             variant="outline"
-            className="mt-4 bg-blue-500 text-white hover:bg-blue-600 hover:text-white border border-blue-500 rounded-lg transition-all"
+            className="mt-4 bg-purple-500 text-white hover:bg-purple-600 hover:text-white border border-purple-500 rounded-lg transition-all"
             onClick={handleOpenProfileModal}
           >
             Chỉnh sửa hồ sơ
@@ -381,7 +381,7 @@ const CompanyProfile_Management = () => {
               <BanknoteIcon className="w-4 h-4 text-gray-500" />
               <span>{companyJwt?.taxCode}</span>
             </div>
-            <p className="text-sm text-red-500 mt-1">
+            <p className="text-sm text-purple-500 mt-1">
               Hãy tự giác cung cấp chính xác mã số thuế, nếu không bạn sẽ không
               thể tuyển dụng.
             </p>

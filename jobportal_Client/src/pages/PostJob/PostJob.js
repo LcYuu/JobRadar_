@@ -668,7 +668,7 @@ const PostJob = () => {
                 <Label>Trách nhiệm công việc</Label>
                 <p className="text-sm text-gray-500 mb-2">
                   Danh sách các trách nhiệm cho vị trí công việc này (**Chú ý:
-                  Mỗi trách nhiệm cách nhau bởi dấu ";")
+                  Mỗi trách nhiệm cách nhau bởi dấu xuống dòng)
                 </p>
                 <div className="border rounded-md">
                   <Editor
@@ -737,7 +737,7 @@ const PostJob = () => {
                 <p className="text-sm text-gray-500 mb-2">
                   Thêm các kỹ năng và trình độ cần có cho vai trò này để khuyến
                   khích nhiều ứng viên đa dạng hơn nộp đơn (**Chú ý: Mỗi yêu cầu
-                  cách nhau bởi dấu ";")
+                  cách nhau bởi dấu xuống dòng)
                 </p>
                 <div className="border rounded-md">
                   <Editor
@@ -788,7 +788,7 @@ const PostJob = () => {
                 <p className="text-sm text-gray-500 mb-2">
                   Thêm các phúc lợi mà công ty cung cấp để khuyến khích ứng viên
                   nộp đơn (**Chú ý: Mỗi đặc quyền hoặc lợi ích cách nhau bởi dấu
-                  ";")
+                  xuống dòng)
                 </p>
                 <div className="border rounded-md">
                   <Editor
@@ -925,9 +925,9 @@ const PostJob = () => {
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center ${
                   currentStep > index + 1
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-purple-600 text-white"
                     : currentStep === index + 1
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-purple-600 text-white"
                     : "bg-gray-200"
                 }`}
               >
@@ -957,7 +957,7 @@ const PostJob = () => {
         <div className="flex-1" />
         <Button
           variant="default"
-          className="bg-indigo-600"
+          className="bg-purple-600 text-white"
           onClick={currentStep === 3 ? handleSubmitJob : handleNextStep}
         >
           {currentStep === 3 ? "Đăng" : "Bước tiếp theo"}
@@ -975,7 +975,7 @@ const PostJob = () => {
             <div className="flex justify-end">
               <Button
                 variant="default"
-                className="bg-indigo-600"
+                className="bg-purple-600"
                 onClick={() => {
                   setShowSuccessModal(false);
                   navigate("/employer/account-management/job-management"); // Chuyển về trang quản lý việc làm
