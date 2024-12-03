@@ -6,21 +6,16 @@ import {
   updateUserStatus,
 } from "../../../redux/User/user.action";
 import { Button } from "../../../ui/button";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, Search } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../ui/select";
+
 import Swal from "sweetalert2";
+import { Input } from "../../../ui/input";
 
 export default function UserList() {
   const dispatch = useDispatch();
@@ -29,30 +24,13 @@ export default function UserList() {
   );
   const [currentPage, setCurrentPage] = useState(0);
   const [size, setSize] = useState(5);
-  const [filters, setFilters] = useState({
-    searchTerm: "",
-    role: "all",
-    status: "all",
-  });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [role, setRole] = useState("");
+  const [status, setStatus] = useState("");
 
   useEffect(() => {
-    dispatch(getAllUsers(currentPage, size, filters));
-  }, [dispatch, currentPage, size, filters]);
-
-  const handleSearch = (e) => {
-    setFilters((prev) => ({ ...prev, searchTerm: e.target.value }));
-    setCurrentPage(0);
-  };
-
-  const handleRoleFilter = (e) => {
-    setFilters((prev) => ({ ...prev, role: e.target.value }));
-    setCurrentPage(0);
-  };
-
-  const handleStatusFilter = (e) => {
-    setFilters((prev) => ({ ...prev, status: e.target.value }));
-    setCurrentPage(0);
-  };
+    dispatch(getAllUsers(searchTerm, role, status, currentPage, size));
+  }, [dispatch, currentPage, size]);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalPages) {
@@ -77,22 +55,16 @@ export default function UserList() {
     }).then((result) => {
       if (result.isConfirmed) {
         dispatch(deleteUser(userId)).then(() => {
-          dispatch(getAllUsers(currentPage, size, filters));
+          dispatch(getAllUsers(currentPage, size));
           Swal.fire("Đã xóa!", "Người dùng đã được xóa thành công.", "success");
         });
       }
     });
   };
 
-  const handleToggleStatus = (user) => {
-    dispatch(
-      updateUserStatus(user.userId, {
-        ...user,
-        active: !user.active,
-      })
-    ).then(() => {
-      dispatch(getAllUsers(currentPage, size, filters));
-    });
+  const applyFilters = () => {
+    setCurrentPage(0);
+    dispatch(getAllUsers(searchTerm, role, status, currentPage, size));
   };
 
   if (loading) return <div className="text-center py-8">Đang tải...</div>;
@@ -107,38 +79,45 @@ export default function UserList() {
         </div>
         <div className="flex items-center gap-4">
           <div className="relative">
-            <input
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Input
               type="text"
-              value={filters.searchTerm}
-              onChange={handleSearch}
-              placeholder="Tìm kiếm theo tên hoặc email..."
-              className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-80"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Tìm kiếm theo tên..."
+              className="pl-8 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 w-80"
             />
           </div>
           <select
-            value={filters.role}
-            onChange={handleRoleFilter}
-            className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
-            <option value="all">Tất cả loại tài khoản</option>
+            <option value="">Tất cả loại tài khoản</option>
             <option value="1">Admin</option>
             <option value="2">Seeker</option>
             <option value="3">Employer</option>
           </select>
           <select
-            value={filters.status}
-            onChange={handleStatusFilter}
-            className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
-            <option value="all">Tất cả trạng thái</option>
-            <option value="1">Còn hoạt động</option>
-            <option value="0">Đã khóa</option>
+            <option value="">Tất cả trạng thái</option>
+            <option value="true">Còn hoạt động</option>
+            <option value="false">Đã khóa</option>
           </select>
+          <Button
+            onClick={applyFilters}
+            className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            Áp dụng
+          </Button>
         </div>
       </div>
 
       <div className="bg-white rounded-lg shadow">
-        <table className="w-full">
+        <table className="w-full table-fixed">
           <thead className="bg-purple-600 text-white text-sm">
             <tr>
               <th className="text-left p-4">Avatar</th>
@@ -176,9 +155,9 @@ export default function UserList() {
                       </div>
                     </div>
                   </td>
-                  <td className="p-4">{user.userName}</td>
-                  <td className="p-4">{user.email}</td>
-                  <td className="p-4">
+                  <td className="p-4 truncate">{user.userName}</td>
+                  <td className="p-4 truncate">{user.email}</td>
+                  <td className="p-4 truncate">
                     <span className="px-2 py-1 rounded-full">
                       {user.userType.user_type_name}
                     </span>
@@ -225,7 +204,7 @@ export default function UserList() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
-                          onClick={() => handleToggleStatus(user)}
+                        // onClick={() => handleToggleStatus(user)}
                         >
                           {user.active ? "Khóa tài khoản" : "Mở khóa tài khoản"}
                         </DropdownMenuItem>
