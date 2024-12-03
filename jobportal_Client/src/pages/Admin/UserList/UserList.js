@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../ui/select";
+import Swal from "sweetalert2";
 
 export default function UserList() {
   const dispatch = useDispatch();
@@ -65,11 +66,22 @@ export default function UserList() {
   };
 
   const handleDeleteUser = (userId) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa người dùng này?")) {
-      dispatch(deleteUser(userId)).then(() => {
-        dispatch(getAllUsers(currentPage, size, filters));
-      });
-    }
+    Swal.fire({
+      title: "Bạn có chắc chắn muốn xóa người dùng này?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(deleteUser(userId)).then(() => {
+          dispatch(getAllUsers(currentPage, size, filters));
+          Swal.fire("Đã xóa!", "Người dùng đã được xóa thành công.", "success");
+        });
+      }
+    });
   };
 
   const handleToggleStatus = (user) => {
@@ -167,7 +179,7 @@ export default function UserList() {
                   <td className="p-4">{user.userName}</td>
                   <td className="p-4">{user.email}</td>
                   <td className="p-4">
-                    <span className="px-2 py-1 rounded-full text-xs">
+                    <span className="px-2 py-1 rounded-full">
                       {user.userType.user_type_name}
                     </span>
                   </td>
@@ -261,7 +273,7 @@ export default function UserList() {
             >
               Previous
             </Button>
-            <Button variant="outline" className="bg-indigo-600 text-white">
+            <Button variant="outline" className="bg-purple-600 text-white">
               {currentPage + 1}
             </Button>
             <Button

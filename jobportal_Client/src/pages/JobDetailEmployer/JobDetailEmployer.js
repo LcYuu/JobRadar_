@@ -23,6 +23,22 @@ import SkillJobPostModal from "./SkillJobPostModal";
 import { Badge } from "@mui/material";
 
 const JobDetailEmployer = () => {
+  const statusStyles = {
+    "Hết hạn": {
+      backgroundColor: "rgba(255, 0, 0, 0.1)", // Màu đỏ nhạt cho Hết hạn
+      color: "red", // Màu chữ đỏ
+    },
+    "Đang mở": {
+      backgroundColor: "rgba(0, 255, 0, 0.1)", // Màu xanh lá nhạt cho Đang mở
+      color: "green", // Màu chữ xanh lá
+    },
+    "Chưa được duyệt": {
+      backgroundColor: "rgba(255, 165, 0, 0.1)", // Màu cam nhạt cho Chưa được duyệt
+      color: "orange", // Màu chữ cam
+    },
+    // Bạn có thể thêm các trạng thái khác nếu cần
+  };
+
   const colors = [
     "bg-sky-500",
     "bg-purple-500",
@@ -183,7 +199,7 @@ const JobDetailEmployer = () => {
 
                 <div className="flex items-center mb-2 mt-4">
                   <label className="block text-gray-700 font-bold w-1/4">
-                    Vị trí cần tuyển:
+                    Vị trí:
                   </label>
                   <input
                     type="text"
@@ -210,7 +226,7 @@ const JobDetailEmployer = () => {
               </div>
             ) : (
               <div>
-                <h1 className="text-2xl font-bold mb-2">{detailJob?.title}</h1>
+                <h1 className="text-2xl text-purple-700 font-bold mb-2">{detailJob?.title}</h1>
                 <div className="flex items-center gap-4 text-gray-600">
                   <span className="flex items-center gap-1">
                     <User className="w-4 h-4" />
@@ -226,12 +242,15 @@ const JobDetailEmployer = () => {
           </div>
 
           <div className="flex gap-3">
-            {detailJob?.approve === false ? (
+            {detailJob?.status === "Hết hạn" ? null : detailJob?.approve === // Kiểm tra xem công việc chưa được duyệt hay không (approve === false)
+              false ? (
               isEditing ? (
+                // Nếu đang trong chế độ chỉnh sửa, hiển thị nút Lưu
                 <Button variant="outline" onClick={handleSave}>
                   Lưu
                 </Button>
               ) : (
+                // Nếu không trong chế độ chỉnh sửa, hiển thị nút Chỉnh sửa
                 <Button variant="outline" onClick={() => setIsEditing(true)}>
                   Chỉnh sửa
                 </Button>
@@ -239,27 +258,28 @@ const JobDetailEmployer = () => {
             ) : null}
           </div>
         </div>
-        <div className="mt-4 flex items-center gap-4">
+        <div className="mt-4 flex items-center gap-4 p-4 ">
           <Badge
-            variant={
-              detailJob?.approve
-                ? detailJob?.status === "Đang mở"
-                  ? "filled"
-                  : "outlined"
-                : "dot"
+            style={
+              detailJob?.approve === false
+                ? statusStyles["Chưa được duyệt"] || {
+                    backgroundColor: "rgba(0, 0, 0, 0.1)",
+                    color: "black",
+                  }
+                : detailJob?.status
+                ? statusStyles[detailJob?.status] || {
+                    backgroundColor: "rgba(0, 0, 0, 0.1)",
+                    color: "black",
+                  }
+                : { backgroundColor: "rgba(0, 0, 0, 0.1)", color: "black" }
             }
-            color={
-              detailJob?.approve
-                ? detailJob?.status === "Đang mở"
-                  ? "green"
-                  : detailJob?.status === "Đã đóng"
-                  ? "orange"
-                  : "red"
-                : "default"
-            }
-            className={!detailJob?.approve ? "text-blue-500 font-bold" : ""}
+            variant="secondary"
           >
-            {detailJob?.approve ? detailJob?.status : "Chưa được duyệt"}
+            {detailJob?.approve === false
+              ? "Chưa được duyệt"
+              : detailJob?.status === "Hết hạn"
+              ? "Hết hạn"
+              : detailJob?.status}
           </Badge>
 
           <span className="text-sm text-gray-500 flex items-center gap-1">
@@ -269,13 +289,14 @@ const JobDetailEmployer = () => {
               {new Date(detailJob?.createDate).toLocaleDateString("vi-VN")}
             </span>
           </span>
+
           <span className="text-sm text-gray-500">
-            Còn:{" "}
-            {Math.ceil(
-              (new Date(detailJob?.expireDate) - new Date()) /
-                (1000 * 60 * 60 * 24)
-            )}{" "}
-            ngày
+            {new Date(detailJob?.expireDate) < new Date()
+              ? null
+              : `Còn: ${Math.ceil(
+                  (new Date(detailJob?.expireDate) - new Date()) /
+                    (1000 * 60 * 60 * 24)
+                )} ngày`}
           </span>
         </div>
       </div>
@@ -284,7 +305,7 @@ const JobDetailEmployer = () => {
         {/* Main Content */}
         <div className="col-span-2 space-y-6">
           {/* Job Description */}
-          <Card className="p-6">
+          <Card className="p-6 bg-white shadow-lg">
             <h2 className="text-xl font-semibold mb-4">Mô tả công việc</h2>
             {isEditing ? (
               <textarea
@@ -310,7 +331,7 @@ const JobDetailEmployer = () => {
           </Card>
 
           {/* Yêu cầu */}
-          <Card className="p-6">
+          <Card className="p-6 bg-white shadow-lg">
             <h2 className="text-xl font-semibold mb-4">Yêu cầu</h2>
             <ul className="space-y-2">
               {isEditing ? (
@@ -334,7 +355,7 @@ const JobDetailEmployer = () => {
           </Card>
 
           {/* Trách nhiệm công việc */}
-          <Card className="p-6">
+          <Card className="p-6 bg-white shadow-lg">
             <h2 className="text-xl font-semibold mb-4">
               Trách nhiệm công việc
             </h2>
@@ -360,7 +381,7 @@ const JobDetailEmployer = () => {
           </Card>
 
           {/* Quyền lợi */}
-          <Card className="p-6">
+          <Card className="p-6 bg-white shadow-lg">
             <h2 className="text-xl font-semibold mb-4">Quyền lợi</h2>
             <ul className="space-y-2">
               {isEditing ? (
@@ -387,7 +408,7 @@ const JobDetailEmployer = () => {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Job Stats */}
-          <Card className="p-6">
+          <Card className="p-6 bg-white shadow-lg">
             <h3 className="font-semibold mb-4">Thông tin chung</h3>
             <div className="space-y-4">
               {/* Hạn nộp hồ sơ */}
@@ -462,10 +483,11 @@ const JobDetailEmployer = () => {
           </Card>
 
           {/* Required Skills */}
-          <Card className="p-6">
+          <Card className="p-6 bg-white shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold">Kỹ năng yêu cầu</h3>
-              {detailJob?.approve === false ? (
+              {detailJob?.status !== "Hết hạn" &&
+              detailJob?.approve === false ? (
                 <Button
                   size="icon"
                   variant="ghost"
