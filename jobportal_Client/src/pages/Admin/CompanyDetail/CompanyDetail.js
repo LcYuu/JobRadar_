@@ -20,6 +20,16 @@ import {
   Phone,
   Mail,
   Clock,
+
+  ArrowLeft
+} from 'lucide-react';
+import { getCompanyById, updateCompanyStatus, deleteCompany, getCompanyJobCounts ,getCompanyJobStats } from '../../../redux/Company/company.action';
+import { toast } from 'react-toastify';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "../../../ui/dialog";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { format } from 'date-fns';
+  Code2,
+  Banknote,
 } from "lucide-react";
 import {
   getCompanyById,
@@ -51,6 +61,7 @@ import {
 import { format } from "date-fns";
 import { store } from "../../../redux/store";
 
+
 export default function CompanyDetail() {
   const navigate = useNavigate();
   const { companyId } = useParams();
@@ -76,6 +87,7 @@ export default function CompanyDetail() {
   const [isMounted, setIsMounted] = useState(true);
 
   useEffect(() => {
+
     dispatch(getCompanyProfile(companyId));
     dispatch(getCompanyJobCounts(companyId));
     return () => {
@@ -84,6 +96,7 @@ export default function CompanyDetail() {
   }, [dispatch]);
 
   useEffect(() => {
+
     if (chartDateRange.startDate && chartDateRange.endDate) {
       const start = new Date(chartDateRange.startDate);
       const end = new Date(chartDateRange.endDate);
@@ -103,13 +116,11 @@ export default function CompanyDetail() {
       setIsChartLoading(true);
       setError(null);
 
-      dispatch(
-        getCompanyJobStats(
-          companyId,
-          chartDateRange.startDate,
-          chartDateRange.endDate
-        )
-      )
+      const formattedStartDate = start.toISOString().split('T')[0];
+      const formattedEndDate = end.toISOString().split('T')[0];
+
+      dispatch(getCompanyJobStats(companyId, formattedStartDate, formattedEndDate))
+
         .then(() => {
           setIsChartLoading(false);
         })
@@ -119,6 +130,16 @@ export default function CompanyDetail() {
         });
     }
   }, [dispatch, companyId, chartDateRange]);
+
+  useEffect(() => {
+    if (!companyProfile || companyProfile.companyId !== companyId) {
+      dispatch(getCompanyById(companyId));
+      dispatch(getCompanyJobCounts(companyId));
+    }
+    return () => {
+      setIsMounted(false);
+    };
+  }, [dispatch, companyId, companyProfile]);
 
   const handleStatusChange = async () => {
     try {
@@ -182,29 +203,22 @@ export default function CompanyDetail() {
   };
 
   const chartData = useMemo(() => {
-    if (!jobStats || !Array.isArray(jobStats)) {
-      return [];
-    }
+    if (!jobStats) return [];
+    
+    return jobStats.map(stat => ({
+      date: new Date(stat.date).toLocaleDateString('vi-VN'),
+      fullDate: new Date(stat.date).toLocaleDateString('vi-VN', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }),
+      totalJobs: stat.totalJobs,
+      activeJobs: stat.activeJobs,
+      closedJobs: stat.closedJobs,
+      pendingJobs: stat.pendingJobs
+    }));
 
-    return jobStats.map((stat) => {
-      const date = new Date(stat.date);
-      return {
-        name: date.toLocaleDateString("vi-VN", {
-          month: "numeric",
-          day: "numeric",
-        }),
-        fullDate: date.toLocaleDateString("vi-VN", {
-          weekday: "long",
-          day: "numeric",
-          month: "numeric",
-          year: "numeric",
-        }),
-        totalJobs: stat.totalJobs || 0,
-        activeJobs: stat.activeJobs || 0,
-        closedJobs: stat.closedJobs || 0,
-        pendingJobs: stat.pendingJobs || 0,
-      };
-    });
   }, [jobStats]);
 
   const ChartSkeleton = () => (
@@ -216,38 +230,45 @@ export default function CompanyDetail() {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div className="container mx-auto p-6">
-      {/* Header với các nút hành động */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold ">{companyProfile?.companyName}</h1>
-        <br />
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Button
+          variant="ghost"
+          className="flex items-center gap-2 mb-6 hover:bg-gray-100"
+          onClick={() => navigate('/admin/company-list')}
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Trở lại danh sách</span>
+        </Button>
 
-        <div className="flex gap-3">
-          <Button
-            variant={companyProfile?.isActive ? "destructive" : "success"}
-            onClick={handleStatusChange}
-            className="flex items-center gap-2"
-          >
-            {companyProfile?.isActive ? (
-              <>
-                <Lock className="w-4 h-4" />
-                Khóa tài khoản
-              </>
-            ) : (
-              <>
-                <Unlock className="w-4 h-4" />
-                Mở khóa tài khoản
-              </>
-            )}
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => setShowDeleteModal(true)}
-          >
-            Xóa công ty
-          </Button>
+        {/* Header với các nút hành động */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold ">{companyProfile?.companyName}</h1>
+          <br/>
+          
+          <div className="flex gap-3">
+            <Button
+              variant={companyProfile?.isActive ? "destructive" : "success"}
+              onClick={handleStatusChange}
+              className="flex items-center gap-2"
+            >
+              {companyProfile?.isActive ? (
+                <>
+                  <Lock className="w-4 h-4" />
+                  Khóa tài khoản
+                </>
+              ) : (
+                <>
+                  <Unlock className="w-4 h-4" />
+                  Mở khóa tài khoản
+                </>
+              )}
+            </Button>
+            <Button variant="destructive" onClick={() => setShowDeleteModal(true)}>
+              Xóa công ty
+            </Button>
+          </div>
         </div>
-      </div>
 
       {/* Thống kê */}
       <div className="grid grid-cols-4 gap-6 mb-6">
@@ -351,25 +372,26 @@ export default function CompanyDetail() {
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
-              <Briefcase className="w-5 h-5 text-gray-500" />
-              <div>
-                <p className="text-sm text-gray-600">Ngành nghề</p>
-                <p className="font-medium">
-                  {companyProfile?.industry?.industryName || "Chưa cập nhật"}
-                </p>
-              </div>
-            </div>
 
-            <div className="flex items-center gap-4">
-              <Phone className="w-5 h-5 text-gray-500" />
-              <div>
-                <p className="text-sm text-gray-600">Liên hệ</p>
-                <p className="font-medium">
-                  {companyProfile?.contact || "Chưa cập nhật"}
-                </p>
+              <div className="flex items-center gap-4">
+                <Briefcase className="w-5 h-5 text-gray-500" />
+                <div>
+                  <p className="text-sm text-gray-600">Ngành nghề</p>
+                  <p className="font-medium">{companyProfile?.industry?.industryName || 'Chưa cập nhật'}</p>
+                </div>
+
               </div>
-            </div>
+
+              
+
+              <div className="flex items-center gap-4">
+                <Phone className="w-5 h-5 text-gray-500" />
+                <div>
+                  <p className="text-sm text-gray-600">Liên hệ</p>
+                  <p className="font-medium">{companyProfile?.contact || 'Chưa cập nhật'}</p>
+                </div>
+
+              </div>
 
             <div className="flex items-center gap-4">
               <Mail className="w-5 h-5 text-gray-500" />
@@ -394,66 +416,74 @@ export default function CompanyDetail() {
                 </p>
               </div>
             </div>
+
+            <div className="flex items-center gap-4">
+              <Banknote className="w-5 h-5 text-gray-500" />
+              <div>
+                <p className="text-sm text-gray-600">Mã số thuế</p>
+                <p className="font-medium">
+                  {companyProfile?.taxCode || "Chưa cập nhật"}
+                </p>
+              </div>
+            </div>
           </div>
         </Card>
       </div>
 
-      <Card className="p-6 mt-6 bg-white shadow-md">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold">Thống kê tin tuyển dụng</h2>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-gray-500" />
-              <input
-                type="date"
-                name="startDate"
-                value={chartDateRange.startDate}
-                onChange={handleChartDateChange}
-                className="border-none focus:outline-none"
-              />
-              <span>-</span>
-              <input
-                type="date"
-                name="endDate"
-                value={chartDateRange.endDate}
-                onChange={handleChartDateChange}
-                className="border-none focus:outline-none"
-              />
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => handlePeriodFilter("week")}
-                className={`px-3 py-1 rounded transition-colors ${
-                  activePeriod === "week"
-                    ? "bg-indigo-100 text-indigo-600"
-                    : "hover:bg-gray-100"
-                }`}
-              >
-                Tuần
-              </button>
-              <button
-                onClick={() => handlePeriodFilter("month")}
-                className={`px-3 py-1 rounded transition-colors ${
-                  activePeriod === "month"
-                    ? "bg-indigo-100 text-indigo-600"
-                    : "hover:bg-gray-100"
-                }`}
-              >
-                Tháng
-              </button>
-              <button
-                onClick={() => handlePeriodFilter("year")}
-                className={`px-3 py-1 rounded transition-colors ${
-                  activePeriod === "year"
-                    ? "bg-indigo-100 text-indigo-600"
-                    : "hover:bg-gray-100"
-                }`}
-              >
-                Năm
-              </button>
+
+        <Card className="p-6 mt-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold">Thống kê tin tuyển dụng</h2>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-gray-500" />
+                <input
+                  type="date"
+                  name="startDate"
+                  value={chartDateRange.startDate}
+                  onChange={handleChartDateChange}
+                  className="border-none focus:outline-none"
+                />
+                <span>-</span>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={chartDateRange.endDate}
+                  onChange={handleChartDateChange}
+                  className="border-none focus:outline-none"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => handlePeriodFilter('week')}
+                  className={`px-3 py-1 rounded transition-colors ${
+                    activePeriod === 'week' 
+                      ? 'bg-indigo-100 text-indigo-600' 
+                      : 'hover:bg-gray-100'
+                  }`}>
+                  Tuần
+                </button>
+                <button 
+                  onClick={() => handlePeriodFilter('month')}
+                  className={`px-3 py-1 rounded transition-colors ${
+                    activePeriod === 'month' 
+                      ? 'bg-indigo-100 text-indigo-600' 
+                      : 'hover:bg-gray-100'
+                  }`}>
+                  Tháng
+                </button>
+                <button 
+                  onClick={() => handlePeriodFilter('year')}
+                  className={`px-3 py-1 rounded transition-colors ${
+                    activePeriod === 'year' 
+                      ? 'bg-indigo-100 text-indigo-600' 
+                      : 'hover:bg-gray-100'
+                  }`}>
+                  Năm
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
         {dateError && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600">
@@ -487,10 +517,11 @@ export default function CompanyDetail() {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="name"
-                  tick={{ fill: "#666" }}
-                  tickLine={{ stroke: "#666" }}
+                <XAxis 
+                  dataKey="date"
+                  tick={{ fill: '#666' }}
+                  tickLine={{ stroke: '#666' }}
+
                 />
                 <YAxis
                   allowDecimals={false}
@@ -513,65 +544,33 @@ export default function CompanyDetail() {
                     };
                     return [value, labels[name] || name];
                   }}
-                  labelFormatter={(label, items) => {
-                    if (items?.[0]?.payload?.fullDate) {
-                      return items[0].payload.fullDate;
-                    }
-                    return label;
+                  labelFormatter={(label) => {
+                    const item = chartData.find(item => item.date === label);
+                    return item ? item.fullDate : label;
                   }}
                 />
                 <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="totalJobs"
-                  name="Tổng tin"
-                  stroke="#818cf8"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 6 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="activeJobs"
-                  name="Đang tuyển"
-                  stroke="#34d399"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 6 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="closedJobs"
-                  name="Đã đóng"
-                  stroke="#f87171"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 6 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="pendingJobs"
-                  name="Chờ duyệt"
-                  stroke="#facc15"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 6 }}
-                />
+                <Line type="monotone" dataKey="totalJobs" name="Tổng tin" stroke="#818cf8" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="activeJobs" name="Đang tuyển" stroke="#34d399" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="closedJobs" name="Đã đóng" stroke="#f87171" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="pendingJobs" name="Chờ duyệt" stroke="#facc15" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           )}
         </div>
       </Card>
 
-      {/* Modal xác nhận xóa */}
-      {showDeleteModal && (
-        <DeleteConfirmationModal
-          isOpen={showDeleteModal}
-          onClose={() => setShowDeleteModal(false)}
-          onConfirm={handleDelete}
-          companyName={companyProfile?.companyName}
-        />
-      )}
+        {/* Modal xác nhận xóa */}
+        {showDeleteModal && (
+          <DeleteConfirmationModal 
+            isOpen={showDeleteModal}
+            onClose={() => setShowDeleteModal(false)}
+            onConfirm={handleDelete}
+            companyName={companyProfile?.companyName}
+          />
+        )}
+      </div>
+
     </div>
   );
 }

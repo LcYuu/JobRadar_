@@ -18,6 +18,7 @@ import { imageCompanyReducer } from "./ImageCompany/imageCompany.reducer";
 
 import { statsReducer } from './Stats/stats.reducer';
 import { userReducer } from './User/user.reducer';
+import surveyReducer from './Survey/survey.reducer';
 const rootReducer = combineReducers({
     auth:authReducer,
     jobPost:jobPostReducer,
@@ -34,7 +35,8 @@ const rootReducer = combineReducers({
     review:reviewReducer,
     imageCompany: imageCompanyReducer,
     stats: statsReducer,
-    user: userReducer
+    user: userReducer,
+    survey: surveyReducer
 
 })
 export const store = legacy_createStore(rootReducer, applyMiddleware(thunk))
