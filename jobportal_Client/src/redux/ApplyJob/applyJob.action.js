@@ -22,6 +22,9 @@ import {
   UPDATE_APPROVE_FAILURE,
   UPDATE_APPROVE_REQUEST,
   UPDATE_APPROVE_SUCCESS,
+  GET_CANDIDATE_APPLY_INFO_FAILURE,
+  GET_CANDIDATE_APPLY_INFO_REQUEST,
+  GET_CANDIDATE_APPLY_INFO_SUCCESS,
 } from "./applyJob.actionType";
 
 export const getApplyJobByUser = (currentPage, size) => async (dispatch) => {
@@ -202,6 +205,24 @@ export const updateApprove = (postId, userId) => async (dispatch) => {
     dispatch({
       type: UPDATE_APPROVE_FAILURE,
       payload: error.response ? error.response.data : error.message,
+    });
+  }
+};
+
+export const getCandidateApplyInfo = (userId, postId) => async (dispatch) => {
+  dispatch({ type: GET_CANDIDATE_APPLY_INFO_REQUEST });
+  try {
+    const response = await api.get(`/apply-job/candidate-apply/${userId}/${postId}`);
+    console.log("Response data:", response.data);
+    dispatch({
+      type: GET_CANDIDATE_APPLY_INFO_SUCCESS,
+      payload: response.data
+    });
+  } catch (error) {
+    console.error("Error fetching candidate apply info:", error);
+    dispatch({
+      type: GET_CANDIDATE_APPLY_INFO_FAILURE,
+      payload: error.response?.data?.message || "Failed to fetch candidate apply info",
     });
   }
 };
