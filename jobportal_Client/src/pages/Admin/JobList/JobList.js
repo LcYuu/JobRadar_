@@ -178,14 +178,14 @@ export default function AdminJobList() {
                       <DropdownMenuContent align="end">
                         {!job.approve && (
                           <DropdownMenuItem
-                            onClick={() => dispatch(approveJob(job.jobPostId))}
+                            onClick={() => dispatch(approveJob(job.postId))}
                           >
                             Phê duyệt
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuItem
                           onClick={() =>
-                            navigate(`/admin/jobs/${job.jobPostId}`)
+                            navigate(`/admin/jobs/${job.postId}`)
                           }
                         >
                           Chi tiết
