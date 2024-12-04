@@ -19,9 +19,19 @@ import {
 } from "../../redux/Seeker/seeker.action";
 import { getEduCandidate } from "../../redux/Education/edu.action";
 import { getExpCandidate } from "../../redux/Experience/exp.action";
+
 import { getCandidateApplyInfo } from "../../redux/ApplyJob/applyJob.action";
+import { Card } from "../../ui/card";
+
 
 const ApplicantDetail = () => {
+  const getRandomColor = () => {
+    const r = Math.floor(Math.random() * 256);
+    const g = Math.floor(Math.random() * 256);
+    const b = Math.floor(Math.random() * 256);
+    return `rgb(${r}, ${g}, ${b})`;
+  };
+
   const { userId, postId } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -97,11 +107,12 @@ console.log(candidateApplyInfo);
                 alt={profileCandidate?.fullName}
                 className="w-24 h-24 rounded-full mx-auto mb-3"
               />
-              <h1 className="text-xl font-semibold">
+              <h1 className="text-xl font-bold">
                 {profileCandidate?.fullName}
               </h1>
               <div className="mt-6">
-                <p className="text-sm text-gray-600">
+                
+                <p className="text-xl font-bold text-gray-600">
                   {profileCandidate?.title}
                 </p>
                 <p className="text-sm text-gray-500">
@@ -146,18 +157,19 @@ console.log(candidateApplyInfo);
                   value="applicant-profile"
                   className={`px-4 py-2 -mb-px ${
                     activeTab === "applicant-profile"
-                      ? "text-indigo-600 border-b-2 border-indigo-600"
+                      ? "text-purple-600 border-b-2 border-purple-600"
                       : "text-gray-500"
                   }`}
                   onClick={() => setActiveTab("applicant-profile")}
                 >
                   Hồ sơ ứng viên
+
                 </TabsTrigger>
                 <TabsTrigger
                   value="resume"
                   className={`px-4 py-2 -mb-px ${
                     activeTab === "resume"
-                      ? "text-indigo-600 border-b-2 border-indigo-600"
+                      ? "text-purple-600 border-b-2 border-purple-600"
                       : "text-gray-500"
                   }`}
                   onClick={() => setActiveTab("resume")}
@@ -169,11 +181,15 @@ console.log(candidateApplyInfo);
               <TabsContent value="applicant-profile" className="pt-6">
                 <div className="grid grid-cols-3 gap-6">
                   <div className="col-span-3 space-y-6">
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <h2 className="font-semibold mb-4">Thông tin cá nhân</h2>
+                    <Card className="bg-white rounded-lg p-6 shadow-lg">
+                      <h2 className="font-semibold text-purple-600 mb-4">
+                        Thông tin cá nhân
+                      </h2>
                       <div className="grid grid-cols-2 gap-y-4">
                         <div>
-                          <p className="text-sm text-gray-600">Họ và tên</p>
+                          <p className="text-xl font-bold text-black">
+                            Họ và tên
+                          </p>
                           <p className="text-sm">
                             {profileCandidate?.fullName}
                           </p>
@@ -191,20 +207,25 @@ console.log(candidateApplyInfo);
                           <p className="text-sm">{profileCandidate?.phoneNumber}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-600">Ngày sinh</p>
+                          <p className="text-xl font-bold text-black">Ngày sinh</p>
                           <p className="text-sm">
                             {profileCandidate?.dateOfBirth ? (
                               <>
                                 <span>{new Date(profileCandidate.dateOfBirth).toLocaleDateString("en-GB")}</span>
                                 <span>
-                                  {" "}( {calculateAge(profileCandidate.dateOfBirth)} years old)
+                                  {" "}
+                                  ({calculateAge(
+                                    profileCandidate.dateOfBirth
+                                  )}{" "}
+                                  tuổi)
                                 </span>
                               </>
                             ) : (
-                              "No date of birth available"
+                              "Không có thông tin ngày sinh"
                             )}
                           </p>
                         </div>
+
                         <div>
                           <p className="text-sm text-gray-600">Địa chỉ</p>
                           <p className="text-sm">{profileCandidate?.address}</p>
@@ -222,45 +243,97 @@ console.log(candidateApplyInfo);
                             </p>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-6">
-                            {/* Cột bên trái - Experience */}
-                            <div>
-                              <p className="text-sm text-gray-600">
-                                Kinh nghiệm
-                              </p>
-                              {/* Kiểm tra nếu có dữ liệu kinh nghiệm */}
-                              {expCandidate?.length > 0 ? (
-                                expCandidate.map((exp, index) => (
-                                  <div
-                                    key={index}
-                                    className="space-y-2 flex items-center"
-                                  >
-                                    <span className="text-green-500 mr-2">
-                                      ✔️
-                                    </span>
-                                    <p className="text-sm">{exp.jobTitle}</p>
-                                  </div>
-                                ))
-                              ) : (
-                                <p className="text-sm text-gray-500">
-                                  No experience information available.
-                                </p>
-                              )}
-                            </div>
+                         <div className="grid grid-cols-2 gap-6">
+  {/* Cột bên trái - Kinh nghiệm */}
+  <div className="pr-6">
+    <p className="text-xl font-bold text-black">Kinh nghiệm</p>
+    {/* Kiểm tra nếu có dữ liệu kinh nghiệm */}
+    {expCandidate?.length > 0 ? (
+      expCandidate.map((exp, index) => (
+        <div key={index} className="space-y-4 pb-4">
+          <div className="space-y-2 flex items-start">
+            <span className="text-green-500 mr-2">⭐</span>
+            <p className="text-sm font-semibold">{exp.jobTitle}</p>
+          </div>
+        </div>
+      ))
+    ) : (
+      <p className="text-sm text-gray-600">Chưa có kinh nghiệm</p>
+    )}
+  </div>
 
-                            {/* Cột bên phải - Education */}
-                            <div>
-                              <p className="text-sm text-gray-600">Học vấn</p>
-                              {eduCandidate?.length > 0 ? (
-                                eduCandidate.map((edu, index) => (
-                                  <div
-                                    key={index}
-                                    className="space-y-2 flex items-center"
-                                  >
+  {/* Cột bên phải - Địa chỉ */}
+  <div className="col-span-2">
+    <p className="text-xl font-bold text-black">Địa chỉ</p>
+    <p className="text-sm">{profileCandidate?.address}</p>
+  </div>
+
+  {/* Thông tin chuyên môn */}
+  <div className="col-span-2">
+    <Card className="bg-white rounded-lg p-6 shadow-lg">
+      <h2 className="font-semibold text-purple-600 mb-4">
+        Thông tin chuyên môn
+      </h2>
+      <div className="space-y-6">
+        {/* Giới thiệu */}
+        <div>
+          <p className="text-xl text-black font-bold">Giới thiệu</p>
+          <p className="text-sm mt-1">{profileCandidate?.description}</p>
+        </div>
+      </div>
+    </Card>
+  </div>
+</div>
+
+                                  {/* Tên công ty */}
+                                  <div className="text-sm text-gray-600">
+                                    <strong>Công ty:</strong> {exp.companyName}
+                                  </div>
+
+                                  {/* Ngày bắt đầu và kết thúc */}
+
+                                  <div className="text-sm text-gray-600">
+                                    <strong>Ngày bắt đầu:</strong>{" "}
+                                    {exp.startDate}
+                                  </div>
+                                  <div className="text-sm text-gray-600">
+                                    <strong>Ngày kết thúc:</strong>{" "}
+                                    {exp.endDate || "Hiện tại"}
+                                  </div>
+
+                                  {/* Mô tả */}
+                                  <div className="text-sm text-gray-600">
+                                    <strong>Mô tả:</strong>{" "}
+                                    {exp.description || "Không có mô tả"}
+                                  </div>
+
+                                  {/* Đường viền ngăn cách giữa các kinh nghiệm */}
+                                  {index < expCandidate.length - 1 && (
+                                    <div className="border-t border-gray-400 mt-4"></div>
+                                  )}
+                                </div>
+                              ))
+                            ) : (
+                              <p className="text-sm text-gray-500">
+                                Không có thông tin kinh nghiệm.
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Cột bên phải - Học vấn */}
+                          <div className="pl-6">
+                            <p className="text-xl font-bold text-black">
+                              Học vấn
+                            </p>
+                            {eduCandidate?.length > 0 ? (
+                              eduCandidate.map((edu, index) => (
+                                <div key={index} className="space-y-4 pb-4">
+                                  <div className="space-y-2 flex items-start">
+
                                     <span className="text-green-500 mr-2">
-                                      ✔️
+                                      ⭐
                                     </span>
-                                    <p className="text-sm">
+                                    <p className="text-sm font-semibold">
                                       {edu?.certificateDegreeName}
                                     </p>
                                   </div>
@@ -288,22 +361,84 @@ console.log(candidateApplyInfo);
                                   </span>
                                 ))}
                               </div>
+
+                                  {/* Ngày bắt đầu và kết thúc */}
+                                  <div className="text-sm text-gray-600">
+                                    <strong>Ngày bắt đầu:</strong>{" "}
+                                    {edu?.startDate}
+                                  </div>
+                                  <div className="text-sm text-gray-600">
+                                    <strong>Ngày kết thúc:</strong>{" "}
+                                    {edu?.endDate || "Hiện tại"}
+                                  </div>
+
+                                  {/* Major */}
+                                  <div className="text-sm text-gray-600">
+                                    <strong>Chuyên ngành:</strong>{" "}
+                                    {edu?.major || "Không có thông tin"}
+                                  </div>
+
+                                  {/* Tên tổ chức */}
+                                  <div className="text-sm text-gray-600">
+                                    <strong>Tổ chức:</strong>{" "}
+                                    {edu?.universityName ||
+                                      "Không có thông tin"}
+                                  </div>
+
+                                  {/* GPA */}
+                                  <div className="text-sm text-gray-600">
+                                    <strong>GPA:</strong>{" "}
+                                    {edu?.gpa || "Chưa có GPA"}
+                                  </div>
+
+                                  {/* Đường viền ngăn cách giữa các học vấn */}
+                                  {index < eduCandidate.length - 1 && (
+                                    <div className="border-t border-gray-400 mt-4"></div>
+                                  )}
+                                </div>
+                              ))
+
                             ) : (
                               <p className="text-sm text-gray-500">
-                                No skills information available.
+                                Không có thông tin học vấn.
                               </p>
                             )}
                           </div>
                         </div>
+
+                        <div>
+                          <p className="text-xl font-bold text-black">
+                            Kỹ năng
+                          </p>
+                          {skillsCandidate?.skills?.length > 0 ? (
+                            <div className="flex gap-2 mt-1">
+                              {skillsCandidate.skills.map((skill, index) => (
+                                <span
+                                  key={index}
+                                  className="text-sm text-white flex items-center px-3 py-1 rounded-full"
+                                  style={{
+                                    backgroundColor: getRandomColor(), // Áp dụng màu ngẫu nhiên cho Badge
+                                  }}
+                                >
+                                  {skill.skillName}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-500">
+                              Không có thông tin kỹ năng.
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    </Card>
                   </div>
                 </div>
               </TabsContent>
 
               <TabsContent value="resume">
                 <div className="bg-white rounded-lg p-6 shadow-sm mt-6">
-                  <h2 className="font-semibold mb-4">Resume</h2>
+                  <h2 className="font-semibold mb-4 text-purple-600">Resume</h2>
                   <div className="aspect-[3/4] bg-gray-100 rounded-lg flex items-center justify-center">
                     {profileCandidate?.pathCV ? (
                       <iframe
@@ -312,9 +447,7 @@ console.log(candidateApplyInfo);
                         title="Resume Preview"
                       ></iframe>
                     ) : (
-                      <p className="text-gray-500">
-                        No resume available for preview
-                      </p>
+                      <p className="text-gray-500">Không tìm thấy CV</p>
                     )}
                   </div>
                 </div>

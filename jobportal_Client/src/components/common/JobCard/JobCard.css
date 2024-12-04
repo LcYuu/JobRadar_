@@ -1,7 +1,7 @@
 .job-type-badge {
-  background-color: rgba(0, 128, 0, 0.1);
-  color: green;
-  border: 1px solid green;
+  background-color: rgba(128, 0, 128, 0.1); /* Màu nền tím */
+  color: purple; /* Màu chữ tím */
+  border: 1px solid purple; /* Màu viền tím */
   padding: 4px 12px;
   border-radius: 12px;
   font-size: 14px;
@@ -11,8 +11,8 @@
 }
 
 .job-type-badge:hover {
-  background-color: green;
-  color: white;
+  background-color: purple; /* Màu nền khi hover là tím */
+  color: white; /* Màu chữ trắng khi hover */
 }
 
 .location-ellipsis {
@@ -33,7 +33,7 @@
 .card:hover {
   transform: translateY(-10px); /* Di chuyển cao hơn một chút */
   box-shadow: 0 10px 35px rgba(0, 0, 0, 0.25); /* Đổ bóng nổi bật hơn */
-  border-color: rgba(0, 128, 0, 0.5);
+  border-color: rgba(128, 0, 128, 0.5); /* Màu viền tím */
   border-width: 2px;
   border-style: solid;
 }
@@ -45,7 +45,7 @@
 }
 
 .card:hover .card-header {
-  background-color: rgba(0, 128, 0, 0.05);
+  background-color: rgba(128, 0, 128, 0.05); /* Màu nền khi hover là tím nhạt */
 }
 
 .card-content {
@@ -54,6 +54,6 @@
 }
 
 .card:hover .card-content {
-  color: green;
+  color: purple; /* Màu chữ tím khi hover */
   transform: scale(1.03); /* Phóng chữ thêm một chút */
 }

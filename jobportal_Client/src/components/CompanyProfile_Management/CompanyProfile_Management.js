@@ -30,6 +30,7 @@ import {
   deleteImageCompany,
 } from "../../redux/ImageCompany/imageCompany.action";
 import { Avatar } from "@mui/material";
+import Swal from "sweetalert2";
 
 const CompanyProfile_Management = () => {
   const dispatch = useDispatch();
@@ -57,7 +58,7 @@ const CompanyProfile_Management = () => {
     imgPath: [],
   });
 
-  const [image, setImage] = useState(companyJwt?.images || []);
+  // const [image, setImage] = useState(companyJwt?.images || []);
   const [images, setImages] = useState([]); // Lưu trữ nhiều hình ảnh
 
   const handleSelectImage = (event) => {
@@ -167,17 +168,27 @@ const CompanyProfile_Management = () => {
 
   const removeImage = async (imgId) => {
     console.log(imgId);
-    if (window.confirm("Bạn có chắc chắn muốn xóa hình ảnh này?")) {
+
+    // Sử dụng swal thay vì window.confirm
+    const result = await Swal.fire({
+      title: "Bạn có chắc chắn muốn xóa hình ảnh này?",
+      text: "Hành động này không thể hoàn tác!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+    });
+
+    if (result.isConfirmed) {
       try {
         await dispatch(deleteImageCompany(imgId));
         dispatch(getCompanyByJWT());
-        showSuccessToast("Xóa kinh nghiệm thành công!");
+        showSuccessToast("Xóa hình ảnh thành công!");
       } catch (error) {
-        console.error("Có lỗi xảy ra khi xóa kinh nghiệm:", error);
-        showSuccessToast(
-          "Xóa kinh nghiệm thất bại. Vui lòng thử lại!",
-          "error"
-        );
+        console.error("Có lỗi xảy ra khi xóa hình ảnh:", error);
+        showSuccessToast("Xóa hình ảnh thất bại. Vui lòng thử lại!", "error");
       }
     }
   };
@@ -264,7 +275,7 @@ const CompanyProfile_Management = () => {
           </div>
           <Button
             variant="outline"
-            className="mt-4 bg-blue-500 text-white hover:bg-blue-600 hover:text-white border border-blue-500 rounded-lg transition-all"
+            className="mt-4 bg-purple-500 text-white hover:bg-purple-600 hover:text-white border border-purple-500 rounded-lg transition-all"
             onClick={handleOpenProfileModal}
           >
             Chỉnh sửa hồ sơ
@@ -377,7 +388,7 @@ const CompanyProfile_Management = () => {
               <BanknoteIcon className="w-4 h-4 text-gray-500" />
               <span>{companyJwt?.taxCode}</span>
             </div>
-            <p className="text-sm text-red-500 mt-1">
+            <p className="text-sm text-purple-500 mt-1">
               Hãy tự giác cung cấp chính xác mã số thuế, nếu không bạn sẽ không
               thể tuyển dụng.
             </p>
@@ -394,8 +405,12 @@ const CompanyProfile_Management = () => {
               Chỉnh sửa
             </Button>
           ) : (
-            <Button onClick={() => handleSave()} variant="primary">
-              Lưu
+            <Button
+              onClick={() => handleSave()}
+              variant="primary"
+              disabled={isLoading} // Vô hiệu hóa nút khi đang lưu
+            >
+              {isLoading ? "Đang lưu..." : "Lưu"}
             </Button>
           )}
         </div>
@@ -451,6 +466,9 @@ const CompanyProfile_Management = () => {
           )}
         </div>
       </Card>
+      {showToast && (
+        <Toast message={toastMessage} onClose={() => setShowToast(false)} />
+      )}
     </div>
   );
 };

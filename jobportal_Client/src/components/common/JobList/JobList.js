@@ -3,6 +3,7 @@ import JobCard from "../JobCard/JobCard";
 import { useDispatch, useSelector } from "react-redux";
 import logo1 from "../../../assets/images/common/logo1.jpg";
 import { getAllJobAction } from "../../../redux/JobPost/jobPost.action";
+import { Button } from "../../../ui/button";
 
 export default function JobList() {
   const dispatch = useDispatch();
@@ -13,7 +14,7 @@ export default function JobList() {
     error,
   } = useSelector((store) => store.jobPost);
   const [currentPage, setCurrentPage] = useState(0);
-  const [size] = useState(12);
+  const [size, setSize] = useState(12); // Số lượng bản ghi mỗi trang
 
   useEffect(() => {
     // Set loading state when fetching new data
@@ -26,14 +27,23 @@ export default function JobList() {
     }
   };
 
+  const handleSizeChange = (e) => {
+    setSize(Number(e.target.value));
+    setCurrentPage(0); // Reset về trang đầu khi thay đổi số lượng bản ghi mỗi trang
+  };
+
   if (loading) return <p>Đang tải...</p>;
   if (error) return <p>{error}</p>;
 
   return (
     <section className="py-12">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Các công việc nổi bật</h2>
-        
+        <h2
+          className="text-3xl font-bold text-center mb-8"
+          style={{ color: "#43bfb3" }}
+        >
+          Các công việc nổi bật
+        </h2>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {jobPost.length > 0 ? (
@@ -53,34 +63,46 @@ export default function JobList() {
           <p>Không có công việc nào để hiển thị.</p>
         )}
       </div>
-      <div className="flex items-center justify-center mt-6">
-        <button
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 0}
-          className={`px-4 py-2 mx-2 text-white rounded-lg transition duration-300 
-            ${
-              currentPage === 0
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-500 hover:bg-blue-600"
-            }`}
-        >
-          Trước
-        </button>
-        <span className="text-sm font-semibold mx-4">{`Trang ${
-          currentPage + 1
-        } / ${totalPages}`}</span>
-        <button
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage >= totalPages - 1}
-          className={`px-4 py-2 mx-2 text-white rounded-lg transition duration-300 
-            ${
-              currentPage >= totalPages - 1
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-500 hover:bg-blue-600"
-            }`}
-        >
-          Tiếp theo
-        </button>
+      <div className="p-4 border-t flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span>Hiển thị</span>
+          <select
+            className="border rounded p-1"
+            value={size}
+            onChange={handleSizeChange}
+          >
+            <option value={12}>12</option>
+            <option value={20}>20</option>
+            <option value={40}>40</option>
+          </select>
+          <span>ứng viên mỗi trang</span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            disabled={currentPage === 0}
+            onClick={() => handlePageChange(currentPage - 1)}
+            className="bg-white text-black"
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            className="bg-purple-600 text-white"
+            onClick={() => handlePageChange(currentPage)}
+          >
+            {currentPage + 1}
+          </Button>
+          <Button
+            variant="outline"
+            disabled={currentPage === totalPages - 1}
+            onClick={() => handlePageChange(currentPage + 1)}
+            className="bg-white text-black"
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </section>
   );

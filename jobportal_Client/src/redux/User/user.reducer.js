@@ -10,7 +10,7 @@ import {
   UPDATE_USER_STATUS_FAILURE,
   GET_USER_TYPES_REQUEST,
   GET_USER_TYPES_SUCCESS,
-  GET_USER_TYPES_FAILURE,
+  // GET_USER_TYPES_FAILURE,
 } from "./user.actionType";
 
 const initialState = {
@@ -55,8 +55,8 @@ export const userReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         users: action.payload.content,
-        totalPages: action.payload.totalPages,
-        totalElements: action.payload.totalElements,
+        totalPages: action.payload.page.totalPages,
+        totalElements: action.payload.page.totalElements,
         error: null
       };
 

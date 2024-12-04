@@ -1,6 +1,7 @@
 package com.job_portal.DTO;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -16,6 +17,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class CompanyDTO {
+	private UUID companyId;
     private String companyName;
     private Long applicationCount;
     private Integer industryId;

@@ -14,6 +14,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "../../ui/avatar";
 import { Separator } from "../../ui/separator";
 import logo from "../../assets/images/common/logo.jpg";
 import { logoutAction } from "../../redux/Auth/auth.action";
+import Swal from "sweetalert2";
 
 export default function Sidebar({ selectedSection, setSelectedSection }) {
   const { user } = useSelector((state) => state.auth);
@@ -109,81 +110,98 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
     navigate(item.path);
   };
 
-  const handleLogout = () => {
-    const confirmLogout = window.confirm("Bạn có chắc chắn muốn đăng xuất?");
-    if (confirmLogout) {
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: 'Xác nhận đăng xuất',
+      text: 'Bạn có chắc chắn muốn đăng xuất?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Đăng xuất',
+      cancelButtonText: 'Hủy',
+    });
+  
+    if (result.isConfirmed) {
       dispatch(logoutAction());
     }
   };
+  
 
   return (
-    <div>
-      <nav className="w-80 border-r bg-white p-6 relative h-screen">
+    <div className="flex bg-gray-100 min-h-screen">
+      <nav className="w-80 bg-white p-6 border-r shadow-lg">
+        {/* Logo Section */}
         <div className="flex items-center gap-3 pb-8">
           <img
             src={logo}
             alt="logo"
-            className="h-10 w-10 rounded-full bg-primary"
+            className="h-12 w-12 rounded-full bg-primary shadow-md"
           />
-          <Link to="/" className="text-2xl font-bold text-primary">
+          <Link
+            to="/"
+            className="text-3xl font-bold text-primary hover:text-indigo-700 transition duration-200"
+          >
             JobRadar
           </Link>
         </div>
 
-        <div className="mb-12 p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
-          <Avatar className="h-16 w-16 mb-4 border-2 border-primary/20">
+        {/* User Profile */}
+        <div className="mb-12 p-4 rounded-lg bg-gradient-to-r from-[#6441a5] via-[#2a0845] to-[#6441a5] hover:bg-gradient-to-l transition-all duration-300">
+          <Avatar className="h-20 w-20 mb-4 border-4 border-primary/20">
             <AvatarImage src={user?.avatar} />
-            <AvatarFallback className="text-xl font-medium">
+            <AvatarFallback className="text-2xl font-semibold text-white">
               {user?.userName?.charAt(0) || "U"}
             </AvatarFallback>
           </Avatar>
           <div className="space-y-1">
-            <p className="text-base font-semibold text-gray-800">
+            <p className="text-xl font-semibold text-white">
               {user?.userName || "Loading..."}
             </p>
-            <p className="text-sm text-gray-500 break-words whitespace-normal">
+            <p className="text-sm text-white break-words">
               {user?.email || "Loading..."}
             </p>
           </div>
         </div>
 
-        
-
+        {/* Menu Items */}
         <div className="space-y-2">
           {menuItems.map((item) => (
             <Button
               key={item.label}
               variant="ghost"
-              className={`w-full justify-start text-base font-medium transition-all duration-200 hover:scale-105 
+              className={`w-full justify-start text-lg font-medium py-3 px-4 rounded-lg transition-all duration-300 hover:scale-105 
                 ${
                   selectedSection === item.label
-                    ? "bg-primary/10 text-primary shadow-sm"
+                    ? "bg-primary/10 text-primary shadow-md"
                     : "text-gray-600 hover:bg-gray-100 hover:text-primary"
                 } 
                 focus:outline-none focus:ring-2 focus:ring-primary/20`}
               onClick={() => handleMenuClick(item)}
             >
-              <item.icon className="mr-3 h-5 w-5" />
+              <item.icon className="mr-4 h-6 w-6" />
               {item.label}
             </Button>
           ))}
         </div>
+
+        {/* Logout Button */}
         <Button
           variant="ghost"
-          className="w-full justify-start text-base font-medium transition-all duration-200 hover:bg-red-100 hover:text-red-500 mb-4"
+          className="w-full justify-start text-lg font-medium py-3 px-4 rounded-lg mt-4 transition-all duration-200 hover:bg-red-100 hover:text-red-500"
           onClick={handleLogout}
         >
-          <LogOut className="mr-3 h-5 w-5" />
+          <LogOut className="mr-4 h-6 w-6" />
           Đăng xuất
         </Button>
 
+        {/* Separator */}
         <Separator className="my-8" />
 
+        {/* Banner */}
         <div className="mt-6">
           <img
-            src="https://cdn-new.topcv.vn/unsafe/https://static.topcv.vn/img/Banner%202%20(1).png" // Thay đổi đường dẫn ảnh ở đây
+            src="https://cdn-new.topcv.vn/unsafe/https://static.topcv.vn/img/Banner%202%20(1).png"
             alt="Banner"
-            className="w-80 h-auto  p-6 "
+            className="w-80 h-auto rounded-lg shadow-md"
           />
         </div>
       </nav>

@@ -62,77 +62,77 @@ public class CompanyController {
 
 	@Autowired
 	private UserAccountRepository userAccountRepository;
-	
+
 	@Autowired
 	private IApplyJobService applyJobService;
 	@Autowired
 	private TaxCodeValidation taxCodeValidation;
-	
+
 	@Autowired
 	private ReviewRepository reviewRepository;
-	
+
 	@GetMapping("/validate")
 	public ResponseEntity<Boolean> validateTaxCode(@RequestParam UUID companyId) {
-	    // Tìm công ty theo ID
-	    Optional<Company> companyOptional = companyRepository.findById(companyId);
+		// Tìm công ty theo ID
+		Optional<Company> companyOptional = companyRepository.findById(companyId);
 
-	    if (companyOptional.isEmpty()) {
-	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false); // Không tìm thấy công ty -> false
-	    }
+		if (companyOptional.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false); // Không tìm thấy công ty -> false
+		}
 
-	    Company company = companyOptional.get();
-	    String taxCode = company.getTaxCode();
+		Company company = companyOptional.get();
+		String taxCode = company.getTaxCode();
 
-	    // Kiểm tra mã số thuế qua API VietQR
-	    boolean isTaxCodeValid = taxCodeValidation.checkTaxCode(taxCode);
+		// Kiểm tra mã số thuế qua API VietQR
+		boolean isTaxCodeValid = taxCodeValidation.checkTaxCode(taxCode);
 
-	    // Trả về true nếu hợp lệ, false nếu không hợp lệ
-	    return ResponseEntity.ok(isTaxCodeValid);
+		// Trả về true nếu hợp lệ, false nếu không hợp lệ
+		return ResponseEntity.ok(isTaxCodeValid);
 	}
-	
+
 	@GetMapping("/validate-tax")
 	public ResponseEntity<Boolean> validTaxCode(@RequestHeader("Authorization") String jwt) {
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-	    // Tìm công ty theo ID
-	    Optional<Company> companyOptional = companyRepository.findById(user.get().getCompany().getCompanyId());
+		// Tìm công ty theo ID
+		Optional<Company> companyOptional = companyRepository.findById(user.get().getCompany().getCompanyId());
 
-	    if (companyOptional.isEmpty()) {
-	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false); // Không tìm thấy công ty -> false
-	    }
+		if (companyOptional.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false); // Không tìm thấy công ty -> false
+		}
 
-	    Company company = companyOptional.get();
-	    String taxCode = company.getTaxCode();
+		Company company = companyOptional.get();
+		String taxCode = company.getTaxCode();
 
-	    // Kiểm tra mã số thuế qua API VietQR
-	    boolean isTaxCodeValid = taxCodeValidation.checkTaxCode(taxCode);
+		// Kiểm tra mã số thuế qua API VietQR
+		boolean isTaxCodeValid = taxCodeValidation.checkTaxCode(taxCode);
 
-	    // Trả về true nếu hợp lệ, false nếu không hợp lệ
-	    return ResponseEntity.ok(isTaxCodeValid);
+		// Trả về true nếu hợp lệ, false nếu không hợp lệ
+		return ResponseEntity.ok(isTaxCodeValid);
 	}
-
 
 	@GetMapping("/get-all")
 	public ResponseEntity<List<CompanyDTO>> getAllCompanies() {
-	    List<CompanyDTO> res = companyRepository.findCompaniesWithSavedApplications();
-	    return new ResponseEntity<>(res, HttpStatus.OK);
+		List<CompanyDTO> res = companyRepository.findCompaniesWithSavedApplications().stream().limit(6)
+				.collect(Collectors.toList());
+		return new ResponseEntity<>(res, HttpStatus.OK);
 	}
-	
+
 	@GetMapping("/find-all")
 	public ResponseEntity<List<Company>> findAllCompanies() {
-	    List<Company> res = companyRepository.findAll();
-	    return new ResponseEntity<>(res, HttpStatus.OK);
+		List<Company> res = companyRepository.findAll();
+		return new ResponseEntity<>(res, HttpStatus.OK);
 	}
-	
+
 	@GetMapping("/find-companies-fit-userId")
-	public ResponseEntity<List<Company>> findTop8CompanyFitUserId(@RequestHeader("Authorization") String jwt) throws AllExceptions {
+	public ResponseEntity<List<Company>> findTop8CompanyFitUserId(@RequestHeader("Authorization") String jwt)
+			throws AllExceptions {
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 
-		
-		List<Company> companies = companyRepository.findTop6CompaniesByIndustryId(user.get().getSeeker().getIndustry().getIndustryId()).stream()
-		        .limit(6)
-		        .collect(Collectors.toList());
+		List<Company> companies = companyRepository
+				.findTop6CompaniesByIndustryId(user.get().getSeeker().getIndustry().getIndustryId()).stream().limit(6)
+				.collect(Collectors.toList());
 		return new ResponseEntity<>(companies, HttpStatus.OK);
 	}
 
@@ -148,7 +148,6 @@ public class CompanyController {
 			return new ResponseEntity<>("Cập nhật thông tin thất bại", HttpStatus.BAD_REQUEST);
 		}
 	}
-
 
 	@GetMapping("/searchByName")
 	public ResponseEntity<Object> searchCompaniesByName(@RequestParam("companyName") String companyName) {
@@ -204,7 +203,7 @@ public class CompanyController {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		}
 	}
-	
+
 	@GetMapping("/profile")
 	public ResponseEntity<Company> getProfileCompany(@RequestHeader("Authorization") String jwt) throws AllExceptions {
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
@@ -216,64 +215,48 @@ public class CompanyController {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		}
 	}
-	
+
 	@GetMapping("/can-rating/{companyId}")
-    public ResponseEntity<Boolean> checkIfSaved(@RequestHeader("Authorization") String jwt, 
-    		@PathVariable("companyId") UUID companyId) {
+	public ResponseEntity<Boolean> checkIfSaved(@RequestHeader("Authorization") String jwt,
+			@PathVariable("companyId") UUID companyId) {
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-        boolean isSaved = applyJobService.isEligibleForRating(user.get().getUserId(), companyId);
-        return ResponseEntity.ok(isSaved);
-    }
-	
-	@GetMapping("/search-company-by-feature")
-	public Page<CompanyWithCountJobDTO> searchCompanies(
-	        @RequestParam(required = false) String title,
-	        @RequestParam(required = false) Integer cityId,
-	        @RequestParam(required = false) Integer industryId,
-	        @RequestParam(defaultValue = "0") int page, 
-	        @RequestParam(defaultValue = "6") int size) { 
-
-	    
-	    Pageable pageable = PageRequest.of(page, size); 
-	    return companyRepository.findCompaniesByFilters(title, cityId, industryId, pageable);
+		boolean isSaved = applyJobService.isEligibleForRating(user.get().getUserId(), companyId);
+		return ResponseEntity.ok(isSaved);
 	}
-	
+
+	@GetMapping("/search-company-by-feature")
+	public Page<CompanyWithCountJobDTO> searchCompanies(@RequestParam(required = false) String title,
+			@RequestParam(required = false) Integer cityId, @RequestParam(required = false) Integer industryId,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "6") int size) {
+
+		Pageable pageable = PageRequest.of(page, size);
+		return companyRepository.findCompaniesByFilters(title, cityId, industryId, pageable);
+	}
+
 	@GetMapping("/get-industry-name/{industryId}")
 	public ResponseEntity<String> getIndustryNameById(@PathVariable Integer industryId) {
-	    try {
-	        Optional<Industry> industry = industryRepository.findById(industryId);
-	        if (industry.isPresent()) {
-	            return ResponseEntity.ok(industry.get().getIndustryName());
-	        } else {
-	            return ResponseEntity.notFound().build();
-	        }
-	    } catch (Exception e) {
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body("Error fetching industry name");
-	    }
+		try {
+			Optional<Industry> industry = industryRepository.findById(industryId);
+			if (industry.isPresent()) {
+				return ResponseEntity.ok(industry.get().getIndustryName());
+			} else {
+				return ResponseEntity.notFound().build();
+			}
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error fetching industry name");
+		}
 	}
-	
+
 	@GetMapping("/get-all-companies")
-	public ResponseEntity<Map<String, Object>> getAllCompanies(
-	    @RequestParam(defaultValue = "0") int page,
-	    @RequestParam(defaultValue = "10") int size
-	) {
-	    try {
-	        Pageable paging = PageRequest.of(page, size);
-	        Page<Company> pageCompanies = companyRepository.findAll(paging);
-	        
-	        Map<String, Object> response = new HashMap<>();
-	        response.put("companies", pageCompanies.getContent());
-	        response.put("currentPage", pageCompanies.getNumber());
-	        response.put("totalItems", pageCompanies.getTotalElements());
-	        response.put("totalPages", pageCompanies.getTotalPages());
-	        
-	        return new ResponseEntity<>(response, HttpStatus.OK);
-	    } catch (Exception e) {
-	        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-	    }
+	public ResponseEntity<Page<Company>> searchCompanies(
+			@RequestParam(required = false, defaultValue = "") String companyName,
+			@RequestParam(required = false, defaultValue = "") String industryName,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+
+		Pageable pageable = PageRequest.of(page, size);
+		Page<Company> companies = companyRepository.findCompaniesWithFilters(companyName, industryName, pageable);
+		return ResponseEntity.ok(companies);
 	}
-	
 
 }

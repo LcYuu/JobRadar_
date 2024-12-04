@@ -13,9 +13,11 @@ import { store } from "../../redux/store";
 import {
   findEmployerCompany,
   findJobCompany,
+  updateExpireJob,
 } from "../../redux/JobPost/jobPost.action";
 import { validateTaxCode } from "../../redux/Company/company.action";
 import { toast, ToastContainer } from "react-toastify";
+import Swal from "sweetalert2";
 
 const JobManagement = () => {
   const work = [
@@ -27,11 +29,12 @@ const JobManagement = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [selectedDate, setSelectedDate] = useState("Jul 19 - Jul 25");
+  // const [selectedDate, setSelectedDate] = useState("Jul 19 - Jul 25");
   const {
     jobs = [],
     totalPages,
     totalElements,
+    expireJob,
   } = useSelector((store) => store.jobPost);
 
   const { isValid, loading, error } = useSelector((store) => store.company);
@@ -40,14 +43,64 @@ const JobManagement = () => {
   const [size, setSize] = useState(5);
   const [status, setStatus] = useState("");
   const [typeOfWork, setTypeOfWork] = useState("");
-  const [sortBy, setSortBy] = useState({
-    createDate: "DESC",
-    expireDate: "null",
-    count: "null",
-  });
+  // const [sortBy, setSortBy] = useState({
+  //   createDate: "",
+  //   expireDate: "",
+  //   count: "",
+  // });
   const [filtered, setFiltered] = useState([]); // Kết quả sau lọc;
   const handleViewDetails = (postId) => {
     navigate(`/employer/jobs/${postId}`);
+  };
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState(null);
+
+  const handleOpenModal = (postId) => {
+    setSelectedJobId(postId); // Lưu postId vào state
+    setIsModalOpen(true); // Mở modal
+  };
+
+  const handleOpenExpireConfirmation = () => {
+    Swal.fire({
+      title: "Xác nhận",
+      text: "Bạn có chắc chắn muốn dừng tuyển dụng công việc này?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#28a745", // Màu nút "Có"
+      cancelButtonColor: "#dc3545", // Màu nút "Không"
+      confirmButtonText: "Có",
+      cancelButtonText: "Không",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Nếu người dùng xác nhận
+        handleConfirmExpire(); // Thực hiện hành động dừng tuyển dụng
+      }
+    });
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false); // Đóng modal
+    setSelectedJobId(null); // Reset selectedJobId
+  };
+
+  const handleConfirmExpire = async () => {
+    if (selectedJobId) {
+      dispatch(updateExpireJob(selectedJobId)); // Gọi action để đánh dấu hết hạn
+    }
+    await dispatch(
+      findEmployerCompany(
+        status,
+        typeOfWork,
+        // sortBy.createDate, // Lấy giá trị từ state sortBy
+        // sortBy.expireDate,
+        // sortBy.count,
+        currentPage,
+        size
+      )
+    );
+    handleCloseModal(); // Đóng modal sau khi thực hiện
+    toast.success("Dừng tuyển dụng công việc thành công");
   };
 
   useEffect(() => {
@@ -56,18 +109,18 @@ const JobManagement = () => {
       findEmployerCompany(
         status,
         typeOfWork,
-        sortBy.createDate, // Lấy giá trị từ state sortBy
-        sortBy.expireDate,
-        sortBy.count,
+        // sortBy.createDate, // Lấy giá trị từ state sortBy
+        // sortBy.expireDate,
+        // sortBy.count,
         currentPage,
         size
       )
     );
   }, [
     dispatch,
-    sortBy.createDate, // Chỉ theo dõi sự thay đổi của sortBy
-    sortBy.expireDate,
-    sortBy.count,
+    // sortBy.createDate, // Chỉ theo dõi sự thay đổi của sortBy
+    // sortBy.expireDate,
+    // sortBy.count,
     currentPage,
     size,
   ]);
@@ -87,24 +140,25 @@ const JobManagement = () => {
     setCurrentPage(0); // Reset về trang đầu khi thay đổi số lượng bản ghi mỗi trang
   };
 
-  const handleSort = (column) => {
-    setSortBy((prevState) => {
-      // Tạo một đối tượng mới với tất cả các cột đã được đặt lại thành null
-      const newSort = prevState[column] === "ASC" ? "DESC" : "ASC";
-      const newState = {
-        [column]: newSort, // Cập nhật giá trị của cột hiện tại
-      };
+  // const handleSort = (column) => {
+  //   setSortBy((prevState) => {
+  //     // Tạo một đối tượng mới với tất cả các cột đã được đặt lại thành null
+  //     const newSort = prevState[column] === "ASC" ? "DESC" : "ASC";
+  //     const newState = {
+  //       [column]: newSort, // Cập nhật giá trị của cột hiện tại
+  //     };
 
-      // Đặt các cột còn lại thành null
-      Object.keys(prevState).forEach((key) => {
-        if (key !== column) {
-          newState[key] = null;
-        }
-      });
+  //     // Đặt các cột còn lại thành null
+  //     Object.keys(prevState).forEach((key) => {
+  //       if (key !== column) {
+  //         newState[key] = "";
+  //       }
+  //     });
+  //     setCurrentPage(0);
 
-      return newState;
-    });
-  };
+  //     return newState;
+  //   });
+  // };
 
   const applyFilters = () => {
     setCurrentPage(0);
@@ -127,7 +181,7 @@ const JobManagement = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-semibold">Danh sách công việc</h1>
+          <h1 className="text-2xl font-semibold"></h1>
           {/* <p className="text-gray-500 mt-1">Đây là danh sách việc làm từ {selectedDate}.</p> */}
         </div>
 
@@ -138,7 +192,7 @@ const JobManagement = () => {
           </div> */}
           <Button
             variant="default"
-            className="bg-indigo-600"
+            className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-500 transition-colors"
             onClick={handleClick} // Gọi hàm khi người dùng click
           >
             + Đăng bài
@@ -158,6 +212,7 @@ const JobManagement = () => {
               <option value="">Tất cả trạng thái</option>
               <option value="Đang mở">Đang mở</option> {/* isSave = 1 */}
               <option value="Chưa duyệt">Chưa duyệt</option> {/* isSave = 0 */}
+              <option value="Hết hạn">Hết hạn</option> {/* isSave = 0 */}
             </select>
 
             {/* Lọc theo vị trí công việc */}
@@ -175,39 +230,43 @@ const JobManagement = () => {
             </select>
             <Button
               variant="outline"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-500 transition-colors"
               onClick={applyFilters}
             >
               <Filter className="w-4 h-4" />
-              Filters
+              Áp dụng
             </Button>
           </div>
         </div>
 
         <table className="w-full">
-          <thead>
+          <thead className="bg-purple-600 text-white">
             <tr>
-              <th className="text-left p-4">Tiêu đề</th>
+              <th className="text-left p-4">Tên công việc</th>
               <th className="text-left p-4">Trạng thái</th>
               <th
                 className="text-left p-4 cursor-pointer"
-                onClick={() => handleSort("createDate")}
+                // onClick={() => handleSort("createDate")}
               >
-                Ngày bắt đầu {sortBy.createDate === "ASC" ? "↑" : "↓"}
+                Ngày bắt đầu
+                {/* {sortBy.createDate === "ASC" ? "↑" : "↓"} */}
               </th>
               <th
                 className="text-left p-4 cursor-pointer"
-                onClick={() => handleSort("expireDate")}
+                // onClick={() => handleSort("expireDate")}
               >
-                Ngày kết thúc {sortBy.expireDate === "ASC" ? "↑" : "↓"}
+                Ngày kết thúc
+                {/* {sortBy.expireDate === "ASC" ? "↑" : "↓"} */}
               </th>
               <th className="text-left p-4">Loại công việc</th>
               <th
                 className="text-left p-4 cursor-pointer"
-                onClick={() => handleSort("count")}
+                // onClick={() => handleSort("count")}
               >
-                Số lượng ứng viên {sortBy.count === "ASC" ? "↑" : "↓"}
+                Số lượng ứng viên
+                {/* {sortBy.count === "ASC" ? "↑" : "↓"} */}
               </th>
+              <th className="text-left p-4 cursor-pointer">Hành động</th>
             </tr>
           </thead>
           <tbody>
@@ -246,7 +305,7 @@ const JobManagement = () => {
                     </span>
                   </td>
                   <td className="p-4 text-center">{job?.applicationCount}</td>
-                  <td className="p-4">
+                  <td className="p-4 text-center">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
@@ -257,7 +316,39 @@ const JobManagement = () => {
                         align="end"
                         className="bg-white border border-gray-300 shadow-lg rounded-md p-2"
                       >
-                        <DropdownMenuItem>Chỉnh sửa</DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="hover:bg-gray-100 cursor-pointer"
+                          onClick={handleOpenExpireConfirmation}
+                        >
+                          Dừng tuyển dụng
+                        </DropdownMenuItem>
+                        {isModalOpen && (
+                          <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50">
+                            <div className="bg-white p-6 rounded-lg w-1/3">
+                              <h3 className="text-lg font-semibold">
+                                Xác nhận
+                              </h3>
+                              <p className="mt-2">
+                                Bạn có chắc chắn muốn dừng tuyển dụng công việc
+                                này?
+                              </p>
+                              <div className="mt-4 flex justify-end space-x-4">
+                                <button
+                                  onClick={handleConfirmExpire} // Xác nhận và gọi action
+                                  className="px-4 py-2 bg-green-500 text-white rounded-lg"
+                                >
+                                  Có
+                                </button>
+                                <button
+                                  onClick={handleCloseModal} // Đóng modal mà không thực hiện hành động
+                                  className="px-4 py-2 bg-red-500 text-white rounded-lg"
+                                >
+                                  Không
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                         <DropdownMenuItem
                           className="hover:bg-gray-100 cursor-pointer"
                           onClick={() => handleViewDetails(job.postId)}
@@ -305,7 +396,7 @@ const JobManagement = () => {
             </Button>
             <Button
               variant="outline"
-              className="bg-indigo-600 text-white"
+              className="bg-purple-600 text-white"
               onClick={() => handlePageChange(currentPage)}
             >
               {currentPage + 1}
@@ -325,6 +416,30 @@ const JobManagement = () => {
         autoClose={5000}
         hideProgressBar={true}
       />
+      {/* {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg w-1/3">
+            <h3 className="text-lg font-semibold">Xác nhận</h3>
+            <p className="mt-2">
+              Bạn có chắc chắn muốn dừng tuyển dụng công việc này?
+            </p>
+            <div className="mt-4 flex justify-end space-x-4">
+              <button
+                onClick={handleConfirmExpire} // Xác nhận và gọi action
+                className="px-4 py-2 bg-green-500 text-white rounded-lg"
+              >
+                Có
+              </button>
+              <button
+                onClick={handleCloseModal} // Đóng modal mà không thực hiện hành động
+                className="px-4 py-2 bg-red-500 text-white rounded-lg"
+              >
+                Không
+              </button>
+            </div>
+          </div>
+        </div>
+      )} */}
     </div>
   );
 };
