@@ -246,9 +246,7 @@ const App = () => {
           path="/admin"
           element={
             <ProtectedRoute
-              isAuthenticated={
-                isAuthenticated && user?.userType?.userTypeId === 1
-              }
+              isAuthenticated={isAuthenticated}
             >
               <MyAccount />
             </ProtectedRoute>
@@ -264,6 +262,16 @@ const App = () => {
 
         <Route path="/admin/jobs/:postId" element={<JobDetailAdmin />} />
         <Route path="/admin/survey-statistics" element={<SurveyStatistics />} />
+        <Route
+          path="/admin/*"
+          element={
+            <ProtectedRoute isAuthenticated={
+              isAuthenticated && user?.userType?.userTypeId === 1
+            }>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
       {showFooter && <Footer />}
     </div>
