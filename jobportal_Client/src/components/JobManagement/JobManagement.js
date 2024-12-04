@@ -61,7 +61,7 @@ const JobManagement = () => {
     setIsModalOpen(true); // Mở modal
   };
 
-  const handleOpenExpireConfirmation = () => {
+  const handleOpenExpireConfirmation = (postId) => {
     Swal.fire({
       title: "Xác nhận",
       text: "Bạn có chắc chắn muốn dừng tuyển dụng công việc này?",
@@ -73,8 +73,7 @@ const JobManagement = () => {
       cancelButtonText: "Không",
     }).then((result) => {
       if (result.isConfirmed) {
-        // Nếu người dùng xác nhận
-        handleConfirmExpire(); // Thực hiện hành động dừng tuyển dụng
+        handleConfirmExpire(postId); // Thực hiện hành động dừng tuyển dụng
       }
     });
   };
@@ -84,9 +83,9 @@ const JobManagement = () => {
     setSelectedJobId(null); // Reset selectedJobId
   };
 
-  const handleConfirmExpire = async () => {
-    if (selectedJobId) {
-      dispatch(updateExpireJob(selectedJobId)); // Gọi action để đánh dấu hết hạn
+  const handleConfirmExpire = async (postId) => {
+    if (postId) {
+      await dispatch(updateExpireJob(postId)); // Gọi action để đánh dấu hết hạn
     }
     await dispatch(
       findEmployerCompany(
@@ -99,7 +98,6 @@ const JobManagement = () => {
         size
       )
     );
-    handleCloseModal(); // Đóng modal sau khi thực hiện
     toast.success("Dừng tuyển dụng công việc thành công");
   };
 
@@ -279,7 +277,9 @@ const JobManagement = () => {
                       className={`px-3 py-1 rounded-full text-sm ${
                         job.status === "Đang mở"
                           ? "bg-emerald-100 text-emerald-600"
-                          : "bg-red-100 text-red-600"
+                          : job.status === "Hết hạn"
+                          ? "bg-red-100 text-red-600"
+                          : "bg-yellow-100 text-yellow-600"
                       }`}
                     >
                       {job?.status}
@@ -318,10 +318,20 @@ const JobManagement = () => {
                       >
                         <DropdownMenuItem
                           className="hover:bg-gray-100 cursor-pointer"
-                          onClick={handleOpenExpireConfirmation}
+                          onClick={() =>
+                            handleOpenExpireConfirmation(job.postId)
+                          }
+                          style={{
+                            display:
+                              job.expireDate &&
+                              new Date(job.expireDate) < new Date()
+                                ? "none"
+                                : "block",
+                          }}
                         >
                           Dừng tuyển dụng
                         </DropdownMenuItem>
+
                         {isModalOpen && (
                           <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50">
                             <div className="bg-white p-6 rounded-lg w-1/3">

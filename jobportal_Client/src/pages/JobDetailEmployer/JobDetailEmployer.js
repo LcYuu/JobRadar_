@@ -489,7 +489,7 @@ const JobDetailEmployer = () => {
                     />
                   </div>
                 </div>
-                {/* Các trường khác tương t��� */}
+                
               </div>
             ) : (
               <div>
