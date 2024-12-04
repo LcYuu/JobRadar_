@@ -31,27 +31,16 @@ export default function AdminJobList() {
   const [currentPage, setCurrentPage] = useState(0);
   const [size, setSize] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
+  const [status, setStatus] = useState("");
+  const [approve, setApprove] = useState("");
   const [totalJobs, setTotalJobs] = useState(0);
-  const [filters, setFilters] = useState({
-    status: "all",
-    approve: "all",
-  });
   const navigate = useNavigate();
 
   useEffect(() => {
-    dispatch(getAllJobsForAdmin(currentPage, size));
+    dispatch(
+      getAllJobsForAdmin(searchTerm, status, approve, currentPage, size)
+    );
   }, [dispatch, currentPage, size]);
-
-  useEffect(() => {
-    if (
-      jobPost &&
-      !searchTerm &&
-      filters.status === "all" &&
-      filters.approve === "all"
-    ) {
-      setTotalJobs(totalElements);
-    }
-  }, [jobPost, totalElements]);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalPages) {
@@ -64,35 +53,12 @@ export default function AdminJobList() {
     setCurrentPage(0);
   };
 
-  const filteredJobs = jobPost?.filter((job) => {
-    const matchesSearch =
-      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      job.company?.companyName.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesStatus =
-      filters.status === "all"
-        ? true
-        : filters.status === "Đang mở"
-        ? new Date(job.expireDate) > new Date()
-        : new Date(job.expireDate) <= new Date();
-
-    const matchesApprove =
-      filters.approve === "all"
-        ? true
-        : filters.approve === "approved"
-        ? job.approve
-        : !job.approve;
-
-    return matchesSearch && matchesStatus && matchesApprove;
-  });
-
-  useEffect(() => {
-    if (searchTerm || filters.status !== "all" || filters.approve !== "all") {
-      setTotalJobs(filteredJobs?.length || 0);
-    } else {
-      setTotalJobs(totalElements);
-    }
-  }, [searchTerm, filters, filteredJobs, totalElements]);
+  const applyFilters = () => {
+    setCurrentPage(0);
+    dispatch(
+      getAllJobsForAdmin(searchTerm, status, approve, currentPage, size)
+    );
+  };
 
   if (loading) return <div className="text-center py-8">Đang tải...</div>;
   if (error)
@@ -102,7 +68,9 @@ export default function AdminJobList() {
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow">
         <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="font-semibold">Danh sách công việc ({totalJobs})</h2>
+          <h2 className="font-semibold">
+            Danh sách công việc ({totalElements})
+          </h2>
           <div className="flex items-center gap-4">
             <div className="relative">
               <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -113,73 +81,35 @@ export default function AdminJobList() {
                 className="pl-8"
               />
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Filter className="w-4 h-4" />
-                  {filters.approve === "all"
-                    ? "Trạng thái duyệt"
-                    : filters.approve === "approved"
-                    ? "Đã duyệt"
-                    : "Chờ duyệt"}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem
-                  onClick={() => setFilters((f) => ({ ...f, approve: "all" }))}
-                >
-                  Tất cả
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() =>
-                    setFilters((f) => ({ ...f, approve: "approved" }))
-                  }
-                >
-                  Đã duyệt
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() =>
-                    setFilters((f) => ({ ...f, approve: "pending" }))
-                  }
-                >
-                  Chờ duyệt
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex items-center gap-4">
+              <select
+                value={approve}
+                onChange={(e) => setApprove(e.target.value)}
+                className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Tất cả</option>
+                <option value="true">Đã duyệt</option>
+                <option value="false">Chờ duyệt</option>
+              </select>
+            </div>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Filter className="w-4 h-4" />
-                  {filters.status === "all"
-                    ? "Tình trạng tuyển"
-                    : filters.status === "Đang mở"
-                    ? "Còn tuyển"
-                    : "Đã đóng"}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem
-                  onClick={() => setFilters((f) => ({ ...f, status: "all" }))}
-                >
-                  Tất cả
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() =>
-                    setFilters((f) => ({ ...f, status: "Đang mở" }))
-                  }
-                >
-                  Còn tuyển
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() =>
-                    setFilters((f) => ({ ...f, status: "Đã đóng" }))
-                  }
-                >
-                  Hết hạn
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex items-center gap-2">
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Tất cả</option>
+                <option value="Đang mở">Đang mở</option>
+                <option value="Hết hạn">Hết hạn</option>
+              </select>
+            </div>
+            <Button
+              onClick={applyFilters}
+              className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              Áp dụng
+            </Button>
           </div>
         </div>
 
@@ -198,67 +128,75 @@ export default function AdminJobList() {
           </thead>
 
           <tbody>
-            {filteredJobs?.map((job) => (
-              <tr key={job.jobPostId} className="border-b hover:bg-gray-50">
-                <td className="p-4">{job.title}</td>
-                <td className="p-4">{job.company?.companyName}</td>
-                <td className="p-4">{job.city?.cityName}</td>
-                <td className="p-4">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs ${
-                      job.approve
-                        ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}
-                  >
-                    {job.approve ? "Đã duyệt" : "Chờ duyệt"}
-                  </span>
-                </td>
-                <td className="p-4">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs ${
-                      job.status === "Đang mở"
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {job.status === "Đang mở" ? "Còn tuyển" : "Hết hạn"}
-                  </span>
-                </td>
-                <td className="p-4">
-                  {new Date(job.createDate).toLocaleDateString("vi-VN")}
-                </td>
-                <td className="p-4">
-                  {new Date(job.expireDate).toLocaleDateString("vi-VN")}
-                </td>
-                <td className="p-4">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {!job.approve && (
+            {jobPost?.length > 0 ? (
+              jobPost.map((job) => (
+                <tr key={job.jobPostId} className="border-b hover:bg-gray-50">
+                  <td className="p-4">{job.title}</td>
+                  <td className="p-4">{job.company?.companyName}</td>
+                  <td className="p-4">{job.city?.cityName}</td>
+                  <td className="p-4">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs ${
+                        job.approve
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
+                      {job.approve ? "Đã duyệt" : "Chờ duyệt"}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs ${
+                        job.status === "Đang mở"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {job.status === "Đang mở" ? "Đang mở" : "Hết hạn"}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    {new Date(job.createDate).toLocaleDateString("vi-VN")}
+                  </td>
+                  <td className="p-4">
+                    {new Date(job.expireDate).toLocaleDateString("vi-VN")}
+                  </td>
+                  <td className="p-4">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {!job.approve && (
+                          <DropdownMenuItem
+                            onClick={() => dispatch(approveJob(job.jobPostId))}
+                          >
+                            Phê duyệt
+                          </DropdownMenuItem>
+                        )}
                         <DropdownMenuItem
-                          onClick={() => dispatch(approveJob(job.jobPostId))}
+                          onClick={() => navigate(`/admin/jobs/${job.postId}`)}
                         >
-                          Phê duyệt
+                          Chi tiết
                         </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem
-                        onClick={() => navigate(`/admin/jobs/${job.postId}`)}
-                      >
-                        Chi tiết
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-600">
-                        Xóa
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                        <DropdownMenuItem className="text-red-600">
+                          Xóa
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="8" className="p-4 text-center text-gray-500">
+                  Không có dữ liệu
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
 
@@ -287,7 +225,7 @@ export default function AdminJobList() {
             </Button>
             <Button
               variant="outline"
-              className="bg-indigo-600 text-white"
+              className="bg-purple-600 text-white"
               onClick={() => handlePageChange(currentPage)}
             >
               {currentPage + 1}
