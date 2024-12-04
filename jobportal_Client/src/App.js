@@ -256,7 +256,7 @@ const App = () => {
           <Route path="user-list" element={<UserList />} />
           <Route path="job-list" element={<AdminJobList />} />
           <Route path="settings" element={<Settings />} />
-        </Route>
+        </Route>  
 
         <Route path="/admin/jobs/:postId" element={<JobDetailAdmin />} />
       </Routes>

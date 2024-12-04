@@ -83,7 +83,8 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 
 	long countByCompanyCompanyIdAndIsApproveTrue(UUID companyId);
 
-	long countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(UUID companyId, LocalDateTime currentDate);
+	long countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(UUID companyId,
+			LocalDateTime currentDate);
 
 	@Query(value = "SELECT new com.job_portal.DTO.JobWithApplicationCountDTO("
 			+ "jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
@@ -105,7 +106,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 			+ "AND (:status IS NULL OR jp.status = :status) "
 			+ "AND (:typeOfWork IS NULL OR jp.typeOfWork = :typeOfWork) "
 			+ "GROUP BY jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
-			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName ") 
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName ")
 //			+ "ORDER BY "
 //			+ "CASE WHEN :sortByCreateDate LIKE 'ASC' THEN jp.createDate END ASC, "
 //			+ "CASE WHEN :sortByCreateDate LIKE 'DESC' THEN jp.createDate END DESC, "
@@ -183,7 +184,17 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	@Query("SELECT j FROM JobPost j JOIN j.company c WHERE c.industry.industryId = :industryId AND j.isApprove = true AND j.expireDate > CURRENT_DATE AND j.postId != :excludePostId")
 	List<JobPost> findSimilarJobsByIndustry(@Param("industryId") Integer industryId,
 			@Param("excludePostId") UUID excludePostId);
-	
+
 	Optional<JobPost> findTopByCompanyCompanyIdOrderByCreateDateDesc(UUID companyId);
+
+	@Query("SELECT jp FROM JobPost jp "
+	        + "WHERE (:title IS NULL OR LOWER(jp.title) LIKE LOWER(CONCAT('%', :title, '%'))) "
+	        + "AND (:status IS NULL OR LOWER(jp.status) LIKE LOWER(CONCAT('%', :status, '%'))) "
+	        + "AND (:isApprove IS NULL OR jp.isApprove = :isApprove) "
+	        + "ORDER BY jp.title ASC")
+	Page<JobPost> searchJobPosts(@Param("title") String title, 
+	                             @Param("status") String status,
+	                             @Param("isApprove") Boolean isApprove, 
+	                             Pageable pageable);
 
 }

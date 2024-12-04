@@ -55,8 +55,8 @@ export const userReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         users: action.payload.content,
-        totalPages: action.payload.totalPages,
-        totalElements: action.payload.totalElements,
+        totalPages: action.payload.page.totalPages,
+        totalElements: action.payload.page.totalElements,
         error: null
       };
 
