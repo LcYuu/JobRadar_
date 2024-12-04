@@ -125,6 +125,11 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
     }
   };
   
+  const handleJobRadarClick = (e) => {
+    if (user?.userType?.userTypeId === 1 || user?.userType?.userTypeId === 3) {
+      e.preventDefault(); // Prevent navigation
+    }
+  };
 
   return (
     <div className="flex bg-gray-100 min-h-screen">
@@ -138,7 +143,12 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
           />
           <Link
             to="/"
-            className="text-3xl font-bold text-primary hover:text-indigo-700 transition duration-200"
+            onClick={handleJobRadarClick}
+            className={`text-3xl font-bold ${
+              user?.userType?.userTypeId === 1 || user?.userType?.userTypeId === 3
+                ? "text-gray-400 cursor-not-allowed" 
+                : "text-primary hover:text-indigo-700 transition duration-200"
+            }`}
           >
             JobRadar
           </Link>
