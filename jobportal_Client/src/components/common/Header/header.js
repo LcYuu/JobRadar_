@@ -1,25 +1,30 @@
-import React, { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { Button } from '../../../ui/button';
-import logo from '../../../assets/images/common/logo.jpg';
-import { getProfileAction, logoutAction } from '../../../redux/Auth/auth.action';
+import React, { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { Button } from "../../../ui/button";
+import logo from "../../../assets/images/common/logo.jpg";
+import {
+  getProfileAction,
+  logoutAction,
+} from "../../../redux/Auth/auth.action";
+import Swal from "sweetalert2";
 
 export default function Header() {
   const dispatch = useDispatch();
-  const { jwt, user } = useSelector(store => store.auth);
+  const { jwt, user } = useSelector((store) => store.auth);
   const navigate = useNavigate();
 
   const isAuthenticated = !!jwt && !!user;
   const isSeeker = user?.userType?.userTypeId === 2;
 
   const handleSignUpClick = () => {
-    navigate('/auth/sign-up');
+    navigate("/auth/sign-up");
   };
-  
+
   const handleSignInClick = () => {
-    navigate('/auth/sign-in');
+    navigate("/auth/sign-in");
   };
+
 
   const handleLogout = () => {
     const confirmLogout = window.confirm("Bạn có chắc chắn muốn đăng xuất?");
@@ -37,6 +42,7 @@ export default function Header() {
       navigate('user/account-management');
     }
   };
+
 
   return (
     <header className="bg-gradient-to-r from-gray-900 to-purple-900 px-4 py-3 flex justify-between items-center">
@@ -69,27 +75,44 @@ export default function Header() {
             </ul>
           </nav>
         )}
+
       </div>
 
       <div className="flex space-x-2">
         {isAuthenticated && user ? (
           <div className="flex items-center space-x-4">
-            <div className="flex items-center cursor-pointer" onClick={handleProfileClick}>
-              <img 
-                src={user?.avatar || '/default-avatar.png'} 
-                alt="User Avatar" 
+            <div
+              className="flex items-center cursor-pointer"
+              onClick={handleProfileClick}
+            >
+              <img
+                src={user?.avatar || "/default-avatar.png"}
+                alt="User Avatar"
                 className="w-8 h-8 rounded-full mr-2"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = '/default-avatar.png';
+                  e.target.src = "/default-avatar.png";
                 }}
               />
-              <span className="text-white">{user?.userName || 'User'}</span>
+              <span className="text-white">{user?.userName || "User"}</span>
             </div>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="text-white hover:text-red-200"
-              onClick={handleLogout}
+              onClick={async () => {
+                const result = await Swal.fire({
+                  title: "Xác nhận đăng xuất",
+                  text: "Bạn có chắc chắn muốn đăng xuất?",
+                  icon: "warning",
+                  showCancelButton: true,
+                  confirmButtonText: "Đăng xuất",
+                  cancelButtonText: "Hủy",
+                });
+
+                if (result.isConfirmed) {
+                  dispatch(logoutAction());
+                }
+              }}
             >
               Đăng xuất
             </Button>
@@ -100,6 +123,7 @@ export default function Header() {
               Login
             </Button>
             <Button className="bg-purple-600 text-white hover:bg-purple-700" onClick={handleSignUpClick}>
+
               Sign Up
             </Button>
           </>

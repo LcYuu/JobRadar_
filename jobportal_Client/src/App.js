@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  BrowserRouter as Router,
   Routes,
   Route,
   useLocation,
@@ -19,43 +18,42 @@ import { useEffect, useMemo } from "react";
 import { getProfileAction } from "./redux/Auth/auth.action";
 import ChangePassword from "./pages/ForgotPassword/ChangePassword";
 import MyAccount from "./pages/MyAccount/MyAccount";
-import FindCompanies from "./pages/FindComapnies/FindCompanies";
+import FindCompanies from "./pages/FindCompanies/FindCompanies";
 import CompanyProfile from "./pages/CompanyProfile/CompanyProfile";
 import { useNavigate } from "react-router-dom";
 
-import PublicRoute from './components/PublicRoute/PublicRoute';
-import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
-import Dashboard_Seeker from './components/Dashboard/Dashboard';
-import MyCV from './components/MyCv/MyCv';
-import FavoriteCompanies from './components/FollowingCompanies/FollowingCompanies';
-import MyProfile from './components/MyProfile/MyProfile';
-import JobDetail from './pages/JobDetail/JobDetail';
-import Settings from './components/Settings/settings';
-import Banner from './components/common/Banner/banner';
-import Background from './components/common/Background/background';
-import Dashboard_Employer from './components/Dashboard/DashboardEmployer';
-import CompanyProfile_Management from './components/CompanyProfile_Management/CompanyProfile_Management';
-import JobManagement from './components/JobManagement/JobManagement';
-import CandidateManagement from './components/CandidateManagement/CandidateManagement';
-import ApplicantDetail from './pages/ApplicantDetail/ApplicantDetail';
-import AdminDashboard from './pages/Admin/Dashboard/Dashboard';
-import CompanyList from './pages/Admin/CompanyList/CompanyList';
-import UserList from './pages/Admin/UserList/UserList';
-import AdminJobList from './pages/Admin/JobList/JobList';
+import PublicRoute from "./components/PublicRoute/PublicRoute";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+import Dashboard_Seeker from "./components/Dashboard/Dashboard";
+import MyCV from "./components/MyCv/MyCv";
+import FavoriteCompanies from "./components/FollowingCompanies/FollowingCompanies";
+import MyProfile from "./components/MyProfile/MyProfile";
+import JobDetail from "./pages/JobDetail/JobDetail";
+import Settings from "./components/Settings/settings";
 
-import JobDetailEmployer from './pages/JobDetailEmployer/JobDetailEmployer';
-import PostJob from './pages/PostJob/PostJob';
+import Dashboard_Employer from "./components/Dashboard/DashboardEmployer";
+import CompanyProfile_Management from "./components/CompanyProfile_Management/CompanyProfile_Management";
+import JobManagement from "./components/JobManagement/JobManagement";
+import CandidateManagement from "./components/CandidateManagement/CandidateManagement";
+import ApplicantDetail from "./pages/ApplicantDetail/ApplicantDetail";
+import AdminDashboard from "./pages/Admin/Dashboard/Dashboard";
+import CompanyList from "./pages/Admin/CompanyList/CompanyList";
+import UserList from "./pages/Admin/UserList/UserList";
+import AdminJobList from "./pages/Admin/JobList/JobList";
+
+import JobDetailEmployer from "./pages/JobDetailEmployer/JobDetailEmployer";
+import PostJob from "./pages/PostJob/PostJob";
 
 import RoleSelection from "./pages/SignIn/RoleSelection";
-import CompanyDetail from './pages/Admin/CompanyDetail/CompanyDetail';
-import JobDetailAdmin from './pages/Admin/JobDetail/JobDetailAdmin';
+import CompanyDetail from "./pages/Admin/CompanyDetail/CompanyDetail";
+import JobDetailAdmin from "./pages/Admin/JobDetail/JobDetailAdmin";
 
 import Survey from './pages/Survey/Survey';
 import SurveyStatistics from './pages/Admin/SurveyStatistic/SurveyStatistics';
 
 const App = () => {
   const location = useLocation();
-  const { user, jwt, isAuthenticated } = useSelector((state) => state.auth);
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -202,14 +200,16 @@ const App = () => {
             </PublicRoute>
           }
         />
-        <Route 
-  path="/admin/companies/:companyId" 
-  element={
-    user?.userType?.userTypeId === 1 ? 
-    <CompanyDetail /> : 
-    <CompanyProfile />
-  } 
-/>
+        <Route
+          path="/admin/companies/:companyId"
+          element={
+            user?.userType?.userTypeId === 1 ? (
+              <CompanyDetail />
+            ) : (
+              <CompanyProfile />
+            )
+          }
+        />
 
         {/* <Route path="/company-profile/:id" element={<CompanyProfile />} /> */}
 
@@ -229,25 +229,38 @@ const App = () => {
             element={<CompanyProfile_Management />}
           />
           <Route path="job-management" element={<JobManagement />} />
-          <Route path="candidate-management" element={<CandidateManagement />} />
-          <Route path="candidate-management/applicants/:userId/:postId" element={<ApplicantDetail />} />
+          <Route
+            path="candidate-management"
+            element={<CandidateManagement />}
+          />
+          <Route
+            path="candidate-management/applicants/:userId/:postId"
+            element={<ApplicantDetail />}
+          />
           <Route path="settings" element={<Settings />} />
         </Route>
         <Route path="/employer/jobs/:postId" element={<JobDetailEmployer />} />
         <Route path="/employer/jobs/post" element={<PostJob />} />
         {/* Admin Protected Routes */}
-        <Route path="/admin" element={
-          <ProtectedRoute isAuthenticated={isAuthenticated && user?.userType?.userTypeId === 1}>
-            <MyAccount />
-          </ProtectedRoute>
-        }>
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute
+              isAuthenticated={
+                isAuthenticated && user?.userType?.userTypeId === 1
+              }
+            >
+              <MyAccount />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<AdminDashboard />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="company-list" element={<CompanyList />} />
           <Route path="user-list" element={<UserList />} />
           <Route path="job-list" element={<AdminJobList />} />
           <Route path="settings" element={<Settings />} />
-        </Route>
+        </Route>  
 
         <Route path="/admin/jobs/:postId" element={<JobDetailAdmin />} />
         <Route path="/admin/survey-statistics" element={<SurveyStatistics />} />

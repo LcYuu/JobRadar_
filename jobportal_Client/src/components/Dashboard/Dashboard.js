@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { getApplyJobByUser } from "../../redux/ApplyJob/applyJob.action";
 import Pagination from "../layout/Pagination";
 export default function Dashboard_Seeker() {
-
   const dispatch = useDispatch();
   const {
     applyJobByUser = [],
@@ -34,26 +33,31 @@ export default function Dashboard_Seeker() {
   //   return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
   // });
 
-  
-
-
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
 
   return (
     <div>
-      <Card className="mb-8">
+      <Card className="mb-8 shadow-lg rounded-lg bg-gradient-to-br from-purple-500 via-indigo-500 to-blue-500 text-white">
         <CardContent className="p-6">
-          <h2 className="text-lg font-medium mb-2">Tổng đơn đã ứng tuyển</h2>
+          <h2 className="text-lg font-medium mb-4">Tổng đơn đã ứng tuyển</h2>
           <div className="flex items-center">
-            <span className="text-5xl font-bold mr-4">
-              {totalElements}
-            </span>
-            <FileText className="h-12 w-12 text-gray-400" />
+            <div className="flex flex-col items-center justify-center">
+              <span className="text-6xl font-extrabold mb-2">
+                {totalElements}
+              </span>
+              <span className="text-sm font-medium tracking-wide opacity-90">
+                Đơn đã gửi thành công
+              </span>
+            </div>
+            <div className="ml-6 flex items-center justify-center bg-white bg-opacity-30 p-4 rounded-full shadow-inner">
+              <FileText className="h-16 w-16 text-white" />
+            </div>
           </div>
         </CardContent>
       </Card>
+
       <Card>
         <CardContent className="p-6 bg-gray-50">
           <h2 className="text-lg font-semibold mb-4">Lịch sử ứng tuyển</h2>
@@ -66,88 +70,83 @@ export default function Dashboard_Seeker() {
                 minute: "2-digit",
               });
 
-              console.log("Application status:", app);
-
               return (
-                <Link 
-                  to={`/jobs/job-detail/${app.postId}`} 
+                <Link
+                  to={`/jobs/job-detail/${app.postId}`}
                   key={app.postId}
                   className="block"
                 >
-                  <div className="flex items-start justify-between p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
-                    <div className="flex items-start">
-                      <div className="w-12 h-12 rounded-full flex items-center justify-center mr-4 border border-gray-300">
+                  <div className="flex  justify-between p-5 bg-gradient-to-r from-white via-gray-100 to-gray-50 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200">
+                    {/* Logo */}
+                    <div className="flex items-center">
+                      <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-200 shadow-sm mr-4">
                         <img
                           src={app.logo}
                           alt="Logo"
-                          className="w-full h-full rounded-full object-cover"
+                          className="w-full h-full object-cover"
                         />
                       </div>
-                      <div className="flex flex-col">
+                      {/* Job Info */}
+                      <div className="flex flex-col space-y-4">
                         <div className="flex items-center gap-3">
-                          <h3 className="font-bold text-xl text-indigo-800">
+                          <h3 className="font-bold text-lg text-indigo-800">
                             {app.title}
                           </h3>
                           <span
                             className={`px-3 py-1 rounded-full text-sm ${
                               app.isSave
                                 ? "bg-green-100 text-green-600"
-                                : "bg-yellow-100 text-yellow-600"
+                                : "bg-red-100 text-red-600"
                             }`}
                           >
                             {app.isSave ? "Đã duyệt" : "Chờ duyệt"}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-700 mb-1">
+                        <p className="text-sm text-gray-600">
                           {app.companyName} • {app.location} • {app.typeOfWork}
                         </p>
-                        <span className="text-sm text-gray-500 mb-1">
+                        <span className="text-sm text-gray-500">
                           Thời gian ứng tuyển: {formattedDate} {formattedTime}
                         </span>
-                        <p className="text-sm text-gray-600">
-                          CV tải lên:{" "}
-                          <a
-                            href={app.pathCV}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-medium text-blue-600 hover:underline"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            CV tải lên
-                          </a>
-                        </p>
                       </div>
                     </div>
 
+                    {/* Action Menu */}
                     <div className="flex items-center">
-                      {app.pinned && (
-                        <Pin className="text-yellow-500 h-5 w-5 mr-2" />
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(app.pathCV, "_blank");
+                        }}
+                        className="text-sm bg-purple-500 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-all duration-300 font-medium"
+                      >
+                        Xem CV tải lên
+                      </button>
+
+                      {/* {app.pinned && (
+                        <Pin className="text-yellow-500 h-5 w-5 mr-3" />
                       )}
                       <DropdownMenu.Root>
                         <DropdownMenu.Trigger asChild>
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="icon"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <MoreVertical className="h-5 w-5" />
+                            <MoreVertical className="h-5 w-5 text-gray-600" />
                           </Button>
                         </DropdownMenu.Trigger>
                         <DropdownMenu.Portal>
-                          <DropdownMenu.Content className="min-w-[120px] bg-white rounded-md shadow-md">
-                            <DropdownMenu.Item
-                              className="cursor-pointer p-2 hover:bg-gray-200"
-                            >
+                          <DropdownMenu.Content className="bg-white rounded-lg shadow-md overflow-hidden">
+                            <DropdownMenu.Item className="p-3 hover:bg-gray-200 cursor-pointer">
                               Xóa
                             </DropdownMenu.Item>
-                            <DropdownMenu.Item
-                              className="cursor-pointer p-2 hover:bg-gray-200"
-                            >
+                            <DropdownMenu.Item className="p-3 hover:bg-gray-200 cursor-pointer">
                               {app.pinned ? "Bỏ ghim" : "Ghim"}
                             </DropdownMenu.Item>
                           </DropdownMenu.Content>
                         </DropdownMenu.Portal>
-                      </DropdownMenu.Root>
+                      </DropdownMenu.Root> */}
                     </div>
                   </div>
                 </Link>

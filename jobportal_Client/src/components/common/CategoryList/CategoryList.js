@@ -1,11 +1,10 @@
-import React, { useEffect } from 'react';
-import CategoryCard from '../CategoryCard/CategoryCard';
-import './CategoryList.css'; // Import CSS cho bố cục
-import logo from '../../../assets/images/common/logo.jpg';// Icon giả lập, thay thế bằng các icon thực tế của bạn
-import googleIcon from '../../../assets/icons/google.png';
-import { useDispatch, useSelector } from 'react-redux';
-import { getIndustry } from '../../../redux/Industry/industry.action';
-
+import React, { useEffect } from "react";
+import CategoryCard from "../CategoryCard/CategoryCard";
+import "./CategoryList.css"; // Import CSS cho bố cục
+import logo from "../../../assets/images/common/logo.jpg"; // Icon giả lập, thay thế bằng các icon thực tế của bạn
+import googleIcon from "../../../assets/icons/google.png";
+import { useDispatch, useSelector } from "react-redux";
+import { getIndustry } from "../../../redux/Industry/industry.action";
 
 const iconUrls = [
   "https://cdn-icons-png.flaticon.com/128/3007/3007250.png", // Thương mại điện tử
@@ -21,27 +20,29 @@ const iconUrls = [
 
 const CategoryList = () => {
   const dispatch = useDispatch();
-  const { industries} = useSelector(store => store.industry);
+  const { industries } = useSelector((store) => store.industry);
 
   useEffect(() => {
     dispatch(getIndustry());
   }, [dispatch]);
   return (
     <>
-    <h2 className="text-2xl font-bold">Công việc theo danh mục </h2>
-    <div className="category-list">
-      {industries.slice(1).map((industry, index) => (
-        <CategoryCard
-          key={industry.industryId}
-          icon={iconUrls[index]} 
-          title={industry.industryName}
-          jobCount={industry.jobCount}
-          industryId={industry.industryId}
-        />
-      ))}
-    </div>
+      <h2 className="text-2xl font-bold" style={{ color: "#43bfb3" }}>
+        Công việc theo danh mục
+      </h2>
+
+      <div className="category-list">
+        {industries.slice(1).map((industry, index) => (
+          <CategoryCard
+            key={industry.industryId}
+            icon={iconUrls[index]}
+            title={industry.industryName}
+            jobCount={industry.jobCount}
+            industryId={industry.industryId}
+          />
+        ))}
+      </div>
     </>
-    
   );
 };
 

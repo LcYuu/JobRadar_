@@ -53,4 +53,11 @@ public interface UserAccountRepository extends JpaRepository<UserAccount, UUID> 
     Page<UserAccount> findByIsActive(boolean isActive, Pageable pageable);
     
     Page<UserAccount> findByUserType_UserTypeIdAndIsActive(Integer userTypeId, boolean isActive, Pageable pageable);
+
+	@Query("SELECT ua FROM UserAccount ua WHERE " + "(:userName IS NULL OR ua.userName LIKE %:userName%) AND "
+			+ "(:userTypeId IS NULL OR ua.userType.userTypeId = :userTypeId) AND "
+			+ "(:isActive IS NULL OR ua.isActive = :isActive)")
+	Page<UserAccount> searchUserAccounts(@Param("userName") String userName, @Param("userTypeId") Integer userTypeId,
+			@Param("isActive") Boolean isActive, Pageable pageable);
+
 }

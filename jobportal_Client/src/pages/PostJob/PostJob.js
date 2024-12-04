@@ -28,69 +28,69 @@ import { store } from "../../redux/store";
 import { getCity } from "../../redux/City/city.action";
 
 const cityCodeMapping = {
-  1: 16,    // Hà Nội
-  2: 1,     // Hà Giang 
-  4: 2,     // Cao Bằng
-  6: 6,     // Bắc Kạn
-  8: 8,     // Tuyên Quang
-  10: 3,    // Lào Cai
-  11: 11,   // Điện Biên
-  12: 5,    // Lai Châu
-  14: 4,    // Sơn La
-  15: 9,    // Yên Bái
-  17: 20,   // Hoà Bình
-  19: 10,   // Thái Nguyên
-  20: 7,    // Lạng Sơn
-  22: 17,   // Quảng Ninh
-  24: 14,   // Bắc Giang
-  25: 12,   // Phú Thọ
-  26: 13,   // Vĩnh Phúc
-  27: 15,   // Bắc Ninh
-  30: 18,   // Hải Dương
-  31: 19,   // Hải Phòng
-  33: 21,   // Hưng Yên
-  34: 23,   // Thái Bình
-  35: 22,   // Hà Nam
-  36: 24,   // Nam Định
-  37: 25,   // Ninh Bình
-  38: 26,   // Thanh Hóa
-  40: 27,   // Nghệ An
-  42: 28,   // Hà Tĩnh
-  44: 29,   // Quảng Bình
-  45: 30,   // Quảng Trị
-  46: 31,   // Thừa Thiên Huế
-  48: 32,   // Đà Nẵng
-  49: 33,   // Quảng Nam
-  51: 34,   // Quảng Ngãi
-  52: 37,   // Bình Định
-  54: 38,   // Phú Yên
-  56: 40,   // Khánh Hòa
-  58: 43,   // Ninh Thuận
-  60: 48,   // Bình Thuận
-  62: 35,   // Kon Tum
-  64: 36,   // Gia Lai
-  66: 39,   // Đắk Lắk
-  67: 41,   // Đắk Nông
-  68: 42,   // Lâm Đồng
-  70: 44,   // Bình Phước
-  72: 45,   // Tây Ninh
-  74: 46,   // Bình Dương
-  75: 47,   // Đồng Nai
-  77: 51,   // Bà Rịa - Vũng Tàu
-  79: 49,   // TP Hồ Chí Minh
-  80: 50,   // Long An
-  82: 54,   // Tiền Giang
-  83: 56,   // Bến Tre
-  84: 59,   // Trà Vinh
-  86: 55,   // Vĩnh Long
-  87: 52,   // Đồng Tháp
-  89: 53,   // An Giang
-  91: 58,   // Kiên Giang
-  92: 57,   // Cần Thơ
-  93: 60,   // Hậu Giang
-  94: 61,   // Sóc Trăng
-  95: 62,   // Bạc Liêu
-  96: 63    // Cà Mau
+  1: 16, // Hà Nội
+  2: 1, // Hà Giang
+  4: 2, // Cao Bằng
+  6: 6, // Bắc Kạn
+  8: 8, // Tuyên Quang
+  10: 3, // Lào Cai
+  11: 11, // Điện Biên
+  12: 5, // Lai Châu
+  14: 4, // Sơn La
+  15: 9, // Yên Bái
+  17: 20, // Hoà Bình
+  19: 10, // Thái Nguyên
+  20: 7, // Lạng Sơn
+  22: 17, // Quảng Ninh
+  24: 14, // Bắc Giang
+  25: 12, // Phú Thọ
+  26: 13, // Vĩnh Phúc
+  27: 15, // Bắc Ninh
+  30: 18, // Hải Dương
+  31: 19, // Hải Phòng
+  33: 21, // Hưng Yên
+  34: 23, // Thái Bình
+  35: 22, // Hà Nam
+  36: 24, // Nam Định
+  37: 25, // Ninh Bình
+  38: 26, // Thanh Hóa
+  40: 27, // Nghệ An
+  42: 28, // Hà Tĩnh
+  44: 29, // Quảng Bình
+  45: 30, // Quảng Trị
+  46: 31, // Thừa Thiên Huế
+  48: 32, // Đà Nẵng
+  49: 33, // Quảng Nam
+  51: 34, // Quảng Ngãi
+  52: 37, // Bình Định
+  54: 38, // Phú Yên
+  56: 40, // Khánh Hòa
+  58: 43, // Ninh Thuận
+  60: 48, // Bình Thuận
+  62: 35, // Kon Tum
+  64: 36, // Gia Lai
+  66: 39, // Đắk Lắk
+  67: 41, // Đắk Nông
+  68: 42, // Lâm Đồng
+  70: 44, // Bình Phước
+  72: 45, // Tây Ninh
+  74: 46, // Bình Dương
+  75: 47, // Đồng Nai
+  77: 51, // Bà Rịa - Vũng Tàu
+  79: 49, // TP Hồ Chí Minh
+  80: 50, // Long An
+  82: 54, // Tiền Giang
+  83: 56, // Bến Tre
+  84: 59, // Trà Vinh
+  86: 55, // Vĩnh Long
+  87: 52, // Đồng Tháp
+  89: 53, // An Giang
+  91: 58, // Kiên Giang
+  92: 57, // Cần Thơ
+  93: 60, // Hậu Giang
+  94: 61, // Sóc Trăng
+  95: 62, // Bạc Liêu
+  96: 63, // Cà Mau
 };
 
 function mapApiCodeToCityId(apiCode) {
@@ -141,14 +141,14 @@ const PostJob = () => {
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
-  const [selectedProvince, setSelectedProvince] = useState('');
-  const [selectedDistrict, setSelectedDistrict] = useState('');
-  const [selectedWard, setSelectedWard] = useState('');
-  const [specificAddress, setSpecificAddress] = useState('');
+  const [selectedProvince, setSelectedProvince] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedWard, setSelectedWard] = useState("");
+  const [specificAddress, setSpecificAddress] = useState("");
   const [location, setLocation] = useState({
-    province: '',
-    district: '',
-    ward: ''
+    province: "",
+    district: "",
+    ward: "",
   });
 
   useEffect(() => {
@@ -163,11 +163,11 @@ const PostJob = () => {
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
-        const response = await fetch('https://provinces.open-api.vn/api/p/');
+        const response = await fetch("https://provinces.open-api.vn/api/p/");
         const data = await response.json();
         setProvinces(data);
       } catch (error) {
-        console.error('Error fetching provinces:', error);
+        console.error("Error fetching provinces:", error);
       }
     };
     fetchProvinces();
@@ -177,64 +177,70 @@ const PostJob = () => {
     const fetchDistricts = async () => {
       if (selectedProvince) {
         try {
-          const response = await fetch(`https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`);
+          const response = await fetch(
+            `https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`
+          );
           const data = await response.json();
-          
+
           // Store districts data
           setDistricts(data.districts);
-          
+
           // Store full location string
           const provinceName = data.name;
-          setLocation(prevLocation => ({
+          setLocation((prevLocation) => ({
             ...prevLocation,
-            province: provinceName
+            province: provinceName,
           }));
-  
+
           // Reset child selections
-          setSelectedDistrict('');
-          setSelectedWard('');
+          setSelectedDistrict("");
+          setSelectedWard("");
         } catch (error) {
-          console.error('Error fetching districts:', error);
+          console.error("Error fetching districts:", error);
         }
       }
     };
     fetchDistricts();
   }, [selectedProvince]);
-  
+
   useEffect(() => {
     const fetchWards = async () => {
       if (selectedDistrict) {
         try {
-          const response = await fetch(`https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`);
+          const response = await fetch(
+            `https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`
+          );
           const data = await response.json();
-          
+
           // Store wards data
           setWards(data.wards);
-          
+
           // Update location with district name
-          setLocation(prevLocation => ({
+          setLocation((prevLocation) => ({
             ...prevLocation,
-            district: data.name
+            district: data.name,
           }));
-  
+
           // Reset ward selection
-          setSelectedWard('');
+          setSelectedWard("");
         } catch (error) {
-          console.error('Error fetching wards:', error);
+          console.error("Error fetching wards:", error);
         }
       }
     };
     fetchWards();
   }, [selectedDistrict]);
-  
+
   // Add this effect to handle ward selection
   useEffect(() => {
     if (selectedWard && wards.length > 0) {
-      const selectedWardData = wards.find(ward => ward.code === parseInt(selectedWard));
+      const selectedWardData = wards.find(
+        (ward) => ward.code === parseInt(selectedWard)
+      );
       if (selectedWardData) {
-        setLocation(prevLocation => ({
+        setLocation((prevLocation) => ({
           ...prevLocation,
-          ward: selectedWardData.name
+          ward: selectedWardData.name,
         }));
       }
     }
@@ -344,9 +350,10 @@ const PostJob = () => {
       }
 
       if (!jobData.experience || jobData.experience <= 0) {
-        tempErrors.experience = "Yêu cầu kinh nghiệm không được để trống và lớn hơn 0";
+        tempErrors.experience =
+          "Yêu cầu kinh nghiệm không được để trống và lớn hơn 0";
         isValid = false;
-      } 
+      }
 
       if (!jobData.niceToHaves || jobData.niceToHaves.trim() === "") {
         tempErrors.niceToHaves = "Điều kiện bổ sung không được để trống.";
@@ -377,35 +384,35 @@ const PostJob = () => {
     return { isValid, errors: tempErrors };
   };
 
-  
-
   // Add form validation
-  
+
   // Update handleSubmitJob
   const handleSubmitJob = async (e) => {
     e.preventDefault();
-    
+
     try {
-      const fullAddress = specificAddress + ", " + `${location.ward}, ${location.district}, ${location.province}`;
-  
+      const fullAddress =
+        specificAddress +
+        ", " +
+        `${location.ward}, ${location.district}, ${location.province}`;
+
       const finalJobData = {
         ...jobData,
         cityId: cityCodeMapping[selectedProvince],
         location: fullAddress,
       };
-  
+
       const result = await dispatch(createJobPost(finalJobData));
-  
+
       if (result.success) {
-        toast.success('Tạo tin tuyển dụng thành công!');
-        setShowSuccessModal(true);
+        toast.success(result.message || "Tạo tin tuyển dụng thành công!");
+        setShowSuccessModal(true); // Hiển thị modal khi thành công
       } else {
-        toast.error(result.error || 'Có lỗi xảy ra');
+        toast.error(result?.error || "Có lỗi xảy ra");
       }
-  
     } catch (error) {
-      console.error('Error:', error);
-      toast.error('Có lỗi xảy ra khi tạo tin tuyển dụng');
+      console.error("Error:", error);
+      toast.error("Có lỗi xảy ra khi tạo tin tuyển dụng");
     }
   };
 
@@ -428,6 +435,12 @@ const PostJob = () => {
         return nextStep;
       });
     }
+  };
+
+  const handleExpireDateChange = (e) => {
+    const selectedDate = e.target.value; // Chỉ có ngày (YYYY-MM-DD)
+    const defaultTime = "T00:00:00"; // Mặc định 00:00:00
+    setJobData({ ...jobData, expireDate: `${selectedDate}${defaultTime}` });
   };
 
   const renderStepContent = () => {
@@ -491,7 +504,7 @@ const PostJob = () => {
                 />
               </div>
               <p className="text-sm text-gray-500 mt-1">
-              Nhập một giá trị lương duy nhất.
+                Nhập một giá trị lương duy nhất.
               </p>
               {errors.salary && (
                 <p className="text-red-500 text-sm">{errors.salary}</p>
@@ -521,14 +534,12 @@ const PostJob = () => {
               <Label>Ngày hết hạn</Label>
               <Input
                 type="date"
-                value={jobData.expireDate} // Giá trị ngày hết hạn
-                onChange={
-                  (e) => setJobData({ ...jobData, expireDate: e.target.value }) // Cập nhật ngày hết hạn
-                }
+                value={jobData.expireDate.split("T")[0]} // Hiển thị chỉ ngày
+                onChange={(e) => handleExpireDateChange(e)}
                 className="w-full mt-2 p-2 border border-gray-300 rounded-md"
               />
               <p className="text-sm text-gray-500 mt-1">
-              Chọn ngày hết hạn cho tin tuyển dụng này.
+                Chọn ngày hết hạn cho tin tuyển dụng này.
               </p>
               {errors.expireDate && (
                 <p className="text-red-500 text-sm">{errors.expireDate}</p>
@@ -542,7 +553,11 @@ const PostJob = () => {
                   const skill = skills.find((s) => s.skillId === skillId);
                   return (
                     skill && (
-                      <Badge key={skillId} variant="secondary" className="flex items-center gap-1">
+                      <Badge
+                        key={skillId}
+                        variant="secondary"
+                        className="flex items-center gap-1"
+                      >
                         {skill.skillName}
                         <X
                           className="w-3 h-3 cursor-pointer"
@@ -571,7 +586,10 @@ const PostJob = () => {
                 {isSkillDropdownOpen && (
                   <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
                     {skills.map((skill) => (
-                      <label key={skill.skillId} className="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                      <label
+                        key={skill.skillId}
+                        className="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer"
+                      >
                         <input
                           type="checkbox"
                           className="w-4 h-4 rounded border-gray-300 mr-3"
@@ -602,7 +620,8 @@ const PostJob = () => {
             <div>
               <h2 className="text-lg font-semibold mb-2">Chi tiết</h2>
               <p className="text-sm text-gray-500 mb-4">
-              Thêm mô tả, trách nhiệm về công việc, thế nào là ứng viên phù hợp và cần có những kỹ năng gì..
+                Thêm mô tả, trách nhiệm về công việc, thế nào là ứng viên phù
+                hợp và cần có những kỹ năng gì..
               </p>
 
               {/* Job Description */}
@@ -648,7 +667,8 @@ const PostJob = () => {
               <div className="mb-6">
                 <Label>Trách nhiệm công việc</Label>
                 <p className="text-sm text-gray-500 mb-2">
-                  Danh sách các trách nhiệm cho vị trí công việc này (**Chú ý: Mỗi trách nhiệm cách nhau bởi dấu ";")
+                  Danh sách các trách nhiệm cho vị trí công việc này (**Chú ý:
+                  Mỗi trách nhiệm cách nhau bởi dấu xuống dòng)
                 </p>
                 <div className="border rounded-md">
                   <Editor
@@ -715,8 +735,9 @@ const PostJob = () => {
               <div className="mb-6">
                 <Label>Các yêu cầu cần có</Label>
                 <p className="text-sm text-gray-500 mb-2">
-                Thêm các kỹ năng và trình độ cần có cho vai trò này để
-                khuyến khích nhiều ứng viên đa dạng hơn nộp đơn (**Chú ý: Mỗi yêu cầu cách nhau bởi dấu ";")
+                  Thêm các kỹ năng và trình độ cần có cho vai trò này để khuyến
+                  khích nhiều ứng viên đa dạng hơn nộp đơn (**Chú ý: Mỗi yêu cầu
+                  cách nhau bởi dấu xuống dòng)
                 </p>
                 <div className="border rounded-md">
                   <Editor
@@ -759,14 +780,15 @@ const PostJob = () => {
             <div>
               <h2 className="text-lg font-semibold mb-2">Thông tin cơ bản</h2>
               <p className="text-sm text-gray-500 mb-4">
-              Liệt kê các đặc quyền và lợi ích hàng đầu của công ty 
+                Liệt kê các đặc quyền và lợi ích hàng đầu của công ty
               </p>
 
               <div className="mb-6">
                 <Label>Phúc lợi</Label>
                 <p className="text-sm text-gray-500 mb-2">
-                Thêm các phúc lợi mà công ty cung cấp để khuyến khích ứng viên
-                nộp đơn (**Chú ý: Mỗi đặc quyền hoặc lợi ích cách nhau bởi dấu ";")
+                  Thêm các phúc lợi mà công ty cung cấp để khuyến khích ứng viên
+                  nộp đơn (**Chú ý: Mỗi đặc quyền hoặc lợi ích cách nhau bởi dấu
+                  xuống dòng)
                 </p>
                 <div className="border rounded-md">
                   <Editor
@@ -893,27 +915,29 @@ const PostJob = () => {
 
       {/* Progress Steps */}
       <div className="flex items-center justify-between mb-8">
-        {["Thông tin công việc", "Mô tả công việc", "Phúc lợi và đặc quyền"].map(
-          (step, index) => (
-            <React.Fragment key={index}>
-              <div className="flex items-center gap-2">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    currentStep > index + 1
-                      ? "bg-indigo-600 text-white"
-                      : currentStep === index + 1
-                      ? "bg-indigo-600 text-white"
-                      : "bg-gray-200"
-                  }`}
-                >
-                  {index + 1}
-                </div>
-                <span className="text-sm">{step}</span>
+        {[
+          "Thông tin công việc",
+          "Mô tả công việc",
+          "Phúc lợi và đặc quyền",
+        ].map((step, index) => (
+          <React.Fragment key={index}>
+            <div className="flex items-center gap-2">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  currentStep > index + 1
+                    ? "bg-purple-600 text-white"
+                    : currentStep === index + 1
+                    ? "bg-purple-600 text-white"
+                    : "bg-gray-200"
+                }`}
+              >
+                {index + 1}
               </div>
-              {index < 2 && <div className="flex-1 h-px bg-gray-200 mx-4" />}
-            </React.Fragment>
-          )
-        )}
+              <span className="text-sm">{step}</span>
+            </div>
+            {index < 2 && <div className="flex-1 h-px bg-gray-200 mx-4" />}
+          </React.Fragment>
+        ))}
       </div>
 
       {/* Form Content */}
@@ -933,7 +957,7 @@ const PostJob = () => {
         <div className="flex-1" />
         <Button
           variant="default"
-          className="bg-indigo-600"
+          className="bg-purple-600 text-white"
           onClick={currentStep === 3 ? handleSubmitJob : handleNextStep}
         >
           {currentStep === 3 ? "Đăng" : "Bước tiếp theo"}
@@ -951,7 +975,7 @@ const PostJob = () => {
             <div className="flex justify-end">
               <Button
                 variant="default"
-                className="bg-indigo-600"
+                className="bg-purple-600"
                 onClick={() => {
                   setShowSuccessModal(false);
                   navigate("/employer/account-management/job-management"); // Chuyển về trang quản lý việc làm

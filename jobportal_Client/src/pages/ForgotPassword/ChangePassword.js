@@ -16,7 +16,7 @@ export default function ChangePassword() {
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { loading, message, error } = useSelector((state) => state.forgotPassword);
+  const { loading, message } = useSelector((state) => state.forgotPassword);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const email = queryParams.get('email');
