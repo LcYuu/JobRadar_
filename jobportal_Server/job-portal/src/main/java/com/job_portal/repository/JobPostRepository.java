@@ -42,12 +42,19 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	// Lọc các JobPost có salary giữa minSalary và maxSalary và đã phê duyệt
 	public List<JobPost> findBySalaryBetweenAndIsApproveTrue(Long minSalary, Long maxSalary);
 
-	@Query(value = "SELECT DATE(create_date) as date, COUNT(*) as count " + "FROM job_post "
-			+ "WHERE create_date BETWEEN :startDate AND :endDate " + "GROUP BY DATE(create_date) "
-			+ "ORDER BY date", nativeQuery = true)
-	List<Object[]> countNewJobsPerDay(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
-	List<JobPost> findByIsApproveTrueAndExpireDateGreaterThanEqual(LocalDate currentDate);
+	@Query(value = "SELECT DATE(create_date) as date, COUNT(*) as count " +
+		       "FROM job_post " +
+		       "WHERE create_date BETWEEN :startDate AND :endDate " +
+		       "GROUP BY DATE(create_date) " +
+		       "ORDER BY date", nativeQuery = true)
+	List<Object[]> countNewJobsPerDay(
+			@Param("startDate") LocalDateTime startDate,
+			@Param("endDate") LocalDateTime endDate
+	);
+
+
+	List<JobPost> findByIsApproveTrueAndExpireDateGreaterThanEqual(LocalDateTime currentDate);
 
 	@Query("SELECT new com.job_portal.DTO.JobRecommendationDTO(j.postId, j.title, j.description, j.location, j.salary, j.experience, "
 			+ "j.typeOfWork, j.createDate, j.expireDate, j.company.companyId, j.company.companyName, j.city.cityName, j.company.industry.industryName, j.company.logo) "
@@ -73,13 +80,13 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 
 	default Specification<JobPost> alwaysActiveJobs() {
 		return (root, query, criteriaBuilder) -> criteriaBuilder.and(criteriaBuilder.isTrue(root.get("isApprove")),
-				criteriaBuilder.greaterThanOrEqualTo(root.get("expireDate"), LocalDate.now()));
+				criteriaBuilder.greaterThanOrEqualTo(root.get("expireDate"), LocalDateTime.now()));
 	}
 
 	Page<JobPost> findByCompanyCompanyIdAndApproveTrue(UUID companyId, Pageable pageable);
 
 	Page<JobPost> findByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(UUID companyId, Pageable pageable,
-			LocalDate now);
+			LocalDateTime now);
 
 	long countByCompanyCompanyIdAndIsApproveTrue(UUID companyId);
 
@@ -129,8 +136,11 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	// companyId,
 	// LocalDateTime currentDate);
 
-	@Query("SELECT COUNT(j) FROM JobPost j WHERE j.createDate BETWEEN :startDate AND :endDate")
-	long countByCreatedAtBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+	@Query("SELECT COUNT(j) FROM JobPost j WHERE DATE(j.createDate) BETWEEN :startDate AND :endDate")
+	long countByCreatedAtBetween(
+		@Param("startDate") LocalDate startDate,
+		@Param("endDate") LocalDate endDate
+	);
 
 	Page<JobPost> findByCompanyCompanyId(UUID companyId, Pageable pageable);
 
@@ -143,35 +153,58 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	 * UUID companyId, LocalDateTime date );
 	 */
 
-	long countByCompanyCompanyIdAndIsApproveFalseOrExpireDateLessThan(UUID companyId, LocalDate date);
+	long countByCompanyCompanyIdAndIsApproveFalseOrExpireDateLessThan(
+			UUID companyId, 
+			LocalDateTime date
+	);
 
-	@Query("SELECT COUNT(j) FROM JobPost j " + "WHERE j.company.companyId = :companyId "
-			+ "AND j.createDate BETWEEN :startDate AND :endDate")
-	long countJobsByCompanyAndDateRange(@Param("companyId") UUID companyId, @Param("startDate") LocalDate startDate,
-			@Param("endDate") LocalDate endDate);
+	@Query("SELECT COUNT(j) FROM JobPost j " +
+		   "WHERE j.company.companyId = :companyId " +
+		   "AND j.createDate BETWEEN :startDate AND :endDate")
+	long countJobsByCompanyAndDateRange(
+		@Param("companyId") UUID companyId,
+		@Param("startDate") LocalDateTime startDate,
+		@Param("endDate") LocalDateTime endDate
+	);
 
-	@Query("SELECT COUNT(j) FROM JobPost j " + "WHERE j.company.companyId = :companyId " + "AND j.isApprove = true "
-			+ "AND j.expireDate >= CURRENT_TIMESTAMP " + "AND j.createDate BETWEEN :startDate AND :endDate")
-	long countActiveJobsByCompanyAndDateRange(@Param("companyId") UUID companyId,
-			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+	@Query("SELECT COUNT(j) FROM JobPost j " +
+		   "WHERE j.company.companyId = :companyId " +
+		   "AND j.isApprove = true " +
+		   "AND j.expireDate >= CURRENT_TIMESTAMP " +
+		   "AND j.createDate BETWEEN :startDate AND :endDate")
+	long countActiveJobsByCompanyAndDateRange(
+		@Param("companyId") UUID companyId,
+		@Param("startDate") LocalDateTime startDate,
+		@Param("endDate") LocalDateTime endDate
+	);
 
-	@Query("SELECT COUNT(j) FROM JobPost j " + "WHERE j.company.companyId = :companyId "
-			+ "AND (j.isApprove = false OR j.expireDate < CURRENT_TIMESTAMP) "
-			+ "AND j.createDate BETWEEN :startDate AND :endDate")
-	long countClosedJobsByCompanyAndDateRange(@Param("companyId") UUID companyId,
-			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
-
+	@Query("SELECT COUNT(j) FROM JobPost j " +
+		   "WHERE j.company.companyId = :companyId " +
+		   "AND (j.isApprove = false OR j.expireDate < CURRENT_TIMESTAMP) " +
+		   "AND j.createDate BETWEEN :startDate AND :endDate")
+	long countClosedJobsByCompanyAndDateRange(
+		@Param("companyId") UUID companyId,
+		@Param("startDate") LocalDateTime startDate,
+		@Param("endDate") LocalDateTime endDate
+	);
 	long countByCompanyCompanyIdAndExpireDateLessThan(UUID companyId, LocalDateTime date);
-
 	long countByCompanyCompanyIdAndIsApproveFalse(UUID companyId);
 
-	@Query("SELECT COUNT(j) FROM JobPost j " + "WHERE j.company.companyId = :companyId " + "AND j.isApprove = false "
-			+ "AND j.createDate BETWEEN :startDate AND :endDate")
-	long countPendingJobsByCompanyAndDateRange(@Param("companyId") UUID companyId,
-			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
-
+	@Query("SELECT COUNT(j) FROM JobPost j " +
+		   "WHERE j.company.companyId = :companyId " +
+		   "AND j.isApprove = false " +
+		   "AND j.createDate BETWEEN :startDate AND :endDate")
+	long countPendingJobsByCompanyAndDateRange(
+		@Param("companyId") UUID companyId,
+		@Param("startDate") LocalDateTime startDate,
+		@Param("endDate") LocalDateTime endDate
+	);
 	@Query("SELECT COUNT(j) FROM JobPost j WHERE DATE(j.createDate) BETWEEN :startDate AND :endDate")
-	long countByCreatedDateBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+    long countByCreatedAtBetween(
+        @Param("startDate") LocalDateTime startDate,
+        @Param("endDate") LocalDateTime endDate
+    );
+
 
 	Page<JobPost> findByStatusAndIsApproveTrue(String status, Pageable pageable);
 
@@ -182,6 +215,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	Page<JobPost> findJobsWithFilters(@Param("title") String title, @Param("status") String status, Pageable pageable);
 
 	@Query("SELECT j FROM JobPost j JOIN j.company c WHERE c.industry.industryId = :industryId AND j.isApprove = true AND j.expireDate > CURRENT_DATE AND j.postId != :excludePostId")
+
 	List<JobPost> findSimilarJobsByIndustry(@Param("industryId") Integer industryId,
 			@Param("excludePostId") UUID excludePostId);
 
@@ -196,5 +230,6 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	                             @Param("status") String status,
 	                             @Param("isApprove") Boolean isApprove, 
 	                             Pageable pageable);
-
+	@Query("SELECT j FROM JobPost j WHERE j.expireDate < ?1 AND (j.surveyEmailSent = false OR j.surveyEmailSent IS NULL)")
+	List<JobPost> findByExpireDateBeforeAndSurveyEmailSentFalse(LocalDateTime date);
 }

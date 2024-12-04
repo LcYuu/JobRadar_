@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tab";
 import { useDispatch, useSelector } from "react-redux";
-import { store } from "../../redux/store";
+
 import {
   getCandidateProfile,
   getCandidateSkills,
@@ -88,7 +88,7 @@ const ApplicantDetail = () => {
           className="flex items-center gap-2 bg-red-600 text-white hover:text-white hover:bg-red-400"
         >
           <ChevronLeft className="w-4 h-4" />
-          Trở lại 
+          Trở lại
         </Button>
 
         {/* <Button variant="outline">More Action</Button> */}
@@ -115,7 +115,6 @@ const ApplicantDetail = () => {
               </div> */}
 
               <div className="mt-6">
-                
                 <p className="text-xl font-bold text-gray-600">
                   {profileCandidate?.title}
                 </p>

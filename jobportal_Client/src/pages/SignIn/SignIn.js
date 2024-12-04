@@ -70,6 +70,13 @@ export default function SignInForm() {
       } else if (user?.userType?.userTypeId === 1) { 
           navigate('/admin/dashboard');
       } 
+        setIsLoading(false);
+        // Wait for 2 seconds then redirect
+        setTimeout(() => {
+          setIsModalOpen(false);
+          navigate("/");
+        }, 500);
+
       } else {
         setLoginStatus("failure");
         setIsModalOpen(true);

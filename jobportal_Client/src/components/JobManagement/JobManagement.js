@@ -202,7 +202,7 @@ const JobManagement = () => {
 
       <div className="bg-white rounded-lg shadow">
         <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="font-semibold">Danh sách</h2>
+          <h2 className="font-semibold text-white">.</h2>
           <div className="flex gap-4 items-center">
             <select
               className="border rounded px-4 py-2"
