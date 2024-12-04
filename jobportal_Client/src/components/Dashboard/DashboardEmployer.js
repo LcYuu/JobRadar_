@@ -119,7 +119,9 @@ export default function Dashboard_Employer() {
       {/* Recent Jobs */}
       <div className="mb-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-purple-600">Các công việc đăng gần đây</h2>
+          <h2 className="text-xl font-semibold text-purple-600">
+            Các công việc đăng gần đây
+          </h2>
         </div>
 
         <div className="grid grid-cols-1 gap-4">
@@ -132,6 +134,7 @@ export default function Dashboard_Employer() {
               <Card className="p-4 bg-white shadow-lg rounded-lg hover:shadow-xl transition-transform transform hover:scale-105 group">
                 <div className="flex items-start justify-between">
                   <div className="flex gap-4">
+                    {/* Job Details */}
                     <div className="flex flex-col">
                       <h3 className="font-semibold text-lg text-gray-900 group-hover:text-indigo-600 transition-colors">
                         {job.title}
@@ -147,12 +150,15 @@ export default function Dashboard_Employer() {
                           {job.industryName}
                         </span>
                         <span className="px-3 py-1 text-xs rounded-full bg-green-50 text-green-600 font-medium">
-                          {job.salary ? `${job.salary.toLocaleString('vi-VN')} VNĐ` : 'Thương lượng'}
+                          {job.salary
+                            ? `${job.salary.toLocaleString("vi-VN")} VNĐ`
+                            : "Thương lượng"}
                         </span>
                       </div>
                     </div>
                   </div>
 
+                  {/* Application Count & Status */}
                   <div className="flex flex-col items-end">
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Users className="w-4 h-4" />
@@ -161,11 +167,11 @@ export default function Dashboard_Employer() {
                     <span
                       className={`mt-2 px-3 py-1 rounded-full text-xs font-medium ${
                         job.approve
-                          ? 'bg-green-100 text-green-600'
-                          : 'bg-yellow-100 text-yellow-600'
+                          ? "bg-green-100 text-green-600"
+                          : "bg-yellow-100 text-yellow-600"
                       }`}
                     >
-                      {job.approve ? 'Đã duyệt' : 'Chờ duyệt'}
+                      {job.approve ? "Đã duyệt" : "Chờ duyệt"}
                     </span>
                   </div>
                 </div>
