@@ -15,11 +15,11 @@ import SuccessIcon from "../../components/common/Icon/Sucess/Sucess";
 import FailureIcon from "../../components/common/Icon/Failed/Failed";
 import googleIcon from "../../assets/icons/google.png";
 import logo1 from "../../assets/images/common/logo1.jpg";
-import {  loginAction } from "../../redux/Auth/auth.action";
+import { loginAction } from "../../redux/Auth/auth.action";
 import { isStrongPassword } from "../../utils/passwordValidator";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import axios from "axios";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 
 // Update Modal component
 const Modal = ({ isOpen, onClose, children }) => {
@@ -32,7 +32,7 @@ const Modal = ({ isOpen, onClose, children }) => {
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
       onClick={handleBackdropClick}
     >
@@ -57,22 +57,14 @@ export default function SignInForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
+  
     try {
       const response = await dispatch(loginAction({ email, password }));
-      
+    
       if (response && response.success) {
         const user = response.user;
-        
-        // Show success message
-        await Swal.fire({
-          icon: 'success',
-          title: 'Đăng nhập thành công!',
-          showConfirmButton: false,
-          timer: 1500
-        });
-
-        // Redirect based on user role
+    
+        // Điều hướng trước
         if (user?.userType?.userTypeId === 3) {
           navigate('/employer/account-management/dashboard');
         } else if (user?.userType?.userTypeId === 1) {
@@ -80,9 +72,18 @@ export default function SignInForm() {
         } else {
           navigate("/");
         }
-
+    
+        // Hiển thị thông báo sau khi chuyển hướng
+        setTimeout(async () => {
+          await Swal.fire({
+            icon: 'success',
+            title: 'Đăng nhập thành công!',
+            showConfirmButton: false,
+            timer: 1500
+          });
+        }, 500); // Trễ một chút để đảm bảo điều hướng đã xảy ra
       } else {
-        // Show detailed error message
+        // Hiển thị lỗi nếu đăng nhập thất bại
         await Swal.fire({
           icon: 'error',
           title: 'Đăng nhập thất bại',
@@ -92,7 +93,7 @@ export default function SignInForm() {
         });
       }
     } catch (error) {
-      // Show unexpected error message
+      // Xử lý lỗi không mong muốn
       await Swal.fire({
         icon: 'error',
         title: 'Lỗi',
@@ -103,7 +104,8 @@ export default function SignInForm() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }    
+  
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -140,7 +142,7 @@ export default function SignInForm() {
         </motion.div>
       );
     }
-    
+
     return null;
   };
 
@@ -150,23 +152,25 @@ export default function SignInForm() {
       console.log("Google Token: ", googleToken);
 
       // Gửi googleToken đến backend để xác thực
-      const res = await axios.post(
-        "http://localhost:8080/auth/login/google",
-        { token: googleToken } 
-      );
+      const res = await axios.post("http://localhost:8080/auth/login/google", {
+        token: googleToken,
+      });
 
-      console.log("Response from server: ", res.data.token); 
+      console.log("Response from server: ", res.data.token);
       const jwtToken = res?.data?.token;
-      console.log("Response from: ", jwtToken); 
+      console.log("Response from: ", jwtToken);
 
       sessionStorage.setItem("jwt", jwtToken);
-      const emailExists = await axios.post("http://localhost:8080/auth/check-email", { token: googleToken });
+      const emailExists = await axios.post(
+        "http://localhost:8080/auth/check-email",
+        { token: googleToken }
+      );
       if (emailExists.data) {
         // dispatch(getProfileAction());
         setTimeout(() => {
           // setIsModalOpen(false);
-          window.location.href = "http://localhost:3000/"; 
-        }, 1000); 
+          window.location.href = "http://localhost:3000/";
+        }, 1000);
       } else {
         setTimeout(() => {
           // setIsModalOpen(false);
@@ -175,18 +179,31 @@ export default function SignInForm() {
       }
     } catch (err) {
       // In lỗi và hiển thị thông báo
-      console.error("Error during login: ", err.response ? err.response.data : err.message);
+      console.error(
+        "Error during login: ",
+        err.response ? err.response.data : err.message
+      );
       setError("Đăng nhập thất bại! Vui lòng thử lại.");
     }
   };
-  
+
   // Modal content based on status
   const modalContent = () => {
     if (loginStatus === "success") {
       return (
         <div className="text-green-600">
-          <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          <svg
+            className="w-16 h-16 mx-auto mb-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 13l4 4L19 7"
+            />
           </svg>
           <p className="text-xl font-semibold">Đăng nhập thành công!</p>
         </div>
@@ -194,8 +211,18 @@ export default function SignInForm() {
     }
     return (
       <div className="text-red-600">
-        <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        <svg
+          className="w-16 h-16 mx-auto mb-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
         <p className="text-xl font-semibold">Đăng nhập thất bại</p>
         <p className="mt-2 text-sm">{error}</p>
@@ -291,24 +318,48 @@ export default function SignInForm() {
           </CardContent>
         </Card>
 
-        <Modal 
-          isOpen={isModalOpen} 
+        <Modal
+          isOpen={isModalOpen}
           onClose={() => loginStatus === "failure" && setIsModalOpen(false)}
         >
           {loginStatus === "success" && (
             <div className="text-center">
-              <svg className="w-16 h-16 mx-auto text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg
+                className="w-16 h-16 mx-auto text-green-500 mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
-              <p className="text-xl font-semibold text-green-600">Đăng nhập thành công!</p>
+              <p className="text-xl font-semibold text-green-600">
+                Đăng nhập thành công!
+              </p>
             </div>
           )}
           {loginStatus === "failure" && (
             <div className="text-center">
-              <svg className="w-16 h-16 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-16 h-16 mx-auto text-red-500 mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
-              <p className="text-xl font-semibold text-red-600">Đăng nhập thất bại</p>
+              <p className="text-xl font-semibold text-red-600">
+                Đăng nhập thất bại
+              </p>
               <p className="mt-2 text-sm text-red-500">{error}</p>
             </div>
           )}
