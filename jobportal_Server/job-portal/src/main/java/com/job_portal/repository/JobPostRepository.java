@@ -230,5 +230,6 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	                             @Param("status") String status,
 	                             @Param("isApprove") Boolean isApprove, 
 	                             Pageable pageable);
-
+	@Query("SELECT j FROM JobPost j WHERE j.expireDate < ?1 AND (j.surveyEmailSent = false OR j.surveyEmailSent IS NULL)")
+	List<JobPost> findByExpireDateBeforeAndSurveyEmailSentFalse(LocalDateTime date);
 }
