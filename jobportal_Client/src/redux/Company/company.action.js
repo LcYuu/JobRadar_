@@ -433,25 +433,21 @@ export const getCompanyById = (companyId) => async (dispatch) => {
     });
   }
 };
-export const getAllCompaniesForAdmin = (page = 0, size = 10) => async (dispatch) => {
+export const getAllCompaniesForAdmin = (companyName, industryName, page, size) => async (dispatch) => {
   dispatch({ type: GET_ALL_COMPANIES_REQUEST });
   try {
     const response = await axios.get(`http://localhost:8080/company/get-all-companies`, {
-      params: { page, size }
+      params: { companyName, industryName, page, size }
     });
     
     dispatch({
       type: GET_ALL_COMPANIES_SUCCESS,
-      payload: {
-        companies: response.data.companies,entPage: response.data.currentPage,
-       totalItems: response.data.totalItems,
-       totalPages: response.data.totalPages
-     }
+      payload: response.data
    });
  } catch (error) {
    dispatch({
      type: GET_ALL_COMPANIES_FAILURE,
-     payload: error.message
+     payload: error.response?.data || 'Error fetching companies'
    });
  }
 ;}

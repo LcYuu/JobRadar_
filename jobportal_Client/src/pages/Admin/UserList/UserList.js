@@ -1,51 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { getAllUsers, deleteUser, updateUserStatus } from '../../../redux/User/user.action';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getAllUsers,
+  deleteUser,
+  updateUserStatus,
+} from "../../../redux/User/user.action";
 import { Button } from "../../../ui/button";
-import { MoreVertical } from 'lucide-react';
+import { MoreVertical, Search } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../ui/select";
+
+import Swal from "sweetalert2";
+import { Input } from "../../../ui/input";
 
 export default function UserList() {
   const dispatch = useDispatch();
-  const { users, totalPages, totalElements, loading, error } = useSelector((state) => state.user);
+  const { users, totalPages, totalElements, loading, error } = useSelector(
+    (state) => state.user
+  );
   const [currentPage, setCurrentPage] = useState(0);
   const [size, setSize] = useState(5);
-  const [filters, setFilters] = useState({
-    searchTerm: '',
-    role: 'all',
-    status: 'all'
-  });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [role, setRole] = useState("");
+  const [status, setStatus] = useState("");
 
   useEffect(() => {
-    dispatch(getAllUsers(currentPage, size, filters));
-  }, [dispatch, currentPage, size, filters]);
-
-  const handleSearch = (e) => {
-    setFilters(prev => ({ ...prev, searchTerm: e.target.value }));
-    setCurrentPage(0);
-  };
-
-  const handleRoleFilter = (e) => {
-    setFilters(prev => ({ ...prev, role: e.target.value }));
-    setCurrentPage(0);
-  };
-
-  const handleStatusFilter = (e) => {
-    setFilters(prev => ({ ...prev, status: e.target.value }));
-    setCurrentPage(0);
-  };
+    dispatch(getAllUsers(searchTerm, role, status, currentPage, size));
+  }, [dispatch, currentPage, size]);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalPages) {
@@ -59,64 +44,81 @@ export default function UserList() {
   };
 
   const handleDeleteUser = (userId) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
-      dispatch(deleteUser(userId)).then(() => {
-        dispatch(getAllUsers(currentPage, size, filters));
-      });
-    }
-  };
-
-  const handleToggleStatus = (user) => {
-    dispatch(updateUserStatus(user.userId, {
-      ...user,
-      active: !user.active
-    })).then(() => {
-      dispatch(getAllUsers(currentPage, size, filters));
+    Swal.fire({
+      title: "Bạn có chắc chắn muốn xóa người dùng này?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(deleteUser(userId)).then(() => {
+          dispatch(getAllUsers(currentPage, size));
+          Swal.fire("Đã xóa!", "Người dùng đã được xóa thành công.", "success");
+        });
+      }
     });
   };
 
+  const applyFilters = () => {
+    setCurrentPage(0);
+    dispatch(getAllUsers(searchTerm, role, status, currentPage, size));
+  };
+
   if (loading) return <div className="text-center py-8">Đang tải...</div>;
-  if (error) return <div className="text-center py-8 text-red-500">{error}</div>;
+  if (error)
+    return <div className="text-center py-8 text-red-500">{error}</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-4">
-        <div className="text-sm text-gray-600">Tổng số người dùng: {totalElements || 0}</div>
+        <div className="text-sm text-gray-600">
+          Tổng số người dùng: {totalElements || 0}
+        </div>
         <div className="flex items-center gap-4">
           <div className="relative">
-            <input
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Input
               type="text"
-              value={filters.searchTerm}
-              onChange={handleSearch}
-              placeholder="Tìm kiếm theo tên hoặc email..."
-              className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-80"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Tìm kiếm theo tên..."
+              className="pl-8 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 w-80"
             />
           </div>
           <select
-            value={filters.role}
-            onChange={handleRoleFilter}
-            className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
-            <option value="all">Tất cả loại tài khoản</option>
+            <option value="">Tất cả loại tài khoản</option>
             <option value="1">Admin</option>
             <option value="2">Seeker</option>
             <option value="3">Employer</option>
           </select>
           <select
-            value={filters.status}
-            onChange={handleStatusFilter}
-            className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
-            <option value="all">Tất cả trạng thái</option>
-            <option value="1">Còn hoạt động</option>
-            <option value="0">Đã khóa</option>
+            <option value="">Tất cả trạng thái</option>
+            <option value="true">Còn hoạt động</option>
+            <option value="false">Đã khóa</option>
           </select>
+          <Button
+            onClick={applyFilters}
+            className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            Áp dụng
+          </Button>
         </div>
       </div>
 
       <div className="bg-white rounded-lg shadow">
-        <table className="w-full">
-          <thead className="bg-gray-50 text-sm text-gray-500">
+        <table className="w-full table-fixed">
+          <thead className="bg-purple-600 text-white text-sm">
             <tr>
               <th className="text-left p-4">Avatar</th>
               <th className="text-left p-4">Tên</th>
@@ -128,6 +130,7 @@ export default function UserList() {
               <th className="text-left p-4"></th>
             </tr>
           </thead>
+
           <tbody>
             {users && users.length > 0 ? (
               users.map((user) => (
@@ -135,8 +138,8 @@ export default function UserList() {
                   <td className="p-4">
                     <div className="group relative">
                       {user.avatar ? (
-                        <img 
-                          src={user.avatar} 
+                        <img
+                          src={user.avatar}
                           alt={`Avatar của ${user.userName}`}
                           className="w-10 h-10 rounded-full object-cover cursor-pointer"
                         />
@@ -152,39 +155,41 @@ export default function UserList() {
                       </div>
                     </div>
                   </td>
-                  <td className="p-4">{user.userName}</td>
-                  <td className="p-4">{user.email}</td>
-                  <td className="p-4">
-                    <span className="px-2 py-1 rounded-full text-xs">
+                  <td className="p-4 truncate">{user.userName}</td>
+                  <td className="p-4 truncate">{user.email}</td>
+                  <td className="p-4 truncate">
+                    <span className="px-2 py-1 rounded-full">
                       {user.userType.user_type_name}
                     </span>
                   </td>
                   <td className="p-4">
-                    <span className={`px-3 py-1 rounded-full text-sm ${
-                      user.active 
-                        ? "bg-emerald-100 text-emerald-600"
-                        : "bg-red-100 text-red-600"
-                    }`}>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm ${
+                        user.active
+                          ? "bg-emerald-100 text-emerald-600"
+                          : "bg-red-100 text-red-600"
+                      }`}
+                    >
                       {user.active ? "Active" : "Inactive"}
                     </span>
                   </td>
                   <td className="p-4">
-                    {new Date(user.createDate).toLocaleDateString('vi-VN', {
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit'
+                    {new Date(user.createDate).toLocaleDateString("vi-VN", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
                     })}
                   </td>
                   <td className="p-4">
                     {user.lastLogin ? (
-                      new Date(user.lastLogin).toLocaleDateString('vi-VN', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit'
+                      new Date(user.lastLogin).toLocaleDateString("vi-VN", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
                       })
                     ) : (
                       <span className="text-gray-400">Chưa đăng nhập</span>
@@ -198,10 +203,12 @@ export default function UserList() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleToggleStatus(user)}>
-                          {user.active ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
+                        <DropdownMenuItem
+                        // onClick={() => handleToggleStatus(user)}
+                        >
+                          {user.active ? "Khóa tài khoản" : "Mở khóa tài khoản"}
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => handleDeleteUser(user.userId)}
                           className="text-red-600"
                         >
@@ -221,7 +228,7 @@ export default function UserList() {
             )}
           </tbody>
         </table>
-        
+
         <div className="p-4 border-t flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span>Hiển thị</span>
@@ -245,10 +252,7 @@ export default function UserList() {
             >
               Previous
             </Button>
-            <Button
-              variant="outline"
-              className="bg-indigo-600 text-white"
-            >
+            <Button variant="outline" className="bg-purple-600 text-white">
               {currentPage + 1}
             </Button>
             <Button
@@ -263,4 +267,4 @@ export default function UserList() {
       </div>
     </div>
   );
-} 
+}

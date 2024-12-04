@@ -39,20 +39,28 @@ const CandidateManagement = () => {
   const [filteredCandidates, setFilteredCandidates] = useState([]); // Kết quả sau lọc
 
   useEffect(() => {
-    dispatch(getApplyJobByCompany(currentPage, size, searchTerm, filterStatus, filterPosition));
+    dispatch(
+      getApplyJobByCompany(
+        currentPage,
+        size,
+        searchTerm,
+        filterStatus,
+        filterPosition
+      )
+    );
   }, [dispatch, currentPage, size]); // Thêm các tham số lọc vào dependency array
 
-  useEffect(() =>{
+  useEffect(() => {
     dispatch(getAllJobPost());
-  }, [dispatch])
+  }, [dispatch]);
 
   const handleUpdate = async (postId, userId) => {
     try {
       // Gọi hành động cập nhật và chờ nó thực hiện
       await dispatch(updateApprove(postId, userId));
-  
+
       toast.success("Đơn ứng tuyển đã được chấp thuận!");
-  
+
       dispatch(getApplyJobByCompany(currentPage, size));
     } catch (error) {
       // Hiển thị thông báo lỗi nếu có lỗi xảy ra
@@ -60,12 +68,20 @@ const CandidateManagement = () => {
     }
   };
   const applyFilters = () => {
-    setCurrentPage(0)
-    dispatch(getApplyJobByCompany(currentPage, size, searchTerm,filterStatus, filterPosition));
+    setCurrentPage(0);
+    dispatch(
+      getApplyJobByCompany(
+        currentPage,
+        size,
+        searchTerm,
+        filterStatus,
+        filterPosition
+      )
+    );
   };
 
-  const displayData = filteredCandidates.length > 0 ? filteredCandidates : applyJobByCompany;
-
+  const displayData =
+    filteredCandidates.length > 0 ? filteredCandidates : applyJobByCompany;
 
   // State cho phân trang
 
@@ -143,6 +159,7 @@ const CandidateManagement = () => {
           <Button
             variant="outline"
             onClick={applyFilters} // Gọi hàm áp dụng lọc
+            className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-500 transition-colors"
           >
             <Filter className="w-4 h-4 mr-2" />
             Áp dụng
@@ -152,7 +169,7 @@ const CandidateManagement = () => {
 
       <div className="bg-white rounded-lg shadow">
         <table className="w-full">
-          <thead className="bg-gray-50">
+          <thead className="bg-purple-600 text-white">
             <tr>
               {/* <th className="p-4 text-left">
                 <input
@@ -212,14 +229,20 @@ const CandidateManagement = () => {
                       second: "2-digit",
                     })}
                   </td>
-                  <Link to={`/employer/jobs/${candidate?.postId}`} className="border-l-indigo-950 hover:underline p-4">
-      {candidate?.title}
-    </Link>
+                  <td>
+                    <Link
+                      to={`/employer/jobs/${candidate?.postId}`}
+                      className="border-l-indigo-950 hover:underline"
+                    >
+                      {candidate?.title}
+                    </Link>
+                  </td>
+
                   <td className="p-4">
                     <div className="flex items-center gap-2">
                       <Button
                         variant="outline"
-                        className="text-indigo-600"
+                        className="text-purple-600"
                         onClick={() => window.open(candidate?.pathCV, "_blank")}
                       >
                         Xem CV
@@ -244,25 +267,19 @@ const CandidateManagement = () => {
                           >
                             Xem chi tiết
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className={`hover:bg-gray-100 cursor-pointer ${
-                              candidate?.isSave
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
-                            }`}
-                            onClick={
-                              candidate?.isSave
-                                ? null
-                                : () =>
-                                    handleUpdate(
-                                      candidate?.postId,
-                                      candidate?.userId
-                                    )
-                            } // Ngăn click nếu isSave là true
-                            disabled={candidate?.isSave} // Vô hiệu hóa nếu isSave là true
-                          >
-                            Chấp thuận đơn
-                          </DropdownMenuItem>
+                          {!candidate?.isSave && (
+                            <DropdownMenuItem
+                              className="hover:bg-gray-100 cursor-pointer"
+                              onClick={() =>
+                                handleUpdate(
+                                  candidate?.postId,
+                                  candidate?.userId
+                                )
+                              }
+                            >
+                              Chấp thuận đơn
+                            </DropdownMenuItem>
+                          )}
                           {/* <DropdownMenuItem className="text-red-600 hover:bg-red-50 cursor-pointer">
                             Xóa
                           </DropdownMenuItem> */}
@@ -308,7 +325,7 @@ const CandidateManagement = () => {
             </Button>
             <Button
               variant="outline"
-              className="bg-indigo-600 text-white"
+              className="bg-purple-600 text-white"
               onClick={() => handlePageChange(currentPage)}
             >
               {currentPage + 1}

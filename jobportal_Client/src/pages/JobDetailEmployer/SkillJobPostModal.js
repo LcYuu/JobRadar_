@@ -6,22 +6,23 @@ import { useDispatch, useSelector } from "react-redux";
 import { getAllSkill } from "../../redux/Skills/skill.action";
 import { Checkbox } from "../../ui/checkbox";
 import {
-  getDetailJobById,
-  updateJob,
-} from "../../redux/JobPost/jobPost.action";
+  getSeekerByUser,
+  updateSeekerAction,
+} from "../../redux/Seeker/seeker.action";
 
-const SkillJobPostModal = ({ open, handleClose, postId }) => {
+const SkillPostModal = ({ open, handleClose }) => {
   const dispatch = useDispatch();
   const { skills } = useSelector((store) => store.skill);
-  const { detailJob } = useSelector((store) => store.jobPost);
-  const [selectedSkills, setSelectedSkills] = useState(detailJob?.skills || []);
+  const { seeker } = useSelector((store) => store.seeker);
+  const [selectedSkills, setSelectedSkills] = useState(seeker.skills || []);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (open && detailJob.skills) {
-      setSelectedSkills(detailJob.skills);
+    if (open && seeker.skills) {
+      // Giữ toàn bộ thông tin kỹ năng từ danh sách của seeker
+      setSelectedSkills(seeker.skills);
     }
-  }, [open, detailJob?.skills]);
+  }, [open, seeker.skills]);
 
   // Thêm useEffect để theo dõi sự thay đổi của selectedSkills
   // useEffect(() => {
@@ -34,13 +35,9 @@ const SkillJobPostModal = ({ open, handleClose, postId }) => {
 
   const handleSaveSkills = async () => {
     try {
-
-      const skillIds =
-        selectedSkills.length > 0
-          ? selectedSkills.map((skill) => skill.skillId)
-          : [];
-      await dispatch(updateJob(postId, { skillIds }));
-      dispatch(getDetailJobById(postId));
+      const skillIds = selectedSkills.map((skill) => skill.skillId);
+      await dispatch(updateSeekerAction({ skillIds }));
+      dispatch(getSeekerByUser()); // Sau khi cập nhật seeker, tải lại dữ liệu seeker
     } catch (error) {
       console.error("Error updating skills:", error);
     } finally {
@@ -53,15 +50,15 @@ const SkillJobPostModal = ({ open, handleClose, postId }) => {
 
   return (
     <Modal open={open} onClose={handleClose} className="animate-fadeIn">
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-xl shadow-2xl p-6">
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-xl shadow-xl p-6">
         <div className="flex items-center justify-between border-b pb-4 mb-4">
-          <h2 className="text-xl font-semibold">Select Skills</h2>
+          <h2 className="text-xl mt-5 font-semibold text-gray-800">Chọn kĩ năng</h2>
           <IconButton onClick={handleClose} className="hover:bg-gray-100">
             <CloseIcon />
           </IconButton>
         </div>
 
-        <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto custom-scrollbar">
+        <div className="flex flex-col gap-3 max-h-[400px] overflow-y-auto custom-scrollbar">
           {skills.map((skill) => (
             <div
               key={skill.skillId}
@@ -91,17 +88,36 @@ const SkillJobPostModal = ({ open, handleClose, postId }) => {
           <Button
             variant="outlined"
             onClick={handleClose}
-            className="hover:bg-gray-50"
+            sx={{
+              color: "#8B5CF6", // Màu chữ tím
+              borderColor: "#8B5CF6", // Màu viền tím
+              "&:hover": {
+                backgroundColor: "#E0D9F9", // Màu nền khi hover
+                borderColor: "#7C3AED", // Màu viền đậm khi hover
+              },
+            }}
           >
             Cancel
           </Button>
           <Button
             variant="contained"
             onClick={handleSaveSkills}
-            className="bg-blue-600 hover:bg-blue-700"
+            sx={{
+              backgroundColor: "#8B5CF6", // Màu tím
+              "&:hover": {
+                backgroundColor: "#7C3AED", // Màu tím đậm khi hover
+              },
+            }}
             disabled={isLoading}
           >
-            {isLoading ? "Saving..." : "Save Changes"}
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <span className="animate-spin">⏳</span>
+                <span>Saving...</span>
+              </div>
+            ) : (
+              "Save Changes"
+            )}
           </Button>
         </div>
       </div>
@@ -109,4 +125,4 @@ const SkillJobPostModal = ({ open, handleClose, postId }) => {
   );
 };
 
-export default SkillJobPostModal;
+export default SkillPostModal;

@@ -15,6 +15,11 @@ public interface IndustryRepository extends JpaRepository<Industry, Integer> {
 	// Tìm kiếm theo từng chữ cái nhập vào
 	@Query("SELECT i FROM Industry i WHERE i.industryName LIKE %:query%")
 	List<Industry> searchIndustry(@Param("query") String query);
+	
+	@Query("SELECT i.industryName FROM Industry i WHERE i.industryId IN :industryId")
+	List<String> findIndustryNamesByIds(@Param("industryId") List<Integer> industryId);
+	
+	
 
 	// Tìm theo tên được chọn từ Combobox
 	Industry findByIndustryName(String industryName);
