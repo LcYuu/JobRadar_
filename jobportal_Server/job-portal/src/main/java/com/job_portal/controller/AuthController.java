@@ -103,6 +103,10 @@ public class AuthController {
 		if (isExist.isPresent()) {
 			return ResponseEntity.status(HttpStatus.CONFLICT).body("Email này đã được sử dụng ở tài khoản khác");
 		}
+		if (!isValidPassword(userAccount.getPassword())) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	                           .body("Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.");
+	    }
 
 		// Nếu email chưa tồn tại, tiếp tục với quá trình tạo tài khoản
 		String otp = otpUtil.generateOtp();
@@ -177,25 +181,53 @@ public class AuthController {
 
 	@PostMapping("/login")
 	public AuthResponse signin(@RequestBody LoginDTO login) {
-		AuthResponse res;
-		Optional<UserAccount> userOpt = userAccountRepository.findByEmail(login.getEmail());
-		if (userOpt.isEmpty()) {
-			throw new UsernameNotFoundException("Email không tồn tại");
-		}
+	    // Kiểm tra email không được để trống
+	    if (login.getEmail() == null || login.getEmail().isEmpty()) {
+	        throw new IllegalArgumentException("Email không được để trống");
+	    }
 
-		UserAccount user = userOpt.get();
-		if (!user.isActive()) {
-			return new AuthResponse("", "Tài khoản của bạn chưa được xác thực");
-		}
+	    // Kiểm tra mật khẩu không được để trống
+	    if (login.getPassword() == null || login.getPassword().isEmpty()) {
+	        throw new IllegalArgumentException("Mật khẩu không được để trống");
+	    }
 
-		Authentication authentication = authenticate(login.getEmail(), login.getPassword());
-		String token = JwtProvider.generateToken(authentication);
-		user.setLastLogin(LocalDateTime.now());
-		userAccountRepository.save(user);
-		res = new AuthResponse(token, "Đăng nhập thành công");
+	    // Kiểm tra độ phức tạp của mật khẩu
+	    if (!isValidPassword(login.getPassword())) {
+	        throw new IllegalArgumentException("Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
+	    }
 
-		return res;
+	    // Kiểm tra tài khoản theo email
+	    Optional<UserAccount> userOpt = userAccountRepository.findByEmail(login.getEmail());
+	    if (userOpt.isEmpty()) {
+	        return new AuthResponse("", "Tài khoản hoặc mật khẩu không đúng");
+	    }
+
+	    UserAccount user = userOpt.get();
+
+	    // Kiểm tra trạng thái hoạt động của tài khoản
+	    if (!user.isActive()) {
+	        return new AuthResponse("", "Tài khoản của bạn chưa được xác thực");
+	    }
+
+	    // Kiểm tra thông tin đăng nhập
+	    try {
+	        Authentication authentication = authenticate(login.getEmail(), login.getPassword());
+	        String token = JwtProvider.generateToken(authentication);
+	        user.setLastLogin(LocalDateTime.now());
+	        userAccountRepository.save(user);
+	        return new AuthResponse(token, "Đăng nhập thành công");
+	    } catch (Exception e) {
+	        return new AuthResponse("", "Tài khoản hoặc mật khẩu không đúng");
+	    }
 	}
+
+	// Hàm kiểm tra độ phức tạp của mật khẩu
+	private boolean isValidPassword(String password) {
+	    // Regex kiểm tra mật khẩu: ít nhất 8 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt
+	    String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
+	    return password.matches(passwordPattern);
+	}
+
 
 	@PutMapping("/regenerate-otp")
 	public String regenerateOtp(@RequestParam String email) {
