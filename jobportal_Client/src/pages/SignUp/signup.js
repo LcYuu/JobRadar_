@@ -40,6 +40,7 @@ export default function SignUpForm() {
     password: "",
     companyName: "",
     businessEmail: "",
+    confirmPassword: "",
   });
   const [errorMessage, setErrorMessage] = useState("");
   // Countdown effect
@@ -58,12 +59,14 @@ export default function SignUpForm() {
     { name: "fullName", placeholder: "Họ và tên", type: "text" },
     { name: "email", placeholder: "Địa chỉ email", type: "email" },
     { name: "password", placeholder: "Mật khẩu", type: "password" },
+    { name: "confirmPassword", placeholder: "Xác nhận mật khẩu", type: "password" },
   ];
 
   const employerFields = [
     { name: "companyName", placeholder: "Tên công ty", type: "text" },
     { name: "businessEmail", placeholder: "Email doanh nghiệp", type: "email" },
     { name: "password", placeholder: "Mật khẩu", type: "password" },
+    { name: "confirmPassword", placeholder: "Xác nhận mật khẩu", type: "password" },
   ];
 
   const fields = activeTab === "job-seeker" ? jobSeekerFields : employerFields;
@@ -74,6 +77,10 @@ export default function SignUpForm() {
       setErrorMessage(
         "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt."
       );
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setErrorMessage("Mật khẩu xác nhận không khớp. Vui lòng thử lại.");
       return;
     }
     const userData = {
