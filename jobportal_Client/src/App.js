@@ -48,6 +48,9 @@ import RoleSelection from "./pages/SignIn/RoleSelection";
 import CompanyDetail from "./pages/Admin/CompanyDetail/CompanyDetail";
 import JobDetailAdmin from "./pages/Admin/JobDetail/JobDetailAdmin";
 
+import Survey from './pages/Survey/Survey';
+import SurveyStatistics from './pages/Admin/SurveyStatistic/SurveyStatistics';
+
 const App = () => {
   const location = useLocation();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
@@ -161,6 +164,7 @@ const App = () => {
             </PublicRoute>
           }
         />
+        <Route path="/survey/:surveyId" element={<Survey />} />
 
         {/* Protected Routes - Cần đăng nhập */}
         <Route
@@ -256,9 +260,10 @@ const App = () => {
           <Route path="user-list" element={<UserList />} />
           <Route path="job-list" element={<AdminJobList />} />
           <Route path="settings" element={<Settings />} />
-        </Route>
+        </Route>  
 
         <Route path="/admin/jobs/:postId" element={<JobDetailAdmin />} />
+        <Route path="/admin/survey-statistics" element={<SurveyStatistics />} />
       </Routes>
       {showFooter && <Footer />}
     </div>

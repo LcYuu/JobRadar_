@@ -253,9 +253,16 @@ const CompanyProfile_Management = () => {
         <div>
           <h1 className="text-2xl font-bold">{companyJwt?.companyName}</h1>
           <div className="flex gap-4 mt-2 text-gray-600">
-            <div className="flex items-center gap-1">
-              <Calendar className="w-6 h-6" />
-              <span>Thành lập: {companyJwt?.establishedTime}</span>
+            <div className="flex items-center gap-4">
+              <Calendar className="w-5 h-5 text-gray-500" />
+              <div>
+                <p className="text-sm text-gray-600">Ngày thành lập</p>
+                <p className="font-medium">
+                  {companyJwt?.establishedTime 
+                    ? new Date(companyJwt.establishedTime).toLocaleDateString('en-GB')
+                    : 'Chưa cập nhật'}
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-1">
               <MapPin className="w-6 h-6" />
@@ -268,7 +275,7 @@ const CompanyProfile_Management = () => {
           </div>
           <Button
             variant="outline"
-            className="mt-4 bg-blue-500 text-white hover:bg-blue-600 hover:text-white border border-blue-500 rounded-lg transition-all"
+            className="mt-4 bg-purple-500 text-white hover:bg-purple-600 hover:text-white border border-purple-500 rounded-lg transition-all"
             onClick={handleOpenProfileModal}
           >
             Chỉnh sửa hồ sơ
@@ -299,7 +306,7 @@ const CompanyProfile_Management = () => {
               placeholder="Nhập mô tả về công ty..."
             />
             <div className="mt-2 flex justify-end">
-              <Button onClick={handleSaveClick}>Save</Button>
+              <Button onClick={handleSaveClick}>Lưu</Button>
             </div>
           </div>
         ) : (
@@ -364,7 +371,7 @@ const CompanyProfile_Management = () => {
               )}
             </div>
             <div className="mt-2 flex justify-end">
-              <Button onClick={handleSaveClick}>Save</Button>
+              <Button onClick={handleSaveClick}>Lưu</Button>
             </div>
           </div>
         ) : (
@@ -381,7 +388,7 @@ const CompanyProfile_Management = () => {
               <BanknoteIcon className="w-4 h-4 text-gray-500" />
               <span>{companyJwt?.taxCode}</span>
             </div>
-            <p className="text-sm text-red-500 mt-1">
+            <p className="text-sm text-purple-500 mt-1">
               Hãy tự giác cung cấp chính xác mã số thuế, nếu không bạn sẽ không
               thể tuyển dụng.
             </p>

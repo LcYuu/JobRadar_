@@ -16,7 +16,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../ui/dropdown-menu";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
+import { getCompanyById } from '../../../redux/Company/company.action';
+import { getCompanyJobCounts } from '../../../redux/Company/company.action';
+import { toast } from 'react-hot-toast';
+import { Input } from "../../../ui/input";
+
 
 const formatDate = (dateString) => {
   if (!dateString) return "N/A";
@@ -46,7 +51,7 @@ export default function CompanyList() {
       color: "#8A2BE2", // Màu tím
       border: "1px solid #8A2BE2", // Viền màu tím
     },
-    "Marketing": {
+    Marketing: {
       backgroundColor: "rgba(255, 140, 0, 0.1)", // Màu cam nhạt
       color: "#FF8C00", // Màu cam
       border: "1px solid #FF8C00", // Viền màu cam
@@ -84,59 +89,44 @@ export default function CompanyList() {
     },
   };
   const dispatch = useDispatch();
-  const { companies, loading, totalItems, totalPages } = useSelector(
+  const { companies, loading, totalElements, totalPages } = useSelector(
     (state) => state.company
   );
   const { allIndustries } = useSelector((state) => state.industry);
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedIndustry, setSelectedIndustry] = useState("all");
+  const [selectedIndustry, setSelectedIndustry] = useState("");
   const navigate = useNavigate();
 
-  // Thêm state cho filtered companies
   const [filteredCompanies, setFilteredCompanies] = useState([]);
 
   useEffect(() => {
-    dispatch(getAllCompaniesForAdmin(currentPage, pageSize));
-    dispatch(getAllIndustries());
+    dispatch(
+      getAllCompaniesForAdmin(
+        searchTerm,
+        selectedIndustry,
+        currentPage,
+        pageSize
+      )
+    );
   }, [dispatch, currentPage, pageSize]);
 
   // Xử lý tìm kiếm và lọc
   useEffect(() => {
-    let result = [...companies];
+    dispatch(getAllIndustries());
+  }, [dispatch]);
 
-    // Tìm kiếm
-    if (searchTerm) {
-      result = result.filter(
-        (company) =>
-          company.companyName
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          company.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          company.contact.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Lọc theo ngành
-    if (selectedIndustry !== "all") {
-      result = result.filter(
-        (company) =>
-          company.industry?.industryId.toString() === selectedIndustry
-      );
-    }
-
-    setFilteredCompanies(result);
-  }, [companies, searchTerm, selectedIndustry]);
-
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
+  const applyFilters = () => {
     setCurrentPage(0);
-  };
-
-  const handleIndustryChange = (e) => {
-    setSelectedIndustry(e.target.value);
-    setCurrentPage(0);
+    dispatch(
+      getAllCompaniesForAdmin(
+        searchTerm,
+        selectedIndustry,
+        currentPage,
+        pageSize
+      )
+    );
   };
 
   // Function to get industry name by ID
@@ -157,42 +147,58 @@ export default function CompanyList() {
     setCurrentPage(0); // Reset về trang đầu khi thay đổi số lượng bản ghi mỗi trang
   };
 
+  // Thêm hàm handleViewDetail
+  const handleViewDetail = async (companyId) => {
+    try {
+      // Pre-fetch data trước khi navigate
+      await Promise.all([
+        dispatch(getCompanyById(companyId)),
+        dispatch(getCompanyJobCounts(companyId))
+      ]);
+      navigate(`/admin/companies/${companyId}`);
+    } catch (error) {
+      toast.error('Có lỗi xảy ra khi tải dữ liệu công ty');
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-4">
+        <div className="flex justify-end items-center gap-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Input
               type="text"
-              value={searchTerm}
-              onChange={handleSearch}
-              placeholder="Tìm kiếm theo tên, địa chỉ, số điện thoại..."
-              className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-80"
+              placeholder="Tìm kiếm theo tên..."
+              className="w-[300px] pl-8"
+              onChange={(e) => setSearchTerm(e.target.value)} // Lưu giá trị tìm kiếm
             />
           </div>
           <select
             value={selectedIndustry}
-            onChange={handleIndustryChange}
-            className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => setSelectedIndustry(e.target.value)}
+            className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
-            <option value="all">Tất cả lĩnh vực</option>
+            <option value="">Tất cả lĩnh vực</option>
             {allIndustries?.map((industry) => (
-              <option
-                key={industry.industryId}
-                value={industry.industryId.toString()}
-              >
+              <option key={industry.industryId} value={industry.industryName}>
                 {industry.industryName}
               </option>
             ))}
           </select>
+          <button
+            onClick={applyFilters} // Thêm sự kiện áp dụng bộ lọc
+            className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          >
+            Áp dụng
+          </button>
         </div>
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="p-4 border-b">
           <p className="text-sm text-gray-600">
-            Tổng số <span className="font-medium">{totalItems}</span> công ty
+            Tổng số <span className="font-medium">{totalElements}</span> công ty
           </p>
         </div>
 
@@ -224,8 +230,14 @@ export default function CompanyList() {
                   Đang tải...
                 </td>
               </tr>
+            ) : companies.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="text-center text-gray-500 py-4">
+                  Không có dữ liệu
+                </td>
+              </tr>
             ) : (
-              filteredCompanies.map((company) => (
+              companies.map((company) => (
                 <tr key={company.companyId} className="hover:bg-gray-50">
                   <td className="p-4">
                     <div className="flex items-center">
@@ -242,9 +254,18 @@ export default function CompanyList() {
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium`}
                       style={{
-                        backgroundColor: industryStyles[getIndustryName(company.industry?.industryId)]?.backgroundColor,
-                        color: industryStyles[getIndustryName(company.industry?.industryId)]?.color,
-                        border: industryStyles[getIndustryName(company.industry?.industryId)]?.border,
+                        backgroundColor:
+                          industryStyles[
+                            getIndustryName(company.industry?.industryId)
+                          ]?.backgroundColor,
+                        color:
+                          industryStyles[
+                            getIndustryName(company.industry?.industryId)
+                          ]?.color,
+                        border:
+                          industryStyles[
+                            getIndustryName(company.industry?.industryId)
+                          ]?.border,
                       }}
                     >
                       {getIndustryName(company.industry?.industryId)}
@@ -262,17 +283,11 @@ export default function CompanyList() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() =>
-                            navigate(`/admin/companies/${company.companyId}`)
-                          }
-                        >
+                        <DropdownMenuItem onClick={() => handleViewDetail(company.companyId)}>
                           Chi tiết
                         </DropdownMenuItem>
-                        <DropdownMenuItem>Chỉnh sửa</DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
-                          Xóa
-                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600">Xóa</DropdownMenuItem>
+
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </td>
@@ -307,7 +322,7 @@ export default function CompanyList() {
             </Button>
             <Button
               variant="outline"
-              className="bg-indigo-600 text-white"
+              className="bg-purple-600 text-white"
               onClick={() => handlePageChange(currentPage)}
             >
               {currentPage + 1}

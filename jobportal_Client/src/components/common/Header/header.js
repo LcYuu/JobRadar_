@@ -15,6 +15,7 @@ export default function Header() {
   const navigate = useNavigate();
 
   const isAuthenticated = !!jwt && !!user;
+  const isSeeker = user?.userType?.userTypeId === 2;
 
   const handleSignUpClick = () => {
     navigate("/auth/sign-up");
@@ -24,59 +25,59 @@ export default function Header() {
     navigate("/auth/sign-in");
   };
 
-  // const handleLogout = () => {
-  //   dispatch(logoutAction());
-  // };
+
+  const handleLogout = () => {
+    const confirmLogout = window.confirm("Bạn có chắc chắn muốn đăng xuất?");
+    if (confirmLogout) {
+      dispatch(logoutAction());
+    }
+  };
 
   const handleProfileClick = () => {
-    navigate("user/account-management");
+    if (user?.userType?.userTypeId === 1) {
+      navigate('/admin/dashboard');
+    } else if (user?.userType?.userTypeId === 3) {
+      navigate('employer/account-management/dashboard');
+    } else {
+      navigate('user/account-management');
+    }
   };
-  const isEmployerOrAdmin =
-    user?.userType?.userTypeId === 3 || user?.userType?.userTypeId === 1;
 
-  // Render nothing if the user is an employer or admin
-  if (isEmployerOrAdmin) {
-    return null;
-  }
 
   return (
     <header className="bg-gradient-to-r from-gray-900 to-purple-900 px-4 py-3 flex justify-between items-center">
       <div className="flex items-center space-x-6">
         <div className="flex items-center space-x-2">
-          <img
-            className="w-8 h-8 bg-purple-600 rounded-full"
-            src={logo}
-            alt="logo"
-          />
-          <Link to="/" className="text-xl font-bold text-white">
-            JobRadar
-          </Link>
+          <img className="w-8 h-8 bg-purple-600 rounded-full" src={logo} alt="logo" />
+          {isSeeker &&(
+            <Link to="/" className="text-xl font-bold text-white">JobRadar</Link>
+          )}
+          
         </div>
-        <nav>
-          <ul className="flex space-x-4">
-            <li>
-              <Link to="/find-jobs">
-                <Button
-                  variant="ghost"
-                  className="text-white hover:text-purple-200"
-                >
-                  Tìm việc
-                </Button>
-              </Link>
-            </li>
-            <li>
-              <Link to="/find-companies">
-                <Button
-                  variant="ghost"
-                  className="text-white hover:text-purple-200"
-                >
-                  Công ty
-                </Button>
-              </Link>
-            </li>
-          </ul>
-        </nav>
+        
+        {isSeeker && (
+          <nav>
+            <ul className="flex space-x-4">
+              <li>
+                <Link to="/find-jobs">
+                  <Button variant="ghost" className="text-white hover:text-purple-200">
+                    Tìm việc
+                  </Button>
+                </Link> 
+              </li>
+              <li>
+                <Link to="/find-companies">
+                  <Button variant="ghost" className="text-white hover:text-purple-200">
+                    Công ty
+                  </Button>
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        )}
+
       </div>
+
       <div className="flex space-x-2">
         {isAuthenticated && user ? (
           <div className="flex items-center space-x-4">
@@ -118,17 +119,11 @@ export default function Header() {
           </div>
         ) : (
           <>
-            <Button
-              variant="ghost"
-              className="text-white hover:text-purple-200"
-              onClick={handleSignInClick}
-            >
+            <Button variant="ghost" className="text-white hover:text-purple-200" onClick={handleSignInClick}>
               Login
             </Button>
-            <Button
-              className="bg-purple-600 text-white hover:bg-purple-700"
-              onClick={handleSignUpClick}
-            >
+            <Button className="bg-purple-600 text-white hover:bg-purple-700" onClick={handleSignUpClick}>
+
               Sign Up
             </Button>
           </>

@@ -99,18 +99,19 @@ public class UserAccountServiceImpl implements IUserAccountService {
 
 
 	@Override
-	public List<DailyAccountCount> getDailyAccountCounts(LocalDate startDate, LocalDate endDate) {
-        List<Object[]> results = userAccountRepository.countNewAccountsPerDay(startDate, endDate);
-        List<DailyAccountCount> dailyAccountCounts = new ArrayList<>();
+	public List<DailyAccountCount> getDailyAccountCounts(LocalDateTime startDate, LocalDateTime endDate) {
+	    List<Object[]> results = userAccountRepository.countNewAccountsPerDay(startDate, endDate);
+	    List<DailyAccountCount> dailyAccountCounts = new ArrayList<>();
 
-        for (Object[] result : results) {
-            LocalDate date = ((java.sql.Date) result[0]).toLocalDate();
-            Long count = ((Number) result[1]).longValue();
-            dailyAccountCounts.add(new DailyAccountCount(date, count));
-        }
+	    for (Object[] result : results) {
+	        // Assuming the first element in the result is already a LocalDateTime
+	        LocalDateTime date = (LocalDateTime) result[0]; // Change here
+	        Long count = ((Number) result[1]).longValue();
+	        dailyAccountCounts.add(new DailyAccountCount(date, count));
+	    }
 
-        return dailyAccountCounts;
-    }
+	    return dailyAccountCounts;
+	}
 
 
 

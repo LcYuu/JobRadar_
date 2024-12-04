@@ -63,14 +63,14 @@ const JobManagement = () => {
 
   const handleOpenExpireConfirmation = () => {
     Swal.fire({
-      title: 'Xác nhận',
-      text: 'Bạn có chắc chắn muốn dừng tuyển dụng công việc này?',
-      icon: 'warning',
+      title: "Xác nhận",
+      text: "Bạn có chắc chắn muốn dừng tuyển dụng công việc này?",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#28a745', // Màu nút "Có"
-      cancelButtonColor: '#dc3545', // Màu nút "Không"
-      confirmButtonText: 'Có',
-      cancelButtonText: 'Không',
+      confirmButtonColor: "#28a745", // Màu nút "Có"
+      cancelButtonColor: "#dc3545", // Màu nút "Không"
+      confirmButtonText: "Có",
+      cancelButtonText: "Không",
     }).then((result) => {
       if (result.isConfirmed) {
         // Nếu người dùng xác nhận
@@ -181,7 +181,7 @@ const JobManagement = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-semibold">Danh sách công việc</h1>
+          <h1 className="text-2xl font-semibold"></h1>
           {/* <p className="text-gray-500 mt-1">Đây là danh sách việc làm từ {selectedDate}.</p> */}
         </div>
 
@@ -192,7 +192,7 @@ const JobManagement = () => {
           </div> */}
           <Button
             variant="default"
-            className="bg-indigo-600"
+            className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-500 transition-colors"
             onClick={handleClick} // Gọi hàm khi người dùng click
           >
             + Đăng bài
@@ -202,7 +202,7 @@ const JobManagement = () => {
 
       <div className="bg-white rounded-lg shadow">
         <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="font-semibold">Danh sách</h2>
+          <h2 className="font-semibold text-white">.</h2>
           <div className="flex gap-4 items-center">
             <select
               className="border rounded px-4 py-2"
@@ -230,32 +230,32 @@ const JobManagement = () => {
             </select>
             <Button
               variant="outline"
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-500 transition-colors"
               onClick={applyFilters}
             >
               <Filter className="w-4 h-4" />
-              Filters
+              Áp dụng
             </Button>
           </div>
         </div>
 
         <table className="w-full">
-          <thead>
+          <thead className="bg-purple-600 text-white">
             <tr>
-              <th className="text-left p-4">Tiêu đề</th>
+              <th className="text-left p-4">Tên công việc</th>
               <th className="text-left p-4">Trạng thái</th>
               <th
                 className="text-left p-4 cursor-pointer"
                 // onClick={() => handleSort("createDate")}
               >
-                Ngày bắt đầu 
+                Ngày bắt đầu
                 {/* {sortBy.createDate === "ASC" ? "↑" : "↓"} */}
               </th>
               <th
                 className="text-left p-4 cursor-pointer"
                 // onClick={() => handleSort("expireDate")}
               >
-                Ngày kết thúc 
+                Ngày kết thúc
                 {/* {sortBy.expireDate === "ASC" ? "↑" : "↓"} */}
               </th>
               <th className="text-left p-4">Loại công việc</th>
@@ -263,9 +263,10 @@ const JobManagement = () => {
                 className="text-left p-4 cursor-pointer"
                 // onClick={() => handleSort("count")}
               >
-                Số lượng ứng viên 
+                Số lượng ứng viên
                 {/* {sortBy.count === "ASC" ? "↑" : "↓"} */}
               </th>
+              <th className="text-left p-4 cursor-pointer">Hành động</th>
             </tr>
           </thead>
           <tbody>
@@ -304,7 +305,7 @@ const JobManagement = () => {
                     </span>
                   </td>
                   <td className="p-4 text-center">{job?.applicationCount}</td>
-                  <td className="p-4">
+                  <td className="p-4 text-center">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
@@ -395,7 +396,7 @@ const JobManagement = () => {
             </Button>
             <Button
               variant="outline"
-              className="bg-indigo-600 text-white"
+              className="bg-purple-600 text-white"
               onClick={() => handlePageChange(currentPage)}
             >
               {currentPage + 1}
