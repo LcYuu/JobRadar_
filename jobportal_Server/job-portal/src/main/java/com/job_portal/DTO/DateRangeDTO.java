@@ -1,6 +1,7 @@
 package com.job_portal.DTO;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,27 +10,27 @@ import lombok.Setter;
 
 
 public class DateRangeDTO {
-	private LocalDate startDate;
-    private LocalDate endDate;
+	private LocalDateTime startDate;
+    private LocalDateTime endDate;
 	public DateRangeDTO() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	public DateRangeDTO(LocalDate startDate, LocalDate endDate) {
+	public DateRangeDTO(LocalDateTime startDate, LocalDateTime endDate) {
 		super();
 		this.startDate = startDate;
 		this.endDate = endDate;
 	}
-	public LocalDate getStartDate() {
+	public LocalDateTime getStartDate() {
 		return startDate;
 	}
-	public void setStartDate(LocalDate startDate) {
+	public void setStartDate(LocalDateTime startDate) {
 		this.startDate = startDate;
 	}
-	public LocalDate getEndDate() {
+	public LocalDateTime getEndDate() {
 		return endDate;
 	}
-	public void setEndDate(LocalDate endDate) {
+	public void setEndDate(LocalDateTime endDate) {
 		this.endDate = endDate;
 	}
     

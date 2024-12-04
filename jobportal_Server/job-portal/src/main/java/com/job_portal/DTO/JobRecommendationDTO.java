@@ -21,8 +21,8 @@ public class JobRecommendationDTO {
 	private Long salary;
 	private String experience;
 	private String typeOfWork;
-	private LocalDate createDate;
-	private LocalDate expireDate;
+	private LocalDateTime createDate;
+	private LocalDateTime expireDate;
 	private UUID companyId;
 	private String companyName;
 	private String cityName;

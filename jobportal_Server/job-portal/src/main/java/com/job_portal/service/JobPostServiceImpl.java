@@ -79,7 +79,7 @@ public class JobPostServiceImpl implements IJobPostService {
 		}
 		// Build the JobPost entity
 		JobPost jobPost = new JobPost(); 	
-		jobPost.setCreateDate(LocalDate.now());
+		jobPost.setCreateDate(LocalDateTime.now());
 		jobPost.setExpireDate(jobPostDTO.getExpireDate());
 		jobPost.setTitle(jobPostDTO.getTitle());
 		jobPost.setDescription(jobPostDTO.getDescription());
@@ -340,28 +340,26 @@ public class JobPostServiceImpl implements IJobPostService {
 
 	}
 
-	public List<DailyJobCount> getDailyJobPostCounts(LocalDate startDate, LocalDate endDate) {
-		List<Object[]> results = jobPostRepository.countNewJobsPerDay(startDate, endDate);
-		List<DailyJobCount> dailyJobPostCounts = new ArrayList<>();
+	@Override
+	public List<DailyJobCount> getDailyJobPostCounts(LocalDateTime startDate, LocalDateTime endDate) {
+	    List<Object[]> results = jobPostRepository.countNewJobsPerDay(startDate, endDate);
+	    List<DailyJobCount> dailyJobPostCounts = new ArrayList<>();
 
-		for (Object[] result : results) {
-			// Xử lý kết quả từ native query
-			java.sql.Date sqlDate = (java.sql.Date) result[0];
-			LocalDate date = sqlDate.toLocalDate();
-			Long count = ((Number) result[1]).longValue();
-			
-			System.out.println("Date: " + date + ", Count: " + count); // Debug log
-			
-			dailyJobPostCounts.add(new DailyJobCount(date, count));
-		}
+	    for (Object[] result : results) {
+	        String dateStr = (String) result[0];
+	        LocalDateTime date = LocalDateTime.parse(dateStr.substring(0, 26)); // Cắt đến microseconds
+	        Long count = ((Number) result[1]).longValue();
+	        
+	        dailyJobPostCounts.add(new DailyJobCount(date, count));
+	    }
 
-		return dailyJobPostCounts;
+	    return dailyJobPostCounts;
 	}
 
 	@Override
 	public Page<JobPost> findByIsApprove(Pageable pageable) {
 		Page<JobPost> jobPost = jobPostRepository.findByIsApproveTrueAndExpireDateGreaterThanEqual(pageable,
-				LocalDate.now());
+				LocalDateTime.now());
 		return jobPost;
 
 	}
@@ -432,7 +430,7 @@ public class JobPostServiceImpl implements IJobPostService {
 	@Override
 	public Map<String, Long> countAllJobsByCompany(UUID companyId) {
 		Map<String, Long> jobCounts = new HashMap<>();
-		LocalDate now = LocalDate.now();
+		LocalDateTime now = LocalDateTime.now();
 
 		// Đếm tổng số công việc
 		long totalJobs = jobPostRepository.countByCompanyCompanyId(companyId);
@@ -463,9 +461,9 @@ public class JobPostServiceImpl implements IJobPostService {
 	}
 
 	@Override
-	public List<Map<String, Object>> getCompanyJobStats(UUID companyId, LocalDate startDate, LocalDate endDate) {
+	public List<Map<String, Object>> getCompanyJobStats(UUID companyId, LocalDateTime startDate, LocalDateTime endDate) {
 		List<Map<String, Object>> stats = new ArrayList<>();
-		LocalDate currentDate = startDate;
+		LocalDateTime currentDate = startDate;
 		
 		while (!currentDate.isAfter(endDate)) {
 			// Đếm số lượng job theo trạng thái
