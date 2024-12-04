@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.job_portal.DTO.DailyAccountCount;
 import com.job_portal.DTO.DateRangeDTO;
+import com.job_portal.models.Company;
 import com.job_portal.models.UserAccount;
 import com.job_portal.repository.UserAccountRepository;
 import com.job_portal.service.IUserAccountService;
@@ -44,46 +45,17 @@ public class UserAccountController {
 	public ResponseEntity<List<UserAccount>> getUsers() {
 		List<UserAccount> users = userAccountRepository.findAll();
 		return new ResponseEntity<>(users, HttpStatus.OK);
-	}
+	} 		
 	@GetMapping("/admin-get-all")
-	public ResponseEntity<Map<String, Object>> getUsers(
+	public ResponseEntity<Page<UserAccount>> getUsers(
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "5") int size,
-			@RequestParam(required = false) String search,
-			@RequestParam(required = false, defaultValue = "all") String role,
-			@RequestParam(required = false, defaultValue = "all") String status) {
-		try {
-			Pageable paging = PageRequest.of(page, size);
-			Page<UserAccount> pageUsers;
-
-			if (search != null && !search.isEmpty()) {
-				pageUsers = userAccountRepository.findByUserNameContainingOrEmailContainingIgnoreCase(
-					search, search, paging);
-			} else if (!role.equals("all") && !status.equals("all")) {
-				boolean isActive = status.equals("1");
-				pageUsers = userAccountRepository.findByUserType_UserTypeIdAndIsActive(
-					Integer.parseInt(role), isActive, paging);
-			} else if (!role.equals("all")) {
-				pageUsers = userAccountRepository.findByUserType_UserTypeId(
-					Integer.parseInt(role), paging);
-			} else if (!status.equals("all")) {
-				boolean isActive = status.equals("1");
-				pageUsers = userAccountRepository.findByIsActive(isActive, paging);
-			} else {
-				pageUsers = userAccountRepository.findAll(paging);
-			}
-
-			Map<String, Object> response = new HashMap<>();
-			response.put("content", pageUsers.getContent());
-			response.put("currentPage", pageUsers.getNumber());
-			response.put("totalElements", pageUsers.getTotalElements());
-			response.put("totalPages", pageUsers.getTotalPages());
-
-			return new ResponseEntity<>(response, HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+			@RequestParam(required = false, defaultValue = "") String userName,
+			@RequestParam(required = false, defaultValue = "") Integer userTypeId,
+			@RequestParam(required = false, defaultValue = "") Boolean active) {
+		Pageable pageable = PageRequest.of(page, size);
+		Page<UserAccount> userAccounts = userAccountRepository.searchUserAccounts(userName, userTypeId, active, pageable);
+		return ResponseEntity.ok(userAccounts);
 	}
 
 	@GetMapping("/{userId}")

@@ -1,16 +1,12 @@
-import axios from "axios"
-import { api, API_BASE_URL } from "../../configs/api"
+import axios from "axios";
+import { api, API_BASE_URL } from "../../configs/api";
 
 // import { CREATE_COMMENT_FAILURE,GET_ALL_JOB_REQUEST, GET_ALL_JOB_FAILURE, CREATE_COMMENT_REQUEST, CREATE_COMMENT_SUCCESS, CREATE_POST_FAILURE, CREATE_POST_REQUEST, CREATE_POST_SUCCESS, GET_ALL_JOB_SUCCESS, GET_ALL_POST_FAILURE, GET_ALL_POST_REQUEST, GET_ALL_POST_SUCCESS, GET_USERS_POST_FAILURE, GET_USERS_POST_REQUEST, GET_USERS_POST_SUCCESS, LIKE_POST_FAILURE, LIKE_POST_REQUEST, LIKE_POST_SUCCESS, GET_TOP8_JOB_REQUEST, GET_TOP8_JOB_FAILURE, GET_TOP8_JOB_SUCCESS, COUNT_JOB_BY_TYPE_REQUEST, COUNT_JOB_BY_TYPE_SUCCESS, COUNT_JOB_BY_TYPE_FAILURE, SEARCH_JOBS_REQUEST, SEARCH_JOBS_SUCCESS, SEARCH_JOBS_FAILURE, SET_SALARY_RANGE_REQUEST, SET_SALARY_RANGE_SUCCESS, SET_SALARY_RANGE_FAILURE, GET_JOBS_BY_COMPANY_REQUEST, GET_JOBS_BY_COMPANY_SUCCESS, GET_JOBS_BY_COMPANY_FAILURE, GET_TOTAL_JOBS_REQUEST, GET_TOTAL_JOBS_SUCCESS, GET_TOTAL_JOBS_FAILURE, GET_JOB_POST_BY_POST_ID_REQUEST, GET_JOB_POST_BY_POST_ID_SUCCESS, GET_JOB_POST_BY_POST_ID_FAILURE, GET_RECOMMEND_JOB_REQUEST, GET_RECOMMEND_JOB_SUCCESS, GET_RECOMMEND_JOB_FAILURE, GET_ALL_ADMIN_JOBS_REQUEST, GET_ALL_ADMIN_JOBS_SUCCESS, GET_ALL_ADMIN_JOBS_FAILURE } from "./jobPost.actionType"
 
-
 import {
-
   GET_ALL_JOB_REQUEST,
   GET_ALL_JOB_FAILURE,
-
   GET_ALL_JOB_SUCCESS,
-
   GET_TOP8_JOB_REQUEST,
   GET_TOP8_JOB_FAILURE,
   GET_TOP8_JOB_SUCCESS,
@@ -75,7 +71,7 @@ import {
   SET_PAGE_SIZE,
   UPDATE_JOB_EXPIRE_REQUEST,
   UPDATE_JOB_EXPIRE_SUCCESS,
-  UPDATE_JOB_EXPIRE_FAILURE
+  UPDATE_JOB_EXPIRE_FAILURE,
 } from "./jobPost.actionType";
 
 // export const getAllJobActionForAdmin = (currentPage, size, filters = {}) => async (dispatch) => {
@@ -86,9 +82,9 @@ import {
 //       size,
 //       ...filters
 //     };
-    
+
 //     const response = await api.get('/job-post/admin-get-all', { params });
-    
+
 //     dispatch({
 //       type: GET_ALL_JOB_SUCCESS,
 //       payload: {
@@ -274,9 +270,8 @@ export const getJobsByCompany =
         type: GET_JOBS_BY_COMPANY_FAILURE,
         payload: error.message,
       });
-
     }
-};
+  };
 
 export const getTotalJobsByCompany = (companyId) => async (dispatch) => {
   dispatch({ type: GET_TOTAL_JOBS_REQUEST });
@@ -327,46 +322,48 @@ export const getTop5Lastest = () => async (dispatch) => {
   }
 };
 
-export const findEmployerCompany = (
-  status,
-  typeOfWork,
-  // sortByCreateDate,
-  // sortByExpireDate,
-  // sortByCount,
-  currentPage,
-  size
-) => async (dispatch) => {
-  dispatch({ type: GET_JOB_COMPANY_REQUEST });
-  const params = {
-    ...(status && { status }), // Chỉ thêm status nếu có giá trị
-    ...(typeOfWork && { typeOfWork }), // Chỉ thêm typeOfWork nếu có giá trị
-    // sortByCreateDate: sortByCreateDate,
-    // sortByExpireDate: sortByExpireDate,
-    // sortByCount: sortByCount,
-    page: currentPage,
-    size: size,
+export const findEmployerCompany =
+  (
+    status,
+    typeOfWork,
+    // sortByCreateDate,
+    // sortByExpireDate,
+    // sortByCount,
+    currentPage,
+    size
+  ) =>
+  async (dispatch) => {
+    dispatch({ type: GET_JOB_COMPANY_REQUEST });
+    const params = {
+      ...(status && { status }), // Chỉ thêm status nếu có giá trị
+      ...(typeOfWork && { typeOfWork }), // Chỉ thêm typeOfWork nếu có giá trị
+      // sortByCreateDate: sortByCreateDate,
+      // sortByExpireDate: sortByExpireDate,
+      // sortByCount: sortByCount,
+      page: currentPage,
+      size: size,
+    };
+
+    console.log("a" + JSON.stringify(params));
+
+    try {
+      const response = await api.get("/job-post/employer-company", { params });
+
+      dispatch({
+        type: GET_JOB_COMPANY_SUCCESS,
+        payload: {
+          jobs: response.data.content, // Các công việc sau khi lọc và phân trang
+          totalPages: response.data.page.totalPages,
+          totalElements: response.data.page.totalElements,
+        },
+      });
+    } catch (error) {
+      dispatch({
+        type: GET_JOB_COMPANY_FAILURE,
+        payload: error.message || "Lỗi không xác định",
+      });
+    }
   };
-
-  console.log("a" + JSON.stringify(params));
-
-  try {
-    const response = await api.get('/job-post/employer-company', { params });
-
-    dispatch({
-      type: GET_JOB_COMPANY_SUCCESS,
-      payload: {
-        jobs: response.data.content, // Các công việc sau khi lọc và phân trang
-        totalPages: response.data.page.totalPages,
-        totalElements: response.data.page.totalElements,
-      },
-    });
-  } catch (error) {
-    dispatch({
-      type: GET_JOB_COMPANY_FAILURE,
-      payload: error.message || 'Lỗi không xác định',
-    });
-  }
-};
 
 export const getDetailJobById = (postId) => async (dispatch) => {
   dispatch({ type: GET_DETAIL_JOB_BY_ID_REQUEST });
@@ -406,52 +403,51 @@ export const updateJob = (postId, jobPostData) => async (dispatch) => {
 export const createJobPost = (jobPostData) => async (dispatch) => {
   dispatch({ type: CREATE_JOB_REQUEST });
   try {
-      const response = await api.post("/job-post/create-job", jobPostData);
-      dispatch({
-          type: CREATE_JOB_SUCCESS,
-          payload: response.data, // Thông báo thành công từ backend
-      });
-      return {
-        success: true,
-        message: response.data // Thông báo thành công từ backend
-      };
-  } catch (error) {
-      dispatch({
-          type: CREATE_JOB_FAILURE,
-          payload: error.response?.data || "Lỗi khi tạo công việc",
-      });
-      return {
-        success: false,
-        error: error.response?.data || "Lỗi khi tạo công việc" 
-      };
-  }
-};
-export const getAllJobsForAdmin = (page, size) => async (dispatch) => {
-  dispatch({ type: GET_ALL_ADMIN_JOBS_REQUEST });
-  try {
-    const response = await api.get(`/job-post/admin/all-jobs`, {
-      params: {
-        page,
-        size
-      }
-    });
-    
+    const response = await api.post("/job-post/create-job", jobPostData);
     dispatch({
-      type: GET_ALL_ADMIN_JOBS_SUCCESS,
-      payload: {
-        jobPost: response.data.content,
-        totalPages: response.data.page.totalPages,
-        totalElements: response.data.page.totalElements,
-        currentPage: response.data.page.number
-      }
+      type: CREATE_JOB_SUCCESS,
+      payload: response.data, // Thông báo thành công từ backend
     });
+    return {
+      success: true,
+      message: response.data, // Thông báo thành công từ backend
+    };
   } catch (error) {
     dispatch({
-      type: GET_ALL_ADMIN_JOBS_FAILURE,
-      payload: error.message
+      type: CREATE_JOB_FAILURE,
+      payload: error.response?.data || "Lỗi khi tạo công việc",
     });
+    return {
+      success: false,
+      error: error.response?.data || "Lỗi khi tạo công việc",
+    };
   }
 };
+export const getAllJobsForAdmin =
+  (title, status, isApprove, page, size) => async (dispatch) => {
+    dispatch({ type: GET_ALL_ADMIN_JOBS_REQUEST });
+    try {
+      const response = await api.get(`/job-post/admin/all-jobs`, {
+        params: {
+          title,
+          status,
+          isApprove,
+          page,
+          size,
+        },
+      });
+
+      dispatch({
+        type: GET_ALL_ADMIN_JOBS_SUCCESS,
+        payload: response.data
+      });
+    } catch (error) {
+      dispatch({
+        type: GET_ALL_ADMIN_JOBS_FAILURE,
+        payload: error.message,
+      });
+    }
+  };
 
 export const approveJob = (postId) => async (dispatch) => {
   try {
@@ -459,46 +455,48 @@ export const approveJob = (postId) => async (dispatch) => {
     // Sau khi approve thành công, fetch lại danh sách
     dispatch(getAllJobsForAdmin(0, 10));
   } catch (error) {
-    console.error('Error approving job:', error);
+    console.error("Error approving job:", error);
   }
 };
 
 export const setCurrentPage = (page) => ({
   type: SET_CURRENT_PAGE,
-  payload: page
+  payload: page,
 });
 
 export const setPageSize = (size) => ({
   type: SET_PAGE_SIZE,
-  payload: size
+  payload: size,
 });
 
-export const getSimilarJobs = (companyId, excludePostId) => async (dispatch) => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/job-post/similar-jobs`, {
-      params: {
-        companyId,
-        excludePostId,
-      }
-    });
-    dispatch({
-      type: "GET_SIMILAR_JOBS_SUCCESS",
-      payload: response.data
-    });
-  } catch (error) {
-    dispatch({
-      type: "GET_SIMILAR_JOBS_FAILURE",
-      payload: error.message
-    });
-  }
-};
-
+export const getSimilarJobs =
+  (companyId, excludePostId) => async (dispatch) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/job-post/similar-jobs`,
+        {
+          params: {
+            companyId,
+            excludePostId,
+          },
+        }
+      );
+      dispatch({
+        type: "GET_SIMILAR_JOBS_SUCCESS",
+        payload: response.data,
+      });
+    } catch (error) {
+      dispatch({
+        type: "GET_SIMILAR_JOBS_FAILURE",
+        payload: error.message,
+      });
+    }
+  };
 
 export const updateExpireJob = (postId) => async (dispatch) => {
   dispatch({ type: UPDATE_JOB_EXPIRE_REQUEST });
   try {
-    const { data } = await api.put(`job-post/set-expire/${postId}`
-    );
+    const { data } = await api.put(`job-post/set-expire/${postId}`);
     dispatch({ type: UPDATE_JOB_EXPIRE_SUCCESS, payload: data });
     return data;
   } catch (error) {
