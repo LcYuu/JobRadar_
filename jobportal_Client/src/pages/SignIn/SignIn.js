@@ -74,7 +74,6 @@ export default function SignInForm() {
         // Wait for 2 seconds then redirect
         setTimeout(() => {
           setIsModalOpen(false);
-          navigate("/");
         }, 500);
 
       } else {
