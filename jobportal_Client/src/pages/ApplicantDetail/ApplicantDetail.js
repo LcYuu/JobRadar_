@@ -9,20 +9,17 @@ import {
   Twitter,
   Globe,
   MessageSquare,
-  Info,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tab";
 import { useDispatch, useSelector } from "react-redux";
+
 import {
   getCandidateProfile,
   getCandidateSkills,
 } from "../../redux/Seeker/seeker.action";
 import { getEduCandidate } from "../../redux/Education/edu.action";
 import { getExpCandidate } from "../../redux/Experience/exp.action";
-
-import { getCandidateApplyInfo } from "../../redux/ApplyJob/applyJob.action";
 import { Card } from "../../ui/card";
-
 
 const ApplicantDetail = () => {
   const getRandomColor = () => {
@@ -36,19 +33,11 @@ const ApplicantDetail = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("applicant-profile");
-  
-  const { profileCandidate, skillsCandidate } = useSelector((store) => store.seeker);
+  const { profileCandidate, skillsCandidate } = useSelector(
+    (store) => store.seeker
+  );
   const { eduCandidate } = useSelector((store) => store.edu);
   const { expCandidate } = useSelector((store) => store.exp);
-   const { candidateApplyInfo } = useSelector((store) => store.applyJob);
-
-  useEffect(() => {
-    dispatch(getCandidateProfile(userId, postId));
-    dispatch(getCandidateSkills(userId));
-    dispatch(getEduCandidate(userId));
-    dispatch(getExpCandidate(userId));
-    dispatch(getCandidateApplyInfo(userId, postId));
-  }, [dispatch, userId, postId]);
 
   const timeAgo = (date) => {
     const now = new Date();
@@ -78,22 +67,31 @@ const ApplicantDetail = () => {
     return age;
   };
 
+  useEffect(() => {
+    dispatch(getCandidateProfile(userId, postId));
+    dispatch(getCandidateSkills(userId));
+    dispatch(getEduCandidate(userId));
+    dispatch(getExpCandidate(userId));
+  }, [dispatch]);
+
   const contactIcons = {
     email: <Mail className="w-4 h-4 text-gray-500" />,
     phone: <Phone className="w-4 h-4 text-gray-500" />,
   };
-console.log(candidateApplyInfo);
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <Button
           variant="ghost"
-          onClick={() => navigate("/employer/account-management/candidate-management")}
-          className="flex items-center gap-2"
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 bg-red-600 text-white hover:text-white hover:bg-red-400"
         >
           <ChevronLeft className="w-4 h-4" />
-          Trở lại danh sách 
+          Trở lại
         </Button>
+
+        {/* <Button variant="outline">More Action</Button> */}
       </div>
 
       {/* Profile Card */}
@@ -110,8 +108,13 @@ console.log(candidateApplyInfo);
               <h1 className="text-xl font-bold">
                 {profileCandidate?.fullName}
               </h1>
+              {/* <p className="text-gray-600">{applicant.position}</p> */}
+              {/* <div className="flex items-center justify-center mt-2">
+                <span className="text-yellow-500">★</span>
+                <span className="ml-1">{applicant.rating}</span>
+              </div> */}
+
               <div className="mt-6">
-                
                 <p className="text-xl font-bold text-gray-600">
                   {profileCandidate?.title}
                 </p>
@@ -125,25 +128,43 @@ console.log(candidateApplyInfo);
                     : "No apply date available"}
                 </p>
               </div>
-              {/* Contact Information */}
-              <div className="mt-6 text-left">
-                <h3 className="font-medium text-left mb-4">Thông tin đã điền trên form</h3>
+
+              {/* <div className="mt-4">
+                <p className="text-sm mb-2">Stage: {applicant.appliedJob.stage}</p>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full" 
+                    style={{width: `${applicant.appliedJob.progress}%`}}
+                  />
+                </div>
+              </div>
+
+              <Button 
+                variant="default" 
+                className="mt-6 w-full bg-indigo-600 hover:bg-indigo-700"
+              >
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Schedule Interview
+              </Button> */}
+
+              <div className="mt-10">
+                <h3 className="font-medium text-left mb-4">Liên hệ</h3>
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    {contactIcons.email}
-                    <p className="text-sm text-gray-600">{candidateApplyInfo?.email}</p>
+                  <div
+                    key="email"
+                    className="flex items-center gap-3 text-left"
+                  >
+                    {contactIcons.email} {/* Hiển thị icon email */}
+                    {profileCandidate?.emailContact} {/* Hiển thị email */}
                   </div>
-                  <div className="flex items-center gap-3">
-                    {contactIcons.phone}
-                    <p className="text-sm text-gray-600">{profileCandidate?.phoneNumber}</p>
+                  <div
+                    key="phone"
+                    className="flex items-center gap-3 text-left"
+                  >
+                    {contactIcons.phone} {/* Hiển thị icon phone */}
+                    {profileCandidate?.phoneNumber}{" "}
+                    {/* Hiển thị số điện thoại */}
                   </div>
-                  {candidateApplyInfo?.description && (
-                    <div className="mt-4 flex items-center">
-                      <Info className="w-5 h-5 text-gray-600 mr-2" />
-                      <p className="text-sm font-medium">Thông tin thêm</p>
-                    </div>
-                  )}
-                  <p className="text-sm text-gray-600">{candidateApplyInfo?.description}</p>
                 </div>
               </div>
             </div>
@@ -162,8 +183,7 @@ console.log(candidateApplyInfo);
                   }`}
                   onClick={() => setActiveTab("applicant-profile")}
                 >
-                  Hồ sơ ứng viên
-
+                  Thông tin ứng viên
                 </TabsTrigger>
                 <TabsTrigger
                   value="resume"
@@ -174,12 +194,50 @@ console.log(candidateApplyInfo);
                   }`}
                   onClick={() => setActiveTab("resume")}
                 >
-                  Đơn ứng tuyển
+                  Hồ sơ cá nhân
                 </TabsTrigger>
               </TabsList>
 
               <TabsContent value="applicant-profile" className="pt-6">
                 <div className="grid grid-cols-3 gap-6">
+                  {/* Left Column */}
+                  {/* <div className="col-span-1 space-y-6"> */}
+                  {/* <div className="bg-white rounded-lg p-6 shadow-sm">
+                      <h2 className="font-semibold mb-4">Applied Jobs</h2>
+                      <div className="space-y-2">
+                        <p className="font-medium">{applicant.appliedJob.title}</p>
+                        <p className="text-sm text-gray-600">
+                          {applicant.appliedJob.department} • {applicant.appliedJob.type}
+                        </p>
+                        <p className="text-sm text-gray-500">{applicant.appliedJob.appliedDate}</p>
+                        <div className="mt-4">
+                          <p className="text-sm mb-2">Stage: {applicant.appliedJob.stage}</p>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-blue-600 h-2 rounded-full" 
+                              style={{width: `${applicant.appliedJob.progress}%`}}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div> */}
+
+                  {/* <div className="bg-white rounded-lg p-6 shadow-sm">
+                      <h2 className="font-semibold mb-4">Contact</h2>
+                      <div className="space-y-4">
+                        {Object.entries(applicant.contact).map(([key, value]) => (
+                          <div key={key} className="flex items-center gap-3">
+                            {contactIcons[key]}
+                            <div>
+                              <p className="text-sm">{value}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div> */}
+                  {/* </div> */}
+
+                  {/* Right Column */}
                   <div className="col-span-3 space-y-6">
                     <Card className="bg-white rounded-lg p-6 shadow-lg">
                       <h2 className="font-semibold text-purple-600 mb-4">
@@ -195,23 +253,19 @@ console.log(candidateApplyInfo);
                           </p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-600">Giới tính</p>
+                          <p className="text-xl font-bold text-black">
+                            Giới tính
+                          </p>
                           <p className="text-sm">{profileCandidate?.gender}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-gray-600">Email</p>
-                          <p className="text-sm">{profileCandidate?.emailContact}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600">Số điện thoại</p>
-                          <p className="text-sm">{profileCandidate?.phoneNumber}</p>
-                        </div>
-                        <div>
-                          <p className="text-xl font-bold text-black">Ngày sinh</p>
+                          <p className="text-xl font-bold text-black">
+                            Ngày sinh
+                          </p>
                           <p className="text-sm">
                             {profileCandidate?.dateOfBirth ? (
                               <>
-                                <span>{new Date(profileCandidate.dateOfBirth).toLocaleDateString("en-GB")}</span>
+                                <span>{profileCandidate.dateOfBirth}</span>
                                 <span>
                                   {" "}
                                   ({calculateAge(
@@ -225,65 +279,46 @@ console.log(candidateApplyInfo);
                             )}
                           </p>
                         </div>
-
-                        <div>
-                          <p className="text-sm text-gray-600">Địa chỉ</p>
+                        <div className="col-span-2">
+                          <p className="text-xl font-bold text-black">
+                            Địa chỉ
+                          </p>
                           <p className="text-sm">{profileCandidate?.address}</p>
                         </div>
                       </div>
-                    </div>
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <h2 className="font-semibold mb-4">Thông tin chuyên môn</h2>
-                      <div className="bg-white rounded-lg p-6 shadow-sm">
-                        <div className="space-y-6">
-                          <div>
-                            <p className="text-sm text-gray-600">Giới thiệu</p>
-                            <p className="text-sm mt-1">
-                              {profileCandidate?.description}
+                    </Card>
+
+                    <Card className="bg-white rounded-lg p-6 shadow-lg">
+                      <h2 className="font-semibold text-purple-600 mb-4">
+                        Thông tin chuyên môn
+                      </h2>
+                      <div className="space-y-6">
+                        <div>
+                          <p className="text-xl text-black font-bold">
+                            Giới thiệu
+                          </p>
+                          <p className="text-sm mt-1">
+                            {profileCandidate?.description}
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6">
+                          {/* Cột bên trái - Kinh nghiệm */}
+                          <div className="pr-6">
+                            <p className="text-xl font-bold text-black">
+                              Kinh nghiệm
                             </p>
-                          </div>
-
-                         <div className="grid grid-cols-2 gap-6">
-  {/* Cột bên trái - Kinh nghiệm */}
-  <div className="pr-6">
-    <p className="text-xl font-bold text-black">Kinh nghiệm</p>
-    {/* Kiểm tra nếu có dữ liệu kinh nghiệm */}
-    {expCandidate?.length > 0 ? (
-      expCandidate.map((exp, index) => (
-        <div key={index} className="space-y-4 pb-4">
-          <div className="space-y-2 flex items-start">
-            <span className="text-green-500 mr-2">⭐</span>
-            <p className="text-sm font-semibold">{exp.jobTitle}</p>
-          </div>
-        </div>
-      ))
-    ) : (
-      <p className="text-sm text-gray-600">Chưa có kinh nghiệm</p>
-    )}
-  </div>
-
-  {/* Cột bên phải - Địa chỉ */}
-  <div className="col-span-2">
-    <p className="text-xl font-bold text-black">Địa chỉ</p>
-    <p className="text-sm">{profileCandidate?.address}</p>
-  </div>
-
-  {/* Thông tin chuyên môn */}
-  <div className="col-span-2">
-    <Card className="bg-white rounded-lg p-6 shadow-lg">
-      <h2 className="font-semibold text-purple-600 mb-4">
-        Thông tin chuyên môn
-      </h2>
-      <div className="space-y-6">
-        {/* Giới thiệu */}
-        <div>
-          <p className="text-xl text-black font-bold">Giới thiệu</p>
-          <p className="text-sm mt-1">{profileCandidate?.description}</p>
-        </div>
-      </div>
-    </Card>
-  </div>
-</div>
+                            {expCandidate?.length > 0 ? (
+                              expCandidate.map((exp, index) => (
+                                <div key={index} className="space-y-4 pb-4">
+                                  <div className="space-y-2 flex items-start">
+                                    <span className="text-green-500 mr-2">
+                                      ⭐
+                                    </span>
+                                    <p className="text-sm font-semibold">
+                                      {exp.jobTitle}
+                                    </p>
+                                  </div>
 
                                   {/* Tên công ty */}
                                   <div className="text-sm text-gray-600">
@@ -329,7 +364,6 @@ console.log(candidateApplyInfo);
                               eduCandidate.map((edu, index) => (
                                 <div key={index} className="space-y-4 pb-4">
                                   <div className="space-y-2 flex items-start">
-
                                     <span className="text-green-500 mr-2">
                                       ⭐
                                     </span>
@@ -337,30 +371,6 @@ console.log(candidateApplyInfo);
                                       {edu?.certificateDegreeName}
                                     </p>
                                   </div>
-                                ))
-                              ) : (
-                                <p className="text-sm text-gray-500">
-                                  No education information available.
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-600">Các kỹ năng</p>
-                            {skillsCandidate?.skills?.length > 0 ? (
-                              <div className="flex gap-2 mt-1">
-                                {skillsCandidate.skills.map((skill, index) => (
-                                  <span
-                                    key={index}
-                                    className="text-sm text-indigo-600 flex items-center"
-                                  >
-                                    <span className="text-green-500 mr-2">
-                                      ✔️
-                                    </span>
-                                    {skill.skillName}
-                                  </span>
-                                ))}
-                              </div>
 
                                   {/* Ngày bắt đầu và kết thúc */}
                                   <div className="text-sm text-gray-600">
@@ -397,7 +407,6 @@ console.log(candidateApplyInfo);
                                   )}
                                 </div>
                               ))
-
                             ) : (
                               <p className="text-sm text-gray-500">
                                 Không có thông tin học vấn.
