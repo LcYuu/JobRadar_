@@ -129,7 +129,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col pb-20 bg-white -ml-8">
+    <div className="min-h-screen flex flex-col pb-20 bg-white mt-8">
       <div className="flex-1 space-y-6 p-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Chào mừng trở lại</h1>
