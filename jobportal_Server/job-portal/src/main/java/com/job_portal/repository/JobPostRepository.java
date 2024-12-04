@@ -95,25 +95,25 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 
 	@Query(value = "SELECT new com.job_portal.DTO.JobWithApplicationCountDTO("
 			+ "jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
-			+ "jp.typeOfWork, jp.createDate, jp.expireDate, COUNT(a.postId), jp.status, i.industryName) "
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, COUNT(a.postId), jp.status, i.industryName, jp.isApprove) "
 			+ "FROM JobPost jp " + "LEFT JOIN ApplyJob a ON jp.postId = a.postId "
 			+ "JOIN Company c ON jp.company.companyId = c.companyId "
 			+ "JOIN Industry i ON c.industry.industryId = i.industryId " + "WHERE jp.company.companyId = :companyId "
 			+ "AND jp.expireDate >= CURRENT_DATE "
 			+ "GROUP BY jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
-			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName " + "ORDER BY jp.createDate DESC")
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName,  jp.isApprove " + "ORDER BY jp.createDate DESC")
 	List<JobWithApplicationCountDTO> findJobsByCompanyIdSortedByCreateDateDesc(@Param("companyId") UUID companyId);
 
 	@Query(value = "SELECT new com.job_portal.DTO.JobWithApplicationCountDTO("
 			+ "jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
-			+ "jp.typeOfWork, jp.createDate, jp.expireDate, " + "COUNT(a.postId), jp.status, i.industryName) "
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, " + "COUNT(a.postId), jp.status, i.industryName, jp.isApprove) "
 			+ "FROM JobPost jp " + "LEFT JOIN ApplyJob a ON jp.postId = a.postId "
 			+ "JOIN Company c ON jp.company.companyId = c.companyId "
 			+ "JOIN Industry i ON c.industry.industryId = i.industryId " + "WHERE jp.company.companyId = :companyId "
 			+ "AND (:status IS NULL OR jp.status = :status) "
 			+ "AND (:typeOfWork IS NULL OR jp.typeOfWork = :typeOfWork) "
 			+ "GROUP BY jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
-			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName ")
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName,  jp.isApprove ")
 //			+ "ORDER BY "
 //			+ "CASE WHEN :sortByCreateDate LIKE 'ASC' THEN jp.createDate END ASC, "
 //			+ "CASE WHEN :sortByCreateDate LIKE 'DESC' THEN jp.createDate END DESC, "
