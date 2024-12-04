@@ -162,7 +162,7 @@ export default function CompanyList() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 mt-8">
       <div className="flex justify-between items-center mb-4">
         <div className="flex justify-end items-center gap-4">
           <div className="relative">

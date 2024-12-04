@@ -49,6 +49,7 @@ export default function EduModal({
     ),
     startDate: Yup.date()
       .required("Ngày bắt đầu là bắt buộc.")
+      .max(new Date(), "Ngày bắt đầu không được trong tương lai.")
       .typeError("Ngày bắt đầu không hợp lệ."),
     endDate: Yup.date()
       .required("Ngày kết thúc là bắt buộc.")
@@ -58,6 +59,7 @@ export default function EduModal({
       .required("GPA là bắt buộc.")
       .typeError("GPA phải là một số."),
   });
+  
 
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
