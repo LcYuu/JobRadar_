@@ -1,6 +1,8 @@
 package com.job_portal.models;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -9,7 +11,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DailyStats {
-    private LocalDate date;
+    private LocalDateTime date;
     private long newUsers;
     private long newJobs;
 } 

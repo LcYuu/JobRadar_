@@ -9,6 +9,7 @@ import {
   Eye,
   MoreVertical,
   Pin,
+  MapPin,
 } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Link } from "react-router-dom";
@@ -61,14 +62,22 @@ export default function Dashboard_Employer() {
     <div className="p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-semibold">Chào mừng trở lại</h1>
+        <h1 className="text-2xl font-semibold text-purple-600">
+          Chào mừng trở lại
+        </h1>
         {/* <div className="flex items-center gap-4">
           <span className="text-gray-600">{currentDateRange}</span>
           <Button variant="primary">+ Đăng bài</Button>
         </div> */}
       </div>
 
-      <div className="bg-indigo-600 text-white p-6 rounded-lg mb-8 flex justify-between items-center">
+      <div
+        className="p-6 rounded-lg mb-8 flex justify-between items-center"
+        style={{
+          background: "linear-gradient(to right, #2193b0, #6dd5ed)",
+          color: "white",
+        }}
+      >
         <div>
           <h2 className="text-4xl font-bold mb-2 text-white">
             {countReview?.totalReviews ?? 0}
@@ -79,81 +88,95 @@ export default function Dashboard_Employer() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="p-6">
+        <Card
+          className="p-6"
+          style={{
+            background: "linear-gradient(to right, #ffe000, #799f0c)",
+            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+          }}
+        >
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-medium">Số công việc đang tuyển</h3>
             <span className="text-3xl font-bold">{jobs.length}</span>
           </div>
-          <p className="text-gray-600">công việc</p>
         </Card>
 
-        {/* <Card className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-medium">Lượt xem bài đăng</h3>
-            <Eye className="text-gray-400" />
-          </div>
-          <div className="text-3xl font-bold mb-2">{stats.totalViews}</div>
-          <p className="text-sm text-gray-600">
-            This Week <span className="text-green-500">{stats.viewsChange}</span>
-          </p>
-        </Card> */}
-
-        <Card className="p-6">
+        <Card
+          className="p-6"
+          style={{
+            background: "linear-gradient(to right, #c9d6ff, #e2e2e2)",
+            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+          }}
+        >
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-medium">Số lượng ứng tuyển</h3>
             <Users className="text-gray-400" />
           </div>
           <div className="text-3xl font-bold mb-2">{totalApplicationCount}</div>
-          {/* <p className="text-sm text-gray-600">
-            This Week <span className="text-red-500">{stats.applicationsChange}</span>
-          </p> */}
         </Card>
       </div>
 
       {/* Recent Jobs */}
       <div className="mb-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Các công việc đăng gần đây</h2>
-          {/* <Link to="/jobs" className="text-indigo-600 hover:underline">
-            Xem tất cả →
-          </Link> */}
+          <h2 className="text-xl font-semibold text-purple-600">Các công việc đăng gần đây</h2>
         </div>
 
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-4">
           {visibleJobs.map((job) => (
-            <Link
-             key={job.postId}
-             to={`/employer/jobs/${job.postId}`}  // Dẫn tới trang chi tiết công việc
-            className="block"  // Làm cho toàn bộ Card có thể click
-           >
-            <Card
-              key={job.postId}
-              className="p-4 bg-white shadow-lg rounded-lg"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  {/* <img src={job.logo} alt="" className="w-12 h-12 rounded-lg" /> */}
-                  <div>
-                    <h3 className="font-semibold text-gray-800">{job.title}</h3>
-                    <div className="flex items-center text-sm text-gray-600 space-x-2">
-                      <span>{job.location}</span>
-                      <span>•</span>
-                      <span>{job.typeOfWork}</span>
-                    </div>
-                    <div className="flex gap-2 mt-2">
-                      <span className="px-2 py-1 text-xs rounded-full bg-gray-100">
-                        {job.industryName}
-                      </span>
-                    </div>
+<Link
+  key={job.postId}
+  to={`/employer/jobs/${job.postId}`}
+  className="block"
+>
+  <Card className="p-4 bg-white shadow-lg rounded-lg hover:shadow-xl transition-transform transform hover:scale-105 group">
+    <div className="flex items-start justify-between">
+      <div className="flex gap-4">
+        {/* Job Details */}
+        <div className="flex flex-col">
+          <h3 className="font-semibold text-lg text-gray-900 group-hover:text-indigo-600 transition-colors">
+            {job.title}
+          </h3>
+          <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+            <MapPin className="w-4 h-4" />
+            <span>{job.location}</span>
+            <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+            <span>{job.typeOfWork}</span>
+          </div>
+          <div className="flex gap-2 mt-2">
+            <span className="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600 font-medium">
+              {job.industryName}
+            </span>
+            <span className="px-3 py-1 text-xs rounded-full bg-green-50 text-green-600 font-medium">
+              {job.salary ? `${job.salary.toLocaleString('vi-VN')} VNĐ` : 'Thương lượng'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Application Count & Status */}
+      <div className="flex flex-col items-end">
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <Users className="w-4 h-4" />
+          <span>{job.applicationCount} ứng viên</span>
+        </div>
+        <span
+          className={`mt-2 px-3 py-1 rounded-full text-xs font-medium ${
+            job.approve
+              ? 'bg-green-100 text-green-600'
+              : 'bg-yellow-100 text-yellow-600'
+          }`}
+        >
+          {job.approve ? 'Đã duyệt' : 'Chờ duyệt'}
+        </span>
+      </div>
+    </div>
+  </Card>
+</Link>
+
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-sm text-gray-600">
-                    {job.applicationCount} người đã ứng tuyển
-                  </div>
-                </div>
-              </div>
-            </Card>
+              </Card>
             </Link>
           ))}
         </div>

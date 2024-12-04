@@ -271,10 +271,9 @@ export const jobPostReducer = (state = initialState, action) => {
     case GET_ALL_ADMIN_JOBS_SUCCESS:
       return {
         ...state,
-        jobPost: action.payload.jobPost,
-        totalPages: action.payload.totalPages,
-        totalElements: action.payload.totalElements,
-        currentPage: action.payload.currentPage,
+        jobPost: action.payload.content,
+        totalPages: action.payload.page.totalPages,
+        totalElements: action.payload.page.totalElements,
         loading: false,
         error: null,
       };
