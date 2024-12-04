@@ -65,7 +65,7 @@ export default function AdminJobList() {
     return <div className="text-center py-8 text-red-500">{error}</div>;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-8">
       <div className="bg-white rounded-lg shadow">
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="font-semibold">
@@ -113,17 +113,17 @@ export default function AdminJobList() {
           </div>
         </div>
 
-        <table className="w-full">
+        <table className="w-full table-fixed">
           <thead className="bg-purple-600 text-white">
             <tr>
-              <th className="text-left p-4">Tiêu đề</th>
-              <th className="text-left p-4">Công ty</th>
-              <th className="text-left p-4">Địa điểm</th>
+              <th className="text-left p-4 w-80">Tiêu đề</th>
+              <th className="text-left p-4 w-64">Công ty</th>
+              <th className="text-left p-4 w-50">Địa điểm</th>
               <th className="text-left p-4">Trạng thái</th>
               <th className="text-left p-4">Tình trạng</th>
               <th className="text-left p-4">Ngày đăng</th>
               <th className="text-left p-4">Hạn nộp</th>
-              <th className="text-left p-4"></th>
+              <th className="text-left p-4">Action</th>
             </tr>
           </thead>
 
@@ -131,9 +131,15 @@ export default function AdminJobList() {
             {jobPost?.length > 0 ? (
               jobPost.map((job) => (
                 <tr key={job.jobPostId} className="border-b hover:bg-gray-50">
-                  <td className="p-4">{job.title}</td>
-                  <td className="p-4">{job.company?.companyName}</td>
-                  <td className="p-4">{job.city?.cityName}</td>
+                  <td className="p-4 truncate" title={job.title}>
+                    {job.title}
+                  </td>
+                  <td className="p-4 truncate" title={job.company?.companyName}>
+                    {job.company?.companyName}
+                  </td>
+                  <td className="p-4 truncate" title={job.city?.cityName}>
+                    {job.city?.cityName}
+                  </td>
                   <td className="p-4">
                     <span
                       className={`px-2 py-1 rounded-full text-xs ${
@@ -178,7 +184,9 @@ export default function AdminJobList() {
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuItem
-                          onClick={() => navigate(`/admin/jobs/${job.postId}`)}
+                          onClick={() =>
+                            navigate(`/admin/jobs/${job.jobPostId}`)
+                          }
                         >
                           Chi tiết
                         </DropdownMenuItem>
