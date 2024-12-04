@@ -150,8 +150,8 @@ export default function JobDetail() {
           <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
             {/* Left column */}
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4 w-full">
+              <div className="bg-white shadow-md rounded-lg p-5 flex items-center justify-between">
+                <div className="flex items-center space-x-4 w-full pr-7">
                   <img
                     src={postByPostId?.company.logo}
                     alt="Company Logo"
@@ -161,7 +161,7 @@ export default function JobDetail() {
                     <h1 className="text-2xl font-bold break-words">
                       {postByPostId?.title}
                     </h1>
-                    <p className="text-sm text-gray-500 break-words">
+                    <p className="text-sm text-gray-500 font-bold break-words">
                       {postByPostId?.company.companyName} •{" "}
                       {postByPostId?.location} • {postByPostId?.typeOfWork}
                     </p>
@@ -219,12 +219,13 @@ export default function JobDetail() {
                     oneApplyJob={oneApplyJob}
                   />
                 </section>
+                
               </div>
 
               {/* Thông báo dưới nút */}
               {oneApplyJob && (
                 <div className="flex items-center space-x-2 mt-4">
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-purple-600">
                     Đơn ứng tuyển đã được cập nhật vào lúc{" "}
                     {new Date(oneApplyJob.applyDate).toLocaleDateString(
                       "vi-VN",
@@ -240,7 +241,7 @@ export default function JobDetail() {
                       href={oneApplyJob.pathCV}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-indigo-600 hover:text-indigo-800 ml-4"
+                      className="text-black hover:text-purple-400 ml-4"
                     >
                       Xem CV đã nộp
                     </a>
