@@ -9,6 +9,7 @@ import {
   Eye,
   MoreVertical,
   Pin,
+  MapPin,
 } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Link } from "react-router-dom";
@@ -98,7 +99,6 @@ export default function Dashboard_Employer() {
             <h3 className="text-lg font-medium">Số công việc đang tuyển</h3>
             <span className="text-3xl font-bold">{jobs.length}</span>
           </div>
-          <p className="text-gray-600">công việc</p>
         </Card>
 
         <Card
@@ -119,48 +119,61 @@ export default function Dashboard_Employer() {
       {/* Recent Jobs */}
       <div className="mb-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-purple-600">
-            Các công việc đăng gần đây
-          </h2>
-          {/* <Link to="/jobs" className="text-indigo-600 hover:underline">
-            Xem tất cả →
-          </Link> */}
+          <h2 className="text-xl font-semibold text-purple-600">Các công việc đăng gần đây</h2>
         </div>
 
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-4">
           {visibleJobs.map((job) => (
-            <Link
-              key={job.postId}
-              to={`/employer/jobs/${job.postId}`} // Dẫn tới trang chi tiết công việc
-              className="block" // Làm cho toàn bộ Card có thể click
-            >
-              <Card
-                key={job.postId}
-                className="p-4 bg-white shadow-lg rounded-lg hover:shadow-xl transition-shadow group"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    {/* <img src={job.logo} alt="" className="w-12 h-12 rounded-lg" /> */}
-                    <div>
-                      <h3 className="font-semibold text-gray-800 group-hover:text-purple-600 transition-colors">
-                        {job.title}
-                      </h3>
-                      <div className="flex items-center text-sm text-gray-600 space-x-2">
-                        <span>{job.location}</span>
-                        <span>•</span>
-                        <span>{job.typeOfWork}</span>
-                      </div>
-                      <div className="flex gap-2 mt-2">
-                        <span className="px-2 py-1 text-xs rounded-full bg-gray-100">
-                          {job.industryName}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm text-gray-600">
-                      {job.applicationCount} người đã ứng tuyển
-                    </div>
+<Link
+  key={job.postId}
+  to={`/employer/jobs/${job.postId}`}
+  className="block"
+>
+  <Card className="p-4 bg-white shadow-lg rounded-lg hover:shadow-xl transition-transform transform hover:scale-105 group">
+    <div className="flex items-start justify-between">
+      <div className="flex gap-4">
+        {/* Job Details */}
+        <div className="flex flex-col">
+          <h3 className="font-semibold text-lg text-gray-900 group-hover:text-indigo-600 transition-colors">
+            {job.title}
+          </h3>
+          <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+            <MapPin className="w-4 h-4" />
+            <span>{job.location}</span>
+            <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+            <span>{job.typeOfWork}</span>
+          </div>
+          <div className="flex gap-2 mt-2">
+            <span className="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600 font-medium">
+              {job.industryName}
+            </span>
+            <span className="px-3 py-1 text-xs rounded-full bg-green-50 text-green-600 font-medium">
+              {job.salary ? `${job.salary.toLocaleString('vi-VN')} VNĐ` : 'Thương lượng'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Application Count & Status */}
+      <div className="flex flex-col items-end">
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <Users className="w-4 h-4" />
+          <span>{job.applicationCount} ứng viên</span>
+        </div>
+        <span
+          className={`mt-2 px-3 py-1 rounded-full text-xs font-medium ${
+            job.approve
+              ? 'bg-green-100 text-green-600'
+              : 'bg-yellow-100 text-yellow-600'
+          }`}
+        >
+          {job.approve ? 'Đã duyệt' : 'Chờ duyệt'}
+        </span>
+      </div>
+    </div>
+  </Card>
+</Link>
+
                   </div>
                 </div>
               </Card>

@@ -1,6 +1,7 @@
 package com.job_portal.controller;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,8 +122,8 @@ public class UserAccountController {
 	@PostMapping("/count-new-accounts-per-day")
 	public List<DailyAccountCount> countNewAccountsPerDay(@RequestParam String startDate,
 			@RequestParam String endDate) {
-		LocalDate start = LocalDate.parse(startDate);
-		LocalDate end = LocalDate.parse(endDate);
+		LocalDateTime start = LocalDateTime.parse(startDate);
+		LocalDateTime end = LocalDateTime.parse(endDate);
 
 		return userAccountService.getDailyAccountCounts(start, end);
 	}

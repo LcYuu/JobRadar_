@@ -79,7 +79,7 @@ public class JobPostServiceImpl implements IJobPostService {
 			throw new IllegalArgumentException("Company with ID " + companyId + " does not exist");
 		}
 		// Build the JobPost entity
-		JobPost jobPost = new JobPost();
+		JobPost jobPost = new JobPost(); 	
 		jobPost.setCreateDate(LocalDateTime.now());
 		jobPost.setExpireDate(jobPostDTO.getExpireDate());
 		jobPost.setTitle(jobPostDTO.getTitle());
@@ -341,22 +341,21 @@ public class JobPostServiceImpl implements IJobPostService {
 
 	}
 
-	public List<DailyJobCount> getDailyJobPostCounts(LocalDate startDate, LocalDate endDate) {
-		List<Object[]> results = jobPostRepository.countNewJobsPerDay(startDate, endDate);
-		List<DailyJobCount> dailyJobPostCounts = new ArrayList<>();
+	@Override
+	public List<DailyJobCount> getDailyJobPostCounts(LocalDateTime startDate, LocalDateTime endDate) {
+	    List<Object[]> results = jobPostRepository.countNewJobsPerDay(startDate, endDate);
+	    List<DailyJobCount> dailyJobPostCounts = new ArrayList<>();
 
-		for (Object[] result : results) {
-			// Xử lý kết quả từ native query
-			java.sql.Date sqlDate = (java.sql.Date) result[0];
-			LocalDate date = sqlDate.toLocalDate();
-			Long count = ((Number) result[1]).longValue();
+	    for (Object[] result : results) {
+	        String dateStr = (String) result[0];
+	        LocalDateTime date = LocalDateTime.parse(dateStr.substring(0, 26)); // Cắt đến microseconds
+	        Long count = ((Number) result[1]).longValue();
+	        
+	        dailyJobPostCounts.add(new DailyJobCount(date, count));
+	    }
 
-			System.out.println("Date: " + date + ", Count: " + count); // Debug log
+	    return dailyJobPostCounts;
 
-			dailyJobPostCounts.add(new DailyJobCount(date, count));
-		}
-
-		return dailyJobPostCounts;
 	}
 
 	@Override
@@ -457,10 +456,10 @@ public class JobPostServiceImpl implements IJobPostService {
 	}
 
 	@Override
-	public List<Map<String, Object>> getCompanyJobStats(UUID companyId, LocalDate startDate, LocalDate endDate) {
+	public List<Map<String, Object>> getCompanyJobStats(UUID companyId, LocalDateTime startDate, LocalDateTime endDate) {
 		List<Map<String, Object>> stats = new ArrayList<>();
-		LocalDate currentDate = startDate;
-
+		LocalDateTime currentDate = startDate;
+		
 		while (!currentDate.isAfter(endDate)) {
 			// Đếm số lượng job theo trạng thái
 			long totalJobs = jobPostRepository.countJobsByCompanyAndDateRange(companyId, currentDate, currentDate);

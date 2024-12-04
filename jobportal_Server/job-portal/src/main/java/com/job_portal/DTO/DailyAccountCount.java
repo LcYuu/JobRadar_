@@ -1,22 +1,23 @@
 package com.job_portal.DTO;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class DailyAccountCount {
-    private LocalDate registrationDate;
+    private LocalDateTime registrationDate;
     private Long count;
 
     // Constructor, Getters, and Setters
-    public DailyAccountCount(LocalDate registrationDate, Long count) {
+    public DailyAccountCount(LocalDateTime registrationDate, Long count) {
         this.registrationDate = registrationDate;
         this.count = count;
     }
 
-    public LocalDate getRegistrationDate() {
+    public LocalDateTime getRegistrationDate() {
         return registrationDate;
     }
 
-    public void setRegistrationDate(LocalDate registrationDate) {
+    public void setRegistrationDate(LocalDateTime registrationDate) {
         this.registrationDate = registrationDate;
     }
 
