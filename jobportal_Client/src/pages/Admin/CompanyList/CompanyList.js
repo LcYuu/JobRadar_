@@ -16,8 +16,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../ui/dropdown-menu";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
+import { getCompanyById } from '../../../redux/Company/company.action';
+import { getCompanyJobCounts } from '../../../redux/Company/company.action';
+import { toast } from 'react-hot-toast';
 import { Input } from "../../../ui/input";
+
 
 const formatDate = (dateString) => {
   if (!dateString) return "N/A";
@@ -143,6 +147,20 @@ export default function CompanyList() {
     setCurrentPage(0); // Reset về trang đầu khi thay đổi số lượng bản ghi mỗi trang
   };
 
+  // Thêm hàm handleViewDetail
+  const handleViewDetail = async (companyId) => {
+    try {
+      // Pre-fetch data trước khi navigate
+      await Promise.all([
+        dispatch(getCompanyById(companyId)),
+        dispatch(getCompanyJobCounts(companyId))
+      ]);
+      navigate(`/admin/companies/${companyId}`);
+    } catch (error) {
+      toast.error('Có lỗi xảy ra khi tải dữ liệu công ty');
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center mb-4">
@@ -265,17 +283,11 @@ export default function CompanyList() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() =>
-                            navigate(`/admin/companies/${company.companyId}`)
-                          }
-                        >
+                        <DropdownMenuItem onClick={() => handleViewDetail(company.companyId)}>
                           Chi tiết
                         </DropdownMenuItem>
-                        <DropdownMenuItem>Chỉnh sửa</DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
-                          Xóa
-                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600">Xóa</DropdownMenuItem>
+
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </td>

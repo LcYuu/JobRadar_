@@ -95,7 +95,6 @@ public class JobPostController {
 		List<JobPost> jobs = jobPostRepository.findAll();
 		return new ResponseEntity<>(jobs, HttpStatus.OK);
 	}
-
 	@GetMapping("/admin-get-all")
 	public ResponseEntity<Map<String, Object>> getAllJobs(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "12") int size, @RequestParam(required = false) String searchTerm,
@@ -121,6 +120,7 @@ public class JobPostController {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+
 
 	@GetMapping("/get-top8-lastest-job")
 	public ResponseEntity<List<JobPost>> getTop8LatestJobPosts() {
@@ -327,8 +327,8 @@ public class JobPostController {
 
 	@PostMapping("/count-new-jobs-per-day")
 	public List<DailyJobCount> countNewJobsPerDay(@RequestParam String startDate, @RequestParam String endDate) {
-		LocalDate start = LocalDate.parse(startDate);
-		LocalDate end = LocalDate.parse(endDate);
+		LocalDateTime start = LocalDateTime.parse(startDate);
+		LocalDateTime end = LocalDateTime.parse(endDate);
 
 		return jobPostService.getDailyJobPostCounts(start, end);
 	}
@@ -424,6 +424,7 @@ public class JobPostController {
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 		}
+
 	}
 
 	@GetMapping("/count-job-by-type")
@@ -510,9 +511,12 @@ public class JobPostController {
 
 	@GetMapping("/count-by-company/{companyId}")
 	public ResponseEntity<Long> countJobsByCompany(@PathVariable UUID companyId) {
-		long totalJobs = jobPostRepository
-				.countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(companyId, LocalDateTime.now());
-		return ResponseEntity.ok(totalJobs);
+	    long totalJobs = jobPostRepository.countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(
+	        companyId,
+	        LocalDateTime.now()
+	    );
+	    return ResponseEntity.ok(totalJobs);
+
 	}
 
 	@GetMapping("/top-5-job-lastest")
@@ -565,34 +569,38 @@ public class JobPostController {
 	}
 
 	@GetMapping("/stats/daily")
-	public ResponseEntity<?> getDailyStats(@RequestParam String startDate, @RequestParam String endDate) {
-		try {
-			LocalDate start = LocalDate.parse(startDate);
-			LocalDate end = LocalDate.parse(endDate);
+	public ResponseEntity<?> getDailyStats(
+	    @RequestParam String startDate,
+	    @RequestParam String endDate
+	) {
+	    try {
+	    	LocalDate start = LocalDate.parse(startDate);
+	    	LocalDate end = LocalDate.parse(endDate);
+	        
+	        List<Map<String, Object>> dailyStats = new ArrayList<>();
+	        
+	        LocalDate current = start;
+	        while (!current.isAfter(end)) {
+	            long newUsers = userAccountRepository.countByCreatedAtBetween(current, current.plusDays(1));
+	            long newJobs = jobPostRepository.countByCreatedAtBetween(current, current.plusDays(1));
+            
+            Map<String, Object> dayStat = new HashMap<>();
+            dayStat.put("date", current.toString());
+            dayStat.put("newUsers", newUsers);
+            dayStat.put("newJobs", newJobs);
+            
+            dailyStats.add(dayStat);
+            current = current.plusDays(1);
+        }
+        
+        return ResponseEntity.ok(dailyStats);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Error fetching daily stats: " + e.getMessage());
+    }
+}
 
-			List<Map<String, Object>> dailyStats = new ArrayList<>();
-
-			LocalDate current = start;
-			while (!current.isAfter(end)) {
-				long newUsers = userAccountRepository.countByCreatedAtBetween(current, current.plusDays(1));
-				long newJobs = jobPostRepository.countByCreatedAtBetween(current, current.plusDays(1));
-
-				Map<String, Object> dayStat = new HashMap<>();
-				dayStat.put("date", current.toString());
-				dayStat.put("newUsers", newUsers);
-				dayStat.put("newJobs", newJobs);
-
-				dailyStats.add(dayStat);
-				current = current.plusDays(1);
-			}
-
-			return ResponseEntity.ok(dailyStats);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Error fetching daily stats: " + e.getMessage());
-		}
-	}
 
 	@GetMapping("/company/{companyId}")
 	public ResponseEntity<Page<JobPost>> getJobsByCompany(@PathVariable UUID companyId,
@@ -629,18 +637,23 @@ public class JobPostController {
 	}
 
 	@GetMapping("/company/{companyId}/job-stats")
-	public ResponseEntity<?> getCompanyJobStats(@PathVariable UUID companyId, @RequestParam String startDate,
-			@RequestParam String endDate) {
-		try {
-			LocalDate start = LocalDate.parse(startDate);
-			LocalDate end = LocalDate.parse(endDate);
-			List<Map<String, Object>> stats = jobPostService.getCompanyJobStats(companyId, start, end);
-			return ResponseEntity.ok(stats);
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Error getting job stats: " + e.getMessage());
-		}
+
+	public ResponseEntity<?> getCompanyJobStats(
+	    @PathVariable UUID companyId,
+	    @RequestParam String startDate,
+	    @RequestParam String endDate
+	) {
+	    try {
+	    	LocalDateTime start = LocalDateTime.parse(startDate);
+	    	LocalDateTime end = LocalDateTime.parse(endDate);
+	        List<Map<String, Object>> stats = jobPostService.getCompanyJobStats(companyId, start, end);
+	        return ResponseEntity.ok(stats);
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("Error getting job stats: " + e.getMessage());
+	    }
 	}
+	
 
 	@GetMapping("/admin/all-jobs")
 	public ResponseEntity<Page<JobPost>> getAllJobsForAdmin(
@@ -651,6 +664,7 @@ public class JobPostController {
 		Pageable pageable = PageRequest.of(page, size);
 		Page<JobPost> jobPosts = jobPostRepository.searchJobPosts(title, status, isApprove, pageable);
 		return ResponseEntity.ok(jobPosts);
+
 	}
 
 	@GetMapping("/similar-jobs")
@@ -666,5 +680,4 @@ public class JobPostController {
 					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
 		}
 	}
-
 }

@@ -69,7 +69,22 @@ public class ApplyJobController {
 		boolean hasApplied = applyJobService.hasApplied(postId, user.get().getSeeker().getUserId());
 	    return ResponseEntity.ok(hasApplied); 
     }
-
+	@GetMapping("/candidate-apply/{userId}/{postId}")
+	public ResponseEntity<ApplyJobDTO> getCandidateApplyInfo(
+	    @PathVariable("userId") UUID userId,
+	    @PathVariable("postId") UUID postId) {
+	    
+	    Optional<ApplyJob> applyJob = applyJobRepository.findByPostIdAndUserId(postId, userId);
+	    
+	    if (applyJob.isPresent()) {
+	        ApplyJobDTO applyJobDTO = new ApplyJobDTO();
+	        applyJobDTO.setEmail(applyJob.get().getEmail());
+	        applyJobDTO.setDescription(applyJob.get().getDescription());
+	        return ResponseEntity.ok(applyJobDTO);
+	    }
+	    
+	    return ResponseEntity.notFound().build();
+	}
 	@GetMapping("/find/{postId}")
 	public ResponseEntity<Optional<ApplyJob>> findApplyJobById(
 			@PathVariable("postId") UUID postId,
