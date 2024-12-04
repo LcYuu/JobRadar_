@@ -124,56 +124,49 @@ export default function Dashboard_Employer() {
 
         <div className="grid grid-cols-1 gap-4">
           {visibleJobs.map((job) => (
-<Link
-  key={job.postId}
-  to={`/employer/jobs/${job.postId}`}
-  className="block"
->
-  <Card className="p-4 bg-white shadow-lg rounded-lg hover:shadow-xl transition-transform transform hover:scale-105 group">
-    <div className="flex items-start justify-between">
-      <div className="flex gap-4">
-        {/* Job Details */}
-        <div className="flex flex-col">
-          <h3 className="font-semibold text-lg text-gray-900 group-hover:text-indigo-600 transition-colors">
-            {job.title}
-          </h3>
-          <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-            <MapPin className="w-4 h-4" />
-            <span>{job.location}</span>
-            <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-            <span>{job.typeOfWork}</span>
-          </div>
-          <div className="flex gap-2 mt-2">
-            <span className="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600 font-medium">
-              {job.industryName}
-            </span>
-            <span className="px-3 py-1 text-xs rounded-full bg-green-50 text-green-600 font-medium">
-              {job.salary ? `${job.salary.toLocaleString('vi-VN')} VNĐ` : 'Thương lượng'}
-            </span>
-          </div>
-        </div>
-      </div>
+            <Link
+              key={job.postId}
+              to={`/employer/jobs/${job.postId}`}
+              className="block"
+            >
+              <Card className="p-4 bg-white shadow-lg rounded-lg hover:shadow-xl transition-transform transform hover:scale-105 group">
+                <div className="flex items-start justify-between">
+                  <div className="flex gap-4">
+                    <div className="flex flex-col">
+                      <h3 className="font-semibold text-lg text-gray-900 group-hover:text-indigo-600 transition-colors">
+                        {job.title}
+                      </h3>
+                      <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                        <MapPin className="w-4 h-4" />
+                        <span>{job.location}</span>
+                        <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+                        <span>{job.typeOfWork}</span>
+                      </div>
+                      <div className="flex gap-2 mt-2">
+                        <span className="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600 font-medium">
+                          {job.industryName}
+                        </span>
+                        <span className="px-3 py-1 text-xs rounded-full bg-green-50 text-green-600 font-medium">
+                          {job.salary ? `${job.salary.toLocaleString('vi-VN')} VNĐ` : 'Thương lượng'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
 
-      {/* Application Count & Status */}
-      <div className="flex flex-col items-end">
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Users className="w-4 h-4" />
-          <span>{job.applicationCount} ứng viên</span>
-        </div>
-        <span
-          className={`mt-2 px-3 py-1 rounded-full text-xs font-medium ${
-            job.approve
-              ? 'bg-green-100 text-green-600'
-              : 'bg-yellow-100 text-yellow-600'
-          }`}
-        >
-          {job.approve ? 'Đã duyệt' : 'Chờ duyệt'}
-        </span>
-      </div>
-    </div>
-  </Card>
-</Link>
-
+                  <div className="flex flex-col items-end">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Users className="w-4 h-4" />
+                      <span>{job.applicationCount} ứng viên</span>
+                    </div>
+                    <span
+                      className={`mt-2 px-3 py-1 rounded-full text-xs font-medium ${
+                        job.approve
+                          ? 'bg-green-100 text-green-600'
+                          : 'bg-yellow-100 text-yellow-600'
+                      }`}
+                    >
+                      {job.approve ? 'Đã duyệt' : 'Chờ duyệt'}
+                    </span>
                   </div>
                 </div>
               </Card>

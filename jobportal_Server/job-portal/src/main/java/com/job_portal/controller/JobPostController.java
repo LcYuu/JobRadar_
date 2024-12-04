@@ -680,13 +680,7 @@ public class JobPostController {
 					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
 		}
 	}
-	@GetMapping("/admin/all-jobs")
-	public ResponseEntity<Page<JobPost>> getAllJobsForAdmin(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "5") int size) {
-		Pageable pageable = PageRequest.of(page, size);
-		Page<JobPost> jobs = jobPostRepository.findAll(pageable);
-		return new ResponseEntity<>(jobs, HttpStatus.OK);
-	}
+	
 
 
 }

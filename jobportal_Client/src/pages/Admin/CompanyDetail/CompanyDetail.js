@@ -20,17 +20,15 @@ import {
   Phone,
   Mail,
   Clock,
-
-  ArrowLeft
+  ArrowLeft,
+  Code2,
+  Banknote,
 } from 'lucide-react';
 import { getCompanyById, updateCompanyStatus, deleteCompany, getCompanyJobCounts ,getCompanyJobStats } from '../../../redux/Company/company.action';
 import { toast } from 'react-toastify';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "../../../ui/dialog";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { format } from 'date-fns';
-  Code2,
-  Banknote,
-} from "lucide-react";
 import {
   getCompanyById,
   updateCompanyStatus,
