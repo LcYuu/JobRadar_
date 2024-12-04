@@ -19,6 +19,7 @@ import {  loginAction } from "../../redux/Auth/auth.action";
 import { isStrongPassword } from "../../utils/passwordValidator";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import axios from "axios";
+import Swal from 'sweetalert2';
 
 // Update Modal component
 const Modal = ({ isOpen, onClose, children }) => {
@@ -59,32 +60,46 @@ export default function SignInForm() {
 
     try {
       const response = await dispatch(loginAction({ email, password }));
-      console.log("Login response:", response);
+      
       if (response && response.success) {
         const user = response.user;
-        setLoginStatus("success");
-        setIsModalOpen(true);
+        
+        // Show success message
+        await Swal.fire({
+          icon: 'success',
+          title: 'Đăng nhập thành công!',
+          showConfirmButton: false,
+          timer: 1500
+        });
+
         // Redirect based on user role
-        if (user?.userType?.userTypeId === 3) { 
+        if (user?.userType?.userTypeId === 3) {
           navigate('/employer/account-management/dashboard');
-      } else if (user?.userType?.userTypeId === 1) { 
+        } else if (user?.userType?.userTypeId === 1) {
           navigate('/admin/dashboard');
-      } 
-        setIsLoading(false);
-        // Wait for 2 seconds then redirect
-        setTimeout(() => {
-          setIsModalOpen(false);
-        }, 500);
+        } else {
+          navigate("/");
+        }
 
       } else {
-        setLoginStatus("failure");
-        setIsModalOpen(true);
-        setError(response?.error || "Đăng nhập thất bại");
+        // Show detailed error message
+        await Swal.fire({
+          icon: 'error',
+          title: 'Đăng nhập thất bại',
+          text: response?.error || 'Có lỗi xảy ra khi đăng nhập',
+          confirmButtonText: 'Thử lại',
+          confirmButtonColor: '#3085d6'
+        });
       }
     } catch (error) {
-      setLoginStatus("failure");
-      setIsModalOpen(true);
-      setError("Đã xảy ra lỗi, vui lòng thử lại");
+      // Show unexpected error message
+      await Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: error.message || 'Đã xảy ra lỗi không mong muốn',
+        confirmButtonText: 'Đóng',
+        confirmButtonColor: '#3085d6'
+      });
     } finally {
       setIsLoading(false);
     }
