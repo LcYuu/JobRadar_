@@ -60,19 +60,11 @@ export default function SignInForm() {
 
     try {
       const response = await dispatch(loginAction({ email, password }));
-      
+    
       if (response && response.success) {
         const user = response.user;
-        
-        // Show success message
-        await Swal.fire({
-          icon: 'success',
-          title: 'Đăng nhập thành công!',
-          showConfirmButton: false,
-          timer: 1500
-        });
-
-        // Redirect based on user role
+    
+        // Điều hướng trước
         if (user?.userType?.userTypeId === 3) {
           navigate('/employer/account-management/dashboard');
         } else if (user?.userType?.userTypeId === 1) {
@@ -80,9 +72,18 @@ export default function SignInForm() {
         } else {
           navigate("/");
         }
-
+    
+        // Hiển thị thông báo sau khi chuyển hướng
+        setTimeout(async () => {
+          await Swal.fire({
+            icon: 'success',
+            title: 'Đăng nhập thành công!',
+            showConfirmButton: false,
+            timer: 1500
+          });
+        }, 500); // Trễ một chút để đảm bảo điều hướng đã xảy ra
       } else {
-        // Show detailed error message
+        // Hiển thị lỗi nếu đăng nhập thất bại
         await Swal.fire({
           icon: 'error',
           title: 'Đăng nhập thất bại',
@@ -92,7 +93,7 @@ export default function SignInForm() {
         });
       }
     } catch (error) {
-      // Show unexpected error message
+      // Xử lý lỗi không mong muốn
       await Swal.fire({
         icon: 'error',
         title: 'Lỗi',
@@ -103,8 +104,7 @@ export default function SignInForm() {
     } finally {
       setIsLoading(false);
     }
-  };
-
+  }
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setLoginStatus(null);
