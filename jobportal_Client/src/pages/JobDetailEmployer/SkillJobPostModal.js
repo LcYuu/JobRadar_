@@ -9,20 +9,21 @@ import {
   getSeekerByUser,
   updateSeekerAction,
 } from "../../redux/Seeker/seeker.action";
+import { getDetailJobById, updateJob } from "../../redux/JobPost/jobPost.action";
 
-const SkillPostModal = ({ open, handleClose }) => {
+const SkillPostModal = ({ open, handleClose, postId }) => {
   const dispatch = useDispatch();
   const { skills } = useSelector((store) => store.skill);
-  const { seeker } = useSelector((store) => store.seeker);
-  const [selectedSkills, setSelectedSkills] = useState(seeker.skills || []);
+  const { detailJob } = useSelector((store) => store.jobPost);
+  const [selectedSkills, setSelectedSkills] = useState(detailJob?.skills || []);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (open && seeker.skills) {
+    if (open && detailJob?.skills) {
       // Giữ toàn bộ thông tin kỹ năng từ danh sách của seeker
-      setSelectedSkills(seeker.skills);
+      setSelectedSkills(detailJob?.skills);
     }
-  }, [open, seeker.skills]);
+  }, [open, detailJob?.skills]);
 
   // Thêm useEffect để theo dõi sự thay đổi của selectedSkills
   // useEffect(() => {
@@ -35,9 +36,9 @@ const SkillPostModal = ({ open, handleClose }) => {
 
   const handleSaveSkills = async () => {
     try {
-      const skillIds = selectedSkills.map((skill) => skill.skillId);
-      await dispatch(updateSeekerAction({ skillIds }));
-      dispatch(getSeekerByUser()); // Sau khi cập nhật seeker, tải lại dữ liệu seeker
+      const skillIds = selectedSkills.map((skill) => skill?.skillId);
+      await dispatch(updateJob(postId, { skillIds }));
+      dispatch(getDetailJobById(postId));// Sau khi cập nhật seeker, tải lại dữ liệu seeker
     } catch (error) {
       console.error("Error updating skills:", error);
     } finally {

@@ -328,12 +328,20 @@ const ApplicantDetail = () => {
                                   {/* Ngày bắt đầu và kết thúc */}
 
                                   <div className="text-sm text-gray-600">
-                                    <strong>Ngày bắt đầu:</strong>{" "}
-                                    {exp.startDate}
+                                    <strong>Ngày bắt đầu: </strong>
+                                    {exp.startDate
+                                      ? new Date(
+                                          exp.startDate
+                                        ).toLocaleDateString("vi-VN")
+                                      : "Không có"}
                                   </div>
                                   <div className="text-sm text-gray-600">
-                                    <strong>Ngày kết thúc:</strong>{" "}
-                                    {exp.endDate || "Hiện tại"}
+                                    <strong>Ngày kết thúc: </strong>
+                                    {exp.endDate
+                                      ? new Date(
+                                          exp.endDate
+                                        ).toLocaleDateString("vi-VN")
+                                      : "Hiện tại"}
                                   </div>
 
                                   {/* Mô tả */}
@@ -374,12 +382,20 @@ const ApplicantDetail = () => {
 
                                   {/* Ngày bắt đầu và kết thúc */}
                                   <div className="text-sm text-gray-600">
-                                    <strong>Ngày bắt đầu:</strong>{" "}
-                                    {edu?.startDate}
+                                    <strong>Ngày bắt đầu: </strong>
+                                    {edu?.startDate
+                                      ? new Date(
+                                          edu.startDate
+                                        ).toLocaleDateString("vi-VN")
+                                      : "Không có"}
                                   </div>
                                   <div className="text-sm text-gray-600">
-                                    <strong>Ngày kết thúc:</strong>{" "}
-                                    {edu?.endDate || "Hiện tại"}
+                                    <strong>Ngày kết thúc: </strong>
+                                    {edu?.endDate
+                                      ? new Date(
+                                          edu.endDate
+                                        ).toLocaleDateString("vi-VN")
+                                      : "Hiện tại"}
                                   </div>
 
                                   {/* Major */}
