@@ -365,6 +365,7 @@ export default function MyProfile() {
     let tempErrors = {
       emailContact: "",
       phoneNumber: "",
+      dateOfBirth: "",
     };
     let isValid = true;
 
@@ -380,6 +381,28 @@ export default function MyProfile() {
     if (formData.phoneNumber && !phoneRegex.test(formData.phoneNumber)) {
       tempErrors.phoneNumber = "Số điện thoại không hợp lệ";
       isValid = false;
+    }
+
+    // Validate date of birth (must be at least 18 years old)
+    if (formData.dateOfBirth) {
+      const today = new Date();
+      const birthDate = new Date(formData.dateOfBirth);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDifference = today.getMonth() - birthDate.getMonth();
+
+      // Adjust age calculation if birthday hasn't occurred yet this year
+      if (
+        monthDifference < 0 ||
+        (monthDifference === 0 && today.getDate() < birthDate.getDate())
+      ) {
+        age--;
+      }
+
+      // Nếu tuổi nhỏ hơn 18 thì báo lỗi, nếu bằng 18 tuổi (hoặc lớn hơn) thì tính là đủ
+      if (age < 18) {
+        tempErrors.dateOfBirth = "Bạn phải đủ 18 tuổi";
+        isValid = false;
+      }
     }
 
     setErrors(tempErrors);
@@ -873,8 +896,15 @@ export default function MyProfile() {
                       name="dateOfBirth"
                       value={formData.dateOfBirth}
                       onChange={handleChange}
-                      className="border p-2 w-full"
+                      className={`border p-2 w-full ${
+                        errors.dateOfBirth ? "border-red-500" : ""
+                      }`}
                     />
+                    {errors.dateOfBirth && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.dateOfBirth}
+                      </p>
+                    )}
                   </div>
                 ) : (
                   seeker?.dateOfBirth && (
