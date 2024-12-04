@@ -72,7 +72,7 @@ export default function UserList() {
     return <div className="text-center py-8 text-red-500">{error}</div>;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-8">
       <div className="flex justify-between items-center mb-4">
         <div className="text-sm text-gray-600">
           Tổng số người dùng: {totalElements || 0}
@@ -120,14 +120,14 @@ export default function UserList() {
         <table className="w-full table-fixed">
           <thead className="bg-purple-600 text-white text-sm">
             <tr>
-              <th className="text-left p-4">Avatar</th>
-              <th className="text-left p-4">Tên</th>
-              <th className="text-left p-4">Email</th>
+              <th className="text-left p-4 w-24">Avatar</th>
+              <th className="text-left p-4 w-80">Tên</th>
+              <th className="text-left p-4 w-64">Email</th>
               <th className="text-left p-4">Loại tài khoản</th>
               <th className="text-left p-4">Trạng thái tài khoản</th>
               <th className="text-left p-4">Ngày tham gia</th>
               <th className="text-left p-4">Lần đăng nhập cuối</th>
-              <th className="text-left p-4"></th>
+              <th className="text-left p-4">Action</th>
             </tr>
           </thead>
 
@@ -135,7 +135,7 @@ export default function UserList() {
             {users && users.length > 0 ? (
               users.map((user) => (
                 <tr key={user.userId} className="border-b hover:bg-gray-50">
-                  <td className="p-4">
+                  <td className="p-4 w-24">
                     <div className="group relative">
                       {user.avatar ? (
                         <img
@@ -155,9 +155,16 @@ export default function UserList() {
                       </div>
                     </div>
                   </td>
-                  <td className="p-4 truncate">{user.userName}</td>
-                  <td className="p-4 truncate">{user.email}</td>
-                  <td className="p-4 truncate">
+                  <td className="p-4 truncate" title={user.userName}>
+                    {user.userName}
+                  </td>
+                  <td className="p-4 truncate" title={user.email}>
+                    {user.email}
+                  </td>
+                  <td
+                    className="p-4 truncate"
+                    title={user.userType.user_type_name}
+                  >
                     <span className="px-2 py-1 rounded-full">
                       {user.userType.user_type_name}
                     </span>
@@ -203,9 +210,7 @@ export default function UserList() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                        // onClick={() => handleToggleStatus(user)}
-                        >
+                        <DropdownMenuItem>
                           {user.active ? "Khóa tài khoản" : "Mở khóa tài khoản"}
                         </DropdownMenuItem>
                         <DropdownMenuItem

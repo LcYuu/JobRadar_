@@ -45,7 +45,10 @@ export default function ExpModal({
     description: Yup.string()
       .required("Vui lòng nhập mô tả công việc")
       .min(10, "Mô tả công việc phải có ít nhất 10 ký tự"),
-    startDate: Yup.date().required("Vui lòng chọn ngày bắt đầu"),
+    startDate: Yup.date()
+      .required("Ngày bắt đầu là bắt buộc.")
+      .max(new Date(), "Ngày bắt đầu không được trong tương lai.")
+      .typeError("Ngày bắt đầu không hợp lệ."),
     endDate: Yup.date()
       .required("Vui lòng chọn ngày kết thúc")
       .min(Yup.ref("startDate"), "Ngày kết thúc phải sau ngày bắt đầu"),
@@ -97,7 +100,9 @@ export default function ExpModal({
                 <CloseIcon />
               </IconButton>
               <h2 className="text-xl mt-6 font-semibold text-gray-800">
-                {editingExperienceId ? "Chỉnh sửa kinh nghiệm" : "Tạo kinh nghiệm"}
+                {editingExperienceId
+                  ? "Chỉnh sửa kinh nghiệm"
+                  : "Tạo kinh nghiệm"}
               </h2>
             </div>
 
