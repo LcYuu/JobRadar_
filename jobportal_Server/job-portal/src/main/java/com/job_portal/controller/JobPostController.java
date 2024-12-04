@@ -87,35 +87,7 @@ public class JobPostController {
 		List<JobPost> jobs = jobPostRepository.findAll();
 		return new ResponseEntity<>(jobs, HttpStatus.OK);
 	}
-	@GetMapping("/admin-get-all")
-	public ResponseEntity<Map<String, Object>> getAllJobs(
-	    @RequestParam(defaultValue = "0") int page,
-	    @RequestParam(defaultValue = "12") int size,
-	    @RequestParam(required = false) String searchTerm,
-	    @RequestParam(required = false, defaultValue = "Open") String status
-	) {
-	    try {
-	        Pageable paging = PageRequest.of(page, size);
-	        Page<JobPost> pageJobs;
-
-	        if (searchTerm != null && !searchTerm.isEmpty()) {
-	            pageJobs = jobPostRepository.findByTitleContainingAndStatusAndIsApproveTrue(
-	                searchTerm, status, paging);
-	        } else {
-	            pageJobs = jobPostRepository.findByStatusAndIsApproveTrue(status, paging);
-	        }
-
-	        Map<String, Object> response = new HashMap<>();
-	        response.put("content", pageJobs.getContent());
-	        response.put("currentPage", pageJobs.getNumber());
-	        response.put("totalElements", pageJobs.getTotalElements());
-	        response.put("totalPages", pageJobs.getTotalPages());
-
-	        return new ResponseEntity<>(response, HttpStatus.OK);
-	    } catch (Exception e) {
-	        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-	    }
-	}
+	
 	
 	@GetMapping("/get-top8-lastest-job")
 	public ResponseEntity<List<JobPost>> getTop8LatestJobPosts() {
@@ -303,8 +275,8 @@ public class JobPostController {
 
 	@PostMapping("/count-new-jobs-per-day")
 	public List<DailyJobCount> countNewJobsPerDay(@RequestParam String startDate, @RequestParam String endDate) {
-		LocalDate start = LocalDate.parse(startDate);
-		LocalDate end = LocalDate.parse(endDate);
+		LocalDateTime start = LocalDateTime.parse(startDate);
+		LocalDateTime end = LocalDateTime.parse(endDate);
 
 		return jobPostService.getDailyJobPostCounts(start, end);
 	}
@@ -363,7 +335,7 @@ public class JobPostController {
 	            String createDateStr = jobNode.get("createDate").asText(null);
 	            if (createDateStr != null && !createDateStr.isEmpty()) {
 	                try {
-	                    job.setCreateDate(LocalDate.parse(createDateStr, formatter));
+	                    job.setCreateDate(LocalDateTime.parse(createDateStr, formatter));
 	                } catch (Exception e) {
 	                    System.out.println("Error parsing createDate: " + createDateStr + " - " + e.getMessage());
 	                }
@@ -373,7 +345,7 @@ public class JobPostController {
 	            String expireDateStr = jobNode.get("expireDate").asText(null);
 	            if (expireDateStr != null && !expireDateStr.isEmpty()) {
 	                try {
-	                    job.setExpireDate(LocalDate.parse(expireDateStr, formatter));
+	                    job.setExpireDate(LocalDateTime.parse(expireDateStr, formatter));
 	                } catch (Exception e) {
 	                    System.out.println("Error parsing expireDate: " + expireDateStr + " - " + e.getMessage());
 	                }
@@ -453,7 +425,7 @@ public class JobPostController {
 	public ResponseEntity<Long> countJobsByCompany(@PathVariable UUID companyId) {
 	    long totalJobs = jobPostRepository.countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(
 	        companyId,
-	        LocalDate.now()
+	        LocalDateTime.now()
 	    );
 	    return ResponseEntity.ok(totalJobs);
 	}
@@ -512,8 +484,8 @@ public class JobPostController {
 	    @RequestParam String endDate
 	) {
 	    try {
-	        LocalDate start = LocalDate.parse(startDate);
-	        LocalDate end = LocalDate.parse(endDate);
+	    	LocalDate start = LocalDate.parse(startDate);
+	    	LocalDate end = LocalDate.parse(endDate);
 	        
 	        List<Map<String, Object>> dailyStats = new ArrayList<>();
 	        
@@ -590,8 +562,8 @@ public class JobPostController {
 	    @RequestParam String endDate
 	) {
 	    try {
-	        LocalDate start = LocalDate.parse(startDate);
-	        LocalDate end = LocalDate.parse(endDate);
+	    	LocalDateTime start = LocalDateTime.parse(startDate);
+	    	LocalDateTime end = LocalDateTime.parse(endDate);
 	        List<Map<String, Object>> stats = jobPostService.getCompanyJobStats(companyId, start, end);
 	        return ResponseEntity.ok(stats);
 	    } catch (Exception e) {
@@ -599,14 +571,30 @@ public class JobPostController {
 	                .body("Error getting job stats: " + e.getMessage());
 	    }
 	}
-	@GetMapping("/admin/all-jobs")
-	public ResponseEntity<Page<JobPost>> getAllJobsForAdmin(
-	    @RequestParam(defaultValue = "0") int page,
-	    @RequestParam(defaultValue = "5") int size
-	) {
-	    Pageable pageable = PageRequest.of(page, size);
-	    Page<JobPost> jobs = jobPostRepository.findAll(pageable);
-	    return new ResponseEntity<>(jobs, HttpStatus.OK);
+	@GetMapping("/admin-get-all")
+	public ResponseEntity<Map<String, Object>> getAllJobs(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "12") int size, @RequestParam(required = false) String searchTerm,
+			@RequestParam(required = false, defaultValue = "Open") String status) {
+		try {
+			Pageable paging = PageRequest.of(page, size);
+			Page<JobPost> pageJobs;
+
+			if (searchTerm != null && !searchTerm.isEmpty()) {
+				pageJobs = jobPostRepository.findByTitleContainingAndStatusAndIsApproveTrue(searchTerm, status, paging);
+			} else {
+				pageJobs = jobPostRepository.findByStatusAndIsApproveTrue(status, paging);
+			}
+
+			Map<String, Object> response = new HashMap<>();
+			response.put("content", pageJobs.getContent());
+			response.put("currentPage", pageJobs.getNumber());
+			response.put("totalElements", pageJobs.getTotalElements());
+			response.put("totalPages", pageJobs.getTotalPages());
+
+			return new ResponseEntity<>(response, HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@GetMapping("/similar-jobs")
@@ -624,5 +612,13 @@ public class JobPostController {
 	                .body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
 	    }
 	}
+	@GetMapping("/admin/all-jobs")
+	public ResponseEntity<Page<JobPost>> getAllJobsForAdmin(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "5") int size) {
+		Pageable pageable = PageRequest.of(page, size);
+		Page<JobPost> jobs = jobPostRepository.findAll(pageable);
+		return new ResponseEntity<>(jobs, HttpStatus.OK);
+	}
+
 
 }

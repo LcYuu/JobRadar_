@@ -29,7 +29,7 @@ public interface IJobPostService {
 //	public List<JobPost> findBySalaryBetween(Long minSalary, Long maxSalary) throws AllExceptions;
 	public boolean approveJob(UUID postId);
 	public JobPost searchJobByPostId(UUID postId) throws AllExceptions;
-	public List<DailyJobCount> getDailyJobPostCounts(LocalDate startDate, LocalDate endDate);
+	public List<DailyJobCount> getDailyJobPostCounts(LocalDateTime startDate, LocalDateTime endDate);
 	public Page<JobPost>findByIsApprove(Pageable pageable);
 	public void exportJobPostToCSV(String filePath) throws IOException;
 	public List<JobPost> getTop8LatestJobPosts();
@@ -40,6 +40,6 @@ public interface IJobPostService {
 	public Page<JobPost> findJobsByCompany(UUID companyId, Pageable pageable);
 	public Page<JobPost> findApprovedJobsByCompany(UUID companyId, Pageable pageable);
 	public Map<String, Long> countAllJobsByCompany(UUID companyId);
-	public List<Map<String, Object>> getCompanyJobStats(UUID companyId, LocalDate startDate, LocalDate endDate);
+	public List<Map<String, Object>> getCompanyJobStats(UUID companyId, LocalDateTime startDate, LocalDateTime endDate);
 	List<JobPost> getSimilarJobsByIndustry(Integer industryId, UUID jobPostId);
 }

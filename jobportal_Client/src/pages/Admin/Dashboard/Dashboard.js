@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from "../../../ui/card";
+import { Button } from '../../../ui/button';
 import { useDispatch, useSelector } from 'react-redux';
 import { Users, Building2, FileText, TrendingUp, Calendar } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -9,14 +10,17 @@ import {
   GET_DAILY_STATS_REQUEST,
   GET_DAILY_STATS_SUCCESS 
 } from '../../../redux/Stats/stats.actionType';
+import { useNavigate } from 'react-router-dom';
 
 export default function AdminDashboard() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { totalUsers, totalCompanies, totalJobs, activeJobs, dailyStats, loading, error } = useSelector((state) => state.stats);
   const [chartDateRange, setChartDateRange] = useState(() => {
     const end = new Date();
     const start = new Date();
     start.setDate(start.getDate() - 7);
+    
     return {
       startDate: start.toISOString().split('T')[0],
       endDate: end.toISOString().split('T')[0]
@@ -33,7 +37,7 @@ export default function AdminDashboard() {
       ...prev,
       [name]: value
     }));
-    setDateError(''); // Clear previous errors
+    setDateError('');
   };
 
   useEffect(() => {
@@ -70,45 +74,33 @@ export default function AdminDashboard() {
   }, [dailyStats]);
 
   const chartData = React.useMemo(() => {
-    if (!dailyStats || !Array.isArray(dailyStats)) {
-      console.log('Invalid dailyStats:', dailyStats);
-      return [];
-    }
+    if (!dailyStats || !Array.isArray(dailyStats)) return [];
     
     return dailyStats.map(stat => {
-      try {
-        if (!stat.date) {
-          console.error('Missing date in stat:', stat);
-          return null;
-        }
+        try {
+            if (!stat.date) return null;
 
-        const date = new Date(stat.date);
-        if (isNaN(date.getTime())) {
-          console.error('Invalid date:', stat.date);
-          return null;
+            const date = new Date(stat.date);
+            return {
+                name: date.toLocaleDateString('vi-VN', { 
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric'
+                }),
+                fullDate: date.toLocaleDateString('vi-VN', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                }),
+                users: Number(stat.newUsers) || 0,
+                jobs: Number(stat.newJobs) || 0
+            };
+        } catch (error) {
+            console.error('Error processing stat:', stat, error);
+            return null;
         }
-
-        return {
-          name: date.toLocaleDateString('vi-VN', { 
-            month: 'numeric',
-            day: 'numeric'
-          }),
-          fullDate: date.toLocaleDateString('vi-VN', {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'numeric',
-            year: 'numeric'
-          }),
-          users: Number(stat.newUsers) || 0,
-          jobs: Number(stat.newJobs) || 0
-        };
-      } catch (error) {
-        console.error('Error processing stat:', stat, error);
-        return null;
-      }
-    })
-    .filter(Boolean)
-    .sort((a, b) => new Date(a.fullDate) - new Date(b.fullDate));
+    }).filter(Boolean);
   }, [dailyStats]);
 
   const handlePeriodFilter = (period) => {
@@ -197,7 +189,7 @@ export default function AdminDashboard() {
                   name="startDate"
                   value={chartDateRange.startDate}
                   onChange={handleChartDateChange}
-                  className="border-none focus:outline-none"
+                  className="border rounded p-1"
                 />
                 <span>-</span>
                 <input
@@ -205,7 +197,7 @@ export default function AdminDashboard() {
                   name="endDate"
                   value={chartDateRange.endDate}
                   onChange={handleChartDateChange}
-                  className="border-none focus:outline-none"
+                  className="border rounded p-1"
                 />
               </div>
               <div className="flex gap-2">
@@ -310,6 +302,10 @@ export default function AdminDashboard() {
             )}
           </div>
         </Card>
+
+        <Button onClick={() => navigate('/admin/survey-statistics')} className="mt-4">
+          Xem Thống Kê Khảo Sát
+        </Button>
       </div>
     </div>
   );

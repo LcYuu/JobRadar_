@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,8 +17,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class JobPostDTO {
-	private LocalDate createDate;
-	private LocalDate expireDate;
+	private LocalDateTime createDate;
+	@JsonFormat(pattern = "yyyy-MM-dd['T'HH:mm:ss[.SSS][.SS][.S]]")
+	private LocalDateTime expireDate;
 	private String title;
 	private String description;
 	private String benefit;

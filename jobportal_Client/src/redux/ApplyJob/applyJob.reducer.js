@@ -8,6 +8,7 @@ import {
   GET_ONE_APPLY_JOB_SUCCESS,
   UPDATE_APPLY_JOB_SUCCESS,
   UPDATE_APPROVE_SUCCESS,
+  GET_CANDIDATE_APPLY_INFO_SUCCESS,
 } from "./applyJob.actionType";
 
 const initialState = {
@@ -21,6 +22,7 @@ const initialState = {
   hasApplied: null,
   applyJobByCompany: [],
   approveApply: null,
+  candidateApplyInfo: null,
 };
 
 export const applyJobReducer = (state = initialState, action) => {
@@ -82,6 +84,12 @@ export const applyJobReducer = (state = initialState, action) => {
       };
     case GET_APPLY_JOB_BY_USER_FAILURE:
       return { ...state, loading: false, error: action.payload };
+    case GET_CANDIDATE_APPLY_INFO_SUCCESS:
+      return {
+        ...state,
+        candidateApplyInfo: action.payload,
+        loading: false,
+      };
 
     default:
       return state;

@@ -118,6 +118,7 @@ export const getCandidateProfile = (userId, postId) => async (dispatch) => {
     dispatch({
       type: GET_CANDIDATE_PROFILE_SUCCESS,
       payload: response.data, // Gửi dữ liệu về store
+
     });
   } catch (error) {
     dispatch({
