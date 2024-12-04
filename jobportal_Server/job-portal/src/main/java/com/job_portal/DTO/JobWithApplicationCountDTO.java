@@ -26,4 +26,5 @@ public class JobWithApplicationCountDTO {
 	private Long applicationCount;
 	private String status;
 	private String industryName; 
+	private boolean isApprove;
 }

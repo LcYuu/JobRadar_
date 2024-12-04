@@ -329,7 +329,8 @@ if (user.getUserType().getUserTypeId() == 1) {
 		
 		String jwtToken = jwtProvider.generateTokenFromEmail(email); // Sử dụng auth trực tiếp
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-		user.get().setLastLogin(LocalDateTime.now());
+		
+//		user.get().setLastLogin(LocalDateTime.now());
 
 		// Trả về JWT token cho người dùng
 		System.out.println("a" + jwtToken);

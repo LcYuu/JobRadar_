@@ -21,7 +21,10 @@ import {
   getCompanyByJWT,
   updateCompanyProfile,
 } from "../../redux/Company/company.action";
-import { getAllIndustries, getIndustry } from "../../redux/Industry/industry.action";
+import {
+  getAllIndustries,
+  getIndustry,
+} from "../../redux/Industry/industry.action";
 
 const style = {
   position: "absolute",
@@ -40,10 +43,14 @@ const style = {
 };
 
 const validationSchema = Yup.object({
-  companyName: Yup.string().required("Company name is required"),
-  establishedTime: Yup.date().required("Established time is required"),
-  address: Yup.string().required("Address is required"),
+  companyName: Yup.string().required("Tên công ty là bắt buộc"),
+  establishedTime: Yup.date()
+    .required("Ngày thành lập là bắt buộc")
+    .max(new Date(), "Ngày thành lập không được trong tương lai"), // Kiểm tra ngày thành lập không được trong tương lai
+  address: Yup.string().required("Địa chỉ là bắt buộc"),
+  industryId: Yup.string().required("Lĩnh vực là bắt buộc"), // Lĩnh vực phải được chọn từ dropdown
 });
+
 
 export default function CompanyProfileModal({ open, handleClose }) {
   const [selectedLogo, setSelectedLogo] = useState("");
@@ -172,7 +179,7 @@ export default function CompanyProfileModal({ open, handleClose }) {
                 formik.touched.companyName && formik.errors.companyName
               }
             />
-            
+
             <TextField
               fullWidth
               id="establishedTime"
