@@ -89,5 +89,16 @@ public class JobPost {
     @ManyToMany	
 	private List<Skills> skills = new ArrayList<>();
 
+    @Column(name = "survey_email_sent")
+    private Boolean surveyEmailSent = false;
+
     // Optional: Add auditing fields like createdBy, updatedBy, etc.
+
+    public Boolean getSurveyEmailSent() {
+        return surveyEmailSent;
+    }
+
+    public void setSurveyEmailSent(Boolean surveyEmailSent) {
+        this.surveyEmailSent = surveyEmailSent;
+    }
 }

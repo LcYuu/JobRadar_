@@ -1,18 +1,21 @@
 package com.job_portal.controller;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.job_portal.models.DailyStats;
 import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.UserAccountRepository;
 
@@ -29,29 +32,36 @@ public class StatsController {
 	private JobPostRepository jobPostRepository;
 
 	@GetMapping("/daily")
-	public ResponseEntity<List<DailyStats>> getDailyStats(
-			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-			@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-		List<DailyStats> stats = new ArrayList<>();
-		LocalDate currentDate = startDate;
-
-		while (!currentDate.isAfter(endDate)) {
-			DailyStats dayStat = new DailyStats();
-			dayStat.setDate(currentDate);
-
-			// Đếm số người dùng mới trong ngày
-			long newUsers = userAccountRepository.countByCreatedDateBetween(currentDate, currentDate);
-
-			// Đếm số bài đăng mới trong ngày
-			long newJobs = jobPostRepository.countByCreatedDateBetween(currentDate, currentDate);
-
-			dayStat.setNewUsers(newUsers);
-			dayStat.setNewJobs(newJobs);
-
-			stats.add(dayStat);
-			currentDate = currentDate.plusDays(1);
-		}
-
-		return ResponseEntity.ok(stats);
+	public ResponseEntity<?> getDailyStats(
+	        @RequestParam String startDate,
+	        @RequestParam String endDate) {
+	    try {
+	        // Parse to LocalDate instead of LocalDateTime
+	        LocalDate start = LocalDate.parse(startDate);
+	        LocalDate end = LocalDate.parse(endDate);
+	        
+	        List<Map<String, Object>> dailyStats = new ArrayList<>();
+	        
+	        LocalDate current = start;
+	        while (!current.isAfter(end)) {
+	            LocalDate nextDay = current.plusDays(1);
+	            long newUsers = userAccountRepository.countByCreatedAtBetween(current, nextDay);
+	            long newJobs = jobPostRepository.countByCreatedAtBetween(current, nextDay);
+	            
+	            Map<String, Object> dayStat = new HashMap<>();
+	            dayStat.put("date", current.toString());
+	            dayStat.put("newUsers", newUsers);
+	            dayStat.put("newJobs", newJobs);
+	            
+	            dailyStats.add(dayStat);
+	            current = nextDay;
+	        }
+	        
+	        return ResponseEntity.ok(dailyStats);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	            .body("Error fetching daily stats: " + e.getMessage());
+	    }
 	}
 }

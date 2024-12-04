@@ -29,29 +29,35 @@ public interface UserAccountRepository extends JpaRepository<UserAccount, UUID> 
 	@Query("UPDATE UserAccount u SET u.password = :password WHERE u.email = :email")
 	void updatePassword(@Param("email") String email, @Param("password") String password);
 
-	@Query(value = "SELECT DATE(u.create_date) AS date, COUNT(u.user_id) AS count " + "FROM user_account u "
-			+ "WHERE u.create_date BETWEEN :startDate AND :endDate " + "GROUP BY DATE(u.create_date) "
-			+ "ORDER BY DATE(u.create_date)", nativeQuery = true)
-	List<Object[]> countNewAccountsPerDay(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
-
-	@Query("SELECT COUNT(u) FROM UserAccount u WHERE u.createDate BETWEEN :startDate AND :endDate")
-	long countByCreatedAtBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+	@Query(value = "SELECT create_date as date, COUNT(user_id) as count " +
+	       "FROM user_account " +
+	       "WHERE create_date BETWEEN :startDate AND :endDate " +
+	       "GROUP BY create_date " +
+	       "ORDER BY date", nativeQuery = true)
+	List<Object[]> countNewAccountsPerDay(
+	    @Param("startDate") LocalDateTime startDate,
+	    @Param("endDate") LocalDateTime endDate
+	);
 
 	@Query("SELECT COUNT(u) FROM UserAccount u WHERE DATE(u.createDate) BETWEEN :startDate AND :endDate")
-	long countByCreatedDateBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+	long countByCreatedAtBetween(
+	    @Param("startDate") LocalDate startDate,
+	    @Param("endDate") LocalDate endDate
+	);
 
-	Page<UserAccount> findByUserNameContainingOrEmailContainingIgnoreCase(String userName, String email,
-			Pageable pageable);
-
-	Page<UserAccount> findByUserType_UserTypeId(Integer userTypeId, Pageable pageable);
-
-	Page<UserAccount> findByIsActive(boolean isActive, Pageable pageable);
-
-	Page<UserAccount> findByUserType_UserTypeIdAndIsActive(Integer userTypeId, boolean isActive, Pageable pageable);
+	Page<UserAccount> findByUserNameContainingOrEmailContainingIgnoreCase(
+        String userName, String email, Pageable pageable);
+    
+    Page<UserAccount> findByUserType_UserTypeId(Integer userTypeId, Pageable pageable);
+    
+    Page<UserAccount> findByIsActive(boolean isActive, Pageable pageable);
+    
+    Page<UserAccount> findByUserType_UserTypeIdAndIsActive(Integer userTypeId, boolean isActive, Pageable pageable);
 
 	@Query("SELECT ua FROM UserAccount ua WHERE " + "(:userName IS NULL OR ua.userName LIKE %:userName%) AND "
 			+ "(:userTypeId IS NULL OR ua.userType.userTypeId = :userTypeId) AND "
 			+ "(:isActive IS NULL OR ua.isActive = :isActive)")
 	Page<UserAccount> searchUserAccounts(@Param("userName") String userName, @Param("userTypeId") Integer userTypeId,
 			@Param("isActive") Boolean isActive, Pageable pageable);
+
 }

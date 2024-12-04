@@ -111,7 +111,7 @@ export default function CompanyProfileModal({ open, handleClose }) {
               <IconButton onClick={handleClose} size="small">
                 <CloseIcon />
               </IconButton>
-              <h2 className="text-xl font-semibold">Edit Profile</h2>
+              <h2 className="text-xl font-semibold">Chỉnh sửa hồ sơ</h2>
             </div>
             <Button
               type="submit"
@@ -119,7 +119,7 @@ export default function CompanyProfileModal({ open, handleClose }) {
               disabled={isLoading || imageLoading}
               className="bg-blue-600 hover:bg-blue-700"
             >
-              {isLoading ? "Saving..." : "Save Changes"}
+              {isLoading ? "Đang lưu..." : "Lưu"}
             </Button>
           </div>
           <div className="flex flex-col items-center">
@@ -161,7 +161,7 @@ export default function CompanyProfileModal({ open, handleClose }) {
               fullWidth
               id="companyName"
               name="companyName"
-              label="companyName"
+              label="Tên công ty"
               variant="outlined"
               value={formik.values.companyName}
               onChange={formik.handleChange}
@@ -177,7 +177,7 @@ export default function CompanyProfileModal({ open, handleClose }) {
               fullWidth
               id="establishedTime"
               name="establishedTime"
-              label="Established Time"
+              label="Thời gian thành lập"
               variant="outlined"
               type="date"
               InputLabelProps={{
@@ -198,7 +198,7 @@ export default function CompanyProfileModal({ open, handleClose }) {
               fullWidth
               id="address"
               name="address"
-              label="Address"
+              label="Địa chỉ"
               variant="outlined"
               value={formik.values.address}
               onChange={formik.handleChange}
@@ -209,7 +209,7 @@ export default function CompanyProfileModal({ open, handleClose }) {
               fullWidth
               id="industryId"
               name="industryId"
-              label="Chọn chuyên ngành"
+              label="Lĩnh vực hoạt động"
               variant="outlined"
               value={formik.values.industryId}
               onChange={formik.handleChange}
