@@ -27,10 +27,10 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	@Query("SELECT j FROM JobPost j WHERE j.experience LIKE %:experience% AND j.isApprove = true")
 	public List<JobPost> findJobByExperience(@Param("experience") String experience);
 
-	@Query("SELECT j FROM JobPost j WHERE j.company.companyId = :companyId AND j.isApprove = true AND j.expireDate >= CURRENT_DATE")
+	@Query("SELECT j FROM JobPost j WHERE j.company.companyId = :companyId AND j.isApprove = true AND j.expireDate >= CURRENT_TIMESTAMP")
 	public Page<JobPost> findJobByCompanyId(@Param("companyId") UUID companyId, Pageable pageable);
 
-	@Query("SELECT j FROM JobPost j WHERE j.company.companyId = :companyId AND j.isApprove = true AND j.expireDate >= CURRENT_DATE")
+	@Query("SELECT j FROM JobPost j WHERE j.company.companyId = :companyId AND j.isApprove = true AND j.expireDate >= CURRENT_TIMESTAMP")
 	public List<JobPost> findJobByCompany(@Param("companyId") UUID companyId);
 
 	// Lọc các JobPost có salary >= minSalary và đã phê duyệt
@@ -58,7 +58,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 
 	@Query("SELECT new com.job_portal.DTO.JobRecommendationDTO(j.postId, j.title, j.description, j.location, j.salary, j.experience, "
 			+ "j.typeOfWork, j.createDate, j.expireDate, j.company.companyId, j.company.companyName, j.city.cityName, j.company.industry.industryName, j.company.logo) "
-			+ "FROM JobPost j WHERE j.isApprove = true AND j.expireDate >= CURRENT_DATE")
+			+ "FROM JobPost j WHERE j.isApprove = true AND j.expireDate >= CURRENT_TIMESTAMP")
 	List<JobRecommendationDTO> findApprovedAndActiveJobs();
 
 	Page<JobPost> findByIsApproveTrueAndExpireDateGreaterThanEqual(Pageable pageable, LocalDateTime currentTime);
@@ -67,15 +67,15 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	List<JobPost> findTop8LatestJobPosts();
 
 	@Query("SELECT new com.job_portal.DTO.JobCountType(j.typeOfWork, COUNT(j)) " + "FROM JobPost j "
-			+ "WHERE j.isApprove = true AND j.expireDate >= CURRENT_DATE " + "GROUP BY j.typeOfWork")
+			+ "WHERE j.isApprove = true AND j.expireDate >= CURRENT_TIMESTAMP " + "GROUP BY j.typeOfWork")
 	List<JobCountType> countJobsByType();
 
 	Page<JobPost> findByIsApproveTrue(Specification<JobPost> spec, Pageable pageable);
 
-	@Query("SELECT MIN(j.salary) FROM JobPost j WHERE j.isApprove = true AND j.expireDate > CURRENT_DATE")
+	@Query("SELECT MIN(j.salary) FROM JobPost j WHERE j.isApprove = true AND j.expireDate >=CURRENT_TIMESTAMP")
 	Long findMinSalary();
 
-	@Query("SELECT MAX(j.salary) FROM JobPost j WHERE j.isApprove = true AND j.expireDate > CURRENT_DATE")
+	@Query("SELECT MAX(j.salary) FROM JobPost j WHERE j.isApprove = true AND j.expireDate >= CURRENT_TIMESTAMP")
 	Long findMaxSalary();
 
 	default Specification<JobPost> alwaysActiveJobs() {
@@ -95,25 +95,25 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 
 	@Query(value = "SELECT new com.job_portal.DTO.JobWithApplicationCountDTO("
 			+ "jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
-			+ "jp.typeOfWork, jp.createDate, jp.expireDate, COUNT(a.postId), jp.status, i.industryName) "
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, COUNT(a.postId), jp.status, i.industryName, jp.isApprove) "
 			+ "FROM JobPost jp " + "LEFT JOIN ApplyJob a ON jp.postId = a.postId "
 			+ "JOIN Company c ON jp.company.companyId = c.companyId "
 			+ "JOIN Industry i ON c.industry.industryId = i.industryId " + "WHERE jp.company.companyId = :companyId "
-			+ "AND jp.expireDate >= CURRENT_DATE "
+			+ "AND jp.expireDate >= CURRENT_TIMESTAMP "
 			+ "GROUP BY jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
-			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName " + "ORDER BY jp.createDate DESC")
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName,  jp.isApprove " + "ORDER BY jp.createDate DESC")
 	List<JobWithApplicationCountDTO> findJobsByCompanyIdSortedByCreateDateDesc(@Param("companyId") UUID companyId);
 
 	@Query(value = "SELECT new com.job_portal.DTO.JobWithApplicationCountDTO("
 			+ "jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
-			+ "jp.typeOfWork, jp.createDate, jp.expireDate, " + "COUNT(a.postId), jp.status, i.industryName) "
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, " + "COUNT(a.postId), jp.status, i.industryName, jp.isApprove) "
 			+ "FROM JobPost jp " + "LEFT JOIN ApplyJob a ON jp.postId = a.postId "
 			+ "JOIN Company c ON jp.company.companyId = c.companyId "
 			+ "JOIN Industry i ON c.industry.industryId = i.industryId " + "WHERE jp.company.companyId = :companyId "
 			+ "AND (:status IS NULL OR jp.status = :status) "
 			+ "AND (:typeOfWork IS NULL OR jp.typeOfWork = :typeOfWork) "
 			+ "GROUP BY jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
-			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName ")
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName,  jp.isApprove ")
 //			+ "ORDER BY "
 //			+ "CASE WHEN :sortByCreateDate LIKE 'ASC' THEN jp.createDate END ASC, "
 //			+ "CASE WHEN :sortByCreateDate LIKE 'DESC' THEN jp.createDate END DESC, "
@@ -127,7 +127,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 //			@Param("sortByCount") String sortByCount, 
 			Pageable pageable);
 
-	List<JobPost> findAllByExpireDateBeforeAndStatus(LocalDate date, String status);
+	List<JobPost> findAllByExpireDateBeforeAndStatus(LocalDateTime date, String status);
 
 	// long countByCompanyCompanyIdAndIsApproveTrue(UUID companyId);
 
@@ -214,7 +214,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 			+ "(:status is null OR j.status = :status) AND " + "j.isApprove = true")
 	Page<JobPost> findJobsWithFilters(@Param("title") String title, @Param("status") String status, Pageable pageable);
 
-	@Query("SELECT j FROM JobPost j JOIN j.company c WHERE c.industry.industryId = :industryId AND j.isApprove = true AND j.expireDate > CURRENT_DATE AND j.postId != :excludePostId")
+	@Query("SELECT j FROM JobPost j JOIN j.company c WHERE c.industry.industryId = :industryId AND j.isApprove = true AND j.expireDate > CURRENT_TIMESTAMP AND j.postId != :excludePostId")
 
 	List<JobPost> findSimilarJobsByIndustry(@Param("industryId") Integer industryId,
 			@Param("excludePostId") UUID excludePostId);
@@ -230,6 +230,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	                             @Param("status") String status,
 	                             @Param("isApprove") Boolean isApprove, 
 	                             Pageable pageable);
-	@Query("SELECT j FROM JobPost j WHERE j.expireDate < ?1 AND (j.surveyEmailSent = false OR j.surveyEmailSent IS NULL)")
+	
+	@Query("SELECT j FROM JobPost j WHERE j.isApprove = true AND j.expireDate < ?1 AND (j.surveyEmailSent = false OR j.surveyEmailSent IS NULL)")
 	List<JobPost> findByExpireDateBeforeAndSurveyEmailSentFalse(LocalDateTime date);
 }

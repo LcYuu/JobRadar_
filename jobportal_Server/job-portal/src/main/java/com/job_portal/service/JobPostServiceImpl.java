@@ -491,7 +491,7 @@ public class JobPostServiceImpl implements IJobPostService {
 
 	@Override
 	public void updateExpiredJobs() {
-		List<JobPost> expiredJobs = jobPostRepository.findAllByExpireDateBeforeAndStatus(LocalDate.now(), "Đang mở");
+		List<JobPost> expiredJobs = jobPostRepository.findAllByExpireDateBeforeAndStatus(LocalDateTime.now(), "Đang mở");
 		// Cập nhật trạng thái thành EXPIRED
 		for (JobPost job : expiredJobs) {
 			job.setStatus("Hết hạn");
