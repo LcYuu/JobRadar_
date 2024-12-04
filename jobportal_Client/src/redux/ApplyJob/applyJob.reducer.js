@@ -34,6 +34,7 @@ export const applyJobReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         applyJobByUser: [...state.applyJobByUser, action.payload], // Thêm ứng tuyển mới vào danh sách
+        hasApplied: true,
         error: null,
       };
     case GET_APPLY_JOB_BY_USER_SUCCESS:
