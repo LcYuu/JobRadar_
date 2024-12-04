@@ -44,6 +44,20 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
     pathCV: "",
   });
 
+  useEffect(() => {
+    // Tự động chọn CV có `isMain` nếu chưa có giá trị trong formData.pathCV
+    if (!formData.pathCV) {
+      const mainCV = cvs.find((cv) => cv.isMain); // Tìm CV chính
+      if (mainCV) {
+        setFormData((prev) => ({
+          ...prev,
+          pathCV: mainCV.pathCV, // Thiết lập URL của CV chính
+        }));
+        setUploadOption("existing"); // Thiết lập tùy chọn là "CV có sẵn"
+      }
+    }
+  }, [cvs, formData.pathCV]); // Chạy khi danh sách CV hoặc formData.pathCV thay đổi
+
   // const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { postId } = useParams();
 
