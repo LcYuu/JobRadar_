@@ -107,18 +107,22 @@ export default function CompanyDetail() {
       const formattedStartDate = start.toISOString().split("T")[0];
       const formattedEndDate = end.toISOString().split("T")[0];
 
-      dispatch(
-        getCompanyJobStats(companyId, formattedStartDate, formattedEndDate)
-      )
-        .then(() => {
+      dispatch(getCompanyJobStats(companyId, formattedStartDate, formattedEndDate))
+        .then((response) => {
+          console.log('API Response:', response);
+          if (!response?.data) {
+            throw new Error("Không có dữ liệu từ API");
+          }
           setIsChartLoading(false);
         })
         .catch((err) => {
+          console.error('Chart Error:', err);
           setError(err.message || "Có lỗi xảy ra khi tải dữ liệu");
           setIsChartLoading(false);
         });
     }
   }, [dispatch, companyId, chartDateRange]);
+
 
   useEffect(() => {
     if (!companyProfile || companyProfile.companyId !== companyId) {
@@ -192,21 +196,36 @@ export default function CompanyDetail() {
   };
 
   const chartData = useMemo(() => {
-    if (!jobStats) return [];
+    if (!jobStats || !Array.isArray(jobStats)) {
+      console.log('No jobStats data available');
+      return [];
+    }
 
-    return jobStats.map((stat) => ({
-      date: new Date(stat.date).toLocaleDateString("vi-VN"),
-      fullDate: new Date(stat.date).toLocaleDateString("vi-VN", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
-      totalJobs: stat.totalJobs,
-      activeJobs: stat.activeJobs,
-      closedJobs: stat.closedJobs,
-      pendingJobs: stat.pendingJobs,
-    }));
+    console.log('Raw jobStats:', jobStats);
+
+    return jobStats.map(stat => {
+      try {
+        if (!stat.date) return null;
+
+        const date = new Date(stat.date);
+        return {
+          date: date.toISOString().split('T')[0],
+          fullDate: date.toLocaleDateString('vi-VN', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }),
+          totalJobs: Number(stat.totalJobs) || 0,
+          activeJobs: Number(stat.activeJobs) || 0,
+          closedJobs: Number(stat.closedJobs) || 0,
+          pendingJobs: Number(stat.pendingJobs) || 0
+        };
+      } catch (error) {
+        console.error('Error processing stat:', stat, error);
+        return null;
+      }
+    }).filter(Boolean);
   }, [jobStats]);
 
   const ChartSkeleton = () => (
@@ -510,12 +529,25 @@ export default function CompanyDetail() {
               !dateError &&
               chartData.length > 0 && (
                 <ResponsiveContainer width="100%" height="100%">
+                  {console.log('Rendering chart with data:', chartData)}
                   <LineChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
                       dataKey="date"
                       tick={{ fill: "#666" }}
                       tickLine={{ stroke: "#666" }}
+                      tickFormatter={(value) => {
+                        console.log('Formatting X-axis value:', value);
+                        try {
+                          return new Date(value).toLocaleDateString("vi-VN", {
+                            day: "2-digit",
+                            month: "2-digit"
+                          });
+                        } catch (error) {
+                          console.error('Error formatting date:', error);
+                          return value;
+                        }
+                      }}
                     />
                     <YAxis
                       allowDecimals={false}

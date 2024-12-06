@@ -2,9 +2,12 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getSurveyStatistics } from '../../../redux/Survey/survey.action';
 import { Card } from "../../../ui/card";
-
+import { Button } from "../../../ui/button";
+import { ArrowLeft } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
 const SurveyStatistics = () => {
     const dispatch = useDispatch();
+    const navigate= useNavigate();
     const { statistics, loading } = useSelector(state => state.survey);
 
     useEffect(() => {
@@ -15,6 +18,14 @@ const SurveyStatistics = () => {
 
     return (
         <div className="container mx-auto px-4 py-8">
+        <Button
+            variant="ghost"
+            className="flex items-center gap-2 mb-6 hover:bg-gray-100"
+            onClick={() => navigate(-1)}
+        >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Trở lại danh sách</span>
+        </Button>
             <h1 className="text-2xl font-bold mb-6">Thống kê khảo sát</h1>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
