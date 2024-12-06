@@ -389,23 +389,37 @@ export const getCompanyJobCounts = (companyId) => async (dispatch) => {
 export const getCompanyJobStats = (companyId, startDate, endDate) => async (dispatch) => {
   dispatch({ type: GET_COMPANY_JOB_STATS_REQUEST });
   try {
+    console.log('Requesting stats with dates:', { startDate, endDate });
+    
     const response = await api.get(
-      `${API_BASE_URL}/job-post/company/${companyId}/job-stats`,
+      `/job-post/company/${companyId}/job-stats`,
       {
-        params: { startDate, endDate }
+        params: { 
+          startDate: startDate,
+          endDate: endDate 
+        }
       }
     );
-    console.log('Job stats response:', response.data); // Add this for debugging
+
+    console.log('Raw API response:', response.data);
+
+    if (!response.data || !Array.isArray(response.data)) {
+      throw new Error('Invalid data format from API');
+    }
+
     dispatch({
       type: GET_COMPANY_JOB_STATS_SUCCESS,
       payload: response.data
     });
+
+    return response;
   } catch (error) {
-    console.error('Error fetching job stats:', error); // Add this for debugging
+    console.error('Error fetching job stats:', error);
     dispatch({
       type: GET_COMPANY_JOB_STATS_FAILURE,
       payload: error.message
     });
+    throw error;
   }
 };
 export const getCompanyById = (companyId) => async (dispatch) => {
