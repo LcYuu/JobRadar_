@@ -133,6 +133,7 @@ export default function AdminJobList() {
               jobPost.map((job, index) => (
                 <tr key={job.jobPostId} className="border-b hover:bg-gray-50">
                   <td className="p-4">{index + 1 + currentPage * size}</td>
+
                   <td className="p-4 truncate" title={job.title}>
                     {job.title}
                   </td>

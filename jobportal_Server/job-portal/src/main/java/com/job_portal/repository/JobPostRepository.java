@@ -113,7 +113,8 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 			+ "AND (:status IS NULL OR jp.status = :status) "
 			+ "AND (:typeOfWork IS NULL OR jp.typeOfWork = :typeOfWork) "
 			+ "GROUP BY jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
-			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName,  jp.isApprove ")
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName,  jp.isApprove "
+			+ "ORDER BY jp.createDate DESC")
 //			+ "ORDER BY "
 //			+ "CASE WHEN :sortByCreateDate LIKE 'ASC' THEN jp.createDate END ASC, "
 //			+ "CASE WHEN :sortByCreateDate LIKE 'DESC' THEN jp.createDate END DESC, "
@@ -225,11 +226,8 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	        + "WHERE (:title IS NULL OR LOWER(jp.title) LIKE LOWER(CONCAT('%', :title, '%'))) "
 	        + "AND (:status IS NULL OR LOWER(jp.status) LIKE LOWER(CONCAT('%', :status, '%'))) "
 	        + "AND (:isApprove IS NULL OR jp.isApprove = :isApprove) "
-	        + "ORDER BY jp.title ASC")
-	Page<JobPost> searchJobPosts(@Param("title") String title, 
-	                             @Param("status") String status,
-	                             @Param("isApprove") Boolean isApprove, 
-	                             Pageable pageable);
+	        + "ORDER BY jp.createDate DESC")
+	Page<JobPost> searchJobPosts(@Param("title") String title, @Param("status") String status, @Param("isApprove") Boolean isApprove,  Pageable pageable);
 	
 	@Query("SELECT j FROM JobPost j WHERE j.isApprove = true AND j.expireDate < ?1 AND (j.surveyEmailSent = false OR j.surveyEmailSent IS NULL)")
 	List<JobPost> findByExpireDateBeforeAndSurveyEmailSentFalse(LocalDateTime date);
