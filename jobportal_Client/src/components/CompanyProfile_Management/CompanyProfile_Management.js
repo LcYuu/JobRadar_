@@ -31,16 +31,25 @@ import {
 } from "../../redux/ImageCompany/imageCompany.action";
 import { Avatar } from "@mui/material";
 import Swal from "sweetalert2";
+import { getReviewByCompany } from "../../redux/Review/review.action";
+import { StarRounded } from "@mui/icons-material";
 
 const CompanyProfile_Management = () => {
   const dispatch = useDispatch();
   const { companyJwt, loading, error } = useSelector((store) => store.company);
   const { imageCompany } = useSelector((store) => store.imageCompany);
   const [isLoading, setIsLoading] = useState(false);
+  const { reviews } = useSelector((store) => store.review);
 
   useEffect(() => {
     dispatch(getCompanyByJWT());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (companyJwt?.companyId) {
+      dispatch(getReviewByCompany(companyJwt.companyId));
+    }
+  }, [dispatch, companyJwt]);
 
   const [open, setOpen] = useState(false);
   const handleOpenProfileModal = () => setOpen(true);
@@ -144,7 +153,7 @@ const CompanyProfile_Management = () => {
         description: companyJwt?.description || "",
         contact: companyJwt?.contact || "",
         email: companyJwt?.email || "",
-        taxCode: companyJwt.taxCode | "",
+        taxCode: companyJwt.taxCode || "",
       });
     }
   }, [companyJwt]);
@@ -240,6 +249,10 @@ const CompanyProfile_Management = () => {
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
   };
+
+  // Tính trung bình đánh giá
+  const totalStars = reviews.reduce((total, review) => total + review.star, 0);
+  const averageStars = reviews.length > 0 ? totalStars / reviews.length : 0;
 
   return (
     <div className="max-w-5xl mx-auto p-6">
@@ -394,6 +407,33 @@ const CompanyProfile_Management = () => {
             </p>
           </div>
         )}
+      </Card>
+
+      <Card className="p-6 bg-white shadow-md rounded-lg mb-6">
+        <h2 className="text-xl font-semibold mb-4">Đánh giá từ ứng viên</h2>
+        
+        <div className="flex items-center gap-4 mb-6">
+          <div className="text-center">
+            <div className="text-3xl font-bold text-purple-600">
+              {averageStars.toFixed(1)}
+            </div>
+            <div className="flex items-center justify-center">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <StarRounded
+                  key={star}
+                  className={`w-5 h-5 ${
+                    star <= averageStars
+                      ? "text-yellow-400"
+                      : "text-gray-300"
+                  }`}
+                />
+              ))}
+            </div>
+            <div className="text-sm text-gray-500 mt-1">
+              {reviews.length} đánh giá
+            </div>
+          </div>
+        </div>
       </Card>
 
       <Card className="p-6  bg-white shadow-md rounded-lg">

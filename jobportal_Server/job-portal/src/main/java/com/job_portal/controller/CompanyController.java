@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +27,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
 import com.job_portal.DTO.CompanyDTO;
 import com.job_portal.DTO.CompanyWithCountJobDTO;
@@ -59,7 +62,8 @@ public class CompanyController {
 	IndustryRepository industryRepository;
 	@Autowired
 	ICompanyService companyService;
-
+	@Autowired
+	private RestTemplate restTemplate;
 	@Autowired
 	private UserAccountRepository userAccountRepository;
 
@@ -103,14 +107,44 @@ public class CompanyController {
 
 		Company company = companyOptional.get();
 		String taxCode = company.getTaxCode();
-
+			
 		// Kiểm tra mã số thuế qua API VietQR
 		boolean isTaxCodeValid = taxCodeValidation.checkTaxCode(taxCode);
 
 		// Trả về true nếu hợp lệ, false nếu không hợp lệ
 		return ResponseEntity.ok(isTaxCodeValid);
 	}
-
+	@GetMapping("/validate-tax-info/{taxCode}")
+	public ResponseEntity<?> validateAndGetTaxInfo(@PathVariable String taxCode) {
+	    String apiUrl = "https://api.vietqr.io/v2/business/" + taxCode;
+	    
+	    try {
+	        // Gửi yêu cầu GET tới API VietQR
+	        ResponseEntity<Map> response = restTemplate.exchange(apiUrl, HttpMethod.GET, null, Map.class);
+	        Map<String, Object> responseBody = response.getBody();
+	        
+	        if (responseBody != null && "00".equals(responseBody.get("code"))) {
+	            // Lấy thông tin công ty từ response
+	            Map<String, Object> data = (Map<String, Object>) responseBody.get("data");
+	            Map<String, Object> companyInfo = new HashMap<>();
+	            
+	            companyInfo.put("companyName", data.get("name"));
+	            companyInfo.put("address", data.get("address"));
+	            companyInfo.put("taxCode", data.get("taxCode"));
+	            
+	            return ResponseEntity.ok(companyInfo);
+	        }
+	        
+	        return ResponseEntity.badRequest().body("Mã số thuế không hợp lệ");
+	        
+	    } catch (HttpClientErrorException.NotFound e) {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+	                .body("Không tìm thấy thông tin công ty với mã số thuế này");
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("Có lỗi xảy ra khi xác thực mã số thuế");
+	    }
+	}
 	@GetMapping("/get-all")
 	public ResponseEntity<List<CompanyDTO>> getAllCompanies() {
 		List<CompanyDTO> res = companyRepository.findCompaniesWithSavedApplications().stream().limit(6)
@@ -135,6 +169,7 @@ public class CompanyController {
 				.collect(Collectors.toList());
 		return new ResponseEntity<>(companies, HttpStatus.OK);
 	}
+	
 
 	@PutMapping("/update-company")
 	public ResponseEntity<String> updateCompany(@RequestHeader("Authorization") String jwt,

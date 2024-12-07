@@ -71,12 +71,11 @@ export default function Dashboard_Seeker() {
               });
 
               return (
-                <Link
-                  to={`/jobs/job-detail/${app.postId}`}
-                  key={app.postId}
-                  className="block"
-                >
-                  <div className="flex  justify-between p-5 bg-gradient-to-r from-white via-gray-100 to-gray-50 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200">
+                <div key={app.postId} className="flex justify-between p-5 bg-gradient-to-r from-white via-gray-100 to-gray-50 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200">
+                  <Link
+                    to={`/jobs/job-detail/${app.postId}`}
+                    className="flex items-center flex-grow"
+                  >
                     {/* Logo */}
                     <div className="flex items-center">
                       <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-200 shadow-sm mr-4">
@@ -110,46 +109,22 @@ export default function Dashboard_Seeker() {
                         </span>
                       </div>
                     </div>
+                  </Link>
 
-                    {/* Action Menu */}
-                    <div className="flex items-center">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          window.open(app.pathCV, "_blank");
-                        }}
-                        className="text-sm bg-purple-500 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-all duration-300 font-medium"
-                      >
-                        Xem CV tải lên
-                      </button>
-
-                      {/* {app.pinned && (
-                        <Pin className="text-yellow-500 h-5 w-5 mr-3" />
-                      )}
-                      <DropdownMenu.Root>
-                        <DropdownMenu.Trigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <MoreVertical className="h-5 w-5 text-gray-600" />
-                          </Button>
-                        </DropdownMenu.Trigger>
-                        <DropdownMenu.Portal>
-                          <DropdownMenu.Content className="bg-white rounded-lg shadow-md overflow-hidden">
-                            <DropdownMenu.Item className="p-3 hover:bg-gray-200 cursor-pointer">
-                              Xóa
-                            </DropdownMenu.Item>
-                            <DropdownMenu.Item className="p-3 hover:bg-gray-200 cursor-pointer">
-                              {app.pinned ? "Bỏ ghim" : "Ghim"}
-                            </DropdownMenu.Item>
-                          </DropdownMenu.Content>
-                        </DropdownMenu.Portal>
-                      </DropdownMenu.Root> */}
-                    </div>
+                  {/* Action Menu */}
+                  <div className="flex items-center ml-4">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.open(app.pathCV, "_blank");
+                      }}
+                      className="text-sm bg-purple-500 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-all duration-300 font-medium"
+                    >
+                      Xem CV tải lên
+                    </button>
                   </div>
-                </Link>
+                </div>
               );
             })}
           </div>
