@@ -120,6 +120,7 @@ export default function UserList() {
         <table className="w-full table-fixed">
           <thead className="bg-purple-600 text-white text-sm">
             <tr>
+              <th className="text-left p-4 w-16">STT</th>
               <th className="text-left p-4 w-24">Avatar</th>
               <th className="text-left p-4 w-80">Tên</th>
               <th className="text-left p-4 w-64">Email</th>
@@ -133,8 +134,9 @@ export default function UserList() {
 
           <tbody>
             {users && users.length > 0 ? (
-              users.map((user) => (
+              users.map((user, index) => (
                 <tr key={user.userId} className="border-b hover:bg-gray-50">
+                  <td className="p-4">{index + 1 + currentPage * size}</td>
                   <td className="p-4 w-24">
                     <div className="group relative">
                       {user.avatar ? (
