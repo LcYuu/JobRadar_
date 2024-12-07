@@ -389,23 +389,37 @@ export const getCompanyJobCounts = (companyId) => async (dispatch) => {
 export const getCompanyJobStats = (companyId, startDate, endDate) => async (dispatch) => {
   dispatch({ type: GET_COMPANY_JOB_STATS_REQUEST });
   try {
+    console.log('Requesting stats with dates:', { startDate, endDate });
+    
     const response = await api.get(
-      `${API_BASE_URL}/job-post/company/${companyId}/job-stats`,
+      `/job-post/company/${companyId}/job-stats`,
       {
-        params: { startDate, endDate }
+        params: { 
+          startDate: startDate,
+          endDate: endDate 
+        }
       }
     );
-    console.log('Job stats response:', response.data); // Add this for debugging
+
+    console.log('Raw API response:', response.data);
+
+    if (!response.data || !Array.isArray(response.data)) {
+      throw new Error('Invalid data format from API');
+    }
+
     dispatch({
       type: GET_COMPANY_JOB_STATS_SUCCESS,
       payload: response.data
     });
+
+    return response;
   } catch (error) {
-    console.error('Error fetching job stats:', error); // Add this for debugging
+    console.error('Error fetching job stats:', error);
     dispatch({
       type: GET_COMPANY_JOB_STATS_FAILURE,
       payload: error.message
     });
+    throw error;
   }
 };
 export const getCompanyById = (companyId) => async (dispatch) => {
@@ -436,18 +450,56 @@ export const getCompanyById = (companyId) => async (dispatch) => {
 export const getAllCompaniesForAdmin = (companyName, industryName, page, size) => async (dispatch) => {
   dispatch({ type: GET_ALL_COMPANIES_REQUEST });
   try {
-    const response = await axios.get(`http://localhost:8080/company/get-all-companies`, {
+    // Lấy danh sách công ty
+    const companiesResponse = await axios.get(`http://localhost:8080/company/get-all-companies`, {
       params: { companyName, industryName, page, size }
     });
-    
+
+    // Lấy reviews cho từng công ty
+    const companiesWithReviews = await Promise.all(
+      companiesResponse.data.content.map(async (company) => {
+        try {
+          const reviewsResponse = await axios.get(
+            `http://localhost:8080/api/v1/reviews/findReviewByCompanyId/${company.companyId}`
+          );
+          const reviews = reviewsResponse.data;
+
+          // Tính trung bình đánh giá
+          const totalStars = reviews.reduce((total, review) => total + review.star, 0);
+          const averageRating = reviews.length > 0 ? totalStars / reviews.length : 0;
+
+          return {
+            ...company,
+            reviews: reviews,
+            averageRating: averageRating,
+            totalReviews: reviews.length
+          };
+        } catch (error) {
+          console.error(`Error fetching reviews for company ${company.companyId}:`, error);
+          return {
+            ...company,
+            reviews: [],
+            averageRating: 0,
+            totalReviews: 0
+          };
+        }
+      })
+    );
+
+    // Cập nhật response data với thông tin đánh giá
+    const updatedResponse = {
+      ...companiesResponse.data,
+      content: companiesWithReviews
+    };
+
     dispatch({
       type: GET_ALL_COMPANIES_SUCCESS,
-      payload: response.data
-   });
- } catch (error) {
-   dispatch({
-     type: GET_ALL_COMPANIES_FAILURE,
-     payload: error.response?.data || 'Error fetching companies'
-   });
- }
-;}
+      payload: updatedResponse
+    });
+  } catch (error) {
+    dispatch({
+      type: GET_ALL_COMPANIES_FAILURE,
+      payload: error.response?.data || 'Error fetching companies'
+    });
+  }
+};
