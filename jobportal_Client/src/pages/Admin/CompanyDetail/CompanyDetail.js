@@ -51,6 +51,8 @@ import {
   getCompanyJobStats,
   getCompanyProfile,
 } from "../../../redux/Company/company.action";
+import { getReviewByCompany } from "../../../redux/Review/review.action";
+import { StarRounded } from "@mui/icons-material";
 
 export default function CompanyDetail() {
   const navigate = useNavigate();
@@ -75,14 +77,16 @@ export default function CompanyDetail() {
   const [dateError, setDateError] = useState("");
   const [error, setError] = useState(null);
   const [isMounted, setIsMounted] = useState(true);
+  const { reviews } = useSelector((store) => store.review);
 
   useEffect(() => {
     dispatch(getCompanyProfile(companyId));
     dispatch(getCompanyJobCounts(companyId));
+    dispatch(getReviewByCompany(companyId));
     return () => {
       setIsMounted(false);
     };
-  }, [dispatch]);
+  }, [dispatch, companyId]);
 
   useEffect(() => {
     if (chartDateRange.startDate && chartDateRange.endDate) {
@@ -352,6 +356,23 @@ export default function CompanyDetail() {
                     companyProfile?.userAccount?.createDate
                   ).toLocaleDateString("vi-VN")}
                 </h3>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6 bg-gradient-to-r from-[#FF8C00] to-[#FFA500]">
+            <div className="flex items-center gap-4">
+              <StarRounded className="w-8 h-8 text-white" />
+              <div>
+                <p className="text-sm text-white">Đánh giá trung bình</p>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xl font-bold text-white">
+                    {reviews.length > 0
+                      ? (reviews.reduce((total, review) => total + review.star, 0) / reviews.length).toFixed(1)
+                      : "0.0"}
+                  </h3>
+                  <span className="text-sm text-white">({reviews.length} đánh giá)</span>
+                </div>
               </div>
             </div>
           </Card>
