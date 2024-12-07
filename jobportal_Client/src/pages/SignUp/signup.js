@@ -41,8 +41,11 @@ export default function SignUpForm() {
     companyName: "",
     businessEmail: "",
     confirmPassword: "",
+    taxCode:"",
   });
   const [errorMessage, setErrorMessage] = useState("");
+  const [companyInfo, setCompanyInfo] = useState(null);
+  const [taxCodeVerified, setTaxCodeVerified] = useState(false);
   // Countdown effect
   useEffect(() => {
     if (isModalOpen && timeLeft > 0 && !isPaused) {
@@ -63,7 +66,8 @@ export default function SignUpForm() {
   ];
 
   const employerFields = [
-    { name: "companyName", placeholder: "Tên công ty", type: "text" },
+    { name: "taxCode", placeholder: "Mã số thuế", type: "text" },
+    { name: "companyName", placeholder: "Tên công ty", type: "text", disabled:true },
     { name: "businessEmail", placeholder: "Email doanh nghiệp", type: "email" },
     { name: "password", placeholder: "Mật khẩu", type: "password" },
     { name: "confirmPassword", placeholder: "Xác nhận mật khẩu", type: "password" },
@@ -73,48 +77,54 @@ export default function SignUpForm() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    if (!isStrongPassword(formData.password)) {
-      setErrorMessage(
-        "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt."
-      );
-      return;
+    
+    if (activeTab === "employer") {
+      if (!taxCodeVerified) {
+        setErrorMessage("Vui lòng xác thực mã số thuế trước khi đăng ký");
+        return;
+      }
+      if (!formData.taxCode) {
+        setErrorMessage("Mã số thuế không được để trống");
+        return;
+      }
     }
-    if (formData.password !== formData.confirmPassword) {
-      setErrorMessage("Mật khẩu xác nhận không khớp. Vui lòng thử lại.");
-      return;
-    }
+
+    const company = activeTab === "employer" ? {
+      companyName: formData.companyName,
+      taxCode: formData.taxCode,
+      address: companyInfo?.address || "",
+      industry: { industryId: 0 },
+      city: { cityId: 0 }
+    } : null;
+
     const userData = {
-      userName:
-        activeTab === "job-seeker" ? formData.fullName : formData.companyName,
-      email:
-        activeTab === "job-seeker" ? formData.email : formData.businessEmail,
+      userName: activeTab === "employer" ? formData.companyName : formData.fullName,
+      email: activeTab === "employer" ? formData.businessEmail : formData.email,
       password: formData.password,
       userType: {
-        userTypeId: userType,
+        userTypeId: activeTab === "employer" ? 3 : 2
       },
+      company: company  // Gửi company object thay vì các trường riêng lẻ
     };
+
+    console.log("userData being sent:", JSON.stringify(userData, null, 2));
+
     try {
-      const response = await dispatch(signupAction(userData));
-      console.log("Signup response:", response); // Add this line
-      if (response && response.success) {
+      const response = await axios.post("http://localhost:8080/auth/signup", userData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      if (response.status === 200) {
         setIsModalOpen(true);
         setTimeLeft(120);
         setIsTimeUp(false);
         setErrorMessage("");
-      } else {
-        console.error("Signup error:", response.error); // Add this line
-        setErrorMessage(
-          response.error || "Đăng ký thất bại. Vui lòng thử lại."
-        );
       }
     } catch (error) {
-      console.error("Signup failed:", error);
-      setErrorMessage(error.message || "Đã xảy ra lỗi. Vui lòng thử lại sau.");
+      console.error("Signup error:", error.response?.data);
+      setErrorMessage(error.response?.data || "Đăng ký thất bại. Vui lòng thử lại.");
     }
-  };
-
-  const handleGoogleSignUp = () => {
-    console.log("Sign Up with Google");
   };
 
   const handleConfirmation = async (e) => {
@@ -148,7 +158,7 @@ export default function SignUpForm() {
           error.response.data || "Xác thực thất bại. Vui lòng thử lại."
         );
       } else if (error.request) {
-        setErrorMessage("Không thể kết nối đến máy chủ. Vui lòng thử lại sau.");
+        setErrorMessage("Không thể k��t nối đến máy chủ. Vui lòng thử lại sau.");
       } else {
         setErrorMessage("Đã xảy ra lỗi. Vui lòng thử lại.");
       }
@@ -260,7 +270,7 @@ export default function SignUpForm() {
             </Button>
             <p className="text-sm text-gray-500 text-center">
               Còn lại {Math.floor(timeLeft / 60)}:
-              {timeLeft % 60 < 10 ? `0${timeLeft % 60}` : timeLeft % 60} để nhập
+              {timeLeft % 60 < 10 ? `0${timeLeft % 60}` : timeLeft % 60} để nhậậập
               mã
             </p>
           </motion.form>
@@ -312,6 +322,35 @@ export default function SignUpForm() {
     );
   };
 
+  const verifyTaxCode = async (taxCode) => {
+    try {
+      console.log("Verifying tax code:", taxCode);
+      const response = await axios.get(`http://localhost:8080/company/validate-tax-info/${taxCode}`);
+      if (response.data) {
+        console.log("Tax code verification response:", response.data);
+        setCompanyInfo(response.data);
+        setTaxCodeVerified(true);
+        
+        // Cập nhật formData với thông tin công ty và giữ lại taxCode gốc
+        const updatedFormData = {
+          ...formData,
+          companyName: response.data.companyName,
+          taxCode: taxCode, // Giữ lại taxCode gốc thay vì lấy từ response
+          address: response.data.address
+        };
+        
+        console.log("Updated formData:", updatedFormData);
+        setFormData(updatedFormData);
+        
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error verifying tax code:", error);
+      return false;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 flex items-center justify-center p-4">
       {/* Card content for sign up */}
@@ -358,26 +397,64 @@ export default function SignUpForm() {
           <form className="space-y-4">
             <div className="space-y-2">
               {fields.map((field) => (
-                <Input
-                  key={field.name}
-                  type={field.type}
-                  placeholder={field.placeholder}
-                  name={field.name}
-                  value={formData[field.name]}
-                  onChange={(e) =>
-                    setFormData({ ...formData, [field.name]: e.target.value })
-                  }
-                  className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-                />
+                <div key={field.name} className="relative">
+                  <Input
+                    type={field.type}
+                    placeholder={field.placeholder}
+                    name={field.name}
+                    value={formData[field.name]}
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+                      console.log(`Updating ${field.name} to:`, newValue);
+                      setFormData(prev => {
+                        const updated = {
+                          ...prev,
+                          [field.name]: newValue
+                        };
+                        console.log("Updated formData:", updated);
+                        return updated;
+                      });
+                    }}
+                    onBlur={(e) => {
+                      if (field.name === "taxCode") {
+                        console.log("Tax code onBlur value:", e.target.value);
+                      }
+                    }}
+                    className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                    disabled={field.disabled}
+                  />
+                  {field.name === "taxCode" && activeTab === "employer" && (
+                    <Button
+                      type="button"
+                      onClick={async () => {
+                        console.log("Verifying tax code:", formData.taxCode); // Debug log
+                        const verified = await verifyTaxCode(formData.taxCode);
+                        if (!verified) {
+                          setErrorMessage("Mã số thuế không hợp lệ hoặc không tồn tại");
+                        }
+                      }}
+                      className="absolute right-0 top-0 h-full px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-r"
+                    >
+                      Xác thực
+                    </Button>
+                  )}
+                </div>
               ))}
             </div>
-            {errorMessage && (
-              <p className="text-red-500 text-sm text-center">
-                {typeof errorMessage === "string"
-                  ? errorMessage
-                  : "Đã xảy ra lỗi. Vui lòng thử lại."}
-              </p>
-            )}
+            <AnimatePresence>
+              {errorMessage && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="text-red-500 text-sm text-center bg-red-50 p-2 rounded-md border border-red-200"
+                >
+                  {typeof errorMessage === "string"
+                    ? errorMessage
+                    : "Đã xảy ra lỗi. Vui lòng thử lại."}
+                </motion.p>
+              )}
+            </AnimatePresence>
             <Button
               onClick={handleRegister}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
