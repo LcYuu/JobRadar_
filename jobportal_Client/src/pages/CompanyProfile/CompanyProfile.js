@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper-bundle.css";
 import { Button } from "../../ui/button";
@@ -302,9 +302,33 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
     }
   };
 
+  const navigate = useNavigate();
+
   return (
-    <main className="min-h-screen bg-background">
-      <div className="container px-4 py-8 mx-auto">
+    <main className="container mx-auto px-4 py-8">
+      {/* Back button */}
+      <Button
+        onClick={() => navigate(-1)}
+        variant="ghost"
+        className="mb-4 flex items-center gap-2 text-gray-600 hover:text-gray-900"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+        Quay lại
+      </Button>
+
+      <div className="max-w-7xl mx-auto">
         <div className="flex items-start gap-6 mb-12">
           <div className="w-24 h-24 bg-indigo-100 rounded-xl overflow-hidden">
             <img

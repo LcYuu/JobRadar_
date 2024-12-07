@@ -20,6 +20,7 @@ import {
 import { getEduCandidate } from "../../redux/Education/edu.action";
 import { getExpCandidate } from "../../redux/Experience/exp.action";
 import { Card } from "../../ui/card";
+import { getCandidateApplyInfo } from "../../redux/ApplyJob/applyJob.action";
 
 const ApplicantDetail = () => {
   const getRandomColor = () => {
@@ -38,6 +39,7 @@ const ApplicantDetail = () => {
   );
   const { eduCandidate } = useSelector((store) => store.edu);
   const { expCandidate } = useSelector((store) => store.exp);
+  const { candidateApplyInfo } = useSelector((store) => store.applyJob);
 
   const timeAgo = (date) => {
     const now = new Date();
@@ -68,11 +70,19 @@ const ApplicantDetail = () => {
   };
 
   useEffect(() => {
+    console.log("Fetching data with userId:", userId, "postId:", postId);
     dispatch(getCandidateProfile(userId, postId));
     dispatch(getCandidateSkills(userId));
     dispatch(getEduCandidate(userId));
     dispatch(getExpCandidate(userId));
-  }, [dispatch]);
+    dispatch(getCandidateApplyInfo(userId, postId));
+  }, [dispatch, userId, postId]);
+
+  useEffect(() => {
+    if (candidateApplyInfo) {
+      console.log("Application Info updated:", candidateApplyInfo);
+    }
+  }, [candidateApplyInfo]);
 
   const contactIcons = {
     email: <Mail className="w-4 h-4 text-gray-500" />,
@@ -148,23 +158,29 @@ const ApplicantDetail = () => {
               </Button> */}
 
               <div className="mt-10">
-                <h3 className="font-medium text-left mb-4">Liên hệ</h3>
+                <h3 className="font-medium text-left mb-4">Thông tin liên hệ trên form</h3>
                 <div className="space-y-3">
-                  <div
-                    key="email"
-                    className="flex items-center gap-3 text-left"
-                  >
-                    {contactIcons.email} {/* Hiển thị icon email */}
-                    {profileCandidate?.emailContact} {/* Hiển thị email */}
-                  </div>
-                  <div
-                    key="phone"
-                    className="flex items-center gap-3 text-left"
-                  >
-                    {contactIcons.phone} {/* Hiển thị icon phone */}
-                    {profileCandidate?.phoneNumber}{" "}
-                    {/* Hiển thị số điện thoại */}
-                  </div>
+                  {candidateApplyInfo ? (
+                    <>
+                      {candidateApplyInfo.email && (
+                        <div className="flex items-center gap-3 text-left">
+                          {contactIcons.email}
+                          <span className="text-sm text-gray-600">{candidateApplyInfo.email}</span>
+                        </div>
+                      )}
+                      
+                      {candidateApplyInfo.description && (
+                        <div className="mt-4">
+                          <h4 className="font-medium text-left mb-2">Thông tin thêm</h4>
+                          <p className="">
+                            {candidateApplyInfo.description}
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-sm text-gray-500">Đang tải thông tin...</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -260,6 +276,20 @@ const ApplicantDetail = () => {
                         </div>
                         <div>
                           <p className="text-xl font-bold text-black">
+                            Email
+                          </p>
+                          <p className="text-sm">{profileCandidate?.emailContact}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-xl font-bold text-black">
+                            Số điện thoại
+                          </p>
+                          <p className="text-sm">{profileCandidate?.phoneNumber}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-xl font-bold text-black">
                             Ngày sinh
                           </p>
                           <p className="text-sm">
@@ -279,13 +309,14 @@ const ApplicantDetail = () => {
                             )}
                           </p>
                         </div>
-                        <div className="col-span-2">
+
+                        <div>
                           <p className="text-xl font-bold text-black">
                             Địa chỉ
                           </p>
                           <p className="text-sm">{profileCandidate?.address}</p>
                         </div>
-                      </div>
+                        </div>
                     </Card>
 
                     <Card className="bg-white rounded-lg p-6 shadow-lg">

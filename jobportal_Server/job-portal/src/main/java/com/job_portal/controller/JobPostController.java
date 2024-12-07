@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -643,12 +644,23 @@ public class JobPostController {
 	    @RequestParam String startDate,
 	    @RequestParam String endDate
 	) {
-	    try {
-	    	LocalDateTime start = LocalDateTime.parse(startDate);
-	    	LocalDateTime end = LocalDateTime.parse(endDate);
+		try {
+	        // Parse ngày với định dạng ISO và set time
+	        LocalDateTime start = LocalDate.parse(startDate).atStartOfDay();
+	        LocalDateTime end = LocalDate.parse(endDate).atTime(23, 59, 59);
+	        
+	        System.out.println("Start date: " + start);
+	        System.out.println("End date: " + end);
+	        
 	        List<Map<String, Object>> stats = jobPostService.getCompanyJobStats(companyId, start, end);
 	        return ResponseEntity.ok(stats);
+	    } catch (DateTimeParseException e) {
+	        System.err.println("Date parsing error: " + e.getMessage());
+	        return ResponseEntity.badRequest()
+	                .body("Invalid date format. Use YYYY-MM-DD");
 	    } catch (Exception e) {
+	        System.err.println("Error in getCompanyJobStats: " + e.getMessage());
+	        e.printStackTrace();
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 	                .body("Error getting job stats: " + e.getMessage());
 	    }
