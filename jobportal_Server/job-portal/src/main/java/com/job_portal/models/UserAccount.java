@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -35,7 +36,7 @@ public class UserAccount {
     @Column(name = "is_active", columnDefinition = "BIT(1)")
     private boolean isActive;
 
-    @Column(name = "user_name", length = 200, nullable = false)
+    @Column(name = "user_name", length = 500, nullable = false)
     private String userName;
 
     @Column(name = "avatar", length = 200)
@@ -63,6 +64,8 @@ public class UserAccount {
 	@OneToOne(mappedBy = "userAccount", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Seeker seeker;
 	
+	
+//	@JsonProperty("company")
 	@JsonIgnore
 	@OneToOne(mappedBy = "userAccount", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Company company;
