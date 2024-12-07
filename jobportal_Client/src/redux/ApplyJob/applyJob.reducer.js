@@ -23,6 +23,7 @@ const initialState = {
   applyJobByCompany: [],
   approveApply: null,
   candidateApplyInfo: null,
+  
 };
 
 export const applyJobReducer = (state = initialState, action) => {

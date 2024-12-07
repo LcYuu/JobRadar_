@@ -21,6 +21,9 @@ import { getCompanyById } from '../../../redux/Company/company.action';
 import { getCompanyJobCounts } from '../../../redux/Company/company.action';
 import { toast } from 'react-hot-toast';
 import { Input } from "../../../ui/input";
+import { StarRounded } from "@mui/icons-material";
+import { getReviewByCompany } from "../../../redux/Review/review.action";
+import { store } from "../../../redux/store";
 
 
 const formatDate = (dateString) => {
@@ -100,6 +103,7 @@ export default function CompanyList() {
   const navigate = useNavigate();
 
   const [filteredCompanies, setFilteredCompanies] = useState([]);
+  const [companyReviews, setCompanyReviews] = useState({});
 
   useEffect(() => {
     dispatch(
@@ -116,6 +120,35 @@ export default function CompanyList() {
   useEffect(() => {
     dispatch(getAllIndustries());
   }, [dispatch]);
+
+  useEffect(() => {
+    const fetchCompanyReviews = async () => {
+      if (companies && companies.length > 0) {
+        const reviewsData = {};
+        for (const company of companies) {
+          try {
+            await dispatch(getReviewByCompany(company.companyId));
+            const reviews = store.getState().review.reviews;
+            
+            // Tính trung bình đánh giá
+            const totalStars = reviews.reduce((total, review) => total + review.star, 0);
+            const averageRating = reviews.length > 0 ? totalStars / reviews.length : 0;
+            
+            reviewsData[company.companyId] = {
+              reviews: reviews,
+              averageRating: averageRating,
+              totalReviews: reviews.length
+            };
+          } catch (error) {
+            console.error(`Error fetching reviews for company ${company.companyId}:`, error);
+          }
+        }
+        setCompanyReviews(reviewsData);
+      }
+    };
+
+    fetchCompanyReviews();
+  }, [companies, dispatch]);
 
   const applyFilters = () => {
     setCurrentPage(0);
@@ -205,6 +238,7 @@ export default function CompanyList() {
         <table className="w-full">
           <thead className="bg-purple-600 text-white">
             <tr>
+              <th className="text-left p-4 w-16">STT</th>
               <th className="text-left p-4 text-sm font-medium text-white">
                 Tên công ty
               </th>
@@ -219,6 +253,9 @@ export default function CompanyList() {
               </th>
               <th className="text-left p-4 text-sm font-medium text-white">
                 Số điện thoại
+              </th>
+              <th className="text-left p-4 text-sm font-medium text-white">
+                Đánh giá
               </th>
               <th className="w-20"></th>
             </tr>
@@ -237,8 +274,9 @@ export default function CompanyList() {
                 </td>
               </tr>
             ) : (
-              companies.map((company) => (
+              companies.map((company, index) => (
                 <tr key={company.companyId} className="hover:bg-gray-50">
+                  <td className="p-4">{index + 1 + currentPage * pageSize}</td>
                   <td className="p-4">
                     <div className="flex items-center">
                       <img
@@ -275,6 +313,25 @@ export default function CompanyList() {
                     {formatDate(company.establishedTime)}
                   </td>
                   <td className="p-4 text-gray-500">{company.contact}</td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <StarRounded
+                            key={star}
+                            className={`w-4 h-4 ${
+                              star <= (companyReviews[company.companyId]?.averageRating || 0)
+                                ? "text-yellow-400"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-sm text-gray-500">
+                        ({companyReviews[company.companyId]?.totalReviews || 0})
+                      </span>
+                    </div>
+                  </td>
                   <td className="p-4">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

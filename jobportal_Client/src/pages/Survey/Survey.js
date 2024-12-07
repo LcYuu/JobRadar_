@@ -5,6 +5,7 @@ import { Button } from '../../ui/button';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import { submitSurvey } from '../../redux/Survey/survey.action';
+import { ArrowLeft } from 'lucide-react';
 
 const Survey = () => {
     const { surveyId } = useParams();
@@ -32,6 +33,15 @@ const Survey = () => {
 
     return (
         <div className="container mx-auto px-4 py-8">
+            <Button
+                variant="ghost"
+                className="flex items-center gap-2 mb-6 hover:bg-gray-100"
+                onClick={() => navigate('/employer/account-management/job-management')}
+            >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Trở lại danh sách</span>
+            </Button>
+
             <Card className="max-w-2xl mx-auto p-6">
                 <h1 className="text-2xl font-bold mb-6">Khảo sát tuyển dụng</h1>
                 <form onSubmit={handleSubmit} className="space-y-6">
