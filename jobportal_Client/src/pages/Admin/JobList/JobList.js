@@ -116,6 +116,7 @@ export default function AdminJobList() {
         <table className="w-full table-fixed">
           <thead className="bg-purple-600 text-white">
             <tr>
+              <th className="text-left p-4 w-16">STT</th>
               <th className="text-left p-4 w-80">Tiêu đề</th>
               <th className="text-left p-4 w-64">Công ty</th>
               <th className="text-left p-4 w-50">Địa điểm</th>
@@ -129,8 +130,10 @@ export default function AdminJobList() {
 
           <tbody>
             {jobPost?.length > 0 ? (
-              jobPost.map((job) => (
-                <tr key={job.postId} className="border-b hover:bg-gray-50">
+              jobPost.map((job, index) => (
+                <tr key={job.jobPostId} className="border-b hover:bg-gray-50">
+                  <td className="p-4">{index + 1 + currentPage * size}</td>
+
                   <td className="p-4 truncate" title={job.title}>
                     {job.title}
                   </td>
