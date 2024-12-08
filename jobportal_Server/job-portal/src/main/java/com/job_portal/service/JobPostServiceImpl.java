@@ -360,8 +360,7 @@ public class JobPostServiceImpl implements IJobPostService {
 
 	@Override
 	public Page<JobPost> findByIsApprove(Pageable pageable) {
-		Page<JobPost> jobPost = jobPostRepository.findByIsApproveTrueAndExpireDateGreaterThanEqual(pageable,
-				LocalDateTime.now());
+		Page<JobPost> jobPost = jobPostRepository.findJobPostActive(pageable);
 		return jobPost;
 
 	}
