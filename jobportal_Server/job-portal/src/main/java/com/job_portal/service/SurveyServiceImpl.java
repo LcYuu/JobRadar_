@@ -18,6 +18,8 @@ import com.job_portal.models.JobPost;
 import com.job_portal.models.Survey;
 import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.SurveyRepository;
+
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -120,6 +122,7 @@ public class SurveyServiceImpl implements ISurveyService {
             survey.setCandidateQuality(surveyDTO.getCandidateQuality());
             survey.setFeedback(surveyDTO.getFeedback());
             survey.setSurveyStatus("COMPLETED");
+            survey.setSubmittedAt(LocalDateTime.now());
             return surveyRepository.save(survey);
         }
         throw new RuntimeException("Survey not found");
@@ -213,14 +216,24 @@ public class SurveyServiceImpl implements ISurveyService {
         return surveys.stream()
             .filter(s -> "COMPLETED".equals(s.getSurveyStatus()) 
                 && s.getFeedback() != null 
+                && s.getCreatedAt() != null
+                && s.getSubmittedAt() != null
                 && !s.getFeedback().isEmpty())
-            .sorted(Comparator.comparing(Survey::getCreatedAt).reversed())
+            .sorted((s1, s2) -> {
+                Duration d1 = Duration.between(s1.getCreatedAt(), s1.getSubmittedAt());
+                Duration d2 = Duration.between(s2.getCreatedAt(), s2.getSubmittedAt());
+                // Sắp xếp theo thời gian phản hồi nhanh nhất
+                return d1.compareTo(d2);
+            })
             .limit(5)
             .map(survey -> {
                 SurveyFeedbackDTO dto = new SurveyFeedbackDTO();
                 dto.setCompanyName(survey.getJobPost().getCompany().getCompanyName());
+                dto.setJobTitle(survey.getJobPost().getTitle());
                 dto.setFeedback(survey.getFeedback());
-                dto.setSubmittedAt(survey.getCreatedAt());
+                dto.setCandidateQuality(survey.getCandidateQuality());
+                dto.setSubmittedAt(survey.getSubmittedAt());
+                dto.setSentAt(survey.getCreatedAt());
                 return dto;
             })
             .collect(Collectors.toList());
@@ -251,6 +264,7 @@ public class SurveyServiceImpl implements ISurveyService {
         survey.setEmailSent(false);
         survey.setSurveyStatus("PENDING");
         survey.setCreatedAt(LocalDateTime.now());
+        survey.setSubmittedAt(LocalDateTime.now());;
         survey = surveyRepository.save(survey);
 
         // Send email logic...
