@@ -42,4 +42,5 @@ public class Survey {
     private LocalDateTime createdAt;
     private String surveyStatus;
     private Boolean emailSent;
+    private LocalDateTime submittedAt;
 }
