@@ -17,4 +17,7 @@ public class SurveyFeedbackDTO {
     private String companyName;
     private String feedback;
     private LocalDateTime submittedAt;
+    private String jobTitle;
+    private int candidateQuality;
+    private LocalDateTime sentAt;
 }
