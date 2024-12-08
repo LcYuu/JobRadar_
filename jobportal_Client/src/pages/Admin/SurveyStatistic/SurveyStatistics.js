@@ -5,6 +5,10 @@ import { Card } from "../../../ui/card";
 import { Button } from "../../../ui/button";
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+
+const COLORS = ['#0088FE', '#00C49F'];
+
 const SurveyStatistics = () => {
     const dispatch = useDispatch();
     const navigate= useNavigate();
@@ -15,6 +19,64 @@ const SurveyStatistics = () => {
     }, [dispatch]);
 
     if (loading) return <div>Loading...</div>;
+
+    const surveyCompletionData = [
+        { name: 'Đã hoàn thành', value: statistics?.completedSurveys },
+        { name: 'Chưa hoàn thành', value: statistics?.pendingSurveys },
+    ];
+
+    const qualityDistributionData = Object.entries(statistics?.candidateQualityDistribution || {}).map(([rating, count]) => ({
+        rating: `⭐ ${rating}`,
+        count,
+    }));
+
+    const calculateResponseTime = (sentAt, submittedAt) => {
+        const sent = new Date(sentAt);
+        const submitted = new Date(submittedAt);
+        const diffMinutes = Math.abs(submitted - sent) / 60000;
+        
+        // Format time display
+        const formatTime = (mins) => {
+            const hours = Math.floor(mins / 60);
+            const minutes = Math.round(mins % 60);
+            if (hours === 0) return `${minutes} phút`;
+            if (minutes === 0) return `${hours} giờ`;
+            return `${hours} giờ ${minutes} phút`;
+        };
+    
+        // Determine response category and color
+        let result = {
+            duration: formatTime(diffMinutes)
+        };
+    
+        if (diffMinutes < 30) {
+            result = {
+                ...result,
+                text: 'Phản hồi rất nhanh',
+                color: 'text-green-600'
+            };
+        } else if (diffMinutes < 120) { // 2 giờ
+            result = {
+                ...result,
+                text: 'Phản hồi nhanh',
+                color: 'text-blue-600'
+            };
+        } else if (diffMinutes < 360) { // 6 giờ
+            result = {
+                ...result,
+                text: 'Phản hồi trung bình',
+                color: 'text-yellow-600'
+            };
+        } else {
+            result = {
+                ...result,
+                text: 'Phản hồi chậm',
+                color: 'text-red-600'
+            };
+        }
+        
+        return result;
+    };
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -63,23 +125,23 @@ const SurveyStatistics = () => {
                                     Đã hoàn thành
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Tổng ứng viên tuyển
+                                    Tổng số tuyển dụng
                                 </th>
                             </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody>
                             {statistics?.companySurveys?.map((company, index) => (
-                                <tr key={index}>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                         {company.companyName}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {company.totalSurveys}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {company.completedSurveys}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {company.totalHired}
                                     </td>
                                 </tr>
@@ -90,15 +152,37 @@ const SurveyStatistics = () => {
             </Card>
 
             <Card className="p-6 mb-8">
+                <h2 className="text-xl font-bold mb-4">Tỷ lệ khảo sát đã hoàn thành</h2>
+                <PieChart width={400} height={300}>
+                    <Pie
+                        data={surveyCompletionData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        fill="#8884d8"
+                        label
+                    >
+                        {surveyCompletionData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                </PieChart>
+            </Card>
+
+            <Card className="p-6 mb-8">
                 <h2 className="text-xl font-bold mb-4">Phân bố chất lượng ứng viên</h2>
-                <div className="grid grid-cols-5 gap-4">
-                    {Object.entries(statistics?.candidateQualityDistribution || {}).map(([rating, count]) => (
-                        <div key={rating} className="text-center">
-                            <div className="text-xl">⭐ {rating}</div>
-                            <div className="font-bold">{count}</div>
-                        </div>
-                    ))}
-                </div>
+                <BarChart width={500} height={300} data={qualityDistributionData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="rating" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="count" fill="#8884d8" />
+                </BarChart>
             </Card>
 
             <Card className="p-6">
@@ -107,16 +191,44 @@ const SurveyStatistics = () => {
                     {statistics?.recentFeedback?.map((feedback, index) => (
                         <div key={index} className="p-4 bg-gray-50 rounded">
                             <div className="font-semibold">{feedback.companyName}</div>
+                            <div className="text-gray-600">{feedback.jobTitle}</div>
+                            <div className="text-yellow-500 mt-1">
+                                {Array(feedback.candidateQuality).fill('⭐').join('')}
+                            </div>
                             <div className="text-gray-600 mt-1">{feedback.feedback}</div>
                             <div className="text-sm text-gray-500 mt-2">
-                                {new Date(feedback.submittedAt).toLocaleString('vi-VN', {
-                                    year: 'numeric',
-                                    month: 'numeric',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    hour12: false
-                                })}
+                                <div>
+                                    Gửi lúc:{" "}
+                                    {new Date(feedback.sentAt).toLocaleString('vi-VN', {
+                                        year: 'numeric',
+                                        month: 'numeric',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: false
+                                    })}
+                                </div>
+                                <div>
+                                    Phản hồi lúc:{" "}
+                                    {new Date(feedback.submittedAt).toLocaleString('vi-VN', {
+                                        year: 'numeric',
+                                        month: 'numeric',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: false
+                                    })}
+                                </div>
+                                {feedback.sentAt && feedback.submittedAt && (
+    <div className="flex items-center mt-2">
+        <div className={`${calculateResponseTime(feedback.sentAt, feedback.submittedAt).color} font-medium`}>
+            {calculateResponseTime(feedback.sentAt, feedback.submittedAt).text}
+        </div>
+        <div className="ml-2 text-gray-500">
+            ({calculateResponseTime(feedback.sentAt, feedback.submittedAt).duration})
+        </div>
+    </div>
+)}
                             </div>
                         </div>
                     ))}
