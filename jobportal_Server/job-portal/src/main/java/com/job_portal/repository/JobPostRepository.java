@@ -229,6 +229,6 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	        + "ORDER BY jp.createDate DESC")
 	Page<JobPost> searchJobPosts(@Param("title") String title, @Param("status") String status, @Param("isApprove") Boolean isApprove,  Pageable pageable);
 	
-	@Query("SELECT j FROM JobPost j WHERE j.isApprove = true AND j.expireDate < ?1 AND (j.surveyEmailSent = false OR j.surveyEmailSent IS NULL)")
+	@Query("SELECT j FROM JobPost j WHERE j.isApprove = true AND j.expireDate < ?1 AND j.status = 'Hết hạn' AND (j.surveyEmailSent = false OR j.surveyEmailSent IS NULL)")
 	List<JobPost> findByExpireDateBeforeAndSurveyEmailSentFalse(LocalDateTime date);
 }
