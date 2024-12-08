@@ -97,7 +97,9 @@ export default function Dashboard_Employer() {
         >
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-medium">Số công việc đang tuyển</h3>
-            <span className="text-3xl font-bold">{jobs.length}</span>
+            <span className="text-3xl font-bold">
+              {jobs.filter((job) => job.approve).length}
+            </span>
           </div>
         </Card>
 
