@@ -20,6 +20,7 @@ import {
   Twitter,
   Facebook,
   Github,
+  ArrowLeft,
 } from "lucide-react";
 import logo from "../../assets/images/common/logo.jpg";
 import ApplyModal from "../../components/common/ApplyModal/ApplyModal";
@@ -145,6 +146,14 @@ export default function JobDetail() {
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="container mx-auto px-4 py-8">
+        <Button
+          variant="ghost"
+          className="flex items-center gap-2 mb-6 hover:bg-gray-100"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Quay lại</span>
+        </Button>
         {/* Main content wrapper */}
         <div className="relative">
           <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
