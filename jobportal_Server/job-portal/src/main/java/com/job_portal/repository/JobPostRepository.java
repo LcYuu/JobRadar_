@@ -129,7 +129,9 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 //			@Param("sortByCount") String sortByCount, 
 			Pageable pageable);
 
-	List<JobPost> findAllByExpireDateBeforeAndStatus(LocalDateTime date, String status);
+	@Query("SELECT j FROM JobPost j WHERE j.expireDate < :date AND j.status = :status")
+	List<JobPost> findAllByExpireDateBeforeAndStatus(@Param("date") LocalDateTime date, @Param("status") String status);
+
 
 	// long countByCompanyCompanyIdAndIsApproveTrue(UUID companyId);
 

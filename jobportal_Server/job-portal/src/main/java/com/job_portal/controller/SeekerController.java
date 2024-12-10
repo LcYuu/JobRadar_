@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.job_portal.DTO.ApplicantProfileDTO;
 import com.job_portal.DTO.FollowCompanyDTO;
+import com.job_portal.DTO.FollowSeekerDTO;
 import com.job_portal.DTO.SeekerDTO;
 import com.job_portal.config.JwtProvider;
 import com.job_portal.models.JobPost;
@@ -31,6 +33,7 @@ import com.job_portal.repository.CompanyRepository;
 import com.job_portal.repository.SeekerRepository;
 import com.job_portal.repository.UserAccountRepository;
 import com.job_portal.service.ICompanyService;
+import com.job_portal.service.INotificationService;
 import com.job_portal.service.ISeekerService;
 import com.social.exceptions.AllExceptions;
 
@@ -48,6 +51,8 @@ public class SeekerController {
 	private UserAccountRepository userAccountRepository;
 	@Autowired
 	private CompanyRepository companyRepository;
+	@Autowired
+	private INotificationService notificationService;
 
 	@GetMapping("/get-all")
 	public ResponseEntity<List<Seeker>> getSeeker() {
@@ -172,4 +177,20 @@ public class SeekerController {
 			return ResponseEntity.status(500).body(null);
 		}
 	}
+	
+	@GetMapping("/{companyId}/followers")
+    public List<FollowSeekerDTO> getSeekersFollowingCompany(@PathVariable UUID companyId) {
+        return seekerRepository.findSeekersFollowingCompany(companyId);
+    }
+	
+	@PatchMapping("/read/{notificationId}")
+	public boolean markNotificationAsRead(@PathVariable UUID notificationId) {
+	    return notificationService.updateNotificationReadStatus(notificationId);
+	}
+	
+	 @GetMapping("/unread-count/{userId}")
+	    public ResponseEntity<Long> getUnreadNotificationCount(@PathVariable UUID userId) {
+	        long unreadCount = notificationService.countUnreadNotifications(userId);
+	        return ResponseEntity.ok(unreadCount);
+	    }
 }
