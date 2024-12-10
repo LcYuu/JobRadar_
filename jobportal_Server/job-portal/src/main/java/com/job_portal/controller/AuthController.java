@@ -39,6 +39,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.job_portal.DTO.LoginDTO;
 import com.job_portal.config.JwtProvider;
+import com.job_portal.DTO.UserSignupDTO;
 import com.job_portal.models.BlackListToken;
 import com.job_portal.models.City;
 import com.job_portal.models.Company;
@@ -98,76 +99,86 @@ public class AuthController {
 	private TaxCodeValidation taxCodeValidation;
 
 	@PostMapping("/signup")
-	public ResponseEntity<String> createUserAccount(@RequestBody UserAccount userAccount) {
-		// Kiểm tra email tồn tại
-		Optional<UserAccount> isExist = userAccountRepository.findByEmail(userAccount.getEmail());
-		if (isExist.isPresent()) {
-			return ResponseEntity.status(HttpStatus.CONFLICT)
-					.body("Email này đã được sử dụng ở tài khoản khác");
-		}
+	public ResponseEntity<String> createUserAccount(@RequestBody UserSignupDTO userSignupDTO) {
+	    try {
+	        // Kiểm tra email tồn tại
+	        Optional<UserAccount> isExist = userAccountRepository.findByEmail(userSignupDTO.getEmail());
+	        if (isExist.isPresent()) {
+	            return ResponseEntity.status(HttpStatus.CONFLICT)
+	                    .body("Email này đã được sử dụng ở tài khoản khác");
+	        }
 
-		// Kiểm tra mật khẩu hợp lệ
-		if (!isValidPassword(userAccount.getPassword())) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body("Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.");
-		}
+	        // Kiểm tra thông tin công ty nếu là employer
+	        if (userSignupDTO.getUserType() != null && userSignupDTO.getUserType().getUserTypeId() == 3) {
+	            if (userSignupDTO.getCompany() == null) {
+	                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	                        .body("Thông tin công ty là bắt buộc đối với tài khoản nhà tuyển dụng");
+	            }
 
-		// Kiểm tra và xử lý thông tin công ty cho tài khoản nhà tuyển dụng
-		if (userAccount.getUserType() != null && userAccount.getUserType().getUserTypeId() == 3) {
-			if (userAccount.getCompany() == null) {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-						.body("Thông tin công ty là bắt buộc đối với tài khoản nhà tuyển dụng");
-			}
+	            Company company = userSignupDTO.getCompany();
+	            if (company.getTaxCode() == null || company.getTaxCode().isEmpty()) {
+	                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	                        .body("Mã số thuế không được để trống");
+	            }
 
-			Company company = userAccount.getCompany();
-			if (company.getTaxCode() == null || company.getTaxCode().isEmpty()) {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-						.body("Mã số thuế không được để trống");
-			}
+	            // Xác thực mã số thuế
+	            boolean isValidTaxCode = taxCodeValidation.checkTaxCode(company.getTaxCode());
+	            if (!isValidTaxCode) {
+	                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	                        .body("Mã số thuế không hợp lệ hoặc không tồn tại");
+	            }
+	        }
 
-			// Xác thực mã số thuế
-			boolean isValidTaxCode = taxCodeValidation.checkTaxCode(company.getTaxCode());
-			if (!isValidTaxCode) {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-						.body("Mã số thuế không hợp lệ hoặc không tồn tại");
-			}
-		}
+	        // Tạo tài khoản mới
+	        UserAccount newUser = new UserAccount();
+	        newUser.setUserId(UUID.randomUUID());
+	        newUser.setUserType(userTypeRepository.findById(userSignupDTO.getUserType().getUserTypeId()).orElse(null));
+	        newUser.setActive(false);
+	        newUser.setEmail(userSignupDTO.getEmail());
+	        newUser.setPassword(passwordEncoder.encode(userSignupDTO.getPassword()));
+	        newUser.setUserName(userSignupDTO.getUserName());
+	        newUser.setCreateDate(LocalDateTime.now());
+	        newUser.setProvider("LOCAL");
 
-		// Tạo và gửi OTP
-		String otp = otpUtil.generateOtp();
-		try {
-			emailUtil.sendOtpEmail(userAccount.getEmail(), otp);
-		} catch (MessagingException e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Không thể gửi OTP, vui lòng thử lại");
-		}
+	        // Xử lý thông tin công ty nếu là employer
+	        if (userSignupDTO.getUserType().getUserTypeId() == 3 && userSignupDTO.getCompany() != null) {
+	            Company company = new Company();
+	            company.setCompanyName(userSignupDTO.getCompany().getCompanyName());
+	            company.setTaxCode(userSignupDTO.getCompany().getTaxCode());
+	            company.setAddress(userSignupDTO.getCompany().getAddress());
+	            
+	            // Lấy và set Industry
+	            Industry industry = industryRepository.findById(1)
+	                    .orElseThrow(() -> new RuntimeException("Industry not found"));
+	            company.setIndustry(industry);
+	            
+	            // Lấy và set City
+	            City city = cityRepository.findById(1)
+	                    .orElseThrow(() -> new RuntimeException("City not found"));
+	            company.setCity(city);
+	            
+	            
+	            company.setUserAccount(newUser);
+	            newUser.setCompany(company);
+	        }
 
-		// Tạo tài khoản mới
-		UserAccount newUser = new UserAccount();
-		newUser.setUserId(UUID.randomUUID());
-		newUser.setUserType(userTypeRepository.findById(userAccount.getUserType().getUserTypeId()).orElse(null));
-		newUser.setActive(false);
-		newUser.setEmail(userAccount.getEmail());
-		newUser.setPassword(passwordEncoder.encode(userAccount.getPassword()));
-		newUser.setUserName(userAccount.getUserName());
-		newUser.setCreateDate(LocalDateTime.now());
-		newUser.setOtp(otp);
-		newUser.setOtpGeneratedTime(LocalDateTime.now());
-
-		// Nếu là nhà tuyển dụng, lưu thông tin công ty
-		if (userAccount.getUserType().getUserTypeId() == 3) {
-			Company company = new Company();
-			company.setUserAccount(newUser);
-			company.setCompanyName(userAccount.getCompany().getCompanyName());
-			company.setTaxCode(userAccount.getCompany().getTaxCode());
-			company.setAddress(userAccount.getCompany().getAddress());
-			company.setIndustry(industryRepository.findById(0).orElse(null)); // Default industry
-			company.setCity(cityRepository.findById(0).orElse(null)); // Default city
-			newUser.setCompany(company);
-		}
-
-		userAccountRepository.save(newUser);
-		return ResponseEntity.ok("Vui lòng check email để nhận mã đăng ký");
+	        // Tạo và gửi OTP
+	        String otp = otpUtil.generateOtp();
+	        emailUtil.sendOtpEmail(newUser.getEmail(), otp);
+	        newUser.setOtp(otp);
+	        newUser.setOtpGeneratedTime(LocalDateTime.now());
+	        
+	        // Lưu user mới
+	        userAccountRepository.save(newUser);
+	        return ResponseEntity.ok("Vui lòng check email để nhận mã đăng ký");
+	        
+	    } catch (MessagingException e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("Không thể gửi OTP, vui lòng thử lại");
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("Đã xảy ra lỗi trong quá trình đăng ký: " + e.getMessage());
+	    }
 	}
 
 	@PutMapping("/verify-account")
