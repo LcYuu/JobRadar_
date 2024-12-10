@@ -55,9 +55,11 @@ import com.job_portal.repository.CityRepository;
 import com.job_portal.repository.CompanyRepository;
 import com.job_portal.repository.IndustryRepository;
 import com.job_portal.repository.JobPostRepository;
+import com.job_portal.repository.NotificationRepository;
 import com.job_portal.repository.UserAccountRepository;
 import com.job_portal.service.ICompanyService;
 import com.job_portal.service.IJobPostService;
+import com.job_portal.service.INotificationService;
 import com.job_portal.service.SearchHistoryServiceImpl;
 import com.job_portal.specification.JobPostSpecification;
 import com.social.exceptions.AllExceptions;
@@ -89,6 +91,9 @@ public class JobPostController {
 	@Autowired
 	private SearchHistoryServiceImpl searchHistoryService;
 
+	@Autowired
+	private INotificationService notificationService;
+
 	String filePath = "D:\\JobRadar_\\search.csv";
 
 	@GetMapping("/get-all")
@@ -96,6 +101,7 @@ public class JobPostController {
 		List<JobPost> jobs = jobPostRepository.findAll();
 		return new ResponseEntity<>(jobs, HttpStatus.OK);
 	}
+
 	@GetMapping("/admin-get-all")
 	public ResponseEntity<Map<String, Object>> getAllJobs(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "12") int size, @RequestParam(required = false) String searchTerm,
@@ -122,7 +128,6 @@ public class JobPostController {
 		}
 	}
 
-
 	@GetMapping("/get-top8-lastest-job")
 	public ResponseEntity<List<JobPost>> getTop8LatestJobPosts() {
 		List<JobPost> jobs = jobPostService.getTop8LatestJobPosts();
@@ -142,9 +147,9 @@ public class JobPostController {
 			String email = JwtProvider.getEmailFromJwtToken(jwt);
 			Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 
-			if (!jobPostService.canPostJob(user.get().getCompany().getCompanyId())) {
-				return new ResponseEntity<>("Công ty chỉ được đăng 1 bài trong vòng 1 giờ.", HttpStatus.FORBIDDEN);
-			}
+//			if (!jobPostService.canPostJob(user.get().getCompany().getCompanyId())) {
+//				return new ResponseEntity<>("Công ty chỉ được đăng 1 bài trong vòng 1 giờ.", HttpStatus.FORBIDDEN);
+//			}
 			boolean isCreated = jobPostService.createJob(jobPostDTO, user.get().getCompany().getCompanyId());
 			if (isCreated) {
 				return new ResponseEntity<>("Công việc được tạo thành công. Chờ Admin phê duyệt", HttpStatus.CREATED);
@@ -161,7 +166,9 @@ public class JobPostController {
 	@PostMapping("/approve/{postId}")
 	public ResponseEntity<String> approveJobPost(@PathVariable UUID postId) {
 		boolean isApproved = jobPostService.approveJob(postId);
+		Optional<Company> company = companyRepository.findCompanyByPostId(postId);
 		if (isApproved) {
+			notificationService.notifyNewJobPost(company.get().getCompanyId());
 			return ResponseEntity.ok("Chấp thuận thành công");
 		} else {
 			return ResponseEntity.status(404).body("Không thể tìm thấy công việc");
@@ -270,51 +277,6 @@ public class JobPostController {
 		List<JobPost> jobPosts = jobPostRepository.findJobByCompany(user.get().getCompany().getCompanyId());
 		return ResponseEntity.ok(jobPosts);
 	}
-
-//	@GetMapping("/min-salary/{minSalary}")
-//	public ResponseEntity<Object> findBySalaryGreaterThanEqual(@PathVariable("minSalary") Long minSalary) {
-//		try {
-//			List<JobPost> jobs = jobPostService.findBySalaryGreaterThanEqual(minSalary);
-//			return ResponseEntity.ok(jobs);
-//		} catch (AllExceptions e) {
-//			// Trả về thông báo từ service
-//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-//		} catch (Exception e) {
-//			// Trả về thông báo lỗi chung
-//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
-//		}
-//	}
-//
-//	@GetMapping("/max-salary/{maxSalary}")
-//	public ResponseEntity<Object> findBySalaryLessThanEqual(@PathVariable("maxSalary") Long maxSalary) {
-//		try {
-//			List<JobPost> jobs = jobPostService.findBySalaryLessThanEqual(maxSalary);
-//			return ResponseEntity.ok(jobs);
-//		} catch (AllExceptions e) {
-//			// Trả về thông báo từ service
-//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-//		} catch (Exception e) {
-//			// Trả về thông báo lỗi chung
-//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
-//		}
-//	}
-//
-//	@GetMapping("/salary-between")
-//	public ResponseEntity<Object> findBySalaryBetween(@RequestParam Long minSalary, @RequestParam Long maxSalary) {
-//		try {
-//			List<JobPost> jobs = jobPostService.findBySalaryBetween(minSalary, maxSalary);
-//			return ResponseEntity.ok(jobs);
-//		} catch (AllExceptions e) {
-//			// Trả về thông báo từ service
-//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-//		} catch (Exception e) {
-//			// Trả về thông báo lỗi chung
-//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
-//		}
-//	}
 
 	@GetMapping("/findJob/{postId}")
 	public ResponseEntity<JobPost> getJobById(@PathVariable("postId") UUID postId) throws AllExceptions {
@@ -512,11 +474,9 @@ public class JobPostController {
 
 	@GetMapping("/count-by-company/{companyId}")
 	public ResponseEntity<Long> countJobsByCompany(@PathVariable UUID companyId) {
-	    long totalJobs = jobPostRepository.countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(
-	        companyId,
-	        LocalDateTime.now()
-	    );
-	    return ResponseEntity.ok(totalJobs);
+		long totalJobs = jobPostRepository
+				.countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(companyId, LocalDateTime.now());
+		return ResponseEntity.ok(totalJobs);
 
 	}
 
@@ -570,38 +530,34 @@ public class JobPostController {
 	}
 
 	@GetMapping("/stats/daily")
-	public ResponseEntity<?> getDailyStats(
-	    @RequestParam String startDate,
-	    @RequestParam String endDate
-	) {
-	    try {
-	    	LocalDate start = LocalDate.parse(startDate);
-	    	LocalDate end = LocalDate.parse(endDate);
-	        
-	        List<Map<String, Object>> dailyStats = new ArrayList<>();
-	        
-	        LocalDate current = start;
-	        while (!current.isAfter(end)) {
-	            long newUsers = userAccountRepository.countByCreatedAtBetween(current, current.plusDays(1));
-	            long newJobs = jobPostRepository.countByCreatedAtBetween(current, current.plusDays(1));
-            
-            Map<String, Object> dayStat = new HashMap<>();
-            dayStat.put("date", current.toString());
-            dayStat.put("newUsers", newUsers);
-            dayStat.put("newJobs", newJobs);
-            
-            dailyStats.add(dayStat);
-            current = current.plusDays(1);
-        }
-        
-        return ResponseEntity.ok(dailyStats);
-    } catch (Exception e) {
-        e.printStackTrace();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body("Error fetching daily stats: " + e.getMessage());
-    }
-}
+	public ResponseEntity<?> getDailyStats(@RequestParam String startDate, @RequestParam String endDate) {
+		try {
+			LocalDate start = LocalDate.parse(startDate);
+			LocalDate end = LocalDate.parse(endDate);
 
+			List<Map<String, Object>> dailyStats = new ArrayList<>();
+
+			LocalDate current = start;
+			while (!current.isAfter(end)) {
+				long newUsers = userAccountRepository.countByCreatedAtBetween(current, current.plusDays(1));
+				long newJobs = jobPostRepository.countByCreatedAtBetween(current, current.plusDays(1));
+
+				Map<String, Object> dayStat = new HashMap<>();
+				dayStat.put("date", current.toString());
+				dayStat.put("newUsers", newUsers);
+				dayStat.put("newJobs", newJobs);
+
+				dailyStats.add(dayStat);
+				current = current.plusDays(1);
+			}
+
+			return ResponseEntity.ok(dailyStats);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Error fetching daily stats: " + e.getMessage());
+		}
+	}
 
 	@GetMapping("/company/{companyId}")
 	public ResponseEntity<Page<JobPost>> getJobsByCompany(@PathVariable UUID companyId,
@@ -639,33 +595,28 @@ public class JobPostController {
 
 	@GetMapping("/company/{companyId}/job-stats")
 
-	public ResponseEntity<?> getCompanyJobStats(
-	    @PathVariable UUID companyId,
-	    @RequestParam String startDate,
-	    @RequestParam String endDate
-	) {
+	public ResponseEntity<?> getCompanyJobStats(@PathVariable UUID companyId, @RequestParam String startDate,
+			@RequestParam String endDate) {
 		try {
-	        // Parse ngày với định dạng ISO và set time
-	        LocalDateTime start = LocalDate.parse(startDate).atStartOfDay();
-	        LocalDateTime end = LocalDate.parse(endDate).atTime(23, 59, 59);
-	        
-	        System.out.println("Start date: " + start);
-	        System.out.println("End date: " + end);
-	        
-	        List<Map<String, Object>> stats = jobPostService.getCompanyJobStats(companyId, start, end);
-	        return ResponseEntity.ok(stats);
-	    } catch (DateTimeParseException e) {
-	        System.err.println("Date parsing error: " + e.getMessage());
-	        return ResponseEntity.badRequest()
-	                .body("Invalid date format. Use YYYY-MM-DD");
-	    } catch (Exception e) {
-	        System.err.println("Error in getCompanyJobStats: " + e.getMessage());
-	        e.printStackTrace();
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body("Error getting job stats: " + e.getMessage());
-	    }
+			// Parse ngày với định dạng ISO và set time
+			LocalDateTime start = LocalDate.parse(startDate).atStartOfDay();
+			LocalDateTime end = LocalDate.parse(endDate).atTime(23, 59, 59);
+
+			System.out.println("Start date: " + start);
+			System.out.println("End date: " + end);
+
+			List<Map<String, Object>> stats = jobPostService.getCompanyJobStats(companyId, start, end);
+			return ResponseEntity.ok(stats);
+		} catch (DateTimeParseException e) {
+			System.err.println("Date parsing error: " + e.getMessage());
+			return ResponseEntity.badRequest().body("Invalid date format. Use YYYY-MM-DD");
+		} catch (Exception e) {
+			System.err.println("Error in getCompanyJobStats: " + e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Error getting job stats: " + e.getMessage());
+		}
 	}
-	
 
 	@GetMapping("/admin/all-jobs")
 	public ResponseEntity<Page<JobPost>> getAllJobsForAdmin(
