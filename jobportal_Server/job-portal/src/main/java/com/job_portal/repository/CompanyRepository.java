@@ -25,6 +25,9 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 
 	@Query("SELECT c FROM Company c WHERE c.companyId = :companyId")
 	Optional<Company> findCompanyByCompanyId(@Param("companyId") UUID companyId);
+	
+	@Query("SELECT c FROM Company c JOIN c.jobPosts jp WHERE jp.postId = :postId")
+    Optional<Company> findCompanyByPostId(@Param("postId") UUID postId);
 
 	@Query("SELECT c FROM Company c WHERE c.city.cityName LIKE %:cityName%")
 	List<Company> findCompaniesByCityName(@Param("cityName") String cityName);
