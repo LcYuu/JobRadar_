@@ -93,9 +93,9 @@ export default function SignUpForm() {
       companyName: formData.companyName,
       taxCode: formData.taxCode,
       address: companyInfo?.address || "",
-      industry: { industryId: 0 },
-      city: { cityId: 0 }
-    } : null;
+      industry: { industryId: 1 },
+      city: { cityId: companyInfo?.cityId || 1 }
+  } : null;
 
     const userData = {
       userName: activeTab === "employer" ? formData.companyName : formData.fullName,
@@ -104,7 +104,8 @@ export default function SignUpForm() {
       userType: {
         userTypeId: activeTab === "employer" ? 3 : 2
       },
-      company: company  // Gửi company object thay vì các trường riêng lẻ
+      company: company,
+      provider: "LOCAL"
     };
 
     console.log("userData being sent:", JSON.stringify(userData, null, 2));
@@ -158,7 +159,7 @@ export default function SignUpForm() {
           error.response.data || "Xác thực thất bại. Vui lòng thử lại."
         );
       } else if (error.request) {
-        setErrorMessage("Không thể k��t nối đến máy chủ. Vui lòng thử lại sau.");
+        setErrorMessage("Không thể kết nối đến máy chủ. Vui lòng thử lại sau.");
       } else {
         setErrorMessage("Đã xảy ra lỗi. Vui lòng thử lại.");
       }
