@@ -26,6 +26,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { createJobPost } from "../../redux/JobPost/jobPost.action";
 import { store } from "../../redux/store";
 import { getCity } from "../../redux/City/city.action";
+import Swal from "sweetalert2";
 
 const cityCodeMapping = {
   1: 16, // Hà Nội
@@ -384,37 +385,70 @@ const PostJob = () => {
     return { isValid, errors: tempErrors };
   };
 
-  // Add form validation
 
-  // Update handleSubmitJob
-  const handleSubmitJob = async (e) => {
-    e.preventDefault();
+const handleSubmitJob = async (e) => {
+  e.preventDefault();
 
-    try {
-      const fullAddress =
-        specificAddress +
-        ", " +
-        `${location.ward}, ${location.district}, ${location.province}`;
+  try {
+    const fullAddress =
+      specificAddress +
+      ", " +
+      `${location.ward}, ${location.district}, ${location.province}`;
 
-      const finalJobData = {
-        ...jobData,
-        cityId: cityCodeMapping[selectedProvince],
-        location: fullAddress,
-      };
+    const finalJobData = {
+      ...jobData,
+      cityId: cityCodeMapping[selectedProvince],
+      location: fullAddress,
+    };
 
-      const result = await dispatch(createJobPost(finalJobData));
+    const result = await dispatch(createJobPost(finalJobData));
 
-      if (result.success) {
-        toast.success(result.message || "Tạo tin tuyển dụng thành công!");
-        setShowSuccessModal(true); // Hiển thị modal khi thành công
-      } else {
-        toast.error(result?.error || "Có lỗi xảy ra");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("Có lỗi xảy ra khi tạo tin tuyển dụng");
+    if (result.success) {
+      // Hiển thị thông báo thành công
+      Swal.fire({
+        icon: "success",
+        title: "Tạo tin tuyển dụng thành công!",
+        text: result.message || "Tin tuyển dụng đã được tạo thành công.",
+        confirmButtonText: "OK",
+      }).then((response) => {
+        if (response.isConfirmed) {
+          // Điều hướng khi người dùng nhấn OK
+          navigate("/employer/account-management/job-management");
+        }
+      });
+
+      setShowSuccessModal(true); // Hiển thị modal khi thành công
+    } else {
+      // Hiển thị thông báo lỗi
+      Swal.fire({
+        icon: "warning",
+        title: "Có lỗi xảy ra",
+        text: result?.error || "Không thể tạo tin tuyển dụng.",
+        confirmButtonText: "OK",
+      }).then((response) => {
+        if (response.isConfirmed) {
+          // Điều hướng khi người dùng nhấn OK
+          navigate("/employer/account-management/job-management");
+        }
+      });
     }
-  };
+  } catch (error) {
+    console.error("Error:", error);
+    // Hiển thị thông báo lỗi khi có ngoại lệ
+    Swal.fire({
+      icon: "warning",
+      title: "Có lỗi xảy ra",
+      text: "Không thể tạo tin tuyển dụng. Vui lòng thử lại.",
+      confirmButtonText: "OK",
+    }).then((response) => {
+      if (response.isConfirmed) {
+        // Điều hướng khi người dùng nhấn OK
+        navigate("/employer/account-management/job-management");
+      }
+    });
+  }
+};
+
 
   const handleProvinceSelection = (provinceCode) => {
     setSelectedProvince(provinceCode);
@@ -964,7 +998,7 @@ const PostJob = () => {
         </Button>
       </div>
 
-      {showSuccessModal && (
+      {/* {showSuccessModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-lg font-semibold mb-2">Đăng tin thành công!</h3>
@@ -986,7 +1020,7 @@ const PostJob = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };
