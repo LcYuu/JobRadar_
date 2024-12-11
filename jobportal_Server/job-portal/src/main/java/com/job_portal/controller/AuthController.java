@@ -157,6 +157,7 @@ public class AuthController {
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 	                .body("Đã xảy ra lỗi trong quá trình đăng ký: " + e.getMessage());
 	    }
+
 	}
 
 	@PutMapping("/verify-account")
@@ -195,58 +196,59 @@ public class AuthController {
 	        }
 	    }
 	    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Xác thực OTP thất bại, vui lòng nhập lại email");
-	}
 
+	}
 
 	@PostMapping("/login")
 	public AuthResponse signin(@RequestBody LoginDTO login) {
-	    // Kiểm tra email không được để trống
-	    if (login.getEmail() == null || login.getEmail().isEmpty()) {
-	        throw new IllegalArgumentException("Email không được để trống");
-	    }
+		// Kiểm tra email không được để trống
+		if (login.getEmail() == null || login.getEmail().isEmpty()) {
+			throw new IllegalArgumentException("Email không được để trống");
+		}
 
-	    // Kiểm tra mật khẩu không được để trống
-	    if (login.getPassword() == null || login.getPassword().isEmpty()) {
-	        throw new IllegalArgumentException("Mật khẩu không được để trống");
-	    }
+		// Kiểm tra mật khẩu không được để trống
+		if (login.getPassword() == null || login.getPassword().isEmpty()) {
+			throw new IllegalArgumentException("Mật khẩu không được để trống");
+		}
 
-	    // Kiểm tra độ phức tạp của mật khẩu
-	    if (!isValidPassword(login.getPassword())) {
-	        throw new IllegalArgumentException("Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
-	    }
+		// Kiểm tra độ phức tạp của mật khẩu
+		if (!isValidPassword(login.getPassword())) {
+			throw new IllegalArgumentException(
+					"Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
+		}
 
-	    // Kiểm tra tài khoản theo email
-	    Optional<UserAccount> userOpt = userAccountRepository.findByEmail(login.getEmail());
-	    if (userOpt.isEmpty()) {
-	        return new AuthResponse("", "Tài khoản hoặc mật khẩu không đúng");
-	    }
+		// Kiểm tra tài khoản theo email
+		Optional<UserAccount> userOpt = userAccountRepository.findByEmail(login.getEmail());
+		if (userOpt.isEmpty()) {
+			return new AuthResponse("", "Tài khoản hoặc mật khẩu không đúng");
+		}
 
-	    UserAccount user = userOpt.get();
+		UserAccount user = userOpt.get();
 
-	    // Kiểm tra trạng thái hoạt động của tài khoản
-	    if (!user.isActive()) {
-	        return new AuthResponse("", "Tài khoản của bạn chưa được xác thực");
-	    }
+		// Kiểm tra trạng thái hoạt động của tài khoản
+		if (!user.isActive()) {
+			return new AuthResponse("", "Tài khoản của bạn chưa được xác thực");
+		}
 
-	    // Kiểm tra thông tin đăng nhập
-	    try {
-	        Authentication authentication = authenticate(login.getEmail(), login.getPassword());
-	        String token = JwtProvider.generateToken(authentication);
-	        user.setLastLogin(LocalDateTime.now());
-	        userAccountRepository.save(user);
-	        return new AuthResponse(token, "Đăng nhập thành công");
-	    } catch (Exception e) {
-	        return new AuthResponse("", "Tài khoản hoặc mật khẩu không đúng");
-	    }
+		// Kiểm tra thông tin đăng nhập
+		try {
+			Authentication authentication = authenticate(login.getEmail(), login.getPassword());
+			String token = JwtProvider.generateToken(authentication);
+			user.setLastLogin(LocalDateTime.now());
+			userAccountRepository.save(user);
+			return new AuthResponse(token, "Đăng nhập thành công");
+		} catch (Exception e) {
+			return new AuthResponse("", "Tài khoản hoặc mật khẩu không đúng");
+		}
 	}
 
 	// Hàm kiểm tra độ phức tạp của mật khẩu
 	private boolean isValidPassword(String password) {
-	    // Regex kiểm tra mật khẩu: ít nhất 8 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt
-	    String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
-	    return password.matches(passwordPattern);
+		// Regex kiểm tra mật khẩu: ít nhất 8 ký tự, có chữ hoa, chữ thường, số và ký tự
+		// đặc biệt
+		String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
+		return password.matches(passwordPattern);
 	}
-
 
 	@PutMapping("/regenerate-otp")
 	public String regenerateOtp(@RequestParam String email) {
@@ -348,16 +350,15 @@ public class AuthController {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND)
 						.body(Collections.singletonMap("error", "User not found"));
 			}
-
 			UserAccount user = userOpt.get();
 			String role;
-if (user.getUserType().getUserTypeId() == 1) {
-    role = "ROLE_ADMIN";
-} else if (user.getUserType().getUserTypeId() == 2) {
-    role = "ROLE_USER";
-} else {
-    role = "ROLE_EMPLOYER"; // Giả sử rằng nếu không phải là ADMIN hoặc USER thì sẽ là EMPLOYER
-}
+			if (user.getUserType().getUserTypeId() == 1) {
+				role = "ROLE_ADMIN";
+			} else if (user.getUserType().getUserTypeId() == 2) {
+				role = "ROLE_USER";
+			} else {
+				role = "ROLE_EMPLOYER"; // Giả sử rằng nếu không phải là ADMIN hoặc USER thì sẽ là EMPLOYER
+			}
 
 			Map<String, String> response = new HashMap<>();
 			response.put("role", role);
@@ -369,7 +370,6 @@ if (user.getUserType().getUserTypeId() == 1) {
 		}
 	}
 
-
 	@PostMapping("/login/google")
 	public AuthResponse loginWithGoogle(@RequestBody Map<String, String> requestBody) {
 		String googleToken = requestBody.get("token"); // Lấy googleToken từ frontend
@@ -377,11 +377,13 @@ if (user.getUserType().getUserTypeId() == 1) {
 		// Giải mã token Google (JWT) để lấy thông tin người dùng
 		DecodedJWT decodedJWT = JWT.decode(googleToken);
 		String email = decodedJWT.getClaim("email").asString();
-		
+
 		String jwtToken = jwtProvider.generateTokenFromEmail(email); // Sử dụng auth trực tiếp
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-		
+
 //		user.get().setLastLogin(LocalDateTime.now());
+//		userAccountRepository.save(user.get());
+		
 
 		// Trả về JWT token cho người dùng
 		System.out.println("a" + jwtToken);
@@ -391,11 +393,12 @@ if (user.getUserType().getUserTypeId() == 1) {
 	}
 
 	@PostMapping("/update-role/{role}")
-	public ResponseEntity<AuthResponse> updateRole(@RequestHeader("Authorization") String jwt, @PathVariable Integer role) {
+	public ResponseEntity<AuthResponse> updateRole(@RequestHeader("Authorization") String jwt,
+			@PathVariable Integer role) {
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 		Optional<UserType> userType = userTypeRepository.findById(role);
-		
+
 		UserAccount newUser = user.get();
 		newUser.setUserType(userType.orElse(null));
 		if (newUser.getUserType().getUserTypeId() == 2) {
@@ -429,10 +432,10 @@ if (user.getUserType().getUserTypeId() == 1) {
 		AuthResponse response = new AuthResponse(String.valueOf(role), "Cập nhật vai trò thành công");
 		return ResponseEntity.ok(response);
 	}
-	
+
 	@PostMapping("/check-email")
 	public ResponseEntity<Boolean> checkEmailExists(@RequestBody Map<String, String> requestBody) {
-		String googleToken = requestBody.get("token"); 
+		String googleToken = requestBody.get("token");
 
 		DecodedJWT decodedJWT = JWT.decode(googleToken);
 		String email = decodedJWT.getClaim("email").asString();
@@ -442,6 +445,7 @@ if (user.getUserType().getUserTypeId() == 1) {
 	        return ResponseEntity.ok(true); 
 	    } else {
 	    	String name = decodedJWT.getClaim("name").asString();
+
 
 			// Tìm người dùng trong cơ sở dữ liệu, nếu không có thì tạo mới
 			Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
@@ -477,8 +481,8 @@ if (user.getUserType().getUserTypeId() == 1) {
 				userAccountRepository.save(newUser);
 			}
 			// Tạo JWT Token cho người dùng và truyền Authentication object
-	        return ResponseEntity.ok(false); // Người dùng chưa tồn tại
-	    }
+			return ResponseEntity.ok(false); // Người dùng chưa tồn tại
+		}
 	}
 
 }

@@ -20,4 +20,5 @@ public class ApplyJobEmployerDTO {
     private String fullName;
     private String title;
     private String avatar;
+    private Boolean isViewed;
 }
