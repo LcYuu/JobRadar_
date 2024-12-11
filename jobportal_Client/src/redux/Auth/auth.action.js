@@ -48,14 +48,12 @@ export const loginAction = (loginData) => async (dispatch) => {
       sessionStorage.setItem("jwt", data.token);
       dispatch({ type: LOGIN_SUCCESS, payload: data.token });
       
-      // Fetch user profile và role
       const profileResponse = await axios.get(`${API_BASE_URL}/users/profile`, {
         headers: {
           Authorization: `Bearer ${data.token}`,
         },
       });
       
-      // Fetch role
       const roleResponse = await axios.get(`${API_BASE_URL}/auth/user-role`, {
         headers: {
           Authorization: `Bearer ${data.token}`,
@@ -70,13 +68,12 @@ export const loginAction = (loginData) => async (dispatch) => {
         }
       });
       
-      // Đảm bảo trả về object với success: true
       return { success: true, user: { ...profileResponse.data, role: roleResponse.data.role } };
     } else {
-      throw new Error('Token not received');
+      throw new Error(data.message || 'Login failed');
     }
   } catch (error) {
-    const errorMessage = error.response?.data?.message || error.message || "Đăng nhập thất bại";
+    const errorMessage = error.response?.data?.message || error.message;
     dispatch({ type: LOGIN_FAILURE, payload: errorMessage });
     return { success: false, error: errorMessage };
   }
