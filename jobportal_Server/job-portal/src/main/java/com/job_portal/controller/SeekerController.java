@@ -7,6 +7,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -58,7 +61,9 @@ public class SeekerController {
 	@Autowired
 	private INotificationService notificationService;
 	@Autowired
-	NotificationRepository notificationRepository;
+	private NotificationRepository notificationRepository;
+
+
 	@GetMapping("/get-all")
 	public ResponseEntity<List<Seeker>> getSeeker() {
 		List<Seeker> seekers = seekerRepository.findAll();
@@ -89,8 +94,7 @@ public class SeekerController {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		}
 	}
-	
-	
+
 	@GetMapping("/seeker-profile")
 	public ResponseEntity<Seeker> getSeekerById(@RequestHeader("Authorization") String jwt) throws AllExceptions {
 		try {
@@ -180,13 +184,14 @@ public class SeekerController {
 			return ResponseEntity.status(500).body(null);
 		}
 	}
-	
+
 	@GetMapping("/{companyId}/followers")
-    public List<FollowSeekerDTO> getSeekersFollowingCompany(@PathVariable UUID companyId) {
-        return seekerRepository.findSeekersFollowingCompany(companyId);
-    }
-	
+	public List<FollowSeekerDTO> getSeekersFollowingCompany(@PathVariable UUID companyId) {
+		return seekerRepository.findSeekersFollowingCompany(companyId);
+	}
+
 	@PatchMapping("/read/{notificationId}")
+
 	public ResponseEntity<?> markNotificationAsRead(@PathVariable UUID notificationId) {
 	    try {
 	        boolean updated = notificationService.updateNotificationReadStatus(notificationId);
