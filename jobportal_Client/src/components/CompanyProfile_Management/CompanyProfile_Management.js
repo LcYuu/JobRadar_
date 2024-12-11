@@ -275,22 +275,15 @@ const CompanyProfile_Management = () => {
 
   // Định nghĩa mảng màu với tên và giá trị
   const colorOptions = [
-    { name: "Sky Blue", value: "from-sky-500 to-sky-700" },
-    { name: "Purple", value: "from-purple-500 to-purple-700" },
-    { name: "Red", value: "from-red-500 to-red-700" },
-    { name: "Green", value: "from-green-500 to-green-700" },
-    { name: "Orange", value: "from-orange-500 to-orange-700" },
-    { name: "Pink", value: "from-pink-500 to-pink-700" },
-    { name: "Indigo", value: "from-indigo-500 to-indigo-700" },
-    { name: "Teal", value: "from-teal-500 to-teal-700" },
-    { name: "Yellow", value: "from-yellow-500 to-yellow-700" },
-    { name: "Lime", value: "from-lime-500 to-lime-700" },
-    { name: "Cyan", value: "from-cyan-500 to-cyan-700" },
-    { name: "Violet", value: "from-violet-500 to-violet-700" },
-    { name: "Fuchsia", value: "from-fuchsia-500 to-fuchsia-700" },
-    { name: "Rose", value: "from-rose-500 to-rose-700" },
-    { name: "Emerald", value: "from-emerald-500 to-emerald-700" },
-    { name: "Amber", value: "from-amber-500 to-amber-700" },
+    { name: 'Sky Blue', value: 'from-sky-500 to-sky-700' },
+    { name: 'Purple', value: 'from-purple-500 to-purple-700' },
+    { name: 'Red', value: 'from-red-500 to-red-700' },
+    { name: 'Green', value: 'from-green-500 to-green-700' },
+    { name: 'Orange', value: 'from-orange-500 to-orange-700' },
+    { name: 'Pink', value: 'from-pink-500 to-pink-700' },
+    { name: 'Indigo', value: 'from-indigo-500 to-indigo-700' },
+    { name: 'Teal', value: 'from-teal-500 to-teal-700' }
+
   ];
 
   // Thêm state để lưu màu đã chọn

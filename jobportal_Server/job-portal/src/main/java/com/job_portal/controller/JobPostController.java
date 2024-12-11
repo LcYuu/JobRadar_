@@ -128,7 +128,6 @@ public class JobPostController {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-
 	@GetMapping("/get-top8-lastest-job")
 	public ResponseEntity<List<JobPost>> getTop8LatestJobPosts() {
 		List<JobPost> jobs = jobPostService.getTop8LatestJobPosts();
@@ -169,7 +168,7 @@ public class JobPostController {
 		boolean isApproved = jobPostService.approveJob(postId);
 		Optional<Company> company = companyRepository.findCompanyByPostId(postId);
 		if (isApproved) {
-			notificationService.notifyNewJobPost(company.get().getCompanyId());
+			notificationService.notifyNewJobPost(company.get().getCompanyId(),postId);
 			return ResponseEntity.ok("Chấp thuận thành công");
 		} else {
 			return ResponseEntity.status(404).body("Không thể tìm thấy công việc");
