@@ -461,7 +461,7 @@ export default function MyProfile() {
           </div>
 
           <div className="relative px-6 pb-6">
-            <Avatar className="absolute -top-16 h-32 w-32 border-4 border-white">
+            <Avatar className="absolute -top-16 h-32 w-32 border-4 ring-4 ring-purple-500">
               <AvatarImage src={user?.avatar} />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
