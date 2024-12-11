@@ -149,7 +149,7 @@ export default function SignInForm() {
 
   const handleGoogleLogin = async (response) => {
     try {
-      const googleToken = response.credential; // Lấy googleToken từ response.credential
+      const googleToken = response.credential;
       console.log("Google Token: ", googleToken);
 
       // Gửi googleToken đến backend để xác thực
@@ -166,20 +166,25 @@ export default function SignInForm() {
         "http://localhost:8080/auth/check-email",
         { token: googleToken }
       );
+
       if (emailExists.data) {
-        // dispatch(getProfileAction());
         setTimeout(() => {
-          // setIsModalOpen(false);
           window.location.href = "http://localhost:3000/";
         }, 1000);
       } else {
+        const defaultAddress = {
+          specificAddress: "",
+          ward: "",
+          district: "",
+          province: ""
+        };
+        sessionStorage.setItem("defaultAddress", JSON.stringify(defaultAddress));
+        
         setTimeout(() => {
-          // setIsModalOpen(false);
           window.location.href = "http://localhost:3000/role-selection";
         }, 1000);
       }
     } catch (err) {
-      // In lỗi và hiển thị thông báo
       console.error(
         "Error during login: ",
         err.response ? err.response.data : err.message

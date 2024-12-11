@@ -107,7 +107,6 @@ public class AuthController {
 	            return ResponseEntity.status(HttpStatus.CONFLICT)
 	                    .body("Email này đã được sử dụng ở tài khoản khác");
 	        }
-
 	        // Tạo tài khoản mới
 	        UserAccount newUser = new UserAccount();
 	        newUser.setUserId(UUID.randomUUID());
@@ -405,6 +404,7 @@ if (user.getUserType().getUserTypeId() == 1) {
 			Seeker seeker = new Seeker();
 			seeker.setUserAccount(newUser);
 			seeker.setIndustry(defaultIndustry);
+			seeker.setAddress(", , ");
 			user.get().setSeeker(seeker);
 			userAccountRepository.save(newUser);
 		} else if (newUser.getUserType().getUserTypeId() == 3) {
@@ -420,6 +420,7 @@ if (user.getUserType().getUserTypeId() == 1) {
 			company.setUserAccount(newUser);
 			company.setIndustry(defaultIndustry);
 			company.setCity(defaultCity);
+			company.setAddress(", , ");
 			user.get().setCompany(company);
 			userAccountRepository.save(newUser);
 		}
@@ -427,7 +428,6 @@ if (user.getUserType().getUserTypeId() == 1) {
 		return ResponseEntity.ok(response);
 	}
 	
-	// Backend (Spring Boot)
 	@PostMapping("/check-email")
 	public ResponseEntity<Boolean> checkEmailExists(@RequestBody Map<String, String> requestBody) {
 		String googleToken = requestBody.get("token"); 
@@ -437,7 +437,7 @@ if (user.getUserType().getUserTypeId() == 1) {
 	    Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 	    System.out.println("d" + user.toString());
 	    if (user.isPresent()) {
-	        return ResponseEntity.ok(true); // Người dùng đã tồn tại
+	        return ResponseEntity.ok(true); 
 	    } else {
 	    	String name = decodedJWT.getClaim("name").asString();
 
@@ -457,8 +457,22 @@ if (user.getUserType().getUserTypeId() == 1) {
 				newUser.setOtpGeneratedTime(null);
 				newUser.setProvider("Google");
 				newUser.setLastLogin(LocalDateTime.now());
+				
+				String defaultAddress = ", , "; 
+			    if (newUser.getUserType() != null) {
+			        if (newUser.getUserType().getUserTypeId() == 2) {
+			            Seeker seeker = new Seeker();
+			            seeker.setUserAccount(newUser);
+			            seeker.setAddress(defaultAddress);
+			            newUser.setSeeker(seeker);
+			        } else if (newUser.getUserType().getUserTypeId() == 3) {
+			            Company company = new Company();
+			            company.setUserAccount(newUser);
+			            company.setAddress(defaultAddress);
+			            newUser.setCompany(company);
+			        }
+			    }
 				userAccountRepository.save(newUser);
-
 			}
 			// Tạo JWT Token cho người dùng và truyền Authentication object
 	        return ResponseEntity.ok(false); // Người dùng chưa tồn tại
