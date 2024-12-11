@@ -100,151 +100,149 @@ public class AuthController {
 
 	@PostMapping("/signup")
 	public ResponseEntity<String> createUserAccount(@RequestBody UserSignupDTO userSignupDTO) {
-	    try {
-	        // Kiểm tra email tồn tại
-	        Optional<UserAccount> isExist = userAccountRepository.findByEmail(userSignupDTO.getEmail());
-	        if (isExist.isPresent()) {
-	            return ResponseEntity.status(HttpStatus.CONFLICT)
-	                    .body("Email này đã được sử dụng ở tài khoản khác");
-	        }
-	        // Tạo tài khoản mới
-	        UserAccount newUser = new UserAccount();
-	        newUser.setUserId(UUID.randomUUID());
-	        newUser.setUserType(userTypeRepository.findById(userSignupDTO.getUserType().getUserTypeId()).orElse(null));
-	        newUser.setActive(false);
-	        newUser.setEmail(userSignupDTO.getEmail());
-	        newUser.setPassword(passwordEncoder.encode(userSignupDTO.getPassword()));
-	        newUser.setUserName(userSignupDTO.getUserName());
-	        newUser.setCreateDate(LocalDateTime.now());
-	        newUser.setProvider("LOCAL");
-        
-	        // Tạo và gửi OTP
-	        String otp = otpUtil.generateOtp();
-	        emailUtil.sendOtpEmail(newUser.getEmail(), otp);
-	        newUser.setOtp(otp);
-	        newUser.setOtpGeneratedTime(LocalDateTime.now());
+		try {
+			// Kiểm tra email tồn tại
+			Optional<UserAccount> isExist = userAccountRepository.findByEmail(userSignupDTO.getEmail());
+			if (isExist.isPresent()) {
+				return ResponseEntity.status(HttpStatus.CONFLICT).body("Email này đã được sử dụng ở tài khoản khác");
+			}
+			// Tạo tài khoản mới
+			UserAccount newUser = new UserAccount();
+			newUser.setUserId(UUID.randomUUID());
+			newUser.setUserType(userTypeRepository.findById(userSignupDTO.getUserType().getUserTypeId()).orElse(null));
+			newUser.setActive(false);
+			newUser.setEmail(userSignupDTO.getEmail());
+			newUser.setPassword(passwordEncoder.encode(userSignupDTO.getPassword()));
+			newUser.setUserName(userSignupDTO.getUserName());
+			newUser.setCreateDate(LocalDateTime.now());
+			newUser.setProvider("LOCAL");
 
-	        // Xử lý thông tin công ty nếu là employer
-	        if (userSignupDTO.getUserType() != null && userSignupDTO.getUserType().getUserTypeId() == 3) {
-	            Company company = userSignupDTO.getCompany();
-	            if (company == null || company.getTaxCode() == null || company.getTaxCode().isEmpty()) {
-	                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-	                        .body("Thông tin công ty và mã số thuế là bắt buộc đối với tài khoản nhà tuyển dụng");
-	            }
+			// Tạo và gửi OTP
+			String otp = otpUtil.generateOtp();
+			emailUtil.sendOtpEmail(newUser.getEmail(), otp);
+			newUser.setOtp(otp);
+			newUser.setOtpGeneratedTime(LocalDateTime.now());
 
-	            // Xác thực mã số thuế
-	            boolean isValidTaxCode = taxCodeValidation.checkTaxCode(company.getTaxCode());
-	            if (!isValidTaxCode) {
-	                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-	                        .body("Mã số thuế không hợp lệ hoặc không tồn tại");
-	            }
+			// Xử lý thông tin công ty nếu là employer
+			if (userSignupDTO.getUserType() != null && userSignupDTO.getUserType().getUserTypeId() == 3) {
+				Company company = userSignupDTO.getCompany();
+				if (company == null || company.getTaxCode() == null || company.getTaxCode().isEmpty()) {
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+							.body("Thông tin công ty và mã số thuế là bắt buộc đối với tài khoản nhà tuyển dụng");
+				}
 
-	            company.setUserAccount(newUser);
-	            company.setIndustry(industryRepository.findById(1).orElse(null));
-	            company.setCity(cityRepository.findById(company.getCity().getCityId()).orElse(null));
-	            newUser.setCompany(company);
-	        }
+				// Xác thực mã số thuế
+				boolean isValidTaxCode = taxCodeValidation.checkTaxCode(company.getTaxCode());
+				if (!isValidTaxCode) {
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+							.body("Mã số thuế không hợp lệ hoặc không tồn tại");
+				}
 
-	        // Lưu user mới
-	        userAccountRepository.save(newUser);
-	        return ResponseEntity.ok("Vui lòng check email để nhận mã đăng ký");
+				company.setUserAccount(newUser);
+				company.setIndustry(industryRepository.findById(1).orElse(null));
+				company.setCity(cityRepository.findById(company.getCity().getCityId()).orElse(null));
+				newUser.setCompany(company);
+			}
 
-	    } catch (MessagingException e) {
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body("Không thể gửi OTP, vui lòng thử lại");
-	    } catch (Exception e) {
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body("Đã xảy ra lỗi trong quá trình đăng ký: " + e.getMessage());
-	    }
+			// Lưu user mới
+			userAccountRepository.save(newUser);
+			return ResponseEntity.ok("Vui lòng check email để nhận mã đăng ký");
+
+		} catch (MessagingException e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Không thể gửi OTP, vui lòng thử lại");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Đã xảy ra lỗi trong quá trình đăng ký: " + e.getMessage());
+		}
 	}
 
 	@PutMapping("/verify-account")
 	public ResponseEntity<String> verifyAccount(@RequestParam String email, @RequestParam String otp) {
-	    Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
+		Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
 
-	    if (userOptional.isPresent()) {
-	        UserAccount user = userOptional.get();
-	        if (user.getOtp().equals(otp)
-	                && Duration.between(user.getOtpGeneratedTime(), LocalDateTime.now()).getSeconds() < (2 * 60)) {
+		if (userOptional.isPresent()) {
+			UserAccount user = userOptional.get();
+			if (user.getOtp().equals(otp)
+					&& Duration.between(user.getOtpGeneratedTime(), LocalDateTime.now()).getSeconds() < (2 * 60)) {
 
-	            user.setActive(true);
-	            user.setOtp(null);
-	            user.setOtpGeneratedTime(null);
+				user.setActive(true);
+				user.setOtp(null);
+				user.setOtpGeneratedTime(null);
 
-	            if (user.getUserType().getUserTypeId() == 2) {
-	                Integer defaultIndustryId = 0;
-	                Industry defaultIndustry = industryRepository.findById(defaultIndustryId).orElse(null);
-	                Seeker seeker = new Seeker();
-	                seeker.setUserAccount(user);
-	                seeker.setIndustry(defaultIndustry);
-	                user.setSeeker(seeker);
-	            } else if (user.getUserType().getUserTypeId() == 3) {
-	                Company existingCompany = user.getCompany();
-	                if (existingCompany != null) {
-	                    existingCompany.setIndustry(industryRepository.findById(0).orElse(null));
-	                    Integer cityId = existingCompany.getCity().getCityId();
-	                    City city = cityRepository.findById(cityId)
-	                            .orElseThrow(() -> new RuntimeException("City not found"));
-	                    existingCompany.setCity(city);
-	                }
-	            }
-	            userAccountRepository.save(user);
-	            return ResponseEntity.ok("Đăng ký tài khoản thành công");
-	        }
-	    }
-	    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Xác thực OTP thất bại, vui lòng nhập lại email");
+				if (user.getUserType().getUserTypeId() == 2) {
+					Integer defaultIndustryId = 0;
+					Industry defaultIndustry = industryRepository.findById(defaultIndustryId).orElse(null);
+					Seeker seeker = new Seeker();
+					seeker.setUserAccount(user);
+					seeker.setIndustry(defaultIndustry);
+					user.setSeeker(seeker);
+				} else if (user.getUserType().getUserTypeId() == 3) {
+					Company existingCompany = user.getCompany();
+					if (existingCompany != null) {
+						existingCompany.setIndustry(industryRepository.findById(0).orElse(null));
+						Integer cityId = existingCompany.getCity().getCityId();
+						City city = cityRepository.findById(cityId)
+								.orElseThrow(() -> new RuntimeException("City not found"));
+						existingCompany.setCity(city);
+					}
+				}
+				userAccountRepository.save(user);
+				return ResponseEntity.ok("Đăng ký tài khoản thành công");
+			}
+		}
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Xác thực OTP thất bại, vui lòng nhập lại email");
 	}
-
 
 	@PostMapping("/login")
 	public AuthResponse signin(@RequestBody LoginDTO login) {
-	    // Kiểm tra email không được để trống
-	    if (login.getEmail() == null || login.getEmail().isEmpty()) {
-	        throw new IllegalArgumentException("Email không được để trống");
-	    }
+		// Kiểm tra email không được để trống
+		if (login.getEmail() == null || login.getEmail().isEmpty()) {
+			throw new IllegalArgumentException("Email không được để trống");
+		}
 
-	    // Kiểm tra mật khẩu không được để trống
-	    if (login.getPassword() == null || login.getPassword().isEmpty()) {
-	        throw new IllegalArgumentException("Mật khẩu không được để trống");
-	    }
+		// Kiểm tra mật khẩu không được để trống
+		if (login.getPassword() == null || login.getPassword().isEmpty()) {
+			throw new IllegalArgumentException("Mật khẩu không được để trống");
+		}
 
-	    // Kiểm tra độ phức tạp của mật khẩu
-	    if (!isValidPassword(login.getPassword())) {
-	        throw new IllegalArgumentException("Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
-	    }
+		// Kiểm tra độ phức tạp của mật khẩu
+		if (!isValidPassword(login.getPassword())) {
+			throw new IllegalArgumentException(
+					"Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
+		}
 
-	    // Kiểm tra tài khoản theo email
-	    Optional<UserAccount> userOpt = userAccountRepository.findByEmail(login.getEmail());
-	    if (userOpt.isEmpty()) {
-	        return new AuthResponse("", "Tài khoản hoặc mật khẩu không đúng");
-	    }
+		// Kiểm tra tài khoản theo email
+		Optional<UserAccount> userOpt = userAccountRepository.findByEmail(login.getEmail());
+		if (userOpt.isEmpty()) {
+			return new AuthResponse("", "Tài khoản hoặc mật khẩu không đúng");
+		}
 
-	    UserAccount user = userOpt.get();
+		UserAccount user = userOpt.get();
 
-	    // Kiểm tra trạng thái hoạt động của tài khoản
-	    if (!user.isActive()) {
-	        return new AuthResponse("", "Tài khoản của bạn chưa được xác thực");
-	    }
+		// Kiểm tra trạng thái hoạt động của tài khoản
+		if (!user.isActive()) {
+			return new AuthResponse("", "Tài khoản của bạn chưa được xác thực");
+		}
 
-	    // Kiểm tra thông tin đăng nhập
-	    try {
-	        Authentication authentication = authenticate(login.getEmail(), login.getPassword());
-	        String token = JwtProvider.generateToken(authentication);
-	        user.setLastLogin(LocalDateTime.now());
-	        userAccountRepository.save(user);
-	        return new AuthResponse(token, "Đăng nhập thành công");
-	    } catch (Exception e) {
-	        return new AuthResponse("", "Tài khoản hoặc mật khẩu không đúng");
-	    }
+		// Kiểm tra thông tin đăng nhập
+		try {
+			Authentication authentication = authenticate(login.getEmail(), login.getPassword());
+			String token = JwtProvider.generateToken(authentication);
+			user.setLastLogin(LocalDateTime.now());
+			userAccountRepository.save(user);
+			return new AuthResponse(token, "Đăng nhập thành công");
+		} catch (Exception e) {
+			return new AuthResponse("", "Tài khoản hoặc mật khẩu không đúng");
+		}
 	}
 
 	// Hàm kiểm tra độ phức tạp của mật khẩu
 	private boolean isValidPassword(String password) {
-	    // Regex kiểm tra mật khẩu: ít nhất 8 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt
-	    String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
-	    return password.matches(passwordPattern);
+		// Regex kiểm tra mật khẩu: ít nhất 8 ký tự, có chữ hoa, chữ thường, số và ký tự
+		// đặc biệt
+		String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
+		return password.matches(passwordPattern);
 	}
-
 
 	@PutMapping("/regenerate-otp")
 	public String regenerateOtp(@RequestParam String email) {
@@ -346,16 +344,15 @@ public class AuthController {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND)
 						.body(Collections.singletonMap("error", "User not found"));
 			}
-
 			UserAccount user = userOpt.get();
 			String role;
-if (user.getUserType().getUserTypeId() == 1) {
-    role = "ROLE_ADMIN";
-} else if (user.getUserType().getUserTypeId() == 2) {
-    role = "ROLE_USER";
-} else {
-    role = "ROLE_EMPLOYER"; // Giả sử rằng nếu không phải là ADMIN hoặc USER thì sẽ là EMPLOYER
-}
+			if (user.getUserType().getUserTypeId() == 1) {
+				role = "ROLE_ADMIN";
+			} else if (user.getUserType().getUserTypeId() == 2) {
+				role = "ROLE_USER";
+			} else {
+				role = "ROLE_EMPLOYER"; // Giả sử rằng nếu không phải là ADMIN hoặc USER thì sẽ là EMPLOYER
+			}
 
 			Map<String, String> response = new HashMap<>();
 			response.put("role", role);
@@ -367,7 +364,6 @@ if (user.getUserType().getUserTypeId() == 1) {
 		}
 	}
 
-
 	@PostMapping("/login/google")
 	public AuthResponse loginWithGoogle(@RequestBody Map<String, String> requestBody) {
 		String googleToken = requestBody.get("token"); // Lấy googleToken từ frontend
@@ -375,11 +371,13 @@ if (user.getUserType().getUserTypeId() == 1) {
 		// Giải mã token Google (JWT) để lấy thông tin người dùng
 		DecodedJWT decodedJWT = JWT.decode(googleToken);
 		String email = decodedJWT.getClaim("email").asString();
-		
+
 		String jwtToken = jwtProvider.generateTokenFromEmail(email); // Sử dụng auth trực tiếp
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-		
+
 //		user.get().setLastLogin(LocalDateTime.now());
+//		userAccountRepository.save(user.get());
+		
 
 		// Trả về JWT token cho người dùng
 		System.out.println("a" + jwtToken);
@@ -389,11 +387,12 @@ if (user.getUserType().getUserTypeId() == 1) {
 	}
 
 	@PostMapping("/update-role/{role}")
-	public ResponseEntity<AuthResponse> updateRole(@RequestHeader("Authorization") String jwt, @PathVariable Integer role) {
+	public ResponseEntity<AuthResponse> updateRole(@RequestHeader("Authorization") String jwt,
+			@PathVariable Integer role) {
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 		Optional<UserType> userType = userTypeRepository.findById(role);
-		
+
 		UserAccount newUser = user.get();
 		newUser.setUserType(userType.orElse(null));
 		if (newUser.getUserType().getUserTypeId() == 2) {
@@ -425,20 +424,20 @@ if (user.getUserType().getUserTypeId() == 1) {
 		AuthResponse response = new AuthResponse(String.valueOf(role), "Cập nhật vai trò thành công");
 		return ResponseEntity.ok(response);
 	}
-	
+
 	// Backend (Spring Boot)
 	@PostMapping("/check-email")
 	public ResponseEntity<Boolean> checkEmailExists(@RequestBody Map<String, String> requestBody) {
-		String googleToken = requestBody.get("token"); 
+		String googleToken = requestBody.get("token");
 
 		DecodedJWT decodedJWT = JWT.decode(googleToken);
 		String email = decodedJWT.getClaim("email").asString();
-	    Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-	    System.out.println("d" + user.toString());
-	    if (user.isPresent()) {
-	        return ResponseEntity.ok(true); // Người dùng đã tồn tại
-	    } else {
-	    	String name = decodedJWT.getClaim("name").asString();
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+		System.out.println("d" + user.toString());
+		if (user.isPresent()) {
+			return ResponseEntity.ok(true); // Người dùng đã tồn tại
+		} else {
+			String name = decodedJWT.getClaim("name").asString();
 
 			// Tìm người dùng trong cơ sở dữ liệu, nếu không có thì tạo mới
 			Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
@@ -457,11 +456,10 @@ if (user.getUserType().getUserTypeId() == 1) {
 				newUser.setProvider("Google");
 				newUser.setLastLogin(LocalDateTime.now());
 				userAccountRepository.save(newUser);
-
 			}
 			// Tạo JWT Token cho người dùng và truyền Authentication object
-	        return ResponseEntity.ok(false); // Người dùng chưa tồn tại
-	    }
+			return ResponseEntity.ok(false); // Người dùng chưa tồn tại
+		}
 	}
 
 }

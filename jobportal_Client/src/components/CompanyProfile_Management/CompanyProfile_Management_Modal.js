@@ -26,69 +26,69 @@ import {
   getIndustry,
 } from "../../redux/Industry/industry.action";
 const cityCodeMapping = {
-  1: 16,    // Hà Nội
-  2: 1,     // Hà Giang 
-  4: 2,     // Cao Bằng
-  6: 6,     // Bắc Kạn
-  8: 8,     // Tuyên Quang
-  10: 3,    // Lào Cai
-  11: 11,   // Điện Biên
-  12: 5,    // Lai Châu
-  14: 4,    // Sơn La
-  15: 9,    // Yên Bái
-  17: 20,   // Hoà Bình
-  19: 10,   // Thái Nguyên
-  20: 7,    // Lạng Sơn
-  22: 17,   // Quảng Ninh
-  24: 14,   // Bắc Giang
-  25: 12,   // Phú Thọ
-  26: 13,   // Vĩnh Phúc
-  27: 15,   // Bắc Ninh
-  30: 18,   // Hải Dương
-  31: 19,   // Hải Phòng
-  33: 21,   // Hưng Yên
-  34: 23,   // Thái Bình
-  35: 22,   // Hà Nam
-  36: 24,   // Nam Định
-  37: 25,   // Ninh Bình
-  38: 26,   // Thanh Hóa
-  40: 27,   // Nghệ An
-  42: 28,   // Hà Tĩnh
-  44: 29,   // Quảng Bình
-  45: 30,   // Quảng Trị
-  46: 31,   // Thừa Thiên Huế
-  48: 32,   // Đà Nẵng
-  49: 33,   // Quảng Nam
-  51: 34,   // Quảng Ngãi
-  52: 37,   // Bình Định
-  54: 38,   // Phú Yên
-  56: 40,   // Khánh Hòa
-  58: 43,   // Ninh Thuận
-  60: 48,   // Bình Thuận
-  62: 35,   // Kon Tum
-  64: 36,   // Gia Lai
-  66: 39,   // Đắk Lắk
-  67: 41,   // Đắk Nông
-  68: 42,   // Lâm Đồng
-  70: 44,   // Bình Phước
-  72: 45,   // Tây Ninh
-  74: 46,   // Bình Dương
-  75: 47,   // Đồng Nai
-  77: 51,   // Bà Rịa - Vũng Tàu
-  79: 49,   // TP Hồ Chí Minh
-  80: 50,   // Long An
-  82: 54,   // Tiền Giang
-  83: 56,   // Bến Tre
-  84: 59,   // Trà Vinh
-  86: 55,   // Vĩnh Long
-  87: 52,   // Đồng Tháp
-  89: 53,   // An Giang
-  91: 58,   // Kiên Giang
-  92: 57,   // Cần Thơ
-  93: 60,   // Hậu Giang
-  94: 61,   // Sóc Trăng
-  95: 62,   // Bạc Liêu
-  96: 63    // Cà Mau
+  1: 16, // Hà Nội
+  2: 1, // Hà Giang
+  4: 2, // Cao Bằng
+  6: 6, // Bắc Kạn
+  8: 8, // Tuyên Quang
+  10: 3, // Lào Cai
+  11: 11, // Điện Biên
+  12: 5, // Lai Châu
+  14: 4, // Sơn La
+  15: 9, // Yên Bái
+  17: 20, // Hoà Bình
+  19: 10, // Thái Nguyên
+  20: 7, // Lạng Sơn
+  22: 17, // Quảng Ninh
+  24: 14, // Bắc Giang
+  25: 12, // Phú Thọ
+  26: 13, // Vĩnh Phúc
+  27: 15, // Bắc Ninh
+  30: 18, // Hải Dương
+  31: 19, // Hải Phòng
+  33: 21, // Hưng Yên
+  34: 23, // Thái Bình
+  35: 22, // Hà Nam
+  36: 24, // Nam Định
+  37: 25, // Ninh Bình
+  38: 26, // Thanh Hóa
+  40: 27, // Nghệ An
+  42: 28, // Hà Tĩnh
+  44: 29, // Quảng Bình
+  45: 30, // Quảng Trị
+  46: 31, // Thừa Thiên Huế
+  48: 32, // Đà Nẵng
+  49: 33, // Quảng Nam
+  51: 34, // Quảng Ngãi
+  52: 37, // Bình Định
+  54: 38, // Phú Yên
+  56: 40, // Khánh Hòa
+  58: 43, // Ninh Thuận
+  60: 48, // Bình Thuận
+  62: 35, // Kon Tum
+  64: 36, // Gia Lai
+  66: 39, // Đắk Lắk
+  67: 41, // Đắk Nông
+  68: 42, // Lâm Đồng
+  70: 44, // Bình Phước
+  72: 45, // Tây Ninh
+  74: 46, // Bình Dương
+  75: 47, // Đồng Nai
+  77: 51, // Bà Rịa - Vũng Tàu
+  79: 49, // TP Hồ Chí Minh
+  80: 50, // Long An
+  82: 54, // Tiền Giang
+  83: 56, // Bến Tre
+  84: 59, // Trà Vinh
+  86: 55, // Vĩnh Long
+  87: 52, // Đồng Tháp
+  89: 53, // An Giang
+  91: 58, // Kiên Giang
+  92: 57, // Cần Thơ
+  93: 60, // Hậu Giang
+  94: 61, // Sóc Trăng
+  95: 62, // Bạc Liêu
+  96: 63, // Cà Mau
 };
 const style = {
   position: "absolute",
@@ -114,7 +114,6 @@ const validationSchema = Yup.object({
   address: Yup.string().required("Địa chỉ là bắt buộc"),
   industryId: Yup.string().required("Lĩnh vực là bắt buộc"), // Lĩnh vực phải được chọn từ dropdown
 });
-
 
 export default function CompanyProfileModal({ open, handleClose }) {
   const [selectedLogo, setSelectedLogo] = useState("");
@@ -164,7 +163,7 @@ export default function CompanyProfileModal({ open, handleClose }) {
           );
           const data = await response.json();
           setDistricts(data.districts);
-          setLocation(prev => ({ ...prev, province: data.name }));
+          setLocation((prev) => ({ ...prev, province: data.name }));
         } catch (error) {
           console.error("Error fetching districts:", error);
         }
@@ -184,7 +183,7 @@ export default function CompanyProfileModal({ open, handleClose }) {
           );
           const data = await response.json();
           setWards(data.wards);
-          setLocation(prev => ({ ...prev, district: data.name }));
+          setLocation((prev) => ({ ...prev, district: data.name }));
         } catch (error) {
           console.error("Error fetching wards:", error);
         }
@@ -197,19 +196,19 @@ export default function CompanyProfileModal({ open, handleClose }) {
 
   useEffect(() => {
     if (companyJwt?.address) {
-      const addressParts = companyJwt.address.split(', ');
+      const addressParts = companyJwt.address.split(", ");
       if (addressParts.length >= 4) {
         setSpecificAddress(addressParts[0]);
         setLocation({
           ward: addressParts[1],
           district: addressParts[2],
-          province: addressParts[3]
+          province: addressParts[3],
         });
 
         // Thiết lập giá trị ban đầu cho các dropdown
-        const province = provinces.find(p => p.name === addressParts[3]);
-        const district = districts.find(d => d.name === addressParts[2]);
-        const ward = wards.find(w => w.name === addressParts[1]);
+        const province = provinces.find((p) => p.name === addressParts[3]);
+        const district = districts.find((d) => d.name === addressParts[2]);
+        const ward = wards.find((w) => w.name === addressParts[1]);
 
         if (province) setSelectedProvince(province.code);
         if (district) setSelectedDistrict(district.code);
@@ -236,13 +235,16 @@ export default function CompanyProfileModal({ open, handleClose }) {
     onSubmit: async (values) => {
       setIsLoading(true);
       try {
-        const fullAddress = `${specificAddress}, ${location.ward}, ${location.district}, ${location.province}`.trim();
-        
-        await dispatch(updateCompanyProfile({
-          ...values,
-          address: fullAddress,
-          cityId: cityCodeMapping[selectedProvince]
-        }));
+        const fullAddress =
+          `${specificAddress}, ${location.ward}, ${location.district}, ${location.province}`.trim();
+
+        await dispatch(
+          updateCompanyProfile({
+            ...values,
+            address: fullAddress,
+            cityId: cityCodeMapping[selectedProvince],
+          })
+        );
         dispatch(getCompanyByJWT());
         handleClose();
       } catch (error) {
@@ -276,20 +278,30 @@ export default function CompanyProfileModal({ open, handleClose }) {
               <IconButton onClick={handleClose} size="small">
                 <CloseIcon />
               </IconButton>
-              <h2 className="text-xl font-semibold">Chỉnh sửa hồ sơ</h2>
+              <h2 className="text-xl font-semibold mt-4">Chỉnh sửa hồ sơ</h2>
             </div>
             <Button
               type="submit"
               variant="contained"
               disabled={isLoading || imageLoading}
-              className="bg-blue-600 hover:bg-blue-700"
+              disableElevation
+              sx={{
+                backgroundColor: "#6b46c1", // Màu tím
+                "&:hover": {
+                  backgroundColor: "#553c9a", // Tím đậm hơn khi hover
+                },
+                "&.Mui-disabled": {
+                  backgroundColor: "#a3a3a3", // Màu xám khi bị vô hiệu hóa
+                },
+                color: "#fff", // Màu chữ trắng
+              }}
             >
               {isLoading ? "Đang lưu..." : "Lưu"}
             </Button>
           </div>
           <div className="flex flex-col items-center">
             <Avatar
-              className="transform mb-2"
+              className="transform mb-2 ring-4 ring-purple-500"
               sx={{ width: "10rem", height: "10rem" }}
               src={selectedLogo || companyJwt?.logo}
             />
@@ -397,9 +409,14 @@ export default function CompanyProfileModal({ open, handleClose }) {
               value={selectedWard}
               onChange={(e) => {
                 setSelectedWard(e.target.value);
-                const selectedWardData = wards.find(w => w.code === Number(e.target.value));
+                const selectedWardData = wards.find(
+                  (w) => w.code === Number(e.target.value)
+                );
                 if (selectedWardData) {
-                  setLocation(prev => ({ ...prev, ward: selectedWardData.name }));
+                  setLocation((prev) => ({
+                    ...prev,
+                    ward: selectedWardData.name,
+                  }));
                 }
               }}
               disabled={!selectedDistrict}
