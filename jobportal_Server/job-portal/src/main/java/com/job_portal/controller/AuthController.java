@@ -142,6 +142,7 @@ public class AuthController {
 	            company.setUserAccount(newUser);
 	            company.setIndustry(industryRepository.findById(1).orElse(null));
 	            company.setCity(cityRepository.findById(company.getCity().getCityId()).orElse(null));
+	            company.setAddress(", , ");
 	            newUser.setCompany(company);
 	        }
 
@@ -177,6 +178,7 @@ public class AuthController {
 	                Seeker seeker = new Seeker();
 	                seeker.setUserAccount(user);
 	                seeker.setIndustry(defaultIndustry);
+	                seeker.setAddress(", , ");
 	                user.setSeeker(seeker);
 	            } else if (user.getUserType().getUserTypeId() == 3) {
 	                Company existingCompany = user.getCompany();
