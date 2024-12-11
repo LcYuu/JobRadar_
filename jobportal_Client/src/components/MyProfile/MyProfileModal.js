@@ -204,7 +204,7 @@ export default function ProfileModal({ open, handleClose }) {
       toast.error("Cập nhật thất bại!");
     }
   };
-
+  console.log("B", selectedProvince, selectedDistrict, selectedWard)
   return (
     <Modal
       open={open}
