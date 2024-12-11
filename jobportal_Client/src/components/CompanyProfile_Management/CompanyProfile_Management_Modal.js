@@ -205,9 +205,18 @@ export default function CompanyProfileModal({ open, handleClose }) {
           district: addressParts[2],
           province: addressParts[3]
         });
+
+        // Thiết lập giá trị ban đầu cho các dropdown
+        const province = provinces.find(p => p.name === addressParts[3]);
+        const district = districts.find(d => d.name === addressParts[2]);
+        const ward = wards.find(w => w.name === addressParts[1]);
+
+        if (province) setSelectedProvince(province.code);
+        if (district) setSelectedDistrict(district.code);
+        if (ward) setSelectedWard(ward.code);
       }
     }
-  }, [companyJwt]);
+  }, [companyJwt, provinces, districts, wards]);
 
   const formik = useFormik({
     initialValues: {
