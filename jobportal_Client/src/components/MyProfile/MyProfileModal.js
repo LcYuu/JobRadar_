@@ -97,8 +97,10 @@ export default function ProfileModal({ open, handleClose }) {
     formik.setFieldValue("avatar", imageUrl); // Cập nhật giá trị avatar trong formik
     setIsLoading(false);
   };
+  console.log("🚀 ~ useEffect ~ seeker?.address:", seeker?.address)
   useEffect(() => {
     if (seeker?.address) {
+      
       const addressParts = seeker?.address.split(',').map(part => part.trim());
       // console.log("addressParts:", addressParts);  // Log provinces
       if (addressParts.length >= 3) {
