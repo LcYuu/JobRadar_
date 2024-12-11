@@ -155,67 +155,57 @@ export default function CompanyProfileModal({ open, handleClose }) {
   }, []);
 
   useEffect(() => {
-    const fetchDistricts = async () => {
-      if (selectedProvince) {
-        try {
-          const response = await fetch(
-            `https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`
-          );
-          const data = await response.json();
-          setDistricts(data.districts);
-          setLocation((prev) => ({ ...prev, province: data.name }));
-        } catch (error) {
-          console.error("Error fetching districts:", error);
+    const initializeAddress = async () => {
+      if (companyJwt?.address) {
+        const addressParts = companyJwt.address.split(',').map(part => part.trim());
+
+        if (addressParts.length >= 3) {
+          const [ward, district, province] = addressParts.slice(-3);
+          const specificAddressPart = addressParts.slice(0, -3).join(', ');
+
+          setSpecificAddress(specificAddressPart);
+          setLocation({
+            ward,
+            district,
+            province
+          });
+
+          const matchingProvince = provinces.find(p => p.name === province);
+          if (matchingProvince) {
+            setSelectedProvince(matchingProvince.code);
+            
+            try {
+              const districtResponse = await fetch(
+                `https://provinces.open-api.vn/api/p/${matchingProvince.code}?depth=2`
+              );
+              const districtData = await districtResponse.json();
+              setDistricts(districtData.districts);
+
+              const matchingDistrict = districtData.districts.find(d => d.name === district);
+              if (matchingDistrict) {
+                setSelectedDistrict(matchingDistrict.code);
+
+                const wardResponse = await fetch(
+                  `https://provinces.open-api.vn/api/d/${matchingDistrict.code}?depth=2`
+                );
+                const wardData = await wardResponse.json();
+                setWards(wardData.wards);
+
+                const matchingWard = wardData.wards.find(w => w.name === ward);
+                if (matchingWard) {
+                  setSelectedWard(matchingWard.code);
+                }
+              }
+            } catch (error) {
+              console.error("Error fetching address data:", error);
+            }
+          }
         }
       }
     };
-    if (selectedProvince) {
-      fetchDistricts();
-    }
-  }, [selectedProvince]);
 
-  useEffect(() => {
-    const fetchWards = async () => {
-      if (selectedDistrict) {
-        try {
-          const response = await fetch(
-            `https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`
-          );
-          const data = await response.json();
-          setWards(data.wards);
-          setLocation((prev) => ({ ...prev, district: data.name }));
-        } catch (error) {
-          console.error("Error fetching wards:", error);
-        }
-      }
-    };
-    if (selectedDistrict) {
-      fetchWards();
-    }
-  }, [selectedDistrict]);
-
-  useEffect(() => {
-    if (companyJwt?.address) {
-      const addressParts = companyJwt.address.split(", ");
-      if (addressParts.length >= 4) {
-        setSpecificAddress(addressParts[0]);
-        setLocation({
-          ward: addressParts[1],
-          district: addressParts[2],
-          province: addressParts[3],
-        });
-
-        // Thiết lập giá trị ban đầu cho các dropdown
-        const province = provinces.find((p) => p.name === addressParts[3]);
-        const district = districts.find((d) => d.name === addressParts[2]);
-        const ward = wards.find((w) => w.name === addressParts[1]);
-
-        if (province) setSelectedProvince(province.code);
-        if (district) setSelectedDistrict(district.code);
-        if (ward) setSelectedWard(ward.code);
-      }
-    }
-  }, [companyJwt, provinces, districts, wards]);
+    initializeAddress();
+  }, [companyJwt, provinces]);
 
   const formik = useFormik({
     initialValues: {
@@ -264,6 +254,58 @@ export default function CompanyProfileModal({ open, handleClose }) {
     formik.setFieldValue("logo", imageUrl); // Cập nhật giá trị avatar trong formik
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    const fetchDistricts = async () => {
+      if (selectedProvince) {
+        try {
+          const response = await fetch(
+            `https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`
+          );
+          const data = await response.json();
+          setDistricts(data.districts);
+          setLocation(prev => ({ ...prev, province: data.name }));
+
+          // Tìm và thiết lập district ban đầu
+          if (location.district) {
+            const matchingDistrict = data.districts.find(d => d.name === location.district);
+            if (matchingDistrict) {
+              setSelectedDistrict(matchingDistrict.code);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching districts:", error);
+        }
+      }
+    };
+    fetchDistricts();
+  }, [selectedProvince, location.district]);
+
+  useEffect(() => {
+    const fetchWards = async () => {
+      if (selectedDistrict) {
+        try {
+          const response = await fetch(
+            `https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`
+          );
+          const data = await response.json();
+          setWards(data.wards);
+          setLocation(prev => ({ ...prev, district: data.name }));
+
+          // Tìm và thiết lập ward ban đầu
+          if (location.ward) {
+            const matchingWard = data.wards.find(w => w.name === location.ward);
+            if (matchingWard) {
+              setSelectedWard(matchingWard.code);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching wards:", error);
+        }
+      }
+    };
+    fetchWards();
+  }, [selectedDistrict, location.ward]);
 
   return (
     <Modal
@@ -376,7 +418,25 @@ export default function CompanyProfileModal({ open, handleClose }) {
               select
               label="Tỉnh/Thành phố"
               value={selectedProvince}
-              onChange={(e) => setSelectedProvince(e.target.value)}
+              onChange={(e) => {
+                const newProvinceCode = e.target.value;
+                setSelectedProvince(newProvinceCode);
+                // Reset district and ward when province changes
+                setSelectedDistrict("");
+                setSelectedWard("");
+                setDistricts([]);
+                setWards([]);
+                // Find province name from code
+                const selectedProvinceData = provinces.find(p => p.code === Number(newProvinceCode));
+                if (selectedProvinceData) {
+                  setLocation(prev => ({
+                    ...prev,
+                    province: selectedProvinceData.name,
+                    district: "",
+                    ward: ""
+                  }));
+                }
+              }}
             >
               <MenuItem value="">Chọn tỉnh/thành phố</MenuItem>
               {provinces.map((province) => (
@@ -391,7 +451,22 @@ export default function CompanyProfileModal({ open, handleClose }) {
               select
               label="Quận/Huyện"
               value={selectedDistrict}
-              onChange={(e) => setSelectedDistrict(e.target.value)}
+              onChange={(e) => {
+                const newDistrictCode = e.target.value;
+                setSelectedDistrict(newDistrictCode);
+                // Reset ward when district changes
+                setSelectedWard("");
+                setWards([]);
+                // Find district name from code
+                const selectedDistrictData = districts.find(d => d.code === Number(newDistrictCode));
+                if (selectedDistrictData) {
+                  setLocation(prev => ({
+                    ...prev,
+                    district: selectedDistrictData.name,
+                    ward: ""
+                  }));
+                }
+              }}
               disabled={!selectedProvince}
             >
               <MenuItem value="">Chọn quận/huyện</MenuItem>
