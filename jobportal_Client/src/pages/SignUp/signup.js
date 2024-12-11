@@ -77,7 +77,10 @@ export default function SignUpForm() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    
+    if (formData.password !== formData.confirmPassword) {
+      setErrorMessage("Mật khẩu xác nhận không khớp");
+      return;
+    }
     if (activeTab === "employer") {
       if (!taxCodeVerified) {
         setErrorMessage("Vui lòng xác thực mã số thuế trước khi đăng ký");
