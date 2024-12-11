@@ -134,7 +134,7 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
 
   return (
     <div className="flex bg-gray-100 min-h-screen">
-      <nav className="w-80 bg-white p-6 border-r shadow-lg">
+      <nav className="w-80 bg-white pt-6 pr-6 pl-6 border-r shadow-lg">
         {/* Logo Section */}
         <div className="flex items-center gap-3 pb-8">
           <img

@@ -18,7 +18,9 @@ import com.job_portal.models.IdApplyJob;
 
 @Repository
 public interface ApplyJobRepository extends JpaRepository<ApplyJob, IdApplyJob> {
-	Optional<ApplyJob> findByPostIdAndUserId(UUID postId, UUID userId);
+	@Query("SELECT a FROM ApplyJob a WHERE a.postId = :postId AND a.userId = :userId")
+	Optional<ApplyJob> findByPostIdAndUserId(@Param("postId") UUID postId, @Param("userId") UUID userId);
+
 	
 	boolean existsByPostIdAndUserId(UUID postId, UUID userId);
 	@Query("SELECT COUNT(a) > 0 FROM ApplyJob a " +
@@ -46,7 +48,7 @@ public interface ApplyJobRepository extends JpaRepository<ApplyJob, IdApplyJob> 
 	Page<ApplyJobInProfile> findApplyJobByUserId(@Param("userId") UUID userId, Pageable pageable);
 	
 	@Query("SELECT new com.job_portal.DTO.ApplyJobEmployerDTO(a.postId, a.userId, a.isSave, a.applyDate, " +
-		       "a.pathCV, a.fullName, j.title, u.avatar) " +
+		       "a.pathCV, a.fullName, j.title, u.avatar, a.isViewed) " +
 		       "FROM ApplyJob a " +
 		       "JOIN a.jobPost j " +
 		       "JOIN UserAccount u ON a.userId = u.userId " +
