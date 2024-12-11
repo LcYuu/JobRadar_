@@ -197,19 +197,25 @@ const JobDetailEmployer = () => {
 
   useEffect(() => {
     if (isEditing && detailJob?.location) {
-      const addressParts = detailJob.location.split(', ');
+      const addressParts = detailJob.location.split(',').map(part => part.trim());
       if (addressParts.length >= 4) {
-        setSpecificAddress(addressParts[0]);
+        // Lấy 3 phần cuối cho ward, district, province
+        const [ward, district, province] = addressParts.slice(-3);
+        // Phần còn lại là số nhà, tên đường (có thể chứa nhiều dấu phẩy)
+        const specificAddressPart = addressParts.slice(0, -3).join(', ');
+
+        setSpecificAddress(specificAddressPart);
         setLocation({
-          ward: addressParts[1],
-          district: addressParts[2],
-          province: addressParts[3]
+          ward,
+          district,
+          province
         });
-        
-        // Find and set initial province
-        const province = provinces.find(p => p.name === addressParts[3]);
-        if (province) {
-          setSelectedProvince(province.code);
+
+        // Tìm và set province code
+        const matchingProvince = provinces.find(p => p.name === province);
+        if (matchingProvince) {
+          setSelectedProvince(matchingProvince.code);
+          // Districts và Wards sẽ được set thông qua các useEffect khác
         }
       }
     }
@@ -224,19 +230,18 @@ const JobDetailEmployer = () => {
           );
           const data = await response.json();
           setDistricts(data.districts);
-          setLocation(prev => ({ ...prev, province: data.name }));
-  
-          // Nếu đang trong chế độ chỉnh sửa và có địa chỉ ban đầu
-          if (isEditing && detailJob?.location) {
-            const addressParts = detailJob.location.split(', ');
-            if (addressParts.length >= 4) {
-              // Tìm district tương ứng với địa chỉ ban đầu
-              const matchingDistrict = data.districts.find(
-                d => d.name === addressParts[2]
-              );
-              if (matchingDistrict) {
-                setSelectedDistrict(matchingDistrict.code);
-              }
+          
+          // Cập nhật tên tỉnh/thành phố trong location state
+          const selectedProvinceData = provinces.find(p => p.code === Number(selectedProvince));
+          if (selectedProvinceData) {
+            setLocation(prev => ({ ...prev, province: selectedProvinceData.name }));
+          }
+
+          // Nếu đang trong chế độ chỉnh sửa và có district ban đầu
+          if (location.district) {
+            const matchingDistrict = data.districts.find(d => d.name === location.district);
+            if (matchingDistrict) {
+              setSelectedDistrict(matchingDistrict.code);
             }
           }
         } catch (error) {
@@ -245,7 +250,7 @@ const JobDetailEmployer = () => {
       }
     };
     fetchDistricts();
-  }, [selectedProvince, isEditing, detailJob]);
+  }, [selectedProvince, location.district, provinces]);
   
   // Thêm useEffect để xử lý wards khi selectedDistrict thay đổi
   useEffect(() => {
@@ -257,20 +262,18 @@ const JobDetailEmployer = () => {
           );
           const data = await response.json();
           setWards(data.wards);
-          setLocation(prev => ({ ...prev, district: data.name }));
-  
-          // Nếu đang trong chế độ chỉnh sửa và có địa chỉ ban đầu
-          if (isEditing && detailJob?.location) {
-            const addressParts = detailJob.location.split(', ');
-            if (addressParts.length >= 4) {
-              // Tìm ward tương ứng với địa chỉ ban đầu
-              const matchingWard = data.wards.find(
-                w => w.name === addressParts[1]
-              );
-              if (matchingWard) {
-                setSelectedWard(matchingWard.code);
-                setLocation(prev => ({ ...prev, ward: matchingWard.name }));
-              }
+          
+          // Cập nhật tên quận/huyện trong location state
+          const selectedDistrictData = districts.find(d => d.code === Number(selectedDistrict));
+          if (selectedDistrictData) {
+            setLocation(prev => ({ ...prev, district: selectedDistrictData.name }));
+          }
+
+          // Nếu đang trong chế độ chỉnh sửa và có ward ban đầu
+          if (location.ward) {
+            const matchingWard = data.wards.find(w => w.name === location.ward);
+            if (matchingWard) {
+              setSelectedWard(matchingWard.code);
             }
           }
         } catch (error) {
@@ -279,32 +282,9 @@ const JobDetailEmployer = () => {
       }
     };
     fetchWards();
-  }, [selectedDistrict, isEditing, detailJob]);
+  }, [selectedDistrict, location.ward, districts]);
   
-  // Cập nhật useEffect xử lý địa chỉ ban đầu
-  useEffect(() => {
-    if (isEditing && detailJob?.location) {
-      const addressParts = detailJob.location.split(', ');
-      if (addressParts.length >= 4) {
-        // Set specific address
-        setSpecificAddress(addressParts[0]);
-        
-        // Set location state
-        setLocation({
-          ward: addressParts[1],
-          district: addressParts[2],
-          province: addressParts[3]
-        });
-  
-        // Tìm và set province code
-        const matchingProvince = provinces.find(p => p.name === addressParts[3]);
-        if (matchingProvince) {
-          setSelectedProvince(matchingProvince.code);
-          // Districts và Wards sẽ được set thông qua các useEffect ở trên
-        }
-      }
-    }
-  }, [isEditing, detailJob, provinces]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -314,7 +294,6 @@ const JobDetailEmployer = () => {
     }));
   };
 
-  console.log(jobData);
 
   const handleSubmit = async () => {
     // Validate required fields
@@ -482,9 +461,27 @@ const JobDetailEmployer = () => {
                       Tỉnh/Thành phố
                     </label>
                     <select
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                       value={selectedProvince}
-                      onChange={(e) => setSelectedProvince(e.target.value)}
+                      onChange={(e) => {
+                        const newProvinceCode = e.target.value;
+                        setSelectedProvince(newProvinceCode);
+                        // Reset district và ward
+                        setSelectedDistrict("");
+                        setSelectedWard("");
+                        setDistricts([]);
+                        setWards([]);
+                        // Cập nhật location state
+                        const selectedProvinceData = provinces.find(p => p.code === Number(newProvinceCode));
+                        if (selectedProvinceData) {
+                          setLocation(prev => ({
+                            ...prev,
+                            province: selectedProvinceData.name,
+                            district: "",
+                            ward: ""
+                          }));
+                        }
+                      }}
+                      className="w-full p-1 border rounded"
                     >
                       <option value="">Chọn tỉnh/thành phố</option>
                       {provinces.map((province) => (
@@ -500,10 +497,25 @@ const JobDetailEmployer = () => {
                       Quận/Huyện
                     </label>
                     <select
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                       value={selectedDistrict}
-                      onChange={(e) => setSelectedDistrict(e.target.value)}
+                      onChange={(e) => {
+                        const newDistrictCode = e.target.value;
+                        setSelectedDistrict(newDistrictCode);
+                        // Reset ward
+                        setSelectedWard("");
+                        setWards([]);
+                        // Cập nhật location state
+                        const selectedDistrictData = districts.find(d => d.code === Number(newDistrictCode));
+                        if (selectedDistrictData) {
+                          setLocation(prev => ({
+                            ...prev,
+                            district: selectedDistrictData.name,
+                            ward: ""
+                          }));
+                        }
+                      }}
                       disabled={!selectedProvince}
+                      className="w-full p-1 border rounded"
                     >
                       <option value="">Chọn quận/huyện</option>
                       {districts.map((district) => (
@@ -818,7 +830,25 @@ const JobDetailEmployer = () => {
                   <div className="space-y-2 w-1/2">
                     <select
                       value={selectedProvince}
-                      onChange={(e) => setSelectedProvince(e.target.value)}
+                      onChange={(e) => {
+                        const newProvinceCode = e.target.value;
+                        setSelectedProvince(newProvinceCode);
+                        // Reset district và ward
+                        setSelectedDistrict("");
+                        setSelectedWard("");
+                        setDistricts([]);
+                        setWards([]);
+                        // Cập nhật location state
+                        const selectedProvinceData = provinces.find(p => p.code === Number(newProvinceCode));
+                        if (selectedProvinceData) {
+                          setLocation(prev => ({
+                            ...prev,
+                            province: selectedProvinceData.name,
+                            district: "",
+                            ward: ""
+                          }));
+                        }
+                      }}
                       className="w-full p-1 border rounded"
                     >
                       <option value="">Chọn tỉnh/thành phố</option>
@@ -831,9 +861,24 @@ const JobDetailEmployer = () => {
 
                     <select
                       value={selectedDistrict}
-                      onChange={(e) => setSelectedDistrict(e.target.value)}
-                      className="w-full p-1 border rounded"
+                      onChange={(e) => {
+                        const newDistrictCode = e.target.value;
+                        setSelectedDistrict(newDistrictCode);
+                        // Reset ward
+                        setSelectedWard("");
+                        setWards([]);
+                        // Cập nhật location state
+                        const selectedDistrictData = districts.find(d => d.code === Number(newDistrictCode));
+                        if (selectedDistrictData) {
+                          setLocation(prev => ({
+                            ...prev,
+                            district: selectedDistrictData.name,
+                            ward: ""
+                          }));
+                        }
+                      }}
                       disabled={!selectedProvince}
+                      className="w-full p-1 border rounded"
                     >
                       <option value="">Chọn quận/huyện</option>
                       {districts.map((district) => (
