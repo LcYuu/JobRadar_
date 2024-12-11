@@ -21,9 +21,8 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
 //    List<Notification> findByUserIdAndType(@Param("userId") UUID userId, @Param("type") NotificationType type);
 
 	// Lấy tất cả thông báo mới nhất của một người dùng
-	@Query("SELECT n FROM Notification n WHERE n.seeker.userId = :userId ORDER BY n.createdAt DESC")
-    Page<Notification> findNotificationByUserId(@Param("userId") UUID userId, Pageable pageable);
-	
+	@Query("SELECT n FROM Notification n WHERE n.seeker.userId = :userId AND n.isRead = false ORDER BY n.createdAt DESC")
+    List<Notification> findNotificationByUserId(@Param("userId") UUID userId);
 	long countBySeeker_UserIdAndIsRead(UUID userId, boolean isRead);
 
 }

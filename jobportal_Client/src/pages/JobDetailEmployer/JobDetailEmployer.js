@@ -196,47 +196,6 @@ const JobDetailEmployer = () => {
   }, []);
 
   useEffect(() => {
-    const fetchDistricts = async () => {
-      if (selectedProvince) {
-        try {
-          const response = await fetch(`https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`);
-          const data = await response.json();
-          setDistricts(data.districts);
-          setLocation(prevLocation => ({
-            ...prevLocation,
-            province: data.name
-          }));
-          setSelectedDistrict('');
-          setSelectedWard('');
-        } catch (error) {
-          console.error('Error fetching districts:', error);
-        }
-      }
-    };
-    fetchDistricts();
-  }, [selectedProvince]);
-
-  useEffect(() => {
-    const fetchWards = async () => {
-      if (selectedDistrict) {
-        try {
-          const response = await fetch(`https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`);
-          const data = await response.json();
-          setWards(data.wards);
-          setLocation(prevLocation => ({
-            ...prevLocation,
-            district: data.name
-          }));
-          setSelectedWard('');
-        } catch (error) {
-          console.error('Error fetching wards:', error);
-        }
-      }
-    };
-    fetchWards();
-  }, [selectedDistrict]);
-
-  useEffect(() => {
     if (isEditing && detailJob?.location) {
       const addressParts = detailJob.location.split(', ');
       if (addressParts.length >= 4) {
@@ -246,16 +205,106 @@ const JobDetailEmployer = () => {
           district: addressParts[2],
           province: addressParts[3]
         });
-      }
-      // Find and set the province code based on the existing cityId
-      const provinceCode = Object.keys(cityCodeMapping).find(
-        key => cityCodeMapping[key] === detailJob.cityId
-      );
-      if (provinceCode) {
-        setSelectedProvince(provinceCode);
+        
+        // Find and set initial province
+        const province = provinces.find(p => p.name === addressParts[3]);
+        if (province) {
+          setSelectedProvince(province.code);
+        }
       }
     }
-  }, [isEditing, detailJob]);
+  }, [isEditing, detailJob, provinces]);
+
+  useEffect(() => {
+    const fetchDistricts = async () => {
+      if (selectedProvince) {
+        try {
+          const response = await fetch(
+            `https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`
+          );
+          const data = await response.json();
+          setDistricts(data.districts);
+          setLocation(prev => ({ ...prev, province: data.name }));
+  
+          // Nếu đang trong chế độ chỉnh sửa và có địa chỉ ban đầu
+          if (isEditing && detailJob?.location) {
+            const addressParts = detailJob.location.split(', ');
+            if (addressParts.length >= 4) {
+              // Tìm district tương ứng với địa chỉ ban đầu
+              const matchingDistrict = data.districts.find(
+                d => d.name === addressParts[2]
+              );
+              if (matchingDistrict) {
+                setSelectedDistrict(matchingDistrict.code);
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching districts:", error);
+        }
+      }
+    };
+    fetchDistricts();
+  }, [selectedProvince, isEditing, detailJob]);
+  
+  // Thêm useEffect để xử lý wards khi selectedDistrict thay đổi
+  useEffect(() => {
+    const fetchWards = async () => {
+      if (selectedDistrict) {
+        try {
+          const response = await fetch(
+            `https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`
+          );
+          const data = await response.json();
+          setWards(data.wards);
+          setLocation(prev => ({ ...prev, district: data.name }));
+  
+          // Nếu đang trong chế độ chỉnh sửa và có địa chỉ ban đầu
+          if (isEditing && detailJob?.location) {
+            const addressParts = detailJob.location.split(', ');
+            if (addressParts.length >= 4) {
+              // Tìm ward tương ứng với địa chỉ ban đầu
+              const matchingWard = data.wards.find(
+                w => w.name === addressParts[1]
+              );
+              if (matchingWard) {
+                setSelectedWard(matchingWard.code);
+                setLocation(prev => ({ ...prev, ward: matchingWard.name }));
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching wards:", error);
+        }
+      }
+    };
+    fetchWards();
+  }, [selectedDistrict, isEditing, detailJob]);
+  
+  // Cập nhật useEffect xử lý địa chỉ ban đầu
+  useEffect(() => {
+    if (isEditing && detailJob?.location) {
+      const addressParts = detailJob.location.split(', ');
+      if (addressParts.length >= 4) {
+        // Set specific address
+        setSpecificAddress(addressParts[0]);
+        
+        // Set location state
+        setLocation({
+          ward: addressParts[1],
+          district: addressParts[2],
+          province: addressParts[3]
+        });
+  
+        // Tìm và set province code
+        const matchingProvince = provinces.find(p => p.name === addressParts[3]);
+        if (matchingProvince) {
+          setSelectedProvince(matchingProvince.code);
+          // Districts và Wards sẽ được set thông qua các useEffect ở trên
+        }
+      }
+    }
+  }, [isEditing, detailJob, provinces]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -267,7 +316,13 @@ const JobDetailEmployer = () => {
 
   console.log(jobData);
 
-  const handleSave = async () => {
+  const handleSubmit = async () => {
+    // Validate required fields
+    if (!selectedProvince || !selectedDistrict || !selectedWard || !specificAddress) {
+      toast.error("Vui lòng điền đầy đủ thông tin địa chỉ");
+      return;
+    }
+
     if (jobData.salary <= 0) {
       toast.error("Mức lương phải lớn hơn 0.");
       return;
@@ -279,32 +334,38 @@ const JobDetailEmployer = () => {
     }
 
     try {
-      let finalAddress;
-      let finalCityId;
+      // Lấy tên đầy đủ của các địa điểm đã chọn
+      const selectedProvinceData = provinces.find(p => p.code === Number(selectedProvince));
+      const selectedDistrictData = districts.find(d => d.code === Number(selectedDistrict));
+      const selectedWardData = wards.find(w => w.code === Number(selectedWard));
 
-      if (selectedProvince && location.province) {
-        // If new address is selected
-        finalAddress = `${specificAddress}, ${location.ward}, ${location.district}, ${location.province}`;
-        finalCityId = cityCodeMapping[selectedProvince];
-      } else {
-        // Keep existing address and cityId
-        finalAddress = detailJob.location;
-        finalCityId = detailJob.cityId;
+      if (!selectedProvinceData || !selectedDistrictData || !selectedWardData) {
+        toast.error("Có lỗi xảy ra khi xử lý thông tin địa chỉ");
+        return;
       }
 
-      const finalJobData = {
+      // Tạo địa chỉ đầy đủ
+      const fullAddress = `${specificAddress}, ${selectedWardData.name}, ${selectedDistrictData.name}, ${selectedProvinceData.name}`;
+
+      // Cập nhật dữ liệu công việc với địa chỉ mới
+      const updatedJobData = {
         ...jobData,
-        cityId: finalCityId,
-        location: finalAddress,
+        location: fullAddress,
+        cityId: cityCodeMapping[selectedProvince] || detailJob.cityId,
       };
 
-      await dispatch(updateJob(postId, finalJobData));
+      // Gọi API cập nhật
+      await dispatch(updateJob(postId, updatedJobData));
+      
+      // Reset form và hiển thị thông báo thành công
       setIsEditing(false);
+      toast.success("Cập nhật thành công!");
+      
+      // Refresh dữ liệu
       dispatch(getDetailJobById(postId));
-      showSuccessToast("Cập nhật thông tin thành công!");
     } catch (error) {
-      console.error("Update failed: ", error);
-      toast.error("Cập nhật thất bại!");
+      console.error("Error updating job:", error);
+      toast.error("Có lỗi xảy ra khi cập nhật thông tin!");
     }
   };
   const [errors, setErrors] = useState({
@@ -513,7 +574,7 @@ const JobDetailEmployer = () => {
               false ? (
               isEditing ? (
                 // Nếu đang trong chế độ chỉnh sửa, hiển thị nút Lưu
-                <Button variant="outline" onClick={handleSave}>
+                <Button variant="outline" onClick={handleSubmit}>
                   Lưu
                 </Button>
               ) : (
@@ -747,7 +808,69 @@ const JobDetailEmployer = () => {
                 )}
               </div>
 
-              {/* Các phần thống kê khác có thể mở rộng tương tự */}
+              {/* Add Address Section */}
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-gray-500" />
+                  <span>Địa điểm làm việc</span>
+                </div>
+                {isEditing ? (
+                  <div className="space-y-2 w-1/2">
+                    <select
+                      value={selectedProvince}
+                      onChange={(e) => setSelectedProvince(e.target.value)}
+                      className="w-full p-1 border rounded"
+                    >
+                      <option value="">Chọn tỉnh/thành phố</option>
+                      {provinces.map((province) => (
+                        <option key={province.code} value={province.code}>
+                          {province.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={selectedDistrict}
+                      onChange={(e) => setSelectedDistrict(e.target.value)}
+                      className="w-full p-1 border rounded"
+                      disabled={!selectedProvince}
+                    >
+                      <option value="">Chọn quận/huyện</option>
+                      {districts.map((district) => (
+                        <option key={district.code} value={district.code}>
+                          {district.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={selectedWard}
+                      onChange={(e) => setSelectedWard(e.target.value)}
+                      className="w-full p-1 border rounded"
+                      disabled={!selectedDistrict}
+                    >
+                      <option value="">Chọn phường/xã</option>
+                      {wards.map((ward) => (
+                        <option key={ward.code} value={ward.code}>
+                          {ward.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <input
+                      type="text"
+                      value={specificAddress}
+                      onChange={(e) => setSpecificAddress(e.target.value)}
+                      placeholder="Số nhà, tên đường"
+                      className="w-full p-1 border rounded"
+                    />
+                  </div>
+                ) : (
+                  <div className="text-right">
+                    <span className="font-medium">{detailJob?.location || "Chưa có thông tin"}</span>
+                  </div>
+                )}
+              </div>
             </div>
           </Card>
 
