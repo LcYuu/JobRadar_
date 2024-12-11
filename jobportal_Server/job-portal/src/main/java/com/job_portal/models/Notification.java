@@ -3,6 +3,7 @@ package com.job_portal.models;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.job_portal.enums.NotificationType;
 
 import jakarta.persistence.Column;
@@ -52,7 +53,8 @@ public class Notification {
     @Column(name = "type", nullable = false, length = 50)
     private NotificationType type;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER) 
+    @JsonIgnoreProperties({"notifications", "applications", "savedJobs", "cvs"})
     @JoinColumn(name = "user_id", nullable = false)
     private Seeker seeker;
 
