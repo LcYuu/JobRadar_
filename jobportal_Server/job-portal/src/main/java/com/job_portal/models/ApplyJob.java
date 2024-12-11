@@ -41,6 +41,9 @@ public class ApplyJob {
     @Column(name = "email", length = 100)
     private String email;
     
+    @Column(name = "is_viewed", nullable = false)
+    private boolean isViewed = false;
+    
     @Lob
     @Column(name = "description", columnDefinition = "MEDIUMTEXT")
     private String description;
@@ -152,6 +155,23 @@ public class ApplyJob {
 	public void setSeeker(Seeker seeker) {
 		this.seeker = seeker;
 	}
-	
+
+	public boolean isViewed() {
+		return isViewed;
+	}
+
+	public void setViewed(boolean isViewed) {
+		this.isViewed = isViewed;
+	}
+	@Override
+	public String toString() {
+	    return "ApplyJob{" +
+	            "postId=" + postId +
+	            ", userId=" + userId +
+	            ", viewed=" + isViewed +
+	            // thêm các thuộc tính khác cần thiết
+	            '}';
+	}
+
 	
 }
