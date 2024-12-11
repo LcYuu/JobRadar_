@@ -50,7 +50,20 @@ import JobDetailAdmin from "./pages/Admin/JobDetail/JobDetailAdmin";
 
 import Survey from './pages/Survey/Survey';
 import SurveyStatistics from './pages/Admin/SurveyStatistic/SurveyStatistics';
+const ProtectedHome = () => {
+  const { user } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    if (user?.userType?.userTypeId === 1) { // Admin
+      navigate('/admin/dashboard');
+    } else if (user?.userType?.userTypeId === 3) { // Employer
+      navigate('/employer/account-management/dashboard');
+    }
+  }, [user, navigate]);
+
+  return <Home />;
+};
 const App = () => {
   const location = useLocation();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
@@ -136,7 +149,7 @@ const App = () => {
           path="/"
           element={
             <PublicRoute>
-              <Home />
+              <ProtectedHome />
             </PublicRoute>
           }
         />
@@ -276,6 +289,7 @@ const App = () => {
       {showFooter && <Footer />}
     </div>
   );
+  
 };
 
 export default App;

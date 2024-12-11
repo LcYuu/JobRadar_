@@ -15,6 +15,7 @@ import { Separator } from "../../ui/separator";
 import logo from "../../assets/images/common/logo.jpg";
 import { logoutAction } from "../../redux/Auth/auth.action";
 import Swal from "sweetalert2";
+import NotificationDropdown from '../Notification/NotificationDropdown';
 
 export default function Sidebar({ selectedSection, setSelectedSection }) {
   const { user } = useSelector((state) => state.auth);
@@ -156,12 +157,17 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
 
         {/* User Profile */}
         <div className="mb-12 p-4 rounded-lg bg-gradient-to-r from-[#6441a5] via-[#2a0845] to-[#6441a5] hover:bg-gradient-to-l transition-all duration-300">
-          <Avatar className="h-20 w-20 mb-4 border-4 border-primary/20">
-            <AvatarImage src={user?.avatar} />
-            <AvatarFallback className="text-2xl font-semibold text-white">
-              {user?.userName?.charAt(0) || "U"}
-            </AvatarFallback>
-          </Avatar>
+          <div className="flex justify-between items-start mb-4">
+            <Avatar className="h-20 w-20 border-4 border-primary/20">
+              <AvatarImage src={user?.avatar} />
+              <AvatarFallback className="text-2xl font-semibold text-white">
+                {user?.userName?.charAt(0) || "U"}
+              </AvatarFallback>
+            </Avatar>
+            {user?.userType?.userTypeId === 2 && (
+              <NotificationDropdown />
+            )}
+          </div>
           <div className="space-y-1">
             <p className="text-xl font-semibold text-white">
               {user?.userName || "Loading..."}
