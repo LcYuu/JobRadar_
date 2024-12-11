@@ -91,7 +91,7 @@ public class JobPostServiceImpl implements IJobPostService {
 		jobPost.setLocation(jobPostDTO.getLocation());
 		jobPost.setTypeOfWork(jobPostDTO.getTypeOfWork());
 		jobPost.setPosition(jobPostDTO.getPosition());
-		jobPost.setStatus("Chưa duyệt");
+		jobPost.setStatus("Đang mở");
 		jobPost.setCompany(company.get());
 		jobPost.setCity(city.get());
 		jobPost.setApprove(false);
@@ -360,8 +360,7 @@ public class JobPostServiceImpl implements IJobPostService {
 
 	@Override
 	public Page<JobPost> findByIsApprove(Pageable pageable) {
-		Page<JobPost> jobPost = jobPostRepository.findByIsApproveTrueAndExpireDateGreaterThanEqual(pageable,
-				LocalDateTime.now());
+		Page<JobPost> jobPost = jobPostRepository.findJobPostActive(pageable);
 		return jobPost;
 
 	}

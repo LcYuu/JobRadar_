@@ -61,9 +61,10 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 			+ "FROM JobPost j WHERE j.isApprove = true AND j.expireDate >= CURRENT_TIMESTAMP")
 	List<JobRecommendationDTO> findApprovedAndActiveJobs();
 
-	Page<JobPost> findByIsApproveTrueAndExpireDateGreaterThanEqual(Pageable pageable, LocalDateTime currentTime);
+	@Query("SELECT j FROM JobPost j WHERE j.isApprove = true AND j.expireDate >= CURRENT_TIMESTAMP ORDER BY j.createDate DESC")
+	Page<JobPost> findJobPostActive(Pageable pageable);
 
-	@Query("SELECT j FROM JobPost j WHERE j.isApprove = true ORDER BY j.createDate DESC")
+	@Query("SELECT j FROM JobPost j WHERE j.isApprove = true AND j.expireDate >= CURRENT_TIMESTAMP ORDER BY j.createDate DESC")
 	List<JobPost> findTop8LatestJobPosts();
 
 	@Query("SELECT new com.job_portal.DTO.JobCountType(j.typeOfWork, COUNT(j)) " + "FROM JobPost j "
@@ -95,25 +96,26 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 
 	@Query(value = "SELECT new com.job_portal.DTO.JobWithApplicationCountDTO("
 			+ "jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
-			+ "jp.typeOfWork, jp.createDate, jp.expireDate, COUNT(a.postId), jp.status, i.industryName, jp.isApprove) "
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, COUNT(DISTINCT a.postId), jp.status, i.industryName, jp.isApprove) "
 			+ "FROM JobPost jp " + "LEFT JOIN ApplyJob a ON jp.postId = a.postId "
 			+ "JOIN Company c ON jp.company.companyId = c.companyId "
 			+ "JOIN Industry i ON c.industry.industryId = i.industryId " + "WHERE jp.company.companyId = :companyId "
 			+ "AND jp.expireDate >= CURRENT_TIMESTAMP "
 			+ "GROUP BY jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
-			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName,  jp.isApprove " + "ORDER BY jp.createDate DESC")
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName,  jp.isApprove " + "ORDER BY jp.createDate DESC, jp.postId")
 	List<JobWithApplicationCountDTO> findJobsByCompanyIdSortedByCreateDateDesc(@Param("companyId") UUID companyId);
 
 	@Query(value = "SELECT new com.job_portal.DTO.JobWithApplicationCountDTO("
 			+ "jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
-			+ "jp.typeOfWork, jp.createDate, jp.expireDate, " + "COUNT(a.postId), jp.status, i.industryName, jp.isApprove) "
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, " + "COUNT(DISTINCT a.postId), jp.status, i.industryName, jp.isApprove) "
 			+ "FROM JobPost jp " + "LEFT JOIN ApplyJob a ON jp.postId = a.postId "
 			+ "JOIN Company c ON jp.company.companyId = c.companyId "
 			+ "JOIN Industry i ON c.industry.industryId = i.industryId " + "WHERE jp.company.companyId = :companyId "
 			+ "AND (:status IS NULL OR jp.status = :status) "
 			+ "AND (:typeOfWork IS NULL OR jp.typeOfWork = :typeOfWork) "
 			+ "GROUP BY jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
-			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName,  jp.isApprove ")
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName,  jp.isApprove "
+			+ "ORDER BY jp.createDate DESC,jp.postId")
 //			+ "ORDER BY "
 //			+ "CASE WHEN :sortByCreateDate LIKE 'ASC' THEN jp.createDate END ASC, "
 //			+ "CASE WHEN :sortByCreateDate LIKE 'DESC' THEN jp.createDate END DESC, "
@@ -127,7 +129,9 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 //			@Param("sortByCount") String sortByCount, 
 			Pageable pageable);
 
-	List<JobPost> findAllByExpireDateBeforeAndStatus(LocalDateTime date, String status);
+	@Query("SELECT j FROM JobPost j WHERE j.expireDate < :date AND j.status = :status")
+	List<JobPost> findAllByExpireDateBeforeAndStatus(@Param("date") LocalDateTime date, @Param("status") String status);
+
 
 	// long countByCompanyCompanyIdAndIsApproveTrue(UUID companyId);
 
@@ -225,12 +229,9 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	        + "WHERE (:title IS NULL OR LOWER(jp.title) LIKE LOWER(CONCAT('%', :title, '%'))) "
 	        + "AND (:status IS NULL OR LOWER(jp.status) LIKE LOWER(CONCAT('%', :status, '%'))) "
 	        + "AND (:isApprove IS NULL OR jp.isApprove = :isApprove) "
-	        + "ORDER BY jp.title ASC")
-	Page<JobPost> searchJobPosts(@Param("title") String title, 
-	                             @Param("status") String status,
-	                             @Param("isApprove") Boolean isApprove, 
-	                             Pageable pageable);
+	        + "ORDER BY jp.createDate DESC")
+	Page<JobPost> searchJobPosts(@Param("title") String title, @Param("status") String status, @Param("isApprove") Boolean isApprove,  Pageable pageable);
 	
-	@Query("SELECT j FROM JobPost j WHERE j.isApprove = true AND j.expireDate < ?1 AND (j.surveyEmailSent = false OR j.surveyEmailSent IS NULL)")
+	@Query("SELECT j FROM JobPost j WHERE j.isApprove = true AND j.expireDate < ?1 AND j.status = 'Hết hạn' AND (j.surveyEmailSent = false OR j.surveyEmailSent IS NULL)")
 	List<JobPost> findByExpireDateBeforeAndSurveyEmailSentFalse(LocalDateTime date);
 }
