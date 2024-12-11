@@ -107,7 +107,6 @@ public class AuthController {
 	            return ResponseEntity.status(HttpStatus.CONFLICT)
 	                    .body("Email này đã được sử dụng ở tài khoản khác");
 	        }
-
 	        // Tạo tài khoản mới
 	        UserAccount newUser = new UserAccount();
 	        newUser.setUserId(UUID.randomUUID());
@@ -118,7 +117,7 @@ public class AuthController {
 	        newUser.setUserName(userSignupDTO.getUserName());
 	        newUser.setCreateDate(LocalDateTime.now());
 	        newUser.setProvider("LOCAL");
-
+        
 	        // Tạo và gửi OTP
 	        String otp = otpUtil.generateOtp();
 	        emailUtil.sendOtpEmail(newUser.getEmail(), otp);

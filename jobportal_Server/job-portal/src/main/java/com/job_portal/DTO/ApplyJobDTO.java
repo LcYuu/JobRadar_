@@ -21,5 +21,6 @@ public class ApplyJobDTO {
     private String fullName;
     private String email;
     private String description;
+    
 }
 

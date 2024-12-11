@@ -332,5 +332,4 @@ public class CompanyController {
 		Page<Company> companies = companyRepository.findCompaniesWithFilters(companyName, industryName, pageable);
 		return ResponseEntity.ok(companies);
 	}
-
 }
