@@ -2,7 +2,6 @@ package com.job_portal.models;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.job_portal.enums.NotificationType;
 
@@ -52,6 +51,7 @@ public class Notification {
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false, length = 50)
     private NotificationType type;
+
 
     @ManyToOne(fetch = FetchType.EAGER) 
     @JsonIgnoreProperties({"notifications", "applications", "savedJobs", "cvs"})
