@@ -69,7 +69,7 @@ export default function AdminJobList() {
       <div className="bg-white rounded-lg shadow">
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="font-semibold">
-            Danh sách công việc ({totalElements})
+            Tổng số công việc ({totalElements})
           </h2>
           <div className="flex items-center gap-4">
             <div className="relative">

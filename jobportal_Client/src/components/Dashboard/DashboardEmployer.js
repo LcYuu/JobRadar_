@@ -91,7 +91,7 @@ export default function Dashboard_Employer() {
         <Card
           className="p-6"
           style={{
-            background: "linear-gradient(to right, #ffe000, #799f0c)",
+            background: "linear-gradient(to right, #D1913C, #FFD194)",
             boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
           }}
         >
