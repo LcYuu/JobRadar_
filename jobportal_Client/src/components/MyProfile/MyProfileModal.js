@@ -99,8 +99,8 @@ export default function ProfileModal({ open, handleClose }) {
   };
   useEffect(() => {
     if (seeker?.address) {
-      const addressParts = seeker.address.split(',').map(part => part.trim());
-
+      const addressParts = seeker?.address.split(',').map(part => part.trim());
+      // console.log("addressParts:", addressParts);  // Log provinces
       if (addressParts.length >= 3) {
         const [ward, district, province] = addressParts.slice(-3);
         const specificAddressPart = addressParts.slice(0, -3).join(', ');
@@ -113,8 +113,10 @@ export default function ProfileModal({ open, handleClose }) {
         });
 
         const matchingProvince = provinces.find(p => p.name === province);
+        console.log("addressParts:", provinces, "a", province);  // Log provinces
         if (matchingProvince) {
           setSelectedProvince(matchingProvince.code);
+          
         }
       }
     }
@@ -125,6 +127,7 @@ export default function ProfileModal({ open, handleClose }) {
         const response = await fetch("https://provinces.open-api.vn/api/p/");
         const data = await response.json();
         setProvinces(data);
+        console.log("Fetched provinces:", data);  // Log provinces
       } catch (error) {
         console.error("Error fetching provinces:", error);
       }
@@ -182,8 +185,6 @@ export default function ProfileModal({ open, handleClose }) {
     fetchWards();
   }, [selectedDistrict, location.ward]);
 
-  
-
   const handleSaveClick = async (values) => {
     const fullAddress = specificAddress && location.ward && location.district && location.province
       ? `${specificAddress}, ${location.ward}, ${location.district}, ${location.province}`.trim()
@@ -205,6 +206,8 @@ export default function ProfileModal({ open, handleClose }) {
     }
   };
 
+  console.log("B", selectedProvince, selectedDistrict, selectedWard)
+
   return (
     <Modal
       open={open}
@@ -224,14 +227,14 @@ export default function ProfileModal({ open, handleClose }) {
               type="submit" 
               variant="contained" 
               disabled={isLoading || imageLoading}
-              className="bg-purple-600 hover:bg-purple-700"
+              className="bg-blue-600 hover:bg-blue-700"
             >
               {isLoading ? "Đang lưu" : "Lưu những thay đổi"}
             </Button>
           </div>
           <div className="flex flex-col items-center">
             <Avatar
-              className="ring-4 ring-purple-500"
+              className="transform"
               sx={{ width: "10rem", height: "10rem" }}
               src={selectedAvatar || user?.avatar}
             />
