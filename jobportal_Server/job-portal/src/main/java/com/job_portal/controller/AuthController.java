@@ -142,6 +142,7 @@ public class AuthController {
 	            company.setUserAccount(newUser);
 	            company.setIndustry(industryRepository.findById(1).orElse(null));
 	            company.setCity(cityRepository.findById(company.getCity().getCityId()).orElse(null));
+	            company.setAddress(", , ");
 	            newUser.setCompany(company);
 	        }
 
@@ -161,39 +162,41 @@ public class AuthController {
 
 	@PutMapping("/verify-account")
 	public ResponseEntity<String> verifyAccount(@RequestParam String email, @RequestParam String otp) {
-		Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
+	    Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
 
-		if (userOptional.isPresent()) {
-			UserAccount user = userOptional.get();
-			if (user.getOtp().equals(otp)
-					&& Duration.between(user.getOtpGeneratedTime(), LocalDateTime.now()).getSeconds() < (2 * 60)) {
+	    if (userOptional.isPresent()) {
+	        UserAccount user = userOptional.get();
+	        if (user.getOtp().equals(otp)
+	                && Duration.between(user.getOtpGeneratedTime(), LocalDateTime.now()).getSeconds() < (2 * 60)) {
 
-				user.setActive(true);
-				user.setOtp(null);
-				user.setOtpGeneratedTime(null);
+	            user.setActive(true);
+	            user.setOtp(null);
+	            user.setOtpGeneratedTime(null);
 
-				if (user.getUserType().getUserTypeId() == 2) {
-					Integer defaultIndustryId = 0;
-					Industry defaultIndustry = industryRepository.findById(defaultIndustryId).orElse(null);
-					Seeker seeker = new Seeker();
-					seeker.setUserAccount(user);
-					seeker.setIndustry(defaultIndustry);
-					user.setSeeker(seeker);
-				} else if (user.getUserType().getUserTypeId() == 3) {
-					Company existingCompany = user.getCompany();
-					if (existingCompany != null) {
-						existingCompany.setIndustry(industryRepository.findById(0).orElse(null));
-						Integer cityId = existingCompany.getCity().getCityId();
-						City city = cityRepository.findById(cityId)
-								.orElseThrow(() -> new RuntimeException("City not found"));
-						existingCompany.setCity(city);
-					}
-				}
-				userAccountRepository.save(user);
-				return ResponseEntity.ok("Đăng ký tài khoản thành công");
-			}
-		}
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Xác thực OTP thất bại, vui lòng nhập lại email");
+	            if (user.getUserType().getUserTypeId() == 2) {
+	                Integer defaultIndustryId = 0;
+	                Industry defaultIndustry = industryRepository.findById(defaultIndustryId).orElse(null);
+	                Seeker seeker = new Seeker();
+	                seeker.setUserAccount(user);
+	                seeker.setIndustry(defaultIndustry);
+	                seeker.setAddress(", , ");
+	                user.setSeeker(seeker);
+	            } else if (user.getUserType().getUserTypeId() == 3) {
+	                Company existingCompany = user.getCompany();
+	                if (existingCompany != null) {
+	                    existingCompany.setIndustry(industryRepository.findById(0).orElse(null));
+	                    Integer cityId = existingCompany.getCity().getCityId();
+	                    City city = cityRepository.findById(cityId)
+	                            .orElseThrow(() -> new RuntimeException("City not found"));
+	                    existingCompany.setCity(city);
+	                }
+	            }
+	            userAccountRepository.save(user);
+	            return ResponseEntity.ok("Đăng ký tài khoản thành công");
+	        }
+	    }
+	    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Xác thực OTP thất bại, vui lòng nhập lại email");
+
 	}
 
 	@PostMapping("/login")
