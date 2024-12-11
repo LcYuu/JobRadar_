@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -147,9 +148,9 @@ public class JobPostController {
 			String email = JwtProvider.getEmailFromJwtToken(jwt);
 			Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 
-//			if (!jobPostService.canPostJob(user.get().getCompany().getCompanyId())) {
-//				return new ResponseEntity<>("Công ty chỉ được đăng 1 bài trong vòng 1 giờ.", HttpStatus.FORBIDDEN);
-//			}
+			if (!jobPostService.canPostJob(user.get().getCompany().getCompanyId())) {
+				return new ResponseEntity<>("Công ty chỉ được đăng 1 bài trong vòng 1 giờ.", HttpStatus.FORBIDDEN);
+			}
 			boolean isCreated = jobPostService.createJob(jobPostDTO, user.get().getCompany().getCompanyId());
 			if (isCreated) {
 				return new ResponseEntity<>("Công việc được tạo thành công. Chờ Admin phê duyệt", HttpStatus.CREATED);
@@ -174,6 +175,8 @@ public class JobPostController {
 			return ResponseEntity.status(404).body("Không thể tìm thấy công việc");
 		}
 	}
+	
+	
 
 	@PutMapping("/update-job/{postId}")
 	public ResponseEntity<String> updateJobPost(@RequestHeader("Authorization") String jwt,

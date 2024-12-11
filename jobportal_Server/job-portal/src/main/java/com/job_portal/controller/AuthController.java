@@ -128,7 +128,6 @@ public class AuthController {
 	                        .body("Mã số thuế không hợp lệ hoặc không tồn tại");
 	            }
 	        }
-
 	        // Tạo tài khoản mới
 	        UserAccount newUser = new UserAccount();
 	        newUser.setUserId(UUID.randomUUID());
@@ -148,16 +147,13 @@ public class AuthController {
 	            company.setAddress(userSignupDTO.getCompany().getAddress());
 	            
 	            // Lấy và set Industry
-	            Industry industry = industryRepository.findById(1)
+	            Industry industry = industryRepository.findById(0)
 	                    .orElseThrow(() -> new RuntimeException("Industry not found"));
 	            company.setIndustry(industry);
-	            
 	            // Lấy và set City
-	            City city = cityRepository.findById(1)
+	            City city = cityRepository.findById(0)
 	                    .orElseThrow(() -> new RuntimeException("City not found"));
 	            company.setCity(city);
-	            
-	            
 	            company.setUserAccount(newUser);
 	            newUser.setCompany(company);
 	        }

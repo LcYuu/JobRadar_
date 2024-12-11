@@ -6,6 +6,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,9 +30,11 @@ import com.job_portal.DTO.FollowSeekerDTO;
 import com.job_portal.DTO.SeekerDTO;
 import com.job_portal.config.JwtProvider;
 import com.job_portal.models.JobPost;
+import com.job_portal.models.Notification;
 import com.job_portal.models.Seeker;
 import com.job_portal.models.UserAccount;
 import com.job_portal.repository.CompanyRepository;
+import com.job_portal.repository.NotificationRepository;
 import com.job_portal.repository.SeekerRepository;
 import com.job_portal.repository.UserAccountRepository;
 import com.job_portal.service.ICompanyService;
@@ -53,6 +58,8 @@ public class SeekerController {
 	private CompanyRepository companyRepository;
 	@Autowired
 	private INotificationService notificationService;
+	@Autowired
+	private NotificationRepository notificationRepository;
 
 	@GetMapping("/get-all")
 	public ResponseEntity<List<Seeker>> getSeeker() {
@@ -84,8 +91,7 @@ public class SeekerController {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		}
 	}
-	
-	
+
 	@GetMapping("/seeker-profile")
 	public ResponseEntity<Seeker> getSeekerById(@RequestHeader("Authorization") String jwt) throws AllExceptions {
 		try {
@@ -177,20 +183,29 @@ public class SeekerController {
 			return ResponseEntity.status(500).body(null);
 		}
 	}
-	
+
 	@GetMapping("/{companyId}/followers")
-    public List<FollowSeekerDTO> getSeekersFollowingCompany(@PathVariable UUID companyId) {
-        return seekerRepository.findSeekersFollowingCompany(companyId);
-    }
-	
+	public List<FollowSeekerDTO> getSeekersFollowingCompany(@PathVariable UUID companyId) {
+		return seekerRepository.findSeekersFollowingCompany(companyId);
+	}
+
 	@PatchMapping("/read/{notificationId}")
 	public boolean markNotificationAsRead(@PathVariable UUID notificationId) {
-	    return notificationService.updateNotificationReadStatus(notificationId);
+		return notificationService.updateNotificationReadStatus(notificationId);
 	}
-	
-	 @GetMapping("/unread-count/{userId}")
-	    public ResponseEntity<Long> getUnreadNotificationCount(@PathVariable UUID userId) {
-	        long unreadCount = notificationService.countUnreadNotifications(userId);
-	        return ResponseEntity.ok(unreadCount);
-	    }
+
+	@GetMapping("/unread-count/{userId}")
+	public ResponseEntity<Long> getUnreadNotificationCount(@PathVariable UUID userId) {
+		long unreadCount = notificationService.countUnreadNotifications(userId);
+		return ResponseEntity.ok(unreadCount);
+	}
+
+	@GetMapping("/notifications")
+	public Page<Notification> getNotifications(@RequestHeader("Authorization") String jwt, 
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "7") int size) {
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+		Pageable pageable = PageRequest.of(page, size);
+		return notificationRepository.findNotificationByUserId(user.get().getSeeker().getUserId(), pageable);
+	}
 }
