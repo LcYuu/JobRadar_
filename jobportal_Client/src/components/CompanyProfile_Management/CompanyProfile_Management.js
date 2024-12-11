@@ -222,7 +222,9 @@ const CompanyProfile_Management = () => {
     }
 
     // Validate phone number (số điện thoại Việt Nam)
-    const phoneRegex = /(0[3|5|7|8|9])+([0-9]{8})\b/;
+    const phoneRegex =
+      /^(0[3|5|7|8|9])([0-9]{8})$|^(1900)[\s]?[0-9]{4,5}[\s]?[0-9]{2,3}$/;
+
     if (formData.contact && !phoneRegex.test(formData.contact)) {
       tempErrors.contact = "Số điện thoại không hợp lệ";
       isValid = false;
@@ -259,7 +261,7 @@ const CompanyProfile_Management = () => {
     "from-purple-500 to-purple-700",
     "from-red-500 to-red-700",
     "from-green-500 to-green-700",
-    "from-orange-500 to-orange-700"
+    "from-orange-500 to-orange-700",
   ];
 
   const [currentColorIndex, setCurrentColorIndex] = useState(0);
@@ -273,22 +275,22 @@ const CompanyProfile_Management = () => {
 
   // Định nghĩa mảng màu với tên và giá trị
   const colorOptions = [
-    { name: 'Sky Blue', value: 'from-sky-500 to-sky-700' },
-    { name: 'Purple', value: 'from-purple-500 to-purple-700' },
-    { name: 'Red', value: 'from-red-500 to-red-700' },
-    { name: 'Green', value: 'from-green-500 to-green-700' },
-    { name: 'Orange', value: 'from-orange-500 to-orange-700' },
-    { name: 'Pink', value: 'from-pink-500 to-pink-700' },
-    { name: 'Indigo', value: 'from-indigo-500 to-indigo-700' },
-    { name: 'Teal', value: 'from-teal-500 to-teal-700' },
-    { name: 'Yellow', value: 'from-yellow-500 to-yellow-700' },
-    { name: 'Lime', value: 'from-lime-500 to-lime-700' },
-    { name: 'Cyan', value: 'from-cyan-500 to-cyan-700' },
-    { name: 'Violet', value: 'from-violet-500 to-violet-700' },
-    { name: 'Fuchsia', value: 'from-fuchsia-500 to-fuchsia-700' },
-    { name: 'Rose', value: 'from-rose-500 to-rose-700' },
-    { name: 'Emerald', value: 'from-emerald-500 to-emerald-700' },
-    { name: 'Amber', value: 'from-amber-500 to-amber-700' }
+    { name: "Sky Blue", value: "from-sky-500 to-sky-700" },
+    { name: "Purple", value: "from-purple-500 to-purple-700" },
+    { name: "Red", value: "from-red-500 to-red-700" },
+    { name: "Green", value: "from-green-500 to-green-700" },
+    { name: "Orange", value: "from-orange-500 to-orange-700" },
+    { name: "Pink", value: "from-pink-500 to-pink-700" },
+    { name: "Indigo", value: "from-indigo-500 to-indigo-700" },
+    { name: "Teal", value: "from-teal-500 to-teal-700" },
+    { name: "Yellow", value: "from-yellow-500 to-yellow-700" },
+    { name: "Lime", value: "from-lime-500 to-lime-700" },
+    { name: "Cyan", value: "from-cyan-500 to-cyan-700" },
+    { name: "Violet", value: "from-violet-500 to-violet-700" },
+    { name: "Fuchsia", value: "from-fuchsia-500 to-fuchsia-700" },
+    { name: "Rose", value: "from-rose-500 to-rose-700" },
+    { name: "Emerald", value: "from-emerald-500 to-emerald-700" },
+    { name: "Amber", value: "from-amber-500 to-amber-700" },
   ];
 
   // Thêm state để lưu màu đã chọn
@@ -303,33 +305,33 @@ const CompanyProfile_Management = () => {
   // Thêm useEffect để xử lý click outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (showColorMenu && !event.target.closest('.color-picker-container')) {
+      if (showColorMenu && !event.target.closest(".color-picker-container")) {
         setShowColorMenu(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showColorMenu]);
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <div className="max-w-5xl mx-auto p-6 ">
       {/* Company Header */}
       <Card className="mb-8 overflow-hidden">
         {/* Cover Background with color picker */}
         <div className={`h-32 relative bg-gradient-to-r ${selectedColor}`}>
           <div className="absolute bottom-2 right-2">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => setShowColorMenu(!showColorMenu)}
               className="text-white hover:bg-white/20"
             >
               <PenSquare className="w-4 h-4 mr-2" />
               Đổi màu
             </Button>
-            
+
             {/* Color Picker Menu */}
             {showColorMenu && (
               <div className="absolute top-full right-0 mt-2 p-2 bg-white rounded-lg shadow-lg w-48 color-picker-container animate-fade-in-down z-50">
@@ -343,7 +345,11 @@ const CompanyProfile_Management = () => {
                         bg-gradient-to-r ${color.value}
                         hover:scale-105 focus:outline-none
                         transform hover:shadow-md
-                        ${selectedColor === color.value ? 'ring-2 ring-white ring-offset-2' : ''}
+                        ${
+                          selectedColor === color.value
+                            ? "ring-2 ring-white ring-offset-2"
+                            : ""
+                        }
                       `}
                       title={color.name}
                     >
@@ -359,17 +365,18 @@ const CompanyProfile_Management = () => {
             )}
           </div>
         </div>
-        
+
         {/* Profile Content */}
-        <div className="p-6">
+        <div className="p-6 bg-white shadow-md rounded-lg">
           <div className="flex flex-col md:flex-row gap-6">
             {/* Avatar Section - Positioned slightly over the cover */}
             <div className="md:w-48 -mt-16 flex flex-col items-center">
               <Avatar
-                className="ring-4 ring-white"
+                className="ring-4 ring-purple-500"
                 sx={{ width: "8rem", height: "8rem" }}
                 src={companyJwt?.logo}
               />
+
               <Button
                 variant="outline"
                 className="mt-4 w-full bg-purple-500 text-white hover:bg-purple-600 hover:text-white border border-purple-500 rounded-lg transition-all"
@@ -381,8 +388,10 @@ const CompanyProfile_Management = () => {
 
             {/* Company Info Section */}
             <div className="flex-1">
-              <h1 className="text-2xl font-bold mb-4">{companyJwt?.companyName}</h1>
-              
+              <h1 className="text-2xl font-bold mb-4">
+                {companyJwt?.companyName}
+              </h1>
+
               {/* Company Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="flex items-center gap-3">
@@ -392,9 +401,11 @@ const CompanyProfile_Management = () => {
                   <div>
                     <p className="text-sm text-gray-600">Ngày thành lập</p>
                     <p className="font-medium">
-                      {companyJwt?.establishedTime 
-                        ? new Date(companyJwt.establishedTime).toLocaleDateString('en-GB')
-                        : 'Chưa cập nhật'}
+                      {companyJwt?.establishedTime
+                        ? new Date(
+                            companyJwt.establishedTime
+                          ).toLocaleDateString("en-GB")
+                        : "Chưa cập nhật"}
                     </p>
                   </div>
                 </div>
@@ -405,7 +416,9 @@ const CompanyProfile_Management = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Địa chỉ</p>
-                    <p className="font-medium">{companyJwt?.address || 'Chưa cập nhật'}</p>
+                    <p className="font-medium">
+                      {companyJwt?.address || "Chưa cập nhật"}
+                    </p>
                   </div>
                 </div>
 
@@ -415,7 +428,9 @@ const CompanyProfile_Management = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Ngành nghề</p>
-                    <p className="font-medium">{companyJwt?.industry?.industryName || 'Chưa cập nhật'}</p>
+                    <p className="font-medium">
+                      {companyJwt?.industry?.industryName || "Chưa cập nhật"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -540,7 +555,7 @@ const CompanyProfile_Management = () => {
 
       <Card className="p-6 bg-white shadow-md rounded-lg mb-6">
         <h2 className="text-xl font-semibold mb-4">Đánh giá từ ứng viên</h2>
-        
+
         <div className="flex items-center gap-4 mb-6">
           <div className="text-center">
             <div className="text-3xl font-bold text-purple-600">
@@ -551,9 +566,7 @@ const CompanyProfile_Management = () => {
                 <StarRounded
                   key={star}
                   className={`w-5 h-5 ${
-                    star <= averageStars
-                      ? "text-yellow-400"
-                      : "text-gray-300"
+                    star <= averageStars ? "text-yellow-400" : "text-gray-300"
                   }`}
                 />
               ))}
