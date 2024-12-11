@@ -81,6 +81,7 @@ public class NotificationServiceImpl implements INotificationService {
 			String content = String.format("Công ty %s vừa xem CV của bạn.", company.getCompanyName());
 			String redirectUrl = "http://localhost:3000/jobs/job-detail/" + postId;
 			sendNotification(seekerId, title, content, NotificationType.APPLICATION_REVIEWED, redirectUrl);
+			System.out.print("Gửi thành công");
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
