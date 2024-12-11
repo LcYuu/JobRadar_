@@ -62,7 +62,7 @@ public class AppConfig {
 		CorsConfiguration cfg = new CorsConfiguration();
 
 		cfg.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // Địa chỉ front-end
-		cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Các phương thức HTTP cho
+		cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")); // Các phương thức HTTP cho
 																							// phép
 		cfg.setAllowCredentials(true); // Cho phép cookie
 		cfg.setAllowedHeaders(Collections.singletonList("*")); // Tất cả các header

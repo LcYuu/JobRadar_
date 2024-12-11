@@ -1,5 +1,6 @@
 package com.job_portal.controller;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,6 +62,7 @@ public class SeekerController {
 	private INotificationService notificationService;
 	@Autowired
 	private NotificationRepository notificationRepository;
+
 
 	@GetMapping("/get-all")
 	public ResponseEntity<List<Seeker>> getSeeker() {
@@ -174,12 +177,10 @@ public class SeekerController {
 	public ResponseEntity<ApplicantProfileDTO> getCandidateDetails(@RequestParam UUID userId,
 			@RequestParam UUID postId) {
 		try {
-			// Gọi service để lấy dữ liệu
 			ApplicantProfileDTO profile = seekerRepository.findCandidateDetails(userId, postId);
-			return ResponseEntity.ok(profile); // Trả về thông tin ứng viên
+			return ResponseEntity.ok(profile); 
 
 		} catch (Exception e) {
-			// Xử lý lỗi nếu có
 			return ResponseEntity.status(500).body(null);
 		}
 	}
@@ -190,22 +191,49 @@ public class SeekerController {
 	}
 
 	@PatchMapping("/read/{notificationId}")
-	public boolean markNotificationAsRead(@PathVariable UUID notificationId) {
-		return notificationService.updateNotificationReadStatus(notificationId);
+
+	public ResponseEntity<?> markNotificationAsRead(@PathVariable UUID notificationId) {
+	    try {
+	        boolean updated = notificationService.updateNotificationReadStatus(notificationId);
+	        if (updated) {
+	            return ResponseEntity.ok().build();
+	        } else {
+	            return ResponseEntity.notFound().build();
+	        }
+	    } catch (Exception e) {
+	        return ResponseEntity.internalServerError().build();
+	    }
+	}
+	
+	@GetMapping("/notifications/{userId}")
+	public ResponseEntity<List<Notification>> getNotificationsByUserId(@PathVariable UUID userId) {
+	    try {
+	        List<Notification> notifications = notificationRepository.findNotificationByUserId(userId);
+	        return ResponseEntity.ok()
+	            .contentType(MediaType.APPLICATION_JSON)
+	            .body(notifications);
+	    } catch (Exception e) {
+	        System.err.println("Error getting notifications: " + e.getMessage());
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	            .contentType(MediaType.APPLICATION_JSON)
+	            .body(Collections.emptyList()); 
+	    }
 	}
 
 	@GetMapping("/unread-count/{userId}")
 	public ResponseEntity<Long> getUnreadNotificationCount(@PathVariable UUID userId) {
-		long unreadCount = notificationService.countUnreadNotifications(userId);
-		return ResponseEntity.ok(unreadCount);
-	}
-
-	@GetMapping("/notifications")
-	public Page<Notification> getNotifications(@RequestHeader("Authorization") String jwt, 
-			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "7") int size) {
-		String email = JwtProvider.getEmailFromJwtToken(jwt);
-		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-		Pageable pageable = PageRequest.of(page, size);
-		return notificationRepository.findNotificationByUserId(user.get().getSeeker().getUserId(), pageable);
+	    try {
+	        long unreadCount = notificationService.countUnreadNotifications(userId);
+	        return ResponseEntity.ok()
+	            .contentType(MediaType.APPLICATION_JSON)
+	            .body(unreadCount);
+	    } catch (Exception e) {
+	        System.err.println("Error getting unread count: " + e.getMessage());
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	            .contentType(MediaType.APPLICATION_JSON)
+	            .body(0L);
+	    }
 	}
 }
