@@ -97,7 +97,28 @@ export default function ProfileModal({ open, handleClose }) {
     formik.setFieldValue("avatar", imageUrl); // Cập nhật giá trị avatar trong formik
     setIsLoading(false);
   };
+  useEffect(() => {
+    if (seeker?.address) {
+      const addressParts = seeker.address.split(',').map(part => part.trim());
 
+      if (addressParts.length >= 3) {
+        const [ward, district, province] = addressParts.slice(-3);
+        const specificAddressPart = addressParts.slice(0, -3).join(', ');
+
+        setSpecificAddress(specificAddressPart);
+        setLocation({
+          ward,
+          district,
+          province
+        });
+
+        const matchingProvince = provinces.find(p => p.name === province);
+        if (matchingProvince) {
+          setSelectedProvince(matchingProvince.code);
+        }
+      }
+    }
+  }, [seeker, provinces]);
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
@@ -120,17 +141,21 @@ export default function ProfileModal({ open, handleClose }) {
           );
           const data = await response.json();
           setDistricts(data.districts);
-          const provinceName = data.name;
-          setLocation(prev => ({ ...prev, province: provinceName }));
+          setLocation(prev => ({ ...prev, province: data.name }));
+
+          if (location.district) {
+            const matchingDistrict = data.districts.find(d => d.name === location.district);
+            if (matchingDistrict) {
+              setSelectedDistrict(matchingDistrict.code);
+            }
+          }
         } catch (error) {
           console.error("Error fetching districts:", error);
         }
       }
     };
-    if (selectedProvince) {
-      fetchDistricts();
-    }
-  }, [selectedProvince]);
+    fetchDistricts();
+  }, [selectedProvince, location.district]);
 
   useEffect(() => {
     const fetchWards = async () => {
@@ -141,31 +166,23 @@ export default function ProfileModal({ open, handleClose }) {
           );
           const data = await response.json();
           setWards(data.wards);
-          const districtName = data.name;
-          setLocation(prev => ({ ...prev, district: districtName }));
+          setLocation(prev => ({ ...prev, district: data.name }));
+
+          if (location.ward) {
+            const matchingWard = data.wards.find(w => w.name === location.ward);
+            if (matchingWard) {
+              setSelectedWard(matchingWard.code);
+            }
+          }
         } catch (error) {
           console.error("Error fetching wards:", error);
         }
       }
     };
-    if (selectedDistrict) {
-      fetchWards();
-    }
-  }, [selectedDistrict]);
+    fetchWards();
+  }, [selectedDistrict, location.ward]);
 
-  useEffect(() => {
-    if (seeker?.address) {
-      const addressParts = seeker.address.split(', ');
-      if (addressParts.length >= 4) {
-        setSpecificAddress(addressParts[0]);
-        setLocation({
-          ward: addressParts[1],
-          district: addressParts[2],
-          province: addressParts[3]
-        });
-      }
-    }
-  }, [seeker]);
+  
 
   const handleSaveClick = async (values) => {
     const fullAddress = specificAddress && location.ward && location.district && location.province
