@@ -224,14 +224,14 @@ export default function ProfileModal({ open, handleClose }) {
               type="submit" 
               variant="contained" 
               disabled={isLoading || imageLoading}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-purple-600 hover:bg-purple-700"
             >
               {isLoading ? "Đang lưu" : "Lưu những thay đổi"}
             </Button>
           </div>
           <div className="flex flex-col items-center">
             <Avatar
-              className="transform"
+              className="ring-4 ring-purple-500"
               sx={{ width: "10rem", height: "10rem" }}
               src={selectedAvatar || user?.avatar}
             />
