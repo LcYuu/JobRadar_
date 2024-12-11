@@ -67,7 +67,7 @@ export default function AdminJobList() {
   return (
     <div className="space-y-6 mt-8">
       <div className="bg-white rounded-lg shadow">
-        <div className="flex justify-between items-center p-4 border-b">
+        <div className="flex justify-between items-center p-4 border-b">Thông tin liên hệ trên form
           <h2 className="font-semibold">
             Tổng số công việc ({totalElements})
           </h2>
