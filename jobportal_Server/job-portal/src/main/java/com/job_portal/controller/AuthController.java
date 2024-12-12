@@ -83,8 +83,10 @@ public class AuthController {
 
 	@Autowired
 	private IndustryRepository industryRepository;
+	
 	@Autowired
 	private CityRepository cityRepository;
+	
 	@Autowired
 	private UserTypeRepository userTypeRepository;
 	@Autowired
@@ -167,7 +169,6 @@ public class AuthController {
 	        UserAccount user = userOptional.get();
 	        if (user.getOtp().equals(otp)
 	                && Duration.between(user.getOtpGeneratedTime(), LocalDateTime.now()).getSeconds() < (2 * 60)) {
-
 	            user.setActive(true);
 	            user.setOtp(null);
 	            user.setOtpGeneratedTime(null);
