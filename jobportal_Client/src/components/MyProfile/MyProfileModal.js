@@ -208,8 +208,6 @@ export default function ProfileModal({ open, handleClose }) {
     }
   };
 
-  console.log("B", selectedProvince, selectedDistrict, selectedWard)
-
   return (
     <Modal
       open={open}
