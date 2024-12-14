@@ -944,7 +944,8 @@ export default function MyProfile() {
                     </select>
                   </div>
                 ) : (
-                  seeker?.industry && (
+                  seeker?.industry &&
+                  seeker.industry.industryId !== 0 && (
                     <div>
                       <Label className="text-sm font-medium whitespace-nowrap">
                         Major
