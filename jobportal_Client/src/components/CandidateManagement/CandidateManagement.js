@@ -189,15 +189,8 @@ const CandidateManagement = () => {
           <tbody>
             {displayData.length > 0 ? (
               displayData.map((candidate) => (
-                <tr key={candidate.postId} className="border-t">
-                  {/* <td className="p-4">
-          <input
-            type="checkbox"
-            // checked={selectedItems.includes(candidate.id)}
-            // onChange={() => handleSelectItem(candidate.id)}
-            className="rounded border-gray-300"
-          />
-        </td> */}
+                <tr key={`${candidate.postId}-${candidate.userId}`} className="border-t">
+                  
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       <img
