@@ -81,25 +81,8 @@ export default function SignUpForm() {
       setErrorMessage("Mật khẩu xác nhận không khớp");
       return;
     }
-    if (activeTab === "employer") {
-      if (!taxCodeVerified) {
-        setErrorMessage("Vui lòng xác thực mã số thuế trước khi đăng ký");
-        return;
-      }
-      if (!formData.taxCode) {
-        setErrorMessage("Mã số thuế không được để trống");
-        return;
-      }
-    }
-
-    const company = activeTab === "employer" ? {
-      companyName: formData.companyName,
-      taxCode: formData.taxCode,
-      address: companyInfo?.address || "",
-      industry: { industryId: 1 },
-      city: { cityId: companyInfo?.cityId || 1 }
-  } : null;
-
+    
+    // Tạo userData cơ bản cho cả 2 loại tài khoản
     const userData = {
       userName: activeTab === "employer" ? formData.companyName : formData.fullName,
       email: activeTab === "employer" ? formData.businessEmail : formData.email,
@@ -107,18 +90,13 @@ export default function SignUpForm() {
       userType: {
         userTypeId: activeTab === "employer" ? 3 : 2
       },
-      company: company,
       provider: "LOCAL"
     };
 
-    console.log("userData being sent:", JSON.stringify(userData, null, 2));
-
     try {
-      const response = await axios.post("http://localhost:8080/auth/signup", userData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      // Gọi API đăng ký cơ bản
+      const response = await axios.post("http://localhost:8080/auth/signup", userData);
+      
       if (response.status === 200) {
         setIsModalOpen(true);
         setTimeLeft(120);
@@ -131,41 +109,82 @@ export default function SignUpForm() {
     }
   };
 
+  const handleVerifyEmployer = async (email) => {
+    try {
+      if (!formData.companyName || !formData.taxCode || !taxCodeVerified) {
+        setErrorMessage("Vui lòng xác thực mã số thuế trước khi tiếp tục");
+        return false;
+      }
+
+      const companyData = {
+        companyName: formData.companyName,
+        taxCode: formData.taxCode,
+        address: companyInfo?.address || "",
+        industry: { industryId: 1 },
+        city: { cityId: companyInfo?.cityId || 1 }
+      };
+      
+      console.log("Sending company data:", companyData); // Debug log
+      
+      const response = await axios.post(
+        `http://localhost:8080/auth/verify-employer`,  // Bỏ query param email
+        companyData,
+        {
+          params: { email: email }  // Thêm email vào params
+        }
+      );
+
+      if (response.status === 200) {
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error verifying employer:", error);
+      if (error.response?.status === 404) {
+        setErrorMessage("Không tìm thấy tài khoản. Vui lòng thử lại sau.");
+      } else {
+        setErrorMessage("Lỗi xác thực thông tin công ty. Vui lòng thử lại.");
+      }
+      return false;
+    }
+  };
+
   const handleConfirmation = async (e) => {
     e.preventDefault();
     setIsPaused(true);
+    
+    const email = activeTab === "job-seeker" ? formData.email : formData.businessEmail;
+    
     try {
-      const email =
-        activeTab === "job-seeker" ? formData.email : formData.businessEmail;
       const response = await axios.put(
-        `http://localhost:8080/auth/verify-account?email=${encodeURIComponent(
-          email
-        )}&otp=${encodeURIComponent(confirmationCode)}`
+        `http://localhost:8080/auth/verify-account?email=${encodeURIComponent(email)}&otp=${encodeURIComponent(confirmationCode)}`
       );
-      console.log("Verification API response:", response);
-      if (response.data === "Đăng ký tài khoản thành công") {
+
+      if (response.data === "Xác thực tài khoản thành công") {
+        // Thêm delay nhỏ để đảm bảo tài khoản đã được xác thực hoàn toàn
+        if (activeTab === "employer" && taxCodeVerified) {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Delay 1s
+          
+          const verifyResult = await handleVerifyEmployer(email);
+          if (!verifyResult) {
+            setConfirmationStatus("failure");
+            setIsPaused(false);
+            return;
+          }
+        }
+        
         setConfirmationStatus("success");
         setIsPaused(true);
       } else {
         setConfirmationStatus("failure");
         setIsPaused(false);
-        setErrorMessage(
-          response.data || "Xác thực thất bại. Vui lòng thử lại."
-        );
+        setErrorMessage(response.data || "Xác thực thất bại. Vui lòng thử lại.");
       }
     } catch (error) {
-      console.error("Verification API error:", error);
+      console.error("Verification error:", error);
       setConfirmationStatus("failure");
       setIsPaused(false);
-      if (error.response) {
-        setErrorMessage(
-          error.response.data || "Xác thực thất bại. Vui lòng thử lại."
-        );
-      } else if (error.request) {
-        setErrorMessage("Không thể kết nối đến máy chủ. Vui lòng thử lại sau.");
-      } else {
-        setErrorMessage("Đã xảy ra lỗi. Vui lòng thử lại.");
-      }
+      setErrorMessage(error.response?.data || "Xác thực thất bại. Vui lòng thử lại.");
     }
   };
 
@@ -274,7 +293,7 @@ export default function SignUpForm() {
             </Button>
             <p className="text-sm text-gray-500 text-center">
               Còn lại {Math.floor(timeLeft / 60)}:
-              {timeLeft % 60 < 10 ? `0${timeLeft % 60}` : timeLeft % 60} để nhậậập
+              {timeLeft % 60 < 10 ? `0${timeLeft % 60}` : timeLeft % 60} để nhập
               mã
             </p>
           </motion.form>
@@ -328,32 +347,34 @@ export default function SignUpForm() {
 
   const verifyTaxCode = async (taxCode) => {
     try {
-      console.log("Verifying tax code:", taxCode);
       const response = await axios.get(`http://localhost:8080/company/validate-tax-info/${taxCode}`);
       if (response.data) {
-        console.log("Tax code verification response:", response.data);
         setCompanyInfo(response.data);
         setTaxCodeVerified(true);
         
-        // Cập nhật formData với thông tin công ty và giữ lại taxCode gốc
-        const updatedFormData = {
-          ...formData,
+        setFormData(prev => ({
+          ...prev,
           companyName: response.data.companyName,
-          taxCode: taxCode, // Giữ lại taxCode gốc thay vì lấy từ response
+          taxCode: taxCode,
           address: response.data.address
-        };
-        
-        console.log("Updated formData:", updatedFormData);
-        setFormData(updatedFormData);
+        }));
         
         return true;
       }
       return false;
     } catch (error) {
       console.error("Error verifying tax code:", error);
+      setErrorMessage("Mã số thuế không hợp lệ hoặc không tồn tại");
       return false;
     }
   };
+
+  useEffect(() => {
+    if (taxCodeVerified) {
+      console.log("Tax code verified:", formData.taxCode);
+      console.log("Company info:", companyInfo);
+    }
+  }, [taxCodeVerified, formData.taxCode, companyInfo]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 flex items-center justify-center p-4">
@@ -479,7 +500,7 @@ export default function SignUpForm() {
           Bằng cách nhấp vào 'Đăng ký', bạn xác nhận rằng bạn đã đọc và chấp nhận
             {" "}
             <a href="#" className="underline text-indigo-600">
-            Điều khoản dịch vụ
+            Điều kho��n dịch vụ
             </a>{" "}
             và{" "}
             <a href="#" className="underline text-indigo-600">
