@@ -276,13 +276,13 @@ const JobManagement = () => {
                     <span
                       className={`px-3 py-1 rounded-full text-sm ${
                         job.status === "Đang mở"
-                          ? "bg-emerald-100 text-emerald-600"
+                          ? "bg-emerald-100 text-emerald-600" // Màu xanh lá cho "Đang mở"
                           : job.status === "Hết hạn"
-                          ? "bg-red-100 text-red-600"
-                          : "bg-yellow-100 text-yellow-600"
+                          ? "bg-red-100 text-red-600" // Màu đỏ cho "Hết hạn"
+                          : "bg-yellow-100 text-yellow-600" // Màu vàng cho "Chờ duyệt"
                       }`}
                     >
-                      {job?.status}
+                      {job.status}
                     </span>
                   </td>
                   <td className="p-4">
