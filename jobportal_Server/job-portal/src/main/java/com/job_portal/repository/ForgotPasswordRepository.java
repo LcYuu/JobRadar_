@@ -1,5 +1,7 @@
 package com.job_portal.repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,4 +21,5 @@ public interface ForgotPasswordRepository extends JpaRepository<ForgotPassword, 
     void deleteByUserAccountEmail(@Param("email") String email);
 
 	 Optional<ForgotPassword> findByOtpAndUserAccount(String otp, UserAccount userAccount);
+	 List<ForgotPassword> findByExpirationTimeBefore(LocalDateTime now);
 }
