@@ -285,34 +285,53 @@ public class AuthController {
 
 	@PostMapping("/forgot-password/verifyMail/{email}")
 	public ResponseEntity<String> verifyMail(@PathVariable String email) throws MessagingException {
-		Optional<UserAccount> userAccount = Optional.of(userAccountRepository.findByEmail(email)
-				.orElseThrow(() -> new UsernameNotFoundException("Vui lòng cung cấp đúng email")));
+	    Optional<UserAccount> userAccount = Optional.of(userAccountRepository.findByEmail(email)
+	            .orElseThrow(() -> new UsernameNotFoundException("Vui lòng cung cấp đúng email")));
 
-		String otp = otpUtil.generateOtp();
-		emailUtil.sendForgotMail(email, otp);
+	    String otp = otpUtil.generateOtp();
+	    emailUtil.sendForgotMail(email, otp);
 
-		ForgotPassword fp = ForgotPassword.builder().otp(otp)
-				.expirationTime(new Date(System.currentTimeMillis() + 5 * 60 * 1000)).userAccount(userAccount.get())
-				.build();
-		forgotPasswordRepository.save(fp);
-		return ResponseEntity.ok("Vui lòng kiểm tra email để nhận mã OTP");
+	    // Lưu expirationTime là LocalDateTime thay vì Date
+	    LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(1);  // Thêm 1 phút
+	    ForgotPassword fp = ForgotPassword.builder()
+	            .otp(otp)
+	            .expirationTime(expirationTime)
+	            .userAccount(userAccount.get())
+	            .build();
+	    forgotPasswordRepository.save(fp);
 
+	    return ResponseEntity.ok("Vui lòng kiểm tra email để nhận mã OTP");
 	}
+
 
 	@PostMapping("/forgot-password/verifyOtp/{email}/{otp}")
 	public ResponseEntity<String> verifyOtp(@PathVariable String email, @PathVariable String otp)
-			throws MessagingException {
-		Optional<UserAccount> userAccount = Optional.of(userAccountRepository.findByEmail(email)
-				.orElseThrow(() -> new UsernameNotFoundException("Vui lòng cung cấp đúng email")));
+	        throws MessagingException {
+	    // Tìm kiếm tài khoản người dùng theo email
+	    Optional<UserAccount> userAccount = Optional.of(userAccountRepository.findByEmail(email)
+	            .orElseThrow(() -> new UsernameNotFoundException("Vui lòng cung cấp đúng email")));
 
-		ForgotPassword fp = forgotPasswordRepository.findByOtpAndUserAccount(otp, userAccount.get())
-				.orElseThrow(() -> new RuntimeException("Không thể xác nhận OTP cho email: " + email));
-		if (fp.getExpirationTime().before(Date.from(Instant.now()))) {
-			forgotPasswordRepository.deleteById(fp.getFpId());
-			return new ResponseEntity<>("OTP đã hết hạn", HttpStatus.EXPECTATION_FAILED);
-		}
-		return ResponseEntity.ok("Xác thực OTP thành công");
+	    // Tìm OTP từ cơ sở dữ liệu
+	    ForgotPassword fp = forgotPasswordRepository.findByOtpAndUserAccount(otp, userAccount.get())
+	            .orElseThrow(() -> new RuntimeException("Không thể xác nhận OTP cho email: " + email));
+
+	    // Log thông tin để kiểm tra
+	    System.out.println("Expiration time: " + fp.getExpirationTime());
+	    System.out.println("Current time: " + LocalDateTime.now());
+
+	    // Kiểm tra xem mã OTP đã hết hạn chưa
+	    if (fp.getExpirationTime().isBefore(LocalDateTime.now())) {
+	        // Nếu OTP hết hạn, xóa bản ghi và trả về thông báo lỗi
+	        System.out.println("OTP đã hết hạn, tiến hành xóa...");
+	        forgotPasswordRepository.deleteById(fp.getFpId()); // Đảm bảo gọi delete đúng
+	        return new ResponseEntity<>("Mã OTP đã hết hạn", HttpStatus.BAD_REQUEST); // Đổi mã trạng thái phù hợp
+	    }
+
+	    // Trả về thông báo nếu OTP hợp lệ
+	    return ResponseEntity.ok("Xác thực OTP thành công");
 	}
+
+
 
 	@PostMapping("/forgot-password/changePassword/{email}")
 	public ResponseEntity<String> changePassword(@RequestBody ChangePassword changePassword, @PathVariable String email)

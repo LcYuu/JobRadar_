@@ -12,6 +12,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
@@ -64,8 +65,14 @@ public class Seeker {
     @ManyToMany(mappedBy = "follows")
     private List<Company> followedCompanies = new ArrayList<>();
     
-    @ManyToMany
-	private List<Skills> skills = new ArrayList<>();
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+        name = "seeker_profile_skills",
+        joinColumns = @JoinColumn(name = "seeker_user_id"), // Khóa ngoại liên kết tới Seeker
+        inverseJoinColumns = @JoinColumn(name = "skills_skill_id") // Khóa ngoại liên kết tới Skills
+    )
+    private List<Skills> skills = new ArrayList<>();
+
     
     @OneToMany(mappedBy = "seeker", fetch = FetchType.EAGER, cascade = CascadeType.ALL , orphanRemoval = true)
     private List<SocialLink> socialLinks = new ArrayList<>();

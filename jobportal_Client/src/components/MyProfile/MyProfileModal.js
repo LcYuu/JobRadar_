@@ -7,13 +7,20 @@ import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
-import * as Yup from 'yup';
-import { getProfileAction, updateProfileAction } from "../../redux/Auth/auth.action";
+import * as Yup from "yup";
+import {
+  getProfileAction,
+  updateProfileAction,
+} from "../../redux/Auth/auth.action";
 import { uploadToCloudinary } from "../../utils/uploadToCloudinary";
-import { getSeekerByUser, updateSeekerAction } from "../../redux/Seeker/seeker.action";
+import {
+  getSeekerByUser,
+  updateSeekerAction,
+} from "../../redux/Seeker/seeker.action";
 import { Label } from "../../ui/label";
 import { Input } from "../../ui/input";
 import { toast } from "react-hot-toast";
+import Swal from "sweetalert2";
 
 const style = {
   position: "absolute",
@@ -34,9 +41,9 @@ const style = {
 const validationSchema = Yup.object({
   userName: Yup.string().required("Username is required"),
   address: Yup.string().required("Address is required"),
-  specificAddress: Yup.string().when('isEditingInfo', {
+  specificAddress: Yup.string().when("isEditingInfo", {
     is: true,
-    then: Yup.string().required('Số nhà, tên đường là bắt buộc'),
+    then: Yup.string().required("Số nhà, tên đường là bắt buộc"),
   }),
 });
 
@@ -74,10 +81,12 @@ export default function ProfileModal({ open, handleClose }) {
       setIsLoading(true);
       try {
         await Promise.all([
-          dispatch(updateProfileAction({ 
-            userName: values.userName, 
-            avatar: selectedAvatar || values.avatar 
-          })),
+          dispatch(
+            updateProfileAction({
+              userName: values.userName,
+              avatar: selectedAvatar || values.avatar,
+            })
+          ),
           handleSaveClick(values),
         ]);
         await dispatch(getProfileAction());
@@ -86,6 +95,15 @@ export default function ProfileModal({ open, handleClose }) {
         console.error("Update failed:", error);
       } finally {
         setIsLoading(false);
+        Swal.fire({
+          icon: "success",
+          title: "Cập nhật",
+          text: "Cập nhật thông tin thành công",
+          customClass: {
+            popup: "z-[9999]", // Sử dụng lớp z-index của Tailwind
+            backdrop: "bg-black bg-opacity-50",
+          },
+        });
       }
     },
   });
@@ -97,28 +115,28 @@ export default function ProfileModal({ open, handleClose }) {
     formik.setFieldValue("avatar", imageUrl); // Cập nhật giá trị avatar trong formik
     setIsLoading(false);
   };
-  console.log("🚀 ~ useEffect ~ seeker?.address:", seeker?.address)
+  console.log("🚀 ~ useEffect ~ seeker?.address:", seeker?.address);
   useEffect(() => {
     if (seeker?.address) {
-      
-      const addressParts = seeker?.address.split(',').map(part => part.trim());
+      const addressParts = seeker?.address
+        .split(",")
+        .map((part) => part.trim());
       // console.log("addressParts:", addressParts);  // Log provinces
       if (addressParts.length >= 3) {
         const [ward, district, province] = addressParts.slice(-3);
-        const specificAddressPart = addressParts.slice(0, -3).join(', ');
+        const specificAddressPart = addressParts.slice(0, -3).join(", ");
 
         setSpecificAddress(specificAddressPart);
         setLocation({
           ward,
           district,
-          province
+          province,
         });
 
-        const matchingProvince = provinces.find(p => p.name === province);
-        console.log("addressParts:", provinces, "a", province);  // Log provinces
+        const matchingProvince = provinces.find((p) => p.name === province);
+        console.log("addressParts:", provinces, "a", province); // Log provinces
         if (matchingProvince) {
           setSelectedProvince(matchingProvince.code);
-          
         }
       }
     }
@@ -129,7 +147,7 @@ export default function ProfileModal({ open, handleClose }) {
         const response = await fetch("https://provinces.open-api.vn/api/p/");
         const data = await response.json();
         setProvinces(data);
-        console.log("Fetched provinces:", data);  // Log provinces
+        console.log("Fetched provinces:", data); // Log provinces
       } catch (error) {
         console.error("Error fetching provinces:", error);
       }
@@ -146,10 +164,12 @@ export default function ProfileModal({ open, handleClose }) {
           );
           const data = await response.json();
           setDistricts(data.districts);
-          setLocation(prev => ({ ...prev, province: data.name }));
+          setLocation((prev) => ({ ...prev, province: data.name }));
 
           if (location.district) {
-            const matchingDistrict = data.districts.find(d => d.name === location.district);
+            const matchingDistrict = data.districts.find(
+              (d) => d.name === location.district
+            );
             if (matchingDistrict) {
               setSelectedDistrict(matchingDistrict.code);
             }
@@ -171,10 +191,12 @@ export default function ProfileModal({ open, handleClose }) {
           );
           const data = await response.json();
           setWards(data.wards);
-          setLocation(prev => ({ ...prev, district: data.name }));
+          setLocation((prev) => ({ ...prev, district: data.name }));
 
           if (location.ward) {
-            const matchingWard = data.wards.find(w => w.name === location.ward);
+            const matchingWard = data.wards.find(
+              (w) => w.name === location.ward
+            );
             if (matchingWard) {
               setSelectedWard(matchingWard.code);
             }
@@ -188,10 +210,11 @@ export default function ProfileModal({ open, handleClose }) {
   }, [selectedDistrict, location.ward]);
 
   const handleSaveClick = async (values) => {
-    const fullAddress = specificAddress && location.ward && location.district && location.province
-      ? `${specificAddress}, ${location.ward}, ${location.district}, ${location.province}`.trim()
-      : seeker?.address || '';
-    
+    const fullAddress =
+      specificAddress && location.ward && location.district && location.province
+        ? `${specificAddress}, ${location.ward}, ${location.district}, ${location.province}`.trim()
+        : seeker?.address || "";
+
     try {
       await dispatch(
         updateSeekerAction({
@@ -223,9 +246,9 @@ export default function ProfileModal({ open, handleClose }) {
               </IconButton>
               <h2 className="text-xl font-semibold">Chỉnh sửa hồ sơ</h2>
             </div>
-            <Button 
-              type="submit" 
-              variant="contained" 
+            <Button
+              type="submit"
+              variant="contained"
               disabled={isLoading || imageLoading}
               className="bg-blue-600 hover:bg-blue-700"
             >
@@ -246,9 +269,9 @@ export default function ProfileModal({ open, handleClose }) {
                 style={{ display: "none" }}
                 id="image-input"
               />
-              <label 
+              <label
                 htmlFor="image-input"
-                 className="p-2 bg-white rounded-full shadow-md cursor-pointer hover:bg-gray-50"
+                className="p-2 bg-white rounded-full shadow-md cursor-pointer hover:bg-gray-50"
               >
                 {imageLoading ? (
                   <div className="animate-spin">⌛</div>
@@ -281,7 +304,9 @@ export default function ProfileModal({ open, handleClose }) {
             {isEditingInfo ? (
               <div className="space-y-4">
                 <div>
-                  <Label className="text-sm font-medium block mb-1">Tỉnh/Thành phố</Label>
+                  <Label className="text-sm font-medium block mb-1">
+                    Tỉnh/Thành phố
+                  </Label>
                   <select
                     className="w-full p-2 border rounded-md"
                     value={selectedProvince}
@@ -297,7 +322,9 @@ export default function ProfileModal({ open, handleClose }) {
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium block mb-1">Quận/Huyện</Label>
+                  <Label className="text-sm font-medium block mb-1">
+                    Quận/Huyện
+                  </Label>
                   <select
                     className="w-full p-2 border rounded-md"
                     value={selectedDistrict}
@@ -314,15 +341,22 @@ export default function ProfileModal({ open, handleClose }) {
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium block mb-1">Phường/Xã</Label>
+                  <Label className="text-sm font-medium block mb-1">
+                    Phường/Xã
+                  </Label>
                   <select
                     className="w-full p-2 border rounded-md"
                     value={selectedWard}
                     onChange={(e) => {
                       setSelectedWard(e.target.value);
-                      const selectedWardData = wards.find(w => w.code === Number(e.target.value));
+                      const selectedWardData = wards.find(
+                        (w) => w.code === Number(e.target.value)
+                      );
                       if (selectedWardData) {
-                        setLocation(prev => ({ ...prev, ward: selectedWardData.name }));
+                        setLocation((prev) => ({
+                          ...prev,
+                          ward: selectedWardData.name,
+                        }));
                       }
                     }}
                     disabled={!selectedDistrict}
@@ -337,7 +371,9 @@ export default function ProfileModal({ open, handleClose }) {
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium block mb-1">Số nhà, tên đường</Label>
+                  <Label className="text-sm font-medium block mb-1">
+                    Số nhà, tên đường
+                  </Label>
                   <Input
                     type="text"
                     value={specificAddress}
