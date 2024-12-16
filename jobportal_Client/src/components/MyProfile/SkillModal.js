@@ -9,6 +9,7 @@ import {
   getSeekerByUser,
   updateSeekerAction,
 } from "../../redux/Seeker/seeker.action";
+import Swal from "sweetalert2";
 
 const SkillModal = ({ open, handleClose }) => {
   const dispatch = useDispatch();
@@ -34,6 +35,20 @@ const SkillModal = ({ open, handleClose }) => {
   }, [dispatch]);
 
   const handleSaveSkills = async () => {
+    if (selectedSkills.length === 0) {
+      handleClose();
+      Swal.fire({
+        icon: "warning",
+        title: "Lỗi",
+        text: "Bạn phải chọn ít nhất một kỹ năng!",
+        customClass: {
+          popup: "z-[9999]", // Sử dụng lớp z-index của Tailwind
+          backdrop: "bg-black bg-opacity-50",
+        },
+      });
+      return; // Dừng hàm nếu không có kỹ năng nào được chọn
+    }
+  
     try {
       const skillIds = selectedSkills.map((skill) => skill.skillId);
       await dispatch(updateSeekerAction({ skillIds }));
@@ -42,14 +57,25 @@ const SkillModal = ({ open, handleClose }) => {
       console.error("Error updating skills:", error);
     } finally {
       handleClose();
+      Swal.fire({
+        icon: "success",
+        title: "Cập nhật",
+        text: "Cập nhật kỹ năng thành công",
+        customClass: {
+          popup: "z-[9999]", // Sử dụng lớp z-index của Tailwind
+          backdrop: "bg-black bg-opacity-50",
+        },
+      });
     }
   };
+  
+  
 
   console.log("All skills:", skills); // Kiểm tra toàn bộ kỹ năng từ store
   console.log("Selected skills:", selectedSkills); // Kiểm tra danh sách skill đã chọn
 
   return (
-    <Modal open={open} onClose={handleClose} className="animate-fadeIn">
+    <Modal open={open} onClose={handleClose} className="animate-fadeIn fixed inset-0 z-50">
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-xl shadow-xl p-6">
         <div className="flex items-center justify-between border-b pb-4 mb-4">
           <h2 className="text-xl mt-5 font-semibold text-gray-800">Chọn kĩ năng</h2>
