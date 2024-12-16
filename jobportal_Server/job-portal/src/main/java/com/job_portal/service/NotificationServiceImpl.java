@@ -72,7 +72,6 @@ public class NotificationServiceImpl implements INotificationService {
 
 	            StringBuilder contentBuilder = new StringBuilder();
 	            contentBuilder.append("Mức lương: ")
-	                .append(" - ")
 	                .append(jobPost.getSalary() != null ? jobPost.getSalary() : "Thỏa thuận")
 	                .append("\n\n") 
 	                .append("Địa điểm: ")
