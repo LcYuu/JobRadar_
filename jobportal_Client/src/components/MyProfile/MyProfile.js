@@ -526,7 +526,9 @@ export default function MyProfile() {
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground whitespace-pre-line">
-                    {seeker.description}
+                    {seeker.description
+                      ? seeker.description
+                      : "Chưa cập nhật mô tả về bản thân"}
                   </p>
                 )}
               </CardContent>
@@ -543,60 +545,67 @@ export default function MyProfile() {
                 </Button>
               </CardHeader>
               <CardContent className="space-y-6">
-                {exp?.map((experience, index) => (
-                  <div
-                    key={index}
-                    className="flex gap-4 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200"
-                  >
+                {exp && exp.length > 0 ? (
+                  exp.map((experience, index) => (
                     <div
-                      className={`h-12 w-12 rounded-full ${getColorByIndex(
-                        index
-                      )} shadow-md`}
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h4 className="font-semibold text-lg">
-                            {experience.jobTitle}
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            Công ty: {experience.companyName}
-                          </p>
+                      key={index}
+                      className="flex gap-4 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200"
+                    >
+                      <div
+                        className={`h-12 w-12 rounded-full ${getColorByIndex(
+                          index
+                        )} shadow-md`}
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h4 className="font-semibold text-lg">
+                              {experience.jobTitle}
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              Công ty: {experience.companyName}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="hover:bg-blue-100 transition-colors duration-200"
+                              onClick={() => handleEditExperience(experience)}
+                            >
+                              <Edit className="h-4 w-4 text-blue-600" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="hover:bg-red-100 transition-colors duration-200"
+                              onClick={() =>
+                                handleDeleteExp(experience.experienceId)
+                              }
+                            >
+                              <Delete className="h-4 w-4 text-red-600" />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="hover:bg-blue-100 transition-colors duration-200"
-                            onClick={() => handleEditExperience(experience)}
-                          >
-                            <Edit className="h-4 w-4 text-blue-600" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="hover:bg-red-100 transition-colors duration-200"
-                            onClick={() =>
-                              handleDeleteExp(experience.experienceId)
-                            }
-                          >
-                            <Delete className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </div>
+                        <p className="mt-2 text-sm text-gray-600">
+                          {formatDate(experience.startDate)} -{" "}
+                          {experience.endDate
+                            ? formatDate(experience.endDate)
+                            : "Present"}
+                        </p>
+                        <p className="mt-2 text-sm text-gray-500">
+                          {experience.description}
+                        </p>
                       </div>
-                      <p className="mt-2 text-sm text-gray-600">
-                        {formatDate(experience.startDate)} -{" "}
-                        {experience.endDate
-                          ? formatDate(experience.endDate)
-                          : "Present"}
-                      </p>
-                      <p className="mt-2 text-sm text-gray-500">
-                        {experience.description}
-                      </p>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    Chưa cập nhật kinh nghiệm
+                  </p>
+                )}
               </CardContent>
+
               <section>
                 <ExpModal
                   open={openExp}
@@ -944,7 +953,8 @@ export default function MyProfile() {
                     </select>
                   </div>
                 ) : (
-                  seeker?.industry && (
+                  seeker?.industry &&
+                  seeker.industry.industryId !== 0 && (
                     <div>
                       <Label className="text-sm font-medium whitespace-nowrap">
                         Major

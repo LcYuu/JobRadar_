@@ -104,8 +104,6 @@ public class UserAccount {
 		this.provider = provider;
 	}
 
-
-
 	public Company getCompany() {
 		return company;
 	}

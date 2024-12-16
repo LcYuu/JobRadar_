@@ -91,7 +91,7 @@ public class JobPostServiceImpl implements IJobPostService {
 		jobPost.setLocation(jobPostDTO.getLocation());
 		jobPost.setTypeOfWork(jobPostDTO.getTypeOfWork());
 		jobPost.setPosition(jobPostDTO.getPosition());
-		jobPost.setStatus("Đang mở");
+		jobPost.setStatus("Chờ duyệt");
 		jobPost.setCompany(company.get());
 		jobPost.setCity(city.get());
 		jobPost.setApprove(false);
