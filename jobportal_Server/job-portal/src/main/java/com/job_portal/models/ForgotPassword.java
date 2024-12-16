@@ -1,5 +1,6 @@
 package com.job_portal.models;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import jakarta.persistence.Column;
@@ -33,7 +34,7 @@ public class ForgotPassword {
 	private String otp;
 
 	@Column(nullable = false)
-	private Date expirationTime;
+	private LocalDateTime expirationTime;
 
 	@OneToOne
 	@JoinColumn(name = "user_id")
