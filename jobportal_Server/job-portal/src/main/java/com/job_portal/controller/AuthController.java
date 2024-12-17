@@ -108,7 +108,6 @@ public class AuthController {
 	            return ResponseEntity.status(HttpStatus.CONFLICT)
 	                    .body("Email này đã được sử dụng ở tài khoản khác");
 	        }
-	        
 	        UserAccount newUser = new UserAccount();
 	        newUser.setUserId(UUID.randomUUID());
 	        newUser.setUserType(userTypeRepository.findById(userSignupDTO.getUserType().getUserTypeId()).orElse(null));
