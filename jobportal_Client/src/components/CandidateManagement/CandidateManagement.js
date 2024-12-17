@@ -121,7 +121,6 @@ const CandidateManagement = () => {
           {/* Tổng số người ứng tuyển: {candidates.length} */}
         </h1>
         <div className="flex gap-4 items-center">
-          {/* Ô tìm kiếm */}
           <Input
             type="text"
             placeholder="Tìm kiếm"
