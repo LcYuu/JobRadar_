@@ -106,8 +106,6 @@ export default function SignInForm() {
     }
   }    
   
-
-
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setLoginStatus(null);
@@ -279,6 +277,7 @@ export default function SignInForm() {
               <div className="space-y-2">
                 <Input
                   type="email"
+                
                   placeholder="Địa chỉ email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
