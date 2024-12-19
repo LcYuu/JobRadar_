@@ -38,7 +38,7 @@ export default function ChangePassword() {
     // Kiểm tra sự khớp của mật khẩu xác nhận
     if (newPassword !== confirmPassword) {
       setStatus('failure');
-      setErrorMessage('Mật khẩu không khớp. Vui lòng thử lại.');
+      setErrorMessage('Mật khẩu và xác nhận mật khẩu không khớp. Vui lòng thử lại.');
       return;
     }
 

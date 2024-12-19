@@ -27,7 +27,6 @@ public class TaxCodeValidation {
             // Gửi yêu cầu GET tới API VietQR
             ResponseEntity<Map> response = restTemplate.exchange(apiUrl, HttpMethod.GET, null, Map.class);
 
-            // Kiểm tra mã trả về từ API, nếu "code" là "00" thì mã số thuế hợp lệ
             Map<String, Object> responseBody = response.getBody();
             if (responseBody != null && "00".equals(responseBody.get("code"))) {
                 return true; // Mã số thuế hợp lệ

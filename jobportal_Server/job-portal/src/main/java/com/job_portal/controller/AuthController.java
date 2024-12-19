@@ -215,7 +215,7 @@ public class AuthController {
 		}
 		Optional<UserAccount> userOpt = userAccountRepository.findByEmail(login.getEmail());
 		if (userOpt.isEmpty()) {
-			return new AuthResponse("", "Tài khoản hoặc mật khẩu không đúng");
+			return new AuthResponse("", "Email hoặc mật khẩu không đúng");
 		}
 		UserAccount user = userOpt.get();
 		if (!user.isActive()) {
@@ -228,7 +228,7 @@ public class AuthController {
 			userAccountRepository.save(user);
 			return new AuthResponse(token, "Đăng nhập thành công");
 		} catch (Exception e) {
-			return new AuthResponse("", "Tài khoản hoặc mật khẩu không đúng");
+			return new AuthResponse("", "Email hoặc mật khẩu không đúng");
 		}
 	}
 	private boolean isValidPassword(String password) {
@@ -257,10 +257,10 @@ public class AuthController {
 	private Authentication authenticate(String email, String password) {
 		UserDetails userDetails = accountDetailService.loadUserByUsername(email);
 		if (userDetails == null) {
-			throw new BadCredentialsException("Tài khoản hoặc mật khẩu không đúng");
+			throw new BadCredentialsException("Email hoặc mật khẩu không đúng");
 		}
 		if (!passwordEncoder.matches(password, userDetails.getPassword())) {
-			throw new BadCredentialsException("Tài khoản hoặc mật khẩu không đúng");
+			throw new BadCredentialsException("Email hoặc mật khẩu không đúng");
 		}
 		return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 	}
@@ -283,24 +283,40 @@ public class AuthController {
 	};
 
 	@PostMapping("/forgot-password/verifyMail/{email}")
-	public ResponseEntity<String> verifyMail(@PathVariable String email) throws MessagingException {
-	    Optional<UserAccount> userAccount = Optional.of(userAccountRepository.findByEmail(email)
-	            .orElseThrow(() -> new UsernameNotFoundException("Vui lòng cung cấp đúng email")));
+	public ResponseEntity<Map<String, String>> verifyMail(@PathVariable String email) throws MessagingException {
+	    Optional<UserAccount> userAccount = userAccountRepository.findByEmail(email);
 
-	    String otp = otpUtil.generateOtp();
-	    emailUtil.sendForgotMail(email, otp);
+	    if (userAccount.isEmpty()) {
+	        // Trả về JSON thay vì plain text
+	        Map<String, String> errorResponse = new HashMap<>();
+	        errorResponse.put("error", "Email không tồn tại");
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+	    }
 
-	    // Lưu expirationTime là LocalDateTime thay vì Date
-	    LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(1);  // Thêm 1 phút
-	    ForgotPassword fp = ForgotPassword.builder()
-	            .otp(otp)
-	            .expirationTime(expirationTime)
-	            .userAccount(userAccount.get())
-	            .build();
-	    forgotPasswordRepository.save(fp);
+	    try {
+	        String otp = otpUtil.generateOtp();
+	        emailUtil.sendForgotMail(email, otp);
 
-	    return ResponseEntity.ok("Vui lòng kiểm tra email để nhận mã OTP");
+	        LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(1);
+	        ForgotPassword fp = ForgotPassword.builder()
+	                .otp(otp)
+	                .expirationTime(expirationTime)
+	                .userAccount(userAccount.get())
+	                .build();
+
+	        forgotPasswordRepository.save(fp);
+
+	        Map<String, String> successResponse = new HashMap<>();
+	        successResponse.put("message", "Vui lòng kiểm tra email để nhận mã OTP");
+	        return ResponseEntity.ok(successResponse);
+
+	    } catch (Exception e) {
+	        Map<String, String> errorResponse = new HashMap<>();
+	        errorResponse.put("error", "Đã xảy ra lỗi khi gửi OTP. Vui lòng thử lại.");
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+	    }
 	}
+
 
 
 	@PostMapping("/forgot-password/verifyOtp/{email}/{otp}")
@@ -342,7 +358,7 @@ public class AuthController {
 
 		userAccountRepository.updatePassword(email, encodedPassword);
 		forgotPasswordRepository.deleteByUserAccountEmail(email);
-		return ResponseEntity.ok("Password đã thay đổi thành công");
+		return ResponseEntity.ok("Mật khẩu đã thay đổi thành công");
 	}
 
 	@GetMapping("/user-role")

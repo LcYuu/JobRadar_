@@ -690,6 +690,7 @@ const handleSubmitJob = async (e) => {
                         options: ["unordered", "ordered"],
                       },
                     }}
+                    placeholder="Nhập mô tả công việc..."
                   />
                 </div>
                 {errors.description && (
@@ -730,6 +731,7 @@ const handleSubmitJob = async (e) => {
                         options: ["unordered", "ordered"],
                       },
                     }}
+                    placeholder="Nhập trách nhiệm công việc..."
                   />
                 </div>
                 {errors.requirement && (
@@ -799,6 +801,7 @@ const handleSubmitJob = async (e) => {
                         options: ["unordered", "ordered"],
                       },
                     }}
+                    placeholder="Nhập yêu cầu thêm..."
                   />
                 </div>
               </div>
@@ -850,6 +853,7 @@ const handleSubmitJob = async (e) => {
                         options: ["unordered", "ordered"],
                       },
                     }}
+                    placeholder="Nhập lợi ích..."
                   />
                 </div>
                 {errors.benefit && (
@@ -865,6 +869,7 @@ const handleSubmitJob = async (e) => {
                     required
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     value={selectedProvince}
+                    id="tinh"
                     onChange={(e) => handleProvinceSelection(e.target.value)}
                   >
                     <option value="">Chọn tỉnh/thành phố</option>
@@ -881,6 +886,7 @@ const handleSubmitJob = async (e) => {
                     Quận/Huyện
                   </label>
                   <select
+                    id="quan"
                     required
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     value={selectedDistrict}
@@ -901,6 +907,7 @@ const handleSubmitJob = async (e) => {
                     Phường/Xã
                   </label>
                   <select
+                  id="xa"
                     required
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     value={selectedWard}
