@@ -67,7 +67,7 @@ export default function AdminJobList() {
   return (
     <div className="space-y-6 mt-8">
       <div className="bg-white rounded-lg shadow">
-        <div className="flex justify-between items-center p-4 border-b">Thông tin liên hệ trên form
+        <div className="flex justify-between items-center p-4 border-b">
           <h2 className="font-semibold">
             Tổng số công việc ({totalElements})
           </h2>
@@ -134,7 +134,7 @@ export default function AdminJobList() {
                 <tr key={job.jobPostId} className="border-b hover:bg-gray-50">
                   <td className="p-4">{index + 1 + currentPage * size}</td>
 
-                  <td className="p-4 truncate" title={job.title}>
+                  <td id="job-title" className="p-4 truncate" title={job.title}>
                     {job.title}
                   </td>
                   <td className="p-4 truncate" title={job.company?.companyName}>

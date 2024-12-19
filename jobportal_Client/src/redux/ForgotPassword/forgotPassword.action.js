@@ -14,13 +14,22 @@ import { API_BASE_URL } from "../../configs/api";
 
 export const forgotPasswordAction = (email) => async (dispatch) => {
   dispatch({ type: FORGOT_PASSWORD_REQUEST });
+
   try {
     const response = await axios.post(`${API_BASE_URL}/auth/forgot-password/verifyMail/${email}`);
+    
+    // Dispatch khi gọi API thành công
     dispatch({ type: FORGOT_PASSWORD_SUCCESS, payload: response.data, success: true });
-    return { success: true }; // Return success
+
+    return { success: true, message: response.data.message || "Yêu cầu gửi OTP thành công" };
   } catch (error) {
-    dispatch({ type: FORGOT_PASSWORD_FAILURE, payload: error.response?.data || error.message, success: false });
-    return { success: false }; // Return failure
+    // Lấy thông báo lỗi cụ thể từ backend (nếu có)
+    const errorMessage = error.response?.data?.error || "Đã xảy ra lỗi. Vui lòng thử lại.";
+
+    // Dispatch khi gọi API thất bại
+    dispatch({ type: FORGOT_PASSWORD_FAILURE, payload: errorMessage, success: false });
+
+    return { success: false, error: errorMessage };
   }
 };
 

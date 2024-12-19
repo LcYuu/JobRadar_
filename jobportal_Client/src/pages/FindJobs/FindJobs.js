@@ -268,7 +268,7 @@ export default function JobSearchPage() {
             {/* Salary Range Filter */}
             <div>
               <h3 className="font-semibold mb-2 text-gray-800 tracking-tight">
-                Bộ lọc theo mức lương
+                Bộ lọc theo mức lương (đơn vị: VND)
               </h3>
               <RangeSlider
                 min={minSalary}
