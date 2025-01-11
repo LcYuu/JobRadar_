@@ -38,7 +38,7 @@ public class Company {
 	@Column(name = "company_id")
 	private UUID companyId;
 
-	@Column(name = "company_name", length = 100)
+	@Column(name = "company_name", length = 500)
 	private String companyName;
 
 	@ManyToOne(fetch = FetchType.EAGER)
