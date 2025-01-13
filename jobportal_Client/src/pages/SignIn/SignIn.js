@@ -60,7 +60,7 @@ export default function SignInForm() {
   
     try {
       const response = await dispatch(loginAction({ email, password }));
-    
+      console.log(response?.error)
       if (response && response.success) {
         const user = response.user;
     
