@@ -60,7 +60,7 @@ public class AppConfig {
 	private CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration cfg = new CorsConfiguration();
 
-		cfg.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // Địa chỉ front-end
+		cfg.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://jobradar-one.vercel.app")); // Địa chỉ front-end
 		cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")); // Các phương thức HTTP cho
 																							// phép
 		cfg.setAllowCredentials(true); // Cho phép cookie
