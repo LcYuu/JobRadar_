@@ -25,6 +25,9 @@ import {
   GET_CANDIDATE_APPLY_INFO_FAILURE,
   GET_CANDIDATE_APPLY_INFO_REQUEST,
   GET_CANDIDATE_APPLY_INFO_SUCCESS,
+  NOTIFICATION_VIEW_JOB_REQUEST,
+  NOTIFICATION_VIEW_JOB_SUCCESS,
+  NOTIFICATION_VIEW_JOB_FAILURE,
 } from "./applyJob.actionType";
 
 export const getApplyJobByUser = (currentPage, size) => async (dispatch) => {
@@ -226,3 +229,23 @@ export const getCandidateApplyInfo = (userId, postId) => async (dispatch) => {
     });
   }
 };
+
+export const getNotificationViewJob = (userId, postId) => async (dispatch) => {
+  console.log("🚀 ~ getNotificationViewJob ~ getNotificationViewJob:", userId, postId)
+  dispatch({ type: NOTIFICATION_VIEW_JOB_REQUEST });
+  try {
+    const response = await api.post(`/apply-job/viewApply/${userId}/${postId}`);
+    console.log("Res:", response.data);
+    dispatch({
+      type: NOTIFICATION_VIEW_JOB_SUCCESS,
+      payload: response.data
+    });
+  } catch (error) {
+    console.error("Error fetching candidate apply info:", error);
+    dispatch({
+      type: NOTIFICATION_VIEW_JOB_FAILURE,
+      payload: error.response?.data?.message || "Failed to fetch candidate apply info",
+    });
+  }
+};
+

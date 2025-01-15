@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { store } from "../../redux/store";
 import {
   getApplyJobByCompany,
+  getNotificationViewJob,
   updateApprove,
 } from "../../redux/ApplyJob/applyJob.action";
 import {
@@ -25,8 +26,8 @@ const CandidateManagement = () => {
   const dispatch = useDispatch();
   const {
     applyJobByCompany = [],
+    viewedJobs = [],
     totalPages,
-    totalElements,
   } = useSelector((store) => store.applyJob);
 
   const { positions } = useSelector((store) => store.jobPost);
@@ -252,11 +253,12 @@ const CandidateManagement = () => {
                         >
                           <DropdownMenuItem
                             className="hover:bg-gray-100 cursor-pointer"
-                            onClick={() =>
+                            onClick={() => {
+                              dispatch(getNotificationViewJob(candidate?.userId, candidate?.postId)); // Gọi API
                               navigate(
                                 `/employer/account-management/candidate-management/applicants/${candidate?.userId}/${candidate?.postId}`
-                              )
-                            }
+                              );
+                            }}
                           >
                             Xem chi tiết
                           </DropdownMenuItem>
