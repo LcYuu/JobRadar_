@@ -4,19 +4,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "../../ui/dialog";
-import { motion, AnimatePresence } from "framer-motion";
-import SuccessIcon from "../../components/common/Icon/Sucess/Sucess";
-import FailureIcon from "../../components/common/Icon/Failed/Failed";
-import googleIcon from "../../assets/icons/google.png";
+
+
 import logo1 from "../../assets/images/common/logo1.jpg";
 import { loginAction } from "../../redux/Auth/auth.action";
-import { isStrongPassword } from "../../utils/passwordValidator";
+
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -106,44 +98,44 @@ export default function SignInForm() {
     }
   }    
   
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setLoginStatus(null);
-  };
+  // const handleCloseModal = () => {
+  //   setIsModalOpen(false);
+  //   setLoginStatus(null);
+  // };
 
-  const renderLoginStatus = () => {
-    if (!isModalOpen) return null;
+  // const renderLoginStatus = () => {
+  //   if (!isModalOpen) return null;
 
-    if (loginStatus === "success") {
-      return (
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -50 }}
-          className="flex flex-col items-center"
-        >
-          <SuccessIcon className="w-16 h-16 text-green-500 mb-4" />
-          <p className="text-lg font-semibold text-green-700">
-            Đăng nhập thành công
-          </p>
-        </motion.div>
-      );
-    } else if (loginStatus === "failure") {
-      return (
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -50 }}
-          className="flex flex-col items-center"
-        >
-          <FailureIcon className="w-16 h-16 text-red-500 mb-4" />
-          <p className="text-lg font-semibold text-red-700">{error}</p>
-        </motion.div>
-      );
-    }
+  //   if (loginStatus === "success") {
+  //     return (
+  //       <motion.div
+  //         initial={{ opacity: 0, y: 50 }}
+  //         animate={{ opacity: 1, y: 0 }}
+  //         exit={{ opacity: 0, y: -50 }}
+  //         className="flex flex-col items-center"
+  //       >
+  //         <SuccessIcon className="w-16 h-16 text-green-500 mb-4" />
+  //         <p className="text-lg font-semibold text-green-700">
+  //           Đăng nhập thành công
+  //         </p>
+  //       </motion.div>
+  //     );
+  //   } else if (loginStatus === "failure") {
+  //     return (
+  //       <motion.div
+  //         initial={{ opacity: 0, y: 50 }}
+  //         animate={{ opacity: 1, y: 0 }}
+  //         exit={{ opacity: 0, y: -50 }}
+  //         className="flex flex-col items-center"
+  //       >
+  //         <FailureIcon className="w-16 h-16 text-red-500 mb-4" />
+  //         <p className="text-lg font-semibold text-red-700">{error}</p>
+  //       </motion.div>
+  //     );
+  //   }
 
-    return null;
-  };
+  //   return null;
+  // };
 
   const handleGoogleLogin = async (response) => {
     try {
