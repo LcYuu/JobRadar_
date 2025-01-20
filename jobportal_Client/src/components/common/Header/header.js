@@ -3,11 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { Button } from "../../../ui/button";
 import logo from "../../../assets/images/common/logo.jpg";
-import {
-  getProfileAction,
-  logoutAction,
-} from "../../../redux/Auth/auth.action";
+
 import Swal from "sweetalert2";
+import { logoutAction } from "../../../redux/Auth/auth.thunk";
 
 export default function Header() {
   const dispatch = useDispatch();

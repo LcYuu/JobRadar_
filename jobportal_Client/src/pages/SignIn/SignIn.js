@@ -4,22 +4,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "../../ui/dialog";
-import { motion, AnimatePresence } from "framer-motion";
-import SuccessIcon from "../../components/common/Icon/Sucess/Sucess";
-import FailureIcon from "../../components/common/Icon/Failed/Failed";
-import googleIcon from "../../assets/icons/google.png";
+
+
 import logo1 from "../../assets/images/common/logo1.jpg";
-import { loginAction } from "../../redux/Auth/auth.action";
-import { isStrongPassword } from "../../utils/passwordValidator";
+
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { loginAction } from "../../redux/Auth/auth.thunk";
 
 // Update Modal component
 const Modal = ({ isOpen, onClose, children }) => {
@@ -52,7 +44,6 @@ export default function SignInForm() {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,10 +51,13 @@ export default function SignInForm() {
   
     try {
       const response = await dispatch(loginAction({ email, password }));
-    
-      if (response && response.success) {
-        const user = response.user;
-    
+      console.log("🚀 ~ handleSubmit ~ response:", response)
+      const { payload } = response;
+      console.log("🚀 ~ handleSubmit ~ payload:", payload)
+      
+      if (payload && payload.success) {
+        const user = payload.user; 
+        console.log("🚀 ~ handleSubmit ~ user:", user)
         // Điều hướng trước
         if (user?.userType?.userTypeId === 3) {
           navigate('/employer/account-management/dashboard');
@@ -72,7 +66,6 @@ export default function SignInForm() {
         } else {
           navigate("/");
         }
-    
         // Hiển thị thông báo sau khi chuyển hướng
         setTimeout(async () => {
           await Swal.fire({
@@ -87,7 +80,7 @@ export default function SignInForm() {
         await Swal.fire({
           icon: 'error',
           title: 'Đăng nhập thất bại',
-          text: response?.error || 'Có lỗi xảy ra khi đăng nhập',
+          text: payload || 'Có lỗi xảy ra khi đăng nhập',
           confirmButtonText: 'Thử lại',
           confirmButtonColor: '#3085d6'
         });
@@ -97,7 +90,7 @@ export default function SignInForm() {
       await Swal.fire({
         icon: 'error',
         title: 'Lỗi',
-        text: error.message || 'Đã xảy ra lỗi không mong muốn',
+        text:  'Đã xảy ra lỗi không mong muốn',
         confirmButtonText: 'Đóng',
         confirmButtonColor: '#3085d6'
       });
@@ -106,44 +99,44 @@ export default function SignInForm() {
     }
   }    
   
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setLoginStatus(null);
-  };
+  // const handleCloseModal = () => {
+  //   setIsModalOpen(false);
+  //   setLoginStatus(null);
+  // };
 
-  const renderLoginStatus = () => {
-    if (!isModalOpen) return null;
+  // const renderLoginStatus = () => {
+  //   if (!isModalOpen) return null;
 
-    if (loginStatus === "success") {
-      return (
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -50 }}
-          className="flex flex-col items-center"
-        >
-          <SuccessIcon className="w-16 h-16 text-green-500 mb-4" />
-          <p className="text-lg font-semibold text-green-700">
-            Đăng nhập thành công
-          </p>
-        </motion.div>
-      );
-    } else if (loginStatus === "failure") {
-      return (
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -50 }}
-          className="flex flex-col items-center"
-        >
-          <FailureIcon className="w-16 h-16 text-red-500 mb-4" />
-          <p className="text-lg font-semibold text-red-700">{error}</p>
-        </motion.div>
-      );
-    }
+  //   if (loginStatus === "success") {
+  //     return (
+  //       <motion.div
+  //         initial={{ opacity: 0, y: 50 }}
+  //         animate={{ opacity: 1, y: 0 }}
+  //         exit={{ opacity: 0, y: -50 }}
+  //         className="flex flex-col items-center"
+  //       >
+  //         <SuccessIcon className="w-16 h-16 text-green-500 mb-4" />
+  //         <p className="text-lg font-semibold text-green-700">
+  //           Đăng nhập thành công
+  //         </p>
+  //       </motion.div>
+  //     );
+  //   } else if (loginStatus === "failure") {
+  //     return (
+  //       <motion.div
+  //         initial={{ opacity: 0, y: 50 }}
+  //         animate={{ opacity: 1, y: 0 }}
+  //         exit={{ opacity: 0, y: -50 }}
+  //         className="flex flex-col items-center"
+  //       >
+  //         <FailureIcon className="w-16 h-16 text-red-500 mb-4" />
+  //         <p className="text-lg font-semibold text-red-700">{error}</p>
+  //       </motion.div>
+  //     );
+  //   }
 
-    return null;
-  };
+  //   return null;
+  // };
 
   const handleGoogleLogin = async (response) => {
     try {

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import EmployerCard from "../common/EmployerCard/EmployerCard";
 import { useDispatch, useSelector } from "react-redux";
-import { getCompanyPopular } from "../../redux/Company/company.action";
+import { getCompanyPopular } from "../../redux/Company/company.thunk";
+
 
 export default function TopListEmployers() {
   const dispatch = useDispatch();
-  const { companies = [] } = useSelector((store) => store.company); // Đảm bảo `companies` là mảng rỗng mặc định
+  const { companies = [] } = useSelector((store) => store.company); 
   const [currentImageIndexes, setCurrentImageIndexes] = useState([]);
 
   useEffect(() => {

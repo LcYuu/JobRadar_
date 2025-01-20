@@ -22,7 +22,6 @@ public class LoginTest {
 
 //    @Test
     public void testLogin_01() {
-        
         // Kiểm tra kết nối tới backend trước khi bắt đầu test
         try {
             URL url = new URL("http://localhost:8080");  // URL của backend
@@ -76,8 +75,8 @@ public class LoginTest {
         } 
     }
     
-    //@Test
-    public void testLogin_02() {
+    @Test
+    public void loginFailure_02() {
         
         // Đảm bảo đường dẫn đến ChromeDriver là đúng
         System.setProperty("webdriver.chrome.driver", "D:\\ChromeDev\\chromedriver-win64\\chromedriver.exe");  // Cập nhật đường dẫn đúng cho ChromeDriver
@@ -115,8 +114,8 @@ public class LoginTest {
         } 
     }
     
-    //@Test
-    public void testLogin_03() {
+    @Test
+    public void loginFailure_03() {
         
         // Đảm bảo đường dẫn đến ChromeDriver là đúng
         System.setProperty("webdriver.chrome.driver", "D:\\ChromeDev\\chromedriver-win64\\chromedriver.exe");  // Cập nhật đường dẫn đúng cho ChromeDriver
@@ -153,8 +152,8 @@ public class LoginTest {
             e.printStackTrace();
         } 
     }
-    //@Test
-    public void testLogin_04() {
+    @Test
+    public void loginFailure_04() {
         
         // Đảm bảo đường dẫn đến ChromeDriver là đúng
         System.setProperty("webdriver.chrome.driver", "D:\\ChromeDev\\chromedriver-win64\\chromedriver.exe");  // Cập nhật đường dẫn đúng cho ChromeDriver

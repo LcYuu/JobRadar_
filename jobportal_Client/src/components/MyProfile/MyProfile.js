@@ -17,29 +17,29 @@ import { Input } from "../../ui/input";
 import { Label } from "../../ui/label";
 import { useDispatch, useSelector } from "react-redux";
 import { store } from "../../redux/store";
-import {
-  getSeekerByUser,
-  updateSeekerAction,
-} from "../../redux/Seeker/seeker.action";
+
 import { GenIcon } from "react-icons/lib";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMars, faVenus } from "@fortawesome/free-solid-svg-icons";
-import {
-  deleteExperience,
-  getExpByUser,
-} from "../../redux/Experience/exp.action";
-import {
-  deleteEducation,
-  getEduByUser,
-} from "../../redux/Education/edu.action";
+
 import ProfileModal from "./MyProfileModal";
-import { getProfileAction } from "../../redux/Auth/auth.action";
+
 import SkillModal from "./SkillModal";
 import ExpModal from "./ExpModal";
 import EduModal from "./EduModal";
-import { getIndustry } from "../../redux/Industry/industry.action";
 import { formatDate, formatDateForInput } from "../../utils/dateUtils";
 import Swal from "sweetalert2";
+import { getIndustry } from "../../redux/Industry/industry.thunk";
+import {
+  deleteExperience,
+  getExpByUser,
+} from "../../redux/Experience/exp.thunk";
+import { deleteEducation, getEduByUser } from "../../redux/Education/edu.thunk";
+import { getProfileAction } from "../../redux/Auth/auth.thunk";
+import {
+  getSeekerByUser,
+  updateSeekerAction,
+} from "../../redux/Seeker/seeker.thunk";
 
 export default function MyProfile() {
   const colors = [
@@ -218,8 +218,7 @@ export default function MyProfile() {
     try {
       await dispatch(
         updateSeekerAction({
-          ...formData,
-          background: selectedBackground,
+          userData: { ...formData, background: selectedBackground },
         })
       );
       setIsEditingDes(false);

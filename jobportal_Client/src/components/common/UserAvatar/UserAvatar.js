@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { getProfileAction } from '../../../redux/Auth/auth.action';
+import { getProfileAction } from '../../../redux/Auth/auth.thunk';
+
 
 const UserAvatar = () => {
   const { auth } = useSelector(store => store);

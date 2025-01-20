@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import { Card, CardContent } from "../../ui/card";
 import { useDispatch, useSelector } from "react-redux";
-import { getFollowedCompany } from "../../redux/Seeker/seeker.action";
 import { useNavigate } from "react-router-dom";
+import { getFollowedCompany } from "../../redux/Seeker/seeker.thunk";
 
 export default function FavoriteCompanies() {
   const dispatch = useDispatch();

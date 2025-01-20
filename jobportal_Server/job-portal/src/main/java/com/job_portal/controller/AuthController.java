@@ -204,14 +204,13 @@ public class AuthController {
 	@PostMapping("/login")
 	public AuthResponse signin(@RequestBody LoginDTO login) {
 		if (login.getEmail() == null || login.getEmail().isEmpty()) {
-			throw new IllegalArgumentException("Email không được để trống");
+			return new AuthResponse("", "Email không được để trống");
 		}
 		if (login.getPassword() == null || login.getPassword().isEmpty()) {
-			throw new IllegalArgumentException("Mật khẩu không được để trống");
+			return new AuthResponse("", "Mật khẩu không được để trống");
 		}
 		if (!isValidPassword(login.getPassword())) {
-			throw new IllegalArgumentException(
-					"Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
+			return new AuthResponse("", "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
 		}
 		Optional<UserAccount> userOpt = userAccountRepository.findByEmail(login.getEmail());
 		if (userOpt.isEmpty()) {
@@ -237,7 +236,7 @@ public class AuthController {
 	}
 	
 	@PutMapping("/regenerate-otp")
-	public String regenerateOtp(@RequestParam String email) {
+	public ResponseEntity<String> regenerateOtp(@RequestParam String email) {
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 //		if (user == null) {
 //			throw new RuntimeException("User not found with email: " + email);
@@ -246,12 +245,12 @@ public class AuthController {
 		try {
 			emailUtil.sendOtpEmail(email, otp);
 		} catch (MessagingException e) {
-			throw new RuntimeException("Không thể gửi email, vui lòng thử lại");
+			return new ResponseEntity<>("Không thể gửi mail, vui lòng thử lại", HttpStatus.BAD_REQUEST); // Đổi mã trạng thái phù hợp
 		}
 		user.get().setOtp(otp);
 		user.get().setOtpGeneratedTime(LocalDateTime.now());
 		userAccountRepository.save(user.get());
-		return "Vui lòng check email đã nhận mã đăng ký";
+		return new ResponseEntity<>("Vui lòng check mail để nhận mã đăng ký", HttpStatus.OK); // Đổi mã trạng thái phù hợp
 	}
 
 	private Authentication authenticate(String email, String password) {

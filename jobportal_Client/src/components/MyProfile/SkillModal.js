@@ -3,13 +3,11 @@ import React, { useEffect, useState } from "react";
 import { IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllSkill } from "../../redux/Skills/skill.action";
 import { Checkbox } from "../../ui/checkbox";
-import {
-  getSeekerByUser,
-  updateSeekerAction,
-} from "../../redux/Seeker/seeker.action";
+
 import Swal from "sweetalert2";
+import { getAllSkill } from "../../redux/Skills/skill.thunk";
+import { getSeekerByUser, updateSeekerAction } from "../../redux/Seeker/seeker.thunk";
 
 const SkillModal = ({ open, handleClose }) => {
   const dispatch = useDispatch();
@@ -51,7 +49,10 @@ const SkillModal = ({ open, handleClose }) => {
   
     try {
       const skillIds = selectedSkills.map((skill) => skill.skillId);
-      await dispatch(updateSeekerAction({ skillIds }));
+      const userData = {
+        skillIds,
+      };
+      await dispatch(updateSeekerAction({ userData }));
       dispatch(getSeekerByUser()); // Sau khi cập nhật seeker, tải lại dữ liệu seeker
     } catch (error) {
       console.error("Error updating skills:", error);
