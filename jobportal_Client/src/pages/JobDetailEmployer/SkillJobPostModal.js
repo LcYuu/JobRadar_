@@ -3,26 +3,24 @@ import React, { useEffect, useState } from "react";
 import { IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllSkill } from "../../redux/Skills/skill.action";
-import { Checkbox } from "../../ui/checkbox";
-import {
-  getSeekerByUser,
-  updateSeekerAction,
-} from "../../redux/Seeker/seeker.action";
 
-const SkillPostModal = ({ open, handleClose }) => {
+import { Checkbox } from "../../ui/checkbox";
+import { getAllSkill } from "../../redux/Skills/skill.thunk";
+import { getDetailJobById, updateJob } from "../../redux/JobPost/jobPost.thunk";
+
+const SkillPostModal = ({ open, handleClose, postId }) => {
   const dispatch = useDispatch();
   const { skills } = useSelector((store) => store.skill);
-  const { seeker } = useSelector((store) => store.seeker);
-  const [selectedSkills, setSelectedSkills] = useState(seeker.skills || []);
+  const { detailJob } = useSelector((store) => store.jobPost);
+  const [selectedSkills, setSelectedSkills] = useState(detailJob?.skills || []);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (open && seeker.skills) {
+    if (open && detailJob?.skills) {
       // Giữ toàn bộ thông tin kỹ năng từ danh sách của seeker
-      setSelectedSkills(seeker.skills);
+      setSelectedSkills(detailJob?.skills);
     }
-  }, [open, seeker.skills]);
+  }, [open, detailJob?.skills]);
 
   // Thêm useEffect để theo dõi sự thay đổi của selectedSkills
   // useEffect(() => {
@@ -35,13 +33,18 @@ const SkillPostModal = ({ open, handleClose }) => {
 
   const handleSaveSkills = async () => {
     try {
-      const skillIds = selectedSkills.map((skill) => skill.skillId);
-      await dispatch(updateSeekerAction({ skillIds }));
-      dispatch(getSeekerByUser()); // Sau khi cập nhật seeker, tải lại dữ liệu seeker
+      const skillIds = selectedSkills.map((skill) => skill?.skillId);
+      await dispatch(
+        updateJob({
+          postId, // Truyền postId
+          jobPostData: { skillIds }, // Đảm bảo định dạng `jobPostData`
+        })
+      );
+      dispatch(getDetailJobById(postId)); // Tải lại chi tiết công việc
     } catch (error) {
       console.error("Error updating skills:", error);
     } finally {
-      handleClose();
+      handleClose(); // Đóng modal hoặc xử lý UI sau khi hoàn tất
     }
   };
 
@@ -52,7 +55,9 @@ const SkillPostModal = ({ open, handleClose }) => {
     <Modal open={open} onClose={handleClose} className="animate-fadeIn">
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-xl shadow-xl p-6">
         <div className="flex items-center justify-between border-b pb-4 mb-4">
-          <h2 className="text-xl mt-5 font-semibold text-gray-800">Chọn kĩ năng</h2>
+          <h2 className="text-xl mt-5 font-semibold text-gray-800">
+            Chọn kĩ năng
+          </h2>
           <IconButton onClick={handleClose} className="hover:bg-gray-100">
             <CloseIcon />
           </IconButton>

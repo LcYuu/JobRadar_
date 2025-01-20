@@ -32,14 +32,14 @@ public interface IndustryRepository extends JpaRepository<Industry, Integer> {
 //		       "GROUP BY i.industryId, i.industryName")
 //		List<CountJobByIndustry> countJobsByIndustry();
 	@Query("SELECT new com.job_portal.DTO.CountJobByIndustry(i.industryId, i.industryName, COUNT(jp.postId)) "
-			+ "FROM Industry i " + "LEFT JOIN Company c ON c.industry.industryId = i.industryId "
-			+ "LEFT JOIN JobPost jp ON jp.company.companyId = c.companyId "
-			+ "WHERE (jp.expireDate >= CURRENT_DATE OR jp.expireDate IS NULL) " + // Chỉ chọn công việc còn trong thời
-																					// gian tuyển dụng
-			"AND (jp.isApprove = true OR jp.postId IS NULL) " + // Chỉ chọn công việc đã được phê duyệt hoặc không có
-																// công việc
-			"GROUP BY i.industryId, i.industryName")
+	        + "FROM Industry i "
+	        + "LEFT JOIN Company c ON c.industry.industryId = i.industryId "
+	        + "LEFT JOIN JobPost jp ON jp.company.companyId = c.companyId "
+	        + "WHERE (jp.expireDate >= CURRENT_DATE OR jp.expireDate IS NULL) "
+	        + "AND (jp.isApprove = true OR jp.postId IS NULL) "
+	        + "GROUP BY i.industryId, i.industryName ")
 	List<CountJobByIndustry> countJobsByIndustry();
+
 
 	@Query("SELECT new com.job_portal.DTO.CountJobByIndustry(i.industryId, i.industryName, COUNT(jp.postId)) "
 			+ "FROM Industry i " + "INNER JOIN Company c ON c.industry.industryId = i.industryId "

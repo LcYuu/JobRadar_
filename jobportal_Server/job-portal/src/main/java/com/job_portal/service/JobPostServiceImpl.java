@@ -91,7 +91,7 @@ public class JobPostServiceImpl implements IJobPostService {
 		jobPost.setLocation(jobPostDTO.getLocation());
 		jobPost.setTypeOfWork(jobPostDTO.getTypeOfWork());
 		jobPost.setPosition(jobPostDTO.getPosition());
-		jobPost.setStatus("Chưa duyệt");
+		jobPost.setStatus("Chờ duyệt");
 		jobPost.setCompany(company.get());
 		jobPost.setCity(city.get());
 		jobPost.setApprove(false);
@@ -360,8 +360,7 @@ public class JobPostServiceImpl implements IJobPostService {
 
 	@Override
 	public Page<JobPost> findByIsApprove(Pageable pageable) {
-		Page<JobPost> jobPost = jobPostRepository.findByIsApproveTrueAndExpireDateGreaterThanEqual(pageable,
-				LocalDateTime.now());
+		Page<JobPost> jobPost = jobPostRepository.findJobPostActive(pageable);
 		return jobPost;
 
 	}
@@ -491,7 +490,7 @@ public class JobPostServiceImpl implements IJobPostService {
 
 	@Override
 	public void updateExpiredJobs() {
-		List<JobPost> expiredJobs = jobPostRepository.findAllByExpireDateBeforeAndStatus(LocalDate.now(), "Đang mở");
+		List<JobPost> expiredJobs = jobPostRepository.findAllByExpireDateBeforeAndStatus(LocalDateTime.now(), "Đang mở");
 		// Cập nhật trạng thái thành EXPIRED
 		for (JobPost job : expiredJobs) {
 			job.setStatus("Hết hạn");

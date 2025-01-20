@@ -1,45 +1,24 @@
 package com.job_portal.models;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class IdApplyJob implements Serializable {
 
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private UUID postId;
     private UUID userId;
-
-    // Default constructor
-    public IdApplyJob() {}
-
-    // Parameterized constructor
-    public IdApplyJob(UUID postId, UUID userId) {
-        this.postId = postId;
-        this.userId = userId;
-    }
-
-    // Getters and Setters
-    public UUID getPostId() {
-        return postId;
-    }
-
-    public void setPostId(UUID postId) {
-        this.postId = postId;
-    }
-
-    public UUID getUserId() {
-        return userId;
-    }
-
-    public void setUserId(UUID userId) {
-        this.userId = userId;
-    }
-
-    // Override equals and hashCode
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

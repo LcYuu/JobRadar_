@@ -17,6 +17,11 @@ const RangeSlider = ({ min = 0, max = 100, onChange }) => {
     }
   };
 
+  // Hàm định dạng số với dấu chấm
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat("vi-VN").format(value);
+  };
+
   return (
     <div className="range">
       <ReactSlider
@@ -30,8 +35,8 @@ const RangeSlider = ({ min = 0, max = 100, onChange }) => {
         pearling
       />
       <div className="container">
-        <div className="from">Từ: {values[0]}</div>
-        <div className="to">Đến: {values[1]}</div>
+        <div className="from">Từ: {formatCurrency(values[0])}</div>
+        <div className="to">Đến: {formatCurrency(values[1])}</div>
       </div>
     </div>
   );
