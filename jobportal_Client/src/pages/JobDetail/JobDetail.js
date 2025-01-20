@@ -11,28 +11,13 @@ import {
   Clock,
   DollarSign,
   MapPin,
-  Users,
-  Globe,
-  Calendar,
-  Building2,
-  Trophy,
-  Linkedin,
-  Twitter,
-  Facebook,
-  Github,
+
+  ArrowLeft,
 } from "lucide-react";
-import logo from "../../assets/images/common/logo.jpg";
 import ApplyModal from "../../components/common/ApplyModal/ApplyModal";
 import JobCard_AllJob from "../../components/common/JobCard_AllJob/JobCard_AllJob";
-import { store } from "../../redux/store";
-import {
-  getJobPostByPostId,
-  getSimilarJobs,
-} from "../../redux/JobPost/jobPost.action";
-import {
-  checkIfApplied,
-  getOneApplyJob,
-} from "../../redux/ApplyJob/applyJob.action";
+import { checkIfApplied, getOneApplyJob } from "../../redux/ApplyJob/applyJob.thunk";
+import { getJobPostByPostId, getSimilarJobs } from "../../redux/JobPost/jobPost.thunk";
 
 export default function JobDetail() {
   const industryStyles = {
@@ -131,7 +116,9 @@ export default function JobDetail() {
 
   useEffect(() => {
     if (postByPostId?.company?.companyId) {
-      dispatch(getSimilarJobs(postByPostId.company.companyId, postId));
+      const companyId = postByPostId?.company?.companyId
+      const excludePostId = postId
+      dispatch(getSimilarJobs({companyId, excludePostId}));
     }
   }, [dispatch, postByPostId, postId]);
 
@@ -145,13 +132,21 @@ export default function JobDetail() {
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="container mx-auto px-4 py-8">
+        <Button
+          variant="ghost"
+          className="flex items-center gap-2 mb-6 hover:bg-gray-100"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Quay lại</span>
+        </Button>
         {/* Main content wrapper */}
         <div className="relative">
           <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
             {/* Left column */}
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4 w-full">
+              <div className="bg-white shadow-md rounded-lg p-5 flex items-center justify-between">
+                <div className="flex items-center space-x-4 w-full pr-7">
                   <img
                     src={postByPostId?.company.logo}
                     alt="Company Logo"
@@ -161,7 +156,7 @@ export default function JobDetail() {
                     <h1 className="text-2xl font-bold break-words">
                       {postByPostId?.title}
                     </h1>
-                    <p className="text-sm text-gray-500 break-words">
+                    <p className="text-sm text-gray-500 font-bold break-words">
                       {postByPostId?.company.companyName} •{" "}
                       {postByPostId?.location} • {postByPostId?.typeOfWork}
                     </p>
@@ -219,12 +214,13 @@ export default function JobDetail() {
                     oneApplyJob={oneApplyJob}
                   />
                 </section>
+                
               </div>
 
               {/* Thông báo dưới nút */}
               {oneApplyJob && (
                 <div className="flex items-center space-x-2 mt-4">
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-purple-600">
                     Đơn ứng tuyển đã được cập nhật vào lúc{" "}
                     {new Date(oneApplyJob.applyDate).toLocaleDateString(
                       "vi-VN",
@@ -240,7 +236,7 @@ export default function JobDetail() {
                       href={oneApplyJob.pathCV}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-indigo-600 hover:text-indigo-800 ml-4"
+                      className="text-black hover:text-purple-400 ml-4"
                     >
                       Xem CV đã nộp
                     </a>

@@ -15,7 +15,6 @@ import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 import FindJobs from "./pages/FindJobs/FindJobs";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useMemo } from "react";
-import { getProfileAction } from "./redux/Auth/auth.action";
 import ChangePassword from "./pages/ForgotPassword/ChangePassword";
 import MyAccount from "./pages/MyAccount/MyAccount";
 import FindCompanies from "./pages/FindCompanies/FindCompanies";
@@ -50,7 +49,21 @@ import JobDetailAdmin from "./pages/Admin/JobDetail/JobDetailAdmin";
 
 import Survey from './pages/Survey/Survey';
 import SurveyStatistics from './pages/Admin/SurveyStatistic/SurveyStatistics';
+import { getProfileAction } from "./redux/Auth/auth.thunk";
+const ProtectedHome = () => {
+  const { user } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    if (user?.userType?.userTypeId === 1) { // Admin
+      navigate('/admin/dashboard');
+    } else if (user?.userType?.userTypeId === 3) { // Employer
+      navigate('/employer/account-management/dashboard');
+    }
+  }, [user, navigate]);
+
+  return <Home />;
+};
 const App = () => {
   const location = useLocation();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
@@ -136,7 +149,7 @@ const App = () => {
           path="/"
           element={
             <PublicRoute>
-              <Home />
+              <ProtectedHome />
             </PublicRoute>
           }
         />
@@ -246,9 +259,7 @@ const App = () => {
           path="/admin"
           element={
             <ProtectedRoute
-              isAuthenticated={
-                isAuthenticated && user?.userType?.userTypeId === 1
-              }
+              isAuthenticated={isAuthenticated}
             >
               <MyAccount />
             </ProtectedRoute>
@@ -264,10 +275,21 @@ const App = () => {
 
         <Route path="/admin/jobs/:postId" element={<JobDetailAdmin />} />
         <Route path="/admin/survey-statistics" element={<SurveyStatistics />} />
+        <Route
+          path="/admin/*"
+          element={
+            <ProtectedRoute isAuthenticated={
+              isAuthenticated && user?.userType?.userTypeId === 1
+            }>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
       {showFooter && <Footer />}
     </div>
   );
+  
 };
 
 export default App;

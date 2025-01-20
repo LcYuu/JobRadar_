@@ -25,6 +25,9 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 
 	@Query("SELECT c FROM Company c WHERE c.companyId = :companyId")
 	Optional<Company> findCompanyByCompanyId(@Param("companyId") UUID companyId);
+	
+	@Query("SELECT c FROM Company c JOIN c.jobPosts jp WHERE jp.postId = :postId")
+    Optional<Company> findCompanyByPostId(@Param("postId") UUID postId);
 
 	@Query("SELECT c FROM Company c WHERE c.city.cityName LIKE %:cityName%")
 	List<Company> findCompaniesByCityName(@Param("cityName") String cityName);
@@ -35,15 +38,38 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 	@Query("SELECT c FROM Company c WHERE c.industry.industryId = :industryId")
 	List<Company> findTop6CompaniesByIndustryId(@Param("industryId") Integer industryId);
 
-	@Query("SELECT new com.job_portal.DTO.CompanyDTO(" + "c.companyId, " + "c.companyName, " + "COUNT(a.postId), "
-			+ "c.industry.industryId, " + "c.city.cityId, " + "c.address, " + "c.description, " + "c.logo, "
-			+ "c.contact, " + "c.email, " + "c.establishedTime, c.taxCode) " + "FROM Company c "
-			+ "LEFT JOIN c.jobPosts jp " + "LEFT JOIN ApplyJob a ON jp.postId = a.jobPost.postId "
-			+ "WHERE (a.isSave = true OR a.postId IS NULL) "
-			+ "AND (jp.isApprove = true AND jp.expireDate >= CURRENT_DATE) " + "GROUP BY c.companyId, c.companyName, "
-			+ "c.industry.industryId, " + "c.city.cityId, " + "c.address, " + "c.description, " + "c.logo, "
-			+ "c.contact, " + "c.email, " + "c.establishedTime, c.taxCode " + "ORDER BY COUNT(a.postId) DESC")
+	@Query("SELECT new com.job_portal.DTO.CompanyDTO(" 
+	        + "c.companyId, " 
+	        + "c.companyName, " 
+	        + "COUNT(a.postId), "
+	        + "c.industry.industryId, "
+	        + "c.city.cityId, "
+	        + "c.address, "
+	        + "c.description, "
+	        + "c.logo, "
+	        + "c.contact, "
+	        + "c.email, "
+	        + "c.establishedTime, "
+	        + "c.taxCode) "
+	        + "FROM Company c "
+	        + "LEFT JOIN c.jobPosts jp "
+	        + "LEFT JOIN ApplyJob a ON jp.postId = a.jobPost.postId "
+	        + "WHERE (a.isSave = true OR a.postId IS NULL) "
+	        + "AND (jp.isApprove = true) "  // Chỉ kiểm tra trạng thái phê duyệt
+	        + "GROUP BY c.companyId, c.companyName, "
+	        + "c.industry.industryId, "
+	        + "c.city.cityId, "
+	        + "c.address, "
+	        + "c.description, "
+	        + "c.logo, "
+	        + "c.contact, "
+	        + "c.email, "
+	        + "c.establishedTime, "
+	        + "c.taxCode "
+	        + "ORDER BY COUNT(a.postId) DESC")
 	List<CompanyDTO> findCompaniesWithSavedApplications();
+
+
 
 //	@Query("SELECT new com.job_portal.DTO.CompanyWithCountJobDTO(c.companyId, c.companyName, i.industryId, c.description, i.industryName, c.city.cityId, COUNT(j)) "
 //			+ "FROM Company c " + "JOIN c.jobPosts j " + "JOIN c.industry i " + "WHERE j.isApprove = true "
@@ -72,5 +98,4 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 			+ "ORDER BY c.companyName ASC")
 	Page<Company> findCompaniesWithFilters(@Param("companyName") String companyName,
 			@Param("industryName") String industryName, Pageable pageable);
-
 }

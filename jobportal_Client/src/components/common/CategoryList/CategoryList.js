@@ -1,10 +1,9 @@
 import React, { useEffect } from "react";
 import CategoryCard from "../CategoryCard/CategoryCard";
 import "./CategoryList.css"; // Import CSS cho bố cục
-import logo from "../../../assets/images/common/logo.jpg"; // Icon giả lập, thay thế bằng các icon thực tế của bạn
-import googleIcon from "../../../assets/icons/google.png";
 import { useDispatch, useSelector } from "react-redux";
-import { getIndustry } from "../../../redux/Industry/industry.action";
+import { getIndustry } from "../../../redux/Industry/industry.thunk";
+
 
 const iconUrls = [
   "https://cdn-icons-png.flaticon.com/128/3007/3007250.png", // Thương mại điện tử

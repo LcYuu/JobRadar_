@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -63,6 +64,8 @@ public class UserAccount {
 	@OneToOne(mappedBy = "userAccount", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Seeker seeker;
 	
+	
+//	@JsonProperty("company")
 	@JsonIgnore
 	@OneToOne(mappedBy = "userAccount", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Company company;
@@ -100,8 +103,6 @@ public class UserAccount {
 	public void setProvider(String provider) {
 		this.provider = provider;
 	}
-
-
 
 	public Company getCompany() {
 		return company;

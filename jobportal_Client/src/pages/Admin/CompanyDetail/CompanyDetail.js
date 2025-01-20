@@ -4,16 +4,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "../../../ui/button";
 import { Card } from "../../../ui/card";
 import {
-  Building2,
   Users,
   Calendar,
   Lock,
   Unlock,
-  History,
   AlertTriangle,
   FileText,
   UserCheck,
-  UserX,
+
   MapPin,
   Briefcase,
   Users2,
@@ -42,23 +40,30 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Code2, Banknote } from "lucide-react";
+import {  Banknote } from "lucide-react";
+
+import { StarRounded } from "@mui/icons-material";
 import {
-  getCompanyById,
-  updateCompanyStatus,
   deleteCompany,
+  getCompanyById,
   getCompanyJobCounts,
   getCompanyJobStats,
   getCompanyProfile,
-} from "../../../redux/Company/company.action";
+  updateCompanyStatus,
+} from "../../../redux/Company/company.thunk";
+import { getReviewByCompany } from "../../../redux/Review/review.thunk";
 
 export default function CompanyDetail() {
   const navigate = useNavigate();
   const { companyId } = useParams();
   const dispatch = useDispatch();
   const { companyProfile, jobCounts, jobStats, loading } = useSelector(
+    
+    
     (store) => store.company
   );
+  console.log("🚀 ~ CompanyDetail ~ companyProfile:", companyProfile)
+  console.log("🚀 ~ CompanyDetail ~ jobCounts:", jobCounts)
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [chartDateRange, setChartDateRange] = useState(() => {
     const end = new Date();
@@ -75,14 +80,16 @@ export default function CompanyDetail() {
   const [dateError, setDateError] = useState("");
   const [error, setError] = useState(null);
   const [isMounted, setIsMounted] = useState(true);
+  const { reviews } = useSelector((store) => store.review);
 
   useEffect(() => {
-    dispatch(getCompanyProfile(companyId));
-    dispatch(getCompanyJobCounts(companyId));
+    dispatch(getCompanyProfile( companyId ));
+    dispatch(getCompanyJobCounts( companyId ));
+    dispatch(getReviewByCompany( companyId ));
     return () => {
       setIsMounted(false);
     };
-  }, [dispatch]);
+  }, [dispatch, companyId]);
 
   useEffect(() => {
     if (chartDateRange.startDate && chartDateRange.endDate) {
@@ -108,12 +115,18 @@ export default function CompanyDetail() {
       const formattedEndDate = end.toISOString().split("T")[0];
 
       dispatch(
-        getCompanyJobStats(companyId, formattedStartDate, formattedEndDate)
+        getCompanyJobStats({ companyId, startDate: formattedStartDate, endDate: formattedEndDate })
       )
-        .then(() => {
+        .unwrap() // Lấy trực tiếp `payload` từ Redux Toolkit
+        .then((payload) => {
+          console.log("API Payload:", payload); // Đây là dữ liệu trả về từ API
+          if (!payload) {
+            throw new Error("Không có dữ liệu từ API");
+          }
           setIsChartLoading(false);
         })
         .catch((err) => {
+          console.error("Chart Error:", err);
           setError(err.message || "Có lỗi xảy ra khi tải dữ liệu");
           setIsChartLoading(false);
         });
@@ -122,7 +135,7 @@ export default function CompanyDetail() {
 
   useEffect(() => {
     if (!companyProfile || companyProfile.companyId !== companyId) {
-      dispatch(getCompanyById(companyId));
+      dispatch(getCompanyById(companyId ));
       dispatch(getCompanyJobCounts(companyId));
     }
     return () => {
@@ -132,7 +145,12 @@ export default function CompanyDetail() {
 
   const handleStatusChange = async () => {
     try {
-      await dispatch(updateCompanyStatus(companyId, !companyProfile.isActive));
+      await dispatch(
+        updateCompanyStatus({
+          companyId,
+          isActive: !companyProfile.isActive,
+        })
+      );
       dispatch(getCompanyById(companyId));
     } catch (error) {
       toast.error("Không thể cập nhật trạng thái công ty");
@@ -192,21 +210,38 @@ export default function CompanyDetail() {
   };
 
   const chartData = useMemo(() => {
-    if (!jobStats) return [];
+    if (!jobStats || !Array.isArray(jobStats)) {
+      console.log("No jobStats data available");
+      return [];
+    }
 
-    return jobStats.map((stat) => ({
-      date: new Date(stat.date).toLocaleDateString("vi-VN"),
-      fullDate: new Date(stat.date).toLocaleDateString("vi-VN", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
-      totalJobs: stat.totalJobs,
-      activeJobs: stat.activeJobs,
-      closedJobs: stat.closedJobs,
-      pendingJobs: stat.pendingJobs,
-    }));
+    console.log("Raw jobStats:", jobStats);
+
+    return jobStats
+      .map((stat) => {
+        try {
+          if (!stat.date) return null;
+
+          const date = new Date(stat.date);
+          return {
+            date: date.toISOString().split("T")[0],
+            fullDate: date.toLocaleDateString("vi-VN", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            }),
+            totalJobs: Number(stat.totalJobs) || 0,
+            activeJobs: Number(stat.activeJobs) || 0,
+            closedJobs: Number(stat.closedJobs) || 0,
+            pendingJobs: Number(stat.pendingJobs) || 0,
+          };
+        } catch (error) {
+          console.error("Error processing stat:", stat, error);
+          return null;
+        }
+      })
+      .filter(Boolean);
   }, [jobStats]);
 
   const ChartSkeleton = () => (
@@ -333,6 +368,30 @@ export default function CompanyDetail() {
                     companyProfile?.userAccount?.createDate
                   ).toLocaleDateString("vi-VN")}
                 </h3>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-6 bg-gradient-to-r from-[#FF8C00] to-[#FFA500]">
+            <div className="flex items-center gap-4">
+              <StarRounded className="w-8 h-8 text-white" />
+              <div>
+                <p className="text-sm text-white">Đánh giá trung bình</p>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xl font-bold text-white">
+                    {reviews.length > 0
+                      ? (
+                          reviews.reduce(
+                            (total, review) => total + review.star,
+                            0
+                          ) / reviews.length
+                        ).toFixed(1)
+                      : "0.0"}
+                  </h3>
+                  <span className="text-sm text-white">
+                    ({reviews.length} đánh giá)
+                  </span>
+                </div>
               </div>
             </div>
           </Card>
@@ -510,12 +569,25 @@ export default function CompanyDetail() {
               !dateError &&
               chartData.length > 0 && (
                 <ResponsiveContainer width="100%" height="100%">
+                  {console.log("Rendering chart with data:", chartData)}
                   <LineChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
                       dataKey="date"
                       tick={{ fill: "#666" }}
                       tickLine={{ stroke: "#666" }}
+                      tickFormatter={(value) => {
+                        console.log("Formatting X-axis value:", value);
+                        try {
+                          return new Date(value).toLocaleDateString("vi-VN", {
+                            day: "2-digit",
+                            month: "2-digit",
+                          });
+                        } catch (error) {
+                          console.error("Error formatting date:", error);
+                          return value;
+                        }
+                      }}
                     />
                     <YAxis
                       allowDecimals={false}

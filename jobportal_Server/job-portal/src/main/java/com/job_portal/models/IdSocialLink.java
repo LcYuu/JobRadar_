@@ -1,9 +1,19 @@
 package com.job_portal.models;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class IdSocialLink implements Serializable {
     
     /**
@@ -13,32 +23,6 @@ public class IdSocialLink implements Serializable {
 	private UUID userId;
     private String socialName;
 
-    // Constructors
-    public IdSocialLink() {}
-
-    public IdSocialLink(UUID userId, String socialName) {
-        this.userId = userId;
-        this.socialName = socialName;
-    }
-
-    // Getters and Setters
-    public UUID getUserId() {
-        return userId;
-    }
-
-    public void setUserId(UUID userId) {
-        this.userId = userId;
-    }
-
-    public String getSocialName() {
-        return socialName;
-    }
-
-    public void setSocialName(String socialName) {
-        this.socialName = socialName;
-    }
-
-    // Equals and HashCode
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

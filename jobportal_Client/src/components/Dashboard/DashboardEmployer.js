@@ -1,43 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Button } from "../../ui/button";
 import { Card } from "../../ui/card";
 import {
-  BarChart,
-  Calendar,
   Users,
-  Eye,
-  MoreVertical,
-  Pin,
   MapPin,
 } from "lucide-react";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { Link } from "react-router-dom";
-import {
-  findEmployerCompany,
-  getTop5Lastest,
-} from "../../redux/JobPost/jobPost.action";
-import { countReviewByCompany } from "../../redux/Review/review.action";
-import { store } from "../../redux/store";
+import { getTop5Lastest } from "../../redux/JobPost/jobPost.thunk";
+import { countReviewByCompany } from "../../redux/Review/review.thunk";
 
 export default function Dashboard_Employer() {
   const dispatch = useDispatch();
-  const [currentDateRange, setCurrentDateRange] = useState("Jul 19 - Jul 25");
+  // const [currentDateRange, setCurrentDateRange] = useState("Jul 19 - Jul 25");
 
   const [visibleJobs, setVisibleJobs] = useState([]); // Lưu công việc hiển thị (mặc định 5)
-  const { jobs = [] } = useSelector((store) => store.jobPost);
-  const { countReview } = useSelector((store) => store.review);
+  const { jobs = [] } = useSelector(store => store.jobPost);
+  const { countReview } = useSelector(store => store.review);
   const [totalApplicationCount, setTotalApplicationCount] = useState(0);
 
   // Stats data (replace with actual data from Redux)
-  const stats = {
-    newCandidates: 76,
-    totalJobs: 12,
-    totalViews: 2342,
-    totalApplications: 654,
-    viewsChange: "+6.4%",
-    applicationsChange: "-0.5%",
-  };
+  // const stats = {
+  //   newCandidates: 76,
+  //   totalJobs: 12,
+  //   totalViews: 2342,
+  //   totalApplications: 654,
+  //   viewsChange: "+6.4%",
+  //   applicationsChange: "-0.5%",
+  // };
 
   useEffect(() => {
     dispatch(getTop5Lastest());
@@ -91,13 +80,15 @@ export default function Dashboard_Employer() {
         <Card
           className="p-6"
           style={{
-            background: "linear-gradient(to right, #ffe000, #799f0c)",
+            background: "linear-gradient(to right, #D1913C, #FFD194)",
             boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
           }}
         >
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-medium">Số công việc đang tuyển</h3>
-            <span className="text-3xl font-bold">{jobs.length}</span>
+            <span className="text-3xl font-bold">
+              {jobs.filter((job) => job.approve).length}
+            </span>
           </div>
         </Card>
 
