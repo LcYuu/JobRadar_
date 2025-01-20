@@ -8,24 +8,17 @@ import {
   X,
   ArrowLeft,
   ChevronDown,
-  Clock,
-  Bold,
-  Italic,
-  List,
-  ListOrdered,
-  Link2,
-  Plus,
 } from "lucide-react";
 import { Editor } from "react-draft-wysiwyg";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import { EditorState, convertToRaw, ContentState } from "draft-js";
-import { toast } from "react-toastify";
+import { EditorState } from "draft-js";
 import "react-toastify/dist/ReactToastify.css";
-import { getAllSkill } from "../../redux/Skills/skill.action";
 import { useDispatch, useSelector } from "react-redux";
-import { createJobPost } from "../../redux/JobPost/jobPost.action";
-import { store } from "../../redux/store";
-import { getCity } from "../../redux/City/city.action";
+
+import Swal from "sweetalert2";
+import { getAllSkill } from "../../redux/Skills/skill.thunk";
+import { getCity } from "../../redux/City/city.thunk";
+import { createJobPost } from "../../redux/JobPost/jobPost.thunk";
 
 const cityCodeMapping = {
   1: 16, // Hà Nội
@@ -384,37 +377,72 @@ const PostJob = () => {
     return { isValid, errors: tempErrors };
   };
 
-  // Add form validation
 
-  // Update handleSubmitJob
-  const handleSubmitJob = async (e) => {
-    e.preventDefault();
+const handleSubmitJob = async (e) => {
+  e.preventDefault();
+  try {
+    const fullAddress =
+      specificAddress +
+      ", " +
+      `${location.ward}, ${location.district}, ${location.province}`;
 
-    try {
-      const fullAddress =
-        specificAddress +
-        ", " +
-        `${location.ward}, ${location.district}, ${location.province}`;
+    const finalJobData = {
+      ...jobData,
+      cityId: cityCodeMapping[selectedProvince],
+      location: fullAddress,
+    };
+    const jobPostData = finalJobData
 
-      const finalJobData = {
-        ...jobData,
-        cityId: cityCodeMapping[selectedProvince],
-        location: fullAddress,
-      };
+    const result = await dispatch(createJobPost(jobPostData));
 
-      const result = await dispatch(createJobPost(finalJobData));
+    
+    if (result?.payload?.success) {
+      // Hiển thị thông báo thành công
+      Swal.fire({
+        icon: "success",
+        title: "Tạo tin tuyển dụng thành công!",
+        text: JSON.stringify(result?.payload?.message) || "Tin tuyển dụng đã được tạo thành công.",
+        confirmButtonText: "OK",
+      }).then((response) => {
+        if (response.isConfirmed) {
+          // Điều hướng khi người dùng nhấn OK
+          navigate("/employer/account-management/job-management");
+        }
+      });
 
-      if (result.success) {
-        toast.success(result.message || "Tạo tin tuyển dụng thành công!");
-        setShowSuccessModal(true); // Hiển thị modal khi thành công
-      } else {
-        toast.error(result?.error || "Có lỗi xảy ra");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error("Có lỗi xảy ra khi tạo tin tuyển dụng");
+      setShowSuccessModal(true); // Hiển thị modal khi thành công
+    } else {
+      // Hiển thị thông báo lỗi
+      Swal.fire({
+        icon: "warning",
+        title: "Có lỗi xảy ra",
+        text: JSON.stringify(result?.payload.error) || "Không thể tạo tin tuyển dụng.",
+        confirmButtonText: "OK",
+      }).then((response) => {
+        if (response.isConfirmed) {
+          // Điều hướng khi người dùng nhấn OK
+          navigate("/employer/account-management/job-management");
+        }
+      });
+        
     }
-  };
+  } catch (error) {
+    console.error("Error:", error);
+    // Hiển thị thông báo lỗi khi có ngoại lệ
+    Swal.fire({
+      icon: "warning",
+      title: "Có lỗi xảy ra",
+      text: "Không thể tạo tin tuyển dụng. Vui lòng thử lại.",
+      confirmButtonText: "OK",
+    }).then((response) => {
+      if (response.isConfirmed) {
+        // Điều hướng khi người dùng nhấn OK
+        navigate("/employer/account-management/job-management");
+      }
+    });
+  }
+};
+
 
   const handleProvinceSelection = (provinceCode) => {
     setSelectedProvince(provinceCode);
@@ -656,6 +684,7 @@ const PostJob = () => {
                         options: ["unordered", "ordered"],
                       },
                     }}
+                    placeholder="Nhập mô tả công việc..."
                   />
                 </div>
                 {errors.description && (
@@ -696,6 +725,7 @@ const PostJob = () => {
                         options: ["unordered", "ordered"],
                       },
                     }}
+                    placeholder="Nhập trách nhiệm công việc..."
                   />
                 </div>
                 {errors.requirement && (
@@ -765,6 +795,7 @@ const PostJob = () => {
                         options: ["unordered", "ordered"],
                       },
                     }}
+                    placeholder="Nhập yêu cầu thêm..."
                   />
                 </div>
               </div>
@@ -816,6 +847,7 @@ const PostJob = () => {
                         options: ["unordered", "ordered"],
                       },
                     }}
+                    placeholder="Nhập lợi ích..."
                   />
                 </div>
                 {errors.benefit && (
@@ -831,6 +863,7 @@ const PostJob = () => {
                     required
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     value={selectedProvince}
+                    id="tinh"
                     onChange={(e) => handleProvinceSelection(e.target.value)}
                   >
                     <option value="">Chọn tỉnh/thành phố</option>
@@ -847,6 +880,7 @@ const PostJob = () => {
                     Quận/Huyện
                   </label>
                   <select
+                    id="quan"
                     required
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     value={selectedDistrict}
@@ -867,6 +901,7 @@ const PostJob = () => {
                     Phường/Xã
                   </label>
                   <select
+                  id="xa"
                     required
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     value={selectedWard}
@@ -964,7 +999,7 @@ const PostJob = () => {
         </Button>
       </div>
 
-      {showSuccessModal && (
+      {/* {showSuccessModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-lg font-semibold mb-2">Đăng tin thành công!</h3>
@@ -986,7 +1021,7 @@ const PostJob = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

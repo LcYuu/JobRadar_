@@ -17,29 +17,29 @@ import { Input } from "../../ui/input";
 import { Label } from "../../ui/label";
 import { useDispatch, useSelector } from "react-redux";
 import { store } from "../../redux/store";
-import {
-  getSeekerByUser,
-  updateSeekerAction,
-} from "../../redux/Seeker/seeker.action";
+
 import { GenIcon } from "react-icons/lib";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMars, faVenus } from "@fortawesome/free-solid-svg-icons";
-import {
-  deleteExperience,
-  getExpByUser,
-} from "../../redux/Experience/exp.action";
-import {
-  deleteEducation,
-  getEduByUser,
-} from "../../redux/Education/edu.action";
+
 import ProfileModal from "./MyProfileModal";
-import { getProfileAction } from "../../redux/Auth/auth.action";
+
 import SkillModal from "./SkillModal";
 import ExpModal from "./ExpModal";
 import EduModal from "./EduModal";
-import { getIndustry } from "../../redux/Industry/industry.action";
 import { formatDate, formatDateForInput } from "../../utils/dateUtils";
 import Swal from "sweetalert2";
+import { getIndustry } from "../../redux/Industry/industry.thunk";
+import {
+  deleteExperience,
+  getExpByUser,
+} from "../../redux/Experience/exp.thunk";
+import { deleteEducation, getEduByUser } from "../../redux/Education/edu.thunk";
+import { getProfileAction } from "../../redux/Auth/auth.thunk";
+import {
+  getSeekerByUser,
+  updateSeekerAction,
+} from "../../redux/Seeker/seeker.thunk";
 
 export default function MyProfile() {
   const colors = [
@@ -218,8 +218,7 @@ export default function MyProfile() {
     try {
       await dispatch(
         updateSeekerAction({
-          ...formData,
-          background: selectedBackground,
+          userData: { ...formData, background: selectedBackground },
         })
       );
       setIsEditingDes(false);
@@ -365,6 +364,7 @@ export default function MyProfile() {
     let tempErrors = {
       emailContact: "",
       phoneNumber: "",
+      dateOfBirth: "",
     };
     let isValid = true;
 
@@ -380,6 +380,28 @@ export default function MyProfile() {
     if (formData.phoneNumber && !phoneRegex.test(formData.phoneNumber)) {
       tempErrors.phoneNumber = "Số điện thoại không hợp lệ";
       isValid = false;
+    }
+
+    // Validate date of birth (must be at least 18 years old)
+    if (formData.dateOfBirth) {
+      const today = new Date();
+      const birthDate = new Date(formData.dateOfBirth);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDifference = today.getMonth() - birthDate.getMonth();
+
+      // Adjust age calculation if birthday hasn't occurred yet this year
+      if (
+        monthDifference < 0 ||
+        (monthDifference === 0 && today.getDate() < birthDate.getDate())
+      ) {
+        age--;
+      }
+
+      // Nếu tuổi nhỏ hơn 18 thì báo lỗi, nếu bằng 18 tuổi (hoặc lớn hơn) thì tính là đủ
+      if (age < 18) {
+        tempErrors.dateOfBirth = "Bạn phải đủ 18 tuổi";
+        isValid = false;
+      }
     }
 
     setErrors(tempErrors);
@@ -438,7 +460,7 @@ export default function MyProfile() {
           </div>
 
           <div className="relative px-6 pb-6">
-            <Avatar className="absolute -top-16 h-32 w-32 border-4 border-white">
+            <Avatar className="absolute -top-16 h-32 w-32 border-4 ring-4 ring-purple-500">
               <AvatarImage src={user?.avatar} />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
@@ -503,7 +525,9 @@ export default function MyProfile() {
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground whitespace-pre-line">
-                    {seeker.description}
+                    {seeker.description
+                      ? seeker.description
+                      : "Chưa cập nhật mô tả về bản thân"}
                   </p>
                 )}
               </CardContent>
@@ -520,60 +544,67 @@ export default function MyProfile() {
                 </Button>
               </CardHeader>
               <CardContent className="space-y-6">
-                {exp?.map((experience, index) => (
-                  <div
-                    key={index}
-                    className="flex gap-4 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200"
-                  >
+                {exp && exp.length > 0 ? (
+                  exp.map((experience, index) => (
                     <div
-                      className={`h-12 w-12 rounded-full ${getColorByIndex(
-                        index
-                      )} shadow-md`}
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h4 className="font-semibold text-lg">
-                            {experience.jobTitle}
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            Công ty: {experience.companyName}
-                          </p>
+                      key={index}
+                      className="flex gap-4 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200"
+                    >
+                      <div
+                        className={`h-12 w-12 rounded-full ${getColorByIndex(
+                          index
+                        )} shadow-md`}
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h4 className="font-semibold text-lg">
+                              {experience.jobTitle}
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              Công ty: {experience.companyName}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="hover:bg-blue-100 transition-colors duration-200"
+                              onClick={() => handleEditExperience(experience)}
+                            >
+                              <Edit className="h-4 w-4 text-blue-600" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="hover:bg-red-100 transition-colors duration-200"
+                              onClick={() =>
+                                handleDeleteExp(experience.experienceId)
+                              }
+                            >
+                              <Delete className="h-4 w-4 text-red-600" />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="hover:bg-blue-100 transition-colors duration-200"
-                            onClick={() => handleEditExperience(experience)}
-                          >
-                            <Edit className="h-4 w-4 text-blue-600" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="hover:bg-red-100 transition-colors duration-200"
-                            onClick={() =>
-                              handleDeleteExp(experience.experienceId)
-                            }
-                          >
-                            <Delete className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </div>
+                        <p className="mt-2 text-sm text-gray-600">
+                          {formatDate(experience.startDate)} -{" "}
+                          {experience.endDate
+                            ? formatDate(experience.endDate)
+                            : "Present"}
+                        </p>
+                        <p className="mt-2 text-sm text-gray-500">
+                          {experience.description}
+                        </p>
                       </div>
-                      <p className="mt-2 text-sm text-gray-600">
-                        {formatDate(experience.startDate)} -{" "}
-                        {experience.endDate
-                          ? formatDate(experience.endDate)
-                          : "Present"}
-                      </p>
-                      <p className="mt-2 text-sm text-gray-500">
-                        {experience.description}
-                      </p>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    Chưa cập nhật kinh nghiệm
+                  </p>
+                )}
               </CardContent>
+
               <section>
                 <ExpModal
                   open={openExp}
@@ -873,8 +904,15 @@ export default function MyProfile() {
                       name="dateOfBirth"
                       value={formData.dateOfBirth}
                       onChange={handleChange}
-                      className="border p-2 w-full"
+                      className={`border p-2 w-full ${
+                        errors.dateOfBirth ? "border-red-500" : ""
+                      }`}
                     />
+                    {errors.dateOfBirth && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.dateOfBirth}
+                      </p>
+                    )}
                   </div>
                 ) : (
                   seeker?.dateOfBirth && (
@@ -914,7 +952,8 @@ export default function MyProfile() {
                     </select>
                   </div>
                 ) : (
-                  seeker?.industry && (
+                  seeker?.industry &&
+                  seeker.industry.industryId !== 0 && (
                     <div>
                       <Label className="text-sm font-medium whitespace-nowrap">
                         Major

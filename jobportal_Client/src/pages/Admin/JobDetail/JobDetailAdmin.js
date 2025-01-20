@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getJobPostByPostId, approveJob } from "../../../redux/JobPost/jobPost.action";
 import { Card, CardContent, CardHeader } from "../../../ui/card";
 import { Badge } from "../../../ui/badge";
 import { Button } from "../../../ui/button";
@@ -22,6 +21,7 @@ import {
   Code,
   FileText,
 } from "lucide-react";
+import { approveJob, getJobPostByPostId } from "../../../redux/JobPost/jobPost.thunk";
 
 export default function JobDetailAdmin() {
   const dispatch = useDispatch();

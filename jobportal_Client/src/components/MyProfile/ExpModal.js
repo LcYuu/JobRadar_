@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
@@ -8,11 +8,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import * as Yup from "yup";
-import {
-  createExperience,
-  getExpByUser,
-  updateExperience,
-} from "../../redux/Experience/exp.action";
+import { createExperience, getExpByUser, updateExperience } from "../../redux/Experience/exp.thunk";
 
 const style = {
   position: "absolute",
@@ -45,7 +41,10 @@ export default function ExpModal({
     description: Yup.string()
       .required("Vui lòng nhập mô tả công việc")
       .min(10, "Mô tả công việc phải có ít nhất 10 ký tự"),
-    startDate: Yup.date().required("Vui lòng chọn ngày bắt đầu"),
+    startDate: Yup.date()
+      .required("Ngày bắt đầu là bắt buộc.")
+      .max(new Date(), "Ngày bắt đầu không được trong tương lai.")
+      .typeError("Ngày bắt đầu không hợp lệ."),
     endDate: Yup.date()
       .required("Vui lòng chọn ngày kết thúc")
       .min(Yup.ref("startDate"), "Ngày kết thúc phải sau ngày bắt đầu"),
@@ -70,11 +69,13 @@ export default function ExpModal({
       setIsLoading(true);
       try {
         if (editingExperienceId) {
-          await dispatch(updateExperience(editingExperienceId, values));
+          const experienceData = values
+          await dispatch(updateExperience({experienceId:editingExperienceId, experienceData}));
           setEditingExperienceId(null);
           showSuccessToast("Cập nhật kinh nghiệm thành công!");
         } else {
-          await dispatch(createExperience(values));
+          const expData = values
+          await dispatch(createExperience(expData));
           showSuccessToast("Cập nhật kinh nghiệm thành công!");
         }
         handleClose();
@@ -97,7 +98,9 @@ export default function ExpModal({
                 <CloseIcon />
               </IconButton>
               <h2 className="text-xl mt-6 font-semibold text-gray-800">
-                {editingExperienceId ? "Chỉnh sửa kinh nghiệm" : "Tạo kinh nghiệm"}
+                {editingExperienceId
+                  ? "Chỉnh sửa kinh nghiệm"
+                  : "Tạo kinh nghiệm"}
               </h2>
             </div>
 

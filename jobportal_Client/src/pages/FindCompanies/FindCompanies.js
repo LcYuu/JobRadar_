@@ -13,15 +13,13 @@ import {
   SelectValue,
 } from "../../ui/select";
 import { useDispatch, useSelector } from "react-redux";
-import { getCity } from "../../redux/City/city.action";
-import {
-  getCompanyFitSeeker,
-  searhCompanies,
-} from "../../redux/Company/company.action";
+
+
 import CompanyCard from "../../components/common/CompanyCard/CompanyCard";
 import { Link } from "react-router-dom";
-import axios from "axios";
-import { getAllIndustries } from "../../redux/Industry/industry.action";
+import { getCompanyFitSeeker, searchCompanies } from "../../redux/Company/company.thunk";
+import { getCity } from "../../redux/City/city.thunk";
+import { getAllIndustries } from "../../redux/Industry/industry.thunk";
 
 export default function FindCompanies() {
   const industryStyles = {
@@ -104,7 +102,7 @@ export default function FindCompanies() {
   });
 
   useEffect(() => {
-    dispatch(searhCompanies(filters, currentPage, size));
+    dispatch(searchCompanies({filters, currentPage, size}));
   }, [filters, currentPage, size, dispatch]);
 
   useEffect(() => {
@@ -149,11 +147,11 @@ export default function FindCompanies() {
   const hasFilteredCompanies = filteredCompanies.length > 0;
   const hasSuggestedCompanies = companyFitSeeker.length > 0;
 
-  const uniqueCompanies = [
-    ...new Map(
-      companyByFeature.map((company) => [company.industryId, company])
-    ).values(),
-  ];
+  // const uniqueCompanies = [
+  //   ...new Map(
+  //     companyByFeature.map((company) => [company.industryId, company])
+  //   ).values(),
+  // ];
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -189,7 +187,7 @@ export default function FindCompanies() {
                 setTempFilters({ ...tempFilters, cityId: value });
               }}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full bg-white">
                 <SelectValue placeholder="Chọn địa điểm" />
               </SelectTrigger>
               <SelectContent>
@@ -219,7 +217,7 @@ export default function FindCompanies() {
               variant={selectedCategory === null ? "default" : "outline"}
               onClick={() => handleCategoryChange(null)}
               className={`hover:bg-gray-200 transition duration-200 ${
-                selectedCategory === null ? "bg-purple-600 text-white" : ""
+                selectedCategory === null ? "bg-purple-600 text-white" : "bg-white"
               }`}
             >
               Tất cả ngành nghề
@@ -236,7 +234,7 @@ export default function FindCompanies() {
                 className={`hover:bg-gray-200 transition duration-200 ${
                   selectedCategory === industry.industryId
                     ? "bg-purple-600 text-white"
-                    : ""
+                    : "bg-white"
                 }`}
               >
                 {industry.industryName}

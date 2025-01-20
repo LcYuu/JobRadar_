@@ -5,22 +5,14 @@ import {
   ChevronLeft,
   Mail,
   Phone,
-  Instagram,
-  Twitter,
-  Globe,
-  MessageSquare,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tab";
 import { useDispatch, useSelector } from "react-redux";
-
-import {
-  getCandidateProfile,
-  getCandidateSkills,
-} from "../../redux/Seeker/seeker.action";
-import { getEduCandidate } from "../../redux/Education/edu.action";
-import { getExpCandidate } from "../../redux/Experience/exp.action";
 import { Card } from "../../ui/card";
-
+import { getCandidateProfile, getCandidateSkills } from "../../redux/Seeker/seeker.thunk";
+import { getEduCandidate } from "../../redux/Education/edu.thunk";
+import { getExpCandidate } from "../../redux/Experience/exp.thunk";
+import { getCandidateApplyInfo } from "../../redux/ApplyJob/applyJob.thunk";
 const ApplicantDetail = () => {
   const getRandomColor = () => {
     const r = Math.floor(Math.random() * 256);
@@ -34,10 +26,11 @@ const ApplicantDetail = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("applicant-profile");
   const { profileCandidate, skillsCandidate } = useSelector(
-    (store) => store.seeker
+    store => store.seeker
   );
   const { eduCandidate } = useSelector((store) => store.edu);
   const { expCandidate } = useSelector((store) => store.exp);
+  const { candidateApplyInfo } = useSelector((store) => store.applyJob);
 
   const timeAgo = (date) => {
     const now = new Date();
@@ -68,11 +61,19 @@ const ApplicantDetail = () => {
   };
 
   useEffect(() => {
-    dispatch(getCandidateProfile(userId, postId));
+    console.log("Fetching data with userId:", userId, "postId:", postId);
+    dispatch(getCandidateProfile({userId, postId}));
     dispatch(getCandidateSkills(userId));
     dispatch(getEduCandidate(userId));
     dispatch(getExpCandidate(userId));
-  }, [dispatch]);
+    dispatch(getCandidateApplyInfo({userId, postId}));
+  }, [dispatch, userId, postId]);
+
+  useEffect(() => {
+    if (candidateApplyInfo) {
+      console.log("Application Info updated:", candidateApplyInfo);
+    }
+  }, [candidateApplyInfo]);
 
   const contactIcons = {
     email: <Mail className="w-4 h-4 text-gray-500" />,
@@ -148,23 +149,29 @@ const ApplicantDetail = () => {
               </Button> */}
 
               <div className="mt-10">
-                <h3 className="font-medium text-left mb-4">Liên hệ</h3>
+                <h3 className="font-medium text-left mb-4">Thông tin liên hệ trên form</h3>
                 <div className="space-y-3">
-                  <div
-                    key="email"
-                    className="flex items-center gap-3 text-left"
-                  >
-                    {contactIcons.email} {/* Hiển thị icon email */}
-                    {profileCandidate?.emailContact} {/* Hiển thị email */}
-                  </div>
-                  <div
-                    key="phone"
-                    className="flex items-center gap-3 text-left"
-                  >
-                    {contactIcons.phone} {/* Hiển thị icon phone */}
-                    {profileCandidate?.phoneNumber}{" "}
-                    {/* Hiển thị số điện thoại */}
-                  </div>
+                  {candidateApplyInfo ? (
+                    <>
+                      {candidateApplyInfo.email && (
+                        <div className="flex items-center gap-3 text-left">
+                          {contactIcons.email}
+                          <span className="text-sm text-gray-600">{candidateApplyInfo.email}</span>
+                        </div>
+                      )}
+                      
+                      {candidateApplyInfo.description && (
+                        <div className="mt-4">
+                          <h4 className="font-medium text-left mb-2">Thông tin thêm</h4>
+                          <p className="">
+                            {candidateApplyInfo.description}
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-sm text-gray-500">Đang tải thông tin...</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -260,6 +267,20 @@ const ApplicantDetail = () => {
                         </div>
                         <div>
                           <p className="text-xl font-bold text-black">
+                            Email
+                          </p>
+                          <p className="text-sm">{profileCandidate?.emailContact}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-xl font-bold text-black">
+                            Số điện thoại
+                          </p>
+                          <p className="text-sm">{profileCandidate?.phoneNumber}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-xl font-bold text-black">
                             Ngày sinh
                           </p>
                           <p className="text-sm">
@@ -279,13 +300,14 @@ const ApplicantDetail = () => {
                             )}
                           </p>
                         </div>
-                        <div className="col-span-2">
+
+                        <div>
                           <p className="text-xl font-bold text-black">
                             Địa chỉ
                           </p>
                           <p className="text-sm">{profileCandidate?.address}</p>
                         </div>
-                      </div>
+                        </div>
                     </Card>
 
                     <Card className="bg-white rounded-lg p-6 shadow-lg">
@@ -328,12 +350,20 @@ const ApplicantDetail = () => {
                                   {/* Ngày bắt đầu và kết thúc */}
 
                                   <div className="text-sm text-gray-600">
-                                    <strong>Ngày bắt đầu:</strong>{" "}
-                                    {exp.startDate}
+                                    <strong>Ngày bắt đầu: </strong>
+                                    {exp.startDate
+                                      ? new Date(
+                                          exp.startDate
+                                        ).toLocaleDateString("vi-VN")
+                                      : "Không có"}
                                   </div>
                                   <div className="text-sm text-gray-600">
-                                    <strong>Ngày kết thúc:</strong>{" "}
-                                    {exp.endDate || "Hiện tại"}
+                                    <strong>Ngày kết thúc: </strong>
+                                    {exp.endDate
+                                      ? new Date(
+                                          exp.endDate
+                                        ).toLocaleDateString("vi-VN")
+                                      : "Hiện tại"}
                                   </div>
 
                                   {/* Mô tả */}
@@ -374,12 +404,20 @@ const ApplicantDetail = () => {
 
                                   {/* Ngày bắt đầu và kết thúc */}
                                   <div className="text-sm text-gray-600">
-                                    <strong>Ngày bắt đầu:</strong>{" "}
-                                    {edu?.startDate}
+                                    <strong>Ngày bắt đầu: </strong>
+                                    {edu?.startDate
+                                      ? new Date(
+                                          edu.startDate
+                                        ).toLocaleDateString("vi-VN")
+                                      : "Không có"}
                                   </div>
                                   <div className="text-sm text-gray-600">
-                                    <strong>Ngày kết thúc:</strong>{" "}
-                                    {edu?.endDate || "Hiện tại"}
+                                    <strong>Ngày kết thúc: </strong>
+                                    {edu?.endDate
+                                      ? new Date(
+                                          edu.endDate
+                                        ).toLocaleDateString("vi-VN")
+                                      : "Hiện tại"}
                                   </div>
 
                                   {/* Major */}

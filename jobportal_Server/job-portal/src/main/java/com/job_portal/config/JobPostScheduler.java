@@ -11,25 +11,28 @@ import com.job_portal.service.IJobPostService;
 @Component
 public class JobPostScheduler {
 
-    @Autowired
-    private IJobPostService jobPostService;
+	@Autowired
+	private IJobPostService jobPostService;
 
-    // Cập nhật file CSV mỗi 5 phút
-    @Scheduled(fixedRate = 300000)
-    public void updateCSV() {
-        try {
-            jobPostService.exportJobPostToCSV("D:\\\\\\\\JobRadar_\\\\\\\\job_post.csv");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    @Scheduled(cron = "0 0 0 * * ?") // Chạy lúc 12:00 AM mỗi ngày
-    public void updateExpiredJobPosts() {
-        try {
-            jobPostService.updateExpiredJobs();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+	// Cập nhật file CSV mỗi 5 phút
+	@Scheduled(fixedRate = 300000)
+	public void updateCSV() {
+		try {
+			jobPostService.exportJobPostToCSV("D:\\\\\\\\JobRadar_\\\\\\\\job_post.csv");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Scheduled(cron = "0 0 0 * * ?") // Chạy lúc 12:00 AM mỗi ngày
+	public void updateExpiredJobPosts() {
+	    try {
+	        jobPostService.updateExpiredJobs();
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
+
+	
 }

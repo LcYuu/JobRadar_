@@ -4,21 +4,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "../../ui/dialog";
-import { motion, AnimatePresence } from "framer-motion";
-import SuccessIcon from "../../components/common/Icon/Sucess/Sucess";
-import FailureIcon from "../../components/common/Icon/Failed/Failed";
-import googleIcon from "../../assets/icons/google.png";
+
+
 import logo1 from "../../assets/images/common/logo1.jpg";
-import {  loginAction } from "../../redux/Auth/auth.action";
-import { isStrongPassword } from "../../utils/passwordValidator";
+
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import axios from "axios";
+import Swal from "sweetalert2";
+import { loginAction } from "../../redux/Auth/auth.thunk";
 
 // Update Modal component
 const Modal = ({ isOpen, onClose, children }) => {
@@ -31,7 +24,7 @@ const Modal = ({ isOpen, onClose, children }) => {
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
       onClick={handleBackdropClick}
     >
@@ -51,128 +44,163 @@ export default function SignInForm() {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
+  
     try {
       const response = await dispatch(loginAction({ email, password }));
-      console.log("Login response:", response);
-      if (response && response.success) {
-        const user = response.user;
-        setLoginStatus("success");
-        setIsModalOpen(true);
-        // Redirect based on user role
-        if (user?.userType?.userTypeId === 3) { 
+      console.log("🚀 ~ handleSubmit ~ response:", response)
+      const { payload } = response;
+      console.log("🚀 ~ handleSubmit ~ payload:", payload)
+      
+      if (payload && payload.success) {
+        const user = payload.user; 
+        console.log("🚀 ~ handleSubmit ~ user:", user)
+        // Điều hướng trước
+        if (user?.userType?.userTypeId === 3) {
           navigate('/employer/account-management/dashboard');
-      } else if (user?.userType?.userTypeId === 1) { 
+        } else if (user?.userType?.userTypeId === 1) {
           navigate('/admin/dashboard');
-      } 
-        setIsLoading(false);
-        // Wait for 2 seconds then redirect
-        setTimeout(() => {
-          setIsModalOpen(false);
+        } else {
           navigate("/");
-        }, 500);
-
+        }
+        // Hiển thị thông báo sau khi chuyển hướng
+        setTimeout(async () => {
+          await Swal.fire({
+            icon: 'success',
+            title: 'Đăng nhập thành công!',
+            showConfirmButton: false,
+            timer: 1500
+          });
+        }, 500); // Trễ một chút để đảm bảo điều hướng đã xảy ra
       } else {
-        setLoginStatus("failure");
-        setIsModalOpen(true);
-        setError(response?.error || "Đăng nhập thất bại");
+        // Hiển thị lỗi nếu đăng nhập thất bại
+        await Swal.fire({
+          icon: 'error',
+          title: 'Đăng nhập thất bại',
+          text: payload || 'Có lỗi xảy ra khi đăng nhập',
+          confirmButtonText: 'Thử lại',
+          confirmButtonColor: '#3085d6'
+        });
       }
     } catch (error) {
-      setLoginStatus("failure");
-      setIsModalOpen(true);
-      setError("Đã xảy ra lỗi, vui lòng thử lại");
+      // Xử lý lỗi không mong muốn
+      await Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text:  'Đã xảy ra lỗi không mong muốn',
+        confirmButtonText: 'Đóng',
+        confirmButtonColor: '#3085d6'
+      });
     } finally {
       setIsLoading(false);
     }
-  };
+  }    
+  
+  // const handleCloseModal = () => {
+  //   setIsModalOpen(false);
+  //   setLoginStatus(null);
+  // };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setLoginStatus(null);
-  };
+  // const renderLoginStatus = () => {
+  //   if (!isModalOpen) return null;
 
-  const renderLoginStatus = () => {
-    if (!isModalOpen) return null;
+  //   if (loginStatus === "success") {
+  //     return (
+  //       <motion.div
+  //         initial={{ opacity: 0, y: 50 }}
+  //         animate={{ opacity: 1, y: 0 }}
+  //         exit={{ opacity: 0, y: -50 }}
+  //         className="flex flex-col items-center"
+  //       >
+  //         <SuccessIcon className="w-16 h-16 text-green-500 mb-4" />
+  //         <p className="text-lg font-semibold text-green-700">
+  //           Đăng nhập thành công
+  //         </p>
+  //       </motion.div>
+  //     );
+  //   } else if (loginStatus === "failure") {
+  //     return (
+  //       <motion.div
+  //         initial={{ opacity: 0, y: 50 }}
+  //         animate={{ opacity: 1, y: 0 }}
+  //         exit={{ opacity: 0, y: -50 }}
+  //         className="flex flex-col items-center"
+  //       >
+  //         <FailureIcon className="w-16 h-16 text-red-500 mb-4" />
+  //         <p className="text-lg font-semibold text-red-700">{error}</p>
+  //       </motion.div>
+  //     );
+  //   }
 
-    if (loginStatus === "success") {
-      return (
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -50 }}
-          className="flex flex-col items-center"
-        >
-          <SuccessIcon className="w-16 h-16 text-green-500 mb-4" />
-          <p className="text-lg font-semibold text-green-700">
-            Đăng nhập thành công
-          </p>
-        </motion.div>
-      );
-    } else if (loginStatus === "failure") {
-      return (
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -50 }}
-          className="flex flex-col items-center"
-        >
-          <FailureIcon className="w-16 h-16 text-red-500 mb-4" />
-          <p className="text-lg font-semibold text-red-700">{error}</p>
-        </motion.div>
-      );
-    }
-    
-    return null;
-  };
+  //   return null;
+  // };
 
   const handleGoogleLogin = async (response) => {
     try {
-      const googleToken = response.credential; // Lấy googleToken từ response.credential
+      const googleToken = response.credential;
       console.log("Google Token: ", googleToken);
 
       // Gửi googleToken đến backend để xác thực
-      const res = await axios.post(
-        "http://localhost:8080/auth/login/google",
-        { token: googleToken } 
-      );
+      const res = await axios.post("http://localhost:8080/auth/login/google", {
+        token: googleToken,
+      });
 
-      console.log("Response from server: ", res.data.token); 
+      console.log("Response from server: ", res.data.token);
       const jwtToken = res?.data?.token;
-      console.log("Response from: ", jwtToken); 
+      console.log("Response from: ", jwtToken);
 
       sessionStorage.setItem("jwt", jwtToken);
-      const emailExists = await axios.post("http://localhost:8080/auth/check-email", { token: googleToken });
+      const emailExists = await axios.post(
+        "http://localhost:8080/auth/check-email",
+        { token: googleToken }
+      );
+
       if (emailExists.data) {
-        // dispatch(getProfileAction());
         setTimeout(() => {
-          // setIsModalOpen(false);
-          window.location.href = "http://localhost:3000/"; 
-        }, 1000); 
+          window.location.href = "http://localhost:3000/";
+        }, 1000);
       } else {
+        const defaultAddress = {
+          specificAddress: "",
+          ward: "",
+          district: "",
+          province: ""
+        };
+        sessionStorage.setItem("defaultAddress", JSON.stringify(defaultAddress));
+        
         setTimeout(() => {
-          // setIsModalOpen(false);
           window.location.href = "http://localhost:3000/role-selection";
         }, 1000);
       }
     } catch (err) {
-      // In lỗi và hiển thị thông báo
-      console.error("Error during login: ", err.response ? err.response.data : err.message);
+      console.error(
+        "Error during login: ",
+        err.response ? err.response.data : err.message
+      );
       setError("Đăng nhập thất bại! Vui lòng thử lại.");
     }
   };
-  
+
   // Modal content based on status
   const modalContent = () => {
     if (loginStatus === "success") {
       return (
         <div className="text-green-600">
-          <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          <svg
+            className="w-16 h-16 mx-auto mb-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 13l4 4L19 7"
+            />
           </svg>
           <p className="text-xl font-semibold">Đăng nhập thành công!</p>
         </div>
@@ -180,8 +208,18 @@ export default function SignInForm() {
     }
     return (
       <div className="text-red-600">
-        <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        <svg
+          className="w-16 h-16 mx-auto mb-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
         <p className="text-xl font-semibold">Đăng nhập thất bại</p>
         <p className="mt-2 text-sm">{error}</p>
@@ -232,6 +270,7 @@ export default function SignInForm() {
               <div className="space-y-2">
                 <Input
                   type="email"
+                
                   placeholder="Địa chỉ email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -277,24 +316,48 @@ export default function SignInForm() {
           </CardContent>
         </Card>
 
-        <Modal 
-          isOpen={isModalOpen} 
+        <Modal
+          isOpen={isModalOpen}
           onClose={() => loginStatus === "failure" && setIsModalOpen(false)}
         >
           {loginStatus === "success" && (
             <div className="text-center">
-              <svg className="w-16 h-16 mx-auto text-green-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg
+                className="w-16 h-16 mx-auto text-green-500 mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
-              <p className="text-xl font-semibold text-green-600">Đăng nhập thành công!</p>
+              <p className="text-xl font-semibold text-green-600">
+                Đăng nhập thành công!
+              </p>
             </div>
           )}
           {loginStatus === "failure" && (
             <div className="text-center">
-              <svg className="w-16 h-16 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-16 h-16 mx-auto text-red-500 mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
-              <p className="text-xl font-semibold text-red-600">Đăng nhập thất bại</p>
+              <p className="text-xl font-semibold text-red-600">
+                Đăng nhập thất bại
+              </p>
               <p className="mt-2 text-sm text-red-500">{error}</p>
             </div>
           )}

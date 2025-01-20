@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getAllJobsForAdmin,
-  approveJob,
-} from "../../../redux/JobPost/jobPost.action";
+
 import { Button } from "../../../ui/button";
 import {
   MoreVertical,
-  Filter,
-  ChevronLeft,
-  ChevronRight,
+
   Search,
 } from "lucide-react";
 import {
@@ -17,30 +12,31 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
+
 } from "../../../ui/dropdown-menu";
 import { Input } from "../../../ui/input";
 import { useNavigate } from "react-router-dom";
+import { approveJob, getAllJobsForAdmin } from "../../../redux/JobPost/jobPost.thunk";
 
 export default function AdminJobList() {
   const dispatch = useDispatch();
   const { jobPost, totalPages, totalElements, loading, error } = useSelector(
-    (state) => state.jobPost
+    (store) => store.jobPost
   );
   const [currentPage, setCurrentPage] = useState(0);
   const [size, setSize] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
   const [status, setStatus] = useState("");
   const [approve, setApprove] = useState("");
-  const [totalJobs, setTotalJobs] = useState(0);
+  // const [totalJobs, setTotalJobs] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(
-      getAllJobsForAdmin(searchTerm, status, approve, currentPage, size)
+      getAllJobsForAdmin({ title:searchTerm, status, isApprove:approve, page:currentPage, size })
     );
   }, [dispatch, currentPage, size]);
+  
 
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalPages) {
@@ -56,7 +52,7 @@ export default function AdminJobList() {
   const applyFilters = () => {
     setCurrentPage(0);
     dispatch(
-      getAllJobsForAdmin(searchTerm, status, approve, currentPage, size)
+      getAllJobsForAdmin({ title:searchTerm, status, isApprove:approve, page:currentPage, size })
     );
   };
 
@@ -65,11 +61,11 @@ export default function AdminJobList() {
     return <div className="text-center py-8 text-red-500">{error}</div>;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-8">
       <div className="bg-white rounded-lg shadow">
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="font-semibold">
-            Danh sách công việc ({totalElements})
+            Tổng số công việc ({totalElements})
           </h2>
           <div className="flex items-center gap-4">
             <div className="relative">
@@ -113,27 +109,36 @@ export default function AdminJobList() {
           </div>
         </div>
 
-        <table className="w-full">
+        <table className="w-full table-fixed">
           <thead className="bg-purple-600 text-white">
             <tr>
-              <th className="text-left p-4">Tiêu đề</th>
-              <th className="text-left p-4">Công ty</th>
-              <th className="text-left p-4">Địa điểm</th>
+              <th className="text-left p-4 w-16">STT</th>
+              <th className="text-left p-4 w-80">Tiêu đề</th>
+              <th className="text-left p-4 w-64">Công ty</th>
+              <th className="text-left p-4 w-50">Địa điểm</th>
               <th className="text-left p-4">Trạng thái</th>
               <th className="text-left p-4">Tình trạng</th>
               <th className="text-left p-4">Ngày đăng</th>
               <th className="text-left p-4">Hạn nộp</th>
-              <th className="text-left p-4"></th>
+              <th className="text-left p-4">Action</th>
             </tr>
           </thead>
 
           <tbody>
             {jobPost?.length > 0 ? (
-              jobPost.map((job) => (
+              jobPost.map((job, index) => (
                 <tr key={job.jobPostId} className="border-b hover:bg-gray-50">
-                  <td className="p-4">{job.title}</td>
-                  <td className="p-4">{job.company?.companyName}</td>
-                  <td className="p-4">{job.city?.cityName}</td>
+                  <td className="p-4">{index + 1 + currentPage * size}</td>
+
+                  <td id="job-title" className="p-4 truncate" title={job.title}>
+                    {job.title}
+                  </td>
+                  <td className="p-4 truncate" title={job.company?.companyName}>
+                    {job.company?.companyName}
+                  </td>
+                  <td className="p-4 truncate" title={job.city?.cityName}>
+                    {job.city?.cityName}
+                  </td>
                   <td className="p-4">
                     <span
                       className={`px-2 py-1 rounded-full text-xs ${
@@ -172,13 +177,15 @@ export default function AdminJobList() {
                       <DropdownMenuContent align="end">
                         {!job.approve && (
                           <DropdownMenuItem
-                            onClick={() => dispatch(approveJob(job.jobPostId))}
+                            onClick={() => dispatch(approveJob(job.postId))}
                           >
                             Phê duyệt
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuItem
-                          onClick={() => navigate(`/admin/jobs/${job.postId}`)}
+                          onClick={() =>
+                            navigate(`/admin/jobs/${job.postId}`)
+                          }
                         >
                           Chi tiết
                         </DropdownMenuItem>

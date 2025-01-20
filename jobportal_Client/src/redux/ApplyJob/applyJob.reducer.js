@@ -9,6 +9,9 @@ import {
   UPDATE_APPLY_JOB_SUCCESS,
   UPDATE_APPROVE_SUCCESS,
   GET_CANDIDATE_APPLY_INFO_SUCCESS,
+  NOTIFICATION_VIEW_JOB_SUCCESS,
+  NOTIFICATION_VIEW_JOB_REQUEST,
+  NOTIFICATION_VIEW_JOB_FAILURE,
 } from "./applyJob.actionType";
 
 const initialState = {
@@ -23,6 +26,7 @@ const initialState = {
   applyJobByCompany: [],
   approveApply: null,
   candidateApplyInfo: null,
+  viewedJobs: [],
 };
 
 export const applyJobReducer = (state = initialState, action) => {
@@ -34,6 +38,7 @@ export const applyJobReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         applyJobByUser: [...state.applyJobByUser, action.payload], // Thêm ứng tuyển mới vào danh sách
+        hasApplied: true,
         error: null,
       };
     case GET_APPLY_JOB_BY_USER_SUCCESS:
@@ -82,6 +87,16 @@ export const applyJobReducer = (state = initialState, action) => {
         updateApply: action.payload,
         error: null,
       };
+    case NOTIFICATION_VIEW_JOB_REQUEST:
+      return { ...state, loading: true, error: null };
+    case NOTIFICATION_VIEW_JOB_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        viewedJobs: [...state.viewedJobs, action.payload],
+      };
+    case NOTIFICATION_VIEW_JOB_FAILURE:
+      return { ...state, loading: false, error: action.payload };
     case GET_APPLY_JOB_BY_USER_FAILURE:
       return { ...state, loading: false, error: action.payload };
     case GET_CANDIDATE_APPLY_INFO_SUCCESS:

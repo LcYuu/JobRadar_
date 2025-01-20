@@ -11,13 +11,9 @@ export const getCVBySeeker= () => async (dispatch) => {
     const jwt = sessionStorage.getItem("jwt"); // Lấy JWT từ sessionStorage
     if (!jwt) {
       throw new Error("No token found");
-    }
-
+    } 
     const response = await api.get(`/cv/searchCV`)
-     
-
     console.log("CV: " + response.data);
-
     dispatch({
       type: GET_CV_SUCCESS,
       payload: response.data,
