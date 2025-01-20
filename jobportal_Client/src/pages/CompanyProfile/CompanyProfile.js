@@ -1,55 +1,36 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { useParams, useNavigate } from "react-router-dom";
+
 import "swiper/swiper-bundle.css";
 import { Button } from "../../ui/button";
-import { Card } from "../../ui/card";
+
 import { Badge } from "../../ui/badge";
-import {
-  Calendar,
-  Users,
-  MapPin,
-  Briefcase,
-  Heart,
-  Clock,
-  GraduationCap,
-  Users2,
-  ChevronRight,
-  Star,
-  Phone,
-  Mail,
-  StarIcon,
-} from "lucide-react";
+import { Calendar, MapPin, Briefcase, Star, Phone, Mail } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import JobCard_AllJob from "../../components/common/JobCard_AllJob/JobCard_AllJob";
-import {
-  getAllJobAction,
-  getJobsByCompany,
-} from "../../redux/JobPost/jobPost.action";
-import logo from "../../assets/images/common/logo.jpg";
-import { getProfileAction } from "../../redux/Auth/auth.action";
-import { store } from "../../redux/store";
-import {
-  checkSaved,
-  getCompanyProfile,
-} from "../../redux/Company/company.action";
-import { StarBorder, StarRounded } from "@mui/icons-material";
+import { StarRounded } from "@mui/icons-material";
 import { toast } from "react-toastify";
 
+import "react-toastify/dist/ReactToastify.css";
+import anonymousIcon from "../../assets/icons/anonymous.png";
+import Swal from "sweetalert2";
+import {
+  createReview,
+  deleteReview,
+  getReviewByCompany,
+} from "../../redux/Review/review.thunk";
 import {
   followCompany,
   getSeekerByUser,
-} from "../../redux/Seeker/seeker.action";
-import "react-toastify/dist/ReactToastify.css";
-
-import { checkIfApplied } from "../../redux/ApplyJob/applyJob.action";
+} from "../../redux/Seeker/seeker.thunk";
 import {
-  createReview,
-  getReviewByCompany,
-  deleteReview,
-} from "../../redux/Review/review.action";
-import anonymousIcon from "../../assets/icons/anonymous.png";
-import Swal from "sweetalert2";
+  getAllJobAction,
+  getJobsByCompany,
+} from "../../redux/JobPost/jobPost.thunk";
+import {
+  checkSaved,
+  getCompanyProfile,
+} from "../../redux/Company/company.thunk";
 const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
   return (
     <div className="flex">
@@ -75,11 +56,7 @@ const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
 export default function CompanyProfile() {
   const { companyId } = useParams();
   const dispatch = useDispatch();
-  const {
-    jobPost = [],
-    totalPages,
-    error,
-  } = useSelector((store) => store.jobPost);
+  const { jobPost = [], error } = useSelector((store) => store.jobPost);
 
   const [loading, setLoading] = useState(true);
 
@@ -97,10 +74,11 @@ export default function CompanyProfile() {
     setIsOpen(false); // Đóng modal
   };
 
-  const { reviews } = useSelector((store) => store.review);
+  const { reviews } = useSelector(store => store.review);
+  console.log("🚀 ~ CompanyProfile ~ reviews:", reviews)
 
   const { companyProfile } = useSelector((store) => store.company);
-  const { seeker, message } = useSelector((store) => store.seeker);
+  const { seeker } = useSelector((store) => store.seeker);
 
   const [isFollowing, setIsFollowing] = useState(false); // Trạng thái theo dõi ban đầu
 
@@ -183,18 +161,21 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         if (!result.isConfirmed) {
           return;
         }
-
-        await dispatch(deleteReview(existingReview.reviewId));
+        const reviewId = existingReview.reviewId;
+        await dispatch(deleteReview(reviewId));
       }
 
       await dispatch(
         createReview(
           {
-            star: feedback.star,
-            message: feedback.message,
-            isAnonymous: feedback.isAnonymous,
+            reviewData: {
+              star: feedback.star,
+              message: feedback.message,
+              isAnonymous: feedback.isAnonymous,
+            },
+            companyId
           },
-          companyId
+          
         )
       );
 
@@ -241,14 +222,14 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
   }, [companyId]); // Chỉ cuộn khi companyId thay đổi
 
   useEffect(() => {
-    dispatch(getAllJobAction(currentPage, size, companyId)); // Assuming your action can accept companyId
-  }, [dispatch, currentPage, size, companyId]);
+    dispatch(getAllJobAction({ currentPage, size })); // Assuming your action can accept companyId
+  }, [dispatch, currentPage, size]);
 
   useEffect(() => {
     dispatch(getCompanyProfile(companyId));
     dispatch(getReviewByCompany(companyId));
     dispatch(checkSaved(companyId));
-    dispatch(getJobsByCompany(companyId, currentPage, size));
+    dispatch(getJobsByCompany({ companyId, currentPage, size }));
   }, [dispatch, currentPage, size, companyId]);
 
   const handleFollowClick = async () => {
@@ -271,8 +252,13 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
   const totalStars = reviews.reduce((total, review) => total + review.star, 0);
   // Tính trung bình
   const averageStars = reviews.length > 0 ? totalStars / reviews.length : 0;
-
-  console.log(checkIfSaved);
+  
+  const validReviews = Array.isArray(reviews)
+  ? reviews.filter(
+      (item) =>
+        typeof item === 'object' && item !== null && item.hasOwnProperty('reviewId')
+    )
+  : [];
 
   const handleDeleteReview = async (reviewId) => {
     // Sử dụng Swal để xác nhận
@@ -323,7 +309,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <path d="m15 18-6-6 6-6"/>
+          <path d="m15 18-6-6 6-6" />
         </svg>
         Quay lại
       </Button>
@@ -533,10 +519,10 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
               Các đánh giá khác
             </h3>
 
-            {reviews.length === 0 ? (
+            {validReviews.length === 0 ? (
               <p className="text-gray-500">Chưa có đánh giá nào.</p>
             ) : (
-              reviews
+              validReviews
                 .sort((a, b) => new Date(b.createDate) - new Date(a.createDate))
                 .map((review, index) => (
                   <div

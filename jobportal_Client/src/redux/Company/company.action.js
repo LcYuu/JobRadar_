@@ -503,3 +503,4 @@ export const getAllCompaniesForAdmin = (companyName, industryName, page, size) =
     });
   }
 };
+

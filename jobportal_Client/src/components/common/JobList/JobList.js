@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import JobCard from "../JobCard/JobCard";
 import { useDispatch, useSelector } from "react-redux";
-import logo1 from "../../../assets/images/common/logo1.jpg";
-import { getAllJobAction } from "../../../redux/JobPost/jobPost.action";
 import { Button } from "../../../ui/button";
+import { getAllJobAction } from "../../../redux/JobPost/jobPost.thunk";
 
 export default function JobList() {
   const dispatch = useDispatch();
@@ -18,7 +17,7 @@ export default function JobList() {
 
   useEffect(() => {
     // Set loading state when fetching new data
-    dispatch(getAllJobAction(currentPage, size));
+    dispatch(getAllJobAction({currentPage, size}));
   }, [dispatch, currentPage, size]);
 
   const handlePageChange = (newPage) => {

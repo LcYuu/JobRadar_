@@ -1,29 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
-import { format, formatDate } from "date-fns";
+import {  formatDate } from "date-fns";
 import { Card } from "../../ui/card";
 import { FileUp, X, Star, Upload, Eye } from "lucide-react";
-import { ToastContainer, toast } from "react-toastify";
+import {  toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch, useSelector } from "react-redux";
 import { uploadToCloudinary } from "../../utils/uploadToCloudinary";
-import {
-  createCV,
-  deleteCV,
-  getCVBySeeker,
-  updateCVIsMain,
-} from "../../redux/CV/cv.action";
-import { store } from "../../redux/store";
 import Swal from "sweetalert2";
+import { createCV, deleteCV, getCVBySeeker, updateCVIsMain } from "../../redux/CV/cv.thunk";
 
 export default function MyCV() {
   const dispatch = useDispatch();
   const [cvFiles, setCvFiles] = useState([]);
   const [selectedPdf, setSelectedPdf] = useState(null);
   const { cvs = [] } = useSelector((store) => store.cv);
+  
 
   useEffect(() => {
     dispatch(getCVBySeeker());
+    
   }, [dispatch]);
 
   const [showToast, setShowToast] = useState(false);
@@ -66,6 +62,7 @@ export default function MyCV() {
 
           await dispatch(createCV(cvData));
           dispatch(getCVBySeeker());
+          console.log("🚀 ~ MyCV ~ cvs:", cvs)
           toast.success("CV đã được tải lên thành công");
         }
       } catch (error) {
@@ -90,10 +87,10 @@ export default function MyCV() {
       try {
         await dispatch(deleteCV(cvId));
         dispatch(getCVBySeeker());
-        showSuccessToast("Xóa CV thành công!");
+        toast.success("CV đã được xóa thành công!");
       } catch (error) {
         console.error("Có lỗi xảy ra khi xóa CV:", error);
-        showSuccessToast("Xóa CV thất bại. Vui lòng thử lại!", "error");
+        toast.error("Xóa CV thất bại. Vui lòng thử lại!")
       }
     }
   };
@@ -121,6 +118,7 @@ export default function MyCV() {
     setSelectedPdf(null);
   };
 
+  
   return (
     <div className="space-y-6">
       <Card className="p-6 bg-white shadow-lg">

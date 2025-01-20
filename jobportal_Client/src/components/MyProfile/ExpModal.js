@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
@@ -8,11 +8,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import * as Yup from "yup";
-import {
-  createExperience,
-  getExpByUser,
-  updateExperience,
-} from "../../redux/Experience/exp.action";
+import { createExperience, getExpByUser, updateExperience } from "../../redux/Experience/exp.thunk";
 
 const style = {
   position: "absolute",
@@ -73,11 +69,13 @@ export default function ExpModal({
       setIsLoading(true);
       try {
         if (editingExperienceId) {
-          await dispatch(updateExperience(editingExperienceId, values));
+          const experienceData = values
+          await dispatch(updateExperience({experienceId:editingExperienceId, experienceData}));
           setEditingExperienceId(null);
           showSuccessToast("Cập nhật kinh nghiệm thành công!");
         } else {
-          await dispatch(createExperience(values));
+          const expData = values
+          await dispatch(createExperience(expData));
           showSuccessToast("Cập nhật kinh nghiệm thành công!");
         }
         handleClose();
