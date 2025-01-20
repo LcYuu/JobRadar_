@@ -7,11 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 
 
 import logo1 from "../../assets/images/common/logo1.jpg";
-import { loginAction } from "../../redux/Auth/auth.action";
 
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { loginAction } from "../../redux/Auth/auth.thunk";
 
 // Update Modal component
 const Modal = ({ isOpen, onClose, children }) => {
@@ -44,7 +44,6 @@ export default function SignInForm() {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,10 +51,13 @@ export default function SignInForm() {
   
     try {
       const response = await dispatch(loginAction({ email, password }));
-      console.log(response?.error)
-      if (response && response.success) {
-        const user = response.user;
-    
+      console.log("🚀 ~ handleSubmit ~ response:", response)
+      const { payload } = response;
+      console.log("🚀 ~ handleSubmit ~ payload:", payload)
+      
+      if (payload && payload.success) {
+        const user = payload.user; 
+        console.log("🚀 ~ handleSubmit ~ user:", user)
         // Điều hướng trước
         if (user?.userType?.userTypeId === 3) {
           navigate('/employer/account-management/dashboard');
@@ -64,7 +66,6 @@ export default function SignInForm() {
         } else {
           navigate("/");
         }
-    
         // Hiển thị thông báo sau khi chuyển hướng
         setTimeout(async () => {
           await Swal.fire({
@@ -79,7 +80,7 @@ export default function SignInForm() {
         await Swal.fire({
           icon: 'error',
           title: 'Đăng nhập thất bại',
-          text: response?.error || 'Có lỗi xảy ra khi đăng nhập',
+          text: payload || 'Có lỗi xảy ra khi đăng nhập',
           confirmButtonText: 'Thử lại',
           confirmButtonColor: '#3085d6'
         });
@@ -89,7 +90,7 @@ export default function SignInForm() {
       await Swal.fire({
         icon: 'error',
         title: 'Lỗi',
-        text: error.message || 'Đã xảy ra lỗi không mong muốn',
+        text:  'Đã xảy ra lỗi không mong muốn',
         confirmButtonText: 'Đóng',
         confirmButtonColor: '#3085d6'
       });

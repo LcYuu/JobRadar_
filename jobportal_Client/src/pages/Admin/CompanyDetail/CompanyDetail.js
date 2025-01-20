@@ -4,16 +4,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "../../../ui/button";
 import { Card } from "../../../ui/card";
 import {
-  Building2,
   Users,
   Calendar,
   Lock,
   Unlock,
-  History,
   AlertTriangle,
   FileText,
   UserCheck,
-  UserX,
+
   MapPin,
   Briefcase,
   Users2,
@@ -42,25 +40,30 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Code2, Banknote } from "lucide-react";
+import {  Banknote } from "lucide-react";
+
+import { StarRounded } from "@mui/icons-material";
 import {
-  getCompanyById,
-  updateCompanyStatus,
   deleteCompany,
+  getCompanyById,
   getCompanyJobCounts,
   getCompanyJobStats,
   getCompanyProfile,
-} from "../../../redux/Company/company.action";
-import { getReviewByCompany } from "../../../redux/Review/review.action";
-import { StarRounded } from "@mui/icons-material";
+  updateCompanyStatus,
+} from "../../../redux/Company/company.thunk";
+import { getReviewByCompany } from "../../../redux/Review/review.thunk";
 
 export default function CompanyDetail() {
   const navigate = useNavigate();
   const { companyId } = useParams();
   const dispatch = useDispatch();
   const { companyProfile, jobCounts, jobStats, loading } = useSelector(
+    
+    
     (store) => store.company
   );
+  console.log("🚀 ~ CompanyDetail ~ companyProfile:", companyProfile)
+  console.log("🚀 ~ CompanyDetail ~ jobCounts:", jobCounts)
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [chartDateRange, setChartDateRange] = useState(() => {
     const end = new Date();
@@ -80,9 +83,9 @@ export default function CompanyDetail() {
   const { reviews } = useSelector((store) => store.review);
 
   useEffect(() => {
-    dispatch(getCompanyProfile(companyId));
-    dispatch(getCompanyJobCounts(companyId));
-    dispatch(getReviewByCompany(companyId));
+    dispatch(getCompanyProfile( companyId ));
+    dispatch(getCompanyJobCounts( companyId ));
+    dispatch(getReviewByCompany( companyId ));
     return () => {
       setIsMounted(false);
     };
@@ -111,26 +114,28 @@ export default function CompanyDetail() {
       const formattedStartDate = start.toISOString().split("T")[0];
       const formattedEndDate = end.toISOString().split("T")[0];
 
-      dispatch(getCompanyJobStats(companyId, formattedStartDate, formattedEndDate))
-        .then((response) => {
-          console.log('API Response:', response);
-          if (!response?.data) {
+      dispatch(
+        getCompanyJobStats({ companyId, startDate: formattedStartDate, endDate: formattedEndDate })
+      )
+        .unwrap() // Lấy trực tiếp `payload` từ Redux Toolkit
+        .then((payload) => {
+          console.log("API Payload:", payload); // Đây là dữ liệu trả về từ API
+          if (!payload) {
             throw new Error("Không có dữ liệu từ API");
           }
           setIsChartLoading(false);
         })
         .catch((err) => {
-          console.error('Chart Error:', err);
+          console.error("Chart Error:", err);
           setError(err.message || "Có lỗi xảy ra khi tải dữ liệu");
           setIsChartLoading(false);
         });
     }
   }, [dispatch, companyId, chartDateRange]);
 
-
   useEffect(() => {
     if (!companyProfile || companyProfile.companyId !== companyId) {
-      dispatch(getCompanyById(companyId));
+      dispatch(getCompanyById(companyId ));
       dispatch(getCompanyJobCounts(companyId));
     }
     return () => {
@@ -140,7 +145,12 @@ export default function CompanyDetail() {
 
   const handleStatusChange = async () => {
     try {
-      await dispatch(updateCompanyStatus(companyId, !companyProfile.isActive));
+      await dispatch(
+        updateCompanyStatus({
+          companyId,
+          isActive: !companyProfile.isActive,
+        })
+      );
       dispatch(getCompanyById(companyId));
     } catch (error) {
       toast.error("Không thể cập nhật trạng thái công ty");
@@ -201,35 +211,37 @@ export default function CompanyDetail() {
 
   const chartData = useMemo(() => {
     if (!jobStats || !Array.isArray(jobStats)) {
-      console.log('No jobStats data available');
+      console.log("No jobStats data available");
       return [];
     }
 
-    console.log('Raw jobStats:', jobStats);
+    console.log("Raw jobStats:", jobStats);
 
-    return jobStats.map(stat => {
-      try {
-        if (!stat.date) return null;
+    return jobStats
+      .map((stat) => {
+        try {
+          if (!stat.date) return null;
 
-        const date = new Date(stat.date);
-        return {
-          date: date.toISOString().split('T')[0],
-          fullDate: date.toLocaleDateString('vi-VN', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          }),
-          totalJobs: Number(stat.totalJobs) || 0,
-          activeJobs: Number(stat.activeJobs) || 0,
-          closedJobs: Number(stat.closedJobs) || 0,
-          pendingJobs: Number(stat.pendingJobs) || 0
-        };
-      } catch (error) {
-        console.error('Error processing stat:', stat, error);
-        return null;
-      }
-    }).filter(Boolean);
+          const date = new Date(stat.date);
+          return {
+            date: date.toISOString().split("T")[0],
+            fullDate: date.toLocaleDateString("vi-VN", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            }),
+            totalJobs: Number(stat.totalJobs) || 0,
+            activeJobs: Number(stat.activeJobs) || 0,
+            closedJobs: Number(stat.closedJobs) || 0,
+            pendingJobs: Number(stat.pendingJobs) || 0,
+          };
+        } catch (error) {
+          console.error("Error processing stat:", stat, error);
+          return null;
+        }
+      })
+      .filter(Boolean);
   }, [jobStats]);
 
   const ChartSkeleton = () => (
@@ -368,10 +380,17 @@ export default function CompanyDetail() {
                 <div className="flex items-center gap-2">
                   <h3 className="text-xl font-bold text-white">
                     {reviews.length > 0
-                      ? (reviews.reduce((total, review) => total + review.star, 0) / reviews.length).toFixed(1)
+                      ? (
+                          reviews.reduce(
+                            (total, review) => total + review.star,
+                            0
+                          ) / reviews.length
+                        ).toFixed(1)
                       : "0.0"}
                   </h3>
-                  <span className="text-sm text-white">({reviews.length} đánh giá)</span>
+                  <span className="text-sm text-white">
+                    ({reviews.length} đánh giá)
+                  </span>
                 </div>
               </div>
             </div>
@@ -550,7 +569,7 @@ export default function CompanyDetail() {
               !dateError &&
               chartData.length > 0 && (
                 <ResponsiveContainer width="100%" height="100%">
-                  {console.log('Rendering chart with data:', chartData)}
+                  {console.log("Rendering chart with data:", chartData)}
                   <LineChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
@@ -558,14 +577,14 @@ export default function CompanyDetail() {
                       tick={{ fill: "#666" }}
                       tickLine={{ stroke: "#666" }}
                       tickFormatter={(value) => {
-                        console.log('Formatting X-axis value:', value);
+                        console.log("Formatting X-axis value:", value);
                         try {
                           return new Date(value).toLocaleDateString("vi-VN", {
                             day: "2-digit",
-                            month: "2-digit"
+                            month: "2-digit",
                           });
                         } catch (error) {
-                          console.error('Error formatting date:', error);
+                          console.error("Error formatting date:", error);
                           return value;
                         }
                       }}

@@ -11,43 +11,36 @@ import {
   PenSquare,
   Plus,
   X,
-  Upload,
-  Code,
   BanknoteIcon,
 } from "lucide-react";
 import { toast } from "react-toastify";
-import {
-  updateCompanyProfile,
-  updateCompanyImages,
-  getCompanyProfile,
-  getCompanyByJWT,
-} from "../../redux/Company/company.action";
 import CompanyProfileModal from "./CompanyProfile_Management_Modal";
-import { store } from "../../redux/store";
 import { uploadToCloudinary } from "../../utils/uploadToCloudinary";
-import {
-  createImageCompany,
-  deleteImageCompany,
-} from "../../redux/ImageCompany/imageCompany.action";
 import { Avatar } from "@mui/material";
 import Swal from "sweetalert2";
-import { getReviewByCompany } from "../../redux/Review/review.action";
+
 import { StarRounded } from "@mui/icons-material";
+import { createImageCompany, deleteImageCompany } from "../../redux/ImageCompany/imageCompany.thunk";
+import { getCompanyByJWT, updateCompanyProfile } from "../../redux/Company/company.thunk";
+import { getReviewByCompany } from "../../redux/Review/review.thunk";
 
 const CompanyProfile_Management = () => {
   const dispatch = useDispatch();
-  const { companyJwt, loading, error } = useSelector((store) => store.company);
+  const { companyJwt, loading, error } = useSelector(store => store.company);
   const { imageCompany } = useSelector((store) => store.imageCompany);
   const [isLoading, setIsLoading] = useState(false);
-  const { reviews } = useSelector((store) => store.review);
+  const { reviews } = useSelector(store => store.review);
 
   useEffect(() => {
     dispatch(getCompanyByJWT());
   }, [dispatch]);
 
+  console.log("🚀 ~ constCompanyProfile_Management= ~  companyJwt?.images:",  companyJwt?.images)
   useEffect(() => {
     if (companyJwt?.companyId) {
-      dispatch(getReviewByCompany(companyJwt.companyId));
+      const companyId = companyJwt?.companyId; // Lấy giá trị cụ thể
+      dispatch(getReviewByCompany(companyId));
+
     }
   }, [dispatch, companyJwt]);
 
@@ -117,7 +110,6 @@ const CompanyProfile_Management = () => {
       console.error("Update failed: ", error);
     }
   };
-  console.log("aaa" + formData.imgPath);
 
   const handleSave = async () => {
     try {
@@ -132,10 +124,10 @@ const CompanyProfile_Management = () => {
           const imageData = {
             pathImg: uploadedUrl, // Đây là URL của ảnh sau khi được upload
           };
-          await dispatch(createImageCompany(imageData)); // Gửi từng URL một
+          const imgData = imageData
+          await dispatch(createImageCompany(imgData)); // Gửi từng URL một
         }
       }
-
       showSuccessToast("Cập nhật thông tin thành công!");
       setIsEditingImg(false);
       dispatch(getCompanyByJWT());
@@ -176,7 +168,7 @@ const CompanyProfile_Management = () => {
   // };
 
   const removeImage = async (imgId) => {
-    console.log(imgId);
+    console.log("asasadasd" + imgId);
 
     // Sử dụng swal thay vì window.confirm
     const result = await Swal.fire({
@@ -592,6 +584,7 @@ const CompanyProfile_Management = () => {
         <div className="grid grid-cols-3 gap-4">
           {Array.isArray(companyJwt?.images) &&
             companyJwt?.images.map((image, index) => (
+              
               <div key={image.imgId} className="relative aspect-video">
                 <img
                   src={image.pathImg}
@@ -601,7 +594,7 @@ const CompanyProfile_Management = () => {
                 {isEditingImg && (
                   <button
                     className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white"
-                    onClick={() => removeImage(image.imgId)}
+                    onClick={() => removeImage(image?.imgId)}
                   >
                     <X className="w-4 h-4" />
                   </button>

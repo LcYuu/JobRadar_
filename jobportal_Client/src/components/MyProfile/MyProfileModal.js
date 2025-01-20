@@ -8,19 +8,21 @@ import ImageIcon from "@mui/icons-material/Image";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import * as Yup from "yup";
-import {
-  getProfileAction,
-  updateProfileAction,
-} from "../../redux/Auth/auth.action";
+
 import { uploadToCloudinary } from "../../utils/uploadToCloudinary";
-import {
-  getSeekerByUser,
-  updateSeekerAction,
-} from "../../redux/Seeker/seeker.action";
+
 import { Label } from "../../ui/label";
 import { Input } from "../../ui/input";
 import { toast } from "react-hot-toast";
 import Swal from "sweetalert2";
+import {
+  getProfileAction,
+  updateProfileAction,
+} from "../../redux/Auth/auth.thunk";
+import {
+  getSeekerByUser,
+  updateSeekerAction,
+} from "../../redux/Seeker/seeker.thunk";
 
 const style = {
   position: "absolute",
@@ -83,8 +85,10 @@ export default function ProfileModal({ open, handleClose }) {
         await Promise.all([
           dispatch(
             updateProfileAction({
-              userName: values.userName,
-              avatar: selectedAvatar || values.avatar,
+              userData: {
+                userName: values.userName,
+                avatar: selectedAvatar || values.avatar,
+              },
             })
           ),
           handleSaveClick(values),
@@ -218,8 +222,7 @@ export default function ProfileModal({ open, handleClose }) {
     try {
       await dispatch(
         updateSeekerAction({
-          ...values,
-          address: fullAddress,
+          userData: { ...values, address: fullAddress },
         })
       );
       await dispatch(getSeekerByUser());

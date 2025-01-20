@@ -49,12 +49,13 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 	        + "c.logo, "
 	        + "c.contact, "
 	        + "c.email, "
-	        + "c.establishedTime, c.taxCode) "
+	        + "c.establishedTime, "
+	        + "c.taxCode) "
 	        + "FROM Company c "
 	        + "LEFT JOIN c.jobPosts jp "
 	        + "LEFT JOIN ApplyJob a ON jp.postId = a.jobPost.postId "
 	        + "WHERE (a.isSave = true OR a.postId IS NULL) "
-	        + "AND (jp.isApprove = true AND (jp.expireDate >= CURRENT_DATE OR jp.expireDate IS NULL)) "  // Sửa điều kiện hết hạn
+	        + "AND (jp.isApprove = true) "  // Chỉ kiểm tra trạng thái phê duyệt
 	        + "GROUP BY c.companyId, c.companyName, "
 	        + "c.industry.industryId, "
 	        + "c.city.cityId, "
@@ -63,9 +64,11 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 	        + "c.logo, "
 	        + "c.contact, "
 	        + "c.email, "
-	        + "c.establishedTime, c.taxCode "
+	        + "c.establishedTime, "
+	        + "c.taxCode "
 	        + "ORDER BY COUNT(a.postId) DESC")
 	List<CompanyDTO> findCompaniesWithSavedApplications();
+
 
 
 //	@Query("SELECT new com.job_portal.DTO.CompanyWithCountJobDTO(c.companyId, c.companyName, i.industryId, c.description, i.industryName, c.city.cityId, COUNT(j)) "
@@ -95,5 +98,4 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 			+ "ORDER BY c.companyName ASC")
 	Page<Company> findCompaniesWithFilters(@Param("companyName") String companyName,
 			@Param("industryName") String industryName, Pageable pageable);
-
 }

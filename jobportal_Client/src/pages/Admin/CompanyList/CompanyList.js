@@ -1,30 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "../../../ui/button";
-import {
-  MoreVertical,
-  Filter,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-import { getAllCompaniesForAdmin } from "../../../redux/Company/company.action";
-import { getAllIndustries } from "../../../redux/Industry/industry.action";
+import { MoreVertical, Search } from "lucide-react";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../ui/dropdown-menu";
-import { useNavigate } from 'react-router-dom';
-import { getCompanyById } from '../../../redux/Company/company.action';
-import { getCompanyJobCounts } from '../../../redux/Company/company.action';
-import { toast } from 'react-hot-toast';
+import { useNavigate } from "react-router-dom";
+
+import { toast } from "react-hot-toast";
 import { Input } from "../../../ui/input";
 import { StarRounded } from "@mui/icons-material";
-import { getReviewByCompany } from "../../../redux/Review/review.action";
-import { store } from "../../../redux/store";
-
+import { store } from "../../../redux/store.js";
+import {
+  getAllCompaniesForAdmin,
+  getCompanyById,
+  getCompanyJobCounts,
+} from "../../../redux/Company/company.thunk.js";
+import { getAllIndustries } from "../../../redux/Industry/industry.thunk.js";
+import { getReviewByCompany } from "../../../redux/Review/review.thunk.js";
 
 const formatDate = (dateString) => {
   if (!dateString) return "N/A";
@@ -35,7 +32,7 @@ const formatDate = (dateString) => {
     return new Intl.DateTimeFormat("vi-VN", {
       year: "numeric",
       month: "2-digit",
-      day: "2-digit",
+      day: "2-digit", 
     }).format(date);
   } catch (error) {
     return "N/A";
@@ -93,7 +90,7 @@ export default function CompanyList() {
   };
   const dispatch = useDispatch();
   const { companies, loading, totalElements, totalPages } = useSelector(
-    (state) => state.company
+    (store) => store.company
   );
   const { allIndustries } = useSelector((state) => state.industry);
   const [currentPage, setCurrentPage] = useState(0);
@@ -102,17 +99,18 @@ export default function CompanyList() {
   const [selectedIndustry, setSelectedIndustry] = useState("");
   const navigate = useNavigate();
 
-  const [filteredCompanies, setFilteredCompanies] = useState([]);
+  // const [filteredCompanies, setFilteredCompanies] = useState([]);
   const [companyReviews, setCompanyReviews] = useState({});
+
 
   useEffect(() => {
     dispatch(
-      getAllCompaniesForAdmin(
-        searchTerm,
-        selectedIndustry,
-        currentPage,
-        pageSize
-      )
+      getAllCompaniesForAdmin({
+        companyName: searchTerm,
+        industryName: selectedIndustry,
+        page: currentPage,
+        size: pageSize,
+      })
     );
   }, [dispatch, currentPage, pageSize]);
 
@@ -129,18 +127,25 @@ export default function CompanyList() {
           try {
             await dispatch(getReviewByCompany(company.companyId));
             const reviews = store.getState().review.reviews;
-            
+
             // Tính trung bình đánh giá
-            const totalStars = reviews.reduce((total, review) => total + review.star, 0);
-            const averageRating = reviews.length > 0 ? totalStars / reviews.length : 0;
-            
+            const totalStars = reviews.reduce(
+              (total, review) => total + review.star,
+              0
+            );
+            const averageRating =
+              reviews.length > 0 ? totalStars / reviews.length : 0;
+
             reviewsData[company.companyId] = {
               reviews: reviews,
               averageRating: averageRating,
-              totalReviews: reviews.length
+              totalReviews: reviews.length,
             };
           } catch (error) {
-            console.error(`Error fetching reviews for company ${company.companyId}:`, error);
+            console.error(
+              `Error fetching reviews for company ${company.companyId}:`,
+              error
+            );
           }
         }
         setCompanyReviews(reviewsData);
@@ -153,12 +158,12 @@ export default function CompanyList() {
   const applyFilters = () => {
     setCurrentPage(0);
     dispatch(
-      getAllCompaniesForAdmin(
-        searchTerm,
-        selectedIndustry,
-        currentPage,
-        pageSize
-      )
+      getAllCompaniesForAdmin({
+        companyName: searchTerm,
+        industryName: selectedIndustry,
+        page: currentPage,
+        size: pageSize,
+      })
     );
   };
 
@@ -186,11 +191,11 @@ export default function CompanyList() {
       // Pre-fetch data trước khi navigate
       await Promise.all([
         dispatch(getCompanyById(companyId)),
-        dispatch(getCompanyJobCounts(companyId))
+        dispatch(getCompanyJobCounts(companyId)),
       ]);
       navigate(`/admin/companies/${companyId}`);
     } catch (error) {
-      toast.error('Có lỗi xảy ra khi tải dữ liệu công ty');
+      toast.error("Có lỗi xảy ra khi tải dữ liệu công ty");
     }
   };
 
@@ -320,7 +325,9 @@ export default function CompanyList() {
                           <StarRounded
                             key={star}
                             className={`w-4 h-4 ${
-                              star <= (companyReviews[company.companyId]?.averageRating || 0)
+                              star <=
+                              (companyReviews[company.companyId]
+                                ?.averageRating || 0)
                                 ? "text-yellow-400"
                                 : "text-gray-300"
                             }`}
@@ -340,11 +347,14 @@ export default function CompanyList() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleViewDetail(company.companyId)}>
+                        <DropdownMenuItem
+                          onClick={() => handleViewDetail(company.companyId)}
+                        >
                           Chi tiết
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">Xóa</DropdownMenuItem>
-
+                        <DropdownMenuItem className="text-red-600">
+                          Xóa
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </td>
