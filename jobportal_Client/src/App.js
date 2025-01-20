@@ -15,7 +15,6 @@ import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 import FindJobs from "./pages/FindJobs/FindJobs";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useMemo } from "react";
-import { getProfileAction } from "./redux/Auth/auth.action";
 import ChangePassword from "./pages/ForgotPassword/ChangePassword";
 import MyAccount from "./pages/MyAccount/MyAccount";
 import FindCompanies from "./pages/FindCompanies/FindCompanies";
@@ -50,6 +49,7 @@ import JobDetailAdmin from "./pages/Admin/JobDetail/JobDetailAdmin";
 
 import Survey from './pages/Survey/Survey';
 import SurveyStatistics from './pages/Admin/SurveyStatistic/SurveyStatistics';
+import { getProfileAction } from "./redux/Auth/auth.thunk";
 const ProtectedHome = () => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
-import { getRecommendJob } from '../../../redux/JobPost/jobPost.action';
 import { useDispatch, useSelector } from 'react-redux';
 import JobCard from '../JobCard/JobCard';
+import { getRecommendJob } from '../../../redux/JobPost/jobPost.thunk';
 
 const RecommendJob = () => {
     const dispatch = useDispatch();

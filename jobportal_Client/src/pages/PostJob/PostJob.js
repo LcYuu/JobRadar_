@@ -8,25 +8,17 @@ import {
   X,
   ArrowLeft,
   ChevronDown,
-  Clock,
-  Bold,
-  Italic,
-  List,
-  ListOrdered,
-  Link2,
-  Plus,
 } from "lucide-react";
 import { Editor } from "react-draft-wysiwyg";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import { EditorState, convertToRaw, ContentState } from "draft-js";
-import { toast } from "react-toastify";
+import { EditorState } from "draft-js";
 import "react-toastify/dist/ReactToastify.css";
-import { getAllSkill } from "../../redux/Skills/skill.action";
 import { useDispatch, useSelector } from "react-redux";
-import { createJobPost } from "../../redux/JobPost/jobPost.action";
-import { store } from "../../redux/store";
-import { getCity } from "../../redux/City/city.action";
+
 import Swal from "sweetalert2";
+import { getAllSkill } from "../../redux/Skills/skill.thunk";
+import { getCity } from "../../redux/City/city.thunk";
+import { createJobPost } from "../../redux/JobPost/jobPost.thunk";
 
 const cityCodeMapping = {
   1: 16, // Hà Nội
@@ -388,7 +380,6 @@ const PostJob = () => {
 
 const handleSubmitJob = async (e) => {
   e.preventDefault();
-
   try {
     const fullAddress =
       specificAddress +
@@ -400,15 +391,17 @@ const handleSubmitJob = async (e) => {
       cityId: cityCodeMapping[selectedProvince],
       location: fullAddress,
     };
+    const jobPostData = finalJobData
 
-    const result = await dispatch(createJobPost(finalJobData));
+    const result = await dispatch(createJobPost(jobPostData));
 
-    if (result.success) {
+    
+    if (result?.payload?.success) {
       // Hiển thị thông báo thành công
       Swal.fire({
         icon: "success",
         title: "Tạo tin tuyển dụng thành công!",
-        text: result.message || "Tin tuyển dụng đã được tạo thành công.",
+        text: JSON.stringify(result?.payload?.message) || "Tin tuyển dụng đã được tạo thành công.",
         confirmButtonText: "OK",
       }).then((response) => {
         if (response.isConfirmed) {
@@ -423,7 +416,7 @@ const handleSubmitJob = async (e) => {
       Swal.fire({
         icon: "warning",
         title: "Có lỗi xảy ra",
-        text: result?.error || "Không thể tạo tin tuyển dụng.",
+        text: JSON.stringify(result?.payload.error) || "Không thể tạo tin tuyển dụng.",
         confirmButtonText: "OK",
       }).then((response) => {
         if (response.isConfirmed) {
@@ -431,6 +424,7 @@ const handleSubmitJob = async (e) => {
           navigate("/employer/account-management/job-management");
         }
       });
+        
     }
   } catch (error) {
     console.error("Error:", error);

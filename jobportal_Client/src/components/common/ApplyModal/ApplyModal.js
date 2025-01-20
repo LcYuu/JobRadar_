@@ -15,16 +15,13 @@ import { Editor } from "react-draft-wysiwyg";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { ContentState, EditorState } from "draft-js";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  checkIfApplied,
-  createApply,
-  updateApply,
-} from "../../../redux/ApplyJob/applyJob.action";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { uploadToCloudinary } from "../../../utils/uploadToCloudinary";
-import { getCVBySeeker } from "../../../redux/CV/cv.action";
+
 import { FaCheckCircle } from "react-icons/fa";
+import { getCVBySeeker } from "../../../redux/CV/cv.thunk";
+import { checkIfApplied, createApply, updateApply } from "../../../redux/ApplyJob/applyJob.thunk";
 
 const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
   const dispatch = useDispatch();
@@ -109,7 +106,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
               ...formData,
               pathCV: uploadedFile, // Gán URL file đã upload vào formData
             };
-            dispatch(updateApply(updatedFormData, postId));
+            dispatch(updateApply({applyData: updatedFormData, postId}));
             toast.success("Cập nhật ứng tuyển thành công!");
           } else {
             toast.error("Đã có lỗi khi tải lên CV");
@@ -130,7 +127,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
               ...formData,
               pathCV: uploadedFile, // Gán URL file đã upload vào formData
             };
-            await dispatch(createApply(updatedFormData, postId));
+            await dispatch(createApply({applyData: updatedFormData, postId}));
             await dispatch(checkIfApplied(postId));
             toast.success("Ứng tuyển thành công!");
           } else {

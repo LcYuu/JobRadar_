@@ -49,6 +49,7 @@ public class ApplyJobController {
 	@Autowired
 	INotificationService notificationService;
 
+
 	@PostMapping("/create-apply/{postId}")
 	public ResponseEntity<String> createApply(@RequestBody ApplyJobDTO applyDTO,
 			@RequestHeader("Authorization") String jwt, @PathVariable("postId") UUID postId) throws AllExceptions {
@@ -125,6 +126,7 @@ public class ApplyJobController {
 
 		// Cập nhật trạng thái đơn ứng tuyển
 		existingApply.setSave(true);
+		
 
 		try {
 			applyJobRepository.save(existingApply);
@@ -192,34 +194,45 @@ public class ApplyJobController {
 
 	@PostMapping("/viewApply/{userId}/{postId}")
 	public ResponseEntity<Void> viewApplyJob(@RequestHeader("Authorization") String jwt, @PathVariable UUID userId,
-			@PathVariable UUID postId) {
-		String email = JwtProvider.getEmailFromJwtToken(jwt);
-		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+	                                         @PathVariable UUID postId) {
+	    try {
+	        // Lấy email từ JWT
+	        String email = JwtProvider.getEmailFromJwtToken(jwt);
+	        Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 
-		if (user.isPresent()) {
-		    Optional<ApplyJob> apply = applyJobRepository.findByPostIdAndUserId(postId, userId);
+	        // Kiểm tra xem người dùng có tồn tại hay không
+	        if (user.isEmpty()) {
+	            System.out.println("User not found with email: " + email);
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+	        }
 
-		    if (apply.isPresent()) {
-		        // In ra nguyên ApplyJob
-		        System.out.println("ApplyJob: " + apply.get().toString());
+	        // Lấy thông tin ApplyJob
+	        Optional<ApplyJob> apply = applyJobRepository.findByPostIdAndUserId(postId, userId);
 
-		        if (!apply.get().isViewed()) {
-		            apply.get().setViewed(true);
-		            applyJobRepository.save(apply.get());
-		            notificationService.notifyApplicationReviewed(userId, postId, user.get().getCompany().getCompanyId());
-		            System.out.println("Notification sent");
-		        } else {
-		            System.out.println("Already viewed, no notification sent.");
-		        }
-		    } else {
-		        System.out.println("Apply job not found.");
-		    }
+	        if (apply.isPresent()) {
+	            ApplyJob applyJob = apply.get();
+	            // Nếu chưa xem, đánh dấu là đã xem
+	            if (!applyJob.isViewed()) {
+	                applyJob.setViewed(true);
+	                applyJobRepository.save(applyJob);
+	                notificationService.notifyApplicationReviewed(userId, postId, user.get().getCompany().getCompanyId());
+	                System.out.println("Notification sent for userId: " + userId + ", postId: " + postId);
+	            } else {
+	                System.out.println("Already viewed, no notification sent.");
+	            }
+	        } else {
+	            System.out.println("Apply job not found for userId: " + userId + ", postId: " + postId);
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+	        }
 
-		    return ResponseEntity.ok().build();
-		} else {
-		    return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-		}
+	        return ResponseEntity.ok().build();
+	    } catch (Exception e) {
+	        System.err.println("Error occurred while processing viewApplyJob: " + e.getMessage());
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	    }
 	}
+
 
 	private ApplyJob convertToEntity(ApplyJobDTO applyDTO, UUID userId, UUID postId) {
 		ApplyJob apply = new ApplyJob();
