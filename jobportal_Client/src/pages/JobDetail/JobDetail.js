@@ -11,29 +11,13 @@ import {
   Clock,
   DollarSign,
   MapPin,
-  Users,
-  Globe,
-  Calendar,
-  Building2,
-  Trophy,
-  Linkedin,
-  Twitter,
-  Facebook,
-  Github,
+
   ArrowLeft,
 } from "lucide-react";
-import logo from "../../assets/images/common/logo.jpg";
 import ApplyModal from "../../components/common/ApplyModal/ApplyModal";
 import JobCard_AllJob from "../../components/common/JobCard_AllJob/JobCard_AllJob";
-import { store } from "../../redux/store";
-import {
-  getJobPostByPostId,
-  getSimilarJobs,
-} from "../../redux/JobPost/jobPost.action";
-import {
-  checkIfApplied,
-  getOneApplyJob,
-} from "../../redux/ApplyJob/applyJob.action";
+import { checkIfApplied, getOneApplyJob } from "../../redux/ApplyJob/applyJob.thunk";
+import { getJobPostByPostId, getSimilarJobs } from "../../redux/JobPost/jobPost.thunk";
 
 export default function JobDetail() {
   const industryStyles = {
@@ -132,7 +116,9 @@ export default function JobDetail() {
 
   useEffect(() => {
     if (postByPostId?.company?.companyId) {
-      dispatch(getSimilarJobs(postByPostId.company.companyId, postId));
+      const companyId = postByPostId?.company?.companyId
+      const excludePostId = postId
+      dispatch(getSimilarJobs({companyId, excludePostId}));
     }
   }, [dispatch, postByPostId, postId]);
 

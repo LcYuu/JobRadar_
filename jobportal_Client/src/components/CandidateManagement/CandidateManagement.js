@@ -11,22 +11,21 @@ import {
 } from "../../ui/dropdown-menu";
 import { useDispatch, useSelector } from "react-redux";
 import { store } from "../../redux/store";
+
+import { toast } from "react-toastify";
 import {
   getApplyJobByCompany,
+  getNotificationViewJob,
   updateApprove,
-} from "../../redux/ApplyJob/applyJob.action";
-import {
-  getAllJobPost,
-  getJobsByCompany,
-} from "../../redux/JobPost/jobPost.action";
-import { toast } from "react-toastify";
+} from "../../redux/ApplyJob/applyJob.thunk";
+import { getAllJobPost } from "../../redux/JobPost/jobPost.thunk";
 const CandidateManagement = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
     applyJobByCompany = [],
+    viewedJobs = [],
     totalPages,
-    totalElements,
   } = useSelector((store) => store.applyJob);
 
   const { positions } = useSelector((store) => store.jobPost);
@@ -40,13 +39,13 @@ const CandidateManagement = () => {
 
   useEffect(() => {
     dispatch(
-      getApplyJobByCompany(
+      getApplyJobByCompany({
         currentPage,
         size,
-        searchTerm,
-        filterStatus,
-        filterPosition
-      )
+        fullName: searchTerm,
+        isSave: filterStatus,
+        title: filterPosition,
+      })
     );
   }, [dispatch, currentPage, size]); // Thêm các tham số lọc vào dependency array
 
@@ -57,11 +56,11 @@ const CandidateManagement = () => {
   const handleUpdate = async (postId, userId) => {
     try {
       // Gọi hành động cập nhật và chờ nó thực hiện
-      await dispatch(updateApprove(postId, userId));
+      await dispatch(updateApprove({postId, userId}));
 
       toast.success("Đơn ứng tuyển đã được chấp thuận!");
 
-      dispatch(getApplyJobByCompany(currentPage, size));
+      dispatch(getApplyJobByCompany({currentPage, size}));
     } catch (error) {
       // Hiển thị thông báo lỗi nếu có lỗi xảy ra
       toast.error("Có lỗi xảy ra khi chấp thuận đơn.");
@@ -70,13 +69,13 @@ const CandidateManagement = () => {
   const applyFilters = () => {
     setCurrentPage(0);
     dispatch(
-      getApplyJobByCompany(
+      getApplyJobByCompany({
         currentPage,
         size,
-        searchTerm,
-        filterStatus,
-        filterPosition
-      )
+        fullName: searchTerm,
+        isSave: filterStatus,
+        title: filterPosition,
+      })
     );
   };
 
@@ -188,8 +187,10 @@ const CandidateManagement = () => {
           <tbody>
             {displayData.length > 0 ? (
               displayData.map((candidate) => (
-                <tr key={`${candidate.postId}-${candidate.userId}`} className="border-t">
-                  
+                <tr
+                  key={`${candidate.postId}-${candidate.userId}`}
+                  className="border-t"
+                >
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       <img
@@ -251,11 +252,17 @@ const CandidateManagement = () => {
                         >
                           <DropdownMenuItem
                             className="hover:bg-gray-100 cursor-pointer"
-                            onClick={() =>
+                            onClick={() => {
+                              dispatch(
+                                getNotificationViewJob(
+                                  candidate?.userId,
+                                  candidate?.postId
+                                )
+                              ); // Gọi API
                               navigate(
                                 `/employer/account-management/candidate-management/applicants/${candidate?.userId}/${candidate?.postId}`
-                              )
-                            }
+                              );
+                            }}
                           >
                             Xem chi tiết
                           </DropdownMenuItem>

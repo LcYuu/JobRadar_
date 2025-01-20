@@ -39,13 +39,15 @@ public interface ApplyJobRepository extends JpaRepository<ApplyJob, IdApplyJob> 
 	        "jp.title, " +
 	        "c.companyName, " +
 	        "jp.typeOfWork, " +
-	        "c.logo)" +
+	        "c.logo) " +
 	        "FROM ApplyJob a " +
 	        "JOIN a.jobPost jp " +
 	        "JOIN Seeker sp ON sp.userId = a.userId " +
 	        "JOIN Company c ON jp.company.companyId = c.companyId " +
-	        "WHERE sp.userId = :userId")
+	        "WHERE sp.userId = :userId " +
+	        "ORDER BY a.applyDate DESC")  // Sắp xếp theo ngày nộp giảm dần
 	Page<ApplyJobInProfile> findApplyJobByUserId(@Param("userId") UUID userId, Pageable pageable);
+
 	
 	@Query("SELECT DISTINCT new com.job_portal.DTO.ApplyJobEmployerDTO(a.postId, a.userId, a.isSave, a.applyDate, " +
 		       "a.pathCV, a.fullName, j.title, u.avatar, a.isViewed) " +

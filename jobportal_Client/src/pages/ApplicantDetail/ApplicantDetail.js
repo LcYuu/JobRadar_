@@ -5,23 +5,14 @@ import {
   ChevronLeft,
   Mail,
   Phone,
-  Instagram,
-  Twitter,
-  Globe,
-  MessageSquare,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tab";
 import { useDispatch, useSelector } from "react-redux";
-
-import {
-  getCandidateProfile,
-  getCandidateSkills,
-} from "../../redux/Seeker/seeker.action";
-import { getEduCandidate } from "../../redux/Education/edu.action";
-import { getExpCandidate } from "../../redux/Experience/exp.action";
 import { Card } from "../../ui/card";
-import { getCandidateApplyInfo } from "../../redux/ApplyJob/applyJob.action";
-
+import { getCandidateProfile, getCandidateSkills } from "../../redux/Seeker/seeker.thunk";
+import { getEduCandidate } from "../../redux/Education/edu.thunk";
+import { getExpCandidate } from "../../redux/Experience/exp.thunk";
+import { getCandidateApplyInfo } from "../../redux/ApplyJob/applyJob.thunk";
 const ApplicantDetail = () => {
   const getRandomColor = () => {
     const r = Math.floor(Math.random() * 256);
@@ -35,7 +26,7 @@ const ApplicantDetail = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("applicant-profile");
   const { profileCandidate, skillsCandidate } = useSelector(
-    (store) => store.seeker
+    store => store.seeker
   );
   const { eduCandidate } = useSelector((store) => store.edu);
   const { expCandidate } = useSelector((store) => store.exp);
@@ -71,11 +62,11 @@ const ApplicantDetail = () => {
 
   useEffect(() => {
     console.log("Fetching data with userId:", userId, "postId:", postId);
-    dispatch(getCandidateProfile(userId, postId));
+    dispatch(getCandidateProfile({userId, postId}));
     dispatch(getCandidateSkills(userId));
     dispatch(getEduCandidate(userId));
     dispatch(getExpCandidate(userId));
-    dispatch(getCandidateApplyInfo(userId, postId));
+    dispatch(getCandidateApplyInfo({userId, postId}));
   }, [dispatch, userId, postId]);
 
   useEffect(() => {

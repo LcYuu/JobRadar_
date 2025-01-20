@@ -9,23 +9,19 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
 import { Search, ChevronDown} from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  countJobByType,
-  fetchSalaryRange,
-  getAllJobAction,
-  searchJobs,
-} from "../../redux/JobPost/jobPost.action";
+
 // import Pagination from "../../components/layout/Pagination";
-import { getCity } from "../../redux/City/city.action";
-import { getIndustryCount } from "../../redux/Industry/industry.action";
+
 import RangeSlider from "../../components/common/RangeSlider/RangeSlider";
 import { useLocation } from "react-router-dom";
+import { countJobByType, fetchSalaryRange, getAllJobAction, searchJobs } from "../../redux/JobPost/jobPost.thunk";
+import { getCity } from "../../redux/City/city.thunk";
+import { getIndustryCount } from "../../redux/Industry/industry.thunk";
 
 export default function JobSearchPage() {
   const dispatch = useDispatch();
@@ -41,8 +37,6 @@ export default function JobSearchPage() {
     totalPages: totalPagesFromSearch = 0,
     totalPages: totalPagesFromAll = 0,
     jobCountByType = [],
-    loading,
-    error,
     minSalary,
     maxSalary,
   } = useSelector((store) => store.jobPost);
@@ -60,6 +54,7 @@ export default function JobSearchPage() {
     cityId: "",
     selectedIndustryIds: [],
   });
+
 
   const isFilterApplied =
     filters.title ||
@@ -83,9 +78,9 @@ export default function JobSearchPage() {
 
   useEffect(() => {
     if (isFilterApplied) {
-      dispatch(searchJobs(filters, currentPage, size));
+      dispatch(searchJobs({filters, currentPage, size}));
     } else {
-      dispatch(getAllJobAction(currentPage, size));
+      dispatch(getAllJobAction({currentPage, size}));
     }
     console.log({
       totalJobs: isFilterApplied ? searchJob.length : jobPost.length,
@@ -94,7 +89,7 @@ export default function JobSearchPage() {
       results: isFilterApplied ? searchJob : jobPost,
       totalPages: isFilterApplied ? totalPagesFromSearch : totalPagesFromAll,
     });
-  }, [filters, currentPage, dispatch]);
+  }, [dispatch, filters, currentPage]);
 
   useEffect(() => {
     // Lấy danh sách thành phố và loại công việc

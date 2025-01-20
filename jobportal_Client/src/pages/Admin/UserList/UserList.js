@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getAllUsers,
-  deleteUser,
-  updateUserStatus,
-} from "../../../redux/User/user.action";
+
 import { Button } from "../../../ui/button";
 import { MoreVertical, Search } from "lucide-react";
 import {
@@ -16,11 +12,12 @@ import {
 
 import Swal from "sweetalert2";
 import { Input } from "../../../ui/input";
+import { deleteUser, getAllUsers } from "../../../redux/User/user.thunk";
 
 export default function UserList() {
   const dispatch = useDispatch();
   const { users, totalPages, totalElements, loading, error } = useSelector(
-    (state) => state.user
+    (store) => store.user
   );
   const [currentPage, setCurrentPage] = useState(0);
   const [size, setSize] = useState(5);
@@ -29,8 +26,11 @@ export default function UserList() {
   const [status, setStatus] = useState("");
 
   useEffect(() => {
-    dispatch(getAllUsers(searchTerm, role, status, currentPage, size));
+    if (searchTerm !== undefined && role !== undefined && status !== undefined) {
+      dispatch(getAllUsers({ userName: searchTerm, userTypeId: role, active: status, page : currentPage, size }));
+    }
   }, [dispatch, currentPage, size]);
+  
 
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalPages) {
@@ -55,7 +55,7 @@ export default function UserList() {
     }).then((result) => {
       if (result.isConfirmed) {
         dispatch(deleteUser(userId)).then(() => {
-          dispatch(getAllUsers(currentPage, size));
+          dispatch(getAllUsers({currentPage, size}));
           Swal.fire("Đã xóa!", "Người dùng đã được xóa thành công.", "success");
         });
       }
@@ -64,7 +64,8 @@ export default function UserList() {
 
   const applyFilters = () => {
     setCurrentPage(0);
-    dispatch(getAllUsers(searchTerm, role, status, currentPage, size));
+    dispatch(getAllUsers({ userName: searchTerm, userTypeId: role, active: status, page : currentPage, size }));
+    
   };
 
   if (loading) return <div className="text-center py-8">Đang tải...</div>;
@@ -165,10 +166,10 @@ export default function UserList() {
                   </td>
                   <td
                     className="p-4 truncate"
-                    title={user.userType.user_type_name}
+                    title={user?.userType?.user_type_name}
                   >
                     <span className="px-2 py-1 rounded-full">
-                      {user.userType.user_type_name}
+                      {user?.userType?.user_type_name}
                     </span>
                   </td>
                   <td className="p-4">
