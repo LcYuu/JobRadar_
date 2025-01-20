@@ -15,16 +15,13 @@ import {
   Edit,
   ArrowLeft
 } from "lucide-react";
-import {
-  getDetailJobById,
-  updateJob,
-} from "../../redux/JobPost/jobPost.action";
+
 // import { store } from "../../redux/store";
 import SkillJobPostModal from "./SkillJobPostModal";
 import { Badge } from "@mui/material";
 import { toast } from "react-toastify";
-import axios from "axios";
-import { getCity } from "../../redux/City/city.action";
+import { getDetailJobById, updateJob } from "../../redux/JobPost/jobPost.thunk";
+
 const cityCodeMapping = {
   1: 16,    // Hà Nội
   2: 1,     // Hà Giang 
@@ -334,7 +331,7 @@ const JobDetailEmployer = () => {
       };
 
       // Gọi API cập nhật
-      await dispatch(updateJob(postId, updatedJobData));
+      await dispatch(updateJob({postId, jobPostData:updatedJobData}));
       
       // Reset form và hiển thị thông báo thành công
       setIsEditing(false);

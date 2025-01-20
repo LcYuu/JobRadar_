@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import JobCard from "../JobCard/JobCard";
 import { useDispatch, useSelector } from 'react-redux';
 import logo1 from '../../../assets/images/common/logo1.jpg';
-import { getTop8LastestJob } from '../../../redux/JobPost/jobPost.action';
+import { getTop8LastestJob } from '../../../redux/JobPost/jobPost.thunk';
 
 export default function Top8Job() {
   const dispatch = useDispatch();

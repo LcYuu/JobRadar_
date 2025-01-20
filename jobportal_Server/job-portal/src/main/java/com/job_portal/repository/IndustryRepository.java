@@ -37,8 +37,7 @@ public interface IndustryRepository extends JpaRepository<Industry, Integer> {
 	        + "LEFT JOIN JobPost jp ON jp.company.companyId = c.companyId "
 	        + "WHERE (jp.expireDate >= CURRENT_DATE OR jp.expireDate IS NULL) "
 	        + "AND (jp.isApprove = true OR jp.postId IS NULL) "
-	        + "GROUP BY i.industryId, i.industryName "
-	        + "HAVING COUNT(jp.postId) > 0")
+	        + "GROUP BY i.industryId, i.industryName ")
 	List<CountJobByIndustry> countJobsByIndustry();
 
 

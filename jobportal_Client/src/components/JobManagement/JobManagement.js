@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../ui/button";
-import { Calendar, Filter, MoreVertical } from "lucide-react";
+import { Filter, MoreVertical } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,15 +9,14 @@ import {
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
 import { useDispatch, useSelector } from "react-redux";
-import { store } from "../../redux/store";
-import {
-  findEmployerCompany,
-  findJobCompany,
-  updateExpireJob,
-} from "../../redux/JobPost/jobPost.action";
-import { validateTaxCode } from "../../redux/Company/company.action";
+
 import { toast, ToastContainer } from "react-toastify";
 import Swal from "sweetalert2";
+import {
+  findEmployerCompany,
+  updateExpireJob,
+} from "../../redux/JobPost/jobPost.thunk";
+import { validateTaxCode } from "../../redux/Company/company.thunk";
 
 const JobManagement = () => {
   const work = [
@@ -104,15 +103,15 @@ const JobManagement = () => {
   useEffect(() => {
     // Gọi API để lấy công việc với các tham số lọc và sắp xếp
     dispatch(
-      findEmployerCompany(
+      findEmployerCompany({
         status,
         typeOfWork,
         // sortBy.createDate, // Lấy giá trị từ state sortBy
         // sortBy.expireDate,
         // sortBy.count,
         currentPage,
-        size
-      )
+        size,
+      })
     );
   }, [
     dispatch,
@@ -160,12 +159,10 @@ const JobManagement = () => {
 
   const applyFilters = () => {
     setCurrentPage(0);
-    dispatch(findEmployerCompany(status, typeOfWork, currentPage, size));
+    dispatch(findEmployerCompany({status, typeOfWork, currentPage, size}));
   };
 
   const displayData = filtered.length > 0 ? filtered : jobs;
-  console.log("adsad" + isValid);
-
   const handleClick = () => {
     if (isValid) {
       navigate("/employer/jobs/post"); // Chuyển hướng nếu mã số thuế hợp lệ
