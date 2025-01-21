@@ -3,10 +3,16 @@ package com.job_portal.models;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.job_portal.enums.SocialPlatform;
+import com.job_portal.enums.UserType;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
@@ -19,26 +25,26 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "social_links")
-@IdClass(IdSocialLink.class)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class SocialLink {
 
-    @Id
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+	
     @Column(name = "user_id", columnDefinition = "BINARY(16)")
     private UUID userId; 
+ 
+    @Enumerated(EnumType.STRING)
+    private SocialPlatform platform;
 
-    @Id
-    @Column(name = "social_name", length = 50)
-    private String socialName;
+    private String url;
 
-    @Column(name = "link", length = 200)
-    private String link;
+    @Enumerated(EnumType.STRING)
+    private UserType type;
 
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
-    private Seeker seeker; 
+
 }
