@@ -120,22 +120,22 @@ public class SeekerController {
 		}
 	}
 
-	@DeleteMapping("/delete-social/{socialName}")
-	public ResponseEntity<String> deleteSocialLink(@RequestHeader("Authorization") String jwt,
-			@PathVariable("socialName") String socialName) {
-		String email = JwtProvider.getEmailFromJwtToken(jwt);
-		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-		try {
-			boolean isDeleted = seekerService.deleteSocialLink(user.get().getUserId(), socialName);
-			if (isDeleted) {
-				return ResponseEntity.ok("SocialLink deleted successfully.");
-			} else {
-				return ResponseEntity.status(404).body("SocialLink not found.");
-			}
-		} catch (AllExceptions e) {
-			return ResponseEntity.status(400).body(e.getMessage());
-		}
-	}
+//	@DeleteMapping("/delete-social/{socialName}")
+//	public ResponseEntity<String> deleteSocialLink(@RequestHeader("Authorization") String jwt,
+//			@PathVariable("socialName") String socialName) {
+//		String email = JwtProvider.getEmailFromJwtToken(jwt);
+//		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+//		try {
+//			boolean isDeleted = seekerService.deleteSocialLink(user.get().getUserId(), socialName);
+//			if (isDeleted) {
+//				return ResponseEntity.ok("SocialLink deleted successfully.");
+//			} else {
+//				return ResponseEntity.status(404).body("SocialLink not found.");
+//			}
+//		} catch (AllExceptions e) {
+//			return ResponseEntity.status(400).body(e.getMessage());
+//		}
+//	}
 
 	@PutMapping("/update-seeker")
 	public ResponseEntity<String> updateSeeker(@RequestHeader("Authorization") String jwt,
@@ -188,10 +188,9 @@ public class SeekerController {
 	@GetMapping("/{companyId}/followers")
 	public List<FollowSeekerDTO> getSeekersFollowingCompany(@PathVariable UUID companyId) {
 		return seekerRepository.findSeekersFollowingCompany(companyId);
-	}
+	} 
 
 	@PatchMapping("/read/{notificationId}")
-
 	public ResponseEntity<?> markNotificationAsRead(@PathVariable UUID notificationId) {
 	    try {
 	        boolean updated = notificationService.updateNotificationReadStatus(notificationId);
@@ -213,8 +212,6 @@ public class SeekerController {
 	            .contentType(MediaType.APPLICATION_JSON)
 	            .body(notifications);
 	    } catch (Exception e) {
-	        System.err.println("Error getting notifications: " + e.getMessage());
-	        e.printStackTrace();
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 	            .contentType(MediaType.APPLICATION_JSON)
 	            .body(Collections.emptyList()); 
@@ -229,8 +226,6 @@ public class SeekerController {
 	            .contentType(MediaType.APPLICATION_JSON)
 	            .body(unreadCount);
 	    } catch (Exception e) {
-	        System.err.println("Error getting unread count: " + e.getMessage());
-	        e.printStackTrace();
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 	            .contentType(MediaType.APPLICATION_JSON)
 	            .body(0L);

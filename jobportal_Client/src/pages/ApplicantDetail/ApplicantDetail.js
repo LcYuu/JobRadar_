@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "../../ui/button";
-import {
-  ChevronLeft,
-  Mail,
-  Phone,
-} from "lucide-react";
+import { ChevronLeft, Mail, Phone } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tab";
 import { useDispatch, useSelector } from "react-redux";
 import { Card } from "../../ui/card";
-import { getCandidateProfile, getCandidateSkills } from "../../redux/Seeker/seeker.thunk";
+import {
+  getCandidateProfile,
+  getCandidateSkills,
+} from "../../redux/Seeker/seeker.thunk";
 import { getEduCandidate } from "../../redux/Education/edu.thunk";
 import { getExpCandidate } from "../../redux/Experience/exp.thunk";
 import { getCandidateApplyInfo } from "../../redux/ApplyJob/applyJob.thunk";
+import { fetchSocialLinksByUserId } from "../../redux/SocialLink/socialLink.thunk";
 const ApplicantDetail = () => {
   const getRandomColor = () => {
     const r = Math.floor(Math.random() * 256);
@@ -22,15 +22,17 @@ const ApplicantDetail = () => {
   };
 
   const { userId, postId } = useParams();
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("applicant-profile");
   const { profileCandidate, skillsCandidate } = useSelector(
-    store => store.seeker
+    (store) => store.seeker
   );
   const { eduCandidate } = useSelector((store) => store.edu);
   const { expCandidate } = useSelector((store) => store.exp);
   const { candidateApplyInfo } = useSelector((store) => store.applyJob);
+  const { socialLinks } = useSelector((store) => store.socialLink);
 
   const timeAgo = (date) => {
     const now = new Date();
@@ -61,19 +63,13 @@ const ApplicantDetail = () => {
   };
 
   useEffect(() => {
-    console.log("Fetching data with userId:", userId, "postId:", postId);
-    dispatch(getCandidateProfile({userId, postId}));
+    dispatch(getCandidateProfile({ userId, postId }));
     dispatch(getCandidateSkills(userId));
     dispatch(getEduCandidate(userId));
     dispatch(getExpCandidate(userId));
-    dispatch(getCandidateApplyInfo({userId, postId}));
+    dispatch(getCandidateApplyInfo({ userId, postId }));
+    dispatch(fetchSocialLinksByUserId(userId));
   }, [dispatch, userId, postId]);
-
-  useEffect(() => {
-    if (candidateApplyInfo) {
-      console.log("Application Info updated:", candidateApplyInfo);
-    }
-  }, [candidateApplyInfo]);
 
   const contactIcons = {
     email: <Mail className="w-4 h-4 text-gray-500" />,
@@ -149,28 +145,34 @@ const ApplicantDetail = () => {
               </Button> */}
 
               <div className="mt-10">
-                <h3 className="font-medium text-left mb-4">Thông tin liên hệ trên form</h3>
+                <h3 className="font-medium text-left mb-4">
+                  Thông tin liên hệ trên form
+                </h3>
                 <div className="space-y-3">
                   {candidateApplyInfo ? (
                     <>
                       {candidateApplyInfo.email && (
                         <div className="flex items-center gap-3 text-left">
                           {contactIcons.email}
-                          <span className="text-sm text-gray-600">{candidateApplyInfo.email}</span>
+                          <span className="text-sm text-gray-600">
+                            {candidateApplyInfo.email}
+                          </span>
                         </div>
                       )}
-                      
+
                       {candidateApplyInfo.description && (
                         <div className="mt-4">
-                          <h4 className="font-medium text-left mb-2">Thông tin thêm</h4>
-                          <p className="">
-                            {candidateApplyInfo.description}
-                          </p>
+                          <h4 className="font-medium text-left mb-2">
+                            Thông tin thêm
+                          </h4>
+                          <p className="">{candidateApplyInfo.description}</p>
                         </div>
                       )}
                     </>
                   ) : (
-                    <p className="text-sm text-gray-500">Đang tải thông tin...</p>
+                    <p className="text-sm text-gray-500">
+                      Đang tải thông tin...
+                    </p>
                   )}
                 </div>
               </div>
@@ -266,17 +268,19 @@ const ApplicantDetail = () => {
                           <p className="text-sm">{profileCandidate?.gender}</p>
                         </div>
                         <div>
-                          <p className="text-xl font-bold text-black">
-                            Email
+                          <p className="text-xl font-bold text-black">Email</p>
+                          <p className="text-sm">
+                            {profileCandidate?.emailContact}
                           </p>
-                          <p className="text-sm">{profileCandidate?.emailContact}</p>
                         </div>
 
                         <div>
                           <p className="text-xl font-bold text-black">
                             Số điện thoại
                           </p>
-                          <p className="text-sm">{profileCandidate?.phoneNumber}</p>
+                          <p className="text-sm">
+                            {profileCandidate?.phoneNumber}
+                          </p>
                         </div>
 
                         <div>
@@ -286,7 +290,17 @@ const ApplicantDetail = () => {
                           <p className="text-sm">
                             {profileCandidate?.dateOfBirth ? (
                               <>
-                                <span>{profileCandidate.dateOfBirth}</span>
+                                <span>
+                                  {profileCandidate.dateOfBirth
+                                    ? new Date(
+                                        profileCandidate.dateOfBirth
+                                      ).toLocaleDateString("vi-VN", {
+                                        day: "2-digit",
+                                        month: "2-digit",
+                                        year: "numeric",
+                                      })
+                                    : "Không có ngày sinh"}
+                                </span>
                                 <span>
                                   {" "}
                                   ({calculateAge(
@@ -307,7 +321,52 @@ const ApplicantDetail = () => {
                           </p>
                           <p className="text-sm">{profileCandidate?.address}</p>
                         </div>
-                        </div>
+                      </div>
+
+                      <p className="text-xl font-bold text-black">
+                        Liên kết xã hội
+                      </p>
+                      {socialLinks &&
+                      Array.isArray(socialLinks) &&
+                      socialLinks.length > 0 ? (
+                        <>
+                          {socialLinks.map((link, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-2"
+                            >
+                              {/* Logo của nền tảng */}
+                              <div
+                                className="platform-icon-container"
+                                style={{
+                                  width: "24px",
+                                  height: "24px",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                <img
+                                  src={require(`../../assets/images/platforms/${link.platform.toLowerCase()}.png`)}
+                                  alt={link.platform.toLowerCase()}
+                                  className="h-full w-full object-contain rounded-full shadow-md"
+                                />
+                              </div>
+
+                              {/* Liên kết */}
+                              <a
+                                href={link.url}
+                                className="text-sm text-blue-600 truncate"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ maxWidth: "calc(100% - 32px)" }} // Đảm bảo không tràn khi container hẹp
+                              >
+                                {link.url}
+                              </a>
+                            </div>
+                          ))}
+                        </>
+                      ) : (
+                        <p className="text-sm ">Không có liên kết xã hội nào</p>
+                      )}
                     </Card>
 
                     <Card className="bg-white rounded-lg p-6 shadow-lg">
