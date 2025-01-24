@@ -48,6 +48,7 @@ public class JwtProvider {
 				.compact();
 		return jwt;
 	 }
+	
 	public static String getEmailFromJwtToken(String jwt) {
 		jwt = jwt.substring(7);
 
@@ -84,6 +85,20 @@ public class JwtProvider {
 	            .build();
 	    Claims claims = parser.parseClaimsJws(token).getBody();
 	    return claims.getExpiration();
+	}
+
+	public boolean isTokenExpired(String token) {
+	    try {
+	        Date expiration = ((JwtParserBuilder) Jwts.builder())
+	                .setSigningKey(key)
+	                .build()
+	                .parseClaimsJws(token)
+	                .getBody()
+	                .getExpiration();
+	        return expiration.before(new Date());
+	    } catch (Exception e) {
+	        return true; // Nếu lỗi, coi như token đã hết hạn
+	    }
 	}
 
 }

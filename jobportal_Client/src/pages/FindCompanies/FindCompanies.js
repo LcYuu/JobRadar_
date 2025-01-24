@@ -77,6 +77,7 @@ export default function FindCompanies() {
     loading,
     error,
   } = useSelector((store) => store.company);
+
   const { cities = [] } = useSelector((store) => store.city);
   const { allIndustries = [] } = useSelector((store) => store.industry);
 
@@ -114,10 +115,9 @@ export default function FindCompanies() {
     dispatch(getAllIndustries());
   }, [dispatch]);
 
-  // Replace current filter change handlers with:
   const handleSearch = () => {
-    setFilters(tempFilters); // Update main filters with temp values
-    setCurrentPage(0); // Reset to first page when searching
+    setFilters(tempFilters); 
+    setCurrentPage(0); 
   };
 
   const handleCategoryChange = (industryId) => {
@@ -240,6 +240,7 @@ export default function FindCompanies() {
                 {industry.industryName}
               </Button>
             ))}
+            console.log("🚀 ~ FindCompanies ~ allIndustries:", allIndustries)
           </div>
         </div>
 
