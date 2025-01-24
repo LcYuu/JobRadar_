@@ -31,7 +31,9 @@ export const fetchSocialLinksByUserId = createAsyncThunk(
     try {
       const response = await axios.get(`${API_BASE_URL}/socialLink/profile-socialLink`, {
         params: { userId },
+      
       });
+      console.log("🚀 ~ response:", response)
       return response.data; // Trả về danh sách socialLinks
     } catch (error) {
       return rejectWithValue(
