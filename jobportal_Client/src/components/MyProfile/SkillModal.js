@@ -70,10 +70,6 @@ const SkillModal = ({ open, handleClose }) => {
     }
   };
   
-  
-
-  console.log("All skills:", skills); // Kiểm tra toàn bộ kỹ năng từ store
-  console.log("Selected skills:", selectedSkills); // Kiểm tra danh sách skill đã chọn
 
   return (
     <Modal open={open} onClose={handleClose} className="animate-fadeIn fixed inset-0 z-50">

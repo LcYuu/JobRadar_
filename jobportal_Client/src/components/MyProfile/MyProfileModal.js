@@ -119,7 +119,6 @@ export default function ProfileModal({ open, handleClose }) {
     formik.setFieldValue("avatar", imageUrl); // Cập nhật giá trị avatar trong formik
     setIsLoading(false);
   };
-  console.log("🚀 ~ useEffect ~ seeker?.address:", seeker?.address);
   useEffect(() => {
     if (seeker?.address) {
       const addressParts = seeker?.address
@@ -138,7 +137,6 @@ export default function ProfileModal({ open, handleClose }) {
         });
 
         const matchingProvince = provinces.find((p) => p.name === province);
-        console.log("addressParts:", provinces, "a", province); // Log provinces
         if (matchingProvince) {
           setSelectedProvince(matchingProvince.code);
         }
@@ -151,7 +149,6 @@ export default function ProfileModal({ open, handleClose }) {
         const response = await fetch("https://provinces.open-api.vn/api/p/");
         const data = await response.json();
         setProvinces(data);
-        console.log("Fetched provinces:", data); // Log provinces
       } catch (error) {
         console.error("Error fetching provinces:", error);
       }
