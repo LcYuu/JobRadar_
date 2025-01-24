@@ -58,6 +58,7 @@ import imageCompanyReducer from "./ImageCompany/imageCompanySlice.js";
 import applyJobReducer from "./ApplyJob/applyJobSlice.js";
 import forgotPasswordReducer from "./ForgotPassword/forgotPasswordSlice.js";
 import statsReducer from "./Stats/statsSlice.js";
+import socialLinkReducer from "./SocialLink/socialLinkSlice.js";
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -77,5 +78,6 @@ export const store = configureStore({
     stats: statsReducer,
     user: userReducer,
     survey: surveyReducer,
+    socialLink: socialLinkReducer,
   },
 });

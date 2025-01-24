@@ -73,7 +73,4 @@ public class Seeker {
     )
     private List<Skills> skills = new ArrayList<>();
 
-    
-    @OneToMany(mappedBy = "seeker", fetch = FetchType.EAGER, cascade = CascadeType.ALL , orphanRemoval = true)
-    private List<SocialLink> socialLinks = new ArrayList<>();
 }

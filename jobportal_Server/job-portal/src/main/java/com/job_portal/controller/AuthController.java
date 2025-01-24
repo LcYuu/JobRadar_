@@ -266,20 +266,29 @@ public class AuthController {
 
 	@PostMapping("/signout")
 	public ResponseEntity<String> signOut(@RequestHeader(name = "Authorization", required = false) String token) {
-		if (token != null && token.startsWith("Bearer ")) {
-			String jwtToken = token.substring(7);
-			// Kiểm tra xem token đã bị blacklisted chưa
-			if (jwtProvider.isTokenBlacklisted(jwtToken)) {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã bị vô hiệu hóa");
-			}
-			// Thêm token vào danh sách đen
-			BlackListToken blacklistedToken = new BlackListToken(jwtToken, LocalDateTime.now());
-			blackListTokenRepository.save(blacklistedToken);
-			return ResponseEntity.ok("Đăng xuất thành công");
-		} else {
-			return ResponseEntity.badRequest().body("Token không hợp lệ hoặc không được cung cấp.");
-		}
-	};
+	    if (token != null && token.startsWith("Bearer ")) {
+	        String jwtToken = token.substring(7);
+
+//	        // Kiểm tra token đã hết hạn chưa
+//	        if (jwtProvider.isTokenExpired(jwtToken)) {
+//	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn");
+//	        }
+
+	        // Kiểm tra token có trong danh sách đen chưa
+	        if (jwtProvider.isTokenBlacklisted(jwtToken)) {
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã bị vô hiệu hóa");
+	        }
+
+	        // Thêm token vào danh sách đen
+	        BlackListToken blacklistedToken = new BlackListToken(jwtToken, LocalDateTime.now());
+	        blackListTokenRepository.save(blacklistedToken);
+
+	        return ResponseEntity.ok("Đăng xuất thành công");
+	    } else {
+	        return ResponseEntity.badRequest().body("Token không hợp lệ hoặc không được cung cấp.");
+	    }
+	}
+
 
 	@PostMapping("/forgot-password/verifyMail/{email}")
 	public ResponseEntity<Map<String, String>> verifyMail(@PathVariable String email) throws MessagingException {

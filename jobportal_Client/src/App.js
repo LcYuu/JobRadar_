@@ -49,7 +49,8 @@ import JobDetailAdmin from "./pages/Admin/JobDetail/JobDetailAdmin";
 
 import Survey from './pages/Survey/Survey';
 import SurveyStatistics from './pages/Admin/SurveyStatistic/SurveyStatistics';
-import { getProfileAction } from "./redux/Auth/auth.thunk";
+import { getProfileAction, logoutAction } from "./redux/Auth/auth.thunk";
+import { startInactivityTimer } from "./utils/session";
 const ProtectedHome = () => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
@@ -72,6 +73,8 @@ const App = () => {
 
   useEffect(() => {
     const token = sessionStorage.getItem("jwt");
+
+    // Kiểm tra nếu có token và chưa tải thông tin người dùng
     if (token && !user) {
       const fetchProfile = async () => {
         const success = await dispatch(getProfileAction());
@@ -80,6 +83,14 @@ const App = () => {
         }
       };
       fetchProfile();
+    }
+
+    // Bắt đầu theo dõi sự không hoạt động của người dùng nếu đã đăng nhập
+    if (token && user) {
+      const stopInactivityTimer = startInactivityTimer(dispatch);
+
+      // Dọn dẹp khi component bị unmount hoặc khi chuyển trang
+      return () => stopInactivityTimer();
     }
   }, [dispatch, user, navigate, location.pathname]);
 

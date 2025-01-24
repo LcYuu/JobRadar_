@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "../../ui/button";
-import { Card } from "../../ui/card";
+import { Card, CardContent, CardHeader } from "../../ui/card";
 import {
   Calendar,
   MapPin,
@@ -12,37 +12,54 @@ import {
   Plus,
   X,
   BanknoteIcon,
+  Edit2,
+  DeleteIcon,
 } from "lucide-react";
-import { toast } from "react-toastify";
+
 import CompanyProfileModal from "./CompanyProfile_Management_Modal";
 import { uploadToCloudinary } from "../../utils/uploadToCloudinary";
 import { Avatar } from "@mui/material";
 import Swal from "sweetalert2";
 
 import { StarRounded } from "@mui/icons-material";
-import { createImageCompany, deleteImageCompany } from "../../redux/ImageCompany/imageCompany.thunk";
-import { getCompanyByJWT, updateCompanyProfile } from "../../redux/Company/company.thunk";
+import {
+  createImageCompany,
+  deleteImageCompany,
+} from "../../redux/ImageCompany/imageCompany.thunk";
+import {
+  getCompanyByJWT,
+  updateCompanyProfile,
+} from "../../redux/Company/company.thunk";
 import { getReviewByCompany } from "../../redux/Review/review.thunk";
+import { Label } from "../../ui/label";
+import {
+  deleteSocialLink,
+  fetchSocialLinks,
+} from "../../redux/SocialLink/socialLink.thunk";
+import SocialLinkModal from "../MyProfile/SocialLinkModal";
 
 const CompanyProfile_Management = () => {
   const dispatch = useDispatch();
-  const { companyJwt, loading, error } = useSelector(store => store.company);
-  const { imageCompany } = useSelector((store) => store.imageCompany);
+  const { companyJwt } = useSelector((store) => store.company);
+
   const [isLoading, setIsLoading] = useState(false);
-  const { reviews } = useSelector(store => store.review);
+  const { reviews } = useSelector((store) => store.review);
+  const [socialLinkUpdated, setSocialLinkUpdated] = useState(false);
 
   useEffect(() => {
     dispatch(getCompanyByJWT());
-  }, [dispatch]);
+    dispatch(fetchSocialLinks());
+    setSocialLinkUpdated(false);
+  }, [dispatch, socialLinkUpdated]);
 
-  console.log("🚀 ~ constCompanyProfile_Management= ~  companyJwt?.images:",  companyJwt?.images)
   useEffect(() => {
     if (companyJwt?.companyId) {
       const companyId = companyJwt?.companyId; // Lấy giá trị cụ thể
       dispatch(getReviewByCompany(companyId));
-
     }
   }, [dispatch, companyJwt]);
+
+  const { socialLinks } = useSelector((store) => store.socialLink);
 
   const [open, setOpen] = useState(false);
   const handleOpenProfileModal = () => setOpen(true);
@@ -62,6 +79,42 @@ const CompanyProfile_Management = () => {
 
   // const [image, setImage] = useState(companyJwt?.images || []);
   const [images, setImages] = useState([]); // Lưu trữ nhiều hình ảnh
+  const [openSocialLink, setOpenSocialLink] = useState(false);
+  const handleOpenSocialLinkModal = () => setOpenSocialLink(true);
+  const handleCloseSocialLink = () => {
+    setOpenSocialLink(false);
+  };
+  const [editingSocialLinkId, setEditingSocialLinkId] = useState(null);
+  const handleEditSocialLink = (socialLink) => {
+    setEditingSocialLinkId(socialLink.id);
+    setFormData({
+      platform: socialLink.platform,
+      url: socialLink.url,
+    });
+
+    handleOpenSocialLinkModal();
+  };
+
+  const handleDeleteSocialLink = async (id) => {
+    const result = await Swal.fire({
+      title: "Xác nhận xóa link này",
+      text: "Bạn có chắc chắn muốn xóa link này?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Có",
+      cancelButtonText: "Không",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await dispatch(deleteSocialLink(id));
+        dispatch(fetchSocialLinks());
+        showSuccessToast("Xóa link thành công!");
+      } catch (error) {
+        showSuccessToast("Xóa link thất bại. Vui lòng thử lại!");
+      }
+    }
+  };
 
   const handleSelectImage = (event) => {
     const files = event.target.files; // Lấy tất cả các file ảnh
@@ -124,7 +177,7 @@ const CompanyProfile_Management = () => {
           const imageData = {
             pathImg: uploadedUrl, // Đây là URL của ảnh sau khi được upload
           };
-          const imgData = imageData
+          const imgData = imageData;
           await dispatch(createImageCompany(imgData)); // Gửi từng URL một
         }
       }
@@ -168,7 +221,6 @@ const CompanyProfile_Management = () => {
   // };
 
   const removeImage = async (imgId) => {
-    console.log("asasadasd" + imgId);
 
     // Sử dụng swal thay vì window.confirm
     const result = await Swal.fire({
@@ -267,15 +319,14 @@ const CompanyProfile_Management = () => {
 
   // Định nghĩa mảng màu với tên và giá trị
   const colorOptions = [
-    { name: 'Sky Blue', value: 'from-sky-500 to-sky-700' },
-    { name: 'Purple', value: 'from-purple-500 to-purple-700' },
-    { name: 'Red', value: 'from-red-500 to-red-700' },
-    { name: 'Green', value: 'from-green-500 to-green-700' },
-    { name: 'Orange', value: 'from-orange-500 to-orange-700' },
-    { name: 'Pink', value: 'from-pink-500 to-pink-700' },
-    { name: 'Indigo', value: 'from-indigo-500 to-indigo-700' },
-    { name: 'Teal', value: 'from-teal-500 to-teal-700' }
-
+    { name: "Sky Blue", value: "from-sky-500 to-sky-700" },
+    { name: "Purple", value: "from-purple-500 to-purple-700" },
+    { name: "Red", value: "from-red-500 to-red-700" },
+    { name: "Green", value: "from-green-500 to-green-700" },
+    { name: "Orange", value: "from-orange-500 to-orange-700" },
+    { name: "Pink", value: "from-pink-500 to-pink-700" },
+    { name: "Indigo", value: "from-indigo-500 to-indigo-700" },
+    { name: "Teal", value: "from-teal-500 to-teal-700" },
   ];
 
   // Thêm state để lưu màu đã chọn
@@ -539,6 +590,103 @@ const CompanyProfile_Management = () => {
       </Card>
 
       <Card className="p-6 bg-white shadow-md rounded-lg mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Liên kết xã hội</h2>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={handleOpenSocialLinkModal}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Thêm liên kết
+          </Button>
+        </div>
+
+        {/* Sử dụng Flexbox để hiển thị logo trên cùng hàng ngang */}
+        <CardContent className="space-y-3 overflow-auto">
+          {socialLinks &&
+          Array.isArray(socialLinks) &&
+          socialLinks.length > 0 ? (
+            socialLinks.map((link, index) => (
+              <div
+                key={index}
+                className="flex gap-4 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
+                style={{ maxWidth: "100%" }} // Giới hạn chiều rộng tối đa
+              >
+                <div
+                  key={index}
+                  className="platform-icon-container"
+                  style={{ width: "48px", height: "48px", flexShrink: 0 }}
+                >
+                  <img
+                    src={require(`../../assets/images/platforms/${link.platform.toLowerCase()}.png`)}
+                    alt={link.platform.toLowerCase()}
+                    className="h-full w-full object-contain rounded-full shadow-md"
+                  />
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  {" "}
+                  {/* Đảm bảo không bị tràn ra ngoài */}
+                  <div className="flex items-start justify-between">
+                    <div className="truncate">
+                      {" "}
+                      {/* Sử dụng truncate để cắt bớt văn bản nếu tràn */}
+                      <Label className="text-sm font-medium">
+                        {link.platform}
+                      </Label>
+                      <br />
+                      <a
+                        href={link.url}
+                        className="text-sm text-blue-600 truncate" // Đảm bảo URL không tràn ra ngoài
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {link.url}
+                      </a>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="hover:bg-blue-100 transition-colors duration-200"
+                        onClick={() => handleEditSocialLink(link)}
+                      >
+                        <Edit2 className="h-4 w-4 text-blue-600" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="hover:bg-red-100 transition-colors duration-200"
+                        onClick={() => handleDeleteSocialLink(link.id)}
+                      >
+                        <DeleteIcon className="h-4 w-4 text-red-600" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-purple-500">
+              Không có liên kết xã hội nào
+            </p>
+          )}
+        </CardContent>
+
+        {/* Modal */}
+        <section>
+          <SocialLinkModal
+            open={openSocialLink}
+            handleClose={handleCloseSocialLink}
+            editingSocialLinkId={editingSocialLinkId}
+            setEditingSocialLinkId={setEditingSocialLinkId}
+            initialData={formData}
+            showSuccessToast={showSuccessToast}
+          />
+        </section>
+      </Card>
+
+      <Card className="p-6 bg-white shadow-md rounded-lg mb-6">
         <h2 className="text-xl font-semibold mb-4">Đánh giá từ ứng viên</h2>
 
         <div className="flex items-center gap-4 mb-6">
@@ -584,7 +732,6 @@ const CompanyProfile_Management = () => {
         <div className="grid grid-cols-3 gap-4">
           {Array.isArray(companyJwt?.images) &&
             companyJwt?.images.map((image, index) => (
-              
               <div key={image.imgId} className="relative aspect-video">
                 <img
                   src={image.pathImg}
