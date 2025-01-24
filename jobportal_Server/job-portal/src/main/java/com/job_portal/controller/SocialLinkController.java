@@ -102,7 +102,7 @@ public class SocialLinkController {
 		}
 	}
 	
-	@GetMapping("/	")
+	@GetMapping("/profile-socialLink")
 	public ResponseEntity<Object> getSocialLinkByUserId(@RequestParam("userId") UUID userId) {
 		try {
 			List<SocialLink> socialLinks = socialLinkService.getSocialLinksByUserId(userId);
