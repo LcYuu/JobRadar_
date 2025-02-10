@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  Routes,
-  Route,
-  useLocation,
-} from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import "./App.css";
 import Header from "./components/common/Header/header";
 import Footer from "./components/common/Footer/Footer";
@@ -47,19 +43,24 @@ import RoleSelection from "./pages/SignIn/RoleSelection";
 import CompanyDetail from "./pages/Admin/CompanyDetail/CompanyDetail";
 import JobDetailAdmin from "./pages/Admin/JobDetail/JobDetailAdmin";
 
-import Survey from './pages/Survey/Survey';
-import SurveyStatistics from './pages/Admin/SurveyStatistic/SurveyStatistics';
+import Survey from "./pages/Survey/Survey";
+import SurveyStatistics from "./pages/Admin/SurveyStatistic/SurveyStatistics";
 import { getProfileAction, logoutAction } from "./redux/Auth/auth.thunk";
 import { startInactivityTimer } from "./utils/session";
+import CompanyReview from "./pages/ReviewManagement/CompanyReview";
+import AdminReview from "./pages/ReviewManagement/AdminReview";
+import SeekerProfile from "./components/SeekerProfile/SeekerProfile";
 const ProtectedHome = () => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user?.userType?.userTypeId === 1) { // Admin
-      navigate('/admin/dashboard');
-    } else if (user?.userType?.userTypeId === 3) { // Employer
-      navigate('/employer/account-management/dashboard');
+    if (user?.userType?.userTypeId === 1) {
+      // Admin
+      navigate("/admin/dashboard");
+    } else if (user?.userType?.userTypeId === 3) {
+      // Employer
+      navigate("/employer/account-management/dashboard");
     }
   }, [user, navigate]);
 
@@ -257,21 +258,26 @@ const App = () => {
             path="candidate-management"
             element={<CandidateManagement />}
           />
+          <Route path="review-management" element={<CompanyReview />} />
+
           <Route
             path="candidate-management/applicants/:userId/:postId"
             element={<ApplicantDetail />}
+          />
+          <Route
+            path="review-detail/:companyId/:userId"
+            element={<SeekerProfile />}
           />
           <Route path="settings" element={<Settings />} />
         </Route>
         <Route path="/employer/jobs/:postId" element={<JobDetailEmployer />} />
         <Route path="/employer/jobs/post" element={<PostJob />} />
+
         {/* Admin Protected Routes */}
         <Route
           path="/admin"
           element={
-            <ProtectedRoute
-              isAuthenticated={isAuthenticated}
-            >
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
               <MyAccount />
             </ProtectedRoute>
           }
@@ -281,17 +287,21 @@ const App = () => {
           <Route path="company-list" element={<CompanyList />} />
           <Route path="user-list" element={<UserList />} />
           <Route path="job-list" element={<AdminJobList />} />
+          <Route path="review-list" element={<AdminReview />} />
+          <Route path="review-detail/:companyId/:userId" element={<SeekerProfile />} />
           <Route path="settings" element={<Settings />} />
-        </Route>  
+        </Route>
 
         <Route path="/admin/jobs/:postId" element={<JobDetailAdmin />} />
         <Route path="/admin/survey-statistics" element={<SurveyStatistics />} />
         <Route
           path="/admin/*"
           element={
-            <ProtectedRoute isAuthenticated={
-              isAuthenticated && user?.userType?.userTypeId === 1
-            }>
+            <ProtectedRoute
+              isAuthenticated={
+                isAuthenticated && user?.userType?.userTypeId === 1
+              }
+            >
               <AdminDashboard />
             </ProtectedRoute>
           }
@@ -300,7 +310,6 @@ const App = () => {
       {showFooter && <Footer />}
     </div>
   );
-  
 };
 
 export default App;
