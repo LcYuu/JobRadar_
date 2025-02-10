@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.job_portal.models.Company;
@@ -76,6 +78,16 @@ public class ReviewServiceImpl implements IReviewService {
 		} catch (Exception e) {
 			throw new AllExceptions("Error deleting review: " + e.getMessage());
 		}
+	}
+
+	@Override
+	public Page<Review> findReviewByCompanyId(UUID companyId, Pageable pageable) {
+		return reviewRepository.findByCompanyCompanyId(companyId, pageable);
+	}
+
+	@Override
+	public Review findReviewByCompanyIdAndUserId(UUID companyId, UUID userId) {
+		return reviewRepository.findReviewByCompanyIdAndUserId(companyId, userId);
 	}
 
 }
