@@ -32,7 +32,10 @@ export default function Dashboard() {
         setSelectedSection("Danh sách ứng tuyển");
       } else if (path.includes("employer/account-management/jobs")) {
         setSelectedSection("Danh sách công việc");
+      } else if (path.includes("employer/account-management/reviews")) {
+        setSelectedSection("Danh sách đánh giá");
       }
+      
     }
   }, [location.pathname, user]);
 
