@@ -17,6 +17,7 @@ import {
   getCompanyById,
   getCompanyByJWT,
   getAllCompaniesForAdmin,
+  findAllCompany,
 } from "./company.thunk.js";
 
 const initialState = {
@@ -161,6 +162,10 @@ const companySlice = createSlice({
         state.companies = action.payload.content;
         state.totalPages = action.payload.page.totalPages;
         state.totalElements = action.payload.page.totalElements;
+      })
+      .addCase(findAllCompany.fulfilled, (state, action) => {
+        state.loading = false;
+        state.companies = action.payload;
       })
       .addMatcher(
         (action) =>
