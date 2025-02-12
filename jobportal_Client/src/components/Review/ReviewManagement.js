@@ -25,25 +25,13 @@ const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
   );
 });
 
-const ReviewManagement = ({ review, role }) => {
-  const navigate = useNavigate();
+const ReviewManagement = ({ review, role, index }) => {
   const isAnonymous = review.anonymous;
-  const seekerProfileLink = `/review-detail/${review.seeker.userId}`;
-
-  const handleNavigate = () => {
-    if (!isAnonymous) {
-      navigate(seekerProfileLink);
-    }
-  };
+  const bgColor = index % 2 === 0 ? "bg-gray-100" : "bg-white";
 
   return (
-    // <div
-    //   onClick={handleNavigate}
-    //   className={`block mb-6 p-4 border-b border-gray-300 rounded-md hover:bg-purple-100 hover:shadow-lg transition ${
-    //     isAnonymous ? "cursor-default" : "cursor-pointer"
-    //   }`}
-    // >
-      <div className="flex items-start mb-4">
+    <>
+      <div className={`flex items-start p-4 ${bgColor} rounded-lg`}>
         <img
           src={isAnonymous ? anonymousIcon : review.seeker.userAccount.avatar}
           alt="Avatar"
@@ -56,9 +44,11 @@ const ReviewManagement = ({ review, role }) => {
                 ? "Người dùng ẩn danh"
                 : `${review.seeker.userAccount.userName[0]}${"*".repeat(
                     review.seeker.userAccount.userName.length - 2
-                  )}${review.seeker.userAccount.userName[
-                    review.seeker.userAccount.userName.length - 1
-                  ]}`}
+                  )}${
+                    review.seeker.userAccount.userName[
+                      review.seeker.userAccount.userName.length - 1
+                    ]
+                  }`}
             </span>
             <span className="text-sm text-gray-500">
               {new Date(review.createDate).toLocaleDateString("vi-VN", {
@@ -75,7 +65,7 @@ const ReviewManagement = ({ review, role }) => {
               <img
                 src={review.company.logo}
                 alt={review.company.companyName}
-                className="w-10 h-10 object-cover mr-2 rounded"
+                className="w-10 h-10 object-cover mr-2 rounded-lg"
               />
               <span className="font-semibold text-gray-900">
                 {review.company.companyName}
@@ -88,7 +78,8 @@ const ReviewManagement = ({ review, role }) => {
           <p className="text-gray-700 mt-2">{review.message}</p>
         </div>
       </div>
-    // </div>
+      <hr className="border-gray-300 rounded-lg" />
+    </>
   );
 };
 

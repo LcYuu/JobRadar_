@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.job_portal.DTO.CountReviewByCompanyDTO;
+import com.job_portal.DTO.CountReviewByStar;
 import com.job_portal.DTO.JobPostDTO;
 import com.job_portal.config.JwtProvider;
 import com.job_portal.models.JobPost;
@@ -37,6 +39,7 @@ import com.job_portal.repository.UserAccountRepository;
 import com.job_portal.service.IApplyJobService;
 import com.job_portal.service.IJobPostService;
 import com.job_portal.service.IReviewService;
+import com.job_portal.specification.ReviewSpecification;
 import com.social.exceptions.AllExceptions;
 
 @RestController
@@ -48,6 +51,7 @@ public class ReviewController {
 
 	@Autowired
 	IReviewService reviewService;
+
 	@Autowired
 	SeekerRepository seekerRepository;
 
@@ -58,14 +62,14 @@ public class ReviewController {
 	private UserAccountRepository userAccountRepository;
 
 	@GetMapping("/get-all")
-	public ResponseEntity<Page<Review>> getAllReviews(
-	        @RequestParam(defaultValue = "0") int page,
-	        @RequestParam(defaultValue = "5") int size) {
-	    
-	    Pageable pageable = PageRequest.of(page, size, Sort.by("createDate").descending());
-	    Page<Review> reviews = reviewRepository.findAll(pageable);
-	    
-	    return ResponseEntity.ok(reviews);
+	public ResponseEntity<Page<Review>> getAllReviews(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "5") int size, @RequestParam(required = false) UUID companyId,
+			@RequestParam(required = false) Integer star) {
+
+		Pageable pageable = PageRequest.of(page, size, Sort.by("createDate").descending());
+		Specification<Review> spec = ReviewSpecification.filterReviews(companyId, star);
+		Page<Review> reviews = reviewRepository.findAll(spec, pageable);
+		return ResponseEntity.ok(reviews);
 	}
 
 	@PostMapping("/create-review/{companyId}")
@@ -76,7 +80,6 @@ public class ReviewController {
 			Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 			Optional<Seeker> seeker = seekerRepository.findById(user.get().getUserId());
 
-			// Set các giá trị cho review
 			Review review = new Review();
 			review.setStar(req.getStar());
 			review.setMessage(req.getMessage());
@@ -111,13 +114,17 @@ public class ReviewController {
 	}
 
 	@GetMapping("/findReviewByCompanyId")
-	public ResponseEntity<Object> findReviewByCompanyId(@RequestHeader("Authorization") String jwt,
-			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+	public ResponseEntity<Object> findReviewByCompanyId(
+			@RequestHeader("Authorization") String jwt,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "5") int size, 
+			@RequestParam(required = false) Integer star) {
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-		Pageable pageable = PageRequest.of(page, size);
+		Pageable pageable = PageRequest.of(page, size, Sort.by("createDate").descending());
 		try {
-			Page<Review> reviews = reviewService.findReviewByCompanyId(user.get().getUserId(), pageable);
+			Specification<Review> spec = ReviewSpecification.filterReviews(user.get().getUserId(), star);
+			Page<Review> reviews = reviewRepository.findAll(spec, pageable);
 			return ResponseEntity.ok(reviews);
 		} catch (Exception e) {
 			// Trả về thông báo lỗi chung
@@ -125,9 +132,10 @@ public class ReviewController {
 					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
 		}
 	}
-	
+
 	@GetMapping("/review-detail")
-	public ResponseEntity<Object> findReviewByCompanyIdAndUserId(@RequestParam("companyId") UUID companyId, @RequestParam("userId") UUID userId) {
+	public ResponseEntity<Object> findReviewByCompanyIdAndUserId(@RequestParam("companyId") UUID companyId,
+			@RequestParam("userId") UUID userId) {
 		try {
 			Review review = reviewService.findReviewByCompanyIdAndUserId(companyId, userId);
 			return ResponseEntity.ok(review);
@@ -164,6 +172,21 @@ public class ReviewController {
 		} catch (Exception e) {
 			return new ResponseEntity<>("Có lỗi xảy ra khi xóa đánh giá", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	@GetMapping("/count-by-star")
+	public ResponseEntity<List<CountReviewByStar>> getReviewCounts(@RequestParam(required = false) UUID companyId) {
+		List<CountReviewByStar> result = reviewService.countReviewsByStar(companyId);
+		return ResponseEntity.ok(result);
+	}
+	
+	@GetMapping("/count-star-by-company-id")
+	public ResponseEntity<List<CountReviewByStar>> findReviewCount(@RequestHeader("Authorization") String jwt) {
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+
+		List<CountReviewByStar> result = reviewService.countReviewsByStar(user.get().getCompany().getCompanyId());
+		return ResponseEntity.ok(result);
 	}
 
 }

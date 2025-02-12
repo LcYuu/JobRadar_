@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import { api } from "../../configs/api";
+import { api, API_BASE_URL } from "../../configs/api";
 
 export const getAllJobAction = createAsyncThunk(
   "jobs/getAll",
@@ -94,7 +94,7 @@ export const countJobByType = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/job-post/count-job-by-type`
+        `${API_BASE_URL}/job-post/count-job-by-type`
       );
       return response.data;
     } catch (error) {
