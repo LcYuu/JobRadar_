@@ -1,6 +1,7 @@
 // src/features/company/companySlice.js
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { api } from "../../configs/api";
+import { api, API_BASE_URL } from "../../configs/api";
+import axios from "axios";
 
 export const getCompanyPopular = createAsyncThunk(
   "company/getCompanyPopular",
@@ -315,6 +316,22 @@ export const getAllCompaniesForAdmin = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error.response?.data || "Error fetching companies"
+      );
+    }
+  }
+);
+
+export const findAllCompany = createAsyncThunk(
+  "company/findAllCompany",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/company/find-all`
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch job counts"
       );
     }
   }

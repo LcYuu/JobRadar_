@@ -1,7 +1,10 @@
 package com.job_portal.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.time.LocalDate;
@@ -10,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.job_portal.DTO.CountReviewByStar;
 import com.job_portal.models.Company;
 import com.job_portal.models.JobPost;
 import com.job_portal.models.Review;
@@ -89,5 +93,11 @@ public class ReviewServiceImpl implements IReviewService {
 	public Review findReviewByCompanyIdAndUserId(UUID companyId, UUID userId) {
 		return reviewRepository.findReviewByCompanyIdAndUserId(companyId, userId);
 	}
+
+	@Override
+	public List<CountReviewByStar> countReviewsByStar(UUID companyId) {
+		return reviewRepository.countReviewsByStar(companyId);
+	}
+
 
 }
