@@ -13,5 +13,5 @@ public interface ISeekerService {
 	public List<Seeker> searchSeekerByName(String userName) throws AllExceptions;
 	public List<Seeker> searchSeekerByIndustry(String industryName) throws AllExceptions;
 	public Seeker findSeekerById(UUID userId) throws AllExceptions;
-	public boolean deleteSocialLink(UUID seekerId, String socialName) throws AllExceptions;
+
 }

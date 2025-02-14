@@ -1,13 +1,16 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { countReviewByCompany, createReview, deleteReview, getReviewByCompany } from "./review.thunk";
+import { countReviewByCompany, createReview, deleteReview, findAllReview, findReviewByCompany, findReviewByCompanyIdAndUserId, finđAllReview, getReviewByCompany } from "./review.thunk";
 
 const reviewSlice = createSlice({
     name: 'review',
     initialState: {
       reviews: [],
+      review: null,
       countReview: 0,
       loading: false,
       error: null,
+      totalPages: null,
+      totalElements: null,
     },
     reducers: {},
     extraReducers: (builder) => {
@@ -63,6 +66,46 @@ const reviewSlice = createSlice({
           );
         })
         .addCase(deleteReview.rejected, (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+        })
+        .addCase(findReviewByCompany.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(findReviewByCompany.fulfilled, (state, action) => {
+          state.loading = false;
+          state.reviews = action.payload.content;
+          state.totalPages = action.payload.page.totalPages;
+          state.totalElements = action.payload.page.totalElements;
+        })
+        .addCase(findReviewByCompany.rejected, (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+        })
+        .addCase(findAllReview.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(findAllReview.fulfilled, (state, action) => {
+          state.loading = false;
+          state.reviews = action.payload.content;
+          state.totalPages = action.payload.page.totalPages;
+          state.totalElements = action.payload.page.totalElements;
+        })
+        .addCase(findAllReview.rejected, (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+        })
+        .addCase(findReviewByCompanyIdAndUserId.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(findReviewByCompanyIdAndUserId.fulfilled, (state, action) => {
+          state.loading = false;
+          state.review = action.payload;
+        })
+        .addCase(findReviewByCompanyIdAndUserId.rejected, (state, action) => {
           state.loading = false;
           state.error = action.payload;
         });

@@ -1,6 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { api, API_BASE_URL } from '../../configs/api';
+import { startInactivityTimer } from '../../utils/session';
 
 // Thêm action type
 export const signupAction = createAsyncThunk(
@@ -20,7 +21,7 @@ export const signupAction = createAsyncThunk(
 
 export const loginAction = createAsyncThunk(
   'auth/login',
-  async (loginData, { rejectWithValue }) => {
+  async (loginData, { dispatch,rejectWithValue }) => {
     try {
       const { data } = await axios.post(`${API_BASE_URL}/auth/login`, loginData);
 
@@ -36,8 +37,9 @@ export const loginAction = createAsyncThunk(
         const roleResponse = await axios.get(`${API_BASE_URL}/auth/user-role`, {
           headers: {
             Authorization: `Bearer ${data.token}`,
-          },
+          },  
         });
+        
 
         const user = {
           ...profileResponse.data,
@@ -83,7 +85,7 @@ export const getProfileAction = createAsyncThunk(
 
 export const logoutAction = createAsyncThunk(
   'auth/logout',
-  async (_, { rejectWithValue }) => {
+  async (_, {dispatch, rejectWithValue }) => {
     try {
       const token = sessionStorage.getItem('jwt');
       const response = await axios.post(`${API_BASE_URL}/auth/signout`, null, {
@@ -101,6 +103,7 @@ export const logoutAction = createAsyncThunk(
     }
   }
 );
+
 
 export const updateProfileAction = createAsyncThunk(
   'auth/updateProfile',

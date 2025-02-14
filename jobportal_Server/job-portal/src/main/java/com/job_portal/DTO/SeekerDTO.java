@@ -22,5 +22,5 @@ public class SeekerDTO {
     private String emailContact;
     private Integer industryId; 
     private List<Integer> skillIds; // Danh sách ID của Skills
-    private List<SocialLinkDTO> socialLinks = new ArrayList<>();
+
 }
