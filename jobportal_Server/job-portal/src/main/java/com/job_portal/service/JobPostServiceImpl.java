@@ -22,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.job_portal.DTO.DailyJobCount;
 import com.job_portal.DTO.JobCountType;
@@ -337,6 +338,7 @@ public class JobPostServiceImpl implements IJobPostService {
 	@Override
 	public JobPost searchJobByPostId(UUID postId) throws AllExceptions {
 		Optional<JobPost> jobPost = jobPostRepository.findById(postId);
+		
 		return jobPost.get();
 
 	}
@@ -510,4 +512,12 @@ public class JobPostServiceImpl implements IJobPostService {
 		}
 		return true; // Nếu chưa có bài đăng nào, cho phép tạo bài
 	}
+
+	@Transactional
+    public void increaseViewCount(UUID postId) {
+        JobPost jobPost = jobPostRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Job post not found"));
+        jobPost.setViewCount(jobPost.getViewCount() + 1);
+        jobPostRepository.save(jobPost);
+    }
 }
