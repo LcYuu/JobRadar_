@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.job_portal.DTO.SeekerDTO;
-import com.job_portal.DTO.SocialLinkDTO;
 import com.job_portal.models.Industry;
 import com.job_portal.models.Seeker;
 import com.job_portal.models.Skills;
@@ -106,44 +105,44 @@ public class SeekerServiceImpl implements ISeekerService {
 	    }
 
 	    // Cập nhật danh sách SocialLink
-	    if (seekerDTO.getSocialLinks() != null && !seekerDTO.getSocialLinks().isEmpty()) {
-	        List<SocialLink> existingSocialLinks = oldSeeker.getSocialLinks();
-	        
-	        // Tạo một set để kiểm tra sự tồn tại
-	        Set<String> newSocialNames = new HashSet<>();
-	        
-	        // Duyệt qua các liên kết mới từ seekerDTO
-	        for (SocialLinkDTO socialLinkDTO : seekerDTO.getSocialLinks()) {
-	            newSocialNames.add(socialLinkDTO.getSocialName());
-	            boolean found = false;
-
-	            // Kiểm tra xem liên kết đã tồn tại chưa
-	            for (SocialLink existingLink : existingSocialLinks) {
-	                if (existingLink.getSocialName().equals(socialLinkDTO.getSocialName())) {
-	                    existingLink.setLink(socialLinkDTO.getLink()); // Cập nhật liên kết hiện tại
-	                    found = true;
-	                    break;
-	                }
-	            }
-
-	            // Nếu không tìm thấy, thêm mới
-	            if (!found) {
-	                SocialLink newSocialLink = new SocialLink();
-	                newSocialLink.setUserId(userId);
-	                newSocialLink.setSocialName(socialLinkDTO.getSocialName());
-	                newSocialLink.setLink(socialLinkDTO.getLink());
-	                newSocialLink.setSeeker(oldSeeker); // Thiết lập lại mối quan hệ
-	                existingSocialLinks.add(newSocialLink);
-	            }
-	        }
-
-	        // Xóa các liên kết không còn tồn tại trong danh sách mới
-	        existingSocialLinks.removeIf(existingLink ->
-	            !newSocialNames.contains(existingLink.getSocialName())
-	        );
-
-	        isUpdated = true; 
-	    }
+//	    if (seekerDTO.getSocialLinks() != null && !seekerDTO.getSocialLinks().isEmpty()) {
+//	        List<SocialLink> existingSocialLinks = oldSeeker.getSocialLinks();
+//	        
+//	        // Tạo một set để kiểm tra sự tồn tại
+//	        Set<String> newSocialNames = new HashSet<>();
+//	        
+//	        // Duyệt qua các liên kết mới từ seekerDTO
+//	        for (SocialLinkDTO socialLinkDTO : seekerDTO.getSocialLinks()) {
+//	            newSocialNames.add(socialLinkDTO.getSocialName());
+//	            boolean found = false;
+//
+//	            // Kiểm tra xem liên kết đã tồn tại chưa
+//	            for (SocialLink existingLink : existingSocialLinks) {
+//	                if (existingLink.getSocialName().equals(socialLinkDTO.getSocialName())) {
+//	                    existingLink.setLink(socialLinkDTO.getLink()); // Cập nhật liên kết hiện tại
+//	                    found = true;
+//	                    break;
+//	                }
+//	            }
+//
+//	            // Nếu không tìm thấy, thêm mới
+//	            if (!found) {
+//	                SocialLink newSocialLink = new SocialLink();
+//	                newSocialLink.setUserId(userId);
+//	                newSocialLink.setSocialName(socialLinkDTO.getSocialName());
+//	                newSocialLink.setLink(socialLinkDTO.getLink());
+//	                newSocialLink.setSeeker(oldSeeker); // Thiết lập lại mối quan hệ
+//	                existingSocialLinks.add(newSocialLink);
+//	            }
+//	        }
+//
+//	        // Xóa các liên kết không còn tồn tại trong danh sách mới
+//	        existingSocialLinks.removeIf(existingLink ->
+//	            !newSocialNames.contains(existingLink.getSocialName())
+//	        );
+//
+//	        isUpdated = true; 
+//	    }
 
 	    // Lưu lại đối tượng Seeker đã cập nhật nếu có thay đổi
 	    if (isUpdated) {
@@ -154,27 +153,27 @@ public class SeekerServiceImpl implements ISeekerService {
 	}
 
 	
-	@Override
-	public boolean deleteSocialLink(UUID userId, String socialName) throws AllExceptions {
-	    // Tìm kiếm Seeker của người dùng
-	    Optional<Seeker> seekerOpt = seekerRepository.findById(userId);
-	    if (seekerOpt.isEmpty()) {
-	        throw new AllExceptions("Seeker not found with userId: " + userId);
-	    }
-	    
-	    Seeker seeker = seekerOpt.get();
-	    // Tìm kiếm và xóa SocialLink
-	    Iterator<SocialLink> iterator = seeker.getSocialLinks().iterator();
-	    while (iterator.hasNext()) {
-	        SocialLink socialLink = iterator.next();
-	        if (socialLink.getSocialName().equalsIgnoreCase(socialName)) {
-	            iterator.remove(); // Xóa SocialLink khỏi danh sách
-	            seekerRepository.save(seeker); // Lưu lại Seeker
-	            return true; // Đã xóa thành công
-	        }
-	    }
-	    return false; // Không tìm thấy SocialLink
-	}
+//	@Override
+//	public boolean deleteSocialLink(UUID userId, String socialName) throws AllExceptions {
+//	    // Tìm kiếm Seeker của người dùng
+//	    Optional<Seeker> seekerOpt = seekerRepository.findById(userId);
+//	    if (seekerOpt.isEmpty()) {
+//	        throw new AllExceptions("Seeker not found with userId: " + userId);
+//	    }
+//	    
+//	    Seeker seeker = seekerOpt.get();
+//	    // Tìm kiếm và xóa SocialLink
+//	    Iterator<SocialLink> iterator = seeker.getSocialLinks().iterator();
+//	    while (iterator.hasNext()) {
+//	        SocialLink socialLink = iterator.next();
+//	        if (socialLink.getSocialName().equalsIgnoreCase(socialName)) {
+//	            iterator.remove(); // Xóa SocialLink khỏi danh sách
+//	            seekerRepository.save(seeker); // Lưu lại Seeker
+//	            return true; // Đã xóa thành công
+//	        }
+//	    }
+//	    return false; // Không tìm thấy SocialLink
+//	}
 
 
 

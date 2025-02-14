@@ -10,8 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 @EnableWebSecurity
 public class JobPortalApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(JobPortalApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(JobPortalApplication.class, args);
+    }
 }

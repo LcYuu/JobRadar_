@@ -1,24 +1,13 @@
 import { useEffect, useState } from "react";
-import {
-  Book,
-  Calendar,
-  Delete,
-  Edit,
-  LogOut,
-  Mail,
-  Phone,
-  Plus,
-} from "lucide-react";
+import { Book, Calendar, Delete, Edit, Mail, Phone, Plus } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 import { Button } from "../../ui/button";
 import { Card, CardContent, CardHeader } from "../../ui/card";
-import { Input } from "../../ui/input";
+
 import { Label } from "../../ui/label";
 import { useDispatch, useSelector } from "react-redux";
-import { store } from "../../redux/store";
 
-import { GenIcon } from "react-icons/lib";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMars, faVenus } from "@fortawesome/free-solid-svg-icons";
 
@@ -40,6 +29,11 @@ import {
   getSeekerByUser,
   updateSeekerAction,
 } from "../../redux/Seeker/seeker.thunk";
+import {
+  deleteSocialLink,
+  fetchSocialLinks,
+} from "../../redux/SocialLink/socialLink.thunk";
+import SocialLinkModal from "./SocialLinkModal";
 
 export default function MyProfile() {
   const colors = [
@@ -74,12 +68,14 @@ export default function MyProfile() {
 
   useEffect(() => {
     dispatch(getIndustry());
+
   }, [dispatch]);
 
   const { user } = useSelector((store) => store.auth);
   const { seeker } = useSelector((store) => store.seeker);
   const { exp } = useSelector((store) => store.exp);
   const { edu } = useSelector((store) => store.edu);
+  const { socialLinks } = useSelector((store) => store.socialLink);
 
   const [open, setOpen] = useState(false);
   const handleOpenProfileModal = () => setOpen(true);
@@ -103,6 +99,15 @@ export default function MyProfile() {
     setRefreshData(true);
   };
 
+  const [openSocialLink, setOpenSocialLink] = useState(false);
+  const handleOpenSocialLinkModal = () => setOpenSocialLink(true);
+  const handleCloseSocialLink = () => {
+    setOpenSocialLink(false);
+    setRefreshData(true);
+  };
+
+  const [socialLinkUpdated, setSocialLinkUpdated] = useState(false);
+
   const [expUpdated, setExpUpdated] = useState(false);
   const [eduUpdated, setEduUpdated] = useState(false);
   const [refreshData, setRefreshData] = useState(false);
@@ -112,10 +117,12 @@ export default function MyProfile() {
     dispatch(getEduByUser());
     dispatch(getProfileAction());
     dispatch(getSeekerByUser());
+    dispatch(fetchSocialLinks());
     setRefreshData(false);
     setExpUpdated(false);
     setEduUpdated(false);
-  }, [dispatch, refreshData, expUpdated, eduUpdated]);
+    setSocialLinkUpdated(false);
+  }, [dispatch, refreshData, expUpdated, eduUpdated, socialLinkUpdated]);
 
   const [isEditingDes, setIsEditingDes] = useState(false);
   const [isEditingInfo, setIsEditingInfo] = useState(false);
@@ -182,6 +189,27 @@ export default function MyProfile() {
     }
   };
 
+  const handleDeleteSocialLink = async (id) => {
+    const result = await Swal.fire({
+      title: "Xác nhận xóa link này",
+      text: "Bạn có chắc chắn muốn xóa link này?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Có",
+      cancelButtonText: "Không",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await dispatch(deleteSocialLink(id));
+        dispatch(fetchSocialLinks());
+        showSuccessToast("Xóa link thành công!");
+      } catch (error) {
+        showSuccessToast("Xóa link thất bại. Vui lòng thử lại!");
+      }
+    }
+  };
+
   useEffect(() => {
     if (seeker) {
       setFormData({
@@ -241,6 +269,7 @@ export default function MyProfile() {
 
   const [editingEducationId, setEditingEducationId] = useState(null);
   const [editingExperienceId, setEditingExperienceId] = useState(null);
+  const [editingSocialLinkId, setEditingSocialLinkId] = useState(null);
 
   const handleEditEducation = (education) => {
     setEditingEducationId(education.educationId);
@@ -255,6 +284,16 @@ export default function MyProfile() {
     handleOpenEduModal();
   };
 
+  const handleEditSocialLink = (socialLink) => {
+    setEditingSocialLinkId(socialLink.id);
+    setFormData({
+      platform: socialLink.platform,
+      url: socialLink.url,
+    });
+
+    handleOpenSocialLinkModal();
+  };
+
   const handleEditExperience = (experience) => {
     setEditingExperienceId(experience.experienceId);
     setFormData({
@@ -265,52 +304,6 @@ export default function MyProfile() {
       description: experience.description,
     });
     handleOpenExpModal();
-  };
-
-  const handleDeleteExperience = (experienceId) => {
-    Swal.fire({
-      title: "Bạn có chắc chắn muốn xóa kinh nghiệm này?",
-      text: "Hành động này không thể hoàn tác!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Xóa",
-      cancelButtonText: "Hủy",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        dispatch(deleteExperience(experienceId))
-          .then(() => {
-            setRefreshData(true);
-          })
-          .catch((error) => {
-            console.error("Error deleting experience:", error);
-          });
-      }
-    });
-  };
-
-  const handleDeleteEducation = (educationId) => {
-    Swal.fire({
-      title: "Bạn có chắc chắn muốn xóa thông tin giáo dục này?",
-      text: "Hành động này không thể hoàn tác!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Xóa",
-      cancelButtonText: "Hủy",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        dispatch(deleteEducation(educationId))
-          .then(() => {
-            setRefreshData(true);
-          })
-          .catch((error) => {
-            console.error("Error deleting education:", error);
-          });
-      }
-    });
   };
 
   useEffect(() => {
@@ -326,6 +319,32 @@ export default function MyProfile() {
       });
     }
   }, [openExp]);
+
+  useEffect(() => {
+    if (!openEdu) {
+      setEditingEducationId(null);
+      setFormData({
+        ...formData,
+        certificateDegreeName: "",
+        major: "",
+        universityName: "",
+        startDate: "",
+        endDate: "",
+        gpa: "",
+      });
+    }
+  }, [openEdu]);
+
+  useEffect(() => {
+    if (!openSocialLink) {
+      setEditingSocialLinkId(null);
+      setFormData({
+        ...formData,
+        platform: "",
+        url: "",
+      });
+    }
+  }, [openSocialLink]);
 
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
@@ -344,21 +363,6 @@ export default function MyProfile() {
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
   };
-
-  useEffect(() => {
-    if (!openEdu) {
-      setEditingEducationId(null);
-      setFormData({
-        ...formData,
-        certificateDegreeName: "",
-        major: "",
-        universityName: "",
-        startDate: "",
-        endDate: "",
-        gpa: "",
-      });
-    }
-  }, [openEdu]);
 
   const validateForm = () => {
     let tempErrors = {
@@ -978,37 +982,100 @@ export default function MyProfile() {
             {/* Social Links */}
             <Card className="bg-white shadow-md">
               <CardHeader className="flex flex-row items-center justify-between">
-                <h3 className="text-lg  text-purple-600 font-semibold">
+                <h3 className="text-lg text-purple-600 font-semibold">
                   Liên kết xã hội
                 </h3>
-                <Button size="icon" variant="ghost">
-                  <Edit className="h-4 w-4" />
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={handleOpenSocialLinkModal}
+                >
+                  <Plus className="h-4 w-4" />
                 </Button>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {seeker.socialLinks &&
-                Array.isArray(seeker.socialLinks) &&
-                seeker.socialLinks.length > 0 ? (
-                  seeker.socialLinks.map((link, index) => (
-                    <div key={index}>
-                      <Label className="text-sm font-medium">
-                        {link.socialName}
-                      </Label>
-                      <br />
-                      <a
-                        href={link.link}
-                        className="text-sm text-blue-600"
-                        target="_blank"
-                        rel="noopener noreferrer"
+
+              {/* Sử dụng Flexbox để hiển thị logo trên cùng hàng ngang */}
+              <CardContent className="space-y-6 overflow-auto">
+                {socialLinks &&
+                Array.isArray(socialLinks) &&
+                socialLinks.length > 0 ? (
+                  socialLinks.map((link, index) => (
+                    <div
+                      key={index}
+                      className="flex gap-4 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
+                      style={{ maxWidth: "100%" }} // Giới hạn chiều rộng tối đa
+                    >
+                      <div
+                        key={index}
+                        className="platform-icon-container"
+                        style={{ width: "48px", height: "48px", flexShrink: 0 }}
                       >
-                        {link.link}
-                      </a>
+                        <img
+                          src={require(`../../assets/images/platforms/${link.platform.toLowerCase()}.png`)}
+                          alt={link.platform.toLowerCase()}
+                          className="h-full w-full object-contain rounded-full shadow-md"
+                        />
+                      </div>
+                      <div className="flex-1 overflow-hidden">
+                        {" "}
+                        {/* Đảm bảo không bị tràn ra ngoài */}
+                        <div className="flex items-start justify-between">
+                          <div className="truncate">
+                            {" "}
+                            {/* Sử dụng truncate để cắt bớt văn bản nếu tràn */}
+                            <Label className="text-sm font-medium">
+                              {link.platform}
+                            </Label>
+                            <br />
+                            <a
+                              href={link.url}
+                              className="text-sm text-blue-600 truncate" // Đảm bảo URL không tràn ra ngoài
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {link.url}
+                            </a>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="hover:bg-blue-100 transition-colors duration-200"
+                              onClick={() => handleEditSocialLink(link)}
+                            >
+                              <Edit className="h-4 w-4 text-blue-600" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="hover:bg-red-100 transition-colors duration-200"
+                              onClick={() => handleDeleteSocialLink(link.id)}
+                            >
+                              <Delete className="h-4 w-4 text-red-600" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   ))
                 ) : (
-                  <div>Không có liên kết xã hội nào</div> // Hiển thị thông báo nếu không có liên kết mạng xã hội
+                  <p className="text-sm text-gray-500">
+                    Không có liên kết xã hội nào
+                  </p>
                 )}
               </CardContent>
+
+              {/* Modal */}
+              <section>
+                <SocialLinkModal
+                  open={openSocialLink}
+                  handleClose={handleCloseSocialLink}
+                  editingSocialLinkId={editingSocialLinkId}
+                  setEditingSocialLinkId={setEditingSocialLinkId}
+                  initialData={formData}
+                  showSuccessToast={showSuccessToast}
+                />
+              </section>
             </Card>
           </div>
         </div>
