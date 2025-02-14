@@ -102,6 +102,7 @@ public class AuthController {
 
 	@PostMapping("/signup")
 	public ResponseEntity<String> createUserAccount(@RequestBody UserSignupDTO userSignupDTO) {
+
 		try {
 			Optional<UserAccount> isExist = userAccountRepository.findByEmail(userSignupDTO.getEmail());
 			if (isExist.isPresent()) {
@@ -128,6 +129,7 @@ public class AuthController {
 		} catch (MessagingException e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Không thể gửi OTP, vui lòng thử lại");
 		}
+
 	}
 
 	@PostMapping("/verify-employer")
