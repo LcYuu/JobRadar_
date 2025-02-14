@@ -111,8 +111,10 @@ export default function JobDetail() {
   useEffect(() => {
     dispatch(getOneApplyJob(postId));
     dispatch(checkIfApplied(postId));
-    dispatch(getJobPostByPostId(postId));
-  }, [dispatch, postId, hasApplied]);
+    if (!postByPostId || postByPostId.postId !== postId) {
+      dispatch(getJobPostByPostId(postId));
+    }
+  }, [dispatch, postId, hasApplied, postByPostId]);
 
   useEffect(() => {
     if (postByPostId?.company?.companyId) {
