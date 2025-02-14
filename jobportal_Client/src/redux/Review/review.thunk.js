@@ -63,10 +63,10 @@ export const deleteReview = createAsyncThunk(
 
 export const findReviewByCompany = createAsyncThunk(
   "reviews/findReviewByCompanyId",
-  async ({ page, size }, { rejectWithValue }) => {
+  async ({ page, size, star }, { rejectWithValue }) => {
     try {
       const response = await api.get(
-        `/review/findReviewByCompanyId?page=${page}&size=${size}`
+        `/review/findReviewByCompanyId`, {params: { page, size, star },}
       );
       return response.data;
     } catch (error) {
@@ -77,10 +77,10 @@ export const findReviewByCompany = createAsyncThunk(
 
 export const findAllReview = createAsyncThunk(
   "reviews/finđAllReview",
-  async ({ page, size }, { rejectWithValue }) => {
+  async ({ page, size, companyId, star }, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/review/get-all?page=${page}&size=${size}`
+        `${API_BASE_URL}/review/get-all`, {params: { page, size, companyId, star },}
       );
       return response.data;
     } catch (error) {
@@ -95,6 +95,34 @@ export const findReviewByCompanyIdAndUserId = createAsyncThunk(
     try {
       const response = await axios.get(
         `${API_BASE_URL}/review/review-detail?companyId=${companyId}&userId=${userId}`
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const countReviewByStar = createAsyncThunk(
+  'review/countReviewByStar',
+  async ({ companyId}, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/review/count-by-star?companyId=${companyId}`
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const countStarByCompanyId = createAsyncThunk(
+  'review/countStarByCompanyId',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get(
+        `/review/count-star-by-company-id`
       );
       return response.data;
     } catch (error) {

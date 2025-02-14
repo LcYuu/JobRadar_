@@ -44,4 +44,5 @@ public interface IJobPostService {
 	List<JobPost> getSimilarJobsByIndustry(Integer industryId, UUID jobPostId);
 	public void updateExpiredJobs();
 	public boolean canPostJob(UUID companyId);
+	public void increaseViewCount(UUID postId);
 }
