@@ -240,7 +240,6 @@ export default function FindCompanies() {
                 {industry.industryName}
               </Button>
             ))}
-            console.log("🚀 ~ FindCompanies ~ allIndustries:", allIndustries)
           </div>
         </div>
 
