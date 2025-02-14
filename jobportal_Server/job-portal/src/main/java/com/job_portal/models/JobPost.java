@@ -92,5 +92,8 @@ public class JobPost {
 
 	@Column(name = "survey_email_sent")
 	private Boolean surveyEmailSent = false;
+	
+	@Column(name = "view_count", nullable = false)
+	private Integer viewCount = 0;
 
 }
