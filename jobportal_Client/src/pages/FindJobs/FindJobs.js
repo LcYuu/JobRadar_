@@ -82,13 +82,6 @@ export default function JobSearchPage() {
     } else {
       dispatch(getAllJobAction({currentPage, size}));
     }
-    console.log({
-      totalJobs: isFilterApplied ? searchJob.length : jobPost.length,
-      currentPage,
-      size,
-      results: isFilterApplied ? searchJob : jobPost,
-      totalPages: isFilterApplied ? totalPagesFromSearch : totalPagesFromAll,
-    });
   }, [dispatch, filters, currentPage]);
 
   useEffect(() => {

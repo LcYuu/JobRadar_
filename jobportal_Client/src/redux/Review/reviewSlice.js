@@ -1,10 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { countReviewByCompany, createReview, deleteReview, findAllReview, findReviewByCompany, findReviewByCompanyIdAndUserId, finđAllReview, getReviewByCompany } from "./review.thunk";
+import { countReviewByCompany, countReviewByStar, countStarByCompanyId, createReview, deleteReview, findAllReview, findReviewByCompany, findReviewByCompanyIdAndUserId, finđAllReview, getReviewByCompany } from "./review.thunk";
 
 const reviewSlice = createSlice({
     name: 'review',
     initialState: {
       reviews: [],
+      countByStar: [],
       review: null,
       countReview: 0,
       loading: false,
@@ -41,6 +42,7 @@ const reviewSlice = createSlice({
           state.loading = false;
           state.error = action.payload;
         })
+        
         // Create Review
         .addCase(createReview.pending, (state) => {
           state.loading = true;
@@ -106,6 +108,30 @@ const reviewSlice = createSlice({
           state.review = action.payload;
         })
         .addCase(findReviewByCompanyIdAndUserId.rejected, (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+        })
+        .addCase(countReviewByStar.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(countReviewByStar.fulfilled, (state, action) => {
+          state.loading = false;
+          state.countByStar = action.payload;
+        })
+        .addCase(countReviewByStar.rejected, (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+        })
+        .addCase(countStarByCompanyId.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(countStarByCompanyId.fulfilled, (state, action) => {
+          state.loading = false;
+          state.countByStar = action.payload;
+        })
+        .addCase(countStarByCompanyId.rejected, (state, action) => {
           state.loading = false;
           state.error = action.payload;
         });

@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.job_portal.DTO.CountReviewByStar;
 import com.job_portal.models.JobPost;
 import com.job_portal.models.Review;
 import com.job_portal.models.Seeker;
@@ -17,4 +18,5 @@ public interface IReviewService {
 	public boolean deleteReview(UUID reviewId) throws AllExceptions;
 	public Page<Review> findReviewByCompanyId(UUID companyId, Pageable pageable);
 	public Review findReviewByCompanyIdAndUserId(UUID companyId, UUID userId);
+	public List<CountReviewByStar> countReviewsByStar(UUID companyId);
 }
