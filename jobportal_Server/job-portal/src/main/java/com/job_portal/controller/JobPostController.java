@@ -284,6 +284,7 @@ public class JobPostController {
 	public ResponseEntity<JobPost> getJobById(@PathVariable("postId") UUID postId) throws AllExceptions {
 		try {
 			JobPost jobPost = jobPostService.searchJobByPostId(postId);
+			jobPostService.increaseViewCount(postId); 
 			return new ResponseEntity<>(jobPost, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -635,7 +636,6 @@ public class JobPostController {
 	public ResponseEntity<Object> getSimilarJobs(@RequestParam UUID companyId,
 			@RequestParam(required = false) UUID excludePostId) {
 		try {
-			// Fetch the industryId based on the companyId
 			Integer industryId = companyService.getIndustryIdByCompanyId(companyId);
 			List<JobPost> similarJobs = jobPostService.getSimilarJobsByIndustry(industryId, excludePostId);
 			return ResponseEntity.ok(similarJobs);
@@ -644,4 +644,6 @@ public class JobPostController {
 					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
 		}
 	}
+	
+	
 }
