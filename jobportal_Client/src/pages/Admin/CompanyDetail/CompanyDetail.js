@@ -11,7 +11,6 @@ import {
   AlertTriangle,
   FileText,
   UserCheck,
-
   MapPin,
   Briefcase,
   Users2,
@@ -19,6 +18,7 @@ import {
   Mail,
   Clock,
   ArrowLeft,
+  Link,
 } from "lucide-react";
 
 import { toast } from "react-toastify";
@@ -40,7 +40,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import {  Banknote } from "lucide-react";
+import { Banknote } from "lucide-react";
 
 import { StarRounded } from "@mui/icons-material";
 import {
@@ -52,18 +52,17 @@ import {
   updateCompanyStatus,
 } from "../../../redux/Company/company.thunk";
 import { getReviewByCompany } from "../../../redux/Review/review.thunk";
+import { fetchSocialLinksByUserId } from "../../../redux/SocialLink/socialLink.thunk";
 
 export default function CompanyDetail() {
   const navigate = useNavigate();
   const { companyId } = useParams();
   const dispatch = useDispatch();
   const { companyProfile, jobCounts, jobStats, loading } = useSelector(
-    
-    
     (store) => store.company
   );
-  console.log("🚀 ~ CompanyDetail ~ companyProfile:", companyProfile)
-  console.log("🚀 ~ CompanyDetail ~ jobCounts:", jobCounts)
+  const { socialLinks } = useSelector((store) => store.socialLink);
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [chartDateRange, setChartDateRange] = useState(() => {
     const end = new Date();
@@ -83,9 +82,10 @@ export default function CompanyDetail() {
   const { reviews } = useSelector((store) => store.review);
 
   useEffect(() => {
-    dispatch(getCompanyProfile( companyId ));
-    dispatch(getCompanyJobCounts( companyId ));
-    dispatch(getReviewByCompany( companyId ));
+    dispatch(getCompanyProfile(companyId));
+    dispatch(getCompanyJobCounts(companyId));
+    dispatch(getReviewByCompany(companyId));
+    dispatch(fetchSocialLinksByUserId(companyId));
     return () => {
       setIsMounted(false);
     };
@@ -115,7 +115,11 @@ export default function CompanyDetail() {
       const formattedEndDate = end.toISOString().split("T")[0];
 
       dispatch(
-        getCompanyJobStats({ companyId, startDate: formattedStartDate, endDate: formattedEndDate })
+        getCompanyJobStats({
+          companyId,
+          startDate: formattedStartDate,
+          endDate: formattedEndDate,
+        })
       )
         .unwrap() // Lấy trực tiếp `payload` từ Redux Toolkit
         .then((payload) => {
@@ -135,7 +139,7 @@ export default function CompanyDetail() {
 
   useEffect(() => {
     if (!companyProfile || companyProfile.companyId !== companyId) {
-      dispatch(getCompanyById(companyId ));
+      dispatch(getCompanyById(companyId));
       dispatch(getCompanyJobCounts(companyId));
     }
     return () => {
@@ -449,6 +453,51 @@ export default function CompanyDetail() {
                   <p className="font-medium">
                     {companyProfile?.email || "Chưa cập nhật"}
                   </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <Link className="w-5 h-5 text-gray-500" />
+                <div>
+                  <p className="text-sm text-gray-600">Liên kết xã hội</p>
+                  {socialLinks &&
+                  Array.isArray(socialLinks) &&
+                  socialLinks.length > 0 ? (
+                    <>
+                      {socialLinks.map((link, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          {/* Logo của nền tảng */}
+                          <div
+                            className="platform-icon-container"
+                            style={{
+                              width: "24px",
+                              height: "24px",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <img
+                              src={require(`../../../assets/images/platforms/${link.platform.toLowerCase()}.png`)}
+                              alt={link.platform.toLowerCase()}
+                              className="h-full w-full object-contain rounded-full shadow-md"
+                            />
+                          </div>
+
+                          {/* Liên kết */}
+                          <a
+                            href={link.url}
+                            className="text-sm text-blue-600 truncate"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ maxWidth: "calc(100% - 32px)" }} // Đảm bảo không tràn khi container hẹp
+                          >
+                            {link.url}
+                          </a>
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <p className="text-sm ">Không có liên kết xã hội nào</p>
+                  )}
                 </div>
               </div>
 

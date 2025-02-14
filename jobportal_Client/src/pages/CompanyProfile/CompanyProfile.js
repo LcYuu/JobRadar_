@@ -31,6 +31,7 @@ import {
   checkSaved,
   getCompanyProfile,
 } from "../../redux/Company/company.thunk";
+import { fetchSocialLinks, fetchSocialLinksByUserId } from "../../redux/SocialLink/socialLink.thunk";
 const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
   return (
     <div className="flex">
@@ -61,6 +62,7 @@ export default function CompanyProfile() {
   const [loading, setLoading] = useState(true);
 
   const { checkIfSaved } = useSelector((store) => store.company);
+  const { socialLinks } = useSelector((store) => store.socialLink);
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
@@ -74,8 +76,8 @@ export default function CompanyProfile() {
     setIsOpen(false); // Đóng modal
   };
 
-  const { reviews } = useSelector(store => store.review);
-  console.log("🚀 ~ CompanyProfile ~ reviews:", reviews)
+  const { reviews } = useSelector((store) => store.review);
+  console.log("🚀 ~ CompanyProfile ~ reviews:", reviews);
 
   const { companyProfile } = useSelector((store) => store.company);
   const { seeker } = useSelector((store) => store.seeker);
@@ -107,6 +109,7 @@ export default function CompanyProfile() {
   const { user } = useSelector((store) => store.auth);
 
   useEffect(() => {
+    
     if (reviews && user) {
       const userReview = reviews.find(
         (review) => review.seeker?.userAccount?.userId === user.userId
@@ -166,17 +169,14 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
       }
 
       await dispatch(
-        createReview(
-          {
-            reviewData: {
-              star: feedback.star,
-              message: feedback.message,
-              isAnonymous: feedback.isAnonymous,
-            },
-            companyId
+        createReview({
+          reviewData: {
+            star: feedback.star,
+            message: feedback.message,
+            isAnonymous: feedback.isAnonymous,
           },
-          
-        )
+          companyId,
+        })
       );
 
       await dispatch(getReviewByCompany(companyId));
@@ -226,9 +226,11 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
   }, [dispatch, currentPage, size]);
 
   useEffect(() => {
+    const userId = companyId
     dispatch(getCompanyProfile(companyId));
     dispatch(getReviewByCompany(companyId));
     dispatch(checkSaved(companyId));
+    dispatch(fetchSocialLinksByUserId(userId));
     dispatch(getJobsByCompany({ companyId, currentPage, size }));
   }, [dispatch, currentPage, size, companyId]);
 
@@ -252,13 +254,15 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
   const totalStars = reviews.reduce((total, review) => total + review.star, 0);
   // Tính trung bình
   const averageStars = reviews.length > 0 ? totalStars / reviews.length : 0;
-  
+
   const validReviews = Array.isArray(reviews)
-  ? reviews.filter(
-      (item) =>
-        typeof item === 'object' && item !== null && item.hasOwnProperty('reviewId')
-    )
-  : [];
+    ? reviews.filter(
+        (item) =>
+          typeof item === "object" &&
+          item !== null &&
+          item.hasOwnProperty("reviewId")
+      )
+    : [];
 
   const handleDeleteReview = async (reviewId) => {
     // Sử dụng Swal để xác nhận
@@ -406,12 +410,14 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                 <span>{companyProfile?.industry?.industryName}</span>
               </div>
             </div>
-            <Button
-              onClick={handleFollowClick}
-              className="mt-6 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-700"
-            >
-              {isFollowing ? "Bỏ theo dõi" : "Theo dõi"}
-            </Button>
+            {!sessionStorage.getItem("jwt") || checkIfSaved === false ? null : (
+              <Button
+                onClick={handleFollowClick}
+                className="mt-6 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-700"
+              >
+                {isFollowing ? "Bỏ theo dõi" : "Theo dõi"}
+              </Button>
+            )}
           </div>
         </div>
         {/* Company Profile, Tech Stack, and Office Location Grid */}
@@ -460,6 +466,50 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
               <span className="text-sm">{companyProfile?.contact}</span>
             </div>
           </div>
+        </div>
+
+        <div className="mb-8">
+          <h2 className="text-xl text-purple-600 font-semibold mb-4">
+            Địa chỉ liên kết
+          </h2>
+          {socialLinks &&
+          Array.isArray(socialLinks) &&
+          socialLinks.length > 0 ? (
+            <>
+              {socialLinks.map((link, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  {/* Logo của nền tảng */}
+                  <div
+                    className="platform-icon-container"
+                    style={{
+                      width: "24px",
+                      height: "24px",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <img
+                      src={require(`../../assets/images/platforms/${link.platform.toLowerCase()}.png`)}
+                      alt={link.platform.toLowerCase()}
+                      className="h-full w-full object-contain rounded-full shadow-md"
+                    />
+                  </div>
+
+                  {/* Liên kết */}
+                  <a
+                    href={link.url}
+                    className="text-sm text-blue-600 truncate"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ maxWidth: "calc(100% - 32px)" }} // Đảm bảo không tràn khi container hẹp
+                  >
+                    {link.url}
+                  </a>
+                </div>
+              ))}
+            </>
+          ) : (
+            <p className="text-sm ">Không có liên kết xã hội nào</p>
+          )}
         </div>
 
         {/* Company Images */}

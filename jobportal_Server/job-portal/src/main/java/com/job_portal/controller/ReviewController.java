@@ -6,6 +6,10 @@ import java.util.UUID;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -46,36 +50,39 @@ public class ReviewController {
 	IReviewService reviewService;
 	@Autowired
 	SeekerRepository seekerRepository;
-	
+
 	@Autowired
 	IApplyJobService applyJobService;
-
 
 	@Autowired
 	private UserAccountRepository userAccountRepository;
 
 	@GetMapping("/get-all")
-	public ResponseEntity<List<Review>> getReview() {
-		List<Review> reviews = reviewRepository.findAll();
-		return new ResponseEntity<>(reviews, HttpStatus.OK);
+	public ResponseEntity<Page<Review>> getAllReviews(
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "5") int size) {
+	    
+	    Pageable pageable = PageRequest.of(page, size, Sort.by("createDate").descending());
+	    Page<Review> reviews = reviewRepository.findAll(pageable);
+	    
+	    return ResponseEntity.ok(reviews);
 	}
 
 	@PostMapping("/create-review/{companyId}")
-	public ResponseEntity<?> createReview(@RequestBody Review req, @PathVariable UUID companyId, @RequestHeader("Authorization") String jwt) {
+	public ResponseEntity<?> createReview(@RequestBody Review req, @PathVariable UUID companyId,
+			@RequestHeader("Authorization") String jwt) {
 		try {
 			String email = JwtProvider.getEmailFromJwtToken(jwt);
 			Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 			Optional<Seeker> seeker = seekerRepository.findById(user.get().getUserId());
-			
+
 			// Set các giá trị cho review
 			Review review = new Review();
 			review.setStar(req.getStar());
 			review.setMessage(req.getMessage());
 			review.setAnonymous(req.isAnonymous());
 			review.setCreateDate(LocalDateTime.now());
-			
-			System.out.println("Is Anonymous value: " + req.isAnonymous()); // Debug log
-			
+
 			boolean isCreated = reviewService.createReview(seeker.get(), companyId, review);
 			if (isCreated) {
 				return new ResponseEntity<>("Đánh giá thành công", HttpStatus.CREATED);
@@ -87,7 +94,7 @@ public class ReviewController {
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	@GetMapping("/findReviewByCompanyId/{companyId}")
 	public ResponseEntity<Object> searchReviewByCompanyId(@PathVariable("companyId") UUID companyId) {
 		try {
@@ -102,16 +109,47 @@ public class ReviewController {
 					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
 		}
 	}
-	@GetMapping("/countReviewByCompany")
-	public ResponseEntity<CountReviewByCompanyDTO> countReviewByCompany(@RequestHeader("Authorization") String jwt) throws AllExceptions {
+
+	@GetMapping("/findReviewByCompanyId")
+	public ResponseEntity<Object> findReviewByCompanyId(@RequestHeader("Authorization") String jwt,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-		
-		CountReviewByCompanyDTO countReview = reviewRepository.countReviewsByCompany(user.get().getCompany().getCompanyId());
-		return new ResponseEntity<>(countReview, HttpStatus.OK);
-		
+		Pageable pageable = PageRequest.of(page, size);
+		try {
+			Page<Review> reviews = reviewService.findReviewByCompanyId(user.get().getUserId(), pageable);
+			return ResponseEntity.ok(reviews);
+		} catch (Exception e) {
+			// Trả về thông báo lỗi chung
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
+		}
 	}
 	
+	@GetMapping("/review-detail")
+	public ResponseEntity<Object> findReviewByCompanyIdAndUserId(@RequestParam("companyId") UUID companyId, @RequestParam("userId") UUID userId) {
+		try {
+			Review review = reviewService.findReviewByCompanyIdAndUserId(companyId, userId);
+			return ResponseEntity.ok(review);
+		} catch (Exception e) {
+			// Trả về thông báo lỗi chung
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
+		}
+	}
+
+	@GetMapping("/countReviewByCompany")
+	public ResponseEntity<CountReviewByCompanyDTO> countReviewByCompany(@RequestHeader("Authorization") String jwt)
+			throws AllExceptions {
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+
+		CountReviewByCompanyDTO countReview = reviewRepository
+				.countReviewsByCompany(user.get().getCompany().getCompanyId());
+		return new ResponseEntity<>(countReview, HttpStatus.OK);
+
+	}
+
 	@DeleteMapping("/delete/{reviewId}")
 	public ResponseEntity<?> deleteReview(@PathVariable UUID reviewId) {
 		try {
@@ -127,5 +165,5 @@ public class ReviewController {
 			return new ResponseEntity<>("Có lỗi xảy ra khi xóa đánh giá", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 }
