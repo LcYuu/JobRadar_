@@ -28,6 +28,5 @@ public class Industry {
 
 	@Column(name = "industry_name", length = 100, nullable = false)
     private String industryName;
-
 }
 
