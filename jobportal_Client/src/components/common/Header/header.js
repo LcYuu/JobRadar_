@@ -70,6 +70,13 @@ export default function Header() {
                   </Button>
                 </Link>
               </li>
+              <li>
+                <Link to="/create-cv">
+                  <Button variant="ghost" className="text-white hover:text-purple-200">
+                    Tạo CV
+                  </Button>
+                </Link>
+              </li>
             </ul>
           </nav>
         )}

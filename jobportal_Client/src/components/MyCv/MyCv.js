@@ -62,14 +62,13 @@ export default function MyCV() {
 
           await dispatch(createCV(cvData));
           dispatch(getCVBySeeker());
-          console.log("🚀 ~ MyCV ~ cvs:", cvs)
           toast.success("CV đã được tải lên thành công");
         }
       } catch (error) {
         toast.error("Đã có lỗi khi tải lên CV");
       }
 
-      event.target.value = ""; // Reset input file
+      event.target.value = ""; 
     }
   };
 
