@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.job_portal.DTO.CVDTO;
+import com.job_portal.DTO.GeneratedCVDTO;
 import com.job_portal.models.CV;
+import com.job_portal.models.GeneratedCV;
 import com.job_portal.models.Seeker;
 import com.job_portal.repository.CVRepository;
 import com.job_portal.repository.SeekerRepository;
@@ -20,6 +22,7 @@ public class CVServiceImpl implements ICVService {
 
 	@Autowired
 	CVRepository cvRepository;
+
 	@Autowired
 	SeekerRepository seekerRepository;
 	@Override
@@ -86,5 +89,7 @@ public class CVServiceImpl implements ICVService {
 			throw new AllExceptions(e.getMessage());
 		}
 	}
+
+	
 
 }

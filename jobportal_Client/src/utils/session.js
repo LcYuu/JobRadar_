@@ -10,7 +10,6 @@ export const startInactivityTimer = (dispatch, warningTime = 55 * 60 * 1000, log
     if (inactivityTimeout) {
       clearTimeout(inactivityTimeout);
     }
-
     // Thiết lập cảnh báo trước khi đăng xuất
     inactivityTimeout = setTimeout(() => {
       Swal.fire({
