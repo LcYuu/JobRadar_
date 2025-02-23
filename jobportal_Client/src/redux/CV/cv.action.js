@@ -8,7 +8,7 @@ export const getCVBySeeker= () => async (dispatch) => {
   dispatch({ type: GET_CV_REQUEST });
 
   try {
-    const jwt = sessionStorage.getItem("jwt"); // Lấy JWT từ sessionStorage
+    const jwt = localStorage.getItem("jwt"); // Lấy JWT từ localStorage
     if (!jwt) {
       throw new Error("No token found");
     } 
