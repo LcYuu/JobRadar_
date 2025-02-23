@@ -34,7 +34,7 @@ export const getApplyJobByUser = (currentPage, size) => async (dispatch) => {
   dispatch({ type: GET_APPLY_JOB_BY_USER_REQUEST });
 
   try {
-    const jwt = sessionStorage.getItem("jwt"); // Lấy JWT từ sessionStorage
+    const jwt = localStorage.getItem("jwt"); // Lấy JWT từ localStorage
     if (!jwt) {
       throw new Error("No token found");
     }
@@ -153,7 +153,7 @@ export const getApplyJobByCompany = (
   dispatch({ type: GET_APPLY_JOB_BY_COMPANY_REQUEST });
 
   try {
-    const jwt = sessionStorage.getItem("jwt"); // Lấy JWT từ sessionStorage
+    const jwt = localStorage.getItem("jwt"); // Lấy JWT từ localStorage
     if (!jwt) {
       throw new Error("No token found");
     }

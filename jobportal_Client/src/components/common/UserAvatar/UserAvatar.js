@@ -9,7 +9,7 @@ const UserAvatar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const isAuthenticated = !!sessionStorage.getItem('jwt');
+  const isAuthenticated = !!localStorage.getItem('jwt');
 
   useEffect(() => {
     const fetchProfile = async () => {
