@@ -6,8 +6,8 @@ const initialState = {
   loading: false,
   error: null,
   successMessage: null,
-  isAuthenticated: !!sessionStorage.getItem('jwt'),
-  jwt: sessionStorage.getItem('jwt') || null,
+  isAuthenticated: !!localStorage.getItem('jwt'),
+  jwt: localStorage.getItem('jwt') || null,
 };
 
 const authSlice = createSlice({
@@ -18,6 +18,10 @@ const authSlice = createSlice({
       state.successMessage = null;
       state.error = null;
     },
+    setUserFromStorage: (state, action) => {
+      state.user = action.payload;
+      state.isAuthenticated = true;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -40,8 +44,10 @@ const authSlice = createSlice({
       .addCase(loginAction.fulfilled, (state, action) => {
         state.loading = false;
         state.jwt = action.payload;
+        state.user = action.payload.user;
         state.isAuthenticated = true;
         state.successMessage = 'Login successful!';
+        localStorage.setItem('user', JSON.stringify(action.payload.user));
       })
       .addCase(loginAction.rejected, (state, action) => {
         state.loading = false;
@@ -97,6 +103,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearMessages } = authSlice.actions;
-
+export const { clearMessages, setUserFromStorage } = authSlice.actions;
 export default authSlice.reducer;

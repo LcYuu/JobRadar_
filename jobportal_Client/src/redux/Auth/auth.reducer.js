@@ -20,8 +20,8 @@ const initialState = {
   user: null,
   loading: false,
   error: null,
-  jwt: sessionStorage.getItem('jwt') || null,
-  isAuthenticated: !!sessionStorage.getItem('jwt'),
+  jwt: localStorage.getItem('jwt') || null,
+  isAuthenticated: !!localStorage.getItem('jwt'),
   userRole: null,
 };
 

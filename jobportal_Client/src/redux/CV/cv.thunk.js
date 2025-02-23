@@ -8,7 +8,7 @@ export const getCVBySeeker = createAsyncThunk(
   "cv/getCVBySeeker",
   async (_, { rejectWithValue }) => {
     try {
-      const jwt = sessionStorage.getItem("jwt");
+      const jwt = localStorage.getItem("jwt");
       if (!jwt) {
         throw new Error("No token found");
       }

@@ -3,7 +3,7 @@ import { logoutAction } from '../redux/Auth/auth.thunk';
 
 let inactivityTimeout = null;
 
-export const startInactivityTimer = (dispatch, warningTime = 55 * 60 * 1000, logoutTime = 60 * 60 * 1000) => {
+export const startInactivityTimer = (dispatch, warningTime = 55 * 1000, logoutTime = 60  * 1000) => {
 
   const resetTimer = () => {
     // Nếu đã có bộ đếm, hủy nó
@@ -26,17 +26,21 @@ export const startInactivityTimer = (dispatch, warningTime = 55 * 60 * 1000, log
         }
       });
 
-      // Đặt thêm bộ đếm để đăng xuất sau 5 phút (tính từ lúc cảnh báo xuất hiện)
+      // Đặt thêm bộ đếm để đăng xuất
       inactivityTimeout = setTimeout(() => {
-        dispatch(logoutAction());
         Swal.fire({
           title: 'Hết phiên làm việc',
-          text: 'Phiên của bạn đã hết hạn. Bạn đã được đăng xuất.',
+          text: 'Phiên của bạn đã hết hạn. Bạn đã đăng xuất.',
           icon: 'info',
           confirmButtonText: 'OK',
         }).then(() => {
-          // Sau khi người dùng nhấn "OK", thực hiện logout ngay lập tức
-          dispatch(logoutAction());
+          dispatch(logoutAction()).then(() => {
+            // Xóa token và user từ localStorage
+            localStorage.removeItem('jwt');
+            localStorage.removeItem('user');
+            // Chuyển hướng về trang đăng nhập
+            window.location.href = '/auth/sign-in';
+          });
         });
       }, logoutTime - warningTime);
     }, warningTime);
