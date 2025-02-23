@@ -1,0 +1,22 @@
+@page {
+    size: auto;
+    margin: 0;
+  }
+  
+  @media print {
+    #no-print {
+      display: none;
+    }
+    #print {
+      display: block;
+    }
+  
+    body {
+      margin: 0;
+      padding: 0;
+      box-shadow: none;
+      -webkit-print-color-adjust: exact; /* Giữ nguyên màu khi in */
+      print-color-adjust: exact;
+    }
+  }
+  

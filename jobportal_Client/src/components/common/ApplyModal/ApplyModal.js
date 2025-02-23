@@ -185,8 +185,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
     document.getElementById("cv-upload").value = "";
   };
 
-  console.log("a" + formData);
-  console.log("b" + selectedFile);
+
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
