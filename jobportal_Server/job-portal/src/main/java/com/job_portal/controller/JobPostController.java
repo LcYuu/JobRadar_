@@ -454,12 +454,7 @@ public class JobPostController {
 			}
 		}
 
-		// Tiến hành tìm kiếm công việc với các filter đã xác định
-		Specification<JobPost> spec = Specification.where(jobPostRepository.alwaysActiveJobs()).and(JobPostSpecification
-				.withFilters(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds));
-
-		Pageable pageable = PageRequest.of(page, size);
-		return jobPostRepository.findAll(spec, pageable);
+		 return jobPostService.searchJobs(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds, page, size);
 	}
 
 	@GetMapping("/salary-range")

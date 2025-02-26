@@ -37,7 +37,6 @@ const generated_cvSlice = createSlice({
         state.error = null;
       })
       .addCase(getGenCVById.fulfilled, (state, action) => {
-        console.log("🚀 ~ Redux nhận dữ liệu:", action.payload);
         state.loading = false;
         state.genCv = action.payload; // Cập nhật genCv
         state.error = null;
