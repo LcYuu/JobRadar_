@@ -8,16 +8,10 @@ import { ArrowLeft, ArrowRight, Home, LayoutGrid } from "lucide-react";
 import { Button } from "../../ui/button";
 import SummeryForm from "./Forms/SummeryForm";
 import { Link, Navigate, useParams } from "react-router-dom";
+import ThemeColor from "./ThemeColor";
 
 const FormSection = () => {
-  const [activeFormIndex, setActiveFormIndex] = useState(() => {
-    return Number(localStorage.getItem("activeFormIndex")) || 1;
-  });
-
-  useEffect(() => {
-    localStorage.setItem("activeFormIndex", activeFormIndex);
-  }, [activeFormIndex]);
-
+  const [activeFormIndex, setActiveFormIndex] = useState(1)
   const [enabledNext, setEnabledNext] = useState(true);
   const { genCvId } = useParams();
 
@@ -30,10 +24,7 @@ const FormSection = () => {
               <Home />
             </Button>
           </Link>
-          <Button className="flex gap-2 bg-gray-200 text-black hover:bg-gray-300 ">
-            <LayoutGrid />
-            Theme
-          </Button>
+          <ThemeColor/>
         </div>
 
         <div className="flex gap-2">
