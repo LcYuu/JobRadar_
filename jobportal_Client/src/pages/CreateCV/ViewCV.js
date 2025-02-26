@@ -3,7 +3,7 @@ import { Button } from "../../ui/button";
 import CVPreview from "../../components/CV/CVPreview";
 import { CVInfoContext } from "../../context/CVInfoContext";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getGenCVById } from "../../redux/GeneratedCV/generated_cv.thunk";
 import "./ViewCV.css";
 import { uploadToCloudinary } from "../../utils/uploadToCloudinary";
@@ -17,7 +17,7 @@ const ViewCV = () => {
   const { genCv, loading } = useSelector((store) => store.genCV);
   const { genCvId } = useParams();
   const dispatch = useDispatch();
-
+  const navigate = useNavigate(); // Khai báo useNavigate
   useEffect(() => {
     if (genCvId) {
       dispatch(getGenCVById(genCvId));
@@ -84,6 +84,10 @@ const ViewCV = () => {
     }
   };
 
+  const handleBack = () => {
+    navigate(-1); // Quay lại trang trước đó
+  };
+
   return (
     <CVInfoContext.Provider value={{ cvInfo, setCvInfo }}>
       <div id="no-print">
@@ -95,8 +99,9 @@ const ViewCV = () => {
             Giờ bạn đã có thể download CV của mình
           </p>
           <div className="flex justify-between px-44 my-10">
+            <Button onClick={handleBack}>Back</Button> {/* Nút Back */}
             <Button onClick={handleDownload}>Download</Button>
-            <Button>Share</Button>
+            {/* <Button>Share</Button> */}
             <Button onClick={handleUpload}>Upload CV</Button>
           </div>
         </div>

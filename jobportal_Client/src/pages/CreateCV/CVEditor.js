@@ -13,9 +13,9 @@ const CVEditor = () => {
   const dispatch = useDispatch();
   const { genCv, loading } = useSelector((store) => store.genCV);
 
-  
   // Set giá trị mặc định để tránh lỗi render
   const [cvInfo, setCvInfo] = useState(null);
+  
 
   useEffect(() => {
     if (genCvId) {
@@ -25,10 +25,12 @@ const CVEditor = () => {
 
   useEffect(() => {
     if (genCv && Object.keys(genCv).length > 0) {
+      console.log("🚀 Dữ liệu từ Redux store:", genCv);
       const jsonCv = JSON.parse(genCv?.cvContent.replace(/^"|"$/g, ""))
       setCvInfo(jsonCv);
     }
   }, [genCv]);
+
 
   return (
     <CVInfoContext.Provider value={{ cvInfo, setCvInfo }}>
