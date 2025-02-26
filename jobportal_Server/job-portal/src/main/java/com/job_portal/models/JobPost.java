@@ -1,6 +1,10 @@
 package com.job_portal.models;
 
 import lombok.*;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.job_portal.utils.LocalDateTimeSerializer;
+import com.job_portal.utils.LocalDateTimeDeserializer;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+
 @Entity
 @Table(name = "job_posts")
 @Data
@@ -32,7 +37,7 @@ public class JobPost {
 	@GeneratedValue(strategy = GenerationType.UUID)
 	@Column(name = "post_id")
 	private UUID postId;
-
+	
 	@Column(name = "create_date", nullable = false)
 	private LocalDateTime createDate;
 

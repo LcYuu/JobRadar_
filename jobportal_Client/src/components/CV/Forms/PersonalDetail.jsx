@@ -3,8 +3,11 @@ import { CVInfoContext } from "../../../context/CVInfoContext";
 import { Input } from "../../../ui/input";
 import { Button } from "../../../ui/button";
 import { useParams } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { updateCV } from "../../../redux/GeneratedCV/generated_cv.thunk";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getGenCVById,
+  updateCV,
+} from "../../../redux/GeneratedCV/generated_cv.thunk";
 import { ImageIcon, LoaderCircle } from "lucide-react";
 import { toast } from "react-toastify";
 import { Avatar } from "@mui/material";
@@ -13,14 +16,13 @@ import { uploadToCloudinary } from "../../../utils/uploadToCloudinary";
 const PersonalDetail = ({ enabledNext }) => {
   const { genCvId } = useParams();
   const dispatch = useDispatch();
+
   const { cvInfo, setCvInfo } = useContext(CVInfoContext);
   const [imageLoading, setImageLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
 
   const [loading, setLoading] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(
-    cvInfo?.profileImage || null
-  );
+  const [selectedImage, setSelectedImage] = useState(cvInfo?.profileImage);
 
   const handleInputChange = (e) => {
     enabledNext(false);
@@ -31,23 +33,22 @@ const PersonalDetail = ({ enabledNext }) => {
     });
   };
 
-  useEffect(() => {
-    
-  }, [selectedImage]);
-
   const handleSelectImage = (event) => {
     const files = event.target.files;
     if (files.length > 0) {
       const newFile = files[0];
+      const tempUrl = URL.createObjectURL(newFile);
 
-      const tempUrl = URL.createObjectURL(newFile); // Tạo URL tạm thời từ file
-
-      setSelectedFile(newFile); // Lưu file thật để upload
+      setSelectedFile(newFile);
       setSelectedImage(tempUrl);
-      setCvInfo((prevData) => ({
-        ...prevData,
-        profileImage: tempUrl, // Lưu đường dẫn tạm vào state
+
+      // Cập nhật profileImage trong cvInfo
+      setCvInfo((prev) => ({
+        ...prev,
+        profileImage: tempUrl,
       }));
+
+      console.log("🖼 Cập nhật ảnh tạm thời:", tempUrl);
     }
   };
 
@@ -57,11 +58,14 @@ const PersonalDetail = ({ enabledNext }) => {
       let uploadedUrl = cvInfo?.profileImage; // Mặc định giữ nguyên
 
       if (selectedFile) {
-        uploadedUrl = await uploadToCloudinary(selectedFile); 
+        uploadedUrl = await uploadToCloudinary(selectedFile);
       }
-      const cvData = JSON.stringify({ ...cvInfo, profileImage: uploadedUrl }).replace(/"/g, '\\"');
+      const cvData = JSON.stringify({
+        ...cvInfo,
+        profileImage: uploadedUrl,
+      }).replace(/"/g, '\\"');
 
-      console.log("🚀 ~ onSave ~ cvData:", cvData)
+      console.log("🚀 ~ onSave ~ cvData:", cvData);
       await dispatch(
         updateCV({ genCvId, cvData: `{ \"cvContent\": \"${cvData}\" }` })
       ).unwrap();
@@ -86,10 +90,7 @@ const PersonalDetail = ({ enabledNext }) => {
         <Avatar
           className="transform mb-2 ring-4 ring-purple-500"
           sx={{ width: "9rem", height: "9rem" }}
-          src={
-            selectedImage ||
-              cvInfo?.profileImage
-          }
+          src={selectedImage || cvInfo?.profileImage}
         />
         <div>
           <input
