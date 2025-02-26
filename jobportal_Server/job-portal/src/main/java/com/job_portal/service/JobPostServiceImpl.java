@@ -18,9 +18,11 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,73 +49,76 @@ import com.opencsv.CSVWriter;
 import com.social.exceptions.AllExceptions;
 
 @Service
-public class JobPostServiceImpl implements IJobPostService {
+public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostService {
 
 	@Autowired
 	private JobPostRepository jobPostRepository;
 	@Autowired
-	CityRepository cityRepository;
+	private CityRepository cityRepository;
 	@Autowired
-	CompanyRepository companyRepository;
-
+	private CompanyRepository companyRepository;
 	@Autowired
 	private SkillRepository skillRepository;
-
 	@Autowired
 	private SearchHistoryRepository searchHistoryRepository;
-
 	@Autowired
 	private SeekerRepository seekerRepository;
 	@Autowired
-	ISearchHistoryService searchHistoryService;
+	private ISearchHistoryService searchHistoryService;
 
-	String filePath = "D:\\\\JobRadar_\\\\search_history.csv";
+	private static final String FILE_PATH = "D:\\\\JobRadar_\\\\search_history.csv";
+
+	public JobPostServiceImpl(RedisTemplate<String, Object> redisTemplate) {
+		super(redisTemplate);
+	}
+
+	long TIME_OUT = 1 * 24 * 60 * 60;
 
 	@Override
 	public boolean createJob(JobPostDTO jobPostDTO, UUID companyId) {
-		Optional<City> city = cityRepository.findById(jobPostDTO.getCityId());
-		if (!city.isPresent()) {
-			throw new IllegalArgumentException("City with ID " + jobPostDTO.getCityId() + " does not exist");
-		}
-		Optional<Company> company = companyRepository.findById(companyId);
-		if (!company.isPresent()) {
-			throw new IllegalArgumentException("Company with ID " + companyId + " does not exist");
-		}
-		// Build the JobPost entity
-		JobPost jobPost = new JobPost(); 	
-		jobPost.setCreateDate(LocalDateTime.now());
-		jobPost.setExpireDate(jobPostDTO.getExpireDate());
-		jobPost.setTitle(jobPostDTO.getTitle());
-		jobPost.setDescription(jobPostDTO.getDescription());
-		jobPost.setBenefit(jobPostDTO.getBenefit());
-		jobPost.setExperience(jobPostDTO.getExperience());
-		jobPost.setSalary(jobPostDTO.getSalary());
-		jobPost.setRequirement(jobPostDTO.getRequirement());
-		jobPost.setLocation(jobPostDTO.getLocation());
-		jobPost.setTypeOfWork(jobPostDTO.getTypeOfWork());
-		jobPost.setPosition(jobPostDTO.getPosition());
-		jobPost.setStatus("Chờ duyệt");
-		jobPost.setCompany(company.get());
-		jobPost.setCity(city.get());
-		jobPost.setApprove(false);
-		jobPost.setNiceToHaves(jobPostDTO.getNiceToHaves());
-
-		// Liên kết với Skills nếu có
-		if (jobPostDTO.getSkillIds() != null && !jobPostDTO.getSkillIds().isEmpty()) {
-			List<Skills> skillsList = new ArrayList<>();
-			for (Integer skillId : jobPostDTO.getSkillIds()) {
-				Optional<Skills> skillOpt = skillRepository.findById(skillId);
-				skillsList.add(skillOpt.get());
-			}
-			jobPost.setSkills(skillsList);
-		}
-
 		try {
-			JobPost saveJobPost = jobPostRepository.save(jobPost);
-			return saveJobPost != null;
+			City city = cityRepository.findById(jobPostDTO.getCityId()).orElseThrow(
+					() -> new IllegalArgumentException("City with ID " + jobPostDTO.getCityId() + " does not exist"));
+
+			Company company = companyRepository.findById(companyId).orElseThrow(
+					() -> new IllegalArgumentException("Company with ID " + companyId + " does not exist"));
+
+			JobPost jobPost = new JobPost();
+			jobPost.setCreateDate(LocalDateTime.now());
+			jobPost.setExpireDate(jobPostDTO.getExpireDate());
+			jobPost.setTitle(jobPostDTO.getTitle());
+			jobPost.setDescription(jobPostDTO.getDescription());
+			jobPost.setBenefit(jobPostDTO.getBenefit());
+			jobPost.setExperience(jobPostDTO.getExperience());
+			jobPost.setSalary(jobPostDTO.getSalary());
+			jobPost.setRequirement(jobPostDTO.getRequirement());
+			jobPost.setLocation(jobPostDTO.getLocation());
+			jobPost.setTypeOfWork(jobPostDTO.getTypeOfWork());
+			jobPost.setPosition(jobPostDTO.getPosition());
+			jobPost.setStatus("Chờ duyệt");
+			jobPost.setCompany(company);
+			jobPost.setCity(city);
+			jobPost.setApprove(false);
+			jobPost.setNiceToHaves(jobPostDTO.getNiceToHaves());
+
+			// Liên kết với Skills nếu có
+			if (jobPostDTO.getSkillIds() != null && !jobPostDTO.getSkillIds().isEmpty()) {
+				List<Skills> skillsList = skillRepository.findAllById(jobPostDTO.getSkillIds());
+				jobPost.setSkills(skillsList);
+			}
+
+			JobPost savedJobPost = jobPostRepository.save(jobPost);
+			if (savedJobPost != null) {
+				// Lưu vào Redis
+				String redisKey = "jobPost:" + savedJobPost.getPostId();
+				this.set(redisKey, savedJobPost);
+				this.setTimeToLive(redisKey, TIME_OUT); // Cache job trong 7 ngày
+				return true;
+			}
 		} catch (Exception e) {
-			return false;
+			e.printStackTrace(); // Log lỗi để dễ debug
 		}
+		return false;
 	}
 
 	@Override
@@ -124,7 +129,13 @@ public class JobPostServiceImpl implements IJobPostService {
 			throw new AllExceptions("Không thể tìm thấy công việc này");
 		}
 
+		// Xóa công việc trong database
 		jobPostRepository.delete(jobPost.get());
+
+		// Xóa công việc trong Redis
+		String redisKey = "jobPost:" + postId;
+		this.delete(redisKey);
+
 		return true;
 	}
 
@@ -224,6 +235,9 @@ public class JobPostServiceImpl implements IJobPostService {
 
 		if (isUpdated) {
 			jobPostRepository.save(oldJob);
+			String redisKey = "jobPost:" + postId;
+			this.set(redisKey, oldJob);
+			this.setTimeToLive(redisKey, TIME_OUT);
 		}
 
 		return isUpdated;
@@ -327,9 +341,17 @@ public class JobPostServiceImpl implements IJobPostService {
 		Optional<JobPost> jobPostOpt = jobPostRepository.findById(postId);
 		if (jobPostOpt.isPresent()) {
 			JobPost jobPost = jobPostOpt.get();
-			jobPost.setApprove(true); // Đặt trường isApprove thành true
+			jobPost.setApprove(true); // Đặt isApprove thành true
 			jobPost.setStatus("Đang mở");
-			jobPostRepository.save(jobPost); // Lưu công việc đã cập nhật
+
+			// Lưu vào database
+			jobPostRepository.save(jobPost);
+
+			// Cập nhật Redis
+			String redisKey = "jobPost:" + postId;
+			this.set(redisKey, jobPost); // Cập nhật dữ liệu trong Redis
+			this.setTimeToLive(redisKey, TIME_OUT); // Thiết lập TTL (7 ngày)
+
 			return true;
 		}
 		return false; // Trả về false nếu không tìm thấy công việc
@@ -338,25 +360,24 @@ public class JobPostServiceImpl implements IJobPostService {
 	@Override
 	public JobPost searchJobByPostId(UUID postId) throws AllExceptions {
 		Optional<JobPost> jobPost = jobPostRepository.findById(postId);
-		
 		return jobPost.get();
 
 	}
 
 	@Override
 	public List<DailyJobCount> getDailyJobPostCounts(LocalDateTime startDate, LocalDateTime endDate) {
-	    List<Object[]> results = jobPostRepository.countNewJobsPerDay(startDate, endDate);
-	    List<DailyJobCount> dailyJobPostCounts = new ArrayList<>();
+		List<Object[]> results = jobPostRepository.countNewJobsPerDay(startDate, endDate);
+		List<DailyJobCount> dailyJobPostCounts = new ArrayList<>();
 
-	    for (Object[] result : results) {
-	        String dateStr = (String) result[0];
-	        LocalDateTime date = LocalDateTime.parse(dateStr.substring(0, 26)); // Cắt đến microseconds
-	        Long count = ((Number) result[1]).longValue();
-	        
-	        dailyJobPostCounts.add(new DailyJobCount(date, count));
-	    }
+		for (Object[] result : results) {
+			String dateStr = (String) result[0];
+			LocalDateTime date = LocalDateTime.parse(dateStr.substring(0, 26)); // Cắt đến microseconds
+			Long count = ((Number) result[1]).longValue();
 
-	    return dailyJobPostCounts;
+			dailyJobPostCounts.add(new DailyJobCount(date, count));
+		}
+
+		return dailyJobPostCounts;
 
 	}
 
@@ -398,12 +419,37 @@ public class JobPostServiceImpl implements IJobPostService {
 		return jobPostRepository.countJobsByType();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Page<JobPost> searchJobsWithPagination(String title, List<String> selectedTypesOfWork, Long minSalary,
 			Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, Pageable pageable) {
+
+		// Tạo key cho Redis dựa trên tham số tìm kiếm
+		String redisKey = "searchJobs:" + title + ":" + selectedTypesOfWork + ":" + minSalary + ":" + maxSalary + ":"
+				+ cityId + ":" + selectedIndustryIds + ":" + pageable.getPageNumber() + ":" + pageable.getPageSize();
+
+		// Kiểm tra Redis có dữ liệu không
+		Page<JobPost> cachedJobs = null; // 👉 Thêm dòng này để khai báo biến trước
+
+		Object cachedObject = this.get(redisKey);
+		if (cachedObject instanceof Page) {
+			cachedJobs = (Page<JobPost>) cachedObject;
+		}
+
+		if (cachedJobs != null) {
+			return cachedJobs; // Trả về dữ liệu cache nếu có
+		}
+
+		// Nếu không có dữ liệu cache, thực hiện truy vấn từ DB
 		Specification<JobPost> spec = JobPostSpecification.withFilters(title, selectedTypesOfWork, minSalary, maxSalary,
 				cityId, selectedIndustryIds);
-		return jobPostRepository.findByIsApproveTrue(spec, pageable);
+		Page<JobPost> jobPosts = jobPostRepository.findByIsApproveTrue(spec, pageable);
+
+		this.set(redisKey, jobPosts);
+		this.setTimeToLive(redisKey, TIME_OUT);
+		System.out.println("Đã lưu vào Redis với key: " + redisKey);
+
+		return jobPosts;
 	}
 
 	public Page<JobPost> findJobByCompanyId(UUID companyId, int page, int size) {
@@ -457,10 +503,11 @@ public class JobPostServiceImpl implements IJobPostService {
 	}
 
 	@Override
-	public List<Map<String, Object>> getCompanyJobStats(UUID companyId, LocalDateTime startDate, LocalDateTime endDate) {
+	public List<Map<String, Object>> getCompanyJobStats(UUID companyId, LocalDateTime startDate,
+			LocalDateTime endDate) {
 		List<Map<String, Object>> stats = new ArrayList<>();
 		LocalDateTime currentDate = startDate;
-		
+
 		while (!currentDate.isAfter(endDate)) {
 			// Đếm số lượng job theo trạng thái
 			long totalJobs = jobPostRepository.countJobsByCompanyAndDateRange(companyId, currentDate, currentDate);
@@ -492,10 +539,13 @@ public class JobPostServiceImpl implements IJobPostService {
 
 	@Override
 	public void updateExpiredJobs() {
-		List<JobPost> expiredJobs = jobPostRepository.findAllByExpireDateBeforeAndStatus(LocalDateTime.now(), "Đang mở");
+		List<JobPost> expiredJobs = jobPostRepository.findAllByExpireDateBeforeAndStatus(LocalDateTime.now(),
+				"Đang mở");
 		// Cập nhật trạng thái thành EXPIRED
 		for (JobPost job : expiredJobs) {
 			job.setStatus("Hết hạn");
+			String redisKey = "jobPost:" + job.getPostId();
+			this.delete(redisKey);
 		}
 
 		// Lưu các thay đổi vào cơ sở dữ liệu
@@ -514,10 +564,37 @@ public class JobPostServiceImpl implements IJobPostService {
 	}
 
 	@Transactional
-    public void increaseViewCount(UUID postId) {
-        JobPost jobPost = jobPostRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Job post not found"));
-        jobPost.setViewCount(jobPost.getViewCount() + 1);
-        jobPostRepository.save(jobPost);
-    }
+	public void increaseViewCount(UUID postId) {
+		JobPost jobPost = jobPostRepository.findById(postId)
+				.orElseThrow(() -> new RuntimeException("Job post not found"));
+		jobPost.setViewCount(jobPost.getViewCount() + 1);
+		jobPostRepository.save(jobPost);
+	}
+
+	public Page<JobPost> searchJobs(String title, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, int page, int size) {
+	    String redisKey = "searchJobs:" + title + ":" + selectedTypesOfWork + ":" + minSalary + ":" + maxSalary + ":"
+	            + cityId + ":" + selectedIndustryIds + ":" + page + ":" + size;
+
+	    // Kiểm tra xem cache có kết quả không
+	    Object cachedData = this.get(redisKey);
+	    if (cachedData instanceof List<?>) {
+	        List<JobPost> jobList = (List<JobPost>) cachedData;
+	        Pageable pageable = PageRequest.of(page, size);
+	        return new PageImpl<>(jobList, pageable, jobList.size());
+	    }
+	    
+	    Specification<JobPost> spec = Specification
+	            .where(jobPostRepository.alwaysActiveJobs())
+	            .and(JobPostSpecification.withFilters(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds));
+
+	    Page<JobPost> result = jobPostRepository.findAll(spec, PageRequest.of(page, size));
+
+	    // Lưu kết quả vào Redis
+	    this.set(redisKey, result);
+	    this.setTimeToLive(redisKey, TIME_OUT); // Cache hết hạn sau 1 ngày
+
+	    return result;
+	}
+
+
 }
