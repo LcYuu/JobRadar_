@@ -62,7 +62,7 @@ export const searchJobs = createAsyncThunk(
         page: currentPage,
         size: size,
       };
-      const token = sessionStorage.getItem("jwt");
+      const token = localStorage.getItem("jwt");
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const response = await api.get(`/job-post/search-job-by-feature`, {
         headers,

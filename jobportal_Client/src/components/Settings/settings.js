@@ -51,7 +51,7 @@ const Settings = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionStorage.getItem('jwt')}`
+          'Authorization': `Bearer ${localStorage.getItem('jwt')}`
         },
         body: JSON.stringify({
           ...formData,
