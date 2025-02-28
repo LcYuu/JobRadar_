@@ -12,9 +12,8 @@ const RoleSelection = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loginStatus, setLoginStatus] = useState(null); // null, 'success', 'failure'
-  const token = sessionStorage.getItem("jwt"); // Lấy JWT token từ sessionStorage
+  const token = localStorage.getItem("jwt"); // Lấy JWT token từ localStorage
   const [error, setError] = useState("");
-
   const handleRoleSubmit = (role) => {
     axios
       .post(`http://localhost:8080/auth/update-role/${role}`, null, {
