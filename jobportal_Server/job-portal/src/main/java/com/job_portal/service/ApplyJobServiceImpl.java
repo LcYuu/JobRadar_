@@ -52,7 +52,7 @@ public class ApplyJobServiceImpl implements IApplyJobService {
 
 	@Override
 	public boolean hasApplied(UUID postId, UUID userId) {
-		 return applyJobRepository.existsByPostIdAndUserId(postId, userId);
+		return applyJobRepository.existsByPostIdAndUserId(postId, userId);
 	}
 
 }
