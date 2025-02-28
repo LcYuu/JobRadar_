@@ -20,7 +20,7 @@ public class RedisServiceImpl implements IRedisService {
 		this.hashOperations = redisTemplate.opsForHash();
 	}
 
-	public void set(String key, Object value) { // Thay đổi kiểu dữ liệu từ String -> Object
+	public void set(String key, Object value) {
 		redisTemplate.opsForValue().set(key, value);
 	}
 

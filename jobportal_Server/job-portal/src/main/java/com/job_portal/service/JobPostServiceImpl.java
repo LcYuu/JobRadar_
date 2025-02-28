@@ -109,10 +109,6 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 
 			JobPost savedJobPost = jobPostRepository.save(jobPost);
 			if (savedJobPost != null) {
-				// Lưu vào Redis
-				String redisKey = "jobPost:" + savedJobPost.getPostId();
-				this.set(redisKey, savedJobPost);
-				this.setTimeToLive(redisKey, TIME_OUT); // Cache job trong 7 ngày
 				return true;
 			}
 		} catch (Exception e) {
@@ -346,11 +342,7 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 
 			// Lưu vào database
 			jobPostRepository.save(jobPost);
-
-			// Cập nhật Redis
-			String redisKey = "jobPost:" + postId;
-			this.set(redisKey, jobPost); // Cập nhật dữ liệu trong Redis
-			this.setTimeToLive(redisKey, TIME_OUT); // Thiết lập TTL (7 ngày)
+			this.delete("searchJobs:*");
 
 			return true;
 		}
@@ -411,8 +403,25 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 
 	@Override
 	public List<JobPost> getTop8LatestJobPosts() {
-		return jobPostRepository.findTop8LatestJobPosts().stream().limit(8).collect(Collectors.toList());
+	    String redisKey = "top_8_latest_jobs";
+	    
+	    // Kiểm tra Redis xem có dữ liệu không
+	    List<JobPost> cachedJobs = (List<JobPost>) this.get(redisKey);
+	    if (cachedJobs != null) {
+	        return cachedJobs;
+	    }
+
+	    List<JobPost> latestJobs = jobPostRepository.findTop8LatestJobPosts()
+	                                                .stream()
+	                                                .limit(8)
+	                                                .collect(Collectors.toList());
+
+	    this.set(redisKey, latestJobs);
+	    this.setTimeToLive(redisKey, 1);
+
+	    return latestJobs;
 	}
+
 
 	@Override
 	public List<JobCountType> getJobCountByType() {
@@ -447,14 +456,30 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 
 		this.set(redisKey, jobPosts);
 		this.setTimeToLive(redisKey, TIME_OUT);
-		System.out.println("Đã lưu vào Redis với key: " + redisKey);
 
 		return jobPosts;
 	}
 
 	public Page<JobPost> findJobByCompanyId(UUID companyId, int page, int size) {
-		return jobPostRepository.findJobByCompanyId(companyId, PageRequest.of(page, size));
+	    // Tạo redis key dựa trên companyId, page, size
+	    String redisKey = "jobByCompany:" + companyId + ":" + page + ":" + size;
+	    
+	    // Kiểm tra cache
+	    Page<JobPost> cachedPage = (Page<JobPost>) this.get(redisKey);
+	    if (cachedPage != null) {
+	        return cachedPage;
+	    }
+	    
+	    // Nếu không có trong cache, truy vấn từ database
+	    Page<JobPost> jobPosts = jobPostRepository.findJobByCompanyId(companyId, PageRequest.of(page, size));
+	    
+	    // Lưu kết quả vào Redis và thiết lập TTL (ví dụ: 7 ngày)
+	    this.set(redisKey, jobPosts);
+	    this.setTimeToLive(redisKey, TIME_OUT);
+	    
+	    return jobPosts;
 	}
+
 
 	public Page<JobPost> findByCompanyId(UUID companyId, Pageable pageable) {
 		return jobPostRepository.findByCompanyCompanyIdAndApproveTrue(companyId, pageable);
