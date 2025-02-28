@@ -22,7 +22,7 @@ export const getExpByUser = () => async (dispatch) => {
   dispatch({ type: GET_EXP_BY_USER_REQUEST });
 
   try {
-    const jwt = sessionStorage.getItem("jwt"); // Lấy JWT từ sessionStorage
+    const jwt = localStorage.getItem("jwt"); // Lấy JWT từ localStorage
     if (!jwt) {
       throw new Error("No token found");
     }
@@ -91,7 +91,7 @@ export const updateExperience =
   (experienceId, experienceData) => async (dispatch) => {
     dispatch({ type: UPDATE_EXP_REQUEST });
     try {
-      const jwt = sessionStorage.getItem("jwt");
+      const jwt = localStorage.getItem("jwt");
       if (!jwt) {
         throw new Error("No token found");
       }

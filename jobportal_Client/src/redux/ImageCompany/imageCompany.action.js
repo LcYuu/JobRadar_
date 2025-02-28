@@ -35,7 +35,7 @@ export const createImageCompany = (imgData) => async (dispatch) => {
   dispatch({ type: CREATE_IMAGE_COMPANY_REQUEST });
 
   try {
-    const jwt = sessionStorage.getItem("jwt"); // Lấy JWT từ sessionStorage
+    const jwt = localStorage.getItem("jwt"); // Lấy JWT từ localStorage
     if (!jwt) {
       throw new Error("No token found");
     }

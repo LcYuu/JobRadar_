@@ -373,7 +373,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
               {company.website}
             </a> */}
 
-            {!sessionStorage.getItem("jwt") || checkIfSaved === false ? (
+            {!localStorage.getItem("jwt") || checkIfSaved === false ? (
               <div className="flex items-center p-3 border border-yellow-400 rounded-lg bg-yellow-50 shadow-sm">
                 <Star className="h-4 w-4 text-yellow-400 mr-2" />
                 <span className="text-gray-700 font-medium">
@@ -410,7 +410,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                 <span>{companyProfile?.industry?.industryName}</span>
               </div>
             </div>
-            {!sessionStorage.getItem("jwt") || checkIfSaved === false ? null : (
+            {!localStorage.getItem("jwt") || checkIfSaved === false ? null : (
               <Button
                 onClick={handleFollowClick}
                 className="mt-6 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-700"
