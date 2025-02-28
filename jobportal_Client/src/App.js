@@ -51,8 +51,12 @@ import { startInactivityTimer } from "./utils/session";
 import CompanyReview from "./pages/ReviewManagement/CompanyReview";
 import AdminReview from "./pages/ReviewManagement/AdminReview";
 import SeekerProfile from "./components/SeekerProfile/SeekerProfile";
+
 import TermsOfService from './pages/Legal/TermsOfService';
 import PrivacyPolicy from './pages/Legal/PrivacyPolicy';
+import CVEditor from "./pages/CreateCV/CVEditor";
+import CVSelection from "./pages/CreateCV/CVSelection";
+import ViewCV from "./pages/CreateCV/ViewCV";
 
 const ProtectedHome = () => {
   const { user } = useSelector((state) => state.auth);
@@ -204,6 +208,33 @@ const App = () => {
           }
         />
         <Route
+          path="/create-cv"
+          element={
+            <PublicRoute>
+              <CVSelection />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/create-cv/detail-cv/:genCvId"
+          element={
+            <PublicRoute>
+              <CVEditor />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/create-cv/view/:genCvId"
+          element={
+            <PublicRoute>
+              <ViewCV />
+            </PublicRoute>
+          }
+        />
+
+        <Route
           path="/change-password"
           element={
             <PublicRoute>
@@ -310,7 +341,10 @@ const App = () => {
           <Route path="user-list" element={<UserList />} />
           <Route path="job-list" element={<AdminJobList />} />
           <Route path="review-list" element={<AdminReview />} />
-          <Route path="review-detail/:companyId/:userId" element={<SeekerProfile />} />
+          <Route
+            path="review-detail/:companyId/:userId"
+            element={<SeekerProfile />}
+          />
           <Route path="settings" element={<Settings />} />
         </Route>
 
