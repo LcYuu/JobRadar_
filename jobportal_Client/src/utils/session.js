@@ -3,6 +3,15 @@ import { logoutAction } from '../redux/Auth/auth.thunk';
 
 let inactivityTimeout = null;
 
+const handleLogout = (dispatch) => {
+  dispatch(logoutAction()).then(() => {
+    localStorage.removeItem('jwt');
+    localStorage.removeItem('user');
+    // Thêm một event để thông báo cho các tab khác
+    localStorage.setItem('logout-event', Date.now().toString());
+    window.location.href = '/auth/sign-in';
+  });
+};
 export const startInactivityTimer = (dispatch, warningTime = 55 * 1000, logoutTime = 60  * 1000) => {
 
   const resetTimer = () => {
@@ -57,5 +66,7 @@ export const startInactivityTimer = (dispatch, warningTime = 55 * 1000, logoutTi
   return () => {
     events.forEach(event => window.removeEventListener(event, resetTimer));
     clearTimeout(inactivityTimeout);
+    // Xóa event listener storage khi component unmount
+    window.removeEventListener('storage', handleLogout);
   };
 };

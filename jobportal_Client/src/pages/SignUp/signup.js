@@ -511,13 +511,11 @@ export default function SignUpForm() {
           <p className="mt-4 text-center text-xs text-gray-500">
           Bằng cách nhấp vào 'Đăng ký', bạn xác nhận rằng bạn đã đọc và chấp nhận
             {" "}
-            <a href="#" className="underline text-indigo-600">
+            <Link to="/terms-of-service" className="underline text-indigo-600">
             Điều khoản dịch vụ
-            </a>{" "}
-            và{" "}
-            <a href="#" className="underline text-indigo-600">
+            {" "}và{" "}
             Chính sách bảo mật
-            </a>
+            </Link>
             {" "}của chúng tôi.
           </p>
         </CardContent>

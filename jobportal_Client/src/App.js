@@ -51,6 +51,9 @@ import { startInactivityTimer } from "./utils/session";
 import CompanyReview from "./pages/ReviewManagement/CompanyReview";
 import AdminReview from "./pages/ReviewManagement/AdminReview";
 import SeekerProfile from "./components/SeekerProfile/SeekerProfile";
+import TermsOfService from './pages/Legal/TermsOfService';
+import PrivacyPolicy from './pages/Legal/PrivacyPolicy';
+
 const ProtectedHome = () => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
@@ -73,6 +76,21 @@ const App = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem("jwt");
+      if (!token && isAuthenticated) {
+        dispatch(logoutAction());
+      }
+    };
+  
+    // Kiểm tra mỗi 1 giây
+    const interval = setInterval(checkAuth, 1000);
+  
+    // Cleanup
+    return () => clearInterval(interval);
+  }, [dispatch, isAuthenticated]);
+  
   useEffect(() => {
     const token = localStorage.getItem("jwt");
     const savedUser = localStorage.getItem("user");
@@ -308,6 +326,22 @@ const App = () => {
             >
               <AdminDashboard />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/terms-of-service"
+          element={
+            <PublicRoute>
+              <TermsOfService />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/privacy-policy"
+          element={
+            <PublicRoute>
+              <PrivacyPolicy />
+            </PublicRoute>
           }
         />
       </Routes>
