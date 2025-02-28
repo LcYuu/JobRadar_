@@ -45,4 +45,7 @@ public interface IJobPostService {
 	public void updateExpiredJobs();
 	public boolean canPostJob(UUID companyId);
 	public void increaseViewCount(UUID postId);
+//	public Page<JobWithApplicationCountDTO> getJobsWithFiltersAndSorting(String title, List<String> selectedTypesOfWork, Long minSalary,
+//			Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, Pageable pageable);
+	public Page<JobPost> searchJobs(String title, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, int page, int size);
 }

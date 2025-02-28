@@ -104,7 +104,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 			+ "GROUP BY jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
 			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName,  jp.isApprove " + "ORDER BY jp.createDate DESC, jp.postId")
 	List<JobWithApplicationCountDTO> findJobsByCompanyIdSortedByCreateDateDesc(@Param("companyId") UUID companyId);
-
+	
 	@Query(value = "SELECT new com.job_portal.DTO.JobWithApplicationCountDTO("
 			+ "jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
 			+ "jp.typeOfWork, jp.createDate, jp.expireDate, " + "COUNT(DISTINCT a.postId), jp.status, i.industryName, jp.isApprove) "
