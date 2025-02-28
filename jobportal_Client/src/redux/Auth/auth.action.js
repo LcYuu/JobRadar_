@@ -45,7 +45,7 @@ export const loginAction = (loginData) => async (dispatch) => {
     const { data } = await axios.post(`${API_BASE_URL}/auth/login`, loginData);
 
     if (data.token) {
-      sessionStorage.setItem("jwt", data.token);
+      localStorage.setItem("jwt", data.token);
       dispatch({ type: LOGIN_SUCCESS, payload: data.token });
       
       const profileResponse = await axios.get(`${API_BASE_URL}/users/profile`, {
@@ -83,7 +83,7 @@ export const loginAction = (loginData) => async (dispatch) => {
 export const getProfileAction = () => async (dispatch) => {
   dispatch({type: GET_PROFILE_REQUEST});
   try {
-    const jwt = sessionStorage.getItem('jwt');
+    const jwt = localStorage.getItem('jwt');
     if (!jwt) {
       throw new Error('No token found');
     }
@@ -111,7 +111,7 @@ export const getProfileAction = () => async (dispatch) => {
 export const logoutAction = () => async (dispatch) => {
   dispatch({ type: LOGOUT_REQUEST });
   try {
-    const token = sessionStorage.getItem('jwt');
+    const token = localStorage.getItem('jwt');
     const response = await axios.post(`${API_BASE_URL}/auth/signout`, null, {
       headers: {
         Authorization: `Bearer ${token}`
@@ -119,10 +119,10 @@ export const logoutAction = () => async (dispatch) => {
     });
 
     if (response.status === 200) {
-      sessionStorage.removeItem('jwt');
+      localStorage.removeItem('jwt');
       dispatch({ type: LOGOUT_SUCCESS });
       window.location.href = '/auth/sign-in';
-    }
+    } 
   } catch (error) {
     dispatch({ type: LOGOUT_FAILURE, payload: error.message });
   }

@@ -9,10 +9,10 @@ export const api = axios.create({
     }
 });
 
-// Interceptor để luôn lấy token mới từ sessionStorage
+// Interceptor để luôn lấy token mới từ localStorage
 api.interceptors.request.use(
     (config) => {
-        const jwt = sessionStorage.getItem("jwt");
+        const jwt = localStorage.getItem("jwt");
         if (jwt) {
             config.headers["Authorization"] = `Bearer ${jwt}`;
         }
