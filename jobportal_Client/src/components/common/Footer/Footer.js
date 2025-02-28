@@ -4,13 +4,11 @@ import { faFacebookF, faTwitter, faInstagram, faLinkedinIn } from '@fortawesome/
 import logo from '../../../assets/images/common/logo.jpg';
 import { Input } from '../../../ui/input';
 import { Button } from '../../../ui/button';
-
+import { Link } from 'react-router-dom';
 export default function Footer() {
-  const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
-
+  const [email, setEmail] = useState('');
   const socialIcons = [
-    { icon: faFacebookF, link: 'https://facebook.com' },
     { icon: faTwitter, link: 'https://twitter.com' },
     { icon: faInstagram, link: 'https://instagram.com' },
     { icon: faLinkedinIn, link: 'https://linkedin.com' }
@@ -77,9 +75,13 @@ export default function Footer() {
               <ul className="text-gray-400 text-sm space-y-2">
                 <li>Companies</li>
                 <li>Pricing</li>
+                <Link to="/terms-of-service" className="text-indigo-600 hover:underline">
                 <li>Terms</li>
+                </Link>
                 <li>Advice</li>
+                <Link to="/privacy-policy" className="text-indigo-600 hover:underline">
                 <li>Privacy Policy</li>
+                </Link>
               </ul>
             </div>
             <div>
