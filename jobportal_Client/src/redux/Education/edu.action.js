@@ -22,7 +22,7 @@ export const getEduByUser = () => async (dispatch) => {
   dispatch({ type: GET_EDU_BY_USER_REQUEST });
 
   try {
-    const jwt = sessionStorage.getItem("jwt"); // Lấy JWT từ sessionStorage
+    const jwt = localStorage.getItem("jwt"); // Lấy JWT từ localStorage
     if (!jwt) {
       throw new Error("No token found");
     }
@@ -89,7 +89,7 @@ export const createEducation = (eduData) => async (dispatch) => {
 export const updateEducation = (educationId, educationData) => async (dispatch) => {
   dispatch({ type: UPDATE_EDU_REQUEST });
   try {
-    const jwt = sessionStorage.getItem("jwt");
+    const jwt = localStorage.getItem("jwt");
     if (!jwt) {
       throw new Error("No token found");
     }

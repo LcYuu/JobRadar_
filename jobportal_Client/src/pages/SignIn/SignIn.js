@@ -152,7 +152,7 @@ export default function SignInForm() {
       const jwtToken = res?.data?.token;
       console.log("Response from: ", jwtToken);
 
-      sessionStorage.setItem("jwt", jwtToken);
+      localStorage.setItem("jwt", jwtToken);
       const emailExists = await axios.post(
         "http://localhost:8080/auth/check-email",
         { token: googleToken }
@@ -169,7 +169,7 @@ export default function SignInForm() {
           district: "",
           province: ""
         };
-        sessionStorage.setItem("defaultAddress", JSON.stringify(defaultAddress));
+        localStorage.setItem("defaultAddress", JSON.stringify(defaultAddress));
         
         setTimeout(() => {
           window.location.href = "http://localhost:3000/role-selection";

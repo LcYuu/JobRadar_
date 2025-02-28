@@ -23,7 +23,7 @@ const NotificationDropdown = () => {
     try {
       const response = await fetch(`http://localhost:8080/seeker/notifications/${user.userId}`, {
         headers: {
-          'Authorization': `Bearer ${sessionStorage.getItem('jwt')}`
+          'Authorization': `Bearer ${localStorage.getItem('jwt')}`
         }
       });
       
@@ -49,7 +49,7 @@ const NotificationDropdown = () => {
     try {
       const response = await fetch(`http://localhost:8080/seeker/unread-count/${user.userId}`, {
         headers: {
-          'Authorization': `Bearer ${sessionStorage.getItem('jwt')}`
+          'Authorization': `Bearer ${localStorage.getItem('jwt')}`
         }
       });
       
@@ -75,7 +75,7 @@ const NotificationDropdown = () => {
         const response = await fetch(`http://localhost:8080/seeker/read/${notification.notificationId}`, {
           method: 'PATCH',
           headers: {
-            'Authorization': `Bearer ${sessionStorage.getItem('jwt')}`,
+            'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
             'Content-Type': 'application/json'
           }
         });
