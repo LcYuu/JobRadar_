@@ -31,7 +31,7 @@ export const getCompanyFitSeeker = createAsyncThunk(
   "company/getCompanyFitSeeker",
   async (_, { rejectWithValue }) => {
     try {
-      const jwt = sessionStorage.getItem("jwt");
+      const jwt = localStorage.getItem("jwt");
       if (!jwt) {
         throw new Error("No token found");
       }
@@ -108,7 +108,7 @@ export const updateCompanyProfile = createAsyncThunk(
 export const updateCompanyImages = createAsyncThunk(
   "company/updateCompanyImages",
   async (images, { rejectWithValue }) => {
-    const jwt = sessionStorage.getItem("jwt");
+    const jwt = localStorage.getItem("jwt");
     if (!jwt) {
       return rejectWithValue("No token found");
     }
