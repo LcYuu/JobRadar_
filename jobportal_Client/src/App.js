@@ -46,14 +46,18 @@ import JobDetailAdmin from "./pages/Admin/JobDetail/JobDetailAdmin";
 import Survey from "./pages/Survey/Survey";
 import SurveyStatistics from "./pages/Admin/SurveyStatistic/SurveyStatistics";
 import { getProfileAction, logoutAction } from "./redux/Auth/auth.thunk";
+import { setUserFromStorage } from "./redux/Auth/authSlice";
 import { startInactivityTimer } from "./utils/session";
 import CompanyReview from "./pages/ReviewManagement/CompanyReview";
 import AdminReview from "./pages/ReviewManagement/AdminReview";
 import SeekerProfile from "./components/SeekerProfile/SeekerProfile";
 
+import TermsOfService from './pages/Legal/TermsOfService';
+import PrivacyPolicy from './pages/Legal/PrivacyPolicy';
 import CVEditor from "./pages/CreateCV/CVEditor";
 import CVSelection from "./pages/CreateCV/CVSelection";
 import ViewCV from "./pages/CreateCV/ViewCV";
+
 const ProtectedHome = () => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
@@ -77,24 +81,42 @@ const App = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = sessionStorage.getItem("jwt");
+    const checkAuth = () => {
+      const token = localStorage.getItem("jwt");
+      if (!token && isAuthenticated) {
+        dispatch(logoutAction());
+      }
+    };
+  
+    // Kiểm tra mỗi 1 giây
+    const interval = setInterval(checkAuth, 1000);
+  
+    // Cleanup
+    return () => clearInterval(interval);
+  }, [dispatch, isAuthenticated]);
+  
+  useEffect(() => {
+    const token = localStorage.getItem("jwt");
+    const savedUser = localStorage.getItem("user");
 
-    // Kiểm tra nếu có token và chưa tải thông tin người dùng
-    if (token && !user) {
-      const fetchProfile = async () => {
-        const success = await dispatch(getProfileAction());
-        if (!success && !location.pathname.startsWith("/auth")) {
-          navigate("/auth/sign-in");
-        }
-      };
-      fetchProfile();
+    if (token) {
+      if (!user && savedUser) {
+        dispatch(setUserFromStorage(JSON.parse(savedUser)));
+      } else if (!user) {
+        const fetchProfile = async () => {
+          const success = await dispatch(getProfileAction());
+          if (success.payload) {
+            localStorage.setItem('user', JSON.stringify(success.payload));
+          } else if (!location.pathname.startsWith("/auth")) {
+            navigate("/auth/sign-in");
+          }
+        };
+        fetchProfile();
+      }
     }
 
-    // Bắt đầu theo dõi sự không hoạt động của người dùng nếu đã đăng nhập
     if (token && user) {
       const stopInactivityTimer = startInactivityTimer(dispatch);
-
-      // Dọn dẹp khi component bị unmount hoặc khi chuyển trang
       return () => stopInactivityTimer();
     }
   }, [dispatch, user, navigate, location.pathname]);
@@ -338,6 +360,22 @@ const App = () => {
             >
               <AdminDashboard />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/terms-of-service"
+          element={
+            <PublicRoute>
+              <TermsOfService />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/privacy-policy"
+          element={
+            <PublicRoute>
+              <PrivacyPolicy />
+            </PublicRoute>
           }
         />
       </Routes>

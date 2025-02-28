@@ -97,7 +97,7 @@ public class JwtProvider {
 	                .getExpiration();
 	        return expiration.before(new Date());
 	    } catch (Exception e) {
-	        return true; // Nếu lỗi, coi như token đã hết hạn
+	        return true; // Nếu lỗi , coi như token đã hết hạn
 	    }
 	}
 

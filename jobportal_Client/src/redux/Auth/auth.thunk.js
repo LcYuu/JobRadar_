@@ -26,7 +26,8 @@ export const loginAction = createAsyncThunk(
       const { data } = await axios.post(`${API_BASE_URL}/auth/login`, loginData);
 
       if (data.token) {
-        sessionStorage.setItem('jwt', data.token);
+        localStorage.setItem('jwt', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
 
         const profileResponse = await axios.get(`${API_BASE_URL}/users/profile`, {
           headers: {
@@ -61,7 +62,7 @@ export const getProfileAction = createAsyncThunk(
   'auth/getProfile',
   async (_, { rejectWithValue }) => {
     try {
-      const jwt = sessionStorage.getItem('jwt');
+      const jwt = localStorage.getItem('jwt');
       if (!jwt) {
         throw new Error('No token found');
       }
@@ -87,7 +88,7 @@ export const logoutAction = createAsyncThunk(
   'auth/logout',
   async (_, {dispatch, rejectWithValue }) => {
     try {
-      const token = sessionStorage.getItem('jwt');
+      const token = localStorage.getItem('jwt');
       const response = await axios.post(`${API_BASE_URL}/auth/signout`, null, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -95,7 +96,8 @@ export const logoutAction = createAsyncThunk(
       });
 
       if (response.status === 200) {
-        sessionStorage.removeItem('jwt');
+        localStorage.removeItem('jwt');
+        localStorage.removeItem('user');
         return;
       }
     } catch (error) {
