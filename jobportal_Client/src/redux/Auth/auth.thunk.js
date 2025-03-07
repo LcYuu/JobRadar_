@@ -131,3 +131,29 @@ export const getUserRole = createAsyncThunk(
     }
   }
 );
+
+export const blockCompany = createAsyncThunk(
+  "auth/blockCompany",
+  async ({ companyId, blockedData }, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(`${API_BASE_URL}/auth/block-company/${companyId}`, blockedData);
+      console.log("🚀 ~ response:", response)
+      return response.data; // Trả về thông báo từ server
+      
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Có lỗi xảy ra");
+    }
+  }
+);
+
+export const unblockCompany = createAsyncThunk(
+  "auth/unblockCompany",
+  async ({ companyId }, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(`${API_BASE_URL}/auth/unblock-company/${companyId}`);
+      return response.data; 
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Có lỗi xảy ra");
+    }
+  }
+);
