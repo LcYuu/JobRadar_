@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Thông báo mở khóa tài khoản</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 15px;
+            border-radius: 8px 8px 0 0;
+        }
+        .header img {
+            max-width: 150px; /* Định kích thước logo */
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 20px;
+            text-align: center;
+        }
+        .button {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://res.cloudinary.com/ddqygrb0g/image/upload/v1741250188/logo1.45a74222c73409492a75_bywgak.jpg" alt="Company Logo">
+            <h2>Thông báo mở khóa tài khoản</h2>
+        </div>
+        <div class="content">
+            <p>Xin chào <strong>${companyName}</strong>,</p>
+            <p>Tài khoản của bạn đã bị khóa trong ${}. Bây giờ bạn có thể đăng nhập lại vào hệ thống và tiếp tục sử dụng dịch vụ của chúng tôi.</p>
+        </div>
+        <div class="footer">
+            <p>© 2024 Job Portal. Mọi quyền được bảo lưu.</p>
+        </div>
+    </div>
+</body>
+</html>
