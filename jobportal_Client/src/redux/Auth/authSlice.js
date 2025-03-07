@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { signupAction, loginAction, getProfileAction, logoutAction, getUserRole } from './auth.thunk';
+import { signupAction, loginAction, getProfileAction, logoutAction, getUserRole, blockCompany, unblockCompany } from './auth.thunk';
 
 const initialState = {
   user: null,
@@ -71,6 +71,32 @@ const authSlice = createSlice({
         return initialState;
       })
       .addCase(logoutAction.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(blockCompany.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.successMessage = null;
+      })
+      .addCase(blockCompany.fulfilled, (state, action) => {
+        state.loading = false;
+        state.successMessage = action.payload;
+      })
+      .addCase(blockCompany.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(unblockCompany.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.successMessage = null;
+      })
+      .addCase(unblockCompany.fulfilled, (state, action) => {
+        state.loading = false;
+        state.successMessage = action.payload;
+      })
+      .addCase(unblockCompany.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
