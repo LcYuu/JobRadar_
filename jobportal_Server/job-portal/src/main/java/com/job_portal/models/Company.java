@@ -1,6 +1,7 @@
 package com.job_portal.models;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -60,7 +61,7 @@ public class Company {
 
 	@Column(name = "contact", length = 15)
 	private String contact;
-	
+
 	@Column(name = "tax_code", length = 30)
 	private String taxCode;
 
@@ -69,6 +70,15 @@ public class Company {
 
 	@Column(name = "established_time", length = 50)
 	private LocalDate establishedTime;
+
+	@Column(name = "is_blocked")
+	private Boolean isBlocked = false;
+	
+	@Column(name = "blocked_reason", length = 200)
+	private String blockedReason;
+	
+	@Column(name = "blocked_until", length = 200)
+	private LocalDateTime blockedUntil;
 
 	@JsonIgnore
 	@OneToMany
@@ -89,7 +99,7 @@ public class Company {
 	private UserAccount userAccount;
 
 //	@JsonIgnore
-	@OneToMany(mappedBy = "company", fetch = FetchType.EAGER, cascade = CascadeType.ALL , orphanRemoval = true)
+	@OneToMany(mappedBy = "company", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<ImageCompany> images = new ArrayList<>();
 
 }

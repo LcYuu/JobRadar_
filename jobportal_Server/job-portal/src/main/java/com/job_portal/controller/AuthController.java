@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.job_portal.DTO.BlockCompanyDTO;
 import com.job_portal.DTO.LoginDTO;
 import com.job_portal.config.JwtProvider;
 import com.job_portal.DTO.UserSignupDTO;
@@ -57,6 +58,7 @@ import com.job_portal.repository.UserTypeRepository;
 import com.job_portal.response.AuthResponse;
 import com.job_portal.response.ChangePassword;
 import com.job_portal.service.AccountDetailServiceImpl;
+import com.job_portal.service.ICompanyService;
 import com.job_portal.utils.EmailUtil;
 import com.job_portal.utils.OtpUtil;
 import com.job_portal.service.TaxCodeValidation;
@@ -71,6 +73,8 @@ public class AuthController {
 
 	@Autowired
 	private UserAccountRepository userAccountRepository;
+	@Autowired
+	private ICompanyService companyService;
 
 	@Autowired
 	private AccountDetailServiceImpl accountDetailService;
@@ -159,6 +163,7 @@ public class AuthController {
 			company.setIndustry(industryRepository.findById(1).orElse(null));
 			company.setCity(cityRepository.findById(company.getCity().getCityId()).orElse(null));
 			company.setAddress(", , ");
+			company.setIsBlocked(false);
 			user.setCompany(company);
 
 			userAccountRepository.save(user);
@@ -217,6 +222,12 @@ public class AuthController {
 		if (!user.isActive()) {
 			return new AuthResponse("", "Tài khoản của bạn chưa được xác thực");
 		}
+		if(user.getUserType().getUserTypeId() == 3) {
+			if(user.getCompany().getIsBlocked() && user.getCompany().getBlockedUntil() != null && user.getCompany().getBlockedUntil().isAfter(LocalDateTime.now())) {
+				return new AuthResponse("", "Tài khoản cuả bạn đã bị khóa. Vui lòng kiểm tra email để biết thêm chi tiết");
+			}
+		}
+		
 		try {
 			Authentication authentication = authenticate(login.getEmail(), login.getPassword());
 			String token = JwtProvider.generateToken(authentication);
@@ -401,6 +412,9 @@ public class AuthController {
 
 //		user.get().setLastLogin(LocalDateTime.now());
 //		userAccountRepository.save(user.get());
+		if(user.get().getCompany().getIsBlocked() && user.get().getCompany().getBlockedUntil() != null && user.get().getCompany().getBlockedUntil().isAfter(LocalDateTime.now())) {
+			return new AuthResponse("", "Tài khoản cuả bạn đã bị khóa. Vui lòng kiểm tra email để biết thêm chi tiết");
+		}
 		AuthResponse res;
 		res = new AuthResponse(jwtToken, "Đăng nhập thành công");
 		return res;
@@ -440,6 +454,7 @@ public class AuthController {
 			company.setIndustry(defaultIndustry);
 			company.setCity(defaultCity);
 			company.setAddress(", , ");
+			company.setIsBlocked(false);
 			user.get().setCompany(company);
 			userAccountRepository.save(newUser);
 		}
@@ -495,4 +510,17 @@ public class AuthController {
 			return ResponseEntity.ok(false); // Người dùng chưa tồn tại
 		}
 	}
+	
+	@PutMapping("/block-company/{companyId}")
+	public ResponseEntity<String> blockCompany(@PathVariable UUID companyId, @RequestBody BlockCompanyDTO blockCompanyDTO) throws MessagingException {
+	    companyService.blockCompany(companyId, blockCompanyDTO.getBlockedReason(), blockCompanyDTO.getBlockedUntil());
+	    return ResponseEntity.ok("Đã khóa tài khoản thành công");
+	}
+	
+	@PutMapping("/unblock-company/{companyId}")
+	public ResponseEntity<String> unblockCompany(@PathVariable UUID companyId) throws MessagingException {
+	    companyService.unblockCompany(companyId);
+	    return ResponseEntity.ok("Mở khóa tài khoản thành công");
+	}
+
 }
