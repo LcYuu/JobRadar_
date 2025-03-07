@@ -24,7 +24,6 @@ const FormSection = () => {
               <Home />
             </Button>
           </Link>
-          <ThemeColor/>
         </div>
 
         <div className="flex gap-2">

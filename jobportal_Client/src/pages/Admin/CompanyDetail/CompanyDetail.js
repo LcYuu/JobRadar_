@@ -53,6 +53,9 @@ import {
 } from "../../../redux/Company/company.thunk";
 import { getReviewByCompany } from "../../../redux/Review/review.thunk";
 import { fetchSocialLinksByUserId } from "../../../redux/SocialLink/socialLink.thunk";
+import BlockedCompanyModal from "../../../components/BlockedCompany/BlockedCompanyModal";
+import Swal from "sweetalert2";
+import { getProfileAction, unblockCompany } from "../../../redux/Auth/auth.thunk";
 
 export default function CompanyDetail() {
   const navigate = useNavigate();
@@ -61,6 +64,17 @@ export default function CompanyDetail() {
   const { companyProfile, jobCounts, jobStats, loading } = useSelector(
     (store) => store.company
   );
+
+  const [isBlocked, setIsBlocked] = useState(companyProfile?.isBlocked);
+
+  const [open, setOpen] = useState(false);
+  const handleOpenBlockModal = () => {
+    console.log("Đã nhấn nút khóa!"); // Kiểm tra sự kiện click
+    setOpen(true);
+  };
+
+  const handleClose = () => setOpen(false);
+
   const { socialLinks } = useSelector((store) => store.socialLink);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -146,20 +160,6 @@ export default function CompanyDetail() {
       setIsMounted(false);
     };
   }, [dispatch, companyId, companyProfile]);
-
-  const handleStatusChange = async () => {
-    try {
-      await dispatch(
-        updateCompanyStatus({
-          companyId,
-          isActive: !companyProfile.isActive,
-        })
-      );
-      dispatch(getCompanyById(companyId));
-    } catch (error) {
-      toast.error("Không thể cập nhật trạng thái công ty");
-    }
-  };
 
   const handleDelete = async () => {
     try {
@@ -256,6 +256,37 @@ export default function CompanyDetail() {
 
   if (loading) return <div>Loading...</div>;
 
+  const handleOpenUnBlockModal = async () => {
+    Swal.fire({
+      title: "Bạn có muốn mở khóa tài khoản không?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Có, mở khóa!",
+      cancelButtonText: "Hủy",
+      reverseButtons: true,
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: "Đang xử lý...",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
+  
+        try {
+          console.log("companyId khi mở khóa:", companyId);
+          await dispatch(unblockCompany({companyId})); 
+          Swal.fire("Thành công!", "Tài khoản đã được mở khóa.", "success");
+          dispatch(getCompanyProfile(companyId));
+        } catch (error) {
+          Swal.fire("Lỗi!", "Đã có lỗi xảy ra, vui lòng thử lại.", "error");
+        }
+      }
+    });
+  };
+  
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -275,28 +306,32 @@ export default function CompanyDetail() {
 
           <div className="flex gap-3">
             <Button
-              variant={companyProfile?.isActive ? "destructive" : "success"}
-              onClick={handleStatusChange}
+              variant={companyProfile?.isBlocked ? "destructive" : "success"}
+              onClick={!companyProfile?.isBlocked ? handleOpenBlockModal : handleOpenUnBlockModal}
               className="flex items-center gap-2"
             >
-              {companyProfile?.isActive ? (
-                <>
-                  <Lock className="w-4 h-4" />
-                  Khóa tài khoản
-                </>
-              ) : (
+              {companyProfile?.isBlocked ? (
                 <>
                   <Unlock className="w-4 h-4" />
                   Mở khóa tài khoản
                 </>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4" />
+                  Khóa tài khoản
+                </>
               )}
             </Button>
-            <Button
-              variant="destructive"
-              onClick={() => setShowDeleteModal(true)}
-            >
-              Xóa công ty
-            </Button>
+
+            <section>
+              {open && (
+                <BlockedCompanyModal
+                  open={open}
+                  handleClose={handleClose}
+                  companyId={companyId}
+                />
+              )}
+            </section>
           </div>
         </div>
 
@@ -626,7 +661,6 @@ export default function CompanyDetail() {
                       tick={{ fill: "#666" }}
                       tickLine={{ stroke: "#666" }}
                       tickFormatter={(value) => {
-                        console.log("Formatting X-axis value:", value);
                         try {
                           return new Date(value).toLocaleDateString("vi-VN", {
                             day: "2-digit",
