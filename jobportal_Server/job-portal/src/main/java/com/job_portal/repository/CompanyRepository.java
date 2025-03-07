@@ -1,5 +1,6 @@
 package com.job_portal.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,6 +21,8 @@ import com.job_portal.models.JobPost;
 
 public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpecificationExecutor<Company> {
 
+	List<Company> findByBlockedUntilBefore(LocalDateTime now);
+	
 	@Query("SELECT c FROM Company c WHERE c.companyName LIKE %:companyName%")
 	List<Company> findCompanyByCompanyName(@Param("companyName") String companyName);
 

@@ -1,5 +1,6 @@
 package com.job_portal.DTO;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -11,13 +12,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CompanyWithCountJobDTO {
+public class BlockCompanyDTO {
+
 	private UUID companyId;
-	private String companyName;
-	private String logo;
-	private Integer industryId;
-	private String description;
-	private String industryName;
-	private Integer cityId;
-	private Long countJob;
+	private boolean isBlocked;
+	private String blockedReason;
+	private LocalDateTime blockedUntil;
 }
