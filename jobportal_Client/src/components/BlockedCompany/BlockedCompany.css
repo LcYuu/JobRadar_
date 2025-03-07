@@ -1,0 +1,50 @@
+.block-company-form {
+    max-width: 400px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f8d7da;
+  
+    h3 {
+      text-align: center;
+      color: #d32f2f;
+    }
+  
+    .form-group {
+      margin-bottom: 16px;
+  
+      label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 6px;
+      }
+  
+      select, textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+  
+      textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+    }
+  
+    button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      background-color: #d32f2f;
+      color: #fff;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+  
+      &:hover {
+        background-color: #b71c1c;
+      }
+    }
+  }
+  

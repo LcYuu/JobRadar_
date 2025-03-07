@@ -184,49 +184,6 @@ export default function SignInForm() {
     }
   };
 
-  // Modal content based on status
-  const modalContent = () => {
-    if (loginStatus === "success") {
-      return (
-        <div className="text-green-600">
-          <svg
-            className="w-16 h-16 mx-auto mb-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 13l4 4L19 7"
-            />
-          </svg>
-          <p className="text-xl font-semibold">Đăng nhập thành công!</p>
-        </div>
-      );
-    }
-    return (
-      <div className="text-red-600">
-        <svg
-          className="w-16 h-16 mx-auto mb-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M6 18L18 6M6 6l12 12"
-          />
-        </svg>
-        <p className="text-xl font-semibold">Đăng nhập thất bại</p>
-        <p className="mt-2 text-sm">{error}</p>
-      </div>
-    );
-  };
-
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 flex items-center justify-center p-4">

@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import com.job_portal.DTO.BlockCompanyDTO;
 import com.job_portal.DTO.CompanyDTO;
 import com.job_portal.DTO.CompanyWithCountJobDTO;
 import com.job_portal.config.JwtProvider;
@@ -110,80 +111,82 @@ public class CompanyController {
 
 		Company company = companyOptional.get();
 		String taxCode = company.getTaxCode();
-			
+
 		// Kiểm tra mã số thuế qua API VietQR
 		boolean isTaxCodeValid = taxCodeValidation.checkTaxCode(taxCode);
 
 		// Trả về true nếu hợp lệ, false nếu không hợp lệ
 		return ResponseEntity.ok(isTaxCodeValid);
 	}
+
 	@GetMapping("/validate-tax-info/{taxCode}")
 	public ResponseEntity<?> validateTaxInfo(@PathVariable String taxCode) {
-	    String apiUrl = "https://api.vietqr.io/v2/business/" + taxCode;
-	    
-	    try {
-	        ResponseEntity<Map> response = restTemplate.exchange(apiUrl, HttpMethod.GET, null, Map.class);
-	        Map<String, Object> responseBody = response.getBody();
-	        
-	        if (responseBody != null && "00".equals(responseBody.get("code"))) {
-	            Map<String, Object> data = (Map<String, Object>) responseBody.get("data");
-	            Map<String, Object> companyInfo = new HashMap<>();
-	            
-	            String address = (String) data.get("address");
-	            System.out.println("Original address: " + address);
-	            companyInfo.put("companyName", data.get("name"));
-	            companyInfo.put("address", address);
-	            companyInfo.put("taxCode", data.get("taxCode"));
-	            
-	            // Tìm cityId dựa trên địa chỉ
-	            String cityName = extractCityFromAddress(address);
-	            System.out.println("Extracted city name: " + cityName);
-	            City city = cityRepository.findByCityName(cityName);
-	            System.out.println("Found city: " + (city != null ? city.getCityName() : 0));
-	            
-	            // Đảm bảo trả về số nguyên cho cityId
-	            int cityId = (city != null) ? city.getCityId() : 1;
-	            System.out.println("Selected cityId: " + cityId);
-	            companyInfo.put("cityId", cityId);
-	            
-	            return ResponseEntity.ok(companyInfo);
-	        }
-	        return ResponseEntity.badRequest().body("Mã số thuế không hợp lệ");
-	    } catch (Exception e) {
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body("Có lỗi xảy ra khi xác thực mã số thuế");
-	    }
+		String apiUrl = "https://api.vietqr.io/v2/business/" + taxCode;
+
+		try {
+			ResponseEntity<Map> response = restTemplate.exchange(apiUrl, HttpMethod.GET, null, Map.class);
+			Map<String, Object> responseBody = response.getBody();
+
+			if (responseBody != null && "00".equals(responseBody.get("code"))) {
+				Map<String, Object> data = (Map<String, Object>) responseBody.get("data");
+				Map<String, Object> companyInfo = new HashMap<>();
+
+				String address = (String) data.get("address");
+				System.out.println("Original address: " + address);
+				companyInfo.put("companyName", data.get("name"));
+				companyInfo.put("address", address);
+				companyInfo.put("taxCode", data.get("taxCode"));
+
+				// Tìm cityId dựa trên địa chỉ
+				String cityName = extractCityFromAddress(address);
+				System.out.println("Extracted city name: " + cityName);
+				City city = cityRepository.findByCityName(cityName);
+				System.out.println("Found city: " + (city != null ? city.getCityName() : 0));
+
+				// Đảm bảo trả về số nguyên cho cityId
+				int cityId = (city != null) ? city.getCityId() : 1;
+				System.out.println("Selected cityId: " + cityId);
+				companyInfo.put("cityId", cityId);
+
+				return ResponseEntity.ok(companyInfo);
+			}
+			return ResponseEntity.badRequest().body("Mã số thuế không hợp lệ");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Có lỗi xảy ra khi xác thực mã số thuế");
+		}
 	}
 
 	private String extractCityFromAddress(String address) {
-	    try {
-	        String[] parts = address.split(",");
-	        System.out.println("Address parts: " + Arrays.toString(parts));
-	        
-	        // Tìm phần tử chứa "Thành phố" hoặc "Tỉnh"
-	        for (int i = parts.length - 2; i >= 0; i--) {
-	            String part = parts[i].trim();
-	            if (part.toLowerCase().contains("thành phố") || part.toLowerCase().contains("tỉnh")) {
-	                System.out.println("Found city part: " + part);
-	                
-	                // Xử lý đặc biệt cho TP HCM
-	                if (part.toLowerCase().contains("hồ chí minh")) {
-	                    return "Thành phố Hồ Chí Minh";
-	                }
-	                
-	                // Xử lý cho các thành phố/tỉnh khác
-	                String processedCity = part.replaceAll("(?i)^(Tỉnh|Thành phố)\\s+", "").trim();
-	                System.out.println("Processed city name: " + processedCity);
-	                return processedCity;
-	            }
-	        }
-	        return "";
-	    } catch (Exception e) {
-	        System.out.println("Error in extractCityFromAddress: " + e.getMessage());
-	        e.printStackTrace();
-	        return "";
-	    }
+		try {
+			String[] parts = address.split(",");
+			System.out.println("Address parts: " + Arrays.toString(parts));
+
+			// Tìm phần tử chứa "Thành phố" hoặc "Tỉnh"
+			for (int i = parts.length - 2; i >= 0; i--) {
+				String part = parts[i].trim();
+				if (part.toLowerCase().contains("thành phố") || part.toLowerCase().contains("tỉnh")) {
+					System.out.println("Found city part: " + part);
+
+					// Xử lý đặc biệt cho TP HCM
+					if (part.toLowerCase().contains("hồ chí minh")) {
+						return "Thành phố Hồ Chí Minh";
+					}
+
+					// Xử lý cho các thành phố/tỉnh khác
+					String processedCity = part.replaceAll("(?i)^(Tỉnh|Thành phố)\\s+", "").trim();
+					System.out.println("Processed city name: " + processedCity);
+					return processedCity;
+				}
+			}
+			return "";
+		} catch (Exception e) {
+			System.out.println("Error in extractCityFromAddress: " + e.getMessage());
+			e.printStackTrace();
+			return "";
+		}
 	}
+
 	@GetMapping("/get-all")
 	public ResponseEntity<List<CompanyDTO>> getAllCompanies() {
 		List<CompanyDTO> res = companyRepository.findCompaniesWithSavedApplications().stream().limit(6)
@@ -208,7 +211,6 @@ public class CompanyController {
 				.collect(Collectors.toList());
 		return new ResponseEntity<>(companies, HttpStatus.OK);
 	}
-	
 
 	@PutMapping("/update-company")
 	public ResponseEntity<String> updateCompany(@RequestHeader("Authorization") String jwt,
@@ -332,4 +334,6 @@ public class CompanyController {
 		Page<Company> companies = companyRepository.findCompaniesWithFilters(companyName, industryName, pageable);
 		return ResponseEntity.ok(companies);
 	}
+
+	
 }
