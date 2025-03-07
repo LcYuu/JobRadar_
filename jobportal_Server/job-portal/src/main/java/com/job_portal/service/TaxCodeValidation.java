@@ -15,7 +15,6 @@ import org.springframework.web.client.RestTemplate;
 public class TaxCodeValidation {
 	private final RestTemplate restTemplate;
 
-    @Autowired
     public TaxCodeValidation(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
@@ -24,7 +23,6 @@ public class TaxCodeValidation {
         String apiUrl = "https://api.vietqr.io/v2/business/" + taxCode;
 
         try {
-            // Gửi yêu cầu GET tới API VietQR
             ResponseEntity<Map> response = restTemplate.exchange(apiUrl, HttpMethod.GET, null, Map.class);
 
             Map<String, Object> responseBody = response.getBody();
@@ -32,14 +30,12 @@ public class TaxCodeValidation {
                 return true; // Mã số thuế hợp lệ
             }
         } catch (HttpClientErrorException.NotFound e) {
-            // Nếu mã số thuế không tồn tại
             return false;
         } catch (Exception e) {
-            // Nếu có lỗi khác trong quá trình gọi API
             e.printStackTrace();
         }
 
-        return false; // Mã số thuế không hợp lệ hoặc có lỗi
+        return false; 
     }
 
 }

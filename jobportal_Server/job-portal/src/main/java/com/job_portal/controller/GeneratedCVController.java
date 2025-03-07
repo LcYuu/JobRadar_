@@ -54,7 +54,7 @@ public class GeneratedCVController {
 	    if (cv.isPresent()) {
 	        return ResponseEntity.ok(cv.get());
 	    } else {
-	        return ResponseEntity.noContent().build(); // Trả về 204 No Content nếu không tìm thấy
+	        return ResponseEntity.noContent().build();
 	    }
 	}
 
@@ -76,10 +76,8 @@ public class GeneratedCVController {
 			List<GeneratedCV> cvs = generatedCVService.findGenCVBySeekerId(user.get().getUserId());
 			return ResponseEntity.ok(cvs);
 		} catch (AllExceptions e) {
-			// Trả về thông báo từ service
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 		} catch (Exception e) {
-			// Trả về thông báo lỗi chung
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
 		}
