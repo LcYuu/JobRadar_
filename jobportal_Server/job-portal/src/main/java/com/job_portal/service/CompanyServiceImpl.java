@@ -2,12 +2,14 @@ package com.job_portal.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,8 +26,10 @@ import com.job_portal.repository.CompanyRepository;
 import com.job_portal.repository.IndustryRepository;
 import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.SeekerRepository;
+import com.job_portal.utils.EmailUtil;
 import com.social.exceptions.AllExceptions;
 
+import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
@@ -42,6 +46,8 @@ public class CompanyServiceImpl implements ICompanyService {
 	@Autowired
 	ISeekerService seekerService;
 	
+	@Autowired
+	private EmailUtil emailUtil;
 	@Autowired
 	SeekerRepository seekerRepository;
 	@Autowired
@@ -225,4 +231,42 @@ public class CompanyServiceImpl implements ICompanyService {
 	           .orElseThrow(() -> new EntityNotFoundException("Company not found"));
 	       return company.getIndustry().getIndustryId(); // Assuming you have a method to get the industry
 	   }
+
+	   @Override
+	   public void blockCompany(UUID companyId, String reason, LocalDateTime until) {
+	       Company company = companyRepository.findById(companyId)
+	               .orElseThrow(() -> new RuntimeException("Employer không tồn tại"));
+
+	       company.setIsBlocked(true);
+	       company.setBlockedReason(reason);
+	       company.setBlockedUntil(until);
+
+	       DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+	       String untilFormatted = until.format(formatter);
+
+	       try {
+	           emailUtil.sendBlockAccountEmail(company.getEmail(), company.getCompanyName(), untilFormatted, reason);
+	       } catch (MessagingException e) {
+	           // Ghi log lỗi nếu gửi email thất bại
+	           Logger.getLogger(getClass().getName()).severe("Lỗi khi gửi email chặn công ty: " + e.getMessage());
+	           // Hoặc có thể throw một exception tùy chỉnh nếu cần
+	           throw new RuntimeException("Gửi email thất bại, vui lòng thử lại sau.");
+	       }
+
+	       companyRepository.save(company);
+	   }
+
+	@Override
+	public void unblockCompany(UUID companyId) throws MessagingException {
+		Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new RuntimeException("Employer không tồn tại"));
+
+		company.setIsBlocked(false);
+		company.setBlockedReason(null);
+		company.setBlockedUntil(null);
+		emailUtil.sendUnBlockAccountEmail(company.getEmail(), company.getCompanyName());
+		
+		companyRepository.save(company);
+		
+	}
 }
