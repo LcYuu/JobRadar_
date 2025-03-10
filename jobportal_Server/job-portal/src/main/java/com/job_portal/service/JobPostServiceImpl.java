@@ -597,26 +597,26 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 	}
 
 	public Page<JobPost> searchJobs(String title, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, int page, int size) {
-	    String redisKey = "searchJobs:" + title + ":" + selectedTypesOfWork + ":" + minSalary + ":" + maxSalary + ":"
-	            + cityId + ":" + selectedIndustryIds + ":" + page + ":" + size;
-
-	    // Kiểm tra xem cache có kết quả không
-	    Object cachedData = this.get(redisKey);
-	    if (cachedData instanceof List<?>) {
-	        List<JobPost> jobList = (List<JobPost>) cachedData;
-	        Pageable pageable = PageRequest.of(page, size);
-	        return new PageImpl<>(jobList, pageable, jobList.size());
-	    }
-	    
+//	    String redisKey = "searchJobs:" + title + ":" + selectedTypesOfWork + ":" + minSalary + ":" + maxSalary + ":"
+//	            + cityId + ":" + selectedIndustryIds + ":" + page + ":" + size;
+//
+//	    // Kiểm tra xem cache có kết quả không
+//	    Object cachedData = this.get(redisKey);
+//	    if (cachedData instanceof List<?>) {
+//	        List<JobPost> jobList = (List<JobPost>) cachedData;
+//	        Pageable pageable = PageRequest.of(page, size);
+//	        return new PageImpl<>(jobList, pageable, jobList.size());
+//	    }
+//	    
 	    Specification<JobPost> spec = Specification
 	            .where(jobPostRepository.alwaysActiveJobs())
 	            .and(JobPostSpecification.withFilters(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds));
 
 	    Page<JobPost> result = jobPostRepository.findAll(spec, PageRequest.of(page, size));
 
-	    // Lưu kết quả vào Redis
-	    this.set(redisKey, result);
-	    this.setTimeToLive(redisKey, TIME_OUT); // Cache hết hạn sau 1 ngày
+//	    // Lưu kết quả vào Redis
+//	    this.set(redisKey, result);
+//	    this.setTimeToLive(redisKey, TIME_OUT); // Cache hết hạn sau 1 ngày
 
 	    return result;
 	}
