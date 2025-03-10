@@ -299,7 +299,7 @@ public class JobPostController {
 		return jobPostService.getDailyJobPostCounts(start, end);
 	}
 
-	@PostMapping("/recommend-jobs")
+	@PostMapping("/recommend-jobs/tfidf")
 	public ResponseEntity<List<JobRecommendationDTO>> getJobRecommendations(
 			@RequestHeader("Authorization") String jwt) {
 		// Lấy email từ JWT
@@ -322,7 +322,100 @@ public class JobPostController {
 		System.out.println("User ID sent to Python API: " + userId);
 
 		// Gửi yêu cầu đến API Python
-		String apiUrl = "http://localhost:5000/recommend-jobs";
+		String apiUrl = "http://localhost:5000/recommend-jobs/tfidf";
+		HttpHeaders headers = new HttpHeaders();
+		// Thêm userId vào header với tên rõ ràng hơn, ví dụ "X-User-Id"
+		headers.set("X-User-Id", userId.toString());
+
+		// Sử dụng ObjectMapper để chuyển đổi requestBody thành JSON
+		ObjectMapper objectMapper = new ObjectMapper();
+		String jsonRequestBody;
+		try {
+			jsonRequestBody = objectMapper.writeValueAsString(requestBody);
+		} catch (JsonProcessingException e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+		}
+
+		HttpEntity<String> entity = new HttpEntity<>(jsonRequestBody, headers);
+
+		try {
+			// Gửi yêu cầu đến API Python
+			ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, String.class);
+
+			// Chuyển đổi JSON Response thành JsonNode
+			JsonNode jsonResponse = objectMapper.readTree(response.getBody());
+
+			// Tạo danh sách JobPost
+			List<JobRecommendationDTO> jobs = new ArrayList<>();
+
+			// Duyệt qua từng đối tượng trong JsonNode và thiết lập từng giá trị cho JobPost
+			for (JsonNode jobNode : jsonResponse) {
+				JobRecommendationDTO job = new JobRecommendationDTO();
+				String createDateStr = jobNode.get("createDate").asText(null);
+				if (createDateStr != null && !createDateStr.isEmpty()) {
+					try {
+						job.setCreateDate(LocalDateTime.parse(createDateStr, formatter));
+					} catch (Exception e) {
+						System.out.println("Error parsing createDate: " + createDateStr + " - " + e.getMessage());
+					}
+				}
+
+				// Xử lý expireDate với kiểm tra null và định dạng
+				String expireDateStr = jobNode.get("expireDate").asText(null);
+				if (expireDateStr != null && !expireDateStr.isEmpty()) {
+					try {
+						job.setExpireDate(LocalDateTime.parse(expireDateStr, formatter));
+					} catch (Exception e) {
+						System.out.println("Error parsing expireDate: " + expireDateStr + " - " + e.getMessage());
+					}
+				}
+				job.setDescription(jobNode.get("description").asText(null));
+				job.setExperience(jobNode.get("experience").asText(null));
+				job.setLocation(jobNode.get("location").asText(null));
+				job.setPostId(UUID.fromString(jobNode.get("postId").asText()));
+				job.setSalary(jobNode.get("salary").asLong());
+				job.setTitle(jobNode.get("title").asText(null));
+				job.setTypeOfWork(jobNode.get("typeOfWork").asText(null));
+				job.setCompanyId(UUID.fromString(jobNode.get("companyId").asText(null)));
+				job.setCompanyName(jobNode.get("companyName").asText(null));
+				job.setCityName(jobNode.get("cityName").asText(null));
+				job.setIndustryName(jobNode.get("industryName").asText(null));
+				job.setLogo(jobNode.get("logo").asText(null));
+				jobs.add(job);
+			}
+
+			return ResponseEntity.ok(jobs); // Trả về danh sách việc làm
+		} catch (JsonProcessingException e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+		}
+	}
+	
+	@PostMapping("/recommend-jobs/collaborative")
+	public ResponseEntity<List<JobRecommendationDTO>> getJobRecommendationCollaborative(
+			@RequestHeader("Authorization") String jwt) {
+		// Lấy email từ JWT
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss z");
+
+		// Tìm người dùng bằng email
+		Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
+		if (!userOptional.isPresent()) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+		}
+
+		UserAccount user = userOptional.get();
+		UUID userId = user.getUserId();
+
+		// Tạo body để gửi đến API Python
+		Map<String, String> requestBody = new HashMap<>();
+		requestBody.put("userId", userId.toString());
+		System.out.println("User ID sent to Python API: " + userId);
+
+		// Gửi yêu cầu đến API Python
+		String apiUrl = "http://localhost:5000/recommend-jobs/collaborative";
 		HttpHeaders headers = new HttpHeaders();
 		// Thêm userId vào header với tên rõ ràng hơn, ví dụ "X-User-Id"
 		headers.set("X-User-Id", userId.toString());
