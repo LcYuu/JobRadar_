@@ -12,7 +12,7 @@ const handleLogout = (dispatch) => {
     window.location.href = '/auth/sign-in';
   });
 };
-export const startInactivityTimer = (dispatch, warningTime = 55 * 1000, logoutTime = 60 * 1000) => {
+export const startInactivityTimer = (dispatch, warningTime = 55 * 60 * 1000, logoutTime = 60 * 60 * 1000) => {
   const token = localStorage.getItem('jwt');
   if (token && isTokenExpired(token)) {
     handleLogout(dispatch);
