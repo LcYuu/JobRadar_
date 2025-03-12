@@ -401,23 +401,37 @@ public class AuthController {
 
 	@PostMapping("/login/google")
 	public AuthResponse loginWithGoogle(@RequestBody Map<String, String> requestBody) {
-		String googleToken = requestBody.get("token"); // Lấy googleToken từ frontend
+		try {
+			String googleToken = requestBody.get("token"); // Lấy googleToken từ frontend
 
-		// Giải mã token Google (JWT) để lấy thông tin người dùng
-		DecodedJWT decodedJWT = JWT.decode(googleToken);
-		String email = decodedJWT.getClaim("email").asString();
+			// Giải mã token Google (JWT) để lấy thông tin người dùng
+			DecodedJWT decodedJWT = JWT.decode(googleToken);
+			String email = decodedJWT.getClaim("email").asString();
 
-		String jwtToken = jwtProvider.generateTokenFromEmail(email); // Sử dụng auth trực tiếp
-		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+			String jwtToken = jwtProvider.generateTokenFromEmail(email); // Sử dụng auth trực tiếp
+			Optional<UserAccount> userOpt = userAccountRepository.findByEmail(email);
 
-//		user.get().setLastLogin(LocalDateTime.now());
-//		userAccountRepository.save(user.get());
-		if(user.get().getCompany().getIsBlocked() && user.get().getCompany().getBlockedUntil() != null && user.get().getCompany().getBlockedUntil().isAfter(LocalDateTime.now())) {
-			return new AuthResponse("", "Tài khoản cuả bạn đã bị khóa. Vui lòng kiểm tra email để biết thêm chi tiết");
+			if (userOpt.isPresent()) {
+				UserAccount user = userOpt.get();
+
+				// Kiểm tra null trước khi truy cập thuộc tính của Company
+				if (user.getCompany() != null &&
+						user.getCompany().getIsBlocked() &&
+						user.getCompany().getBlockedUntil() != null &&
+						user.getCompany().getBlockedUntil().isAfter(LocalDateTime.now())) {
+					return new AuthResponse("", "Tài khoản của bạn đã bị khóa. Vui lòng kiểm tra email để biết thêm chi tiết");
+				}
+
+				// Cập nhật thời gian đăng nhập nếu cần
+				// user.setLastLogin(LocalDateTime.now());
+				// userAccountRepository.save(user);
+			}
+
+			return new AuthResponse(jwtToken, "Đăng nhập thành công");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new AuthResponse("", "Lỗi đăng nhập: " + e.getMessage());
 		}
-		AuthResponse res;
-		res = new AuthResponse(jwtToken, "Đăng nhập thành công");
-		return res;
 	}
 
 	@PostMapping("/update-role/{role}")
