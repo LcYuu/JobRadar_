@@ -1,6 +1,6 @@
 import Swal from 'sweetalert2';
 import { logoutAction } from '../redux/Auth/auth.thunk';
-
+import { isTokenExpired } from './tokenUtils';
 let inactivityTimeout = null;
 
 const handleLogout = (dispatch) => {
@@ -12,8 +12,12 @@ const handleLogout = (dispatch) => {
     window.location.href = '/auth/sign-in';
   });
 };
-export const startInactivityTimer = (dispatch, warningTime = 55 * 60*  1000, logoutTime = 60 * 60 * 1000) => {
-
+export const startInactivityTimer = (dispatch, warningTime = 55 * 1000, logoutTime = 60 * 1000) => {
+  const token = localStorage.getItem('jwt');
+  if (token && isTokenExpired(token)) {
+    handleLogout(dispatch);
+    return () => {}; // Return empty cleanup function
+  }
   const resetTimer = () => {
     // Nếu đã có bộ đếm, hủy nó
     if (inactivityTimeout) {
