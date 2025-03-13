@@ -57,7 +57,7 @@ import PrivacyPolicy from './pages/Legal/PrivacyPolicy';
 import CVEditor from "./pages/CreateCV/CVEditor";
 import CVSelection from "./pages/CreateCV/CVSelection";
 import ViewCV from "./pages/CreateCV/ViewCV";
-
+import { isTokenExpired } from './utils/tokenUtils';
 const ProtectedHome = () => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
@@ -83,8 +83,10 @@ const App = () => {
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem("jwt");
-      if (!token && isAuthenticated) {
-        dispatch(logoutAction());
+      if (!token || isTokenExpired(token)) {
+        if (isAuthenticated) {
+          dispatch(logoutAction());
+        }
       }
     };
   
