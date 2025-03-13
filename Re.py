@@ -12,13 +12,13 @@ import re
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*", "allow_headers": "Authorization"}})
 
-# Danh sách stop words tiếng Việt (mẫu)
+
 VIETNAMESE_STOP_WORDS = [
     "và", "của", "là", "các", "cho", "trong", "tại", "được", "với", "một", 
     "những", "để", "từ", "có", "không", "người", "này", "đã", "ra", "trên"
 ]
 
-# Load job data from CSV
+
 def load_jobs_from_csv(filepath):
     try:
         df = pd.read_csv(filepath, encoding='utf-8', low_memory=False)
@@ -37,7 +37,7 @@ def load_jobs_from_csv(filepath):
         print(f"Error loading jobs from CSV: {e}")
         return []
 
-# Load search history from CSV and clean Search Query
+
 def load_search_history_from_csv(filepath):
     try:
         df = pd.read_csv(filepath, encoding='utf-8', low_memory=False)
@@ -61,13 +61,13 @@ def load_search_history_from_csv(filepath):
         print(f"Error loading search history from CSV: {e}")
         return []
 
-# Preload data
+
 jobs_filepath = 'D:\\JobRadar_\\job_post.csv'
 search_history_filepath = 'D:\\JobRadar_\\search.csv'
 jobs = load_jobs_from_csv(jobs_filepath)
 search_history = load_search_history_from_csv(search_history_filepath)
 
-# Reload data periodically
+
 def reload_data():
     global jobs, search_history
     jobs = load_jobs_from_csv(jobs_filepath)
@@ -85,7 +85,6 @@ thread = Thread(target=schedule_data_update)
 thread.daemon = True
 thread.start()
 
-# Save new search query
 @app.route('/save-search', methods=['POST'])
 def save_search():
     user_id = request.headers.get('X-User-Id')
@@ -199,37 +198,104 @@ def get_tfidf_recommendations(search_history, jobs, top_n=10):
 # Collaborative Filtering Model for Job Recommendation
 def get_collaborative_recommendations(user_id, search_history):
     try:
+        # Convert search history to DataFrame
         user_df = pd.DataFrame(search_history)
         if user_df.empty or 'SeekerID' not in user_df or 'Search Query' not in user_df:
             print("⚠️ Dữ liệu search_history không hợp lệ hoặc rỗng!")
             return np.array([])
 
+        # Filter valid searches
         user_df = user_df[user_df['Search Query'].str.strip() != '']
         if user_df.empty:
             print("⚠️ Không có truy vấn hợp lệ sau khi loại bỏ truy vấn rỗng!")
             return np.array([])
-
-        user_df = user_df.groupby(['SeekerID', 'Search Query']).size().reset_index(name='Search Count')
-        user_job_matrix = user_df.pivot(index='SeekerID', columns='Search Query', values='Search Count').fillna(0)
         
-        if user_id not in user_job_matrix.index:
+        # Add recency weight if 'Search Date' exists
+        if 'Search Date' in user_df.columns:
+            user_df['Search Date'] = pd.to_datetime(user_df['Search Date'], errors='coerce')
+            # Calculate recency weight (more recent = higher weight)
+            max_date = user_df['Search Date'].max()
+            min_date = user_df['Search Date'].min()
+            if max_date != min_date:
+                user_df['Recency Weight'] = (user_df['Search Date'] - min_date) / (max_date - min_date)
+            else:
+                user_df['Recency Weight'] = 1.0
+            user_df['Recency Weight'] = user_df['Recency Weight'].fillna(0.5) + 0.5  # Scale between 0.5 and 1.5
+        else:
+            user_df['Recency Weight'] = 1.0
+            
+        # Count searches with recency weights
+        user_df = user_df.groupby(['SeekerID', 'Search Query']).agg({
+            'Recency Weight': 'mean'  # Using average recency weight for this query
+        }).reset_index()
+        
+        # Create user-query matrix with weighted counts
+        user_job_matrix = user_df.pivot(index='SeekerID', columns='Search Query', values='Recency Weight').fillna(0)
+        
+        # Check if user exists in the matrix (after string conversion for safety)
+        user_id_str = str(user_id)
+        user_indices = [i for i, idx in enumerate(user_job_matrix.index) if str(idx) == user_id_str]
+        
+        if not user_indices:
             print(f"⚠️ User ID {user_id} không tồn tại trong user_job_matrix!")
             return np.array([])
         
+        # Use the first matching index
+        user_idx = user_indices[0]
+        
+        # Compute similarity matrix between users
         user_similarities = cosine_similarity(user_job_matrix)
-        user_sim_df = pd.DataFrame(user_similarities, index=user_job_matrix.index, columns=user_job_matrix.index)
-
-        similar_users = user_sim_df[user_id].sort_values(ascending=False).iloc[1:6].index.tolist()
-        similar_users_searches = user_df[user_df['SeekerID'].isin(similar_users)]['Search Query'].unique()
-
-        similar_users_searches = [query for query in similar_users_searches if query.strip()]
-        print(f"Similar users searches: {similar_users_searches}")
-        return np.array(similar_users_searches)
+        user_sim_df = pd.DataFrame(user_similarities, 
+                                  index=user_job_matrix.index, 
+                                  columns=user_job_matrix.index)
+        
+        # Get similar users sorted by similarity (skip the first as it's the user themselves)
+        similar_users_indices = np.argsort(user_similarities[user_idx])[::-1][1:11]  # Get top 10 similar users
+        similar_users = [user_job_matrix.index[i] for i in similar_users_indices]
+        
+        print(f"Similar users for {user_id}: {similar_users}")
+        
+        # Get searches from similar users and weight by similarity
+        similar_users_queries = []
+        user_searches = set([h.get('Search Query', '') for h in search_history 
+                           if str(h.get('SeekerID', '')) == str(user_id)])
+        
+        for i, sim_user in enumerate(similar_users):
+            similarity_score = user_similarities[user_idx][similar_users_indices[i]]
+            if similarity_score < 0.1:  # Filter out users with low similarity
+                continue
+                
+            # Get this similar user's searches
+            sim_user_searches = user_df[user_df['SeekerID'] == sim_user]['Search Query'].unique()
+            
+            # Filter out searches the user has already done
+            unique_searches = [q for q in sim_user_searches if q not in user_searches]
+            
+            # Weight by similarity
+            for query in unique_searches:
+                if query.strip():  # Ensure non-empty
+                    similar_users_queries.append((query, similarity_score))
+        
+        # Aggregate scores for duplicate queries
+        query_weights = {}
+        for query, weight in similar_users_queries:
+            if query in query_weights:
+                query_weights[query] += weight
+            else:
+                query_weights[query] = weight
+        
+        # Sort queries by weight
+        sorted_queries = sorted(query_weights.items(), key=lambda x: x[1], reverse=True)
+        top_queries = [query for query, _ in sorted_queries[:20]]  
+        
+        # Return unique valid queries
+        return np.array([q for q in top_queries if str(q).strip()])
+        
     except Exception as e:
-        print(f"Error in collaborative filtering: {e}")
+        print(f"❌ Error in collaborative filtering: {e}")
+        import traceback
+        traceback.print_exc()
         return np.array([])
-
-# [Giữ nguyên phần import và các hàm phụ trợ như cũ]
 
 # Endpoint cho TF-IDF recommendations
 @app.route('/recommend-jobs/tfidf', methods=['POST'])
@@ -282,28 +348,85 @@ def recommend_jobs_collaborative():
     if not user_search_history:
         return jsonify([]), 200
 
+    # Get recommended queries using collaborative filtering (maintaining original function signature)
     collaborative_results = get_collaborative_recommendations(user_id, search_history)
     
     recommended_jobs = {}
     if len(collaborative_results) > 0:
         user_queries = [h.get('Search Query', '') for h in user_search_history]
+        
+        # Process each recommended query
         for query in collaborative_results:
+            query_str = str(query).lower()
+            if not query_str:
+                continue
+                
+            # Track match quality for each job
+            matching_jobs = []
+            
             for job in jobs:
-                if (any(
-                    str(q).lower() in str({k: v for k, v in job.items() if k not in ['createDate', 'expireDate']}).lower() 
-                    for q in [query] + user_queries
-                ) or str(query).lower() in str(job.get('title', '')).lower() 
-                   or str(query).lower() in str(job.get('description', '')).lower()):
-                    job_id = job.get('postId')
-                    if job_id and job_id not in recommended_jobs:
-                        reason = f"Matched based on similar users' search query: '{query}'"
-                        job_with_reason = job.copy()
-                        job_with_reason['recommendation_reason'] = reason
-                        recommended_jobs[job_id] = job_with_reason
-                        if len(recommended_jobs) >= 8:  # Giới hạn 8 kết quả
-                            break
-
-    top_recommended_jobs = list(recommended_jobs.values())[:8]
+                # Extract text fields for matching
+                job_title = str(job.get('title', '')).lower()
+                job_desc = str(job.get('description', '')).lower()
+                job_industry = str(job.get('industryName', '')).lower()
+                
+                # Check for matches with weighted scoring
+                match_score = 0
+                if query_str in job_title:
+                    match_score += 3  # Title matches are more important
+                if query_str in job_desc:
+                    match_score += 1
+                if query_str in job_industry:
+                    match_score += 2
+                
+                # Add job if it has any match
+                if match_score > 0:
+                    matching_jobs.append({
+                        'job': job,
+                        'score': match_score,
+                        'query': query
+                    })
+            
+            # Sort matching jobs by score
+            matching_jobs.sort(key=lambda x: x['score'], reverse=True)
+            
+            # Add top matching jobs to recommendations
+            for match in matching_jobs[:3]:  # Take top 3 matches per query
+                job = match['job']
+                job_id = job.get('postId')
+                
+                if job_id and job_id not in recommended_jobs:
+                    # Create personalized reason
+                    reason = f"Matched based on similar users' search for '{match['query']}'"
+                    
+                    # Add job to recommendations
+                    job_with_reason = job.copy()
+                    job_with_reason['recommendation_reason'] = reason
+                    job_with_reason['match_score'] = match['score']
+                    recommended_jobs[job_id] = job_with_reason
+                    
+                    # Stop if we have enough recommendations
+                    if len(recommended_jobs) >= 8:
+                        break
+            
+            # Stop if we have enough recommendations
+            if len(recommended_jobs) >= 8:
+                break
+    
+    # Sort by match score
+    sorted_jobs = sorted(
+        list(recommended_jobs.values()),
+        key=lambda x: x.get('match_score', 0),
+        reverse=True
+    )
+    
+    # Get top 8 jobs
+    top_recommended_jobs = sorted_jobs[:8]
+    
+    # Remove temporary fields
+    for job in top_recommended_jobs:
+        if 'match_score' in job:
+            del job['match_score']
     
     print(f"Collaborative Recommendations for User ID: {user_id}")
     print(f"Total recommended jobs: {len(top_recommended_jobs)}")
@@ -314,7 +437,6 @@ def recommend_jobs_collaborative():
         'Content-Type': 'application/json; charset=utf-8',
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate'
     }
-
 
 if __name__ == '__main__':
     app.run(debug=True)
