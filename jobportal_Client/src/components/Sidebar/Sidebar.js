@@ -102,6 +102,7 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
   ];
 
   let menuItems;
+  
   switch (user?.userType?.userTypeId) {
     case 1:
       menuItems = adminMenuItems;
@@ -115,6 +116,8 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
     default:
       menuItems = [];
   }
+
+  console.log("🚀 ~ Sidebar ~ menuItems:", menuItems)
 
   const handleMenuClick = (item) => {
     setSelectedSection(item.label);
@@ -234,3 +237,4 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
     </div>
   );
 }
+
