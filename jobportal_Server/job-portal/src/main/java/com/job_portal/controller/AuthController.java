@@ -51,8 +51,10 @@ import com.job_portal.models.UserAccount;
 import com.job_portal.models.UserType;
 import com.job_portal.repository.BlackListTokenRepository;
 import com.job_portal.repository.CityRepository;
+import com.job_portal.repository.CompanyRepository;
 import com.job_portal.repository.ForgotPasswordRepository;
 import com.job_portal.repository.IndustryRepository;
+import com.job_portal.repository.SeekerRepository;
 import com.job_portal.repository.UserAccountRepository;
 import com.job_portal.repository.UserTypeRepository;
 import com.job_portal.response.AuthResponse;
@@ -67,6 +69,12 @@ import jakarta.mail.MessagingException;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+
+	@Autowired
+	private SeekerRepository seekerRepository;
+
+	@Autowired
+	private CompanyRepository companyRepository;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -222,12 +230,14 @@ public class AuthController {
 		if (!user.isActive()) {
 			return new AuthResponse("", "Tài khoản của bạn chưa được xác thực");
 		}
-		if(user.getUserType().getUserTypeId() == 3) {
-			if(user.getCompany().getIsBlocked() && user.getCompany().getBlockedUntil() != null && user.getCompany().getBlockedUntil().isAfter(LocalDateTime.now())) {
-				return new AuthResponse("", "Tài khoản cuả bạn đã bị khóa. Vui lòng kiểm tra email để biết thêm chi tiết");
+		if (user.getUserType().getUserTypeId() == 3) {
+			if (user.getCompany().getIsBlocked() && user.getCompany().getBlockedUntil() != null
+					&& user.getCompany().getBlockedUntil().isAfter(LocalDateTime.now())) {
+				return new AuthResponse("",
+						"Tài khoản cuả bạn đã bị khóa. Vui lòng kiểm tra email để biết thêm chi tiết");
 			}
 		}
-		
+
 		try {
 			Authentication authentication = authenticate(login.getEmail(), login.getPassword());
 			String token = JwtProvider.generateToken(authentication);
@@ -414,17 +424,22 @@ public class AuthController {
 			if (userOpt.isPresent()) {
 				UserAccount user = userOpt.get();
 
-				// Kiểm tra null trước khi truy cập thuộc tính của Company
-				if (user.getCompany() != null &&
-						user.getCompany().getIsBlocked() &&
-						user.getCompany().getBlockedUntil() != null &&
-						user.getCompany().getBlockedUntil().isAfter(LocalDateTime.now())) {
-					return new AuthResponse("", "Tài khoản của bạn đã bị khóa. Vui lòng kiểm tra email để biết thêm chi tiết");
+				// Kiểm tra null trước khi gọi getUserTypeId()
+				if (user.getUserType() != null && user.getUserType().getUserTypeId() != null) {
+					// Kiểm tra userTypeId có phải là 3 không
+					if (user.getUserType().getUserTypeId() == 3) {
+						// Kiểm tra null cho company trước khi truy cập thuộc tính của nó
+						if (user.getCompany() != null && user.getCompany().getIsBlocked()
+								&& user.getCompany().getBlockedUntil() != null
+								&& user.getCompany().getBlockedUntil().isAfter(LocalDateTime.now())) {
+							return new AuthResponse("",
+									"Tài khoản của bạn đã bị khóa. Vui lòng kiểm tra email để biết thêm chi tiết");
+						}
+					}
 				}
 
-				// Cập nhật thời gian đăng nhập nếu cần
-				// user.setLastLogin(LocalDateTime.now());
-				// userAccountRepository.save(user);
+				user.setLastLogin(LocalDateTime.now());
+				userAccountRepository.save(user);
 			}
 
 			return new AuthResponse(jwtToken, "Đăng nhập thành công");
@@ -435,106 +450,143 @@ public class AuthController {
 	}
 
 	@PostMapping("/update-role/{role}")
-	public ResponseEntity<AuthResponse> updateRole(@RequestHeader("Authorization") String jwt,
+	public ResponseEntity<UserAccount> updateRole(@RequestHeader("Authorization") String jwt,
 			@PathVariable Integer role) {
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
-		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-		Optional<UserType> userType = userTypeRepository.findById(role);
+		Optional<UserAccount> userOpt = userAccountRepository.findByEmail(email);
+		if (!userOpt.isPresent()) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		}
 
-		UserAccount newUser = user.get();
-		newUser.setUserType(userType.orElse(null));
-		if (newUser.getUserType().getUserTypeId() == 2) {
+		Optional<UserType> userTypeOpt = userTypeRepository.findById(role);
+		if (!userTypeOpt.isPresent()) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+		}
+
+		UserAccount user = userOpt.get();
+		user.setUserType(userTypeOpt.get());
+
+		if (user.getUserType().getUserTypeId() == 2) {
 			Integer defaultIndustryId = 0;
 			Optional<Industry> defaultIndustryOpt = industryRepository.findById(defaultIndustryId);
+			Industry defaultIndustry = defaultIndustryOpt
+					.orElseThrow(() -> new RuntimeException("Default industry not found"));
 
-			Industry defaultIndustry = defaultIndustryOpt.get();
 			Seeker seeker = new Seeker();
-			seeker.setUserAccount(newUser);
+			seeker.setUserAccount(user);
 			seeker.setIndustry(defaultIndustry);
 			seeker.setAddress(", , ");
-			user.get().setSeeker(seeker);
-			userAccountRepository.save(newUser);
-		} else if (newUser.getUserType().getUserTypeId() == 3) {
+			user.setSeeker(seeker);
+		} else if (user.getUserType().getUserTypeId() == 3) {
 			Integer defaultIndustryId = 0;
 			Optional<Industry> defaultIndustryOpt = industryRepository.findById(defaultIndustryId);
-
 			Integer defaultCityId = 0;
 			Optional<City> defaultCityOpt = cityRepository.findById(defaultCityId);
 
-			Industry defaultIndustry = defaultIndustryOpt.get();
-			City defaultCity = defaultCityOpt.get();
+			Industry defaultIndustry = defaultIndustryOpt
+					.orElseThrow(() -> new RuntimeException("Default industry not found"));
+			City defaultCity = defaultCityOpt.orElseThrow(() -> new RuntimeException("Default city not found"));
+
 			Company company = new Company();
-			company.setUserAccount(newUser);
+			company.setUserAccount(user);
 			company.setIndustry(defaultIndustry);
 			company.setCity(defaultCity);
 			company.setAddress(", , ");
 			company.setIsBlocked(false);
-			user.get().setCompany(company);
-			userAccountRepository.save(newUser);
+			user.setCompany(company);
 		}
-		AuthResponse response = new AuthResponse(String.valueOf(role), "Cập nhật vai trò thành công");
-		return ResponseEntity.ok(response);
+
+		UserAccount updatedUser = userAccountRepository.save(user);
+		return ResponseEntity.ok(updatedUser); // Trả về toàn bộ UserAccount
+	}
+
+	@PostMapping("/update-employer")
+	public AuthResponse updateEmployer(@RequestHeader("Authorization") String jwt, @RequestBody Company company) {
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+
+		Optional<Company> existingCompany = companyRepository.findById(user.get().getUserId());
+
+		Company oldCompany = existingCompany.get();
+		oldCompany.setTaxCode(company.getTaxCode());
+		oldCompany.setCompanyName(company.getCompanyName());
+		oldCompany.setEmail(company.getEmail());
+		companyRepository.save(oldCompany);
+		
+		return new AuthResponse("", "Success");
 	}
 
 	@PostMapping("/check-email")
 	public ResponseEntity<Boolean> checkEmailExists(@RequestBody Map<String, String> requestBody) {
+		// 1. Token extraction and decoding
 		String googleToken = requestBody.get("token");
-
 		DecodedJWT decodedJWT = JWT.decode(googleToken);
 		String email = decodedJWT.getClaim("email").asString();
+
+		// 2. User lookup
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+
+		// 3. Check for associated seeker/company
 		if (user.isPresent()) {
-			return ResponseEntity.ok(true);
-		} else {
-			String name = decodedJWT.getClaim("name").asString();
-			// Tìm người dùng trong cơ sở dữ liệu, nếu không có thì tạo mới
-			Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
+			UserAccount userAccount = user.get();
+			Optional<Seeker> seekerOptional = seekerRepository.findById(userAccount.getUserId());
+			Optional<Company> companyOptional = companyRepository.findById(userAccount.getUserId());
 
-			if (userOptional.isEmpty()) {
-				UserAccount newUser = new UserAccount();
-				newUser.setEmail(email);
-				newUser.setUserName(name);
-				newUser.setUserId(UUID.randomUUID());
-				newUser.setUserType(null);
-				newUser.setActive(true);
-				newUser.setPassword("");
-				newUser.setCreateDate(LocalDateTime.now());
-				newUser.setOtp(null);
-				newUser.setOtpGeneratedTime(null);
-				newUser.setProvider("Google");
-				newUser.setLastLogin(LocalDateTime.now());
-
-				String defaultAddress = ", , ";
-				if (newUser.getUserType() != null) {
-					if (newUser.getUserType().getUserTypeId() == 2) {
-						Seeker seeker = new Seeker();
-						seeker.setUserAccount(newUser);
-						seeker.setAddress(defaultAddress);
-						newUser.setSeeker(seeker);
-					} else if (newUser.getUserType().getUserTypeId() == 3) {
-						Company company = new Company();
-						company.setUserAccount(newUser);
-						company.setAddress(defaultAddress);
-						newUser.setCompany(company);
-					}
-				}
-				userAccountRepository.save(newUser);
+			// 4. Main logic
+			if (seekerOptional.isPresent() || companyOptional.isPresent()) {
+				return ResponseEntity.ok(true);
 			}
-			// Tạo JWT Token cho người dùng và truyền Authentication object
-			return ResponseEntity.ok(false); // Người dùng chưa tồn tại
 		}
+
+		// If user doesn't exist or has no seeker/company profile
+		String name = decodedJWT.getClaim("name").asString();
+		Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
+
+		if (userOptional.isEmpty()) {
+			// 5. New user creation
+			UserAccount newUser = new UserAccount();
+			newUser.setEmail(email);
+			newUser.setUserName(name);
+			newUser.setUserId(UUID.randomUUID());
+			newUser.setUserType(null);
+			newUser.setActive(true);
+			newUser.setPassword("");
+			newUser.setCreateDate(LocalDateTime.now());
+			newUser.setOtp(null);
+			newUser.setOtpGeneratedTime(null);
+			newUser.setProvider("Google");
+			newUser.setLastLogin(LocalDateTime.now());
+
+			String defaultAddress = ", , ";
+			if (newUser.getUserType() != null) { // Note: This will never execute due to null UserType
+				if (newUser.getUserType().getUserTypeId() == 2) {
+					Seeker seeker = new Seeker();
+					seeker.setUserAccount(newUser);
+					seeker.setAddress(defaultAddress);
+					newUser.setSeeker(seeker);
+				} else if (newUser.getUserType().getUserTypeId() == 3) {
+					Company company = new Company();
+					company.setUserAccount(newUser);
+					company.setAddress(defaultAddress);
+					newUser.setCompany(company);
+				}
+			}
+			userAccountRepository.save(newUser);
+		}
+		return ResponseEntity.ok(false);
 	}
-	
+
 	@PutMapping("/block-company/{companyId}")
-	public ResponseEntity<String> blockCompany(@PathVariable UUID companyId, @RequestBody BlockCompanyDTO blockCompanyDTO) throws MessagingException {
-	    companyService.blockCompany(companyId, blockCompanyDTO.getBlockedReason(), blockCompanyDTO.getBlockedUntil());
-	    return ResponseEntity.ok("Đã khóa tài khoản thành công");
+	public ResponseEntity<String> blockCompany(@PathVariable UUID companyId,
+			@RequestBody BlockCompanyDTO blockCompanyDTO) throws MessagingException {
+		companyService.blockCompany(companyId, blockCompanyDTO.getBlockedReason(), blockCompanyDTO.getBlockedUntil());
+		return ResponseEntity.ok("Đã khóa tài khoản thành công");
 	}
-	
+
 	@PutMapping("/unblock-company/{companyId}")
 	public ResponseEntity<String> unblockCompany(@PathVariable UUID companyId) throws MessagingException {
-	    companyService.unblockCompany(companyId);
-	    return ResponseEntity.ok("Mở khóa tài khoản thành công");
+		companyService.unblockCompany(companyId);
+		return ResponseEntity.ok("Mở khóa tài khoản thành công");
 	}
 
 }
