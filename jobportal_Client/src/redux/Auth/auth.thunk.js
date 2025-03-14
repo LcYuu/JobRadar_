@@ -58,6 +58,27 @@ export const loginAction = createAsyncThunk(
   }
 );
 
+export const updateRole = createAsyncThunk(
+  "auth/updateRole",
+  async (role, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("jwt");
+      const response = await axios.post(
+        `${API_BASE_URL}/auth/update-role/${role}`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data; // Trả về dữ liệu từ API (bao gồm userTypeId)
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Đã có lỗi xảy ra");
+    }
+  }
+);
+
 export const getProfileAction = createAsyncThunk(
   'auth/getProfile',
   async (_, { rejectWithValue }) => {
@@ -154,6 +175,21 @@ export const unblockCompany = createAsyncThunk(
       return response.data; 
     } catch (error) {
       return rejectWithValue(error.response?.data || "Có lỗi xảy ra");
+    }
+  }
+);
+
+export const updateEmployer = createAsyncThunk(
+  "auth/updateEmployer",
+  async (companyData, { rejectWithValue }) => {
+    try {
+      const response = await api.post("/auth/update-employer", companyData);
+      return response.data; 
+    } catch (error) {
+      console.error("Error updating employer:", error);
+      return rejectWithValue(
+        error.response?.data?.message || "Cập nhật thông tin công ty thất bại"
+      );
     }
   }
 );

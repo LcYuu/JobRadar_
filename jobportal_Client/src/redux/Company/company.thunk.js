@@ -270,9 +270,8 @@ export const getAllCompaniesForAdmin = createAsyncThunk(
     try {
       const companiesResponse = await api.get(`/company/get-all-companies`, {
         params: { companyName, industryName, page, size },
-      
       });
-      console.log("🚀 ~ companiesResponse:", companiesResponse)
+      console.log("🚀 ~ companiesResponse:", companiesResponse);
 
       const companiesWithReviews = await Promise.all(
         companiesResponse.data.content.map(async (company) => {
@@ -325,9 +324,7 @@ export const findAllCompany = createAsyncThunk(
   "company/findAllCompany",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(
-        `${API_BASE_URL}/company/find-all`
-      );
+      const response = await axios.get(`${API_BASE_URL}/company/find-all`);
       return response.data;
     } catch (error) {
       return rejectWithValue(
