@@ -20,7 +20,7 @@ public class GeneratedCV {
     private String cvName;
     
     @Column(name = "cv_content", columnDefinition = "TEXT")
-    private String cvContent; // Lưu JSON nội dung CV
+    private String cvContent;
     
     @Column(name = "create_time", nullable = false)
     private LocalDateTime createTime;
