@@ -231,7 +231,6 @@ export const getCandidateApplyInfo = (userId, postId) => async (dispatch) => {
 };
 
 export const getNotificationViewJob = (userId, postId) => async (dispatch) => {
-  console.log("🚀 ~ getNotificationViewJob ~ getNotificationViewJob:", userId, postId)
   dispatch({ type: NOTIFICATION_VIEW_JOB_REQUEST });
   try {
     const response = await api.post(`/apply-job/viewApply/${userId}/${postId}`);

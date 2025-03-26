@@ -72,5 +72,6 @@ public class Seeker {
         inverseJoinColumns = @JoinColumn(name = "skills_skill_id") 
     )
     private List<Skills> skills = new ArrayList<>();
+    private boolean isSubcription  = false;
 
 }

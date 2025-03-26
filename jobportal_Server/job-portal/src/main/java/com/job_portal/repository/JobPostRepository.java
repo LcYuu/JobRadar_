@@ -32,6 +32,9 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 
 	@Query("SELECT j FROM JobPost j WHERE j.company.companyId = :companyId AND j.isApprove = true AND j.expireDate >= CURRENT_TIMESTAMP")
 	public List<JobPost> findJobByCompany(@Param("companyId") UUID companyId);
+	
+	@Query("SELECT jp FROM JobPost jp WHERE jp.createDate > :createdAt AND jp.company.industry.industryId = :industryId AND jp.isApprove = true AND jp.expireDate >= CURRENT_TIMESTAMP")
+	public List<JobPost> findByCreateDateAfterAndIndustryId(@Param("createdAt") LocalDateTime createdAt, @Param("industryId") Integer industryId);
 
 	// Lọc các JobPost có salary >= minSalary và đã phê duyệt
 	public List<JobPost> findBySalaryGreaterThanEqualAndIsApproveTrue(Long minSalary);
