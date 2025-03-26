@@ -424,11 +424,9 @@ public class AuthController {
 			if (userOpt.isPresent()) {
 				UserAccount user = userOpt.get();
 
-				// Kiểm tra null trước khi gọi getUserTypeId()
+
 				if (user.getUserType() != null && user.getUserType().getUserTypeId() != null) {
-					// Kiểm tra userTypeId có phải là 3 không
 					if (user.getUserType().getUserTypeId() == 3) {
-						// Kiểm tra null cho company trước khi truy cập thuộc tính của nó
 						if (user.getCompany() != null && user.getCompany().getIsBlocked()
 								&& user.getCompany().getBlockedUntil() != null
 								&& user.getCompany().getBlockedUntil().isAfter(LocalDateTime.now())) {

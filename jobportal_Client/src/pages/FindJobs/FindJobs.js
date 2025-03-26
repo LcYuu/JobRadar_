@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 
@@ -12,16 +12,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
-import { Search, ChevronDown} from "lucide-react";
+import { Search, ChevronDown } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 
 // import Pagination from "../../components/layout/Pagination";
 
 import RangeSlider from "../../components/common/RangeSlider/RangeSlider";
 import { useLocation } from "react-router-dom";
-import { countJobByType, fetchSalaryRange, getAllJobAction, searchJobs } from "../../redux/JobPost/jobPost.thunk";
+import {
+  countJobByType,
+  fetchSalaryRange,
+  getAllJobAction,
+  searchJobs,
+} from "../../redux/JobPost/jobPost.thunk";
 import { getCity } from "../../redux/City/city.thunk";
 import { getIndustryCount } from "../../redux/Industry/industry.thunk";
+import useWebSocket from "../../utils/useWebSocket";
 
 export default function JobSearchPage() {
   const dispatch = useDispatch();
@@ -55,7 +61,6 @@ export default function JobSearchPage() {
     selectedIndustryIds: [],
   });
 
-
   const isFilterApplied =
     filters.title ||
     filters.cityId ||
@@ -78,9 +83,9 @@ export default function JobSearchPage() {
 
   useEffect(() => {
     if (isFilterApplied) {
-      dispatch(searchJobs({filters, currentPage, size}));
+      dispatch(searchJobs({ filters, currentPage, size }));
     } else {
-      dispatch(getAllJobAction({currentPage, size}));
+      dispatch(getAllJobAction({ currentPage, size }));
     }
   }, [dispatch, filters, currentPage]);
 
@@ -113,6 +118,25 @@ export default function JobSearchPage() {
 
   const results = isFilterApplied ? searchJob : jobPost;
   const totalPages = isFilterApplied ? totalPagesFromSearch : totalPagesFromAll;
+
+  const handleMessage = useCallback(
+    (dispatch, _, topic) => {
+      if (topic === "/topic/job-updates") {
+        dispatch(countJobByType());
+        dispatch(getIndustryCount());
+        dispatch(fetchSalaryRange());
+        dispatch(searchJobs({ filters, currentPage, size }));
+        dispatch(getAllJobAction({ currentPage, size }));
+      }
+      else if(topic === "/topic/industry-updates"){
+        dispatch(getIndustryCount());
+      }
+    },[]
+  );
+
+  useWebSocket(["/topic/job-updates", "/topic/industry-updates"], (dispatch, message, topic) =>
+    handleMessage(dispatch, message, topic)
+  )(dispatch);
 
   return (
     <div className="min-h-screen bg-transparent">
