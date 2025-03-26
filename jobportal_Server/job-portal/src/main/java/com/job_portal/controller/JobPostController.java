@@ -62,6 +62,7 @@ import com.job_portal.service.ICompanyService;
 import com.job_portal.service.IJobPostService;
 import com.job_portal.service.INotificationService;
 import com.job_portal.service.SearchHistoryServiceImpl;
+import com.job_portal.service.WebSocketService;
 import com.job_portal.specification.JobPostSpecification;
 import com.social.exceptions.AllExceptions;
 
@@ -94,6 +95,9 @@ public class JobPostController {
 
 	@Autowired
 	private INotificationService notificationService;
+	
+	@Autowired
+    private WebSocketService webSocketService;
 
 	String filePath = "D:\\JobRadar_\\search.csv";
 
@@ -150,29 +154,32 @@ public class JobPostController {
 			if (!jobPostService.canPostJob(user.get().getCompany().getCompanyId())) {
 				return new ResponseEntity<>("Công ty chỉ được đăng 1 bài trong vòng 1 giờ.", HttpStatus.FORBIDDEN);
 			}
-			boolean isCreated = jobPostService.createJob(jobPostDTO, user.get().getCompany().getCompanyId());
-			if (isCreated) {
-				return new ResponseEntity<>("Công việc được tạo thành công. Chờ Admin phê duyệt", HttpStatus.CREATED);
-			} else {
+			JobPost createdJob = jobPostService.createJob(jobPostDTO, user.get().getCompany().getCompanyId());
+			
+			if (createdJob != null) {
+                webSocketService.sendUpdate("/topic/job-updates", "ADD JOB"); // Gửi JobPost qua WebSocket
+                return new ResponseEntity<>("Công việc được tạo thành công. Chờ Admin phê duyệt", HttpStatus.CREATED);
+            } else {
 				return new ResponseEntity<>("Công việc tạo thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		} catch (Exception e) {
-			// Log lỗi và trả về lỗi chi tiết
-			e.printStackTrace();
 			return new ResponseEntity<>("Đã có lỗi xảy ra: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	@PostMapping("/approve/{postId}")
 	public ResponseEntity<String> approveJobPost(@PathVariable UUID postId) {
-		boolean isApproved = jobPostService.approveJob(postId);
-		Optional<Company> company = companyRepository.findCompanyByPostId(postId);
-		if (isApproved) {
-			notificationService.notifyNewJobPost(company.get().getCompanyId(),postId);
-			return ResponseEntity.ok("Chấp thuận thành công");
-		} else {
-			return ResponseEntity.status(404).body("Không thể tìm thấy công việc");
-		}
+		JobPost approvedJob = jobPostService.approveJob(postId);
+        if (approvedJob != null) {
+            Optional<Company> company = companyRepository.findCompanyByPostId(postId);
+            if (company.isPresent()) {
+                notificationService.notifyNewJobPost(company.get().getCompanyId(), postId);
+            }
+            webSocketService.sendUpdate("/topic/job-updates", "APPROVE JOB"); // Gửi JobPost qua WebSocket
+            return ResponseEntity.ok("Chấp thuận thành công");
+        } else {
+            return ResponseEntity.status(404).body("Không thể tìm thấy công việc");
+        }
 	}
 	
 	
@@ -181,87 +188,59 @@ public class JobPostController {
 	public ResponseEntity<String> updateJobPost(@RequestHeader("Authorization") String jwt,
 			@RequestBody JobPostDTO jobPost, @PathVariable("postId") UUID postId) throws AllExceptions {
 		Optional<JobPost> oldJobPost = jobPostRepository.findById(postId);
-		if (oldJobPost.get().isApprove() == false) {
-			boolean isUpdated = jobPostService.updateJob(jobPost, postId);
-			if (isUpdated) {
-				return new ResponseEntity<>("Cập nhật thành công", HttpStatus.CREATED);
-			} else {
-				return new ResponseEntity<>("Cập nhật thất bại", HttpStatus.BAD_REQUEST);
-			}
-		} else {
-			return new ResponseEntity<>("Bài viết đã được chấp thuận, không được thay đổi", HttpStatus.BAD_REQUEST);
-		}
+        if (!oldJobPost.isPresent()) {
+            return new ResponseEntity<>("Công việc không tồn tại", HttpStatus.NOT_FOUND);
+        }
+        if (!oldJobPost.get().isApprove()) {
+            JobPost updatedJob = jobPostService.updateJob(jobPost, postId);
+            if (updatedJob != null) {
+                webSocketService.sendUpdate("/topic/job-updates", "UPDATE JOB"); // Gửi JobPost qua WebSocket
+                return new ResponseEntity<>("Cập nhật thành công", HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Cập nhật thất bại", HttpStatus.BAD_REQUEST);
+            }
+        } else {
+            return new ResponseEntity<>("Bài viết đã được chấp thuận, không được thay đổi", HttpStatus.BAD_REQUEST);
+        }
 	}
 
 	@PutMapping("/set-expire/{postId}")
-	public ResponseEntity<Boolean> updateExpireJobPost(@PathVariable("postId") UUID postId) throws AllExceptions {
-		Optional<JobPost> oldJobPostOptional = jobPostRepository.findById(postId);
+    public ResponseEntity<Boolean> updateExpireJobPost(@PathVariable("postId") UUID postId) {
+        try {
+            Optional<JobPost> oldJobPostOptional = jobPostRepository.findById(postId);
 
-		if (oldJobPostOptional.isEmpty()) {
-			return new ResponseEntity<>(false, HttpStatus.NOT_FOUND); // Trả về false nếu công việc không tồn tại
-		}
+            if (oldJobPostOptional.isEmpty()) {
+                return new ResponseEntity<>(false, HttpStatus.NOT_FOUND);
+            }
 
-		JobPost oldJobPost = oldJobPostOptional.get();
-		oldJobPost.setExpireDate(LocalDateTime.now()); // Cập nhật ngày hết hạn
-		oldJobPost.setStatus("Hết hạn"); // Đặt trạng thái công việc thành "Hết hạn"
+            JobPost oldJobPost = oldJobPostOptional.get();
+            oldJobPost.setExpireDate(LocalDateTime.now());
+            oldJobPost.setStatus("Hết hạn");
+            jobPostRepository.save(oldJobPost);
 
-		jobPostRepository.save(oldJobPost); // Lưu công việc đã cập nhật
+            webSocketService.sendUpdate("/topic/job-updates", "EXPIRE JOB"); 
 
-		return new ResponseEntity<>(true, HttpStatus.OK); // Trả về true khi cập nhật thành công
-	}
+            return new ResponseEntity<>(true, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(false, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 	@DeleteMapping("/delete-job/{postId}")
 	public ResponseEntity<String> deleteJob(@PathVariable("postId") UUID postId) {
 		try {
-			boolean isDeleted = jobPostService.deleteJob(postId);
-			if (isDeleted) {
-				return new ResponseEntity<>("Xóa thành công", HttpStatus.OK);
-			} else {
-				return new ResponseEntity<>("Xóa thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		} catch (Exception e) {
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-		}
+            boolean isDeleted = jobPostService.deleteJob(postId);
+            if (isDeleted) {
+                webSocketService.sendUpdate("/topic/job-updates", "DELETE JOB"); 
+                return new ResponseEntity<>("Xóa thành công", HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Xóa thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
 	}
 
-	@GetMapping("/search-by-job-name")
-	public ResponseEntity<Object> searchJobByJobName(@RequestHeader("Authorization") String jwt,
-			@RequestParam("title") String title) {
-		try {
-			String email = JwtProvider.getEmailFromJwtToken(jwt);
-			Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-			UUID userId = null;
-			if (user.get().getUserId() != null) {
-				userId = user.get().getUserId();
-			}
-
-			List<JobPost> jobs = jobPostService.searchJobByJobName(title, userId);
-
-			return ResponseEntity.ok(jobs);
-		} catch (AllExceptions e) {
-			// Trả về thông báo từ service
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-		} catch (Exception e) {
-			// Trả về thông báo lỗi chung
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
-		}
-	}
-
-	@GetMapping("/search-by-experience")
-	public ResponseEntity<Object> searchJobByExperience(@RequestParam("experience") String experience) {
-		try {
-			List<JobPost> jobs = jobPostService.searchJobByExperience(experience);
-			return ResponseEntity.ok(jobs);
-		} catch (AllExceptions e) {
-
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-		} catch (Exception e) {
-
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
-		}
-	}
 
 	@GetMapping("/search-by-company/{companyId}")
 	public ResponseEntity<Page<JobPost>> getJobsByCompanyId(@PathVariable UUID companyId,
@@ -732,6 +711,4 @@ public class JobPostController {
 					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
 		}
 	}
-	
-	
 }

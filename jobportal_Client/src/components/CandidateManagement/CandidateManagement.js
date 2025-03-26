@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
@@ -10,7 +10,6 @@ import {
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
 import { useDispatch, useSelector } from "react-redux";
-import { store } from "../../redux/store";
 
 import { toast } from "react-toastify";
 import {
@@ -19,6 +18,7 @@ import {
   updateApprove,
 } from "../../redux/ApplyJob/applyJob.thunk";
 import { getAllJobPost } from "../../redux/JobPost/jobPost.thunk";
+import useWebSocket from "../../utils/useWebSocket";
 const CandidateManagement = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -55,17 +55,17 @@ const CandidateManagement = () => {
 
   const handleUpdate = async (postId, userId) => {
     try {
-      // Gọi hành động cập nhật và chờ nó thực hiện
-      await dispatch(updateApprove({postId, userId}));
-
+      await dispatch(updateApprove({ postId, userId })).unwrap(); // Chờ hoàn thành
+  
       toast.success("Đơn ứng tuyển đã được chấp thuận!");
-
-      dispatch(getApplyJobByCompany({currentPage, size}));
+  
+      dispatch(getApplyJobByCompany({ currentPage, size }));
     } catch (error) {
-      // Hiển thị thông báo lỗi nếu có lỗi xảy ra
       toast.error("Có lỗi xảy ra khi chấp thuận đơn.");
+      console.error("Lỗi updateApprove:", error);
     }
   };
+  
   const applyFilters = () => {
     setCurrentPage(0);
     dispatch(
@@ -112,6 +112,18 @@ const CandidateManagement = () => {
     setSize(Number(e.target.value));
     setCurrentPage(0); // Reset về trang đầu khi thay đổi số lượng bản ghi mỗi trang
   };
+
+
+  const handleMessage = useCallback(
+    (_, __, topic) => {
+      if (topic === "/topic/apply-updates") {
+        dispatch(getApplyJobByCompany({ currentPage, size }));
+      }
+    },
+    [dispatch, currentPage, size]
+  );
+  
+  useWebSocket(["/topic/apply-updates"], handleMessage);
 
   return (
     <div className="p-6">
@@ -254,10 +266,10 @@ const CandidateManagement = () => {
                             className="hover:bg-gray-100 cursor-pointer"
                             onClick={() => {
                               dispatch(
-                                getNotificationViewJob(
-                                  candidate?.userId,
-                                  candidate?.postId
-                                )
+                                getNotificationViewJob({
+                                  userId:candidate?.userId,
+                                  postId:candidate?.postId
+                                })
                               ); // Gọi API
                               navigate(
                                 `/employer/account-management/candidate-management/applicants/${candidate?.userId}/${candidate?.postId}`
