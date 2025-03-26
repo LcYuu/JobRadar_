@@ -35,6 +35,7 @@ import com.job_portal.repository.ApplyJobRepository;
 import com.job_portal.repository.UserAccountRepository;
 import com.job_portal.service.IApplyJobService;
 import com.job_portal.service.INotificationService;
+import com.job_portal.service.WebSocketService;
 import com.social.exceptions.AllExceptions;
 
 @RestController
@@ -49,6 +50,8 @@ public class ApplyJobController {
 	@Autowired
 	INotificationService notificationService;
 
+	@Autowired
+    private WebSocketService webSocketService;
 
 	@PostMapping("/create-apply/{postId}")
 	public ResponseEntity<String> createApply(@RequestBody ApplyJobDTO applyDTO,
@@ -58,6 +61,7 @@ public class ApplyJobController {
 		ApplyJob apply = convertToEntity(applyDTO, user.get().getUserId(), postId);
 		boolean isCreated = applyJobService.createApplyJob(apply);
 		if (isCreated) {
+			webSocketService.sendUpdate("/topic/apply-updates", "ADD APPLY");
 			return new ResponseEntity<>("Nộp đơn thành công", HttpStatus.CREATED);
 		} else {
 			return new ResponseEntity<>("Nộp đơn thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -121,15 +125,12 @@ public class ApplyJobController {
 		if (applyOptional.isEmpty()) {
 			return new ResponseEntity<>("Apply job not found", HttpStatus.NOT_FOUND);
 		}
-
-		ApplyJob existingApply = applyOptional.get();
-
-		// Cập nhật trạng thái đơn ứng tuyển
-		existingApply.setSave(true);
-		
-
 		try {
+			ApplyJob existingApply = applyOptional.get();
+			// Cập nhật trạng thái đơn ứng tuyển
+			existingApply.setSave(true);
 			applyJobRepository.save(existingApply);
+			webSocketService.sendUpdate("/topic/apply-updates", "APPROVE APPLY");
 			return new ResponseEntity<>("Approve successfully", HttpStatus.OK);
 		} catch (Exception e) {
 			// Ghi log lỗi nếu cần thiết
@@ -146,6 +147,7 @@ public class ApplyJobController {
 		ApplyJob apply = convertToEntity(applyDTO, user.get().getUserId(), postId);
 		boolean isCreated = applyJobService.updateApplyJob(apply);
 		if (isCreated) {
+			webSocketService.sendUpdate("/topic/apply-updates", "UPDATE APPLY");
 			return new ResponseEntity<>("Update successfully.", HttpStatus.CREATED);
 		} else {
 			return new ResponseEntity<>("Failed to update.", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -200,7 +202,6 @@ public class ApplyJobController {
 	        String email = JwtProvider.getEmailFromJwtToken(jwt);
 	        Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 
-	        // Kiểm tra xem người dùng có tồn tại hay không
 	        if (user.isEmpty()) {
 	            System.out.println("User not found with email: " + email);
 	            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

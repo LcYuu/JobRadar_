@@ -3,6 +3,7 @@ import JobCard from "../JobCard/JobCard";
 import { useDispatch, useSelector } from 'react-redux';
 import logo1 from '../../../assets/images/common/logo1.jpg';
 import { getTop8LastestJob } from '../../../redux/JobPost/jobPost.thunk';
+import useWebSocket from '../../../utils/useWebSocket';
 
 export default function Top8Job() {
   const dispatch = useDispatch();
@@ -11,6 +12,22 @@ export default function Top8Job() {
   useEffect(() => {
     dispatch(getTop8LastestJob());
   }, [dispatch]);
+
+  const handleMessage = (dispatch, message, topic) => {
+    if (topic === "/topic/job-updates") {
+      if (message === "ADD JOB") {
+        dispatch(getTop8LastestJob());
+      }
+      else if (message === "EXPIRE JOB") {
+        dispatch(getTop8LastestJob());
+      }
+      else if(message === "APPROVE JOB"){
+        dispatch(getTop8LastestJob());
+      }
+    }
+  };
+
+  useWebSocket(["/topic/job-updates"], handleMessage);
 
   
   if (loading) return <p>Đang tải...</p>;
