@@ -18,36 +18,41 @@ import com.job_portal.DTO.JobCountType;
 import com.job_portal.models.Industry;
 import com.job_portal.repository.IndustryRepository;
 import com.job_portal.service.IIndustryService;
+import com.job_portal.service.WebSocketService;
 import com.social.exceptions.AllExceptions;
 
 @RestController
 public class IndustryController {
-	
+
 	@Autowired
 	private IndustryRepository industryRepository;
-	
+
 	@Autowired
 	private IIndustryService industryService;
-	
-	
+
+	@Autowired
+	private WebSocketService webSocketService;
+
 	@GetMapping("/industry/get-all")
 	public ResponseEntity<List<Industry>> getIndustry() {
 		List<Industry> categories = industryRepository.findAll();
 		return new ResponseEntity<>(categories, HttpStatus.OK);
 	}
-	
+
 	@PostMapping("/industry/create-industry")
 	public ResponseEntity<String> createIndustry(@RequestBody Industry industry) {
-	    boolean isCreated = industryService.createIndustry(industry);
-	    if (isCreated) {
-	        return new ResponseEntity<>("Create industry Success", HttpStatus.CREATED);
-	    } else {
-	        return new ResponseEntity<>("Create industry Failed", HttpStatus.BAD_REQUEST);
-	    }
+		boolean isCreated = industryService.createIndustry(industry);
+		if (isCreated) {
+			webSocketService.sendUpdate("/topic/industry-updates", "ADD INDUSTRY");
+			return new ResponseEntity<>("Create industry Success", HttpStatus.CREATED);
+		} else {
+			return new ResponseEntity<>("Create industry Failed", HttpStatus.BAD_REQUEST);
+		}
 	}
-	
+
 	@GetMapping("/industry/{industry_id}")
-	public ResponseEntity<Industry> getIndustryById(@PathVariable("industry_id") Integer industry_id) throws AllExceptions {
+	public ResponseEntity<Industry> getIndustryById(@PathVariable("industry_id") Integer industry_id)
+			throws AllExceptions {
 		try {
 			Industry industry = industryService.findIndustryById(industry_id);
 			return new ResponseEntity<>(industry, HttpStatus.OK);
@@ -56,12 +61,12 @@ public class IndustryController {
 		}
 	}
 
-
 	@DeleteMapping("/industry/{industry_id}")
 	public ResponseEntity<String> deleteIndustry(@PathVariable("industry_id") Integer industry_id) {
 		try {
 			boolean isDeleted = industryService.deleteIndustry(industry_id);
 			if (isDeleted) {
+				webSocketService.sendUpdate("/topic/industry-updates", "DELETE INDUSTRY");
 				return new ResponseEntity<>("Industry deleted successfully", HttpStatus.OK);
 			} else {
 				return new ResponseEntity<>("Industry deletion failed", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -76,15 +81,16 @@ public class IndustryController {
 		List<Industry> industries = industryService.searchIndustry(query);
 		return industries;
 	}
-	
+
 	@GetMapping("/industry/countJobByIndustry")
 	public List<CountJobByIndustry> countJobByIndustry() {
 		List<CountJobByIndustry> industries = industryRepository.countJobsByIndustry();
 		return industries;
 	}
-	
+
 	@GetMapping("/industry/count-industry")
-    public List<CountJobByIndustry> getCountIndustry() {
-		 return industryService.getIndustryCount(); 
-    }
+	public List<CountJobByIndustry> getCountIndustry() {
+		webSocketService.sendUpdate("/topic/industry-updates", "COUNT INDUSTRY");
+		return industryService.getIndustryCount();
+	}
 }
