@@ -7,10 +7,6 @@ export const uploadToCloudinary = async (file) => {
     return null;
   }
 
-  console.log("📂 Uploading file:", file.name);
-  console.log("📂 File Type:", file.type);
-  console.log("📂 File Size:", file.size, "bytes");
-
   // Kiểm tra file có vượt quá 10MB không (tài khoản miễn phí bị giới hạn)
   const MAX_SIZE = 10 * 1024 * 1024; // 10MB
   if (file.size > MAX_SIZE) {
@@ -24,13 +20,14 @@ export const uploadToCloudinary = async (file) => {
     data.append("upload_preset", upload_preset);
     data.append("resource_type", "auto"); // Để Cloudinary tự xác định loại file
 
-    const uploadURL = `https://api.cloudinary.com/v1_1/${cloud_name}/upload`;
+    const uploadURL = `https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`;
 
     console.log("🚀 Upload URL:", uploadURL);
 
     const res = await fetch(uploadURL, {
       method: "POST",
       body: data,
+      headers: { Accept: "application/json" },
     });
 
     const fileData = await res.json();

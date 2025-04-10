@@ -32,7 +32,7 @@ const formatDate = (dateString) => {
     return new Intl.DateTimeFormat("vi-VN", {
       year: "numeric",
       month: "2-digit",
-      day: "2-digit", 
+      day: "2-digit",
     }).format(date);
   } catch (error) {
     return "N/A";
@@ -101,7 +101,6 @@ export default function CompanyList() {
 
   // const [filteredCompanies, setFilteredCompanies] = useState([]);
   const [companyReviews, setCompanyReviews] = useState({});
-
 
   useEffect(() => {
     dispatch(
@@ -294,25 +293,26 @@ export default function CompanyList() {
                   </td>
                   <td className="p-4 text-gray-500">{company.address}</td>
                   <td className="p-4">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium`}
-                      style={{
-                        backgroundColor:
-                          industryStyles[
-                            getIndustryName(company.industry?.industryId)
-                          ]?.backgroundColor,
-                        color:
-                          industryStyles[
-                            getIndustryName(company.industry?.industryId)
-                          ]?.color,
-                        border:
-                          industryStyles[
-                            getIndustryName(company.industry?.industryId)
-                          ]?.border,
-                      }}
-                    >
-                      {getIndustryName(company.industry?.industryId)}
-                    </span>
+                    <div className="flex flex-col gap-2">
+                      {company.industry?.map((ind) => {
+                        const industryName = getIndustryName(ind.industryId);
+                        const style = industryStyles[industryName] || {};
+
+                        return (
+                          <span
+                            key={ind.industryId}
+                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                            style={{
+                              backgroundColor: style.backgroundColor,
+                              color: style.color,
+                              border: style.border,
+                            }}
+                          >
+                            {industryName}
+                          </span>
+                        );
+                      })}
+                    </div>
                   </td>
                   <td className="p-4 text-gray-500">
                     {formatDate(company.establishedTime)}

@@ -88,7 +88,7 @@ export const getProfileAction = createAsyncThunk(
         throw new Error('No token found');
       }
 
-      const { data } = await api.get(`${API_BASE_URL}/users/profile`, {
+      const { data } = await api.get(`/users/profile`, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },

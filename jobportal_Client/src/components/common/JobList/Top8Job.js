@@ -52,7 +52,7 @@ export default function Top8Job() {
               jobTitle={job.title}
               company={job.company.companyName}
               location={job.city.cityName}
-              category={job.company.industry.industryName}
+              category={job?.industry ? job.industry.map(ind => ind.industryName) : []}
               jobType={job.typeOfWork}
               companyLogo={job.company.logo || logo1}
             />

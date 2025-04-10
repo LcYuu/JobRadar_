@@ -33,10 +33,9 @@ export default function JobList() {
       if (topic === "/topic/job-updates") {
         if (message === "ADD JOB") {
           dispatch(getAllJobAction({ currentPage, size }));
-          console.log("Added job, fetching...");
+
         } else if (message === "EXPIRE JOB") {
           dispatch(getAllJobAction({ currentPage, size }));
-          console.log("Expire job, fetching...");
         } else if (message === "APPROVE JOB") {
           dispatch(getAllJobAction({ currentPage, size }));
         }
@@ -76,7 +75,7 @@ export default function JobList() {
               jobTitle={job.title}
               company={job.company.companyName}
               location={job.city.cityName}
-              category={job.company.industry.industryName}
+              category={job?.industry ? job.industry.map(ind => ind.industryName) : []}
               jobType={job.typeOfWork}
               companyLogo={job.company.logo}
             />

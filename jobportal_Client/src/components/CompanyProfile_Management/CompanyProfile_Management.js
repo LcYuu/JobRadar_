@@ -221,7 +221,6 @@ const CompanyProfile_Management = () => {
   // };
 
   const removeImage = async (imgId) => {
-
     // Sử dụng swal thay vì window.confirm
     const result = await Swal.fire({
       title: "Bạn có chắc chắn muốn xóa hình ảnh này?",
@@ -464,9 +463,15 @@ const CompanyProfile_Management = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Ngành nghề</p>
-                    <p className="font-medium">
-                      {companyJwt?.industry?.industryName || "Chưa cập nhật"}
-                    </p>
+                    {companyJwt?.industry?.length > 0 ? (
+                      <ul className="font-medium">
+                        {companyJwt.industry.map((ind, index) => (
+                          <li key={index}>{ind.industryName}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="font-medium">Chưa cập nhật</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -480,32 +485,37 @@ const CompanyProfile_Management = () => {
       </Card>
 
       {/* Company Description */}
-      <Card className="mb-6 p-6 bg-white shadow-md rounded-lg">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Hồ sơ công ty</h2>
-          <Button onClick={() => handleEditDesClick()} variant="ghost">
-            <PenSquare className="w-4 h-4 mr-2" />
-            Chỉnh sửa
-          </Button>
-        </div>
-        {isEditingDes ? (
-          <div>
-            <textarea
-              name="description"
-              className="w-full p-3 border rounded-md"
-              rows="4"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Nhập mô tả về công ty..."
-            />
-            <div className="mt-2 flex justify-end">
-              <Button onClick={handleSaveClick}>Lưu</Button>
-            </div>
+      {companyJwt && (
+        <Card className="mb-6 p-6 bg-white shadow-md rounded-lg">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Hồ sơ công ty</h2>
+            <Button onClick={() => handleEditDesClick()} variant="ghost">
+              <PenSquare className="w-4 h-4 mr-2" />
+              Chỉnh sửa
+            </Button>
           </div>
-        ) : (
-          <p className="text-gray-600">{companyJwt?.description}</p>
-        )}
-      </Card>
+          {isEditingDes ? (
+            <div>
+              <textarea
+                name="description"
+                className="w-full p-3 border rounded-md"
+                rows="4"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Nhập mô tả về công ty..."
+              />
+              <div className="mt-2 flex justify-end">
+                <Button onClick={handleSaveClick}>Lưu</Button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-600">
+              {companyJwt.description ||
+                "Chưa có mô tả về công ty. Nhấn chỉnh sửa để thêm mô tả."}
+            </p>
+          )}
+        </Card>
+      )}
 
       {/* Contact Information */}
       <Card className="mb-6 p-6  bg-white shadow-md rounded-lg">

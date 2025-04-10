@@ -34,8 +34,7 @@ export const getAllIndustries = createAsyncThunk(
     try {
       const response = await axios.get(`${API_BASE_URL}/get-all`);
       const validIndustries = response.data.filter(industry => 
-        industry.industryName && 
-        industry.industryName.toLowerCase() !== 'none'
+        industry.industryName
       );
       return validIndustries;
     } catch (error) {

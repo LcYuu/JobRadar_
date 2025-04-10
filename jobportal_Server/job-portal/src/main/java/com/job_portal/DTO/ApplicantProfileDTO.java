@@ -2,6 +2,7 @@ package com.job_portal.DTO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -29,5 +30,5 @@ public class ApplicantProfileDTO {
 	private String avatar;
 	private String typeOfWork;
 	private String title;
-	private String industryName;
+	private List<String> industryName;  // 🔹 Đổi từ String sang List<String>
 }

@@ -42,9 +42,13 @@ public class Company {
 	@Column(name = "company_name", length = 500)
 	private String companyName;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "industry_id")
-	private Industry industry;
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+	@JoinTable(
+	    name = "company_industries",
+	    joinColumns = @JoinColumn(name = "company_id"),
+	    inverseJoinColumns = @JoinColumn(name = "industry_id")
+	)
+	private List<Industry> industry = new ArrayList<>();
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "city_id")
@@ -101,5 +105,4 @@ public class Company {
 //	@JsonIgnore
 	@OneToMany(mappedBy = "company", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<ImageCompany> images = new ArrayList<>();
-
 }
