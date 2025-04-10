@@ -9,6 +9,7 @@ import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import * as Yup from "yup";
 import { createExperience, getExpByUser, updateExperience } from "../../redux/Experience/exp.thunk";
+import { toast } from "react-toastify";
 
 const style = {
   position: "absolute",
@@ -33,7 +34,6 @@ export default function ExpModal({
   editingExperienceId,
   setEditingExperienceId,
   initialData,
-  showSuccessToast,
 }) {
   const validationSchema = Yup.object({
     jobTitle: Yup.string().required("Vui lòng nhập tiêu đề công việc"),
@@ -72,11 +72,11 @@ export default function ExpModal({
           const experienceData = values
           await dispatch(updateExperience({experienceId:editingExperienceId, experienceData}));
           setEditingExperienceId(null);
-          showSuccessToast("Cập nhật kinh nghiệm thành công!");
+          toast.success("Cập nhật kinh nghiệm thành công!");
         } else {
           const expData = values
           await dispatch(createExperience(expData));
-          showSuccessToast("Cập nhật kinh nghiệm thành công!");
+          toast.success("Cập nhật kinh nghiệm thành công!");
         }
         handleClose();
         dispatch(getExpByUser()); // Refresh the experience list
