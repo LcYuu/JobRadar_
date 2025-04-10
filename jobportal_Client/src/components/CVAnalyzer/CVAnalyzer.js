@@ -9,6 +9,7 @@ const CVAnalyzer = () => {
   const [jobDescription, setJobDescription] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
+  const [showDetailedAnalysis, setShowDetailedAnalysis] = useState(false);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -140,55 +141,275 @@ const CVAnalyzer = () => {
         <div className="mt-8 border-t pt-6">
           <h3 className="text-xl font-bold mb-4">Kết quả phân tích</h3>
           
-          <div className="bg-purple-50 p-4 rounded-lg mb-4">
-            <div className="text-2xl font-bold text-center text-purple-700 mb-2">
-              {Math.round(result.matching_score.totalScore)}%
+          <div className="bg-purple-50 p-6 rounded-lg mb-6">
+            <div className="flex flex-col items-center mb-4">
+              <div className="text-3xl font-bold text-center text-purple-700 mb-2">
+                {Math.round(result.matching_score.totalScore)}%
+              </div>
+              <div className="text-center text-purple-600 text-lg font-medium">
+                Mức độ phù hợp với công việc
+              </div>
+              <div className="mt-2 text-center text-purple-500 font-medium">
+                {result.matching_score.suitabilityLevel}
+              </div>
             </div>
-            <div className="text-center text-purple-600">
-              Mức độ phù hợp với công việc
+            
+            {result.matching_score.recommendations && (
+              <div className="mt-4">
+                <h4 className="font-semibold mb-2">Nhận xét</h4>
+                <ul className="list-disc pl-5 space-y-1">
+                  {result.matching_score.recommendations.map((rec, index) => (
+                    <li key={index} className="text-gray-700">{rec}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="bg-white p-4 rounded-lg border shadow-sm">
+              <h4 className="font-semibold mb-3 text-green-700">Kỹ năng phù hợp</h4>
+              {result.matching_score.matchedSkills.length > 0 ? (
+                <ul className="list-disc pl-5 space-y-1">
+                  {result.matching_score.matchedSkills.map((skill, index) => (
+                    <li key={index} className="text-green-600">{skill}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500 italic">Không tìm thấy kỹ năng phù hợp</p>
+              )}
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg border shadow-sm">
+              <h4 className="font-semibold mb-3 text-red-700">Kỹ năng còn thiếu</h4>
+              {result.matching_score.missingSkills.length > 0 ? (
+                <ul className="list-disc pl-5 space-y-1">
+                  {result.matching_score.missingSkills.map((skill, index) => (
+                    <li key={index} className="text-red-600">{skill}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500 italic">Bạn đã có tất cả các kỹ năng yêu cầu</p>
+              )}
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <h4 className="font-semibold mb-2">Kỹ năng phù hợp</h4>
-              <ul className="list-disc pl-5">
-                {result.matching_score.matchedSkills.map((skill, index) => (
-                  <li key={index} className="text-green-600">{skill}</li>
+          {result.matching_score.extraSkills && result.matching_score.extraSkills.length > 0 && (
+            <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
+              <h4 className="font-semibold mb-3 text-blue-700">Kỹ năng bổ sung</h4>
+              <ul className="list-disc pl-5 space-y-1">
+                {result.matching_score.extraSkills.map((skill, index) => (
+                  <li key={index} className="text-blue-600">{skill}</li>
                 ))}
               </ul>
             </div>
-            <div>
-              <h4 className="font-semibold mb-2">Kỹ năng còn thiếu</h4>
-              <ul className="list-disc pl-5">
-                {result.matching_score.missingSkills.map((skill, index) => (
-                  <li key={index} className="text-red-600">{skill}</li>
+          )}
+          
+          {result.matching_score.categorizedSkills && Object.keys(result.matching_score.categorizedSkills).length > 0 && (
+            <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
+              <h4 className="font-semibold mb-3">Kỹ năng theo nhóm</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Object.entries(result.matching_score.categorizedSkills).map(([category, skills]) => (
+                  <div key={category} className="border rounded p-3">
+                    <h5 className="font-medium mb-2 capitalize">{category.replace('_', ' ')}</h5>
+                    <ul className="list-disc pl-5 text-sm">
+                      {skills.map((skill, index) => (
+                        <li key={index} className={
+                          result.matching_score.matchedSkills.includes(skill) 
+                            ? "text-green-600" 
+                            : "text-gray-600"
+                        }>
+                          {skill}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {result.matching_score.cvImprovementSuggestions && result.matching_score.cvImprovementSuggestions.length > 0 && (
+            <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
+              <h4 className="font-semibold mb-3 text-indigo-700">Gợi ý cải thiện CV</h4>
+              <ul className="list-disc pl-5 space-y-1">
+                {result.matching_score.cvImprovementSuggestions.map((suggestion, index) => (
+                  <li key={index} className="text-indigo-600">{suggestion}</li>
                 ))}
               </ul>
+            </div>
+          )}
+          
+          <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
+            <h4 className="font-semibold mb-3">Điểm chi tiết</h4>
+            <div className="space-y-3">
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span>Kỹ năng:</span>
+                  <span className="font-medium">{Math.round(result.matching_score.detailedScores.skills_match)}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div className="bg-blue-600 h-2.5 rounded-full" style={{width: `${Math.round(result.matching_score.detailedScores.skills_match)}%`}}></div>
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span>Học vấn:</span>
+                  <span className="font-medium">{Math.round(result.matching_score.detailedScores.education_match)}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div className="bg-green-600 h-2.5 rounded-full" style={{width: `${Math.round(result.matching_score.detailedScores.education_match)}%`}}></div>
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span>Kinh nghiệm:</span>
+                  <span className="font-medium">{Math.round(result.matching_score.detailedScores.experience_match)}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div className="bg-yellow-600 h-2.5 rounded-full" style={{width: `${Math.round(result.matching_score.detailedScores.experience_match)}%`}}></div>
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span>Độ tương đồng tổng thể:</span>
+                  <span className="font-medium">{Math.round(result.matching_score.detailedScores.overall_similarity)}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div className="bg-purple-600 h-2.5 rounded-full" style={{width: `${Math.round(result.matching_score.detailedScores.overall_similarity)}%`}}></div>
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span>Điểm ngữ cảnh:</span>
+                  <span className="font-medium">{Math.round(result.matching_score.detailedScores.context_score)}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div className="bg-pink-600 h-2.5 rounded-full" style={{width: `${Math.round(result.matching_score.detailedScores.context_score)}%`}}></div>
+                </div>
+              </div>
             </div>
           </div>
           
-          <div className="mb-4">
-            <h4 className="font-semibold mb-2">Điểm chi tiết</h4>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span>Kỹ năng:</span>
-                <span>{Math.round(result.matching_score.detailedScores.skills_match)}%</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Học vấn:</span>
-                <span>{Math.round(result.matching_score.detailedScores.education_match)}%</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Kinh nghiệm:</span>
-                <span>{Math.round(result.matching_score.detailedScores.experience_match)}%</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Tổng thể:</span>
-                <span>{Math.round(result.matching_score.detailedScores.overall_similarity)}%</span>
-              </div>
+          {result.detailedAnalysis && (
+            <div className="mt-4">
+              <button 
+                onClick={() => setShowDetailedAnalysis(!showDetailedAnalysis)} 
+                className="flex items-center text-purple-600 font-medium hover:underline"
+              >
+                {showDetailedAnalysis ? (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                    Ẩn phân tích chi tiết
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Xem phân tích chi tiết
+                  </>
+                )}
+              </button>
+              
+              {showDetailedAnalysis && (
+                <div className="mt-4 space-y-6">
+                  {/* Phân tích chi tiết về học vấn */}
+                  {result.detailedAnalysis.education && (
+                    <div className="p-4 bg-gray-50 rounded-lg">
+                      <h4 className="font-medium text-gray-900 mb-3">Chi tiết về học vấn</h4>
+                      <div className="space-y-2 text-sm">
+                        {result.detailedAnalysis.education.cv_level && (
+                          <div>
+                            <span className="font-medium">Trình độ trong CV:</span> {result.detailedAnalysis.education.cv_level}
+                          </div>
+                        )}
+                        {result.detailedAnalysis.education.job_level && (
+                          <div>
+                            <span className="font-medium">Trình độ yêu cầu:</span> {result.detailedAnalysis.education.job_level}
+                          </div>
+                        )}
+                        {result.detailedAnalysis.education.cv_majors && result.detailedAnalysis.education.cv_majors.length > 0 && (
+                          <div>
+                            <span className="font-medium">Chuyên ngành trong CV:</span> {result.detailedAnalysis.education.cv_majors.join(', ')}
+                          </div>
+                        )}
+                        {result.detailedAnalysis.education.job_majors && result.detailedAnalysis.education.job_majors.length > 0 && (
+                          <div>
+                            <span className="font-medium">Chuyên ngành yêu cầu:</span> {result.detailedAnalysis.education.job_majors.join(', ')}
+                          </div>
+                        )}
+                        {result.detailedAnalysis.education.reason && (
+                          <div>
+                            <span className="font-medium">Lý do:</span> {result.detailedAnalysis.education.reason}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Phân tích chi tiết về kinh nghiệm */}
+                  {result.detailedAnalysis.experience && (
+                    <div className="p-4 bg-gray-50 rounded-lg">
+                      <h4 className="font-medium text-gray-900 mb-3">Chi tiết về kinh nghiệm</h4>
+                      <div className="space-y-2 text-sm">
+                        {result.detailedAnalysis.experience.cv_years !== undefined && (
+                          <div>
+                            <span className="font-medium">Số năm kinh nghiệm trong CV:</span> {result.detailedAnalysis.experience.cv_years} năm
+                          </div>
+                        )}
+                        {result.detailedAnalysis.experience.job_years !== undefined && (
+                          <div>
+                            <span className="font-medium">Số năm kinh nghiệm yêu cầu:</span> {result.detailedAnalysis.experience.job_years} năm
+                          </div>
+                        )}
+                        {result.detailedAnalysis.experience.tech_experience && (
+                          <div>
+                            <span className="font-medium">Kinh nghiệm với công nghệ:</span> {result.detailedAnalysis.experience.tech_experience.matched_skills?.join(', ') || 'Không có'}
+                          </div>
+                        )}
+                        {result.detailedAnalysis.experience.reason && (
+                          <div>
+                            <span className="font-medium">Lý do:</span> {result.detailedAnalysis.experience.reason}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Thông tin về trọng số đánh giá */}
+                  {result.detailedAnalysis.weights && (
+                    <div className="p-4 bg-gray-50 rounded-lg">
+                      <h4 className="font-medium text-gray-900 mb-3">Trọng số đánh giá</h4>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span className="font-medium">Kỹ năng:</span> {(result.detailedAnalysis.weights.skills * 100).toFixed(0)}%
+                        </div>
+                        <div>
+                          <span className="font-medium">Học vấn:</span> {(result.detailedAnalysis.weights.education * 100).toFixed(0)}%
+                        </div>
+                        <div>
+                          <span className="font-medium">Kinh nghiệm:</span> {(result.detailedAnalysis.weights.experience * 100).toFixed(0)}%
+                        </div>
+                        <div>
+                          <span className="font-medium">Tương đồng tổng thể:</span> {(result.detailedAnalysis.weights.overall_similarity * 100).toFixed(0)}%
+                        </div>
+                        <div>
+                          <span className="font-medium">Ngữ cảnh:</span> {(result.detailedAnalysis.weights.context * 100).toFixed(0)}%
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-          </div>
+          )}
         </div>
       )}
     </Card>

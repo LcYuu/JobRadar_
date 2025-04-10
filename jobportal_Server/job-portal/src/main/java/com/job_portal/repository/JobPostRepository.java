@@ -114,20 +114,9 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 			+ "AND (:status IS NULL OR jp.status = :status) "
 			+ "AND (:typeOfWork IS NULL OR jp.typeOfWork = :typeOfWork) "
 			+ "GROUP BY jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
-			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName,  jp.isApprove "
-			+ "ORDER BY jp.createDate DESC,jp.postId")
-//			+ "ORDER BY "
-//			+ "CASE WHEN :sortByCreateDate LIKE 'ASC' THEN jp.createDate END ASC, "
-//			+ "CASE WHEN :sortByCreateDate LIKE 'DESC' THEN jp.createDate END DESC, "
-//			+ "CASE WHEN :sortByExpireDate LIKE 'ASC' THEN jp.expireDate END ASC, "
-//			+ "CASE WHEN :sortByExpireDate LIKE 'DESC' THEN jp.expireDate END DESC, "
-//			+ "CASE WHEN :sortByCount LIKE 'ASC' THEN COUNT(a.postId) END ASC, "
-//			+ "CASE WHEN :sortByCount LIKE 'DESC' THEN COUNT(a.postId) END DESC", nativeQuery = false)
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName,  jp.isApprove ")
 	Page<JobWithApplicationCountDTO> findJobsWithFiltersAndSorting(@Param("companyId") UUID companyId,
-			@Param("status") String status, @Param("typeOfWork") String typeOfWork,
-//			@Param("sortByCreateDate") String sortByCreateDate, @Param("sortByExpireDate") String sortByExpireDate,
-//			@Param("sortByCount") String sortByCount, 
-			Pageable pageable);
+			@Param("status") String status, @Param("typeOfWork") String typeOfWork, Pageable pageable);
 
 	@Query("SELECT j FROM JobPost j WHERE j.expireDate < :date AND j.status = :status")
 	List<JobPost> findAllByExpireDateBeforeAndStatus(@Param("date") LocalDateTime date, @Param("status") String status);
@@ -234,4 +223,17 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	
 	@Query("SELECT j FROM JobPost j WHERE j.isApprove = true AND j.expireDate < ?1 AND j.status = 'Hết hạn' AND (j.surveyEmailSent = false OR j.surveyEmailSent IS NULL)")
 	List<JobPost> findByExpireDateBeforeAndSurveyEmailSentFalse(LocalDateTime date);
+
+	@Query(value = "SELECT new com.job_portal.DTO.JobWithApplicationCountDTO("
+			+ "jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, " + "COUNT(DISTINCT a.postId), jp.status, i.industryName, jp.isApprove) "
+			+ "FROM JobPost jp " + "LEFT JOIN ApplyJob a ON jp.postId = a.postId "
+			+ "JOIN Company c ON jp.company.companyId = c.companyId "
+			+ "JOIN Industry i ON c.industry.industryId = i.industryId " + "WHERE jp.company.companyId = :companyId "
+			+ "AND (:status IS NULL OR jp.status = :status) "
+			+ "AND (:typeOfWork IS NULL OR jp.typeOfWork = :typeOfWork) "
+			+ "GROUP BY jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName,  jp.isApprove ")
+	List<JobWithApplicationCountDTO> findAllJobsWithFilters(@Param("companyId") UUID companyId,
+			@Param("status") String status, @Param("typeOfWork") String typeOfWork);
 }

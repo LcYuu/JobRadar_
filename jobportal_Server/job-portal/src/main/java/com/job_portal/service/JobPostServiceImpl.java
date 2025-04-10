@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,34 +17,26 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.job_portal.DTO.*;
+import com.job_portal.models.*;
+import com.job_portal.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
-import com.job_portal.DTO.DailyJobCount;
-import com.job_portal.DTO.JobCountType;
-import com.job_portal.DTO.JobPostDTO;
-import com.job_portal.DTO.JobRecommendationDTO;
-import com.job_portal.DTO.JobWithApplicationCountDTO;
-import com.job_portal.models.City;
-import com.job_portal.models.Company;
-import com.job_portal.models.Industry;
-import com.job_portal.models.JobPost;
-import com.job_portal.models.SearchHistory;
-import com.job_portal.models.Seeker;
-import com.job_portal.models.Skills;
-import com.job_portal.repository.CityRepository;
-import com.job_portal.repository.CompanyRepository;
-import com.job_portal.repository.JobPostRepository;
-import com.job_portal.repository.SearchHistoryRepository;
-import com.job_portal.repository.SeekerRepository;
-import com.job_portal.repository.SkillRepository;
 import com.job_portal.specification.JobPostSpecification;
 import com.opencsv.CSVWriter;
 import com.social.exceptions.AllExceptions;
@@ -51,6 +44,8 @@ import com.social.exceptions.AllExceptions;
 @Service
 public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostService {
 
+	@Autowired
+	private ApplyJobRepository applyJobRepository;
 	@Autowired
 	private JobPostRepository jobPostRepository;
 	@Autowired
@@ -65,6 +60,8 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 	private SeekerRepository seekerRepository;
 	@Autowired
 	private ISearchHistoryService searchHistoryService;
+	@Autowired
+	private RestTemplate restTemplate;
 
 	private static final String FILE_PATH = "D:\\\\JobRadar_\\\\search_history.csv";
 
@@ -128,9 +125,7 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 		// Xóa công việc trong database
 		jobPostRepository.delete(jobPost.get());
 
-		// Xóa công việc trong Redis
-		String redisKey = "jobPost:" + postId;
-		this.delete(redisKey);
+
 
 		return true;
 	}
@@ -231,9 +226,7 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 
 		if (isUpdated) {
 			jobPostRepository.save(oldJob);
-			String redisKey = "jobPost:" + postId;
-			this.set(redisKey, oldJob);
-			this.setTimeToLive(redisKey, TIME_OUT);
+
 		}
 
 		return isUpdated;
@@ -403,21 +396,14 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 
 	@Override
 	public List<JobPost> getTop8LatestJobPosts() {
-	    String redisKey = "top_8_latest_jobs";
-	    
-	    // Kiểm tra Redis xem có dữ liệu không
-	    List<JobPost> cachedJobs = (List<JobPost>) this.get(redisKey);
-	    if (cachedJobs != null) {
-	        return cachedJobs;
-	    }
+
 
 	    List<JobPost> latestJobs = jobPostRepository.findTop8LatestJobPosts()
 	                                                .stream()
 	                                                .limit(8)
 	                                                .collect(Collectors.toList());
 
-	    this.set(redisKey, latestJobs);
-	    this.setTimeToLive(redisKey, 1);
+
 
 	    return latestJobs;
 	}
@@ -434,48 +420,28 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 			Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, Pageable pageable) {
 
 		// Tạo key cho Redis dựa trên tham số tìm kiếm
-		String redisKey = "searchJobs:" + title + ":" + selectedTypesOfWork + ":" + minSalary + ":" + maxSalary + ":"
-				+ cityId + ":" + selectedIndustryIds + ":" + pageable.getPageNumber() + ":" + pageable.getPageSize();
 
-		// Kiểm tra Redis có dữ liệu không
-		Page<JobPost> cachedJobs = null; // 👉 Thêm dòng này để khai báo biến trước
-
-		Object cachedObject = this.get(redisKey);
-		if (cachedObject instanceof Page) {
-			cachedJobs = (Page<JobPost>) cachedObject;
-		}
-
-		if (cachedJobs != null) {
-			return cachedJobs; // Trả về dữ liệu cache nếu có
-		}
 
 		// Nếu không có dữ liệu cache, thực hiện truy vấn từ DB
 		Specification<JobPost> spec = JobPostSpecification.withFilters(title, selectedTypesOfWork, minSalary, maxSalary,
 				cityId, selectedIndustryIds);
 		Page<JobPost> jobPosts = jobPostRepository.findByIsApproveTrue(spec, pageable);
 
-		this.set(redisKey, jobPosts);
-		this.setTimeToLive(redisKey, TIME_OUT);
+
 
 		return jobPosts;
 	}
 
 	public Page<JobPost> findJobByCompanyId(UUID companyId, int page, int size) {
 	    // Tạo redis key dựa trên companyId, page, size
-	    String redisKey = "jobByCompany:" + companyId + ":" + page + ":" + size;
+
 	    
 	    // Kiểm tra cache
-	    Page<JobPost> cachedPage = (Page<JobPost>) this.get(redisKey);
-	    if (cachedPage != null) {
-	        return cachedPage;
-	    }
+
 	    
 	    // Nếu không có trong cache, truy vấn từ database
 	    Page<JobPost> jobPosts = jobPostRepository.findJobByCompanyId(companyId, PageRequest.of(page, size));
-	    
-	    // Lưu kết quả vào Redis và thiết lập TTL (ví dụ: 7 ngày)
-	    this.set(redisKey, jobPosts);
-	    this.setTimeToLive(redisKey, TIME_OUT);
+
 	    
 	    return jobPosts;
 	}
@@ -569,8 +535,7 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 		// Cập nhật trạng thái thành EXPIRED
 		for (JobPost job : expiredJobs) {
 			job.setStatus("Hết hạn");
-			String redisKey = "jobPost:" + job.getPostId();
-			this.delete(redisKey);
+
 		}
 
 		// Lưu các thay đổi vào cơ sở dữ liệu
@@ -597,16 +562,9 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 	}
 
 	public Page<JobPost> searchJobs(String title, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, int page, int size) {
-	    String redisKey = "searchJobs:" + title + ":" + selectedTypesOfWork + ":" + minSalary + ":" + maxSalary + ":"
-	            + cityId + ":" + selectedIndustryIds + ":" + page + ":" + size;
 
-	    // Kiểm tra xem cache có kết quả không
-	    Object cachedData = this.get(redisKey);
-	    if (cachedData instanceof List<?>) {
-	        List<JobPost> jobList = (List<JobPost>) cachedData;
-	        Pageable pageable = PageRequest.of(page, size);
-	        return new PageImpl<>(jobList, pageable, jobList.size());
-	    }
+
+
 	    
 	    Specification<JobPost> spec = Specification
 	            .where(jobPostRepository.alwaysActiveJobs())
@@ -614,11 +572,160 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 
 	    Page<JobPost> result = jobPostRepository.findAll(spec, PageRequest.of(page, size));
 
-	    // Lưu kết quả vào Redis
-	    this.set(redisKey, result);
-	    this.setTimeToLive(redisKey, TIME_OUT); // Cache hết hạn sau 1 ngày
+
 
 	    return result;
+	}
+	
+	@Override
+	public Page<JobPost> semanticSearchWithFilters(String query, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, int page, int size) {
+		// Tạo specification cho các bộ lọc
+		Specification<JobPost> filterSpec = Specification
+				.where(jobPostRepository.alwaysActiveJobs())
+				.and(JobPostSpecification.withFilters(null, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds));
+		
+		// Lấy tất cả job posts phù hợp với bộ lọc
+		List<JobPost> filteredJobs = jobPostRepository.findAll(filterSpec);
+		
+		// Nếu không có query, trả về kết quả đã lọc với phân trang
+		if (query == null || query.trim().isEmpty()) {
+			int start = (int) Math.min(page * size, filteredJobs.size());
+			int end = (int) Math.min((page + 1) * size, filteredJobs.size());
+			List<JobPost> pageContent = filteredJobs.subList(start, end);
+			return new PageImpl<>(pageContent, PageRequest.of(page, size), filteredJobs.size());
+		}
+		
+		// Thực hiện tìm kiếm ngữ nghĩa trên các job posts đã lọc
+		List<JobPost> semanticResults = new ArrayList<>();
+		
+		// Sử dụng Gemini API để tìm kiếm ngữ nghĩa
+		try {
+			// Tạo danh sách các job posts để gửi đến Gemini API
+			List<Map<String, Object>> jobsForSemanticSearch = filteredJobs.stream()
+					.map(job -> {
+						Map<String, Object> jobMap = new HashMap<>();
+						jobMap.put("postId", job.getPostId().toString());
+						jobMap.put("title", job.getTitle());
+						jobMap.put("description", job.getDescription());
+						jobMap.put("requirement", job.getRequirement());
+						jobMap.put("experience", job.getExperience());
+						jobMap.put("typeOfWork", job.getTypeOfWork());
+						jobMap.put("location", job.getLocation());
+						jobMap.put("salary", job.getSalary());
+						return jobMap;
+					})
+					.collect(Collectors.toList());
+			
+			// Gọi Gemini API để tìm kiếm ngữ nghĩa
+			Map<String, Object> requestBody = new HashMap<>();
+			requestBody.put("query", query);
+			requestBody.put("jobs", jobsForSemanticSearch);
+			
+			// Gửi yêu cầu đến Gemini API
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			
+			HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+			
+			// Thay thế URL bằng URL thực tế của Gemini API
+			String geminiApiUrl = "http://localhost:5000/semantic-search";
+			
+			ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+					geminiApiUrl,
+					HttpMethod.POST,
+					entity,
+					new ParameterizedTypeReference<List<Map<String, Object>>>() {}
+			);
+			
+			// Xử lý kết quả từ Gemini API
+			List<Map<String, Object>> semanticResultsFromApi = response.getBody();
+			
+			if (semanticResultsFromApi != null) {
+				// Lấy danh sách các postId từ kết quả tìm kiếm ngữ nghĩa
+				List<UUID> semanticPostIds = semanticResultsFromApi.stream()
+						.map(result -> UUID.fromString((String) result.get("postId")))
+						.collect(Collectors.toList());
+				
+				// Lọc các job posts dựa trên kết quả tìm kiếm ngữ nghĩa
+				semanticResults = filteredJobs.stream()
+						.filter(job -> semanticPostIds.contains(job.getPostId()))
+						.collect(Collectors.toList());
+				
+				// Sắp xếp kết quả theo thứ tự từ kết quả tìm kiếm ngữ nghĩa
+				semanticResults.sort((job1, job2) -> {
+					int index1 = semanticPostIds.indexOf(job1.getPostId());
+					int index2 = semanticPostIds.indexOf(job2.getPostId());
+					return Integer.compare(index1, index2);
+				});
+			} else {
+				// Nếu không có kết quả từ Gemini API, sử dụng tìm kiếm thông thường
+				semanticResults = filteredJobs.stream()
+						.filter(job -> job.getTitle().toLowerCase().contains(query.toLowerCase()) ||
+								(job.getDescription() != null && job.getDescription().toLowerCase().contains(query.toLowerCase())))
+						.collect(Collectors.toList());
+			}
+		} catch (Exception e) {
+			// Nếu có lỗi khi gọi Gemini API, sử dụng tìm kiếm thông thường
+			semanticResults = filteredJobs.stream()
+					.filter(job -> job.getTitle().toLowerCase().contains(query.toLowerCase()) ||
+							(job.getDescription() != null && job.getDescription().toLowerCase().contains(query.toLowerCase())))
+					.collect(Collectors.toList());
+			e.printStackTrace();
+		}
+		
+		// Áp dụng phân trang cho kết quả tìm kiếm ngữ nghĩa
+		int start = (int) Math.min(page * size, semanticResults.size());
+		int end = (int) Math.min((page + 1) * size, semanticResults.size());
+		List<JobPost> pageContent = semanticResults.subList(start, end);
+		
+		return new PageImpl<>(pageContent, PageRequest.of(page, size), semanticResults.size());
+	}
+
+	@Override
+	public Map<String, List<CandidateWithScoreDTO>> getCandidatesByJobForCompany(UUID companyId, String sortDirection, String sortBy) {
+		// Lấy tất cả ứng viên cho công ty
+		List<ApplyJob> applications = applyJobRepository.findByCompanyId(companyId);
+
+		// Nhóm ứng viên theo job và sắp xếp theo điểm matching
+		Map<String, List<CandidateWithScoreDTO>> groupedCandidates = applications.stream()
+				.map(app -> {
+					CandidateWithScoreDTO dto = new CandidateWithScoreDTO();
+					dto.setUserId(app.getUserId());
+					dto.setPostId(app.getPostId());
+					dto.setFullName(app.getFullName());
+					dto.setPathCV(app.getPathCV());
+					dto.setSave(app.isSave());
+					dto.setApplyDate(app.getApplyDate());
+					dto.setTitle(app.getJobPost().getTitle());
+					dto.setMatchingScore(app.getMatchingScore());
+					return dto;
+				})
+				.collect(Collectors.groupingBy(
+						CandidateWithScoreDTO::getTitle,
+						Collectors.collectingAndThen(
+								Collectors.toList(),
+								list -> {
+									// Sắp xếp dựa trên tham số đầu vào
+									if (sortBy != null && sortBy.equals("title")) {
+										if (sortDirection != null && sortDirection.equals("asc")) {
+											list.sort(Comparator.comparing(CandidateWithScoreDTO::getTitle));
+										} else {
+											list.sort(Comparator.comparing(CandidateWithScoreDTO::getTitle).reversed());
+										}
+									} else {
+										// Mặc định sắp xếp theo matchingScore
+										if (sortDirection != null && sortDirection.equals("asc")) {
+											list.sort(Comparator.comparing(CandidateWithScoreDTO::getMatchingScore));
+										} else {
+											list.sort(Comparator.comparing(CandidateWithScoreDTO::getMatchingScore).reversed());
+										}
+									}
+									return list;
+								}
+						)
+				));
+
+		return groupedCandidates;
 	}
 
 

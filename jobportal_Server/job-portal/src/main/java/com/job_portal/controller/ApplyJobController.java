@@ -2,6 +2,7 @@ package com.job_portal.controller;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -173,7 +174,9 @@ public class ApplyJobController {
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size,
 			@RequestParam(required = false) String fullName, // Thêm search theo fullName
 			@RequestParam(required = false) Boolean isSave, // Thêm filter theo isSave
-			@RequestParam(required = false) String title // Thêm filter theo title
+			@RequestParam(required = false) String title, // Thêm filter theo title
+			@RequestParam(defaultValue = "applyDate") String sortBy, // Thêm sắp xếp theo trường
+			@RequestParam(defaultValue = "desc") String sortDirection // Thêm hướng sắp xếp
 	) {
 		// Lấy email từ JWT
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
@@ -185,8 +188,38 @@ public class ApplyJobController {
 
 		UUID companyId = user.get().getCompany().getCompanyId();
 
-		// Tạo pageable với sắp xếp mặc định
-		Pageable pageable = PageRequest.of(page, size, Sort.by("applyDate").descending());
+		// Tạo hướng sắp xếp từ tham số
+		Sort.Direction direction = sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+		
+		// Tạo phương thức sắp xếp dựa trên trường và hướng
+		Sort sort;
+		
+		// Xử lý sắp xếp tùy chỉnh
+		switch (sortBy.toLowerCase()) {
+			case "matchingscore":
+				// Sắp xếp theo điểm tương đồng
+				sort = Sort.by(direction, "matchingScore").and(Sort.by(Sort.Direction.DESC, "applyDate"));
+				break;
+			case "applydate":
+				// Sắp xếp theo ngày nộp đơn
+				sort = Sort.by(direction, "applyDate");
+				break;
+			case "fullname":
+				// Sắp xếp theo tên
+				sort = Sort.by(direction, "fullName");
+				break;
+			case "title":
+				// Sắp xếp theo vị trí công việc
+				sort = Sort.by(direction, "title");
+				break;
+			default:
+				// Mặc định sắp xếp theo ngày nộp đơn
+				sort = Sort.by(Sort.Direction.DESC, "applyDate");
+				break;
+		}
+
+		// Tạo pageable với sắp xếp đã chọn
+		Pageable pageable = PageRequest.of(page, size, sort);
 
 		// Gọi repository với các tham số lọc
 		return applyJobRepository.findApplyJobsWithFilters(companyId, fullName, isSave, title, pageable);
@@ -233,6 +266,158 @@ public class ApplyJobController {
 	    }
 	}
 
+
+	@PostMapping("/update-matching-score")
+	public ResponseEntity<?> updateMatchingScore(@RequestBody Map<String, Object> payload) {
+		try {
+			System.out.println("Received payload: " + payload);
+			
+			String postId = String.valueOf(payload.get("postId"));
+			String userId = String.valueOf(payload.get("userId"));
+			Double matchingScore = ((Number) payload.get("matchingScore")).doubleValue();
+
+			System.out.println("Extracted data - postId: " + postId + ", userId: " + userId + ", score: " + matchingScore);
+
+			// Validate UUIDs
+			if (postId == null || userId == null || postId.equals("null") || userId.equals("null")) {
+				return ResponseEntity.badRequest().body("Invalid postId or userId");
+			}
+
+			try {
+				// Chuyển đổi String ID thành UUID
+				UUID postUuid = UUID.fromString(postId);
+				UUID userUuid = UUID.fromString(userId);
+
+				// Gọi service để cập nhật điểm
+				applyJobService.updateMatchingScore(postUuid, userUuid, matchingScore);
+				
+				System.out.println("Successfully updated matching score");
+				return ResponseEntity.ok().build();
+			} catch (IllegalArgumentException e) {
+				System.err.println("Invalid UUID format: " + e.getMessage());
+				return ResponseEntity.badRequest().body("Invalid UUID format: " + e.getMessage());
+			}
+		} catch (Exception e) {
+			System.err.println("Error updating matching score: " + e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Error updating matching score: " + e.getMessage());
+		}
+	}
+
+	@GetMapping("/get-matching-scores")
+	public ResponseEntity<?> getMatchingScores() {
+		try {
+			List<Map<String, Object>> results = applyJobRepository.findAllWithMatchingScore();
+			System.out.println("Retrieved " + results.size() + " entries with matching scores");
+			return ResponseEntity.ok(results);
+		} catch (Exception e) {
+			System.err.println("Error retrieving matching scores: " + e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Error retrieving matching scores: " + e.getMessage());
+		}
+	}
+
+	@PostMapping("/update-full-analysis")
+	public ResponseEntity<?> updateFullAnalysis(@RequestBody Map<String, Object> payload) {
+		try {
+			System.out.println("Received full analysis payload");
+			
+			String postId = String.valueOf(payload.get("postId"));
+			String userId = String.valueOf(payload.get("userId"));
+			Double matchingScore = ((Number) payload.get("matchingScore")).doubleValue();
+			String analysisResult = (String) payload.get("analysisResult");
+
+			System.out.println("Extracted data - postId: " + postId + ", userId: " + userId + ", score: " + matchingScore);
+
+			// Validate UUIDs
+			if (postId == null || userId == null || postId.equals("null") || userId.equals("null")) {
+				return ResponseEntity.badRequest().body("Invalid postId or userId");
+			}
+
+			// Validate analysis result
+			if (analysisResult == null || analysisResult.isEmpty()) {
+				return ResponseEntity.badRequest().body("Analysis result cannot be empty");
+			}
+
+			try {
+				// Chuyển đổi String ID thành UUID
+				UUID postUuid = UUID.fromString(postId);
+				UUID userUuid = UUID.fromString(userId);
+
+				// Gọi service để cập nhật điểm và kết quả phân tích
+				applyJobService.updateFullAnalysisResult(postUuid, userUuid, matchingScore, analysisResult);
+				
+				System.out.println("Successfully updated full analysis");
+				return ResponseEntity.ok().build();
+			} catch (IllegalArgumentException e) {
+				System.err.println("Invalid UUID format: " + e.getMessage());
+				return ResponseEntity.badRequest().body("Invalid UUID format: " + e.getMessage());
+			}
+		} catch (Exception e) {
+			System.err.println("Error updating full analysis: " + e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Error updating full analysis: " + e.getMessage());
+		}
+	}
+
+	@GetMapping("/get-analysis-result/{postId}/{userId}")
+	public ResponseEntity<?> getAnalysisResult(@PathVariable String postId, @PathVariable String userId) {
+		try {
+			System.out.println("Getting analysis result for postId: " + postId + ", userId: " + userId);
+			
+			// Validate UUIDs
+			if (postId == null || userId == null || postId.isEmpty() || userId.isEmpty()) {
+				return ResponseEntity.badRequest().body("Invalid postId or userId");
+			}
+
+			try {
+				// Chuyển đổi String ID thành UUID
+				UUID postUuid = UUID.fromString(postId);
+				UUID userUuid = UUID.fromString(userId);
+
+				// Gọi service để lấy kết quả phân tích
+				String analysisResult = applyJobService.getAnalysisResult(postUuid, userUuid);
+				
+				if (analysisResult == null || analysisResult.isEmpty()) {
+					return ResponseEntity.ok().body(null);
+				}
+				
+				System.out.println("Successfully retrieved analysis result");
+				
+				// Sử dụng org.springframework.http.MediaType để đảm bảo trả về dữ liệu dạng JSON
+				// thay vì chuỗi văn bản
+				return ResponseEntity
+					.ok()
+					.contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+					.body(analysisResult);
+			} catch (IllegalArgumentException e) {
+				System.err.println("Invalid UUID format: " + e.getMessage());
+				return ResponseEntity.badRequest().body("Invalid UUID format: " + e.getMessage());
+			}
+		} catch (Exception e) {
+			System.err.println("Error retrieving analysis result: " + e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Error retrieving analysis result: " + e.getMessage());
+		}
+	}
+
+	@GetMapping("/get-matching-scores-with-details")
+	public ResponseEntity<?> getMatchingScoresWithDetails() {
+		try {
+			List<Map<String, Object>> results = applyJobRepository.findAllWithMatchingScoreAndAnalysis();
+			System.out.println("Retrieved " + results.size() + " entries with matching scores and analysis details");
+			return ResponseEntity.ok(results);
+		} catch (Exception e) {
+			System.err.println("Error retrieving matching scores with details: " + e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Error retrieving matching scores with details: " + e.getMessage());
+		}
+	}
 
 	private ApplyJob convertToEntity(ApplyJobDTO applyDTO, UUID userId, UUID postId) {
 		ApplyJob apply = new ApplyJob();
