@@ -25,6 +25,7 @@ import {
 } from "../../redux/SocialLink/socialLink.thunk";
 import { SelectTrigger, SelectValue } from "../../ui/select";
 import { Label } from "../../ui/label";
+import { toast } from "react-toastify";
 
 const style = {
   position: "absolute",
@@ -49,7 +50,6 @@ export default function SocialLinkModal({
   editingSocialLinkId,
   setEditingSocialLinkId,
   initialData,
-  showSuccessToast,
 }) {
   const validationSchema = Yup.object({
     platform: Yup.string().required("Vui lòng chọn ít nhất một ứng dụng"),
@@ -84,11 +84,11 @@ export default function SocialLinkModal({
             })
           );
           setEditingSocialLinkId(null);
-          showSuccessToast("Cập nhật link thành công!");
+          toast.success("Cập nhật link thành công!");
         } else {
           const linkData = values;
           await dispatch(createSocialLink(linkData));
-          showSuccessToast("Thêm link thành công!");
+          toast.success("Thêm link thành công!");
         }
         handleClose();
         dispatch(fetchSocialLinks()); // Refresh the experience list
@@ -100,7 +100,6 @@ export default function SocialLinkModal({
     },
   });
 
-  console.log("🚀 ~ formik.values.url:", formik.values.platform)
   return (
     <Modal open={open} onClose={handleClose} className="animate-fadeIn">
       <Box sx={style} className="bg-white rounded-lg p-6 shadow-lg">

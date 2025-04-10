@@ -20,7 +20,7 @@ public class SeekerDTO {
     private String phoneNumber;
     private String description;
     private String emailContact;
-    private Integer industryId; 
+    public List<Integer> industryIds;
     private List<Integer> skillIds; // Danh sách ID của Skills
 
 }

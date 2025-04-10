@@ -11,13 +11,20 @@ import {
   Clock,
   DollarSign,
   MapPin,
-
   ArrowLeft,
+  Briefcase,
+  UserCheck,
 } from "lucide-react";
 import ApplyModal from "../../components/common/ApplyModal/ApplyModal";
 import JobCard_AllJob from "../../components/common/JobCard_AllJob/JobCard_AllJob";
-import { checkIfApplied, getOneApplyJob } from "../../redux/ApplyJob/applyJob.thunk";
-import { getJobPostByPostId, getSimilarJobs } from "../../redux/JobPost/jobPost.thunk";
+import {
+  checkIfApplied,
+  getOneApplyJob,
+} from "../../redux/ApplyJob/applyJob.thunk";
+import {
+  getJobPostByPostId,
+  getSimilarJobs,
+} from "../../redux/JobPost/jobPost.thunk";
 
 export default function JobDetail() {
   const industryStyles = {
@@ -118,9 +125,9 @@ export default function JobDetail() {
 
   useEffect(() => {
     if (postByPostId?.company?.companyId) {
-      const companyId = postByPostId?.company?.companyId
-      const excludePostId = postId
-      dispatch(getSimilarJobs({companyId, excludePostId}));
+      const companyId = postByPostId?.company?.companyId;
+      const excludePostId = postId;
+      dispatch(getSimilarJobs({ companyId, excludePostId }));
     }
   }, [dispatch, postByPostId, postId]);
 
@@ -216,7 +223,6 @@ export default function JobDetail() {
                     oneApplyJob={oneApplyJob}
                   />
                 </section>
-                
               </div>
 
               {/* Thông báo dưới nút */}
@@ -263,7 +269,7 @@ export default function JobDetail() {
                 {/* Card for Job Responsibilities */}
                 <div className="p-6 bg-white rounded-lg shadow-lg">
                   <h2 className="text-lg font-semibold">
-                    Trách nhiệm công việc
+                    Yêu cầu công việc
                   </h2>
                   <ul className="space-y-2 text-sm text-gray-600">
                     {postByPostId?.requirement ? (
@@ -453,11 +459,21 @@ export default function JobDetail() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2 text-gray-600">
-                      <MapPin className="h-5 w-5" />
+                      <Briefcase className="h-5 w-5" />
                       <span>Loại công việc</span>
                     </div>
                     <span className="font-medium">
                       {postByPostId?.typeOfWork}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2 text-gray-600">
+                      <UserCheck className="h-5 w-5" />
+                      <span>Vị trí</span>
+                    </div>
+                    <span className="font-medium">
+                      {postByPostId?.position}
                     </span>
                   </div>
 
@@ -475,6 +491,8 @@ export default function JobDetail() {
                         : "N/A"}
                     </span>
                   </div>
+
+                  
                 </div>
               </Card>
 
@@ -482,16 +500,15 @@ export default function JobDetail() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Lĩnh vực</h3>
                   <div className="flex flex-wrap gap-2">
-                    <Badge
-                      variant="secondary"
-                      style={
-                        industryStyles[
-                          postByPostId?.company.industry.industryName
-                        ]
-                      }
-                    >
-                      {postByPostId?.company.industry.industryName}
-                    </Badge>
+                    {postByPostId?.industry?.map((industry) => (
+                      <Badge
+                        key={industry.industryId}
+                        variant="secondary"
+                        style={industryStyles[industry.industryName]}
+                      >
+                        {industry.industryName}
+                      </Badge>
+                    ))}
                   </div>
                 </div>
               </Card>

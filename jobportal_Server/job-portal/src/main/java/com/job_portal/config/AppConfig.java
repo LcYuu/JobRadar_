@@ -43,7 +43,11 @@ public class AppConfig {
 	        });
 
 		http.authorizeHttpRequests(
-				Authorize -> Authorize.requestMatchers("/api/**").authenticated().anyRequest().permitAll())
+		        Authorize -> Authorize
+		            .requestMatchers("/ws/**").permitAll() // Cho phép WebSocket không cần JWT
+		            .requestMatchers("/api/**").authenticated()
+		            .anyRequest().permitAll()
+		    )
 				.addFilterBefore(new JwtValidator(), BasicAuthenticationFilter.class);
 
 		http.csrf(csrf -> csrf.disable());

@@ -72,7 +72,7 @@ const JobManagement = () => {
       cancelButtonText: "Không",
     }).then((result) => {
       if (result.isConfirmed) {
-        handleConfirmExpire(postId); // Thực hiện hành động dừng tuyển dụng
+        handleConfirmExpire(postId); 
       }
     });
   };

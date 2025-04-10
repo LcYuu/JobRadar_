@@ -32,6 +32,7 @@ const ApplicantDetail = () => {
   const { eduCandidate } = useSelector((store) => store.edu);
   const { expCandidate } = useSelector((store) => store.exp);
   const { candidateApplyInfo } = useSelector((store) => store.applyJob);
+  console.log("🚀 ~ ApplicantDetail ~ candidateApplyInfo:", candidateApplyInfo);
   const { socialLinks } = useSelector((store) => store.socialLink);
 
   const timeAgo = (date) => {
@@ -115,10 +116,17 @@ const ApplicantDetail = () => {
                 <p className="text-xl font-bold text-gray-600">
                   {profileCandidate?.title}
                 </p>
-                <p className="text-sm text-gray-500">
-                  {profileCandidate?.industryName} •{" "}
-                  {profileCandidate?.typeOfWork}
-                </p>
+                <div className="text-sm text-gray-500">
+                  <p>
+                    {profileCandidate?.industryName?.map((industry, index) => (
+                      <span key={index}>
+                        {index > 0 && " • "} {industry}
+                      </span>
+                    ))}
+                  </p>
+                  <p>{profileCandidate?.typeOfWork}</p>
+                </div>
+
                 <p className="text-xs text-gray-400 mt-1">
                   {profileCandidate?.applyDate
                     ? `${timeAgo(profileCandidate.applyDate)}`
@@ -151,7 +159,7 @@ const ApplicantDetail = () => {
                 <div className="space-y-3">
                   {candidateApplyInfo ? (
                     <>
-                      {candidateApplyInfo.email && (
+                      {candidateApplyInfo?.email && (
                         <div className="flex items-center gap-3 text-left">
                           {contactIcons.email}
                           <span className="text-sm text-gray-600">
@@ -160,7 +168,7 @@ const ApplicantDetail = () => {
                         </div>
                       )}
 
-                      {candidateApplyInfo.description && (
+                      {candidateApplyInfo?.description && (
                         <div className="mt-4">
                           <h4 className="font-medium text-left mb-2">
                             Thông tin thêm

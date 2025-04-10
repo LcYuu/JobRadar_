@@ -158,7 +158,15 @@ export default function SignInForm() {
         { token: googleToken }
       );
 
-      if (emailExists.data) {
+      if (!jwtToken) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Đăng nhập thất bại',
+          text: res?.data?.message || 'Có lỗi xảy ra khi đăng nhập',
+          confirmButtonText: 'Thử lại',
+          confirmButtonColor: '#3085d6'
+        });
+      } else if (emailExists.data) {
         setTimeout(() => {
           window.location.href = "http://localhost:3000/";
         }, 1000);

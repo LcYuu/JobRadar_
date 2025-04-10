@@ -15,6 +15,4 @@ public class OtpUtil {
 		}
 		return output;
 	}
-
-
 }

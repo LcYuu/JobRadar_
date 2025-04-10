@@ -9,7 +9,7 @@ import java.util.UUID;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -38,10 +38,14 @@ public class Seeker {
     @Column(name = "address", length = 100)
     private String address;
 
-    @ManyToOne
-    @JoinColumn(name = "industry_id", nullable = true)
-    private Industry industry;
-
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+        name = "seeker_industries",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "industry_id")
+    )
+    private List<Industry> industry = new ArrayList<>();
+    
     @Column(name = "gender", length = 100)
     private String gender;
 
@@ -72,5 +76,6 @@ public class Seeker {
         inverseJoinColumns = @JoinColumn(name = "skills_skill_id") 
     )
     private List<Skills> skills = new ArrayList<>();
+    private boolean isSubcription  = false;
 
 }

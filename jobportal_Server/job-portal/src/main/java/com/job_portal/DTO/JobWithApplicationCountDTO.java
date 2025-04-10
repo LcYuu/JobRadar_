@@ -2,6 +2,7 @@ package com.job_portal.DTO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -25,6 +26,6 @@ public class JobWithApplicationCountDTO {
 	private LocalDateTime expireDate;
 	private Long applicationCount;
 	private String status;
-	private String industryName; 
+	private List<String> industryNames;
 	private boolean isApprove;
 }

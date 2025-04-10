@@ -1,94 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../ui/button';
+import { fetchNotifications, fetchUnreadCount, markNotificationAsRead } from '../../redux/Notifications/notification.thunk';
+
 
 const NotificationDropdown = () => {
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
-  const { user } = useSelector((state) => state.auth);
+  const { user } = useSelector((store) => store.auth);
+  const { notifications, unreadCount } = useSelector((store) => store.notifications);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchNotifications();
-    fetchUnreadCount();
-  }, [user]);
-
-  const fetchNotifications = async () => {
-    if (!user?.userId) return;
-    try {
-      const response = await fetch(`http://localhost:8080/seeker/notifications/${user.userId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('jwt')}`
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new TypeError("Response was not JSON");
-      }
-      
-      const data = await response.json();
-      const unreadNotifications = data.filter(notification => !notification.isRead);
-      setNotifications(unreadNotifications);
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
+    if (user?.userId) {
+      dispatch(fetchNotifications(user.userId));
+      dispatch(fetchUnreadCount(user.userId));
     }
-  };
-
-  const fetchUnreadCount = async () => {
-    if (!user?.userId) return;
-    try {
-      const response = await fetch(`http://localhost:8080/seeker/unread-count/${user.userId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('jwt')}`
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new TypeError("Response was not JSON");
-      }
-      
-      const count = await response.json();
-      setUnreadCount(count);
-    } catch (error) {
-      console.error('Error fetching unread count:', error);
-    }
-  };
+  }, [dispatch, user]);
 
   const handleNotificationClick = async (notification) => {
     if (!notification.isRead) {
-      try {
-        const response = await fetch(`http://localhost:8080/seeker/read/${notification.notificationId}`, {
-          method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.ok) {
-          await fetchNotifications();
-          await fetchUnreadCount();
-        } else {
-          console.error('Failed to mark notification as read:', response.status);
-        }
-      } catch (error) {
-        console.error('Error marking notification as read:', error);
-      }
+      await dispatch(markNotificationAsRead(notification.notificationId));
+      dispatch(fetchNotifications(user.userId));
+      dispatch(fetchUnreadCount(user.userId));
     }
   
     const path = notification.redirectUrl.startsWith('http') 
@@ -102,12 +40,12 @@ const NotificationDropdown = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       if (user?.userId) {
-        fetchUnreadCount();
+        dispatch(fetchUnreadCount(user.userId));
       }
     }, 3000); 
   
     return () => clearInterval(interval);
-  }, [user]);
+  }, [dispatch, user]);
 
   return (
     <div className="relative inline-flex items-center">
@@ -145,7 +83,7 @@ const NotificationDropdown = () => {
           </div>
 
           <div className="overflow-y-auto max-h-[calc(85vh-4rem)]">
-            {notifications.length === 0 ? (
+            {(!notifications || notifications.length === 0) ? (
               <div className="flex flex-col items-center justify-center py-8">
                 <Bell className="h-12 w-12 text-gray-300 mb-3" />
                 <p className="text-gray-500 text-center">Không có thông báo nào</p>

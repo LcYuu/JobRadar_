@@ -60,7 +60,10 @@ import forgotPasswordReducer from "./ForgotPassword/forgotPasswordSlice.js";
 import statsReducer from "./Stats/statsSlice.js";
 import socialLinkReducer from "./SocialLink/socialLinkSlice.js";
 import generatedCvReducer from "./GeneratedCV/generated_cvSlice.js";
+
 import cvAnalysisReducer from "./CVAnalysis/cvAnalysisSlice.js";
+import subscriptionReducer from "./Subscription/subscriptionSlice.js";
+import notificationsReducer from "./Notifications/notificationSlice.js";
 
 export const store = configureStore({
   reducer: {
@@ -84,5 +87,8 @@ export const store = configureStore({
     socialLink: socialLinkReducer,
     genCV: generatedCvReducer,
     cvAnalysis: cvAnalysisReducer,
+    genCV:generatedCvReducer,
+    subscription: subscriptionReducer,
+    notifications: notificationsReducer
   },
 });

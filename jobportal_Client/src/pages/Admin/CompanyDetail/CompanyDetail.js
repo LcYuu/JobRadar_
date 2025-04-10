@@ -55,7 +55,10 @@ import { getReviewByCompany } from "../../../redux/Review/review.thunk";
 import { fetchSocialLinksByUserId } from "../../../redux/SocialLink/socialLink.thunk";
 import BlockedCompanyModal from "../../../components/BlockedCompany/BlockedCompanyModal";
 import Swal from "sweetalert2";
-import { getProfileAction, unblockCompany } from "../../../redux/Auth/auth.thunk";
+import {
+  getProfileAction,
+  unblockCompany,
+} from "../../../redux/Auth/auth.thunk";
 
 export default function CompanyDetail() {
   const navigate = useNavigate();
@@ -273,10 +276,10 @@ export default function CompanyDetail() {
             Swal.showLoading();
           },
         });
-  
+
         try {
           console.log("companyId khi mở khóa:", companyId);
-          await dispatch(unblockCompany({companyId})); 
+          await dispatch(unblockCompany({ companyId }));
           Swal.fire("Thành công!", "Tài khoản đã được mở khóa.", "success");
           dispatch(getCompanyProfile(companyId));
         } catch (error) {
@@ -285,7 +288,6 @@ export default function CompanyDetail() {
       }
     });
   };
-  
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -307,7 +309,11 @@ export default function CompanyDetail() {
           <div className="flex gap-3">
             <Button
               variant={companyProfile?.isBlocked ? "destructive" : "success"}
-              onClick={!companyProfile?.isBlocked ? handleOpenBlockModal : handleOpenUnBlockModal}
+              onClick={
+                !companyProfile?.isBlocked
+                  ? handleOpenBlockModal
+                  : handleOpenUnBlockModal
+              }
               className="flex items-center gap-2"
             >
               {companyProfile?.isBlocked ? (
@@ -466,7 +472,11 @@ export default function CompanyDetail() {
                 <div>
                   <p className="text-sm text-gray-600">Ngành nghề</p>
                   <p className="font-medium">
-                    {companyProfile?.industry?.industryName || "Chưa cập nhật"}
+                    {companyProfile?.industry?.length > 0
+                      ? companyProfile.industry
+                          .map((ind) => ind.industryName)
+                          .join(", ")
+                      : "Chưa cập nhật"}
                   </p>
                 </div>
               </div>

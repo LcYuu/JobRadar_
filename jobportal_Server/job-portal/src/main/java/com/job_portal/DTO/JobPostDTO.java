@@ -34,4 +34,5 @@ public class JobPostDTO {
 	private boolean isApprove;
 	private String niceToHaves;
 	private List<Integer> skillIds; // Danh sách ID của Skills
+	private List<Integer> industryIds; // Danh sách ID của Skills
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import { Card, CardContent } from "../../ui/card";
 import { FileText} from "lucide-react";
@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import Pagination from "../layout/Pagination";
 import { getApplyJobByUser } from "../../redux/ApplyJob/applyJob.thunk";
+import useWebSocket from "../../utils/useWebSocket";
 export default function Dashboard_Seeker() {
   const dispatch = useDispatch();
   const {
@@ -36,6 +37,17 @@ export default function Dashboard_Seeker() {
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
+
+  const handleMessage = useCallback(
+    (_, __, topic) => {
+      if (topic === "/topic/apply-updates") {
+        dispatch(getApplyJobByUser({ currentPage, size }));
+      }
+    },
+    [dispatch, currentPage, size]
+  );
+  
+  useWebSocket(["/topic/apply-updates"], handleMessage);
 
   return (
     <div>

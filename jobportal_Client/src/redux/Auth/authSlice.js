@@ -1,11 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { signupAction, loginAction, getProfileAction, logoutAction, getUserRole, blockCompany, unblockCompany } from './auth.thunk';
+import { signupAction, loginAction, getProfileAction, logoutAction, getUserRole, blockCompany, unblockCompany, updateRole, updateEmployer } from './auth.thunk';
 
 const initialState = {
   user: null,
   loading: false,
   error: null,
   successMessage: null,
+  loginStatus: null,
   isAuthenticated: !!localStorage.getItem('jwt'),
   jwt: localStorage.getItem('jwt') || null,
 };
@@ -53,6 +54,20 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+      .addCase(updateRole.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateRole.fulfilled, (state, action) => {
+        state.loading = false;
+        state.loginStatus = "success";
+        state.user = action.payload;
+      })
+      .addCase(updateRole.rejected, (state, action) => {
+        state.loading = false;
+        state.loginStatus = "failure";
+        state.error = action.payload || "Đã có lỗi xảy ra";
+      })
       .addCase(getProfileAction.pending, (state) => {
         state.loading = true;
       })
@@ -99,6 +114,10 @@ const authSlice = createSlice({
       .addCase(unblockCompany.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(updateEmployer.fulfilled, (state,action) => {
+        state.loading = false;
+        state.successMessage = "Success";  
       })
       // .addCase(updateProfileAction.pending, (state) => {
       //   state.loading = true;

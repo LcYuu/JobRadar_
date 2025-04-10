@@ -72,6 +72,12 @@ const CompanyReview = () => {
       setPage(newPage);
     }
   };
+  
+  // Create a sorted copy of the reviews array
+  const sortedReviews = [...reviews].sort((a, b) => 
+    new Date(b.createDate) - new Date(a.createDate)
+  );
+  
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mt-4">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Các đánh giá</h2>
@@ -122,9 +128,7 @@ const CompanyReview = () => {
       </div>
       <ul className="space-y-4">
         {reviews.length > 0 ? (
-          reviews
-            .sort((a, b) => new Date(b.createDate) - new Date(a.createDate))
-            .map((review, index) => (
+          sortedReviews.map((review, index) => (
               <div
                 key={review.reviewId}
                 className={`block rounded-md transition ${

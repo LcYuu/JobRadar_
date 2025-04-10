@@ -35,23 +35,35 @@ export default function FavoriteCompanies() {
               </tr>
             </thead>
             <tbody>
-              {followedCompany.map((company, index) => (
-                <tr
-                  key={company.companyId}
-                  className="border-b last:border-b-0 hover:bg-blue-50 transition duration-200 ease-in-out cursor-pointer"
-                  onClick={() => handleCompanyClick(company.companyId)}
-                >
-                  <td className="p-3 font-medium text-gray-700">{index + 1}</td>
-                  <td className="p-3 flex items-center space-x-3 text-gray-800">
-                    <img
-                      src={company.logo}
-                      alt={`${company.companyName} logo`}
-                      className="h-10 w-10 rounded-full shadow-md border border-gray-300 hover:scale-105 transition-transform duration-200"
-                    />
-                    <span className="font-semibold">{company.companyName}</span>
+              {followedCompany.length > 0 ? (
+                followedCompany.map((company, index) => (
+                  <tr
+                    key={company.companyId}
+                    className="border-b last:border-b-0 hover:bg-blue-50 transition duration-200 ease-in-out cursor-pointer"
+                    onClick={() => handleCompanyClick(company.companyId)}
+                  >
+                    <td className="p-3 font-medium text-gray-700">
+                      {index + 1}
+                    </td>
+                    <td className="p-3 flex items-center space-x-3 text-gray-800">
+                      <img
+                        src={company.logo}
+                        alt={`${company.companyName} logo`}
+                        className="h-10 w-10 rounded-full shadow-md border border-gray-300 hover:scale-105 transition-transform duration-200"
+                      />
+                      <span className="font-semibold">
+                        {company.companyName}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="2" className="text-center py-4 text-gray-500">
+                    Bạn chưa theo dõi công ty nào.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </CardContent>

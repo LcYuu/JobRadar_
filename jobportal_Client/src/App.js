@@ -58,6 +58,7 @@ import CVEditor from "./pages/CreateCV/CVEditor";
 import CVSelection from "./pages/CreateCV/CVSelection";
 import ViewCV from "./pages/CreateCV/ViewCV";
 import { isTokenExpired } from './utils/tokenUtils';
+import VerifiedCompany from "./pages/SignIn/VerifiedCompany";
 const ProtectedHome = () => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
@@ -175,6 +176,9 @@ const App = () => {
           }
         />
         <Route path="/role-selection" element={<RoleSelection />} />
+
+        <Route path="/update-employer" element={<VerifiedCompany/>}/>
+        
         <Route
           path="/auth/forgot-password"
           element={
