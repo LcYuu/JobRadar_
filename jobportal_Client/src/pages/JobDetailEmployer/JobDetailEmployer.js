@@ -13,7 +13,7 @@ import {
   User,
   Hourglass,
   Edit,
-  ArrowLeft
+  ArrowLeft,
 } from "lucide-react";
 
 // import { store } from "../../redux/store";
@@ -21,71 +21,72 @@ import SkillJobPostModal from "./SkillJobPostModal";
 import { Badge } from "@mui/material";
 import { toast } from "react-toastify";
 import { getDetailJobById, updateJob } from "../../redux/JobPost/jobPost.thunk";
+import IndustryJobPostModal from "./IndustryJobPostModal";
 
 const cityCodeMapping = {
-  1: 16,    // Hà Nội
-  2: 1,     // Hà Giang 
-  4: 2,     // Cao Bằng
-  6: 6,     // Bắc Kạn
-  8: 8,     // Tuyên Quang
-  10: 3,    // Lào Cai
-  11: 11,   // Điện Biên
-  12: 5,    // Lai Châu
-  14: 4,    // Sơn La
-  15: 9,    // Yên Bái
-  17: 20,   // Hoà Bình
-  19: 10,   // Thái Nguyên
-  20: 7,    // Lạng Sơn
-  22: 17,   // Quảng Ninh
-  24: 14,   // Bắc Giang
-  25: 12,   // Phú Thọ
-  26: 13,   // Vĩnh Phúc
-  27: 15,   // Bắc Ninh
-  30: 18,   // Hải Dương
-  31: 19,   // Hải Phòng
-  33: 21,   // Hưng Yên
-  34: 23,   // Thái Bình
-  35: 22,   // Hà Nam
-  36: 24,   // Nam Định
-  37: 25,   // Ninh Bình
-  38: 26,   // Thanh Hóa
-  40: 27,   // Nghệ An
-  42: 28,   // Hà Tĩnh
-  44: 29,   // Quảng Bình
-  45: 30,   // Quảng Trị
-  46: 31,   // Thừa Thiên Huế
-  48: 32,   // Đà Nẵng
-  49: 33,   // Quảng Nam
-  51: 34,   // Quảng Ngãi
-  52: 37,   // Bình Định
-  54: 38,   // Phú Yên
-  56: 40,   // Khánh Hòa
-  58: 43,   // Ninh Thuận
-  60: 48,   // Bình Thuận
-  62: 35,   // Kon Tum
-  64: 36,   // Gia Lai
-  66: 39,   // Đắk Lắk
-  67: 41,   // Đắk Nông
-  68: 42,   // Lâm Đồng
-  70: 44,   // Bình Phước
-  72: 45,   // Tây Ninh
-  74: 46,   // Bình Dương
-  75: 47,   // Đồng Nai
-  77: 51,   // Bà Rịa - Vũng Tàu
-  79: 49,   // TP Hồ Chí Minh
-  80: 50,   // Long An
-  82: 54,   // Tiền Giang
-  83: 56,   // Bến Tre
-  84: 59,   // Trà Vinh
-  86: 55,   // Vĩnh Long
-  87: 52,   // Đồng Tháp
-  89: 53,   // An Giang
-  91: 58,   // Kiên Giang
-  92: 57,   // Cần Thơ
-  93: 60,   // Hậu Giang
-  94: 61,   // Sóc Trăng
-  95: 62,   // Bạc Liêu
-  96: 63    // Cà Mau
+  1: 16, // Hà Nội
+  2: 1, // Hà Giang
+  4: 2, // Cao Bằng
+  6: 6, // Bắc Kạn
+  8: 8, // Tuyên Quang
+  10: 3, // Lào Cai
+  11: 11, // Điện Biên
+  12: 5, // Lai Châu
+  14: 4, // Sơn La
+  15: 9, // Yên Bái
+  17: 20, // Hoà Bình
+  19: 10, // Thái Nguyên
+  20: 7, // Lạng Sơn
+  22: 17, // Quảng Ninh
+  24: 14, // Bắc Giang
+  25: 12, // Phú Thọ
+  26: 13, // Vĩnh Phúc
+  27: 15, // Bắc Ninh
+  30: 18, // Hải Dương
+  31: 19, // Hải Phòng
+  33: 21, // Hưng Yên
+  34: 23, // Thái Bình
+  35: 22, // Hà Nam
+  36: 24, // Nam Định
+  37: 25, // Ninh Bình
+  38: 26, // Thanh Hóa
+  40: 27, // Nghệ An
+  42: 28, // Hà Tĩnh
+  44: 29, // Quảng Bình
+  45: 30, // Quảng Trị
+  46: 31, // Thừa Thiên Huế
+  48: 32, // Đà Nẵng
+  49: 33, // Quảng Nam
+  51: 34, // Quảng Ngãi
+  52: 37, // Bình Định
+  54: 38, // Phú Yên
+  56: 40, // Khánh Hòa
+  58: 43, // Ninh Thuận
+  60: 48, // Bình Thuận
+  62: 35, // Kon Tum
+  64: 36, // Gia Lai
+  66: 39, // Đắk Lắk
+  67: 41, // Đắk Nông
+  68: 42, // Lâm Đồng
+  70: 44, // Bình Phước
+  72: 45, // Tây Ninh
+  74: 46, // Bình Dương
+  75: 47, // Đồng Nai
+  77: 51, // Bà Rịa - Vũng Tàu
+  79: 49, // TP Hồ Chí Minh
+  80: 50, // Long An
+  82: 54, // Tiền Giang
+  83: 56, // Bến Tre
+  84: 59, // Trà Vinh
+  86: 55, // Vĩnh Long
+  87: 52, // Đồng Tháp
+  89: 53, // An Giang
+  91: 58, // Kiên Giang
+  92: 57, // Cần Thơ
+  93: 60, // Hậu Giang
+  94: 61, // Sóc Trăng
+  95: 62, // Bạc Liêu
+  96: 63, // Cà Mau
 };
 const JobDetailEmployer = () => {
   const statusStyles = {
@@ -125,6 +126,10 @@ const JobDetailEmployer = () => {
   const [openSkill, setOpenSkill] = useState(false);
   const handleOpenSkillModal = () => setOpenSkill(true);
   const handleCloseSkill = () => setOpenSkill(false);
+
+  const [openIndustry, setOpenIndustry] = useState(false);
+  const handleOpenIndustryModal = () => setOpenIndustry(true);
+  const handleCloseIndustry = () => setOpenIndustry(false);
   const [jobData, setJobData] = useState({
     // createDate: "",
     expireDate: "",
@@ -139,20 +144,19 @@ const JobDetailEmployer = () => {
     position: "",
     // status: "",
     niceToHaves: "",
-    skillIds: [], // Danh sách kỹ năng, mặc định là mảng rỗng
   });
 
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
-  const [selectedProvince, setSelectedProvince] = useState('');
-  const [selectedDistrict, setSelectedDistrict] = useState('');
-  const [selectedWard, setSelectedWard] = useState('');
-  const [specificAddress, setSpecificAddress] = useState('');
+  const [selectedProvince, setSelectedProvince] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedWard, setSelectedWard] = useState("");
+  const [specificAddress, setSpecificAddress] = useState("");
   const [location, setLocation] = useState({
-    province: '',
-    district: '',
-    ward: ''
+    province: "",
+    district: "",
+    ward: "",
   });
 
   useEffect(() => {
@@ -182,11 +186,11 @@ const JobDetailEmployer = () => {
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
-        const response = await fetch('https://provinces.open-api.vn/api/p/');
+        const response = await fetch("https://provinces.open-api.vn/api/p/");
         const data = await response.json();
         setProvinces(data);
       } catch (error) {
-        console.error('Error fetching provinces:', error);
+        console.error("Error fetching provinces:", error);
       }
     };
     fetchProvinces();
@@ -194,22 +198,24 @@ const JobDetailEmployer = () => {
 
   useEffect(() => {
     if (isEditing && detailJob?.location) {
-      const addressParts = detailJob.location.split(',').map(part => part.trim());
+      const addressParts = detailJob.location
+        .split(",")
+        .map((part) => part.trim());
       if (addressParts.length >= 4) {
         // Lấy 3 phần cuối cho ward, district, province
         const [ward, district, province] = addressParts.slice(-3);
         // Phần còn lại là số nhà, tên đường (có thể chứa nhiều dấu phẩy)
-        const specificAddressPart = addressParts.slice(0, -3).join(', ');
+        const specificAddressPart = addressParts.slice(0, -3).join(", ");
 
         setSpecificAddress(specificAddressPart);
         setLocation({
           ward,
           district,
-          province
+          province,
         });
 
         // Tìm và set province code
-        const matchingProvince = provinces.find(p => p.name === province);
+        const matchingProvince = provinces.find((p) => p.name === province);
         if (matchingProvince) {
           setSelectedProvince(matchingProvince.code);
           // Districts và Wards sẽ được set thông qua các useEffect khác
@@ -227,16 +233,23 @@ const JobDetailEmployer = () => {
           );
           const data = await response.json();
           setDistricts(data.districts);
-          
+
           // Cập nhật tên tỉnh/thành phố trong location state
-          const selectedProvinceData = provinces.find(p => p.code === Number(selectedProvince));
+          const selectedProvinceData = provinces.find(
+            (p) => p.code === Number(selectedProvince)
+          );
           if (selectedProvinceData) {
-            setLocation(prev => ({ ...prev, province: selectedProvinceData.name }));
+            setLocation((prev) => ({
+              ...prev,
+              province: selectedProvinceData.name,
+            }));
           }
 
           // Nếu đang trong chế độ chỉnh sửa và có district ban đầu
           if (location.district) {
-            const matchingDistrict = data.districts.find(d => d.name === location.district);
+            const matchingDistrict = data.districts.find(
+              (d) => d.name === location.district
+            );
             if (matchingDistrict) {
               setSelectedDistrict(matchingDistrict.code);
             }
@@ -248,7 +261,7 @@ const JobDetailEmployer = () => {
     };
     fetchDistricts();
   }, [selectedProvince, location.district, provinces]);
-  
+
   // Thêm useEffect để xử lý wards khi selectedDistrict thay đổi
   useEffect(() => {
     const fetchWards = async () => {
@@ -259,16 +272,23 @@ const JobDetailEmployer = () => {
           );
           const data = await response.json();
           setWards(data.wards);
-          
+
           // Cập nhật tên quận/huyện trong location state
-          const selectedDistrictData = districts.find(d => d.code === Number(selectedDistrict));
+          const selectedDistrictData = districts.find(
+            (d) => d.code === Number(selectedDistrict)
+          );
           if (selectedDistrictData) {
-            setLocation(prev => ({ ...prev, district: selectedDistrictData.name }));
+            setLocation((prev) => ({
+              ...prev,
+              district: selectedDistrictData.name,
+            }));
           }
 
           // Nếu đang trong chế độ chỉnh sửa và có ward ban đầu
           if (location.ward) {
-            const matchingWard = data.wards.find(w => w.name === location.ward);
+            const matchingWard = data.wards.find(
+              (w) => w.name === location.ward
+            );
             if (matchingWard) {
               setSelectedWard(matchingWard.code);
             }
@@ -280,8 +300,6 @@ const JobDetailEmployer = () => {
     };
     fetchWards();
   }, [selectedDistrict, location.ward, districts]);
-  
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -291,10 +309,14 @@ const JobDetailEmployer = () => {
     }));
   };
 
-
   const handleSubmit = async () => {
     // Validate required fields
-    if (!selectedProvince || !selectedDistrict || !selectedWard || !specificAddress) {
+    if (
+      !selectedProvince ||
+      !selectedDistrict ||
+      !selectedWard ||
+      !specificAddress
+    ) {
       toast.error("Vui lòng điền đầy đủ thông tin địa chỉ");
       return;
     }
@@ -311,9 +333,15 @@ const JobDetailEmployer = () => {
 
     try {
       // Lấy tên đầy đủ của các địa điểm đã chọn
-      const selectedProvinceData = provinces.find(p => p.code === Number(selectedProvince));
-      const selectedDistrictData = districts.find(d => d.code === Number(selectedDistrict));
-      const selectedWardData = wards.find(w => w.code === Number(selectedWard));
+      const selectedProvinceData = provinces.find(
+        (p) => p.code === Number(selectedProvince)
+      );
+      const selectedDistrictData = districts.find(
+        (d) => d.code === Number(selectedDistrict)
+      );
+      const selectedWardData = wards.find(
+        (w) => w.code === Number(selectedWard)
+      );
 
       if (!selectedProvinceData || !selectedDistrictData || !selectedWardData) {
         toast.error("Có lỗi xảy ra khi xử lý thông tin địa chỉ");
@@ -331,12 +359,12 @@ const JobDetailEmployer = () => {
       };
 
       // Gọi API cập nhật
-      await dispatch(updateJob({postId, jobPostData:updatedJobData}));
-      
+      await dispatch(updateJob({ postId, jobPostData: updatedJobData }));
+
       // Reset form và hiển thị thông báo thành công
       setIsEditing(false);
       toast.success("Cập nhật thành công!");
-      
+
       // Refresh dữ liệu
       dispatch(getDetailJobById(postId));
     } catch (error) {
@@ -395,24 +423,25 @@ const JobDetailEmployer = () => {
   const getRemainingTime = () => {
     const currentDate = new Date();
     const expireDate = new Date(detailJob?.expireDate);
-    const remainingDays = Math.ceil((expireDate - currentDate) / (1000 * 60 * 60 * 24));
-    
+    const remainingDays = Math.ceil(
+      (expireDate - currentDate) / (1000 * 60 * 60 * 24)
+    );
+
     if (remainingDays <= 0) {
       return "Đã hết hạn";
     }
     return `Còn: ${remainingDays} ngày`;
   };
 
-  
-
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header Section */}
       <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 mb-6">
-      <Button
+        <Button
           variant="ghost"
           className="flex items-center gap-2 mb-6 hover:bg-gray-100"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/employer/account-management/job-management")}
+
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Trở lại danh sách</span>
@@ -468,13 +497,15 @@ const JobDetailEmployer = () => {
                         setDistricts([]);
                         setWards([]);
                         // Cập nhật location state
-                        const selectedProvinceData = provinces.find(p => p.code === Number(newProvinceCode));
+                        const selectedProvinceData = provinces.find(
+                          (p) => p.code === Number(newProvinceCode)
+                        );
                         if (selectedProvinceData) {
-                          setLocation(prev => ({
+                          setLocation((prev) => ({
                             ...prev,
                             province: selectedProvinceData.name,
                             district: "",
-                            ward: ""
+                            ward: "",
                           }));
                         }
                       }}
@@ -502,12 +533,14 @@ const JobDetailEmployer = () => {
                         setSelectedWard("");
                         setWards([]);
                         // Cập nhật location state
-                        const selectedDistrictData = districts.find(d => d.code === Number(newDistrictCode));
+                        const selectedDistrictData = districts.find(
+                          (d) => d.code === Number(newDistrictCode)
+                        );
                         if (selectedDistrictData) {
-                          setLocation(prev => ({
+                          setLocation((prev) => ({
                             ...prev,
                             district: selectedDistrictData.name,
-                            ward: ""
+                            ward: "",
                           }));
                         }
                       }}
@@ -532,8 +565,13 @@ const JobDetailEmployer = () => {
                       value={selectedWard}
                       onChange={(e) => {
                         setSelectedWard(e.target.value);
-                        const selectedWardData = wards.find(w => w.code === e.target.value);
-                        setLocation(prev => ({...prev, ward: selectedWardData?.name || ''}));
+                        const selectedWardData = wards.find(
+                          (w) => w.code === e.target.value
+                        );
+                        setLocation((prev) => ({
+                          ...prev,
+                          ward: selectedWardData?.name || "",
+                        }));
                       }}
                       disabled={!selectedDistrict}
                     >
@@ -559,11 +597,12 @@ const JobDetailEmployer = () => {
                     />
                   </div>
                 </div>
-                
               </div>
             ) : (
               <div>
-                <h1 className="text-2xl text-purple-700 font-bold mb-2">{detailJob?.title}</h1>
+                <h1 className="text-2xl text-purple-700 font-bold mb-2">
+                  {detailJob?.title}
+                </h1>
                 <div className="flex items-center gap-4 text-gray-600">
                   <span className="flex items-center gap-1">
                     <User className="w-4 h-4" />
@@ -579,8 +618,21 @@ const JobDetailEmployer = () => {
           </div>
 
           <div className="flex gap-3">
-            {detailJob?.status === "Hết hạn" ? null : detailJob?.approve === // Kiểm tra xem công việc chưa được duyệt hay không (approve === false)
+            {/* {detailJob?.status === "Hết hạn" ? null : detailJob?.approve === // Kiểm tra xem công việc chưa được duyệt hay không (approve === false)
               false ? (
+              isEditing ? (
+                // Nếu đang trong chế độ chỉnh sửa, hiển thị nút Lưu
+                <Button variant="outline" onClick={handleSubmit}>
+                  Lưu
+                </Button>
+              ) : (
+                // Nếu không trong chế độ chỉnh sửa, hiển thị nút Chỉnh sửa
+                <Button variant="outline" onClick={() => setIsEditing(true)}>
+                  Chỉnh sửa
+                </Button>
+              )
+            ) : null} */}
+            {detailJob?.approve === false ? (
               isEditing ? (
                 // Nếu đang trong chế độ chỉnh sửa, hiển thị nút Lưu
                 <Button variant="outline" onClick={handleSubmit}>
@@ -628,14 +680,12 @@ const JobDetailEmployer = () => {
           </span>
 
           <span className="text-sm text-gray-500">
-
             {new Date(detailJob?.expireDate) < new Date()
               ? null
               : `Còn: ${Math.ceil(
                   (new Date(detailJob?.expireDate) - new Date()) /
                     (1000 * 60 * 60 * 24)
                 )} ngày`}
-
           </span>
         </div>
       </div>
@@ -693,7 +743,7 @@ const JobDetailEmployer = () => {
             </ul>
           </Card>
 
-          {/* Trách nhiệm công việc */}
+          
           <Card className="p-6 bg-white shadow-lg">
             <h2 className="text-xl font-semibold mb-4">
               Trách nhiệm công việc
@@ -816,7 +866,76 @@ const JobDetailEmployer = () => {
                   <span className="font-medium">{detailJob?.experience}</span>
                 )}
               </div>
+
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <Hourglass className="w-5 h-5 text-gray-500" />
+                  <span>Vị trí công việc</span>
+                </div>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    value={jobData.position}
+                    onChange={handleChange}
+                    name="position"
+                    className="border p-1 rounded"
+                  />
+                ) : (
+                  <span className="font-medium">{detailJob?.position}</span>
+                )}
               </div>
+          </Card>
+
+          <Card className="p-6 bg-white shadow-lg">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold">Chuyên ngành</h3>
+              {detailJob?.status !== "Hết hạn" &&
+              detailJob?.approve === false ? (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={handleOpenIndustryModal}
+                  className="hover:bg-primary/10 transition-colors"
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              ) : null}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {Array.isArray(detailJob?.industry) &&
+              detailJob.industry.length > 0 ? (
+                detailJob.industry.map((industry, index) => {
+                  const bgColor = getColorByIndex(index);
+                  const textColor = bgColor.replace("bg-", "text-");
+
+                  return (
+                    <div
+                      key={industry.industryId || index}
+                      className={`${bgColor} bg-opacity-15 rounded-full px-4 py-2 text-sm 
+                        flex items-center gap-2 transition-all duration-200 hover:bg-opacity-25`}
+                    >
+                      <span
+                        className={`w-2 h-2 rounded-full ${bgColor}`}
+                      ></span>
+                      <span className={`font-medium ${textColor}`}>
+                        {industry.industryName}
+                      </span>
+                    </div>
+                  );
+                })
+              ) : (
+                <span>Không có chuyên ngành</span>
+              )}
+            </div>
+
+            <section>
+              <IndustryJobPostModal
+                open={openIndustry}
+                handleClose={handleCloseIndustry}
+                postId={postId}
+              />
+            </section>
           </Card>
 
           {/* Required Skills */}
