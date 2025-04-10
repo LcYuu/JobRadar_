@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +37,7 @@ import com.job_portal.models.JobPost;
 import com.job_portal.models.Notification;
 import com.job_portal.models.Seeker;
 import com.job_portal.models.UserAccount;
+import com.job_portal.projection.ApplicantProfileProjection;
 import com.job_portal.repository.CompanyRepository;
 import com.job_portal.repository.NotificationRepository;
 import com.job_portal.repository.SeekerRepository;
@@ -62,27 +65,15 @@ public class SeekerController {
 	private INotificationService notificationService;
 	@Autowired
 	private NotificationRepository notificationRepository;
+	
+	   private static final Logger logger = LoggerFactory.getLogger(SeekerController.class);
+
 
 
 	@GetMapping("/get-all")
 	public ResponseEntity<List<Seeker>> getSeeker() {
 		List<Seeker> seekers = seekerRepository.findAll();
 		return new ResponseEntity<>(seekers, HttpStatus.OK);
-	}
-
-	@GetMapping("/search-by-name")
-	public ResponseEntity<Object> searchSeekersByName(@RequestParam("userName") String userName) {
-		try {
-			List<Seeker> seekers = seekerService.searchSeekerByName(userName);
-			return ResponseEntity.ok(seekers);
-		} catch (AllExceptions e) {
-			// Trả về thông báo từ service
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-		} catch (Exception e) {
-			// Trả về thông báo lỗi chung
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
-		}
 	}
 
 	@GetMapping("/candidate-skills")
@@ -107,18 +98,7 @@ public class SeekerController {
 		}
 	}
 
-	@GetMapping("/search-by-industry")
-	public ResponseEntity<Object> searchSeekersByIndustry(@RequestParam("industryName") String industryName) {
-		try {
-			List<Seeker> seekers = seekerService.searchSeekerByIndustry(industryName);
-			return ResponseEntity.ok(seekers);
-		} catch (AllExceptions e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
-		}
-	}
+
 
 //	@DeleteMapping("/delete-social/{socialName}")
 //	public ResponseEntity<String> deleteSocialLink(@RequestHeader("Authorization") String jwt,
@@ -174,16 +154,41 @@ public class SeekerController {
 	}
 
 	@GetMapping("/profile-apply")
-	public ResponseEntity<ApplicantProfileDTO> getCandidateDetails(@RequestParam UUID userId,
-			@RequestParam UUID postId) {
-		try {
-			ApplicantProfileDTO profile = seekerRepository.findCandidateDetails(userId, postId);
-			return ResponseEntity.ok(profile); 
+    public ResponseEntity<ApplicantProfileDTO> getCandidateDetails(
+            @RequestParam String userId, 
+            @RequestParam String postId) {
+        try {
+       
+            ApplicantProfileProjection projection = seekerRepository.findCandidateDetails(userId, postId);
 
-		} catch (Exception e) {
-			return ResponseEntity.status(500).body(null);
-		}
-	}
+            List<String> industries = List.of(projection.getIndustryName().split(", "));
+
+            ApplicantProfileDTO profile = new ApplicantProfileDTO(
+                projection.getPostId(),
+                projection.getUserId(),
+                projection.getAddress(),
+                projection.getDateOfBirth(),
+                projection.getDescription(),
+                projection.getEmailContact(),
+                projection.getGender(),
+                projection.getPhoneNumber(),
+                projection.getApplyDate(),
+                projection.getPathCV(),
+                projection.getFullName(),
+                projection.getCompanyId(),
+                projection.getAvatar(),
+                projection.getTypeOfWork(),
+                projection.getTitle(),
+                industries
+            );
+
+
+            return ResponseEntity.ok(profile);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+
 
 	@GetMapping("/{companyId}/followers")
 	public List<FollowSeekerDTO> getSeekersFollowingCompany(@PathVariable UUID companyId) {

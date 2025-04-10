@@ -128,19 +128,19 @@ export default function SignUpForm() {
         return false;
       }
 
-      const companyData = {
+      const company = {
         companyName: formData.companyName,
         taxCode: formData.taxCode,
         address: companyInfo?.address || "",
-        industry: { industryId: 1 },
-        city: { cityId: companyInfo?.cityId || 1 }
+        industry: [{ industryId: 0 }],
+        city: { cityId: companyInfo?.cityId || 0 }
       };
       
-      console.log("Sending company data:", companyData); // Debug log
+      console.log("Sending company data:", company); // Debug log
       
       const response = await axios.post(
         `http://localhost:8080/auth/verify-employer`,  // Bỏ query param email
-        companyData,
+        company,
         {
           params: { email: email }  // Thêm email vào params
         }

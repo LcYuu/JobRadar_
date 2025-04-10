@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
+import com.job_portal.models.Industry;
 import com.job_portal.models.JobPost;
 import com.job_portal.models.Seeker;
 import com.job_portal.models.Subscription;
@@ -106,17 +107,22 @@ public class SubscriptionServiceImpl implements ISubscriptionService {
 	        logger.info("Bắt đầu gửi thông báo cho: {}", subscription.getEmail());
 	        
 	        Seeker seeker = subscription.getSeeker();
-	        if (seeker == null || seeker.getIndustry() == null) {
-	            logger.warn("Không thể gửi email vì seeker hoặc industry bị null cho: {}", subscription.getEmail());
+	        if (seeker == null || seeker.getIndustry() == null || seeker.getIndustry().isEmpty()) {
+	            logger.warn("Không thể gửi email vì seeker hoặc industries bị null hoặc rỗng cho: {}", subscription.getEmail());
 	            return;
 	        }
 
-	        Integer industryId = seeker.getIndustry().getIndustryId();
+	        // Lấy danh sách industry IDs từ Seeker
+	        List<Integer> industryIds = seeker.getIndustry().stream()
+	                .map(Industry::getIndustryId)
+	                .collect(Collectors.toList());
 	        LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
 	        
-	        logger.info("Tìm kiếm công việc mới cho ngành {} từ {}", industryId, threeDaysAgo);
-	        List<JobPost> matchedJobs = jobPostRepository.findByCreateDateAfterAndIndustryId(threeDaysAgo, industryId)
-	                .stream().limit(7).collect(Collectors.toList());
+	        logger.info("Tìm kiếm công việc mới cho các ngành {} từ {}", industryIds, threeDaysAgo);
+	        List<JobPost> matchedJobs = jobPostRepository.findByCreateDateAfterAndIndustryIds(threeDaysAgo, industryIds)
+	                .stream()
+	                .limit(7)
+	                .collect(Collectors.toList());
 
 	        logger.info("Tìm thấy {} công việc mới cho: {}", matchedJobs.size(), subscription.getEmail());
 
