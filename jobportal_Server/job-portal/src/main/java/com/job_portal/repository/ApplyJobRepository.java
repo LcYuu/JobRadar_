@@ -1,6 +1,7 @@
 package com.job_portal.repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,13 +36,38 @@ public interface ApplyJobRepository extends JpaRepository<ApplyJob, IdApplyJob> 
 	Page<ApplyJobInProfile> findApplyJobByUserId(@Param("userId") UUID userId, Pageable pageable);
 
 	@Query("SELECT DISTINCT new com.job_portal.DTO.ApplyJobEmployerDTO(a.postId, a.userId, a.isSave, a.applyDate, "
-			+ "a.pathCV, a.fullName, j.title, u.avatar, a.isViewed) " + "FROM ApplyJob a " + "JOIN a.jobPost j "
+			+ "a.pathCV, a.fullName, j.title, u.avatar, a.isViewed, a.matchingScore) " + "FROM ApplyJob a " + "JOIN a.jobPost j "
 			+ "JOIN UserAccount u ON a.userId = u.userId " + "WHERE j.company.companyId = :companyId "
 			+ "AND (:fullName IS NULL OR LOWER(a.fullName) LIKE LOWER(CONCAT('%', :fullName, '%'))) "
 			+ "AND (:isSave IS NULL OR a.isSave = :isSave) "
-			+ "AND (:title IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :title, '%'))) "
-			+ "ORDER BY a.applyDate DESC")
+			+ "AND (:title IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :title, '%')))")
 	Page<ApplyJobEmployerDTO> findApplyJobsWithFilters(@Param("companyId") UUID companyId,
 			@Param("fullName") String fullName, @Param("isSave") Boolean isSave, @Param("title") String title,
 			Pageable pageable);
+
+	@Query("SELECT a FROM ApplyJob a " +
+		   "JOIN JobPost j ON a.postId = j.postId " +
+		   "WHERE j.company.companyId = :companyId " +
+		   "ORDER BY a.applyDate DESC")
+	List<ApplyJob> findByCompanyId(@Param("companyId") UUID companyId);
+
+	@Query("SELECT a FROM ApplyJob a " +
+		   "JOIN JobPost j ON a.postId = j.postId " +
+		   "WHERE j.company.companyId = :companyId " +
+		   "ORDER BY a.matchingScore DESC, a.applyDate DESC")
+	List<ApplyJob> findByCompanyIdOrderByMatchingScore(@Param("companyId") UUID companyId);
+
+	@Query("SELECT a FROM ApplyJob a " +
+		   "WHERE a.postId = :postId " +
+		   "ORDER BY a.matchingScore DESC, a.applyDate DESC")
+	List<ApplyJob> findByPostIdOrderByMatchingScore(@Param("postId") UUID postId);
+
+	@Query("SELECT new map(a.postId as postId, a.userId as userId, a.matchingScore as matchingScore, a.applyDate as lastUpdated) " +
+		   "FROM ApplyJob a WHERE a.matchingScore > 0")
+	List<Map<String, Object>> findAllWithMatchingScore();
+
+	@Query("SELECT new map(a.postId as postId, a.userId as userId, a.matchingScore as matchingScore, a.applyDate as lastUpdated, a.analysisResult as analysisResult) " +
+		   "FROM ApplyJob a WHERE a.matchingScore > 0 AND a.analysisResult IS NOT NULL")
+	List<Map<String, Object>> findAllWithMatchingScoreAndAnalysis();
+
 }
