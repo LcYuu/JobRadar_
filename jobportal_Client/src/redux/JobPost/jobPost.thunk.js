@@ -176,10 +176,12 @@ export const getTop5Lastest = createAsyncThunk(
 // Tìm công việc theo công ty
 export const findEmployerCompany = createAsyncThunk(
   "jobs/findEmployerCompany",
-  async ({ status, typeOfWork, currentPage, size }, { rejectWithValue }) => {
+  async ({ status, typeOfWork, sortBy, sortDirection, currentPage, size }, { rejectWithValue }) => {
     const params = {
       ...(status && { status }),
       ...(typeOfWork && { typeOfWork }),
+      ...(sortBy && { sortBy }),
+      ...(sortDirection && { sortDirection }),
       page: currentPage,
       size,
     };
@@ -294,6 +296,56 @@ export const updateExpireJob = createAsyncThunk(
       return data;
     } catch (error) {
       return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const semanticSearchJobsWithGemini = createAsyncThunk(
+  "jobPost/semanticSearchJobsWithGemini",
+  async ({ query, filters, currentPage, size }, thunkAPI) => {
+    try {
+      // Chuẩn bị tham số cho API
+      const params = {
+        query,
+        page: currentPage,
+        size: size || 100, // Sử dụng size được truyền vào hoặc mặc định 100 để lấy nhiều kết quả hơn
+      };
+
+      // Thêm các tùy chọn lọc nếu có
+      if (filters?.selectedTypesOfWork?.length > 0) {
+        params.selectedTypesOfWork = filters.selectedTypesOfWork;
+      }
+      if (filters?.cityId) {
+        params.cityId = filters.cityId;
+      }
+      if (filters?.selectedIndustryIds?.length > 0) {
+        params.selectedIndustryIds = filters.selectedIndustryIds;
+      }
+      if (filters?.minSalary !== undefined && filters.minSalary !== null) {
+        params.minSalary = filters.minSalary;
+      }
+      if (filters?.maxSalary !== undefined && filters.maxSalary !== null) {
+        params.maxSalary = filters.maxSalary;
+      }
+
+      console.log("Gọi API semantic search với params:", params);
+
+      const token = localStorage.getItem("token");
+      const headers = {
+        Authorization: token ? token : "",
+      };
+
+      const response = await api.get('/job-post/semantic-search', { headers, params });
+      console.log("Kết quả semantic search:", response.data);
+
+      return {
+        content: response.data.content, 
+        totalPages: response.data.totalPages, 
+        totalElements: response.data.totalElements
+      };
+    } catch (error) {
+      console.error("Lỗi khi tìm kiếm ngữ nghĩa:", error);
+      return thunkAPI.rejectWithValue(error.response?.data || { message: error.message });
     }
   }
 );

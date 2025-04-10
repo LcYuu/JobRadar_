@@ -52,6 +52,13 @@ public class ApplyJob {
     
     @Column(name = "is_viewed", nullable = false)
     private boolean isViewed = false;
+
+    @Column(name="matching_score", nullable = false)
+    private double matchingScore;
+
+    @Lob
+    @Column(name = "analysis_result", columnDefinition = "LONGTEXT")
+    private String analysisResult;
     
     @Lob
     @Column(name = "description", columnDefinition = "MEDIUMTEXT")
@@ -67,5 +74,6 @@ public class ApplyJob {
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false)
     private Seeker seeker;
 
-	
+
+
 }
