@@ -132,8 +132,10 @@ public class AuthController {
 			newUser.setProvider("LOCAL");
 
 			String otp = otpUtil.generateOtp();
+
 			emailUtil.sendOtpEmail(newUser.getEmail(), otp);
 			newUser.setOtp(otp);
+			System.out.println("aa " + newUser.getOtp());
 			newUser.setOtpGeneratedTime(LocalDateTime.now());
 
 			userAccountRepository.save(newUser);
@@ -167,8 +169,15 @@ public class AuthController {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Mã số thuế không hợp lệ hoặc không tồn tại");
 			}
 
+			// Set default industry (ID = 1) into the industries list
+			List<Industry> defaultIndustries = new ArrayList<>();
+			Industry defaultIndustry = industryRepository.findById(0).orElse(null);
+			if (defaultIndustry != null) {
+				defaultIndustries.add(defaultIndustry);
+			}
+			company.setIndustry(defaultIndustries);
+
 			company.setUserAccount(user);
-			company.setIndustry(industryRepository.findById(1).orElse(null));
 			company.setCity(cityRepository.findById(company.getCity().getCityId()).orElse(null));
 			company.setAddress(", , ");
 			company.setIsBlocked(false);
@@ -187,7 +196,10 @@ public class AuthController {
 		Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
 		if (userOptional.isPresent()) {
 			UserAccount user = userOptional.get();
-			if (user.getOtp().equals(otp)
+			System.out.println("aa " + user.getOtp());
+
+			// Kiểm tra nếu OTP là null
+			if (user.getOtp() != null && user.getOtp().equals(otp)
 					&& Duration.between(user.getOtpGeneratedTime(), LocalDateTime.now()).getSeconds() < (2 * 60)) {
 
 				user.setActive(true);
@@ -198,7 +210,12 @@ public class AuthController {
 				if (user.getUserType().getUserTypeId() == 2) {
 					Seeker seeker = new Seeker();
 					seeker.setUserAccount(user);
-					seeker.setIndustry(industryRepository.findById(0).orElse(null));
+					List<Industry> defaultIndustries = new ArrayList<>();
+					Industry defaultIndustry = industryRepository.findById(0).orElse(null);
+					if (defaultIndustry != null) {
+						defaultIndustries.add(defaultIndustry);
+					}
+					seeker.setIndustry(defaultIndustries);
 					seeker.setAddress(", , ");
 					user.setSeeker(seeker);
 				}
@@ -424,7 +441,6 @@ public class AuthController {
 			if (userOpt.isPresent()) {
 				UserAccount user = userOpt.get();
 
-
 				if (user.getUserType() != null && user.getUserType().getUserTypeId() != null) {
 					if (user.getUserType().getUserTypeId() == 3) {
 						if (user.getCompany() != null && user.getCompany().getIsBlocked()
@@ -464,18 +480,22 @@ public class AuthController {
 		UserAccount user = userOpt.get();
 		user.setUserType(userTypeOpt.get());
 
-		if (user.getUserType().getUserTypeId() == 2) {
+		if (user.getUserType().getUserTypeId() == 2) { // Seeker
 			Integer defaultIndustryId = 0;
 			Optional<Industry> defaultIndustryOpt = industryRepository.findById(defaultIndustryId);
 			Industry defaultIndustry = defaultIndustryOpt
 					.orElseThrow(() -> new RuntimeException("Default industry not found"));
 
+			// Set default industry as a list
+			List<Industry> defaultIndustries = new ArrayList<>();
+			defaultIndustries.add(defaultIndustry);
+
 			Seeker seeker = new Seeker();
 			seeker.setUserAccount(user);
-			seeker.setIndustry(defaultIndustry);
+			seeker.setIndustry(defaultIndustries); // Updated to setIndustries
 			seeker.setAddress(", , ");
 			user.setSeeker(seeker);
-		} else if (user.getUserType().getUserTypeId() == 3) {
+		} else if (user.getUserType().getUserTypeId() == 3) { // Employer
 			Integer defaultIndustryId = 0;
 			Optional<Industry> defaultIndustryOpt = industryRepository.findById(defaultIndustryId);
 			Integer defaultCityId = 0;
@@ -485,9 +505,13 @@ public class AuthController {
 					.orElseThrow(() -> new RuntimeException("Default industry not found"));
 			City defaultCity = defaultCityOpt.orElseThrow(() -> new RuntimeException("Default city not found"));
 
+			// Set default industry as a list
+			List<Industry> defaultIndustries = new ArrayList<>();
+			defaultIndustries.add(defaultIndustry);
+
 			Company company = new Company();
 			company.setUserAccount(user);
-			company.setIndustry(defaultIndustry);
+			company.setIndustry(defaultIndustries);
 			company.setCity(defaultCity);
 			company.setAddress(", , ");
 			company.setIsBlocked(false);
@@ -495,7 +519,7 @@ public class AuthController {
 		}
 
 		UserAccount updatedUser = userAccountRepository.save(user);
-		return ResponseEntity.ok(updatedUser); // Trả về toàn bộ UserAccount
+		return ResponseEntity.ok(updatedUser); // Return the full UserAccount
 	}
 
 	@PostMapping("/update-employer")
@@ -510,7 +534,7 @@ public class AuthController {
 		oldCompany.setCompanyName(company.getCompanyName());
 		oldCompany.setEmail(company.getEmail());
 		companyRepository.save(oldCompany);
-		
+
 		return new AuthResponse("", "Success");
 	}
 

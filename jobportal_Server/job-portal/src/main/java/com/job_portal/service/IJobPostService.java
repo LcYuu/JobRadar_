@@ -41,7 +41,7 @@ public interface IJobPostService {
 	public Page<JobPost> findApprovedJobsByCompany(UUID companyId, Pageable pageable);
 	public Map<String, Long> countAllJobsByCompany(UUID companyId);
 	public List<Map<String, Object>> getCompanyJobStats(UUID companyId, LocalDateTime startDate, LocalDateTime endDate);
-	List<JobPost> getSimilarJobsByIndustry(Integer industryId, UUID jobPostId); 
+	public List<JobPost> getSimilarJobsByIndustry(List<Integer> industryIds, UUID excludePostId);
 	public void updateExpiredJobs();
 	public boolean canPostJob(UUID companyId);
 	public void increaseViewCount(UUID postId);

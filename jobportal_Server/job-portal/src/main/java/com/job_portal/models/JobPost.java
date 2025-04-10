@@ -13,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
@@ -77,11 +78,11 @@ public class JobPost {
 	@Column(name = "status", length = 50, nullable = false)
 	private String status;
 
-	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE) // Thêm CascadeType.REMOVE
+	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE) 
 	@JoinColumn(name = "city_id")
 	private City city;
 
-	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE) // Thêm CascadeType.REMOVE
+	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE) 
 	@JoinColumn(name = "company_id")
 	private Company company;
 
@@ -100,5 +101,13 @@ public class JobPost {
 	
 	@Column(name = "view_count", nullable = false)
 	private Integer viewCount = 0;
+	
+	@ManyToMany
+	@JoinTable(
+	    name = "job_post_industry",
+	    joinColumns = @JoinColumn(name = "post_id"),
+	    inverseJoinColumns = @JoinColumn(name = "industry_id")
+	)
+	private List<Industry> industry = new ArrayList<>();
 
 }

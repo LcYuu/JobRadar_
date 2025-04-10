@@ -15,6 +15,18 @@ const iconUrls = [
   "https://cdn-icons-png.flaticon.com/128/2779/2779775.png", // Thiết kế
   "https://cdn-icons-png.flaticon.com/128/675/675795.png", // Điện - điện tử
   "https://cdn-icons-png.flaticon.com/128/3135/3135727.png", // Kinh doanh
+  "https://cdn-icons-png.flaticon.com/128/3976/3976625.png",
+  "https://cdn-icons-png.flaticon.com/128/10365/10365919.png",
+  "https://cdn-icons-png.flaticon.com/128/3635/3635987.png",
+  "https://cdn-icons-png.flaticon.com/128/1667/1667118.png",
+  "https://cdn-icons-png.flaticon.com/128/2966/2966327.png",
+  "https://cdn-icons-png.flaticon.com/128/4363/4363531.png",
+  "https://cdn-icons-png.flaticon.com/128/1570/1570887.png",
+  "https://cdn-icons-png.flaticon.com/128/9280/9280764.png",
+  "https://cdn-icons-png.flaticon.com/128/4900/4900915.png",
+  "https://cdn-icons-png.flaticon.com/128/9068/9068413.png",
+  "https://cdn-icons-png.flaticon.com/128/2974/2974086.png",
+
 ];
 
 const CategoryList = () => {
