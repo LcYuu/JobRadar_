@@ -232,17 +232,20 @@ public class CompanyController {
 	    Pageable pageable = PageRequest.of(page, size);
 	    Page<CompanyWithCountJob> projections = companyRepository.findCompaniesByFilters(title, cityId, industryId, pageable);
 
-	  
+	    // In ra danh sách industryIds dạng chuỗi trước khi chuyển đổi
+	    projections.forEach(proj -> System.out.println("IndustryIds (raw): " + proj.getIndustryIds()));
+
 	    return projections.map(proj -> new CompanyWithCountJobDTO(
 	        proj.getCompanyId(),
 	        proj.getCompanyName(),
 	        proj.getLogo(),
-	        convertStringToList(proj.getIndustryIds()), // Chuyển "1,2,3" thành List<Integer>
+	        convertStringToList(proj.getIndustryIds()), // Ví dụ: "1,2,3" → List<Integer>
 	        proj.getDescription(),
 	        proj.getCityId(),
 	        proj.getCountJob()
 	    ));
 	}
+
 
 	// Hàm chuyển đổi "1,2,3" -> List<Integer>
 	private List<Integer> convertStringToList(String industryIds) {

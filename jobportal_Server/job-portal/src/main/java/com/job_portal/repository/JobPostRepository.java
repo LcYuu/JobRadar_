@@ -58,16 +58,20 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 
 	List<JobPost> findByIsApproveTrueAndExpireDateGreaterThanEqual(LocalDateTime currentDate);
 
-	@Query(value = "SELECT  BIN_TO_UUID(j.post_id) AS postId, j.title, j.description, j.location, j.salary, j.experience, "
-			+ "j.type_of_work, j.create_date, j.expire_date,  BIN_TO_UUID(j.company_id), c.company_name, ci.city_name, "
-			+ "GROUP_CONCAT(DISTINCT i.industry_name) AS industryNames, c.logo " + "FROM job_posts j "
-			+ "JOIN company c ON j.company_id = c.user_id " + "JOIN city ci ON c.city_id = ci.city_id "
+	@Query(value = "SELECT BIN_TO_UUID(j.post_id) AS postId, j.title, j.description, j.location, j.salary, j.experience, "
+			+ "j.type_of_work, j.create_date, j.expire_date, BIN_TO_UUID(j.company_id) AS companyId, c.company_name, ci.city_name, "
+			+ "GROUP_CONCAT(DISTINCT i.industry_name) AS industryNames, c.logo "
+			+ "FROM job_posts j "
+			+ "JOIN company c ON j.company_id = c.user_id "
+			+ "JOIN city ci ON c.city_id = ci.city_id "
 			+ "JOIN company_industries ci2 ON c.user_id = ci2.company_id "
 			+ "JOIN industry i ON ci2.industry_id = i.industry_id "
 			+ "WHERE j.is_approve = true AND j.expire_date >= CURRENT_TIMESTAMP "
 			+ "GROUP BY j.post_id, j.title, j.description, j.location, j.salary, j.experience, j.type_of_work, "
-			+ "j.create_date, j.expire_date, j.company_id, c.company_name, ci.city_name, c.logo", nativeQuery = true)
+			+ "j.create_date, j.expire_date, j.company_id, c.company_name, ci.city_name, c.logo",
+		nativeQuery = true)
 	List<JobRecommendationProjection> findApprovedAndActiveJobs();
+
 
 	@Query("SELECT j FROM JobPost j WHERE j.isApprove = true AND j.expireDate >= CURRENT_TIMESTAMP ORDER BY j.createDate DESC")
 	Page<JobPost> findJobPostActive(Pageable pageable);

@@ -323,7 +323,6 @@ public class JobPostController {
 			// Gửi request tới API Python
 			ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, String.class);
 			JsonNode jsonResponse = objectMapper.readTree(response.getBody());
-
 			List<JobRecommendationDTO> jobs = new ArrayList<>();
 
 			for (JsonNode jobNode : jsonResponse) {
@@ -373,6 +372,8 @@ public class JobPostController {
 
 				jobs.add(job);
 			}
+
+			
 
 			return ResponseEntity.ok(jobs);
 		} catch (JsonProcessingException e) {

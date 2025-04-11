@@ -83,7 +83,7 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 	@Override
 	public JobPost createJob(JobPostDTO jobPostDTO, UUID companyId) {
 		JobPost savedJobPost = new JobPost();
-		
+
 		try {
 			City city = cityRepository.findById(jobPostDTO.getCityId()).orElseThrow(
 					() -> new IllegalArgumentException("City with ID " + jobPostDTO.getCityId() + " does not exist"));
@@ -113,14 +113,14 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 				List<Skills> skillsList = skillRepository.findAllById(jobPostDTO.getSkillIds());
 				jobPost.setSkills(skillsList);
 			}
-			
+
 			if (jobPostDTO.getIndustryIds() != null && !jobPostDTO.getIndustryIds().isEmpty()) {
 				List<Industry> industryList = industryRepository.findAllById(jobPostDTO.getIndustryIds());
 				jobPost.setIndustry(industryList);
 			}
-			
+
 			savedJobPost = jobPostRepository.save(jobPost);
-		
+
 		} catch (Exception e) {
 			e.printStackTrace(); // Log lỗi để dễ debug
 		}
@@ -223,7 +223,7 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 			}
 			oldJob.setSkills(skillsList);
 		}
-		
+
 		if (jobPostDTO.getIndustryIds() != null && !jobPostDTO.getIndustryIds().isEmpty()) {
 			List<Industry> industryList = new ArrayList<>();
 			for (Integer industryId : jobPostDTO.getIndustryIds()) {
@@ -231,7 +231,7 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 				industryList.add(industryOpt.get());
 			}
 			oldJob.setIndustry(industryList);
-		}	
+		}
 		return jobPostRepository.save(oldJob);
 	}
 
@@ -247,7 +247,7 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 			jobPostRepository.save(jobPost);
 			this.delete("searchJobs:*");
 		}
-		return null; 
+		return null;
 	}
 
 	@Override
@@ -283,60 +283,56 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 
 	@Override
 	public void exportJobPostToCSV(String filePath) throws IOException {
-	    List<JobRecommendationProjection> jobProjections = jobPostRepository.findApprovedAndActiveJobs();
+		List<JobRecommendationProjection> jobProjections = jobPostRepository.findApprovedAndActiveJobs();
 
-	    try (FileWriter fileWriter = new FileWriter(filePath);
-	         CSVWriter writer = new CSVWriter(fileWriter)) {
+		try (FileWriter fileWriter = new FileWriter(filePath); CSVWriter writer = new CSVWriter(fileWriter)) {
 
-	        // Viết tiêu đề
-	        String[] header = { 
-	            "postId", "title", "description", "location", "salary", "experience", 
-	            "typeOfWork", "companyId", "companyName", 
-	            "cityName", "industryNames"
-	        };
-	        writer.writeNext(header);
+			// Viết tiêu đề
+			String[] header = { "postId", "title", "description", "location", "salary", "experience", "typeOfWork",
+					"companyId", "companyName", "cityName", "industryNames", "createDate", "expireDate", "logo" };
+			writer.writeNext(header);
 
-	        // Viết dữ liệu
-	        for (JobRecommendationProjection job : jobProjections) {
-	            String[] data = { 
-	                Objects.toString(job.getPostId(), ""),
-	                Objects.toString(job.getTitle(), ""),
-	                cleanText(job.getDescription()), // Xử lý mô tả tránh lỗi CSV
-	                Objects.toString(job.getLocation(), ""),
-	                Objects.toString(job.getSalary(), ""),
-	                Objects.toString(job.getExperience(), ""),
-	                Objects.toString(job.getTypeOfWork(), ""),
-	                Objects.toString(job.getCompanyId(), ""),
-	                Objects.toString(job.getCompanyName(), ""),
-	                Objects.toString(job.getCityName(), ""),
-	                formatIndustryNames(Objects.toString(job.getIndustryNames(), "")),
-
-	            };
-	            writer.writeNext(data);
-	        }
-	    }
+			// Viết dữ liệu
+			for (JobRecommendationProjection job : jobProjections) {
+				String[] data = {
+					Objects.toString(job.getPostId(), ""),
+					Objects.toString(job.getTitle(), ""),
+					cleanText(job.getDescription()),
+					Objects.toString(job.getLocation(), ""),
+					Objects.toString(job.getSalary(), ""),
+					Objects.toString(job.getExperience(), ""),
+					Objects.toString(job.getTypeOfWork(), ""),
+					Objects.toString(job.getCompanyId(), ""),
+					Objects.toString(job.getCompanyName(), ""),
+					Objects.toString(job.getCityName(), ""),
+					formatIndustryNames(Objects.toString(job.getIndustryNames(), "")),
+					Objects.toString(job.getCreateDate(), ""),
+					Objects.toString(job.getExpireDate(), ""),
+					Objects.toString(job.getLogo(), ""),
+				};
+				writer.writeNext(data);
+			}
+			
+		}
 	}
 
 	// Chuyển danh sách ngành nghề thành chuỗi phân tách bằng "|"
 	// Chuyển danh sách ngành nghề từ chuỗi GROUP_CONCAT thành định dạng mong muốn
 	private String formatIndustryNames(String industryNames) {
-	    return (industryNames == null || industryNames.isBlank()) ? "" : industryNames.replace(",", " | ");
+		return (industryNames == null || industryNames.isBlank()) ? "" : industryNames.replace(",", " | ");
 	}
 
 	private String cleanText(String text) {
-	    return text == null ? "" : text.replaceAll("[\\r\\n]+", " ").trim();
+		return text == null ? "" : text.replaceAll("[\\r\\n]+", " ").trim();
 	}
 
 	@Override
 	public List<JobPost> getTop8LatestJobPosts() {
 
-	    List<JobPost> latestJobs = jobPostRepository.findTop8LatestJobPosts()
-	                                                .stream()
-	                                                .limit(8)
-	                                                .collect(Collectors.toList());
-	    return latestJobs;
+		List<JobPost> latestJobs = jobPostRepository.findTop8LatestJobPosts().stream().limit(8)
+				.collect(Collectors.toList());
+		return latestJobs;
 	}
-
 
 	@Override
 	public List<JobCountType> getJobCountByType() {
@@ -376,7 +372,7 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 	}
 
 	public Page<JobPost> findJobByCompanyId(UUID companyId, int page, int size) {
-	    // Tạo redis key dựa trên companyId, page, size
+		// Tạo redis key dựa trên companyId, page, size
 //	    String redisKey = "jobByCompany:" + companyId + ":" + page + ":" + size;
 //	    
 //	    // Kiểm tra cache
@@ -384,17 +380,16 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 //	    if (cachedPage != null) {
 //	        return cachedPage;
 //	    }
-	    
-	    // Nếu không có trong cache, truy vấn từ database
-	    Page<JobPost> jobPosts = jobPostRepository.findJobByCompanyId(companyId, PageRequest.of(page, size));
-	    
+
+		// Nếu không có trong cache, truy vấn từ database
+		Page<JobPost> jobPosts = jobPostRepository.findJobByCompanyId(companyId, PageRequest.of(page, size));
+
 //	    // Lưu kết quả vào Redis và thiết lập TTL (ví dụ: 7 ngày)
 //	    this.set(redisKey, jobPosts);
 //	    this.setTimeToLive(redisKey, TIME_OUT);
-	    
-	    return jobPosts;
-	}
 
+		return jobPosts;
+	}
 
 	public Page<JobPost> findByCompanyId(UUID companyId, Pageable pageable) {
 		return jobPostRepository.findByCompanyCompanyIdAndApproveTrue(companyId, pageable);
@@ -467,7 +462,7 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 
 	@Override
 	public List<JobPost> getSimilarJobsByIndustry(List<Integer> industryIds, UUID excludePostId) {
-	    return jobPostRepository.findSimilarJobsByIndustryIds(industryIds, excludePostId);
+		return jobPostRepository.findSimilarJobsByIndustryIds(industryIds, excludePostId);
 	}
 
 	@Override
@@ -504,7 +499,8 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 		jobPostRepository.save(jobPost);
 	}
 
-	public Page<JobPost> searchJobs(String title, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, int page, int size) {
+	public Page<JobPost> searchJobs(String title, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary,
+			Integer cityId, List<Integer> selectedIndustryIds, int page, int size) {
 //	    String redisKey = "searchJobs:" + title + ":" + selectedTypesOfWork + ":" + minSalary + ":" + maxSalary + ":"
 //	            + cityId + ":" + selectedIndustryIds + ":" + page + ":" + size;
 //
@@ -516,18 +512,17 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 //	        return new PageImpl<>(jobList, pageable, jobList.size());
 //	    }
 //	    
-	    Specification<JobPost> spec = Specification
-	            .where(jobPostRepository.alwaysActiveJobs())
-	            .and(JobPostSpecification.withFilters(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds));
+		System.out.print("selected "  + selectedIndustryIds);
+		Specification<JobPost> spec = Specification.where(jobPostRepository.alwaysActiveJobs()).and(JobPostSpecification
+				.withFilters(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds));
 
-	    Page<JobPost> result = jobPostRepository.findAll(spec, PageRequest.of(page, size));
+		Page<JobPost> result = jobPostRepository.findAll(spec, PageRequest.of(page, size));
 
 //	    // Lưu kết quả vào Redis
 //	    this.set(redisKey, result);
 //	    this.setTimeToLive(redisKey, TIME_OUT); // Cache hết hạn sau 1 ngày
 
-	    return result;
+		return result;
 	}
-
 
 }
