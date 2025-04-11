@@ -127,8 +127,16 @@ export default function FindCompanies() {
         : allIndustries.find((industry) => industry.industryId === industryId)
             ?.industryName || "Tất cả công ty"
     );
-    setTempFilters((prev) => ({ ...prev, industryId: industryId || "" }));
+  
+    const updatedFilters = {
+      ...tempFilters,
+      industryId: industryId || "",
+    };
+  
+    setTempFilters(updatedFilters);
+    setFilters(updatedFilters); // dùng updatedFilters mới
   };
+  
 
   const filteredCompanies = selectedCategory
   ? companyByFeature.filter((company) =>
@@ -219,7 +227,7 @@ export default function FindCompanies() {
             >
               Tất cả ngành nghề
             </Button>
-            {allIndustries.map((industry) => (
+            {allIndustries.slice(1).map((industry) => (
               <Button
                 key={industry.industryId}
                 variant={

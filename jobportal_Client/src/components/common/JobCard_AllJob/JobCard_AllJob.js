@@ -178,8 +178,8 @@ function JobCard_AllJob({ job }) {
           {/* Industry tags and Apply button */}
           <div className="flex justify-between items-center">
             <div className="flex flex-wrap gap-2">
-              {Array.isArray(job.company.industry) ? (
-                job.company.industry.map((industry, index) => (
+              {Array.isArray(job.industry) ? (
+                job.industry.map((industry, index) => (
                   <span
                     key={index}
                     className="px-2 py-1 rounded-full text-xs font-medium"

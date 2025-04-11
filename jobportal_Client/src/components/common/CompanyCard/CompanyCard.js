@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import { Card } from "../../../ui/card";
 import { Badge } from "../../../ui/badge";
 import { Button } from "../../../ui/button";
@@ -13,8 +13,8 @@ const CompanyCard = ({ company, variant = "default" }) => {
 
   if (variant === "suggested") {
     return (
-      <Link 
-        to={`/companies/${company.companyId}`} 
+      <Link
+        to={`/companies/${company.companyId}`}
         className="block"
         onClick={(e) => {
           console.log("Clicked company:", company.companyId);
@@ -31,11 +31,14 @@ const CompanyCard = ({ company, variant = "default" }) => {
               <h3 className="font-semibold">{company.companyName}</h3>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">{company.description}</p>
+          <p className="text-sm text-muted-foreground line-clamp-2">
+            {company.description}
+          </p>
+
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               className="transition duration-200 hover:bg-gray-200"
               onClick={handleCardClick}
             >
@@ -48,14 +51,14 @@ const CompanyCard = ({ company, variant = "default" }) => {
   }
 
   return (
-    <Link 
-      to={`/company-profile/${company.companyId}`} 
+    <Link
+      to={`/company-profile/${company.companyId}`}
       className="block"
       onClick={(e) => {
         console.log("Clicked company:", company.companyId);
       }}
     >
-      <Card 
+      <Card
         onClick={handleCardClick}
         className="p-6 space-y-4 transition-transform duration-300 hover:scale-105 cursor-pointer shadow-lg"
       >
@@ -70,7 +73,9 @@ const CompanyCard = ({ company, variant = "default" }) => {
             <p className="text-sm text-primary">{company.countJob} Jobs</p>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground line-clamp-2">{company.description}</p>
+        <p className="text-sm text-muted-foreground line-clamp-2">
+          {company.description}
+        </p>
         <div className="flex flex-wrap gap-2">
           <Badge className="text-xs">{company.industryName}</Badge>
         </div>
@@ -79,4 +84,4 @@ const CompanyCard = ({ company, variant = "default" }) => {
   );
 };
 
-export default CompanyCard; 
+export default CompanyCard;
