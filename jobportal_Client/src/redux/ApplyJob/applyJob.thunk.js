@@ -74,7 +74,15 @@ export const checkIfApplied = createAsyncThunk(
 export const getApplyJobByCompany = createAsyncThunk(
   "applyJob/getApplyJobByCompany",
   async (
-    { currentPage, size, fullName = "", isSave = null, title = "" },
+    { 
+      currentPage, 
+      size, 
+      fullName = "", 
+      isSave = null, 
+      title = "",
+      sortBy = "applyDate",
+      sortDirection = "desc"
+    },
     { rejectWithValue }
   ) => {
     try {
@@ -84,6 +92,8 @@ export const getApplyJobByCompany = createAsyncThunk(
         ...(fullName && { fullName }),
         ...(isSave !== null && { isSave }),
         ...(title && { title }),
+        sortBy,
+        sortDirection,
       }).toString();
 
       const response = await api.get(
@@ -130,13 +140,11 @@ export const getNotificationViewJob = createAsyncThunk(
   "applyJob/getNotificationViewJob",
   async ({ userId, postId }, { rejectWithValue }) => {
     try {
-      const response = await api.post(
-        `/apply-job/viewApply/${userId}/${postId}`
-      );
+      const response = await api.post(`/apply-job/viewApply/${userId}/${postId}`);
       return response.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message || "Failed to fetch candidate apply info"
+        error.response?.data?.message || "Failed to mark job as viewed"
       );
     }
   }

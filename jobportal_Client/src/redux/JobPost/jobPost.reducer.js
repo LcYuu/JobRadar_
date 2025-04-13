@@ -126,14 +126,6 @@ export const jobPostReducer = (state = initialState, action) => {
         loading: false, // Kết thúc trạng thái tải
         error: null, // Đặt lỗi về null
       };
-    // case SEARCH_JOBS_SUCCESS:
-    //   return {
-    //     ...state,
-    //     searchJob: action.payload.content,
-    //     totalPages: action.payload.page.totalPages,
-    //     loading: false,
-    //     error: null,
-    //   };
     case GET_JOB_POST_BY_POST_ID_SUCCESS:
       return {
         ...state,
@@ -242,7 +234,7 @@ export const jobPostReducer = (state = initialState, action) => {
     case GET_ALL_ADMIN_JOBS_FAILURE:
       return { ...state, loading: false, error: action.payload };
     case GET_ALL_JOBS_REQUEST:
-    // case SEARCH_JOBS_REQUEST:
+    case SEARCH_JOBS_REQUEST:
       return {
         ...state,
         loading: true,
@@ -272,7 +264,7 @@ export const jobPostReducer = (state = initialState, action) => {
       };
 
     case GET_ALL_JOBS_FAILURE:
-    // case SEARCH_JOBS_FAILURE:
+    case SEARCH_JOBS_FAILURE:
       return {
         ...state,
         loading: false,
@@ -292,6 +284,26 @@ export const jobPostReducer = (state = initialState, action) => {
         similarJobs: action.payload,
       };
     case "GET_SIMILAR_JOBS_FAILURE":
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
+
+    case semanticSearchJobsWithGemini.pending:
+      return {
+        ...state,
+        loading: true,
+        error: null,
+      };
+    case semanticSearchJobsWithGemini.fulfilled:
+      return {
+        ...state,
+        loading: false,
+        searchJob: action.payload.content,
+        totalPages: action.payload.totalPages,
+      };
+    case semanticSearchJobsWithGemini.rejected:
       return {
         ...state,
         loading: false,
