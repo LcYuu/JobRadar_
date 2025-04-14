@@ -2,7 +2,13 @@ import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
-import { Avatar, IconButton, MenuItem, TextField } from "@mui/material";
+import {
+  Avatar,
+  Checkbox,
+  IconButton,
+  MenuItem,
+  TextField,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import { useFormik } from "formik";
@@ -105,7 +111,10 @@ const validationSchema = Yup.object({
     .required("Ngày thành lập là bắt buộc")
     .max(new Date(), "Ngày thành lập không được trong tương lai"),
   address: Yup.string().required("Địa chỉ là bắt buộc"),
-  industryId: Yup.string().required("Lĩnh vực là bắt buộc"), // Lĩnh vực phải được chọn từ dropdown
+  industryIds: Yup.array()
+    .of(Yup.string())
+    .min(1, "Vui lòng chọn ít nhất một ngành") // Bắt buộc chọn ít nhất 1 ngành
+    .required("Lĩnh vực hoạt động không được để trống"),
 });
 
 export default function CompanyProfileModal({ open, handleClose }) {
@@ -216,12 +225,16 @@ export default function CompanyProfileModal({ open, handleClose }) {
           ? new Date(companyJwt?.establishedTime).toISOString().split("T")[0] // Chuyển sang định dạng YYYY-MM-DD
           : "",
       address: companyJwt?.address || "",
-      industryId: companyJwt?.industry?.industryId || "",
+      industryIds:
+        companyJwt?.industry?.length > 0
+          ? companyJwt.industry.map((ind) => ind.industryId)
+          : [],
     },
 
     validationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
+      console.log("🔥 onSubmit called!", values); // Kiểm tra Formik có gọi không
       setIsLoading(true);
       try {
         const fullAddress =
@@ -231,7 +244,10 @@ export default function CompanyProfileModal({ open, handleClose }) {
           ...values,
           address: fullAddress || "", // Đảm bảo chuỗi không bị null/undefined
           cityId: cityCodeMapping[selectedProvince] || null, // Xử lý nếu không tìm thấy mã tỉnh
+          industryId: values.industryIds,
         };
+        console.log("🚀 ~ onSubmit: ~ companyData:", companyData);
+
         await dispatch(updateCompanyProfile(companyData));
         dispatch(getCompanyByJWT());
         handleClose();
@@ -306,6 +322,9 @@ export default function CompanyProfileModal({ open, handleClose }) {
     };
     fetchWards();
   }, [selectedDistrict, location.ward]);
+
+  console.log("isLoading:", isLoading, "imageLoading:", imageLoading);
+
 
   return (
     <Modal
@@ -517,21 +536,39 @@ export default function CompanyProfileModal({ open, handleClose }) {
 
             <TextField
               fullWidth
-              id="industryId"
-              name="industryId"
+              id="industryIds"
+              name="industryIds" // Đổi từ industryId -> industryIds
               label="Lĩnh vực hoạt động"
               variant="outlined"
-              value={formik.values.industryId}
-              onChange={formik.handleChange}
               select
+              SelectProps={{
+                multiple: true, // Cho phép chọn nhiều
+                renderValue: (selected) =>
+                  allIndustries
+                    ?.filter((industry) =>
+                      selected.includes(industry.industryId)
+                    )
+                    .map((industry) => industry.industryName)
+                    .join(", "), // Hiển thị tên ngành nghề được chọn
+              }}
+              value={formik.values.industryIds} // Đảm bảo industryIds đồng bộ với Formik
+              onChange={(event) => {
+                formik.setFieldValue("industryIds", event.target.value); // Đảm bảo cập nhật industryIds
+              }}
               error={
-                formik.touched.industryId && Boolean(formik.errors.industryId)
+                formik.touched.industryIds && Boolean(formik.errors.industryIds)
               }
-              helperText={formik.touched.industryId && formik.errors.industryId}
+              helperText={
+                formik.touched.industryIds && formik.errors.industryIds
+              }
             >
-              <MenuItem value="">Chọn chuyên ngành</MenuItem>
               {allIndustries?.map((industry) => (
                 <MenuItem key={industry.industryId} value={industry.industryId}>
+                  <Checkbox
+                    checked={formik.values.industryIds.includes(
+                      industry.industryId
+                    )}
+                  />
                   {industry.industryName}
                 </MenuItem>
               ))}

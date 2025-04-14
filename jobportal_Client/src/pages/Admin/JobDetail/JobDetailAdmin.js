@@ -20,14 +20,22 @@ import {
   Briefcase,
   Code,
   FileText,
+  UserCheck,
 } from "lucide-react";
-import { approveJob, getJobPostByPostId } from "../../../redux/JobPost/jobPost.thunk";
+import {
+  approveJob,
+  getJobPostByPostId,
+} from "../../../redux/JobPost/jobPost.thunk";
 
 export default function JobDetailAdmin() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { postId } = useParams();
-  const { postByPostId: job, loading, error } = useSelector((store) => store.jobPost);
+  const {
+    postByPostId: job,
+    loading,
+    error,
+  } = useSelector((store) => store.jobPost);
 
   useEffect(() => {
     const fetchJobDetails = async () => {
@@ -52,7 +60,7 @@ export default function JobDetailAdmin() {
       job,
       loading,
       error,
-      postId
+      postId,
     });
   }, [job, loading, error, postId]);
 
@@ -79,11 +87,12 @@ export default function JobDetailAdmin() {
     }
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
 
   if (error) {
     return (
@@ -96,12 +105,15 @@ export default function JobDetailAdmin() {
     );
   }
 
-  if (!job) return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <FileX className="h-12 w-12 text-gray-400 mb-4" />
-      <p className="text-lg text-gray-600 font-medium">Không tìm thấy công việc</p>
-    </div>
-  );
+  if (!job)
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <FileX className="h-12 w-12 text-gray-400 mb-4" />
+        <p className="text-lg text-gray-600 font-medium">
+          Không tìm thấy công việc
+        </p>
+      </div>
+    );
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -117,9 +129,9 @@ export default function JobDetailAdmin() {
               <ArrowLeft className="w-4 h-4" />
               <span className="font-medium">Quay lại danh sách</span>
             </Button>
-            
+
             {!job.approve && (
-              <Button 
+              <Button
                 variant="default"
                 className="bg-green-600 hover:bg-green-700 transition-colors"
                 onClick={handleApprove}
@@ -140,10 +152,14 @@ export default function JobDetailAdmin() {
                 />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">{job.title}</h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  {job.title}
+                </h1>
                 <div className="flex items-center space-x-2 text-gray-600">
                   <Building2 className="h-5 w-5" />
-                  <span className="font-medium">{job.company?.companyName}</span>
+                  <span className="font-medium">
+                    {job.company?.companyName}
+                  </span>
                   <span>•</span>
                   <MapPin className="h-5 w-5" />
                   <span>{job.city?.cityName}</span>
@@ -151,10 +167,14 @@ export default function JobDetailAdmin() {
               </div>
             </div>
             <div className="flex flex-col items-end space-y-2">
-              <span className={`px-4 py-2 rounded-full text-sm font-medium ${
-                job.approve ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-              }`}>
-                {job.approve ? 'Đã duyệt' : 'Chờ duyệt'}
+              <span
+                className={`px-4 py-2 rounded-full text-sm font-medium ${
+                  job.approve
+                    ? "bg-green-100 text-green-800"
+                    : "bg-yellow-100 text-yellow-800"
+                }`}
+              >
+                {job.approve ? "Đã duyệt" : "Chờ duyệt"}
               </span>
               {!job.approve && (
                 <span className="flex items-center text-sm text-yellow-600">
@@ -187,15 +207,33 @@ export default function JobDetailAdmin() {
                         <DollarSign className="w-5 h-5 text-green-500" />
                         <div>
                           <p className="text-sm text-gray-600">Mức lương</p>
-                          <p className="font-medium text-gray-900">{formatSalary(job.salary)}</p>
+                          <p className="font-medium text-gray-900">
+                            {formatSalary(job.salary)}
+                          </p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-4 p-3 bg-white rounded-lg border border-gray-200">
                         <Globe className="w-5 h-5 text-blue-500" />
                         <div>
-                          <p className="text-sm text-gray-600">Loại công việc</p>
-                          <p className="font-medium text-gray-900">{job.typeOfWork}</p>
+                          <p className="text-sm text-gray-600">
+                            Loại công việc
+                          </p>
+                          <p className="font-medium text-gray-900">
+                            {job.typeOfWork}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 p-3 bg-white rounded-lg border border-gray-200">
+                        <UserCheck className="w-5 h-5 text-blue-500" />
+                        <div>
+                          <p className="text-sm text-gray-600">
+                            Vai trò
+                          </p>
+                          <p className="font-medium text-gray-900">
+                            {job.position}
+                          </p>
                         </div>
                       </div>
 
@@ -203,7 +241,9 @@ export default function JobDetailAdmin() {
                         <Clock className="w-5 h-5 text-orange-500" />
                         <div>
                           <p className="text-sm text-gray-600">Ngày đăng</p>
-                          <p className="font-medium text-gray-900">{formatDate(job.createDate)}</p>
+                          <p className="font-medium text-gray-900">
+                            {formatDate(job.createDate)}
+                          </p>
                         </div>
                       </div>
 
@@ -211,7 +251,9 @@ export default function JobDetailAdmin() {
                         <Calendar className="w-5 h-5 text-purple-500" />
                         <div>
                           <p className="text-sm text-gray-600">Hạn nộp</p>
-                          <p className="font-medium text-gray-900">{formatDate(job.expireDate)}</p>
+                          <p className="font-medium text-gray-900">
+                            {formatDate(job.expireDate)}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -228,13 +270,15 @@ export default function JobDetailAdmin() {
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <div className="flex flex-wrap gap-3">
                         {job.skills?.map((skill, index) => (
-                          <Badge 
-                            key={index} 
-                            variant="secondary" 
+                          <Badge
+                            key={index}
+                            variant="secondary"
                             className="px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2"
                           >
                             <Code className="w-4 h-4 text-indigo-500" />
-                            <span className="font-medium text-gray-700">{skill.skillName}</span>
+                            <span className="font-medium text-gray-700">
+                              {skill.skillName}
+                            </span>
                           </Badge>
                         ))}
                       </div>
@@ -245,18 +289,32 @@ export default function JobDetailAdmin() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                       <Building2 className="w-5 h-5 mr-2 text-indigo-500" />
                       Lĩnh vực
                     </h3>
-                    <Badge 
-                      variant="outline" 
-                      className="px-4 py-2 bg-white border-indigo-200 text-indigo-700 hover:bg-indigo-50 transition-colors duration-200"
-                    >
-                      {job.company?.industry?.industryName || 'Chưa cập nhật'}
-                    </Badge>
+                    <div className="flex flex-wrap gap-2">
+                      {job.company?.industry?.length > 0 ? (
+                        job.company.industry.map((ind) => (
+                          <Badge
+                            key={ind.industryId}
+                            variant="outline"
+                            className="px-4 py-2 bg-white border-indigo-200 text-indigo-700 hover:bg-indigo-50 transition-colors duration-200"
+                          >
+                            {ind.industryName}
+                          </Badge>
+                        ))
+                      ) : (
+                        <Badge
+                          variant="outline"
+                          className="px-4 py-2 bg-white border-gray-300 text-gray-500"
+                        >
+                          Chưa cập nhật
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -266,33 +324,51 @@ export default function JobDetailAdmin() {
             <Card className="bg-white rounded-lg shadow-md">
               <CardContent className="space-y-6 pt-6">
                 <section className="prose max-w-none">
-                  <h2 className="text-xl font-semibold mb-4">Mô tả công việc</h2>
-                  <p className="text-gray-600 leading-relaxed">{job.description}</p>
+                  <h2 className="text-xl font-semibold mb-4">
+                    Mô tả công việc
+                  </h2>
+                  <p className="text-gray-600 leading-relaxed">
+                    {job.description}
+                  </p>
                 </section>
 
                 <section className="space-y-4">
-                  <h2 className="text-xl font-semibold">Trách nhiệm công việc</h2>
+                  <h2 className="text-xl font-semibold">
+                    Yêu cầu công việc
+                  </h2>
                   <ul className="space-y-3">
                     {job.requirement?.split(";")?.map((item, index) => (
-                      <li key={index} className="flex items-start bg-gray-50 p-3 rounded-lg">
+                      <li
+                        key={index}
+                        className="flex items-start bg-gray-50 p-3 rounded-lg"
+                      >
                         <CheckCircle2 className="mr-3 h-5 w-5 text-green-500 flex-shrink-0" />
                         <span className="text-gray-700">{item.trim()}</span>
                       </li>
                     )) || (
-                      <li className="text-gray-500 italic">Chưa có thông tin</li>
+                      <li className="text-gray-500 italic">
+                        Chưa có thông tin
+                      </li>
                     )}
                   </ul>
                 </section>
                 <section className="space-y-4">
-                  <h2 className="text-xl font-semibold">Kiến thức, kỹ năng cần có</h2>
+                  <h2 className="text-xl font-semibold">
+                    Kiến thức, kỹ năng cần có
+                  </h2>
                   <ul className="space-y-3">
                     {job.niceToHaves?.split(";")?.map((item, index) => (
-                      <li key={index} className="flex items-start bg-gray-50 p-3 rounded-lg">
+                      <li
+                        key={index}
+                        className="flex items-start bg-gray-50 p-3 rounded-lg"
+                      >
                         <CheckCircle2 className="mr-3 h-5 w-5 text-green-500 flex-shrink-0" />
                         <span className="text-gray-700">{item.trim()}</span>
                       </li>
                     )) || (
-                      <li className="text-gray-500 italic">Chưa có thông tin</li>
+                      <li className="text-gray-500 italic">
+                        Chưa có thông tin
+                      </li>
                     )}
                   </ul>
                 </section>
@@ -300,12 +376,17 @@ export default function JobDetailAdmin() {
                   <h2 className="text-xl font-semibold">Quyền lợi</h2>
                   <ul className="space-y-3">
                     {job.benefit?.split(";")?.map((item, index) => (
-                      <li key={index} className="flex items-start bg-gray-50 p-3 rounded-lg">
+                      <li
+                        key={index}
+                        className="flex items-start bg-gray-50 p-3 rounded-lg"
+                      >
                         <CheckCircle2 className="mr-3 h-5 w-5 text-green-500 flex-shrink-0" />
                         <span className="text-gray-700">{item.trim()}</span>
                       </li>
                     )) || (
-                      <li className="text-gray-500 italic">Chưa có thông tin</li>
+                      <li className="text-gray-500 italic">
+                        Chưa có thông tin
+                      </li>
                     )}
                   </ul>
                 </section>
@@ -315,8 +396,12 @@ export default function JobDetailAdmin() {
 
           {/* Right Column - 1/3 width */}
           <div className="space-y-6">
-            <Card className="hover:shadow-lg bg-white rounded-lg shadow-md transition-shadow cursor-pointer" 
-                  onClick={() => navigate(`/admin/companies/${job.company?.companyId}`)}>
+            <Card
+              className="hover:shadow-lg bg-white rounded-lg shadow-md transition-shadow cursor-pointer"
+              onClick={() =>
+                navigate(`/admin/companies/${job.company?.companyId}`)
+              }
+            >
               <CardHeader>
                 <h2 className="text-xl font-semibold">Thông tin công ty</h2>
               </CardHeader>
@@ -329,8 +414,10 @@ export default function JobDetailAdmin() {
                 <h3 className="text-lg font-semibold text-indigo-600 hover:text-indigo-700">
                   {job.company?.companyName}
                 </h3>
-                <p className="text-gray-600 line-clamp-3">{job.company?.description}</p>
-                
+                <p className="text-gray-600 line-clamp-3">
+                  {job.company?.description}
+                </p>
+
                 <div className="flex items-center text-sm text-indigo-600 hover:text-indigo-700">
                   <span>Xem chi tiết công ty</span>
                   <ArrowRight className="w-4 h-4 ml-1" />

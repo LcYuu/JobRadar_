@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
@@ -11,7 +11,6 @@ import {
 } from "../../ui/dropdown-menu";
 import { useDispatch, useSelector } from "react-redux";
 import Swal from "sweetalert2";
-
 import { toast } from "react-toastify";
 import {
   getApplyJobByCompany,
@@ -20,7 +19,7 @@ import {
 } from "../../redux/ApplyJob/applyJob.thunk";
 import { getAllJobPost } from "../../redux/JobPost/jobPost.thunk";
 import useCVAnalysis from "../../hooks/useCVAnalysis";
-
+import useWebSocket from "../../utils/useWebSocket";
 const CandidateManagement = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -73,11 +72,9 @@ const CandidateManagement = () => {
 
   const handleUpdate = async (postId, userId) => {
     try {
-      // Gọi hành động cập nhật và chờ nó thực hiện
-      await dispatch(updateApprove({postId, userId}));
-
+      await dispatch(updateApprove({ postId, userId })).unwrap(); // Chờ hoàn thành
+  
       toast.success("Đơn ứng tuyển đã được chấp thuận!");
-
       dispatch(getApplyJobByCompany({
         currentPage, 
         size,
@@ -88,8 +85,8 @@ const CandidateManagement = () => {
         sortDirection,
       }));
     } catch (error) {
-      // Hiển thị thông báo lỗi nếu có lỗi xảy ra
       toast.error("Có lỗi xảy ra khi chấp thuận đơn.");
+      console.error("Lỗi updateApprove:", error);
     }
   };
   
@@ -174,6 +171,18 @@ const CandidateManagement = () => {
       });
     }
   };
+
+
+  const handleMessage = useCallback(
+    (_, __, topic) => {
+      if (topic === "/topic/apply-updates") {
+        dispatch(getApplyJobByCompany({ currentPage, size }));
+      }
+    },
+    [dispatch, currentPage, size]
+  );
+  
+  useWebSocket(["/topic/apply-updates"], handleMessage);
 
   return (
     <div className="p-6">

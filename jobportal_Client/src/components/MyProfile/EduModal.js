@@ -9,6 +9,7 @@ import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import * as Yup from "yup";
 import { createEducation, getEduByUser, updateEducation } from "../../redux/Education/edu.thunk";
+import { toast } from "react-toastify";
 
 const style = {
   position: "absolute",
@@ -33,7 +34,6 @@ export default function EduModal({
   editingEducationId,
   setEditingEducationId,
   initialData,
-  showSuccessToast,
 }) {
   const validationSchema = Yup.object({
     certificateDegreeName: Yup.string().required("Bằng cấp là bắt buộc."),
@@ -79,11 +79,11 @@ export default function EduModal({
         if (editingEducationId) {
           await dispatch(updateEducation({educationId:editingEducationId, educationData:values}));
           setEditingEducationId(null);
-          showSuccessToast("Cập nhật học vấn thành công!");
+          toast.success("Cập nhật học vấn thành công!");
         } else {
           const eduData = values
           await dispatch(createEducation(eduData));
-          showSuccessToast("Cập nhật học vấn thành công!");
+          toast.success("Cập nhật học vấn thành công!");
         }
         handleClose();
         dispatch(getEduByUser()); // Refresh the education list
