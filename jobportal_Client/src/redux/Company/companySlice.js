@@ -18,6 +18,7 @@ import {
   getCompanyByJWT,
   getAllCompaniesForAdmin,
   findAllCompany,
+  updateEmployer,
 } from "./company.thunk.js";
 
 const initialState = {
