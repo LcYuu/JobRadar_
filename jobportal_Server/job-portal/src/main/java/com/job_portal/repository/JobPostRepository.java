@@ -237,4 +237,17 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 
 	@Query("SELECT j FROM JobPost j WHERE j.isApprove = true AND j.expireDate < ?1 AND j.status = 'Hết hạn' AND (j.surveyEmailSent = false OR j.surveyEmailSent IS NULL)")
 	List<JobPost> findByExpireDateBeforeAndSurveyEmailSentFalse(LocalDateTime date);
+
+	@Query(value = "SELECT new com.job_portal.DTO.JobWithApplicationCountDTO("
+			+ "jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, " + "COUNT(DISTINCT a.postId), jp.status, i.industryName, jp.isApprove) "
+			+ "FROM JobPost jp " + "LEFT JOIN ApplyJob a ON jp.postId = a.postId "
+			+ "JOIN Company c ON jp.company.companyId = c.companyId "
+			+ "JOIN Industry i ON c.industry.industryId = i.industryId " + "WHERE jp.company.companyId = :companyId "
+			+ "AND (:status IS NULL OR jp.status = :status) "
+			+ "AND (:typeOfWork IS NULL OR jp.typeOfWork = :typeOfWork) "
+			+ "GROUP BY jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
+			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName,  jp.isApprove ")
+	List<JobWithApplicationCountDTO> findAllJobsWithFilters(@Param("companyId") UUID companyId,
+			@Param("status") String status, @Param("typeOfWork") String typeOfWork);
 }

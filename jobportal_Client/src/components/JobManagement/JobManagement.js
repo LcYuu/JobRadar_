@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../ui/button";
-import { Filter, MoreVertical } from "lucide-react";
+import { Filter, MoreVertical, ArrowUpDown, ChevronDown, ChevronUp } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,11 +42,11 @@ const JobManagement = () => {
   const [size, setSize] = useState(5);
   const [status, setStatus] = useState("");
   const [typeOfWork, setTypeOfWork] = useState("");
-  // const [sortBy, setSortBy] = useState({
-  //   createDate: "",
-  //   expireDate: "",
-  //   count: "",
-  // });
+  
+  // Thêm state cho sắp xếp
+  const [sortBy, setSortBy] = useState("createdate"); // Mặc định sắp xếp theo ngày tạo
+  const [sortDirection, setSortDirection] = useState("desc"); // Mặc định sắp xếp giảm dần
+  
   const [filtered, setFiltered] = useState([]); // Kết quả sau lọc;
   const handleViewDetails = (postId) => {
     navigate(`/employer/jobs/${postId}`);
@@ -87,15 +87,14 @@ const JobManagement = () => {
       await dispatch(updateExpireJob(postId)); // Gọi action để đánh dấu hết hạn
     }
     await dispatch(
-      findEmployerCompany(
+      findEmployerCompany({
         status,
         typeOfWork,
-        // sortBy.createDate, // Lấy giá trị từ state sortBy
-        // sortBy.expireDate,
-        // sortBy.count,
+        sortBy,
+        sortDirection,
         currentPage,
         size
-      )
+      })
     );
     toast.success("Dừng tuyển dụng công việc thành công");
   };
@@ -106,20 +105,18 @@ const JobManagement = () => {
       findEmployerCompany({
         status,
         typeOfWork,
-        // sortBy.createDate, // Lấy giá trị từ state sortBy
-        // sortBy.expireDate,
-        // sortBy.count,
+        sortBy,
+        sortDirection,
         currentPage,
         size,
       })
     );
   }, [
     dispatch,
-    // sortBy.createDate, // Chỉ theo dõi sự thay đổi của sortBy
-    // sortBy.expireDate,
-    // sortBy.count,
     currentPage,
     size,
+    sortBy,
+    sortDirection,
   ]);
 
   useEffect(() => {
@@ -137,29 +134,33 @@ const JobManagement = () => {
     setCurrentPage(0); // Reset về trang đầu khi thay đổi số lượng bản ghi mỗi trang
   };
 
-  // const handleSort = (column) => {
-  //   setSortBy((prevState) => {
-  //     // Tạo một đối tượng mới với tất cả các cột đã được đặt lại thành null
-  //     const newSort = prevState[column] === "ASC" ? "DESC" : "ASC";
-  //     const newState = {
-  //       [column]: newSort, // Cập nhật giá trị của cột hiện tại
-  //     };
+  // Xử lý sắp xếp
+  const handleSort = (field) => {
+    // Nếu đang sắp xếp theo field này rồi, đảo ngược hướng sắp xếp
+    if (sortBy === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      // Nếu chuyển sang field khác, mặc định sắp xếp giảm dần
+      setSortBy(field);
+      setSortDirection("desc");
+    }
+  };
 
-  //     // Đặt các cột còn lại thành null
-  //     Object.keys(prevState).forEach((key) => {
-  //       if (key !== column) {
-  //         newState[key] = "";
-  //       }
-  //     });
-  //     setCurrentPage(0);
-
-  //     return newState;
-  //   });
-  // };
+  // Hiển thị icon sắp xếp
+  const renderSortIcon = (field) => {
+    if (sortBy !== field) {
+      return <ArrowUpDown className="h-4 w-4 ml-1" />;
+    }
+    return sortDirection === "asc" ? (
+      <ChevronUp className="h-4 w-4 ml-1" />
+    ) : (
+      <ChevronDown className="h-4 w-4 ml-1" />
+    );
+  };
 
   const applyFilters = () => {
     setCurrentPage(0);
-    dispatch(findEmployerCompany({status, typeOfWork, currentPage, size}));
+    dispatch(findEmployerCompany({status, typeOfWork, sortBy, sortDirection, currentPage: 0, size}));
   };
 
   const displayData = filtered.length > 0 ? filtered : jobs;
@@ -233,33 +234,56 @@ const JobManagement = () => {
             </Button>
           </div>
         </div>
+        
+        {/* Thêm thanh sắp xếp */}
+        <div className="bg-white p-4 border-b">
+          <h3 className="font-medium text-gray-700 mb-2">Sắp xếp theo:</h3>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              variant={sortBy === "title" ? "default" : "outline"}
+              className={sortBy === "title" ? "bg-purple-600" : ""}
+              onClick={() => handleSort("title")}
+            >
+              Tên công việc {renderSortIcon("title")}
+            </Button>
+            <Button
+              variant={sortBy === "createdate" ? "default" : "outline"}
+              className={sortBy === "createdate" ? "bg-purple-600" : ""}
+              onClick={() => handleSort("createdate")}
+            >
+              Ngày bắt đầu {renderSortIcon("createdate")}
+            </Button>
+            <Button
+              variant={sortBy === "expiredate" ? "default" : "outline"}
+              className={sortBy === "expiredate" ? "bg-purple-600" : ""}
+              onClick={() => handleSort("expiredate")}
+            >
+              Ngày kết thúc {renderSortIcon("expiredate")}
+            </Button>
+            <Button
+              variant={sortBy === "applicationcount" ? "default" : "outline"}
+              className={sortBy === "applicationcount" ? "bg-purple-600" : ""}
+              onClick={() => handleSort("applicationcount")}
+            >
+              Số lượng ứng viên {renderSortIcon("applicationcount")}
+            </Button>
+          </div>
+        </div>
 
         <table className="w-full">
           <thead className="bg-purple-600 text-white">
             <tr>
               <th className="text-left p-4">Tên công việc</th>
               <th className="text-left p-4">Trạng thái</th>
-              <th
-                className="text-left p-4 cursor-pointer"
-                // onClick={() => handleSort("createDate")}
-              >
+              <th className="text-left p-4">
                 Ngày bắt đầu
-                {/* {sortBy.createDate === "ASC" ? "↑" : "↓"} */}
               </th>
-              <th
-                className="text-left p-4 cursor-pointer"
-                // onClick={() => handleSort("expireDate")}
-              >
+              <th className="text-left p-4">
                 Ngày kết thúc
-                {/* {sortBy.expireDate === "ASC" ? "↑" : "↓"} */}
               </th>
               <th className="text-left p-4">Loại công việc</th>
-              <th
-                className="text-left p-4 cursor-pointer"
-                // onClick={() => handleSort("count")}
-              >
+              <th className="text-left p-4">
                 Số lượng ứng viên
-                {/* {sortBy.count === "ASC" ? "↑" : "↓"} */}
               </th>
               <th className="text-left p-4 cursor-pointer">Hành động</th>
             </tr>
@@ -275,8 +299,10 @@ const JobManagement = () => {
                         job.status === "Đang mở"
                           ? "bg-emerald-100 text-emerald-600" // Màu xanh lá cho "Đang mở"
                           : job.status === "Hết hạn"
-                          ? "bg-red-100 text-red-600" // Màu đỏ cho "Hết hạn"
-                          : "bg-yellow-100 text-yellow-600" // Màu vàng cho "Chờ duyệt"
+                          ? "bg-red-100 text-red-600"
+                          : job.status === "Chưa duyệt"
+                          ? "bg-yellow-100 text-yellow-600"
+                          : "bg-gray-100 text-gray-600"
                       }`}
                     >
                       {job.status}
