@@ -84,11 +84,15 @@ public class SeekerServiceImpl implements ISeekerService {
 	        isUpdated = true;
 	    }
 
-	    // Cập nhật Industry
-	    if (seekerDTO.getIndustryId() != null) {
-	        Optional<Industry> newIndustry = industryRepository.findById(seekerDTO.getIndustryId());
-	        if (!newIndustry.get().equals(oldSeeker.getIndustry())) {
-	            oldSeeker.setIndustry(newIndustry.get());
+	    if (seekerDTO.getIndustryIds() != null && !seekerDTO.getIndustryIds().isEmpty()) {
+	        List<Industry> industriesList = new ArrayList<>();
+	        for (Integer industryId : seekerDTO.getIndustryIds()) {
+	            Optional<Industry> industryOpt = industryRepository.findById(industryId);
+	            industryOpt.ifPresent(industriesList::add);
+	        }
+	        // Only update if the new list is different from the old one
+	        if (!industriesList.equals(oldSeeker.getIndustry())) {
+	            oldSeeker.setIndustry(industriesList);
 	            isUpdated = true;
 	        }
 	    }
@@ -110,43 +114,12 @@ public class SeekerServiceImpl implements ISeekerService {
 	    return isUpdated;
 	}
 
-
-	@Override
-	public List<Seeker> searchSeekerByName(String userName) throws AllExceptions {
-		try {
-			List<Seeker> seekers = seekerRepository.findSeekerByUserName(userName);
-			if (seekers.isEmpty()) {
-				throw new AllExceptions("Không tìm thấy người tìm viêc nào với tên: " + userName);
-			}
-
-			return seekers;
-		} catch (Exception e) {
-			throw new AllExceptions(e.getMessage());
-		}
-	}
-
-	@Override
-	public List<Seeker> searchSeekerByIndustry(String industryName) throws AllExceptions {
-		try {
-			List<Seeker> seekers = seekerRepository.findSeekerByIndustryName(industryName);
-			if (seekers.isEmpty()) {
-				throw new AllExceptions("Không tìm thấy người tìm việc nào với tên ngành: " + industryName);
-			}
-			return seekers;
-		} catch (Exception e) {
-			throw new AllExceptions(e.getMessage());
-		}
-	}
-
 	@Override
 	public Seeker findSeekerById(UUID userId) throws AllExceptions {
 		try {
-			// Tìm kiếm công ty dựa trên companyId
 			Optional<Seeker> seeker = seekerRepository.findById(userId);
-			// Trả về công ty nếu tìm thấy
 			return seeker.get();
 		} catch (Exception e) {
-			// Ném ra ngoại lệ nếu có lỗi xảy ra
 			throw new AllExceptions(e.getMessage());
 		}
 	}

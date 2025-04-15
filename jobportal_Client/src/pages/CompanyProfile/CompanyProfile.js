@@ -31,7 +31,10 @@ import {
   checkSaved,
   getCompanyProfile,
 } from "../../redux/Company/company.thunk";
-import { fetchSocialLinks, fetchSocialLinksByUserId } from "../../redux/SocialLink/socialLink.thunk";
+import {
+  fetchSocialLinks,
+  fetchSocialLinksByUserId,
+} from "../../redux/SocialLink/socialLink.thunk";
 const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
   return (
     <div className="flex">
@@ -109,7 +112,6 @@ export default function CompanyProfile() {
   const { user } = useSelector((store) => store.auth);
 
   useEffect(() => {
-    
     if (reviews && user) {
       const userReview = reviews.find(
         (review) => review.seeker?.userAccount?.userId === user.userId
@@ -226,7 +228,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
   }, [dispatch, currentPage, size]);
 
   useEffect(() => {
-    const userId = companyId
+    const userId = companyId;
     dispatch(getCompanyProfile(companyId));
     dispatch(getReviewByCompany(companyId));
     dispatch(checkSaved(companyId));
@@ -405,9 +407,23 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                 <MapPin className="w-4 h-4 text-gray-400" />
                 <span>{companyProfile?.address}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Briefcase className="w-4 h-4 text-gray-400" />
-                <span>{companyProfile?.industry?.industryName}</span>
+              <div className="flex flex-col gap-1 text-sm text-gray-600">
+                <div className="flex items-center gap-2">
+                  <Briefcase className="w-4 h-4 text-gray-400" />
+                  <span>
+                    {companyProfile?.industry
+                      ?.slice(0, 2)
+                      .map((ind) => ind.industryName)
+                      .join(" & ") || "Chưa có ngành"}
+                  </span>
+                </div>
+                {companyProfile?.industry?.length > 2 && (
+                  <div className="ml-6">
+                    {companyProfile.industry.slice(2).map((ind, index) => (
+                      <div key={index}>{ind.industryName}</div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
             {!localStorage.getItem("jwt") || checkIfSaved === false ? null : (

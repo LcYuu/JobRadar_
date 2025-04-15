@@ -4,7 +4,6 @@ import { Book, Calendar, Delete, Edit, Mail, Phone, Plus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 import { Button } from "../../ui/button";
 import { Card, CardContent, CardHeader } from "../../ui/card";
-
 import { Label } from "../../ui/label";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -12,7 +11,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMars, faVenus } from "@fortawesome/free-solid-svg-icons";
 
 import ProfileModal from "./MyProfileModal";
-
 import SkillModal from "./SkillModal";
 import ExpModal from "./ExpModal";
 import EduModal from "./EduModal";
@@ -34,6 +32,7 @@ import {
   fetchSocialLinks,
 } from "../../redux/SocialLink/socialLink.thunk";
 import SocialLinkModal from "./SocialLinkModal";
+import { toast } from "react-toastify";
 
 export default function MyProfile() {
   const colors = [
@@ -64,18 +63,18 @@ export default function MyProfile() {
   };
 
   const dispatch = useDispatch();
-  const { industries } = useSelector((store) => store.industry);
+  const { industries = [] } = useSelector((store) => store.industry || {});
 
   useEffect(() => {
     dispatch(getIndustry());
-
   }, [dispatch]);
 
-  const { user } = useSelector((store) => store.auth);
-  const { seeker } = useSelector((store) => store.seeker);
-  const { exp } = useSelector((store) => store.exp);
-  const { edu } = useSelector((store) => store.edu);
-  const { socialLinks } = useSelector((store) => store.socialLink);
+  const { user = {} } = useSelector((store) => store.auth || {});
+  const [isIndustryDropdownOpen, setIsIndustryDropdownOpen] = useState(false);
+  const { seeker = {} } = useSelector((store) => store.seeker || {});
+  const { exp = [] } = useSelector((store) => store.exp || {});
+  const { edu = [] } = useSelector((store) => store.edu || {});
+  const { socialLinks = [] } = useSelector((store) => store.socialLink || {});
 
   const [open, setOpen] = useState(false);
   const handleOpenProfileModal = () => setOpen(true);
@@ -133,7 +132,7 @@ export default function MyProfile() {
     emailContact: "",
     gender: "",
     dateOfBirth: "",
-    industryId: "",
+    industryIds: [],
     background: "bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700",
   });
 
@@ -156,13 +155,10 @@ export default function MyProfile() {
       try {
         await dispatch(deleteExperience(experienceId));
         dispatch(getExpByUser());
-        showSuccessToast("Xóa kinh nghiệm thành công!");
+        toast.success("Xóa kinh nghiệm thành công!");
       } catch (error) {
         console.error("Có lỗi xảy ra khi xóa kinh nghiệm:", error);
-        showSuccessToast(
-          "Xóa kinh nghiệm thất bại. Vui lòng thử lại!",
-          "error"
-        );
+        toast.success("Xóa kinh nghiệm thất bại. Vui lòng thử lại!");
       }
     }
   };
@@ -181,10 +177,10 @@ export default function MyProfile() {
       try {
         await dispatch(deleteEducation(educationId));
         dispatch(getEduByUser());
-        showSuccessToast("Xóa học vấn thành công!");
+        toast.success("Xóa học vấn thành công!");
       } catch (error) {
         console.error("Có lỗi xảy ra khi xóa học vấn:", error);
-        showSuccessToast("Xóa học vấn thất bại. Vui lòng thử lại!", "error");
+        toast.error("Xóa học vấn thất bại. Vui lòng thử lại!", "error");
       }
     }
   };
@@ -203,9 +199,9 @@ export default function MyProfile() {
       try {
         await dispatch(deleteSocialLink(id));
         dispatch(fetchSocialLinks());
-        showSuccessToast("Xóa link thành công!");
+        toast.success("Xóa link thành công!");
       } catch (error) {
-        showSuccessToast("Xóa link thất bại. Vui lòng thử lại!");
+        toast.error("Xóa link thất bại. Vui lòng thử lại!");
       }
     }
   };
@@ -219,7 +215,13 @@ export default function MyProfile() {
         emailContact: seeker.emailContact || "",
         gender: seeker.gender || "",
         dateOfBirth: seeker.dateOfBirth || "",
-        industryId: seeker.industry ? seeker.industry.industryId : "",
+        industryIds:
+          seeker.industry && Array.isArray(seeker.industry)
+            ? seeker.industry
+                .filter((ind) => ind?.industryId !== undefined) // Lọc phần tử lỗi
+                .map((ind) => ind.industryId)
+            : [],
+
         background:
           seeker.background ||
           "bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700",
@@ -230,6 +232,17 @@ export default function MyProfile() {
       );
     }
   }, [seeker]);
+
+  console.log("seeker.industry:", seeker.industry);
+  console.log("FormData.industry:", formData.industryIds);
+  console.log(
+    "Industry Ids:",
+    seeker.industry
+      ? Array.isArray(seeker.industry)
+        ? seeker.industry.map((ind) => ind.industryId)
+        : [seeker.industry.industryId]
+      : []
+  );
 
   const handleEditDesClick = () => {
     setIsEditingDes(true);
@@ -252,15 +265,16 @@ export default function MyProfile() {
       setIsEditingDes(false);
       setIsEditingInfo(false);
       dispatch(getSeekerByUser());
-      showSuccessToast("Cập nhật thông tin thành công!");
+      toast.success("Cập nhật thông tin thành công");
     } catch (error) {
       console.error("Update failed: ", error);
+      toast.error(error);
     }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log(name, value); // Kiểm tra giá tr
+    console.log(name, value); // Kiểm tra giá trị
     setFormData((prevData) => ({
       ...prevData,
       [name]: value, // Cập nhật giá trị cho trường tương ứng
@@ -348,21 +362,6 @@ export default function MyProfile() {
 
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
-
-  const Toast = ({ message, onClose }) => (
-    <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded shadow-lg flex items-center gap-2 animate-fade-in-down z-50">
-      <span>{message}</span>
-      <button onClick={onClose} className="text-white hover:text-gray-200">
-        ✕
-      </button>
-    </div>
-  );
-
-  const showSuccessToast = (message) => {
-    setToastMessage(message);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-  };
 
   const validateForm = () => {
     let tempErrors = {
@@ -471,7 +470,7 @@ export default function MyProfile() {
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-semibold">{user?.userName}</h2>
-                <p className="text-muted-foreground">{seeker.address}</p>
+                <p className="text-muted-foreground">{seeker?.address}</p>
               </div>
               <Button
                 variant="outline"
@@ -529,7 +528,7 @@ export default function MyProfile() {
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground whitespace-pre-line">
-                    {seeker.description
+                    {seeker?.description
                       ? seeker.description
                       : "Chưa cập nhật mô tả về bản thân"}
                   </p>
@@ -616,7 +615,6 @@ export default function MyProfile() {
                   editingExperienceId={editingExperienceId}
                   setEditingExperienceId={setEditingExperienceId}
                   initialData={formData}
-                  showSuccessToast={showSuccessToast}
                 />
               </section>
             </Card>
@@ -702,7 +700,6 @@ export default function MyProfile() {
                   editingEducationId={editingEducationId}
                   setEditingEducationId={setEditingEducationId}
                   initialData={formData}
-                  showSuccessToast={showSuccessToast}
                 />
               </section>
             </Card>
@@ -725,7 +722,7 @@ export default function MyProfile() {
                 </Button>
               </CardHeader>
               <CardContent className="space-y-4">
-                {seeker.skills &&
+                {seeker?.skills &&
                 Array.isArray(seeker.skills) &&
                 seeker.skills.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
@@ -934,30 +931,73 @@ export default function MyProfile() {
                   )
                 )}
                 {isEditingInfo ? (
-                  <div className="mb-4">
+                  <div className="relative mb-4">
                     <Label className="text-sm font-medium block mb-1 whitespace-nowrap">
                       Chuyên ngành
                     </Label>
-                    <select
-                      name="industryId"
-                      value={formData.industryId}
-                      onChange={handleChange}
-                      className="border p-2 w-full"
+                    <div
+                      className="border p-2 w-full rounded-md cursor-pointer"
+                      onClick={() =>
+                        setIsIndustryDropdownOpen(!isIndustryDropdownOpen)
+                      }
                     >
-                      <option value="">Chọn chuyên ngành</option>
-                      {industries.slice(1).map((industry) => (
-                        <option
-                          key={industry.industryId}
-                          value={industry.industryId}
-                        >
-                          {industry.industryName}
-                        </option>
-                      ))}
-                    </select>
+                      {(formData?.industryIds ?? []).length > 0
+                        ? industries
+                            .filter((industry) =>
+                              (formData?.industryIds ?? []).includes(
+                                industry.industryId
+                              )
+                            )
+                            .map((industry) => industry.industryName)
+                            .join(", ")
+                        : "Chọn chuyên ngành"}
+                    </div>
+
+                    {isIndustryDropdownOpen && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
+                        {industries.slice(1).map((industry) => (
+                          <label
+                            key={industry.industryId}
+                            className="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer"
+                          >
+                            <input
+                              type="checkbox"
+                              className="w-4 h-4 rounded border-gray-300 mr-3"
+                              checked={(formData.industryIds ?? []).includes(
+                                industry.industryId
+                              )}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    industryIds: [
+                                      ...(prev.industryIds ?? []),
+                                      industry.industryId,
+                                    ], // 👈 Đảm bảo industryId luôn là mảng
+                                  }));
+                                } else {
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    industryIds: (
+                                      prev.industryIds ?? []
+                                    ).filter(
+                                      (id) => id !== industry.industryId
+                                    ),
+                                  }));
+                                }
+                              }}
+                            />
+                            <span className="text-sm">
+                              {industry.industryName}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   seeker?.industry &&
-                  seeker.industry.industryId !== 0 && (
+                  seeker.industry.length > 0 && (
                     <div>
                       <Label className="text-sm font-medium whitespace-nowrap">
                         Major
@@ -965,7 +1005,9 @@ export default function MyProfile() {
                       <div className="mt-1 flex items-center gap-2">
                         <Book className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">
-                          {seeker.industry.industryName}
+                          {seeker.industry
+                            .map((industry) => industry.industryName)
+                            .join(", ")}
                         </span>
                       </div>
                     </div>
@@ -973,7 +1015,7 @@ export default function MyProfile() {
                 )}
               </CardContent>
               {isEditingInfo && (
-                <div className="mt-4 flex justify-end">
+                <div className="mt-4 mr-4 mb-4 flex justify-end">
                   <Button onClick={handleSaveClick}>Lưu</Button>
                 </div>
               )}
@@ -1073,16 +1115,12 @@ export default function MyProfile() {
                   editingSocialLinkId={editingSocialLinkId}
                   setEditingSocialLinkId={setEditingSocialLinkId}
                   initialData={formData}
-                  showSuccessToast={showSuccessToast}
                 />
               </section>
             </Card>
           </div>
         </div>
       </main>
-      {showToast && (
-        <Toast message={toastMessage} onClose={() => setShowToast(false)} />
-      )}
     </div>
   );
 }
