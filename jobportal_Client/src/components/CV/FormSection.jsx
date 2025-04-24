@@ -4,6 +4,7 @@ import ExperienceForm from "./Forms/ExperienceForm";
 import EducationForm from "./Forms/EducationForm";
 import SkillsForm from "./Forms/SkillsForm";
 
+
 import { ArrowLeft, ArrowRight, Home, LayoutGrid, User, FileText, Briefcase, GraduationCap, Star } from "lucide-react";
 import { Button } from "../../ui/button";
 import SummeryForm from "./Forms/SummeryForm";
@@ -11,6 +12,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import ThemeColor from "./ThemeColor";
 
 const FormSection = () => {
+
   const { genCvId } = useParams();
   
   // Khóa localStorage riêng cho từng CV
@@ -102,7 +104,6 @@ const FormSection = () => {
           </button>
         ))}
       </div>
-
       {activeFormIndex === 1 ? (
         <PersonalDetail enabledNext={setEnabledNext} />
       ) : activeFormIndex === 2 ? (

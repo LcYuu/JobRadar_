@@ -7,13 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.job_portal.DTO.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.job_portal.DTO.DailyJobCount;
-import com.job_portal.DTO.JobCountType;
-import com.job_portal.DTO.JobPostDTO;
-import com.job_portal.DTO.JobWithApplicationCountDTO;
 import com.job_portal.models.JobPost;
 import com.social.exceptions.AllExceptions;
 
@@ -48,4 +45,7 @@ public interface IJobPostService {
 //	public Page<JobWithApplicationCountDTO> getJobsWithFiltersAndSorting(String title, List<String> selectedTypesOfWork, Long minSalary,
 //			Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, Pageable pageable);
 	public Page<JobPost> searchJobs(String title, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, int page, int size);
+	Map<String, List<CandidateWithScoreDTO>> getCandidatesByJobForCompany(UUID companyId, String sortDirection, String sortBy);
+	Page<JobPost> semanticSearchWithFilters(String query, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, int page, int size);
+
 }

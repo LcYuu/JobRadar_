@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import java.util.List;
-
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -33,5 +32,4 @@ public class ApplicantProfileDTO {
 	private String typeOfWork;
 	private String title;
 	private List<String> industryName;  // 🔹 Đổi từ String sang List<String>
-
 }

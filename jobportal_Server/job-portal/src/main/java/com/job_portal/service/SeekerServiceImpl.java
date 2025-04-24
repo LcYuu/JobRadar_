@@ -107,6 +107,7 @@ public class SeekerServiceImpl implements ISeekerService {
 	        oldSeeker.setSkills(skillsList);
 	        isUpdated = true;
 	    }
+
 	    if (isUpdated) {
 	        seekerRepository.save(oldSeeker);
 	    }

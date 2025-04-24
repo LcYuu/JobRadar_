@@ -4,11 +4,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import logo1 from "../../assets/images/common/logo1.jpg";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import axios from "axios";
 import Swal from "sweetalert2";
-
-import logo1 from "../../assets/images/common/logo1.jpg";
 import { loginAction } from "../../redux/Auth/auth.thunk";
 
 // Modal component
@@ -105,7 +104,6 @@ export default function SignInForm() {
     }
   };
 
-  // Handle Google login
   const handleGoogleLogin = async (response) => {
     setIsLoading(true);
     setError("");
@@ -120,42 +118,134 @@ export default function SignInForm() {
       if (!jwtToken) {
         throw new Error(res?.data?.message || "Không nhận được JWT token.");
       }
-
-      // Store JWT in sessionStorage
-      sessionStorage.setItem("jwt", jwtToken);
-
+      localStorage.setItem("jwt", jwtToken);
       // Check if email exists
       const emailExists = await axios.post(
         `${API_BASE_URL}/auth/check-email`,
         { token: googleToken }
       );
 
-      setIsModalOpen(true);
-      setLoginStatus("success");
-
-      setTimeout(() => {
-        setIsModalOpen(false);
-        if (emailExists.data) {
-          navigate("/");
-        } else {
-          const defaultAddress = {
-            specificAddress: "",
-            ward: "",
-            district: "",
-            province: "",
-          };
-          sessionStorage.setItem("defaultAddress", JSON.stringify(defaultAddress));
-          navigate("/role-selection");
-        }
-      }, 1500);
+      if (!jwtToken) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Đăng nhập thất bại',
+          text: res?.data?.message || 'Có lỗi xảy ra khi đăng nhập',
+          confirmButtonText: 'Thử lại',
+          confirmButtonColor: '#3085d6'
+        });
+      } else if (emailExists.data) {
+        setTimeout(() => {
+          window.location.href = "http://localhost:3000/";
+        }, 1000);
+      } else {
+        const defaultAddress = {
+          specificAddress: "",
+          ward: "",
+          district: "",
+          province: ""
+        };
+        localStorage.setItem("defaultAddress", JSON.stringify(defaultAddress));
+        
+        setTimeout(() => {
+          window.location.href = "http://localhost:3000/role-selection";
+        }, 1000);
+      }
     } catch (err) {
-      console.error("Google login error:", err);
-      setError(err.response?.data?.message || "Đăng nhập Google thất bại.");
-      setIsModalOpen(true);
-      setLoginStatus("failure");
-    } finally {
-      setIsLoading(false);
+      console.error(
+        "Error during login: ",
+        err.response ? err.response.data : err.message
+      );
+      setError("Đăng nhập thất bại! Vui lòng thử lại.");
     }
+  };
+
+  // const handleGoogleLogin = async (response) => {
+  //   try {
+  //     const googleToken = response.credential;
+  //     console.log("Google Token: ", googleToken);
+
+  //     // Gửi googleToken đến backend để xác thực
+  //     const res = await axios.post("http://localhost:8080/auth/login/google", {
+  //       token: googleToken,
+  //     });
+
+  //     console.log("Response from server: ", res.data.token);
+  //     const jwtToken = res?.data?.token;
+  //     console.log("Response from: ", jwtToken);
+
+  //     sessionStorage.setItem("jwt", jwtToken);
+  //     const emailExists = await axios.post(
+  //       "http://localhost:8080/auth/check-email",
+  //       { token: googleToken }
+  //     );
+
+  //     if (emailExists.data) {
+  //       setTimeout(() => {
+  //         window.location.href = "http://localhost:3000/";
+  //       }, 1000);
+  //     } else {
+  //       const defaultAddress = {
+  //         specificAddress: "",
+  //         ward: "",
+  //         district: "",
+  //         province: ""
+  //       };
+  //       sessionStorage.setItem("defaultAddress", JSON.stringify(defaultAddress));
+        
+  //       setTimeout(() => {
+  //         window.location.href = "http://localhost:3000/role-selection";
+  //       }, 1000);
+  //     }
+  //   } catch (err) {
+  //     console.error(
+  //       "Error during login: ",
+  //       err.response ? err.response.data : err.message
+  //     );
+  //     setError("Đăng nhập thất bại! Vui lòng thử lại.");
+  //   }
+  // };
+
+  // Modal content based on status
+  const modalContent = () => {
+    if (loginStatus === "success") {
+      return (
+        <div className="text-green-600">
+          <svg
+            className="w-16 h-16 mx-auto mb-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+          <p className="text-xl font-semibold">Đăng nhập thành công!</p>
+        </div>
+      );
+    }
+    return (
+      <div className="text-red-600">
+        <svg
+          className="w-16 h-16 mx-auto mb-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+        <p className="text-xl font-semibold">Đăng nhập thất bại</p>
+        <p className="mt-2 text-sm">{error}</p>
+      </div>
+    );
   };
 
   return (
@@ -203,6 +293,7 @@ export default function SignInForm() {
               <div className="space-y-2">
                 <Input
                   type="email"
+                
                   placeholder="Địa chỉ email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -249,7 +340,7 @@ export default function SignInForm() {
 
         <Modal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => loginStatus === "failure" && setIsModalOpen(false)}
         >
           {loginStatus === "success" ? (
             <div className="text-center">

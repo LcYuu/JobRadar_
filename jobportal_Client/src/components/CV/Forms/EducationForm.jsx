@@ -1,10 +1,13 @@
+
 import { LoaderCircle } from "lucide-react";
 import React, { useContext, useEffect, useState, useRef } from "react";
+
 import { Input } from "../../../ui/input";
 import { Textarea } from "../../../ui/textarea";
 import { Button } from "../../../ui/button";
 import { toast } from "react-toastify";
 import { CVInfoContext } from "../../../context/CVInfoContext";
+
 import { useDispatch, useSelector } from "react-redux";
 import { updateCV, getGenCVById } from "../../../redux/GeneratedCV/generated_cv.thunk";
 import { useParams } from "react-router-dom";
@@ -90,6 +93,7 @@ const EducationForm = ({ enabledNext }) => {
         endDate: "",
         description: "",
       },
+
     ];
     
     // Set flag to prevent infinite loop
@@ -223,13 +227,14 @@ const EducationForm = ({ enabledNext }) => {
       // Reset updating flag
       isUpdating.current = false;
       
-      // Các trạng thái loading đã được xử lý trong try/catch
+      //c trạng thái loading đã được xử lý trong try/catch
     }
   };
 
   return (
     <div
       className="p-5 shadow-lg rounded-lg border-t-purple-500
+
   border-t-4 mt-10 relative"
     >
       {(loading || updateLoading) && console.log("EducationForm rendering: loading active", {loading, updateLoading})}
@@ -243,6 +248,7 @@ const EducationForm = ({ enabledNext }) => {
       <p>Thêm chi tiết trình độ học vấn</p>
       <div>
         {eduList.map((item, index) => (
+
           <div key={index}>
             <div className="grid grid-cols-2 gap-3 border p-3 my-5 shadow-lg  rounded-lg">
               <div>
@@ -323,6 +329,7 @@ const EducationForm = ({ enabledNext }) => {
             "Lưu"
           )}
         </Button>
+
       </div>
     </div>
   );

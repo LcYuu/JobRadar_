@@ -33,7 +33,6 @@ public class TaxCodeValidation {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return false; 
     }
 

@@ -1,5 +1,4 @@
 import React, { createContext, useState, useCallback } from "react";
-
 // Create the context
 export const CVInfoContext = createContext({
   cvInfo: {},
@@ -37,3 +36,4 @@ export const CVInfoProvider = ({ children }) => {
     </CVInfoContext.Provider>
   );
 };
+

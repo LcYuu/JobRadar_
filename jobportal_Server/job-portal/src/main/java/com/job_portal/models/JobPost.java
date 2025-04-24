@@ -1,6 +1,7 @@
 package com.job_portal.models;
 
 import lombok.*;
+
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.job_portal.utils.LocalDateTimeSerializer;

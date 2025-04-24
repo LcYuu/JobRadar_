@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import JobCard from '../JobCard/JobCard';
 import { getRecommendJob } from '../../../redux/JobPost/jobPost.thunk';
 
-
 const RecommendJob = () => {
     const dispatch = useDispatch();
     const { recommendJob = [], loading, error } = useSelector(store => store.jobPost);

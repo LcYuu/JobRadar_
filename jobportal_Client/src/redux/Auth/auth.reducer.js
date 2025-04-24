@@ -25,13 +25,13 @@
 
 // const initialState = {
 //   user: null,
-//   user: null,
 //   loading: false,
 //   error: null,
 //   jwt: localStorage.getItem('jwt') || null,
 //   isAuthenticated: !!localStorage.getItem('jwt'),
 //   userRole: null,
 // };
+
 
 // export const authReducer = (state = initialState, action) => {
 //   switch (action.type) {

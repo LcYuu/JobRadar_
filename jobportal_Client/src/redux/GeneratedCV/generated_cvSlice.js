@@ -39,6 +39,7 @@ const generated_cvSlice = createSlice({
         state.error = null;
       })
       .addCase(getGenCVById.fulfilled, (state, action) => {
+
         console.log("🚀 ~ getGenCVById.fulfilled, action.payload:", action.payload);
         state.loading = false;
         state.genCv = action.payload;
@@ -55,6 +56,7 @@ const generated_cvSlice = createSlice({
       .addCase(deleteCV.fulfilled, (state, action) => {
         state.loading = false;
         state.genCvs = state.genCvs.filter((cvs) => cvs.generatedCvId !== action.payload);
+
       })
       .addCase(deleteCV.rejected, (state, action) => {
         state.loading = false;
@@ -87,5 +89,5 @@ const generated_cvSlice = createSlice({
 });
 
 export const { clearMessages, resetGenCv } = generated_cvSlice.actions;
-
 export default generated_cvSlice.reducer;
+

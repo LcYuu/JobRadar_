@@ -55,4 +55,48 @@ public class ApplyJobServiceImpl implements IApplyJobService {
 		return applyJobRepository.existsByPostIdAndUserId(postId, userId);
 	}
 
+	@Override
+	public void updateMatchingScore(UUID postId, UUID userId, Double matchingScore) throws AllExceptions {
+		// Tìm đơn ứng tuyển
+		Optional<ApplyJob> applyJobOpt = applyJobRepository.findByPostIdAndUserId(postId, userId);
+
+		if (applyJobOpt.isPresent()) {
+			ApplyJob applyJob = applyJobOpt.get();
+			// Cập nhật điểm phù hợp
+			applyJob.setMatchingScore(matchingScore);
+			applyJobRepository.save(applyJob);
+		} else {
+			throw new RuntimeException("Apply job not found for postId: " + postId + " and userId: " + userId);
+		}
+	}
+
+	@Override
+	public void updateFullAnalysisResult(UUID postId, UUID userId, Double matchingScore, String analysisResult) throws AllExceptions {
+		// Tìm đơn ứng tuyển
+		Optional<ApplyJob> applyJobOpt = applyJobRepository.findByPostIdAndUserId(postId, userId);
+
+		if (applyJobOpt.isPresent()) {
+			ApplyJob applyJob = applyJobOpt.get();
+			// Cập nhật điểm phù hợp và kết quả phân tích chi tiết
+			applyJob.setMatchingScore(matchingScore);
+			applyJob.setAnalysisResult(analysisResult);
+			applyJobRepository.save(applyJob);
+		} else {
+			throw new RuntimeException("Apply job not found for postId: " + postId + " and userId: " + userId);
+		}
+	}
+
+	@Override
+	public String getAnalysisResult(UUID postId, UUID userId) throws AllExceptions {
+		Optional<ApplyJob> applyJobOpt = applyJobRepository.findByPostIdAndUserId(postId, userId);
+
+		if (applyJobOpt.isPresent()) {
+			ApplyJob applyJob = applyJobOpt.get();
+			return applyJob.getAnalysisResult();
+		} else {
+			throw new RuntimeException("Apply job not found for postId: " + postId + " and userId: " + userId);
+		}
+
+	}
+
 }

@@ -101,7 +101,6 @@ const App = () => {
   useEffect(() => {
     const token = localStorage.getItem("jwt");
     const savedUser = localStorage.getItem("user");
-
     if (token) {
       if (!user && savedUser) {
         dispatch(setUserFromStorage(JSON.parse(savedUser)));

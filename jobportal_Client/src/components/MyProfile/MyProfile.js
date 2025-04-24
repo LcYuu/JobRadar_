@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import {
   Award,
   Book,
@@ -16,6 +17,7 @@ import {
   School,
   Tag,
 } from "lucide-react";
+
 
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 import { Button } from "../../ui/button";
@@ -573,6 +575,7 @@ export default function MyProfile() {
                       <div
                         className={`h-12 w-12 rounded-full ${getColorByIndex(
                           index
+
                         )} shadow-md flex items-center justify-center`}
                       >
                         <span className="text-white font-bold">
@@ -637,6 +640,15 @@ export default function MyProfile() {
                             </p>
                           </div>
                         </div>
+                        <p className="mt-2 text-sm text-gray-600">
+                          {formatDate(experience.startDate)} -{" "}
+                          {experience.endDate
+                            ? formatDate(experience.endDate)
+                            : "Present"}
+                        </p>
+                        <p className="mt-2 text-sm text-gray-500">
+                          {experience.description}
+                        </p>
                       </div>
                     </div>
                   ))

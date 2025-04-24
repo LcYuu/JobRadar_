@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-
-
 import java.time.format.DateTimeParseException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -16,7 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
+import com.job_portal.DTO.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +21,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -50,13 +50,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.job_portal.DTO.CompanyDTO;
-import com.job_portal.DTO.DailyJobCount;
-import com.job_portal.DTO.JobCountType;
-import com.job_portal.DTO.JobPostDTO;
-import com.job_portal.DTO.JobRecommendationDTO;
-import com.job_portal.DTO.JobWithApplicationCountDTO;
-import com.job_portal.DTO.SeekerDTO;
+
 import com.job_portal.config.JwtProvider;
 import com.job_portal.models.Company;
 import com.job_portal.models.JobPost;
@@ -121,6 +115,7 @@ public class JobPostController {
 		List<JobPost> jobs = jobPostRepository.findAll();
 		return new ResponseEntity<>(jobs, HttpStatus.OK);
 	}
+
 	@GetMapping("/admin-get-all")
 	public ResponseEntity<Map<String, Object>> getAllJobs(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "12") int size, @RequestParam(required = false) String searchTerm,
@@ -169,12 +164,11 @@ public class JobPostController {
 			if (!jobPostService.canPostJob(user.get().getCompany().getCompanyId())) {
 				return new ResponseEntity<>("Công ty chỉ được đăng 1 bài trong vòng 1 giờ.", HttpStatus.FORBIDDEN);
 			}
+
 			JobPost createdJob = jobPostService.createJob(jobPostDTO, user.get().getCompany().getCompanyId());
 
 			if (createdJob != null) {
 				webSocketService.sendUpdate("/topic/job-updates", "ADD JOB"); // Gửi JobPost qua WebSocket
-
-
 				return new ResponseEntity<>("Công việc được tạo thành công. Chờ Admin phê duyệt", HttpStatus.CREATED);
 			} else {
 				return new ResponseEntity<>("Công việc tạo thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -269,11 +263,13 @@ public class JobPostController {
 
 	@GetMapping("/search-by-company")
 	public ResponseEntity<List<JobPost>> getJobsByCompanyId(@RequestHeader("Authorization") String jwt) {
+
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 		List<JobPost> jobPosts = jobPostRepository.findJobByCompany(user.get().getCompany().getCompanyId());
 		return ResponseEntity.ok(jobPosts);
 	}
+
 
 
 //	@GetMapping("/min-salary/{minSalary}")
@@ -339,7 +335,6 @@ public class JobPostController {
 
 		return jobPostService.getDailyJobPostCounts(start, end);
 	}
-
 
 	@PostMapping("/recommend-jobs/phobert")
 	public ResponseEntity<List<JobRecommendationDTO>> getJobRecommendations(
@@ -528,7 +523,6 @@ public class JobPostController {
 		} catch (JsonProcessingException e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 		}
-
 		HttpEntity<String> entity = new HttpEntity<>(jsonRequestBody, headers);
 
 		try {
@@ -660,6 +654,74 @@ public class JobPostController {
 
 		return jobPostService.searchJobs(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds,
 				page, size);
+
+	}
+
+	@GetMapping("/semantic-search")
+	public ResponseEntity<Map<String, Object>> semanticSearch(
+			@RequestHeader(value = "Authorization", required = false) String jwt,
+			@RequestParam(required = false) String query,
+			@RequestParam(required = false) List<String> selectedTypesOfWork,
+			@RequestParam(required = false) Long minSalary, 
+			@RequestParam(required = false) Long maxSalary,
+			@RequestParam(required = false) Integer cityId,
+			@RequestParam(required = false) List<Integer> selectedIndustryIds,
+			@RequestParam(defaultValue = "0") int page, 
+			@RequestParam(defaultValue = "7") int size) {
+		
+		try {
+			// Lưu lịch sử tìm kiếm nếu người dùng đã đăng nhập
+			if (jwt != null) {
+				String email = JwtProvider.getEmailFromJwtToken(jwt);
+				Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+
+				if (user.isPresent() && user.get().getSeeker() != null) {
+					StringBuilder searchQuery = new StringBuilder();
+					if (query != null && !query.isEmpty()) {
+						searchQuery.append("Semantic Query: ").append(query).append(" | ");
+					}
+					if (selectedTypesOfWork != null && !selectedTypesOfWork.isEmpty()) {
+						searchQuery.append("TypesOfWork: ").append(String.join(", ", selectedTypesOfWork)).append(" | ");
+					}
+					if (maxSalary != null) {
+						searchQuery.append("MaxSalary: ").append(maxSalary).append(" | ");
+					}
+					if (cityId != null) {
+						String cityName = cityRepository.findCityNameById(cityId);
+						if (cityName != null && !cityName.isEmpty()) {
+							searchQuery.append("CityName: ").append(cityName).append(" | ");
+						}
+					}
+					if (selectedIndustryIds != null && !selectedIndustryIds.isEmpty()) {
+						List<String> industryNames = industryRepository.findIndustryNamesByIds(selectedIndustryIds);
+						searchQuery.append("IndustryNames: ").append(String.join(", ", industryNames)).append(" | ");
+					}
+					
+					if (searchQuery.length() > 0) {
+						searchQuery.setLength(searchQuery.length() - 3);
+					}
+					
+					searchHistoryService.exportSearchHistoryToCSV(filePath, searchQuery.toString(),
+							user.get().getSeeker().getUserId());
+				}
+			}
+			
+			// Gọi service để thực hiện tìm kiếm ngữ nghĩa với các bộ lọc
+			Page<JobPost> results = jobPostService.semanticSearchWithFilters(
+					query, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds, page, size);
+			
+			Map<String, Object> response = new HashMap<>();
+			response.put("content", results.getContent());
+			response.put("currentPage", results.getNumber());
+			response.put("totalElements", results.getTotalElements());
+			response.put("totalPages", results.getTotalPages());
+			
+			return ResponseEntity.ok(response);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("error", "Đã xảy ra lỗi khi thực hiện tìm kiếm ngữ nghĩa: " + e.getMessage()));
+		}
 	}
 
 	@GetMapping("/salary-range")
@@ -713,6 +775,78 @@ public class JobPostController {
 	            .collect(Collectors.toList()));
 	}
 
+//	@GetMapping("/employer-company")
+//	public ResponseEntity<Page<JobWithApplicationCountDTO>> getFilteredJobs(@RequestHeader("Authorization") String jwt,
+//			@RequestParam(required = false) String status, @RequestParam(required = false) String typeOfWork,
+//			@RequestParam(required = false) String sortBy, @RequestParam(required = false) String sortDirection,
+//			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+//		String email = JwtProvider.getEmailFromJwtToken(jwt);
+//		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+//		// Xác định hướng sắp xếp (mặc định là giảm dần)
+//		Sort.Direction direction = Sort.Direction.DESC;
+//		if (sortDirection != null && sortDirection.equalsIgnoreCase("asc")) {
+//			direction = Sort.Direction.ASC;
+//		}
+//
+//		// Xác định trường sắp xếp (mặc định là createDate)
+//		String sortField = "createDate";
+//		if (sortBy != null) {
+//			switch (sortBy.toLowerCase()) {
+//				case "title":
+//					sortField = "title";
+//					break;
+//				case "createdate":
+//					sortField = "createDate";
+//					break;
+//				case "expiredate":
+//					sortField = "expireDate";
+//					break;
+//				case "applicationcount":
+//					// ApplicationCount được xử lý đặc biệt bên dưới
+//					break;
+//				default:
+//					sortField = "createDate";
+//			}
+//		}
+//
+//		// Lấy dữ liệu từ repository
+//		Page<JobWithApplicationCountDTO> jobs;
+//		
+//		if (sortBy != null && sortBy.equalsIgnoreCase("applicationcount")) {
+//			// Trường hợp đặc biệt: sắp xếp theo số lượng ứng viên
+//			// Ở đây chúng ta không thể sử dụng trực tiếp Pageable vì cần xử lý ở mức ứng dụng
+//			// Lấy tất cả jobs phù hợp với filter
+//			List<JobWithApplicationCountDTO> allJobs = jobPostRepository
+//				.findAllJobsWithFilters(user.get().getCompany().getCompanyId(), status, typeOfWork);
+//			
+//			// Sắp xếp theo applicationCount với hướng thích hợp
+//			if (direction == Sort.Direction.ASC) {
+//				allJobs.sort((job1, job2) -> Long.compare(job1.getApplicationCount(), job2.getApplicationCount()));
+//			} else {
+//				allJobs.sort((job1, job2) -> Long.compare(job2.getApplicationCount(), job1.getApplicationCount()));
+//			}
+//			
+//			// Tạo phân trang thủ công
+//			int start = (int) Math.min(page * size, allJobs.size());
+//			int end = (int) Math.min((page + 1) * size, allJobs.size());
+//			List<JobWithApplicationCountDTO> pageContent = allJobs.subList(start, end);
+//			
+//			jobs = new PageImpl<>(pageContent, PageRequest.of(page, size), allJobs.size());
+//		} else {
+//			// Trường hợp thông thường: sắp xếp theo các trường khác
+//			Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+//			jobs = jobPostRepository
+//					.findJobsWithFiltersAndSorting(user.get().getCompany().getCompanyId().toString(), status, typeOfWork, pageable);
+//      Page<JobWithApplicationCountDTO> jobDTOs = pro.map(p -> new JobWithApplicationCountDTO(
+//	    	    p.getPostId(), p.getTitle(), p.getDescription(), p.getLocation(),
+//	    	    p.getSalary(), p.getExperience(), p.getTypeOfWork(), p.getCreateDate(),
+//	    	    p.getExpireDate(), p.getApplicationCount(), p.getStatus(),
+//	    	    p.getIndustryNames() != null ? Arrays.asList(p.getIndustryNames().split(", ")) : null,
+//	    	    p.getIsApprove()
+//	    	));
+//		}
+//  return ResponseEntity.ok(jobs);
+//	}
 	@GetMapping("/employer-company")
 	public ResponseEntity<Page<JobWithApplicationCountDTO>> getFilteredJobs(
 	        @RequestHeader("Authorization") String jwt,
@@ -841,8 +975,6 @@ public class JobPostController {
 		}
 	}
 
-
-
 	@GetMapping("/admin/all-jobs")
 	public ResponseEntity<Page<JobPost>> getAllJobsForAdmin(
 			@RequestParam(required = false, defaultValue = "") String title,
@@ -861,7 +993,6 @@ public class JobPostController {
 		try {
 
 			List<Integer> industryId = companyService.getIndustryIdsByCompanyId(companyId);
-
 			List<JobPost> similarJobs = jobPostService.getSimilarJobsByIndustry(industryId, excludePostId);
 			return ResponseEntity.ok(similarJobs);
 		} catch (Exception e) {
@@ -869,4 +1000,26 @@ public class JobPostController {
 					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
 		}
 	}
+	// Thêm endpoint mới
+	@GetMapping("/candidates-by-job")
+	public ResponseEntity<Map<String, List<CandidateWithScoreDTO>>> getCandidatesByJob(
+			@RequestHeader("Authorization") String jwt,
+			@RequestParam(required = false) String sortDirection, 
+			@RequestParam(required = false) String sortBy
+	) {
+		try {
+			String email = JwtProvider.getEmailFromJwtToken(jwt);
+			Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+			UUID companyId = user.get().getCompany().getCompanyId();
+
+			// Lấy danh sách ứng viên được nhóm theo job và sắp xếp theo điểm
+			Map<String, List<CandidateWithScoreDTO>> groupedCandidates = 
+					jobPostService.getCandidatesByJobForCompany(companyId, sortDirection, sortBy);
+
+			return ResponseEntity.ok(groupedCandidates);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+		}
+	}
+
 }

@@ -32,8 +32,9 @@ const initialState = {
   jobCountByType: [],
   jobPost: [],
   postByPostId: null,
-  totalPages: 0,
+  totalPages: 0, // Tổng số trang
   approve: false,
+  // totalItems: 0,
   totalJobs: 0,
   recommendJob: [],
   employerCompany: [],
@@ -49,6 +50,7 @@ const jobPostSlice = createSlice({
   name: "jobPost",
   initialState,
   reducers: {
+
     // Thêm reducer để reset jobPost
     resetJobPost: (state) => {
       state.jobPost = [];
@@ -57,13 +59,14 @@ const jobPostSlice = createSlice({
       state.totalElements = 0;
       state.loading = false;
     },
+
   },
   extraReducers: (builder) => {
     builder
       .addCase(getAllJobAction.fulfilled, (state, action) => {
         state.loading = false;
         state.jobPost = action.payload.content;
-        state.totalPages = action.payload.page.totalPages;
+        state.totalPages = action.payload.page.totalPages; // Lưu trữ tổng số trang
         state.error = null;
       })
       .addCase(getTop8LastestJob.fulfilled, (state, action) => {
@@ -86,9 +89,11 @@ const jobPostSlice = createSlice({
       })
       .addCase(countJobByType.fulfilled, (state, action) => {
         state.jobCountByType = action.payload;
-        state.loading = false;
-        state.error = null;
+        state.loading = false; // Kết thúc trạng thái tải
+        state.error = null; // Đặt lỗi về null
       })
+
+
       .addCase(getJobPostByPostId.fulfilled, (state, action) => {
         state.loading = false;
         state.postByPostId = action.payload;
@@ -101,22 +106,27 @@ const jobPostSlice = createSlice({
         state.loading = false;
         state.error = null;
       })
+
       .addCase(fetchSalaryRange.fulfilled, (state, action) => {
         state.loading = false;
-        state.minSalary = action.payload.minSalary;
-        state.maxSalary = action.payload.maxSalary;
+        state.minSalary = action.payload.minSalary; // Cập nhật minSalary
+        state.maxSalary = action.payload.maxSalary; // Cập nhật maxSalary
       })
+
+      // Handle updateCompanyProfile actions
+
       .addCase(getTotalJobsByCompany.fulfilled, (state, action) => {
         state.loading = false;
         state.totalJobs = action.payload;
         state.error = null;
       })
-      .addCase(getAllJobPost.fulfilled, (state, action) => {
+      // Handle updateCompanyImages actions
+      .addCase(getAllJobPost.fulfilled, (state,action) => {
         state.loading = false;
         state.positions = action.payload;
         state.error = null;
       })
-      .addCase(getTop5Lastest.fulfilled, (state, action) => {
+      .addCase(getTop5Lastest.fulfilled, (state,action) => {
         state.loading = false;
         state.jobs = action.payload;
         state.error = null;
@@ -128,17 +138,18 @@ const jobPostSlice = createSlice({
         state.loading = false;
         state.error = null;
       })
-      .addCase(getDetailJobById.fulfilled, (state, action) => {
+      .addCase(getDetailJobById.fulfilled, (state,action) => {
         state.loading = false;
         state.detailJob = action.payload;
         state.error = null;
       })
-      .addCase(updateJob.fulfilled, (state, action) => {
+      .addCase(updateJob.fulfilled, (state,action) => {
+
         state.loading = false;
         state.detailJob = action.payload;
         state.error = null;
       })
-      .addCase(createJobPost.fulfilled, (state, action) => {
+      .addCase(createJobPost.fulfilled, (state,action) => {
         state.loading = false;
         state.detailJob = action.payload;
         state.error = null;
@@ -149,14 +160,18 @@ const jobPostSlice = createSlice({
         state.totalElements = action.payload.page.totalElements;
         state.loading = false;
       })
+
       .addCase(approveJob.fulfilled, (state) => {
+        state.loading = false; // Đặt loading thành false khi thành công
+        state.error = null; // Reset lỗi
+      })
+
+      .addCase(getSimilarJobs.fulfilled, (state,action) => {
         state.loading = false;
+        // state.simi = action.payload;
         state.error = null;
       })
-      .addCase(getSimilarJobs.fulfilled, (state, action) => {
-        state.loading = false;
-        state.error = null;
-      })
+
       .addCase(updateExpireJob.fulfilled, (state, action) => {
         state.loading = false;
         state.expireJob = action.payload;
@@ -182,8 +197,8 @@ const jobPostSlice = createSlice({
       );
   },
 });
-
 // Export action resetJobPost
 export const { resetJobPost } = jobPostSlice.actions;
 
 export default jobPostSlice.reducer;
+

@@ -17,11 +17,11 @@ export const getGenCVBySeeker = createAsyncThunk(
     }
   }
 );
-      
 export const getGenCVById = createAsyncThunk(
   "genCV/getGenCVById",
   async (genCvId, { rejectWithValue }) => {
     try {
+
       const response = await axios.get(
         `${API_BASE_URL}/generated-cv/get-gencv-by-id/${genCvId}?t=${Date.now()}`,
         {
@@ -40,7 +40,6 @@ export const getGenCVById = createAsyncThunk(
     }
   }
 );
-
 // Xóa CV
 export const deleteCV = createAsyncThunk(
   "genCV/deleteCV",

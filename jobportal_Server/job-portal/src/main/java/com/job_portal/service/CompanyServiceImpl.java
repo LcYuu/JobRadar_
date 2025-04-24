@@ -2,7 +2,6 @@ package com.job_portal.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,13 +29,13 @@ import com.job_portal.repository.CompanyRepository;
 import com.job_portal.repository.IndustryRepository;
 import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.SeekerRepository;
-
 import com.job_portal.utils.EmailUtil;
 
 import com.social.exceptions.AllExceptions;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 
+import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
@@ -54,11 +53,11 @@ public class CompanyServiceImpl implements ICompanyService {
 	ISeekerService seekerService;
 	
 	@Autowired
+	private EmailUtil emailUtil;
+	@Autowired
 	SeekerRepository seekerRepository;
 	@Autowired
 	JobPostRepository jobPostRepository;
-	@Autowired
-	private EmailUtil emailUtil;
 
 	@Override
 	public boolean deleteCompany(UUID companyId) throws AllExceptions {

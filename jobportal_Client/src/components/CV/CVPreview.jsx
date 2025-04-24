@@ -1,4 +1,6 @@
+
 import React, { useContext, useEffect, useState, memo } from "react";
+
 import { CVInfoContext } from "../../context/CVInfoContext";
 import PersonalDetail from "./Preview/PersonalDetail";
 import SummeryPreview from "./Preview/SummeryPreview";

@@ -115,7 +115,6 @@ public class AuthController {
 
 	@PostMapping("/signup")
 	public ResponseEntity<String> createUserAccount(@RequestBody UserSignupDTO userSignupDTO) {
-
 		try {
 			Optional<UserAccount> isExist = userAccountRepository.findByEmail(userSignupDTO.getEmail());
 			if (isExist.isPresent()) {
@@ -191,7 +190,6 @@ public class AuthController {
 					.body("Đã xảy ra lỗi trong quá trình xác thực: " + e.getMessage());
 		}
 	}
-
 	@PutMapping("/verify-account")
 	public ResponseEntity<String> verifyAccount(@RequestParam String email, @RequestParam String otp) {
 		Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
@@ -220,6 +218,7 @@ public class AuthController {
 					user.setSeeker(seeker);
 				}
 
+
 				userAccountRepository.save(user);
 				return ResponseEntity.ok("Xác thực tài khoản thành công");
 			}
@@ -247,6 +246,7 @@ public class AuthController {
 		if (!user.isActive()) {
 			return new AuthResponse("", "Tài khoản của bạn chưa được xác thực");
 		}
+
 		if (user.getUserType().getUserTypeId() == 3) {
 			if (user.getCompany().getIsBlocked() && user.getCompany().getBlockedUntil() != null
 					&& user.getCompany().getBlockedUntil().isAfter(LocalDateTime.now())) {
@@ -271,7 +271,6 @@ public class AuthController {
 		String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
 		return password.matches(passwordPattern);
 	}
-
 	@PutMapping("/regenerate-otp")
 	public ResponseEntity<String> regenerateOtp(@RequestParam String email) {
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
@@ -291,7 +290,6 @@ public class AuthController {
 		userAccountRepository.save(user.get());
 
 		return new ResponseEntity<>("Vui lòng check mail để nhận mã đăng ký", HttpStatus.OK); // Đổi mã trạng thái phù
-																								// hợp
 	}
 
 	private Authentication authenticate(String email, String password) {
@@ -341,7 +339,6 @@ public class AuthController {
 			errorResponse.put("error", "Email không tồn tại");
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
 		}
-
 		try {
 			String otp = otpUtil.generateOtp();
 			emailUtil.sendForgotMail(email, otp);
@@ -349,6 +346,7 @@ public class AuthController {
 			LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(1);
 			ForgotPassword fp = ForgotPassword.builder().otp(otp).expirationTime(expirationTime)
 					.userAccount(userAccount.get()).build();
+
 
 			forgotPasswordRepository.save(fp);
 
@@ -433,7 +431,7 @@ public class AuthController {
 	public AuthResponse loginWithGoogle(@RequestBody Map<String, String> requestBody) {
 		try {
 			String googleToken = requestBody.get("token"); // Lấy googleToken từ frontend
-			
+
 			// Giải mã token Google (JWT) để lấy thông tin người dùng
 			DecodedJWT decodedJWT = JWT.decode(googleToken);
 			String email = decodedJWT.getClaim("email").asString();
@@ -454,6 +452,7 @@ public class AuthController {
 						}
 					}
 				}
+
 
 				user.setLastLogin(LocalDateTime.now());
 				userAccountRepository.save(user);
@@ -711,5 +710,4 @@ public class AuthController {
 //	        return ResponseEntity.ok(false); // Người dùng chưa tồn tại
 //	    }
 //	}
-
 }
