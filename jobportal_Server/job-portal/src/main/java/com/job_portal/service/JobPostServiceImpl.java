@@ -646,5 +646,10 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 		return groupedCandidates;
 	}
 
+	@Override
+	public List<JobPost> findAllJobsByCompany(UUID companyId) {
+		// Using the existing repository method that returns all jobs for a company
+		return jobPostRepository.findJobByCompany(companyId);
+	}
 
 }

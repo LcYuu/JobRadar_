@@ -5,13 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.job_portal.DTO.*;
@@ -667,19 +661,23 @@ public class JobPostController {
 	}
 
 	@GetMapping("/employer-company")
-	public ResponseEntity<Page<JobWithApplicationCountDTO>> getFilteredJobs(@RequestHeader("Authorization") String jwt,
-			@RequestParam(required = false) String status, @RequestParam(required = false) String typeOfWork,
-			@RequestParam(required = false) String sortBy, @RequestParam(required = false) String sortDirection,
-			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+	public ResponseEntity<Page<JobWithApplicationCountDTO>> getFilteredJobs(
+			@RequestHeader("Authorization") String jwt,
+			@RequestParam(required = false) String status,
+			@RequestParam(required = false) String typeOfWork,
+			@RequestParam(required = false) String sortBy,
+			@RequestParam(required = false) String sortDirection,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "5") int size) {
+
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-		// Xác định hướng sắp xếp (mặc định là giảm dần)
+
 		Sort.Direction direction = Sort.Direction.DESC;
-		if (sortDirection != null && sortDirection.equalsIgnoreCase("asc")) {
+		if ("asc".equalsIgnoreCase(sortDirection)) {
 			direction = Sort.Direction.ASC;
 		}
 
-		// Xác định trường sắp xếp (mặc định là createDate)
 		String sortField = "createDate";
 		if (sortBy != null) {
 			switch (sortBy.toLowerCase()) {
@@ -693,50 +691,58 @@ public class JobPostController {
 					sortField = "expireDate";
 					break;
 				case "applicationcount":
-					// ApplicationCount được xử lý đặc biệt bên dưới
+					// handled separately
 					break;
 				default:
 					sortField = "createDate";
 			}
 		}
 
-		// Lấy dữ liệu từ repository
-		Page<JobWithApplicationCountDTO> jobs;
-		
-		if (sortBy != null && sortBy.equalsIgnoreCase("applicationcount")) {
-			// Trường hợp đặc biệt: sắp xếp theo số lượng ứng viên
-			// Ở đây chúng ta không thể sử dụng trực tiếp Pageable vì cần xử lý ở mức ứng dụng
-			// Lấy tất cả jobs phù hợp với filter
-			List<JobWithApplicationCountDTO> allJobs = jobPostRepository
-				.findAllJobsWithFilters(user.get().getCompany().getCompanyId(), status, typeOfWork);
-			
-			// Sắp xếp theo applicationCount với hướng thích hợp
+		Page<JobWithApplicationCountProjection> jobs;
+
+		if ("applicationcount".equalsIgnoreCase(sortBy)) {
+			// Sắp xếp đặc biệt theo applicationCount
+			List<JobWithApplicationCountProjection> allJobs = jobPostRepository
+					.findAllJobsWithFilters(user.get().getCompany().getCompanyId().toString(), status, typeOfWork);
+
 			if (direction == Sort.Direction.ASC) {
-				allJobs.sort((job1, job2) -> Long.compare(job1.getApplicationCount(), job2.getApplicationCount()));
+				allJobs.sort(Comparator.comparingLong(JobWithApplicationCountProjection::getApplicationCount));
 			} else {
 				allJobs.sort((job1, job2) -> Long.compare(job2.getApplicationCount(), job1.getApplicationCount()));
 			}
-			
-			// Tạo phân trang thủ công
+
 			int start = (int) Math.min(page * size, allJobs.size());
 			int end = (int) Math.min((page + 1) * size, allJobs.size());
-			List<JobWithApplicationCountDTO> pageContent = allJobs.subList(start, end);
-			
+			List<JobWithApplicationCountProjection> pageContent = allJobs.subList(start, end);
+
 			jobs = new PageImpl<>(pageContent, PageRequest.of(page, size), allJobs.size());
 		} else {
-			// Trường hợp thông thường: sắp xếp theo các trường khác
 			Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
 			jobs = jobPostRepository
-					.findJobsWithFiltersAndSorting(user.get().getCompany().getCompanyId(), status, typeOfWork, pageable);
-      Page<JobWithApplicationCountDTO> jobDTOs = pro.map(p -> new JobWithApplicationCountDTO(
-	    	    p.getPostId(), p.getTitle(), p.getDescription(), p.getLocation(),
-	    	    p.getSalary(), p.getExperience(), p.getTypeOfWork(), p.getCreateDate(),
-	    	    p.getExpireDate(), p.getApplicationCount(), p.getStatus(),
-	    	    p.getIndustryNames() != null ? Arrays.asList(p.getIndustryNames().split(", ")) : null,
-	    	    p.getIsApprove()
-	    	));
+					.findJobsWithFiltersAndSorting(user.get().getUserId().toString(), status, typeOfWork, pageable);
 		}
-  return ResponseEntity.ok(jobs);
+
+		Page<JobWithApplicationCountDTO> jobDTOs = jobs.map(this::mapToDTO);
+		return ResponseEntity.ok(jobDTOs);
+	}
+
+	// Hàm chuyển đổi Projection -> DTO (dùng chung)
+	private JobWithApplicationCountDTO mapToDTO(JobWithApplicationCountProjection p) {
+		return new JobWithApplicationCountDTO(
+				p.getPostId(),
+				p.getTitle(),
+				p.getDescription(),
+				p.getLocation(),
+				p.getSalary(),
+				p.getExperience(),p.
+				getTypeOfWork(),
+				p.getCreateDate(),
+				p.getExpireDate(),
+				p.getApplicationCount(),
+				p.getStatus(),
+				p.getIndustryNames() != null ? Arrays.asList(p.getIndustryNames().split(", ")) : null,
+				p.getIsApprove()
+		);
 	}
 
 
@@ -775,11 +781,21 @@ public class JobPostController {
 
 	@GetMapping("/company/{companyId}")
 	public ResponseEntity<Page<JobPost>> getJobsByCompany(@PathVariable UUID companyId,
-			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+			@RequestParam(defaultValue = "0") int page, 
+			@RequestParam(defaultValue = "10") int size,
+			@RequestParam(required = false, defaultValue = "false") boolean getAllJobs) {
 		try {
-			Pageable pageable = PageRequest.of(page, size);
-			Page<JobPost> jobs = jobPostService.findJobsByCompany(companyId, pageable);
-			return ResponseEntity.ok(jobs);
+			if (getAllJobs) {
+				// Get all jobs without pagination
+				List<JobPost> allJobs = jobPostService.findAllJobsByCompany(companyId);
+				Page<JobPost> jobsPage = new PageImpl<>(allJobs, Pageable.unpaged(), allJobs.size());
+				return ResponseEntity.ok(jobsPage);
+			} else {
+				// Regular paginated response
+				Pageable pageable = PageRequest.of(page, size);
+				Page<JobPost> jobs = jobPostService.findJobsByCompany(companyId, pageable);
+				return ResponseEntity.ok(jobs);
+			}
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 		}

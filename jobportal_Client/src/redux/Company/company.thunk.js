@@ -62,7 +62,14 @@ export const searchCompanies = createAsyncThunk(
       const response = await api.get(`/company/search-company-by-feature`, {
         params,
       });
-      return response.data;
+      
+      // Extract pagination information and content
+      return {
+        content: response.data.content,
+        totalPages: response.data.page?.totalPages || 1,
+        totalElements: response.data.page?.totalElements || response.data.content.length,
+        currentPage: currentPage
+      };
     } catch (error) {
       return rejectWithValue(error.message);
     }

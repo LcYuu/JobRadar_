@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useCallback } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
@@ -16,8 +15,7 @@ import {
 import { Search, ChevronDown, Sparkles, X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 
-// import Pagination from "../../components/layout/Pagination";
-
+import Pagination from "../../components/common/Pagination/Pagination";
 import RangeSlider from "../../components/common/RangeSlider/RangeSlider";
 import { useLocation } from "react-router-dom";
 import { countJobByType, fetchSalaryRange, getAllJobAction, searchJobs, semanticSearchJobsWithGemini } from "../../redux/JobPost/jobPost.thunk";
@@ -25,6 +23,7 @@ import { getCity } from "../../redux/City/city.thunk";
 import { getIndustryCount } from "../../redux/Industry/industry.thunk";
 import { toast } from "react-toastify";
 import useWebSocket from "../../utils/useWebSocket";
+import { ProgressBar } from "../../ui/progress";
 
 export default function JobSearchPage() {
   const dispatch = useDispatch();
@@ -47,25 +46,58 @@ export default function JobSearchPage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [size] = useState(7);
 
-  const [searchInput, setSearchInput] = useState(""); // State tạm thời để lưu input
-  const [lastSearchQuery, setLastSearchQuery] = useState(""); // Lưu từ khóa tìm kiếm cuối cùng
+  const [searchInput, setSearchInput] = useState(() => {
+    return sessionStorage.getItem("searchInput") || "";
+  });
+  const [lastSearchQuery, setLastSearchQuery] = useState("");
 
   const { cities = [] } = useSelector((store) => store.city);
   const { industryCount = [] } = useSelector((store) => store.industry);
-  const [filters, setFilters] = useState({
-    title: "",
-    selectedTypesOfWork: [],
-    cityId: "",
-    selectedIndustryIds: [],
+  const [filters, setFilters] = useState(() => {
+    const savedFilters = sessionStorage.getItem("searchFilters");
+    if (savedFilters) {
+      try {
+        return JSON.parse(savedFilters);
+      } catch (e) {
+        console.error("Lỗi khi parse filters từ sessionStorage:", e);
+      }
+    }
+    return {
+      title: "",
+      selectedTypesOfWork: [],
+      cityId: "",
+      selectedIndustryIds: [],
+    };
   });
 
-
   const [isSemanticSearching, setIsSemanticSearching] = useState(false);
-  const [semanticResults, setSemanticResults] = useState(null);
-  const [isUsingSemanticSearch, setIsUsingSemanticSearch] = useState(false);
-  const [semanticSearchCache, setSemanticSearchCache] = useState({}); // Cache kết quả tìm kiếm ngữ nghĩa
+  const [semanticResults, setSemanticResults] = useState(() => {
+    const savedResults = sessionStorage.getItem("semanticResults");
+    if (savedResults) {
+      try {
+        return JSON.parse(savedResults);
+      } catch (e) {
+        console.error("Lỗi khi parse kết quả tìm kiếm từ sessionStorage:", e);
+      }
+    }
+    return null;
+  });
+  const [isUsingSemanticSearch, setIsUsingSemanticSearch] = useState(() => {
+    return sessionStorage.getItem("isUsingSemanticSearch") === "true";
+  });
+  const [semanticSearchCache, setSemanticSearchCache] = useState({});
 
-  const [allResults, setAllResults] = useState(null); // Lưu trữ toàn bộ kết quả từ API
+  const [allResults, setAllResults] = useState(() => {
+    const savedAllResults = sessionStorage.getItem("allResults");
+    if (savedAllResults) {
+      try {
+        return JSON.parse(savedAllResults);
+      } catch (e) {
+        console.error("Lỗi khi parse allResults từ sessionStorage:", e);
+      }
+    }
+    return null;
+  });
   const isFilterApplied =
     filters.title ||
     filters.cityId ||
@@ -76,8 +108,10 @@ export default function JobSearchPage() {
 
   const location = useLocation();
 
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchProgress, setSearchProgress] = useState(0);
+
   useEffect(() => {
-    // Check if there are selected industry IDs in the state
     if (location.state?.selectedIndustryIds) {
       setFilters((prev) => ({
         ...prev,
@@ -86,7 +120,30 @@ export default function JobSearchPage() {
     }
   }, [location]);
 
-  // Hàm để lấy kết quả tìm kiếm thông thường
+  useEffect(() => {
+    sessionStorage.setItem("searchInput", searchInput);
+  }, [searchInput]);
+  
+  useEffect(() => {
+    sessionStorage.setItem("searchFilters", JSON.stringify(filters));
+  }, [filters]);
+  
+  useEffect(() => {
+    if (semanticResults) {
+      sessionStorage.setItem("semanticResults", JSON.stringify(semanticResults));
+    }
+  }, [semanticResults]);
+  
+  useEffect(() => {
+    sessionStorage.setItem("isUsingSemanticSearch", isUsingSemanticSearch);
+  }, [isUsingSemanticSearch]);
+  
+  useEffect(() => {
+    if (allResults) {
+      sessionStorage.setItem("allResults", JSON.stringify(allResults));
+    }
+  }, [allResults]);
+
   const fetchRegularSearchResults = useCallback(() => {
     if (isFilterApplied) {
       dispatch(searchJobs({ filters, currentPage, size }));
@@ -96,80 +153,75 @@ export default function JobSearchPage() {
   }, [dispatch, filters, currentPage, size, isFilterApplied]);
 
   useEffect(() => {
-    // Chỉ gọi tìm kiếm thông thường nếu không đang sử dụng tìm kiếm ngữ nghĩa
     if (!isUsingSemanticSearch) {
       fetchRegularSearchResults();
     }
   }, [fetchRegularSearchResults, isUsingSemanticSearch]);
 
   useEffect(() => {
-    // Lấy danh sách thành phố và loại công việc
     dispatch(getCity());
     dispatch(countJobByType());
     dispatch(getIndustryCount());
     dispatch(fetchSalaryRange());
   }, [dispatch]);
 
-  const handlePageChange = (page) => {
+  const handlePageChange = useCallback((page) => {
+    console.log("Changing to page:", page);
     setCurrentPage(page);
     
-    // Nếu đang sử dụng tìm kiếm ngữ nghĩa và có allResults, không cần gọi API
-    if (isUsingSemanticSearch && allResults) {
-      // Phân trang sẽ được xử lý bởi getDisplayResults
+    if (isUsingSemanticSearch && semanticResults) {
+      sessionStorage.setItem("currentPage", page.toString());
       return;
     }
     
-    // Nếu không phải tìm kiếm ngữ nghĩa, gọi API với trang mới
     if (isFilterApplied) {
       dispatch(searchJobs({ filters, page, size }));
     } else {
       dispatch(getAllJobAction({ page, size }));
     }
-  };
+    
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }, [isUsingSemanticSearch, semanticResults, isFilterApplied, filters, size, dispatch]);
 
   useEffect(() => {
     if (isFilterApplied) {
-      setCurrentPage(0); // Đặt lại trang về 0 khi bộ lọc thay đổi
+      setCurrentPage(0);
     }
   }, [filters]);
 
   const handleSalaryChange = (newValues) => {
-    handleFilterChange({
+    const newFilters = {
       ...filters,
       minSalary: newValues[0],
       maxSalary: newValues[1],
-    });
+    };
+    
+    handleFilterChange(newFilters);
   };
 
-  // Hàm để tạo cache key từ query và filters
   const createCacheKey = (query, filters) => {
     return `${query}-${JSON.stringify(filters)}`;
   };
 
-  // Hàm để lọc kết quả tìm kiếm ngữ nghĩa dựa trên filters hiện tại
   const filterSemanticResults = useCallback((results) => {
     if (!results || !results.content) return [];
     
-    // Không cần lọc thủ công, API đã xử lý bộ lọc
     return results.content; 
   }, []);
 
-  // Hàm để áp dụng phân trang cho kết quả đã lọc
   const paginateResults = useCallback((filteredResults, page, pageSize) => {
-    // Không cần phân trang thủ công, API đã xử lý phân trang
     return filteredResults;
   }, []);
 
-  // Theo dõi thay đổi của bộ lọc và tự động áp dụng khi đang sử dụng tìm kiếm ngữ nghĩa
   useEffect(() => {
-    // Nếu đang sử dụng tìm kiếm ngữ nghĩa và có từ khóa tìm kiếm
     if (isUsingSemanticSearch && searchInput.trim() && allResults) {
       console.log("Bộ lọc thay đổi, lọc kết quả trên client");
       
-      // Tạo cache key mới
       const cacheKey = `${searchInput}-${JSON.stringify(filters)}`;
       
-      // Kiểm tra cache
       const cachedResults = semanticSearchCache[cacheKey];
       
       if (cachedResults) {
@@ -179,86 +231,107 @@ export default function JobSearchPage() {
         return;
       }
       
-      // Lọc kết quả từ dữ liệu đã có
       const filteredResults = filterResultsLocally(allResults.content, filters);
       
-      // Tạo kết quả mới
       const newResults = {
         ...allResults,
         content: filteredResults,
         totalElements: filteredResults.length
       };
       
-      // Lưu vào cache
       setSemanticSearchCache(prev => ({
         ...prev,
         [cacheKey]: newResults
       }));
       
-      // Cập nhật state
       setSemanticResults(newResults);
       setCurrentPage(0);
     }
   }, [filters, isUsingSemanticSearch, searchInput, allResults]);
 
-  // Hàm xử lý thay đổi bộ lọc
-  const handleFilterChange = (newFilters) => {
+  const filterResultsLocally = useCallback((jobs, currentFilters) => {
+    if (!jobs) return [];
+    
+    return jobs.filter(job => {
+      if (currentFilters.selectedTypesOfWork && currentFilters.selectedTypesOfWork.length > 0) {
+        const jobType = typeof job.typeOfWork === 'string' ? job.typeOfWork : 
+                        (job.typesOfWork?.name || 
+                         job.typeOfWork?.name || 
+                         job.typeOfJobWork || 
+                         null);
+                         
+        console.log("Job type for filtering:", job.postId || job.id, jobType);
+        
+        if (!jobType || !currentFilters.selectedTypesOfWork.includes(jobType)) {
+          return false;
+        }
+      }
+      
+      if (currentFilters.cityId) {
+        const jobCityId = job.city?.cityId || job.cityId;
+        if (!jobCityId || jobCityId !== currentFilters.cityId) {
+          return false;
+        }
+      }
+      
+      if (currentFilters.selectedIndustryIds && currentFilters.selectedIndustryIds.length > 0) {
+        const jobIndustryId = job.industry?.industryId || job.industryId;
+        if (!jobIndustryId || !currentFilters.selectedIndustryIds.includes(jobIndustryId)) {
+          return false;
+        }
+      }
+      
+      if (currentFilters.minSalary !== undefined && currentFilters.minSalary !== null) {
+        const jobSalary = job.salary || 0;
+        if (jobSalary < currentFilters.minSalary) {
+          return false;
+        }
+      }
+      
+      if (currentFilters.maxSalary !== undefined && currentFilters.maxSalary !== null) {
+        const jobSalary = job.salary || 0;
+        if (jobSalary > currentFilters.maxSalary) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+  }, []);
+
+  const handleFilterChange = useCallback((newFilters) => {
     console.log("Bộ lọc thay đổi:", newFilters);
     setFilters(newFilters);
     
-    // Nếu không đang sử dụng tìm kiếm ngữ nghĩa, áp dụng bộ lọc ngay lập tức
-    if (!isUsingSemanticSearch) {
+    if (isUsingSemanticSearch && allResults && allResults.content) {
+      console.log("Áp dụng bộ lọc cho kết quả semantic search");
+      
+      const filteredResults = filterResultsLocally(allResults.content, newFilters);
+      
+      const newSemanticResults = {
+        ...allResults,
+        content: filteredResults,
+        totalElements: filteredResults.length,
+        totalPages: Math.ceil(filteredResults.length / size)
+      };
+      
+      setSemanticResults(newSemanticResults);
+      setCurrentPage(0);
+    } else if (!isUsingSemanticSearch) {
       if (Object.values(newFilters).some(value => {
         if (Array.isArray(value)) {
           return value.length > 0;
         }
         return value !== undefined && value !== null && value !== "";
       })) {
-        console.log("Áp dụng bộ lọc ngay lập tức");
+        console.log("Áp dụng bộ lọc thông thường");
         dispatch(searchJobs({ filters: newFilters, page: 0, size }));
       } else {
         console.log("Không có bộ lọc, lấy tất cả công việc");
         dispatch(getAllJobAction({ page: 0, size }));
       }
     }
-  };
-
-  // Hàm để lọc kết quả trên client
-  const filterResultsLocally = (results, filters) => {
-    if (!results) return [];
-    
-    return results.filter(job => {
-      // Lọc theo loại công việc
-      if (filters.selectedTypesOfWork.length > 0 && 
-          !filters.selectedTypesOfWork.includes(job.typeOfWork)) {
-        return false;
-      }
-      
-      // Lọc theo thành phố
-      if (filters.cityId && job.city?.cityId !== filters.cityId) {
-        return false;
-      }
-      
-      // Lọc theo ngành nghề
-      if (filters.selectedIndustryIds.length > 0 && 
-          !filters.selectedIndustryIds.includes(job.industry?.industryId)) {
-        return false;
-      }
-      
-      // Lọc theo mức lương
-      if (filters.minSalary !== undefined && filters.minSalary !== null && 
-          job.salary < filters.minSalary) {
-        return false;
-      }
-      
-      if (filters.maxSalary !== undefined && filters.maxSalary !== null && 
-          job.salary > filters.maxSalary) {
-        return false;
-      }
-      
-      return true;
-    });
-  };
+  }, [isUsingSemanticSearch, allResults, size, dispatch, filterResultsLocally]);
 
   const handleSearch = async () => {
     if (!searchInput.trim()) {
@@ -266,64 +339,110 @@ export default function JobSearchPage() {
     }
 
     try {
-      // Gọi API semantic search với endpoint mới
+      setLastSearchQuery(searchInput);
+      
+      setIsSearching(true);
+      setSearchProgress(5);
+      
+      const searchPhases = [
+        { progress: 20, delay: 300 },
+        { progress: 40, delay: 800 },
+        { progress: 65, delay: 1300 },
+        { progress: 85, delay: 1800 }
+      ];
+      
+      searchPhases.forEach(phase => {
+        setTimeout(() => {
+          if (isSearching) {
+            setSearchProgress(phase.progress);
+          }
+        }, phase.delay);
+      });
+      
       console.log("Gọi API semantic search với query:", searchInput);
       
       const result = await dispatch(semanticSearchJobsWithGemini({
         query: searchInput,
-        filters: {}, // Gọi API không có filter để lấy tất cả kết quả
+        filters: {},
         currentPage: 0,
-        size: 100 // Lấy nhiều kết quả hơn để xử lý lọc trên client
+        size: 100
       })).unwrap();
 
-      // Lưu lại toàn bộ kết quả để xử lý lọc
+      setSearchProgress(100);
+      
+      if (!result || !result.content || !Array.isArray(result.content)) {
+        console.error("Kết quả tìm kiếm ngữ nghĩa không hợp lệ:", result);
+        throw new Error("Kết quả tìm kiếm không hợp lệ");
+      }
+      
+      console.log("Nhận được kết quả tìm kiếm:", result.content.length, "công việc");
+      
       setAllResults(result);
       
-      // Lọc kết quả dựa trên bộ lọc hiện tại
       const filteredResults = filterResultsLocally(result.content, filters);
+      console.log("Số lượng kết quả sau khi lọc:", filteredResults.length);
       
-      // Tạo kết quả mới đã lọc
       const filteredResult = {
         ...result,
         content: filteredResults,
-        totalElements: filteredResults.length
+        totalElements: filteredResults.length,
+        totalPages: Math.ceil(filteredResults.length / size)
       };
       
-      // Lưu vào cache
       const cacheKey = `${searchInput}-${JSON.stringify(filters)}`;
       setSemanticSearchCache(prev => ({
         ...prev,
         [cacheKey]: filteredResult
       }));
       
-      // Cập nhật state
       setSemanticResults(filteredResult);
       setIsUsingSemanticSearch(true);
       setCurrentPage(0);
+      
+      sessionStorage.setItem("lastSearchQuery", searchInput);
+      sessionStorage.setItem("semanticResults", JSON.stringify(filteredResult));
+      sessionStorage.setItem("allResults", JSON.stringify(result));
+      sessionStorage.setItem("isUsingSemanticSearch", "true");
+      
+      toast.success(`Đã tìm thấy ${filteredResults.length} công việc phù hợp với bạn!`, {
+        position: "top-right",
+        autoClose: 3000
+      });
+      
+      setTimeout(() => {
+        setIsSearching(false);
+      }, 800);
     } catch (error) {
       console.error("Lỗi khi tìm kiếm ngữ nghĩa:", error);
-      // Nếu có lỗi, chuyển về tìm kiếm thông thường
+      toast.error("Có lỗi khi tìm kiếm. Đang chuyển sang tìm kiếm thông thường.");
+      
       setIsUsingSemanticSearch(false);
       setSemanticResults(null);
-      // Áp dụng bộ lọc title
       const newFilters = { ...filters, title: searchInput };
       dispatch(searchJobs({ filters: newFilters, page: 0, size }));
+      
+      setIsSearching(false);
+      
+      sessionStorage.setItem("isUsingSemanticSearch", "false");
+      sessionStorage.removeItem("semanticResults");
+      sessionStorage.removeItem("allResults");
     }
   };
 
-  // Hàm để xóa tìm kiếm ngữ nghĩa và quay lại tìm kiếm thông thường
   const clearSemanticSearch = () => {
-    // Reset các state liên quan đến tìm kiếm ngữ nghĩa
     setIsUsingSemanticSearch(false);
     setSemanticResults(null);
-    setAllResults(null); // Xóa kết quả gốc đã lưu
+    setAllResults(null);
     setSearchInput("");
     setCurrentPage(0);
     
-    // Xóa cache liên quan đến tìm kiếm ngữ nghĩa
     setSemanticSearchCache({});
     
-    // Kiểm tra xem có bộ lọc nào đang được áp dụng không
+    sessionStorage.removeItem("searchInput");
+    sessionStorage.removeItem("semanticResults");
+    sessionStorage.removeItem("allResults");
+    sessionStorage.setItem("isUsingSemanticSearch", "false");
+    
     const hasActiveFilters = Object.values(filters).some(value => {
       if (Array.isArray(value)) {
         return value.length > 0;
@@ -331,72 +450,93 @@ export default function JobSearchPage() {
       return value !== undefined && value !== null && value !== "";
     });
     
-    // Nếu có bộ lọc, sử dụng searchJobs
     if (hasActiveFilters) {
       console.log("Có bộ lọc đang áp dụng, sử dụng searchJobs");
       dispatch(searchJobs({ filters, page: 0, size }));
     } else {
-      // Nếu không có bộ lọc, lấy tất cả công việc
       console.log("Không có bộ lọc, lấy tất cả công việc");
       dispatch(getAllJobAction({ page: 0, size }));
     }
   };
 
-  // Hàm xử lý phân trang cho kết quả đã lọc trên client
   const paginateResultsLocally = (filteredResults, page, pageSize) => {
     const start = page * pageSize;
     const end = start + pageSize;
     return filteredResults.slice(start, end);
   };
 
-  // Xử lý kết quả hiển thị dựa trên loại tìm kiếm
-  const getDisplayResults = () => {
-    // Nếu đang sử dụng tìm kiếm ngữ nghĩa và có kết quả
-    if (isUsingSemanticSearch && semanticResults) {
-      console.log("Sử dụng kết quả từ tìm kiếm ngữ nghĩa:", semanticResults);
-      
-      // Phân trang kết quả nếu có allResults
-      if (allResults) {
-        const filteredResults = filterResultsLocally(allResults.content, filters);
-        const paginatedResults = paginateResultsLocally(filteredResults, currentPage, size);
+  const getDisplayResults = useCallback(() => {
+    try {
+      if (isUsingSemanticSearch && semanticResults) {
+        console.log("Sử dụng kết quả từ tìm kiếm ngữ nghĩa:", semanticResults);
+        
+        if (!semanticResults.content || !Array.isArray(semanticResults.content)) {
+          console.error("semanticResults.content không hợp lệ:", semanticResults.content);
+          return {
+            content: [],
+            totalElements: 0,
+            totalPages: 1
+          };
+        }
+        
+        const resultsArray = Array.isArray(semanticResults.content)   
+          ? semanticResults.content 
+          : [];
+          
+        console.log("Số lượng kết quả trước khi phân trang:", resultsArray.length);
+        
+        const totalResults = resultsArray.length || 0;
+        const totalPages = Math.max(Math.ceil(totalResults / size) || 1, 1);
+        
+        const startIndex = currentPage * size;
+        const endIndex = Math.min(startIndex + size, totalResults);
+        
+        console.log("Thông số phân trang:", { startIndex, endIndex, totalResults });
+        
+        const paginatedContent = totalResults > 0 
+          ? resultsArray.slice(startIndex, endIndex) 
+          : [];
+          
+        console.log("Số lượng kết quả hiển thị:", paginatedContent.length);
         
         return {
-          content: paginatedResults,
-          totalElements: filteredResults.length,
-          totalPages: Math.ceil(filteredResults.length / size)
+          content: paginatedContent,
+          totalElements: totalResults,
+          totalPages: totalPages
         };
       }
-      
+
+      if (isFilterApplied) {
+        console.log("Sử dụng kết quả từ searchJobs với bộ lọc");
+        return {
+          content: searchJob || [],
+          totalElements: searchJob?.length || 0,
+          totalPages: totalPagesFromSearch || 1
+        };
+      }
+
+      console.log("Sử dụng tất cả công việc");
       return {
-        content: semanticResults.content,
-        totalElements: semanticResults.totalElements,
-        totalPages: semanticResults.totalPages
+        content: jobPost || [],
+        totalElements: jobPost?.length || 0,
+        totalPages: totalPagesFromAll || 1
+      };
+    } catch (error) {
+      console.error("Lỗi trong getDisplayResults:", error);
+      return {
+        content: [],
+        totalElements: 0,
+        totalPages: 1
       };
     }
-
-    // Nếu có bộ lọc, sử dụng kết quả từ searchJobs
-    if (isFilterApplied) {
-      console.log("Sử dụng kết quả từ searchJobs với bộ lọc");
-      return {
-        content: searchJob,
-        totalElements: searchJob.length,
-        totalPages: totalPagesFromSearch
-      };
-    }
-
-    // Nếu không có bộ lọc, sử dụng tất cả công việc
-    console.log("Sử dụng tất cả công việc");
-    return {
-      content: jobPost,
-      totalElements: jobPost.length,
-      totalPages: totalPagesFromAll
-    };
-  };
+  }, [isUsingSemanticSearch, semanticResults, isFilterApplied, 
+      searchJob, jobPost, currentPage, size, 
+      totalPagesFromSearch, totalPagesFromAll]);
 
   const displayResults = getDisplayResults();
-  const results = displayResults.content;
-  const totalPages = displayResults.totalPages;
-  const totalResults = displayResults.totalElements;
+  const results = displayResults.content || [];
+  const totalPages = displayResults.totalPages || 0;
+  const totalResults = displayResults.totalElements || 0;
 
   const handleMessage = useCallback(
     (dispatch, _, topic) => {
@@ -416,6 +556,50 @@ export default function JobSearchPage() {
   useWebSocket(["/topic/job-updates", "/topic/industry-updates"], (dispatch, message, topic) =>
     handleMessage(dispatch, message, topic)
   )(dispatch);
+
+  useEffect(() => {
+    const initializeSearchState = async () => {
+      const savedIsUsingSemanticSearch = sessionStorage.getItem("isUsingSemanticSearch") === "true";
+      const savedSearchInput = sessionStorage.getItem("searchInput");
+      const savedAllResults = sessionStorage.getItem("allResults");
+      const savedSemanticResults = sessionStorage.getItem("semanticResults");
+      const savedFilters = sessionStorage.getItem("searchFilters");
+      
+      if (savedIsUsingSemanticSearch && savedSemanticResults && savedAllResults) {
+        try {
+          const parsedAllResults = JSON.parse(savedAllResults);
+          const parsedSemanticResults = JSON.parse(savedSemanticResults);
+          const parsedFilters = savedFilters ? JSON.parse(savedFilters) : filters;
+          
+          setIsUsingSemanticSearch(true);
+          setAllResults(parsedAllResults);
+          setSemanticResults(parsedSemanticResults);
+          setFilters(parsedFilters);
+          
+          if (savedSearchInput) {
+            setSearchInput(savedSearchInput);
+          }
+        } catch (e) {
+          console.error("Lỗi khi khôi phục trạng thái tìm kiếm:", e);
+          dispatch(getAllJobAction({ page: 0, size }));
+        }
+      } else if (!savedIsUsingSemanticSearch && isFilterApplied) {
+        dispatch(searchJobs({ filters, page: 0, size }));
+      } else {
+        dispatch(getAllJobAction({ page: 0, size }));
+      }
+    };
+    
+    initializeSearchState();
+  }, []);
+
+  useEffect(() => {
+    console.log("Pagination state updated:", {
+      isUsingSemanticSearch,
+      totalPages,
+      currentPage
+    });
+  }, [isUsingSemanticSearch, totalPages, currentPage]);
 
   return (
     <div className="min-h-screen bg-transparent">
@@ -506,7 +690,6 @@ export default function JobSearchPage() {
 
         <div className="flex space-x-8 mt-20">
           <aside className="w-80 space-y-6 bg-white p-6 rounded-lg shadow-lg">
-            {/* Filter Section */}
             <div>
               <h3 className="font-semibold mb-2 flex justify-between items-center text-gray-800 tracking-tight">
                 Loại công việc
@@ -521,6 +704,7 @@ export default function JobSearchPage() {
                       key={job.typeOfWork}
                     >
                       <Checkbox
+                        checked={filters.selectedTypesOfWork.includes(job.typeOfWork)}
                         onCheckedChange={(checked) => {
                           const updatedTypesOfWork = checked
                             ? [...filters.selectedTypesOfWork, job.typeOfWork]
@@ -542,7 +726,6 @@ export default function JobSearchPage() {
               </div>
             </div>
 
-            {/* Industry Section */}
             <div>
               <h3 className="font-semibold mb-2 flex justify-between items-center text-gray-800 tracking-tight">
                 Danh mục
@@ -584,7 +767,6 @@ export default function JobSearchPage() {
               </div>
             </div>
 
-            {/* Salary Range Filter */}
             <div>
               <h3 className="font-semibold mb-2 flex justify-between items-center text-gray-800 tracking-tight">
                 Mức lương
@@ -623,42 +805,6 @@ export default function JobSearchPage() {
                   Tổng số: {totalResults} kết quả
                 </span>
               </div>
-
-              {/* <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-500">Sắp xếp theo:</span>
-                <Select>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Chọn tiêu chí sắp xếp" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Sắp xếp theo</SelectLabel>
-                      <SelectItem value="Most relevant">
-                        Liên quan nhất
-                      </SelectItem>
-                      <SelectItem value="Newest">Mới nhất</SelectItem>
-                      <SelectItem value="Oldest">Cũ nhất</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-
-                <div className="flex border rounded">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-r-none"
-                  >
-                    <Grid size={20} />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-l-none bg-gray-100"
-                  >
-                    <List size={20} />
-                  </Button>
-                </div>
-              </div> */}
             </div>
 
             {results.length === 0 ? (
@@ -676,6 +822,50 @@ export default function JobSearchPage() {
             )}
           </div>
         </div>
+
+        {isSearching && (
+          <>
+            <div className="fixed inset-0 bg-black bg-opacity-60 z-40 flex items-center justify-center backdrop-blur-sm">
+              <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md mx-auto z-50 border-t-4 border-purple-500 animate-fadeIn">
+                <div className="text-center mb-4">
+                  <h2 className="text-xl font-bold text-gray-800">Đang tìm kiếm cho bạn</h2>
+                  <p className="text-gray-600 mt-1">Chúng tôi đang phân tích hàng ngàn việc làm để tìm những công việc phù hợp nhất</p>
+                </div>
+                
+                <div className="mb-6 mt-8">
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="font-medium text-gray-700">Tiến trình tìm kiếm</span>
+                    <span className="text-purple-600 font-medium">{Math.round(searchProgress)}%</span>
+                  </div>
+                  <ProgressBar value={searchProgress} className="h-3" />
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                  <div className="flex">
+                    <div className="w-auto mr-3">
+                      <div className="bg-purple-100 p-2 rounded-full">
+                        <Sparkles size={20} className="text-purple-600" />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-800 text-sm">Đang thực hiện</h3>
+                      <p className="text-gray-600 text-sm mt-1">
+                        {searchProgress < 30 ? "Phân tích yêu cầu của bạn" : 
+                         searchProgress < 60 ? "So khớp với công việc phù hợp" : 
+                         searchProgress < 90 ? "Xếp hạng kết quả tìm kiếm" :
+                         "Hoàn tất tìm kiếm"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-5 text-center">
+                  <p className="text-xs text-gray-500">Có thể mất 5-10 giây. Kết quả sẽ xuất hiện ngay sau đây.</p>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </main>
     </div>
   );
