@@ -884,6 +884,7 @@ const JobDetailEmployer = () => {
                   <span className="font-medium">{detailJob?.position}</span>
                 )}
               </div>
+              </div>
           </Card>
 
           <Card className="p-6 bg-white shadow-lg">

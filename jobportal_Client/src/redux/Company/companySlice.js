@@ -55,7 +55,9 @@ const companySlice = createSlice({
       .addCase(searchCompanies.fulfilled, (state, action) => {
         state.loading = false;
         state.companyByFeature = action.payload.content;
-        state.totalPages = action.payload.page.totalPages;
+        state.totalPages = action.payload.totalPages;
+        state.totalElements = action.payload.totalElements;
+        state.currentPage = action.payload.currentPage;
         state.error = null;
       })
 

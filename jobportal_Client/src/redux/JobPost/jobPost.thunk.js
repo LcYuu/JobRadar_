@@ -119,11 +119,18 @@ export const getJobPostByPostId = createAsyncThunk(
 
 export const getJobsByCompany = createAsyncThunk(
   "jobs/getJobsByCompany",
-  async ({ companyId, currentPage, size }, { rejectWithValue }) => {
+  async ({ companyId, currentPage, size, getAllJobs = false }, { rejectWithValue }) => {
     try {
-      const response = await api.get(
-        `/job-post/search-by-company/${companyId}?page=${currentPage}&size=${size}`
-      );
+      let url = '';
+      if (getAllJobs) {
+        // Use the new endpoint that returns all jobs for a company
+        url = `/job-post/company/${companyId}?getAllJobs=true`;
+      } else {
+        // Use the original paginated endpoint
+        url = `/job-post/search-by-company/${companyId}?page=${currentPage}&size=${size}`;
+      }
+      
+      const response = await api.get(url);
       return {
         content: response.data.content,
         totalPages: response.data.totalPages,
