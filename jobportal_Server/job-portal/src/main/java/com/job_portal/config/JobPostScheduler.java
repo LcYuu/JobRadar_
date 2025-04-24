@@ -13,7 +13,6 @@ public class JobPostScheduler {
 
 	@Autowired
 	private IJobPostService jobPostService;
-
 	// Cập nhật file CSV mỗi 5 phút
 	@Scheduled(fixedRate = 300000)
 	public void updateCSV() {
@@ -34,5 +33,4 @@ public class JobPostScheduler {
 	    }
 	}
 
-	
 }

@@ -84,7 +84,6 @@ public class ReviewServiceImpl implements IReviewService {
 		}
 	}
 
-
 	@Override
 	public Page<Review> findReviewByCompanyId(UUID companyId, Pageable pageable) {
 		return reviewRepository.findByCompanyCompanyId(companyId, pageable);

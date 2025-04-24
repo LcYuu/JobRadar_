@@ -2,6 +2,7 @@ package com.job_portal.controller;
 
 
 import java.sql.Timestamp;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpMethod;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,6 +48,7 @@ import com.job_portal.models.JobPost;
 import com.job_portal.models.Review;
 
 import com.job_portal.models.Seeker;
+
 import com.job_portal.models.UserAccount;
 import com.job_portal.projection.CompanyProjection;
 import com.job_portal.projection.CompanyWithCountJob;
@@ -82,7 +85,6 @@ public class CompanyController {
 	private IApplyJobService applyJobService;
 	@Autowired
 	private TaxCodeValidation taxCodeValidation;
-
 
 	@Autowired
 	private ReviewRepository reviewRepository;
@@ -199,31 +201,33 @@ public class CompanyController {
 	public List<CompanyDTO> getCompaniesWithSavedApplications() {
 	    List<CompanyProjection> projections = companyRepository.findCompaniesWithSavedApplications();
 	    
-	    return projections.stream().map(projection -> {
-	        List<Integer> industryIds = new ArrayList<>();
-	        if (projection.getIndustryIds() != null && !projection.getIndustryIds().isEmpty()) {
-	            industryIds = Arrays.stream(projection.getIndustryIds().split(","))
-	                                .map(Integer::parseInt)
-	                                .collect(Collectors.toList());
-	        }
+	    return projections.stream()
+	        .limit(9) // <-- Giới hạn tại đây
+	        .map(projection -> {
+	            List<Integer> industryIds = new ArrayList<>();
+	            if (projection.getIndustryIds() != null && !projection.getIndustryIds().isEmpty()) {
+	                industryIds = Arrays.stream(projection.getIndustryIds().split(","))
+	                                    .map(Integer::parseInt)
+	                                    .collect(Collectors.toList());
+	            }
 
-	        return new CompanyDTO(
-	            projection.getCompanyId(),
-	            projection.getCompanyName(),
-	            projection.getApplicationCount(),
-	            industryIds,
-	            projection.getCityId(),
-	            projection.getAddress(),
-	            projection.getDescription(),
-	            projection.getLogo(),
-	            projection.getContact(),
-	            projection.getEmail(),
-	            projection.getEstablishedTime() != null ? projection.getEstablishedTime().toLocalDate() : null,
-	            projection.getTaxCode()
-	        );
-	    }).collect(Collectors.toList());
+	            return new CompanyDTO(
+	                projection.getCompanyId(),
+	                projection.getCompanyName(),
+	                projection.getApplicationCount(),
+	                industryIds,
+	                projection.getCityId(),
+	                projection.getAddress(),
+	                projection.getDescription(),
+	                projection.getLogo(),
+	                projection.getContact(),
+	                projection.getEmail(),
+	                projection.getEstablishedTime() != null ? projection.getEstablishedTime().toLocalDate() : null,
+	                projection.getTaxCode()
+	            );
+	        }).collect(Collectors.toList());
 	}
-	
+
 	@GetMapping("/search-company-by-feature")
 	public Page<CompanyWithCountJobDTO> searchCompanies(
 	        @RequestParam(required = false) String title,
@@ -235,17 +239,23 @@ public class CompanyController {
 	    Pageable pageable = PageRequest.of(page, size);
 	    Page<CompanyWithCountJob> projections = companyRepository.findCompaniesByFilters(title, cityId, industryId, pageable);
 
-	  
+
+	    // In ra danh sách industryIds dạng chuỗi trước khi chuyển đổi
+	    projections.forEach(proj -> System.out.println("IndustryIds (raw): " + proj.getIndustryIds()));
+
+
 	    return projections.map(proj -> new CompanyWithCountJobDTO(
 	        proj.getCompanyId(),
 	        proj.getCompanyName(),
 	        proj.getLogo(),
-	        convertStringToList(proj.getIndustryIds()), // Chuyển "1,2,3" thành List<Integer>
+
+	        convertStringToList(proj.getIndustryIds()), // Ví dụ: "1,2,3" → List<Integer>
 	        proj.getDescription(),
 	        proj.getCityId(),
 	        proj.getCountJob()
 	    ));
 	}
+
 
 	// Hàm chuyển đổi "1,2,3" -> List<Integer>
 	private List<Integer> convertStringToList(String industryIds) {
@@ -367,7 +377,6 @@ public class CompanyController {
 		boolean isSaved = applyJobService.isEligibleForRating(user.get().getUserId(), companyId);
 		return ResponseEntity.ok(isSaved);
 	}
-
 
 	@GetMapping("/get-industry-name/{industryId}")
 	public ResponseEntity<String> getIndustryNameById(@PathVariable Integer industryId) {

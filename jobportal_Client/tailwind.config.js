@@ -7,7 +7,6 @@ module.exports = {
       backgroundImage: {
         'banner-gradient': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       },
-
       primary: {
         DEFAULT: "#9f5bff",
         foreground: "hsl(var(--primary-foreground))",

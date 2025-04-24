@@ -35,6 +35,8 @@ import {
   fetchSocialLinks,
   fetchSocialLinksByUserId,
 } from "../../redux/SocialLink/socialLink.thunk";
+
+import { resetJobPost } from "../../redux/JobPost/jobPostSlice";
 const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
   return (
     <div className="flex">
@@ -224,11 +226,8 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
   }, [companyId]); // Chỉ cuộn khi companyId thay đổi
 
   useEffect(() => {
-    dispatch(getAllJobAction({ currentPage, size })); // Assuming your action can accept companyId
-  }, [dispatch, currentPage, size]);
-
-  useEffect(() => {
     const userId = companyId;
+    dispatch(resetJobPost());
     dispatch(getCompanyProfile(companyId));
     dispatch(getReviewByCompany(companyId));
     dispatch(checkSaved(companyId));

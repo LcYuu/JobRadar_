@@ -14,6 +14,7 @@ export default function JobList() {
     loading,
     error,
   } = useSelector((store) => store.jobPost);
+
   const [currentPage, setCurrentPage] = useState(0);
   const [size, setSize] = useState(12); // Số lượng bản ghi mỗi trang
 
@@ -128,3 +129,4 @@ export default function JobList() {
     </section>
   );
 }
+

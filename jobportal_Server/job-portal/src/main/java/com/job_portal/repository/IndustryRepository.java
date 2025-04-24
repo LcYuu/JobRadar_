@@ -18,7 +18,6 @@ public interface IndustryRepository extends JpaRepository<Industry, Integer> {
 	
 	@Query("SELECT i.industryName FROM Industry i WHERE i.industryId IN :industryId")
 	List<String> findIndustryNamesByIds(@Param("industryId") List<Integer> industryId);
-
 	// Tìm theo tên được chọn từ Combobox
 	Industry findByIndustryName(String industryName);
 

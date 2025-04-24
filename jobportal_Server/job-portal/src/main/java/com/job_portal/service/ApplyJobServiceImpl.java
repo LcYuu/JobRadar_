@@ -96,6 +96,7 @@ public class ApplyJobServiceImpl implements IApplyJobService {
 		} else {
 			throw new RuntimeException("Apply job not found for postId: " + postId + " and userId: " + userId);
 		}
+
 	}
 
 }

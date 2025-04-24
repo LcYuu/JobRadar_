@@ -22,6 +22,7 @@ const surveySchema = Yup.object().shape({
         .required('Vui lòng nhập góp ý của bạn')
 });
 
+
 const Survey = () => {
     const { surveyId } = useParams();
     const navigate = useNavigate();
@@ -85,6 +86,7 @@ const Survey = () => {
                 <ArrowLeft className="w-4 h-4" />
                 <span>Trở lại danh sách</span>
             </Button>
+
 
             <Card className="max-w-2xl mx-auto p-6">
                 <h1 className="text-2xl font-bold mb-6">Khảo sát tuyển dụng</h1>

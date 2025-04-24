@@ -1,12 +1,5 @@
 import axios from "axios";
 import { GET_INDUSTRY_COUNT_FAILURE, GET_INDUSTRY_COUNT_REQUEST, GET_INDUSTRY_COUNT_SUCCESS, GET_INDUSTRY_FAILURE, GET_INDUSTRY_REQUEST, GET_INDUSTRY_SUCCESS, GET_ALL_INDUSTRIES_REQUEST, GET_ALL_INDUSTRIES_SUCCESS, GET_ALL_INDUSTRIES_FAILURE } from "./industry.actionType";
-import { API_BASE_URL } from "../../configs/api";
-
-
-
-
-
-
 
 export const getIndustry = () => async (dispatch) => {
     dispatch({ type: GET_INDUSTRY_REQUEST });

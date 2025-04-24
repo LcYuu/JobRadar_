@@ -36,7 +36,7 @@ public class UserAccount {
     @Column(name = "is_active", columnDefinition = "BIT(1)")
     private boolean isActive;
 
-    @Column(name = "user_name", length = 500, nullable = false)
+   @Column(name = "user_name", length = 500, nullable = false)
     private String userName;
 
     @Column(name = "avatar", length = 200)
@@ -97,8 +97,6 @@ public class UserAccount {
 	public String getProvider() {
 		return provider;
 	}
-
-
 
 	public void setProvider(String provider) {
 		this.provider = provider;

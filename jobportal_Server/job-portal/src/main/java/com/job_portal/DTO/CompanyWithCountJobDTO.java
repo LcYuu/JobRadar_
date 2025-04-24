@@ -2,7 +2,6 @@ package com.job_portal.DTO;
 
 import java.util.List;
 import java.util.UUID;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,4 +19,5 @@ public class CompanyWithCountJobDTO {
     private String description;
     private Integer cityId;
     private Long countJob;
+
 }

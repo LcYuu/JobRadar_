@@ -173,13 +173,26 @@ function JobCard_AllJob({ job }) {
             >
               {job.typeOfWork}
             </span>
+            <span
+              className="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
+              style={
+                typeOfWorkStyles[job.typeOfWork] || {
+                  backgroundColor: "rgba(0, 0, 0, 0.1)",
+                  color: "rgb(0, 0, 0)",
+                  border: "1px solid rgb(0, 0, 0)",
+                }
+              }
+            >
+              {job.typeOfWork}
+            </span>
           </div>
 
           {/* Industry tags and Apply button */}
           <div className="flex justify-between items-center">
             <div className="flex flex-wrap gap-2">
-              {Array.isArray(job.company.industry) ? (
-                job.company.industry.map((industry, index) => (
+              {Array.isArray(job.industry) ? (
+                job.industry.map((industry, index) => (
+
                   <span
                     key={index}
                     className="px-2 py-1 rounded-full text-xs font-medium"
@@ -224,6 +237,18 @@ function JobCard_AllJob({ job }) {
           </div>
         </div>
       </CardContent>
+
+      {isModalOpen && (
+        <ApplyModal
+          job={job}
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          onSubmit={handleSubmit}
+          formData={formData}
+          handleInputChange={handleInputChange}
+          onFileChange={handleFileChange}
+        />
+      )}
 
       {isModalOpen && (
         <ApplyModal

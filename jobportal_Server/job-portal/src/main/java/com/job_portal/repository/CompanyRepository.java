@@ -105,43 +105,82 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 //
 //
 
-	@Query(value = """
-		    SELECT BIN_TO_UUID(c.user_id) AS companyId, 
-		           c.company_name AS companyName, 
-		           c.logo AS logo, 
-		           GROUP_CONCAT(DISTINCT ci.industry_id SEPARATOR ',') AS industryIds, 
-		           c.description AS description, 
-		           c.city_id AS cityId, 
-		           COALESCE(COUNT(DISTINCT j.post_id), 0) AS countJob 
-		    FROM company c 
-		    LEFT JOIN job_posts j ON c.user_id = j.company_id 
-		         AND j.is_approve = true 
-		         AND j.expire_date >= CURRENT_DATE 
-		    LEFT JOIN company_industries ci ON c.user_id = ci.company_id  
-		    WHERE (:title IS NULL OR LOWER(c.company_name) LIKE LOWER(CONCAT('%', :title, '%')) 
-		           OR LOWER(c.description) LIKE LOWER(CONCAT('%', :title, '%'))) 
-		          AND (:cityId IS NULL OR c.city_id = :cityId) 
-		          AND (:industryId IS NULL OR ci.industry_id = :industryId) 
-		    GROUP BY c.user_id, c.company_name, c.logo, c.description, c.city_id
-		    ORDER BY c.company_name ASC
-		""",
-		countQuery = """
-		    SELECT COUNT(DISTINCT c.user_id)
-		    FROM company c 
-		    LEFT JOIN company_industries ci ON c.user_id = ci.company_id  
-		    WHERE (:title IS NULL OR LOWER(c.company_name) LIKE LOWER(CONCAT('%', :title, '%')) 
-		           OR LOWER(c.description) LIKE LOWER(CONCAT('%', :title, '%'))) 
-		          AND (:cityId IS NULL OR c.city_id = :cityId) 
-		          AND (:industryId IS NULL OR ci.industry_id = :industryId)
-		""",
-		nativeQuery = true)
-		Page<CompanyWithCountJob> findCompaniesByFilters(
-		    @Param("title") String title, 
-		    @Param("cityId") Integer cityId,
-		    @Param("industryId") Integer industryId, 
-		    Pageable pageable
-		);
+//	@Query(value = """
+//		    SELECT BIN_TO_UUID(c.user_id) AS companyId, 
+//		           c.company_name AS companyName, 
+//		           c.logo AS logo, 
+//		           GROUP_CONCAT(DISTINCT ci.industry_id SEPARATOR ',') AS industryIds, 
+//		           c.description AS description, 
+//		           c.city_id AS cityId, 
+//		           COALESCE(COUNT(DISTINCT j.post_id), 0) AS countJob 
+//		    FROM company c 
+//		    LEFT JOIN job_posts j ON c.user_id = j.company_id 
+//		         AND j.is_approve = true 
+//		         AND j.expire_date >= CURRENT_DATE 
+//		    LEFT JOIN company_industries ci ON c.user_id = ci.company_id  
+//		    WHERE (:title IS NULL OR LOWER(c.company_name) LIKE LOWER(CONCAT('%', :title, '%')) 
+//		           OR LOWER(c.description) LIKE LOWER(CONCAT('%', :title, '%'))) 
+//		          AND (:cityId IS NULL OR c.city_id = :cityId) 
+//		          AND (:industryId IS NULL OR ci.industry_id = :industryId) 
+//		    GROUP BY c.user_id, c.company_name, c.logo, c.description, c.city_id
+//		    ORDER BY c.company_name ASC
+//		""",
+//		countQuery = """
+//		    SELECT COUNT(DISTINCT c.user_id)
+//		    FROM company c 
+//		    LEFT JOIN company_industries ci ON c.user_id = ci.company_id  
+//		    WHERE (:title IS NULL OR LOWER(c.company_name) LIKE LOWER(CONCAT('%', :title, '%')) 
+//		           OR LOWER(c.description) LIKE LOWER(CONCAT('%', :title, '%'))) 
+//		          AND (:cityId IS NULL OR c.city_id = :cityId) 
+//		          AND (:industryId IS NULL OR ci.industry_id = :industryId)
+//		""",
+//		nativeQuery = true)
+//		Page<CompanyWithCountJob> findCompaniesByFilters(
+//		    @Param("title") String title, 
+//		    @Param("cityId") Integer cityId,
+//		    @Param("industryId") Integer industryId, 
+//		    Pageable pageable
+//		);
 
+	@Query(value = """
+					    SELECT
+			    BIN_TO_UUID(c.user_id) AS companyId,
+			    c.company_name AS companyName,
+			    c.logo AS logo,
+			    GROUP_CONCAT(DISTINCT ci_all.industry_id SEPARATOR ',') AS industryIds,
+			    c.description AS description,
+			    c.city_id AS cityId,
+			    COALESCE(COUNT(DISTINCT j.post_id), 0) AS countJob
+			FROM company c
+			-- Lọc industry để tìm công ty phù hợp
+			LEFT JOIN company_industries ci_filter ON c.user_id = ci_filter.company_id
+			-- Lấy tất cả industry của công ty để hiển thị
+			LEFT JOIN company_industries ci_all ON c.user_id = ci_all.company_id
+			LEFT JOIN job_posts j ON c.user_id = j.company_id
+			    AND j.is_approve = true
+			    AND j.expire_date >= CURRENT_DATE
+			WHERE
+			    (:title IS NULL OR LOWER(c.company_name) LIKE LOWER(CONCAT('%', :title, '%'))
+			     OR LOWER(c.description) LIKE LOWER(CONCAT('%', :title, '%')))
+			    AND (:cityId IS NULL OR c.city_id = :cityId)
+			    AND (:industryId IS NULL OR ci_filter.industry_id = :industryId)
+			GROUP BY c.user_id, c.company_name, c.logo, c.description, c.city_id
+			ORDER BY c.company_name ASC
+
+					""", countQuery = """
+						    SELECT COUNT(DISTINCT c.user_id)
+			FROM company c
+			LEFT JOIN company_industries ci_filter ON c.user_id = ci_filter.company_id
+			WHERE
+			    (:title IS NULL OR LOWER(c.company_name) LIKE LOWER(CONCAT('%', :title, '%'))
+			     OR LOWER(c.description) LIKE LOWER(CONCAT('%', :title, '%')))
+			    AND (:cityId IS NULL OR c.city_id = :cityId)
+			    AND (:industryId IS NULL OR ci_filter.industry_id = :industryId)
+
+						""", nativeQuery = true)
+	Page<CompanyWithCountJob> findCompaniesByFilters(@Param("title") String title, @Param("cityId") Integer cityId,
+			@Param("industryId") Integer industryId, Pageable pageable);
+	
 //	@Query("SELECT new com.job_portal.DTO.CompanyWithCountJobDTO(c.companyId, c.companyName, i.industryId, c.description, i.industryName, c.city.cityId, COUNT(j)) "
 //			+ "FROM Company c " + "JOIN c.jobPosts j " + "JOIN c.industry i " + "WHERE j.isApprove = true "
 //			+ "GROUP BY c.companyId, c.companyName, c.description, i.industryName")
@@ -158,8 +197,6 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 //			+ "GROUP BY c.companyId, c.companyName, c.logo, c.description, i.industryId, i.industryName, c.city.cityId")
 //	Page<CompanyWithCountJobDTO> findCompaniesByFilters(@Param("title") String title, @Param("cityId") Integer cityId,
 //			@Param("industryId") Integer industryId, Pageable pageable);
-	
-	
 
 	@Query("SELECT new com.job_portal.DTO.FollowCompanyDTO(c.companyId, c.logo, c.companyName) " + "FROM Company c "
 			+ "JOIN c.follows s " + "WHERE s.userId = :seekerId")
@@ -177,5 +214,6 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 		    @Param("industryName") String industryName,
 		    Pageable pageable
 		);
+
 
 }
