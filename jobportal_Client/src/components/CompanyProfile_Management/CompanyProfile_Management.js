@@ -299,19 +299,19 @@ const CompanyProfile_Management = () => {
   const totalStars = reviews.reduce((total, review) => total + review.star, 0);
   const averageStars = reviews.length > 0 ? totalStars / reviews.length : 0;
 
-  const colors = [
-    "from-sky-500 to-sky-700",
-    "from-purple-500 to-purple-700",
-    "from-red-500 to-red-700",
-    "from-green-500 to-green-700",
-    "from-orange-500 to-orange-700",
-  ];
+  // const colors = [
+  //   "from-sky-500 to-sky-700",
+  //   "from-purple-500 to-purple-700",
+  //   "from-red-500 to-red-700",
+  //   "from-green-500 to-green-700",
+  //   "from-orange-500 to-orange-700",
+  // ];
 
-  const [currentColorIndex, setCurrentColorIndex] = useState(0);
+  // const [currentColorIndex, setCurrentColorIndex] = useState(0);
 
-  const handleChangeBackground = () => {
-    setCurrentColorIndex((prevIndex) => (prevIndex + 1) % colors.length);
-  };
+  // const handleChangeBackground = () => {
+  //   setCurrentColorIndex((prevIndex) => (prevIndex + 1) % colors.length);
+  // };
 
   // Thêm state để kiểm soát việc hiển thị menu màu sắc
   const [showColorMenu, setShowColorMenu] = useState(false);

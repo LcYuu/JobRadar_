@@ -14,10 +14,10 @@ import com.job_portal.models.Company;
 import com.job_portal.models.Seeker;
 import com.job_portal.projection.ApplicantProfileProjection;
 
+
 public interface SeekerRepository extends JpaRepository<Seeker, UUID> {
 
 	public Optional<Seeker> findById(UUID userId);
-
 	@Query(value = """
 		    SELECT 
 		        BIN_TO_UUID(p.post_id) AS postId, 

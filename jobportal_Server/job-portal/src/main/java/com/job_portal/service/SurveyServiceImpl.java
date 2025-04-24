@@ -19,7 +19,6 @@ import com.job_portal.models.Survey;
 import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.SurveyRepository;
 import java.time.Duration;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -235,7 +234,6 @@ public class SurveyServiceImpl implements ISurveyService {
                 dto.setCandidateQuality(survey.getCandidateQuality());
                 dto.setSubmittedAt(survey.getSubmittedAt());
                 dto.setSentAt(survey.getCreatedAt());
-
                 return dto;
             })
             .collect(Collectors.toList());
@@ -267,7 +265,6 @@ public class SurveyServiceImpl implements ISurveyService {
         survey.setSurveyStatus("PENDING");
         survey.setCreatedAt(LocalDateTime.now());
         survey.setSubmittedAt(LocalDateTime.now());;
-
         survey = surveyRepository.save(survey);
 
         // Send email logic...

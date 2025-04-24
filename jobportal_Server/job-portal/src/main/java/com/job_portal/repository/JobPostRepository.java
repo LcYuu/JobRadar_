@@ -111,7 +111,6 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	long countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(UUID companyId,
 			LocalDateTime currentDate);
 
-
 	@Query(value = "SELECT BIN_TO_UUID(jp.post_id) AS postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
 			+ "jp.type_of_work AS typeOfWork, jp.create_date AS createDate, jp.expire_date AS expireDate, "
 			+ "COUNT(DISTINCT a.post_id) AS applicationCount, jp.status, "
@@ -173,7 +172,9 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	// LocalDateTime currentDate);
 
 	@Query("SELECT COUNT(j) FROM JobPost j WHERE DATE(j.createDate) BETWEEN :startDate AND :endDate")
+
 	long countByCreatedAtBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
 
 	Page<JobPost> findByCompanyCompanyId(UUID companyId, Pageable pageable);
 

@@ -68,7 +68,6 @@ public class ApplyJobController {
 		}
 	}
 
-
 	@GetMapping("/checkApply/{postId}")
 	public ResponseEntity<Boolean> checkIfApplied(@PathVariable("postId") UUID postId,
 			@RequestHeader("Authorization") String jwt) {

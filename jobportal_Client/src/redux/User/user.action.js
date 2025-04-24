@@ -71,11 +71,10 @@ export const updateUserStatus = (userId, userData) => async (dispatch) => {
 export const getUserTypes = () => async (dispatch) => {
   dispatch({ type: GET_USER_TYPES_REQUEST });
   try {
-<<<<<<< HEAD
+
     const jwt = localStorage.getItem('jwt');
-=======
-    const jwt = sessionStorage.getItem('jwt');
->>>>>>> adda0d435d9825d9f2fbcba28571bec2b69ba1fb
+
+
     if (!jwt) {
       throw new Error('No token found');
     }
@@ -101,11 +100,10 @@ export const getUserTypes = () => async (dispatch) => {
 export const getUserRoles = () => async (dispatch) => {
   dispatch({ type: GET_USER_ROLES_REQUEST });
   try {
-<<<<<<< HEAD
+
     const jwt = localStorage.getItem('jwt');
-=======
-    const jwt = sessionStorage.getItem('jwt');
->>>>>>> adda0d435d9825d9f2fbcba28571bec2b69ba1fb
+
+
     if (!jwt) {
       throw new Error('No token found');
     }

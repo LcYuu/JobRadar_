@@ -15,6 +15,7 @@ import { loginAction } from "../../redux/Auth/auth.thunk";
 const Modal = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
 
+
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose();

@@ -1,6 +1,7 @@
 package com.job_portal.controller;
 
 import java.sql.Timestamp;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -128,7 +129,6 @@ public class CompanyController {
 		// Trả về true nếu hợp lệ, false nếu không hợp lệ
 		return ResponseEntity.ok(isTaxCodeValid);
 	}
-
 
 	@GetMapping("/validate-tax-info/{taxCode}")
 	public ResponseEntity<?> validateTaxInfo(@PathVariable String taxCode) {

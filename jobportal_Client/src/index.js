@@ -14,6 +14,7 @@ import { isTokenExpired } from './utils/tokenUtils';
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
 
+
     <Provider store={store}>
       <ErrorBoundary>
         <BrowserRouter future={{ v7_relativeSplatPath: true }}>
@@ -33,6 +34,7 @@ root.render(
         />
       </ErrorBoundary>
     </Provider>
+    
     
 );
 

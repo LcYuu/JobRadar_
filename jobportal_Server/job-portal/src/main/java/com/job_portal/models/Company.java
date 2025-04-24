@@ -103,7 +103,6 @@ public class Company {
 	private UserAccount userAccount;
 
 //	@JsonIgnore
-
 	@OneToMany(mappedBy = "company", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<ImageCompany> images = new ArrayList<>();
 

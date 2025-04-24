@@ -2,9 +2,11 @@ package com.job_portal.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,9 +30,13 @@ import com.job_portal.repository.CompanyRepository;
 import com.job_portal.repository.IndustryRepository;
 import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.SeekerRepository;
+
 import com.job_portal.utils.EmailUtil;
+
 import com.social.exceptions.AllExceptions;
 import jakarta.mail.MessagingException;
+import jakarta.persistence.EntityNotFoundException;
+
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
@@ -51,7 +57,6 @@ public class CompanyServiceImpl implements ICompanyService {
 	SeekerRepository seekerRepository;
 	@Autowired
 	JobPostRepository jobPostRepository;
-
 	@Autowired
 	private EmailUtil emailUtil;
 
@@ -69,7 +74,6 @@ public class CompanyServiceImpl implements ICompanyService {
 
 	@Override
 	public boolean updateCompany(CompanyDTO companyDTO, UUID companyId) throws AllExceptions {
-
 		// Tìm kiếm Company theo id
 		Optional<Company> existingCompany = companyRepository.findById(companyId);
 

@@ -23,8 +23,6 @@ import {
   fetchSocialLinks,
   updateSocialLink,
 } from "../../redux/SocialLink/socialLink.thunk";
-import { SelectTrigger, SelectValue } from "../../ui/select";
-import { Label } from "../../ui/label";
 import { toast } from "react-toastify";
 
 const style = {

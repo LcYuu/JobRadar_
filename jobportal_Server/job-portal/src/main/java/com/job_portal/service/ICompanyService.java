@@ -1,7 +1,9 @@
 package com.job_portal.service;
 
 import java.time.LocalDate;
+
 import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -23,5 +25,6 @@ public interface ICompanyService {
 	public List<Integer> getIndustryIdsByCompanyId(UUID companyId);
 	public void blockCompany(UUID companyId, String reason, LocalDateTime until) throws MessagingException;
 	public void unblockCompany(UUID companyId) throws MessagingException;
+
 	
 }

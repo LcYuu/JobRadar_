@@ -30,7 +30,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.job_portal.DTO.ApplicantProfileDTO;
 import com.job_portal.DTO.FollowCompanyDTO;
-
 import com.job_portal.DTO.FollowSeekerDTO;
 
 import com.job_portal.DTO.SeekerDTO;
@@ -72,11 +71,13 @@ public class SeekerController {
 	
 	private static final Logger logger = LoggerFactory.getLogger(SeekerController.class);
 
+
 	@GetMapping("/get-all")
 	public ResponseEntity<List<Seeker>> getSeeker() {
 		List<Seeker> seekers = seekerRepository.findAll();
 		return new ResponseEntity<>(seekers, HttpStatus.OK);
 	}
+
 
 	@GetMapping("/candidate-skills")
 	public ResponseEntity<Seeker> getProfileCandidateById(@RequestParam("userId") UUID userId) throws AllExceptions {
@@ -99,7 +100,6 @@ public class SeekerController {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		}
 	}
-
 
 
 //	@DeleteMapping("/delete-social/{socialName}")
