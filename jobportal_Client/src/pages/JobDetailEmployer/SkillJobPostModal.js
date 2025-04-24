@@ -2,6 +2,7 @@ import { Button, Modal, IconButton } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
+
 import { Checkbox } from "../../ui/checkbox";
 import { getAllSkill } from "../../redux/Skills/skill.thunk";
 import { getDetailJobById, updateJob } from "../../redux/JobPost/jobPost.thunk";
@@ -205,6 +206,7 @@ const SkillPostModal = ({ open, handleClose, postId }) => {
   const handleSaveSkills = async () => {
     setIsLoading(true);
     try {
+
       const skillIds = selectedSkills.map((skill) => skill.skillId);
       await dispatch(
         updateJob({

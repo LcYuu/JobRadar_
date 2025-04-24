@@ -1,5 +1,6 @@
 package com.job_portal.controller;
 
+
 import java.sql.Timestamp;
 
 import java.time.LocalDate;
@@ -19,7 +20,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-
 import org.springframework.http.HttpMethod;
 
 import org.springframework.http.HttpStatus;
@@ -46,6 +46,7 @@ import com.job_portal.models.Company;
 import com.job_portal.models.Industry;
 import com.job_portal.models.JobPost;
 import com.job_portal.models.Review;
+
 import com.job_portal.models.Seeker;
 
 import com.job_portal.models.UserAccount;
@@ -78,10 +79,8 @@ public class CompanyController {
 	private RestTemplate restTemplate;
 	@Autowired
 	private UserAccountRepository userAccountRepository;
-
 	@Autowired
 	CityRepository cityRepository;
-
 	@Autowired
 	private IApplyJobService applyJobService;
 	@Autowired
@@ -229,7 +228,6 @@ public class CompanyController {
 	        }).collect(Collectors.toList());
 	}
 
-	
 	@GetMapping("/search-company-by-feature")
 	public Page<CompanyWithCountJobDTO> searchCompanies(
 	        @RequestParam(required = false) String title,
@@ -241,13 +239,16 @@ public class CompanyController {
 	    Pageable pageable = PageRequest.of(page, size);
 	    Page<CompanyWithCountJob> projections = companyRepository.findCompaniesByFilters(title, cityId, industryId, pageable);
 
+
 	    // In ra danh sách industryIds dạng chuỗi trước khi chuyển đổi
 	    projections.forEach(proj -> System.out.println("IndustryIds (raw): " + proj.getIndustryIds()));
+
 
 	    return projections.map(proj -> new CompanyWithCountJobDTO(
 	        proj.getCompanyId(),
 	        proj.getCompanyName(),
 	        proj.getLogo(),
+
 	        convertStringToList(proj.getIndustryIds()), // Ví dụ: "1,2,3" → List<Integer>
 	        proj.getDescription(),
 	        proj.getCityId(),
@@ -368,7 +369,6 @@ public class CompanyController {
 		}
 	}
 
-
 	@GetMapping("/can-rating/{companyId}")
 	public ResponseEntity<Boolean> checkIfSaved(@RequestHeader("Authorization") String jwt,
 			@PathVariable("companyId") UUID companyId) {
@@ -378,7 +378,6 @@ public class CompanyController {
 		return ResponseEntity.ok(isSaved);
 	}
 
-	
 	@GetMapping("/get-industry-name/{industryId}")
 	public ResponseEntity<String> getIndustryNameById(@PathVariable Integer industryId) {
 		try {
@@ -403,6 +402,4 @@ public class CompanyController {
 		Page<Company> companies = companyRepository.findCompaniesWithFilters(companyName, industryName, pageable);
 		return ResponseEntity.ok(companies);
 	}
-
-	
 }

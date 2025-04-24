@@ -127,6 +127,7 @@ export default function FindCompanies() {
         : allIndustries.find((industry) => industry.industryId === industryId)
             ?.industryName || "Tất cả công ty"
     );
+
   
     const updatedFilters = {
       ...tempFilters,

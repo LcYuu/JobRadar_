@@ -1,6 +1,7 @@
 import React from "react";
 
 const SkillsPreview = ({ cvInfo }) => {
+
   // Chuyển đổi rating sang tên level
   const getRatingName = (rating) => {
     switch (Number(rating)) {

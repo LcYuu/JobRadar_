@@ -27,6 +27,5 @@ public class UserType {
 	private Integer userTypeId;
 
 	private String user_type_name;
-
 	
 }

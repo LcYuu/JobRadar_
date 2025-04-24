@@ -1,4 +1,6 @@
+
 import React, { useContext, useEffect, useState, useRef } from "react";
+
 import { Input } from "../../../ui/input";
 import { Rating } from "@smastrom/react-rating";
 
@@ -7,6 +9,7 @@ import { Button } from "../../../ui/button";
 import { LoaderCircle } from "lucide-react";
 import { CVInfoContext } from "../../../context/CVInfoContext";
 import { toast } from "react-toastify";
+
 import { useDispatch, useSelector } from "react-redux";
 import { updateCV, getGenCVById } from "../../../redux/GeneratedCV/generated_cv.thunk";
 import { useParams } from "react-router-dom";

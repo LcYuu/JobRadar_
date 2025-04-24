@@ -1,4 +1,6 @@
+
 import React, { useContext, useState, useEffect } from "react";
+
 import { Button } from "../../ui/button";
 import { LayoutGrid } from "lucide-react";
 import { CVInfoContext } from "../../context/CVInfoContext";
@@ -8,6 +10,7 @@ import { updateCV } from "../../redux/GeneratedCV/generated_cv.thunk";
 
 const ThemeColor = () => {
   const colors = [
+
     "#FF5733", "#33FF57", "#3357FF", "#FF33A1", "#A133FF",
     "#33FFA1", "#FF7133", "#71FF33", "#7133FF", "#FF3371",
     "#33FF71", "#3371FF", "#A1FF33", "#33A1FF", "#FF5733",

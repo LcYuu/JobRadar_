@@ -19,5 +19,4 @@ public interface IReviewService {
 	public Page<Review> findReviewByCompanyId(UUID companyId, Pageable pageable);
 	public Review findReviewByCompanyIdAndUserId(UUID companyId, UUID userId);
 	public List<CountReviewByStar> countReviewsByStar(UUID companyId);
-
 }

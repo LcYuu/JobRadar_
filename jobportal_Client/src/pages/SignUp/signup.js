@@ -16,13 +16,17 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import SuccessIcon from "../../components/common/Icon/Sucess/Sucess";
 import FailureIcon from "../../components/common/Icon/Failed/Failed";
-
 import logo1 from "../../assets/images/common/logo1.jpg";
 import { isStrongPassword } from "../../utils/passwordValidator";
 
 // Environment variables
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
+// Hàm validate email
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
 
 export default function SignUpForm() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,13 +37,10 @@ export default function SignUpForm() {
   const [isTimeUp, setIsTimeUp] = useState(false);
   const [resendEmail, setResendEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessages, setErrorMessages] = useState([]);
-  const [companyInfo, setCompanyInfo] = useState(null);
-  const [taxCodeVerified, setTaxCodeVerified] = useState(false);
+  const [isPaused, setIsPaused] = useState(false); // Thêm state isPaused
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -49,7 +50,23 @@ export default function SignUpForm() {
     companyName: "",
     businessEmail: "",
     taxCode: "",
+    address: "", // Thêm address vào formData
   });
+  const [errorMessages, setErrorMessages] = useState([]);
+  const [companyInfo, setCompanyInfo] = useState(null);
+  const [taxCodeVerified, setTaxCodeVerified] = useState(false);
+
+  // Countdown effect
+  useEffect(() => {
+    if (isModalOpen && timeLeft > 0 && !isPaused) {
+      const timer = setTimeout(() => {
+        setTimeLeft(timeLeft - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (timeLeft === 0) {
+      setIsTimeUp(true);
+    }
+  }, [timeLeft, isModalOpen, isPaused]);
 
   // Form fields for job seeker and employer
   const jobSeekerFields = [
@@ -69,74 +86,51 @@ export default function SignUpForm() {
 
   const fields = activeTab === "job-seeker" ? jobSeekerFields : employerFields;
 
-  // Validate email format
-  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  // Add error message with auto-dismiss
   const addErrorMessage = (message) => {
     const id = Date.now();
     setErrorMessages((prev) => [...prev, { id, message }]);
     setTimeout(() => {
       setErrorMessages((prev) => prev.filter((msg) => msg.id !== id));
-    }, 3000);
+    }, 2000);
   };
 
-  // Countdown timer
-  useEffect(() => {
-    if (isModalOpen && timeLeft > 0 && !confirmationStatus) {
-      const timer = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-      return () => clearInterval(timer);
-    } else if (timeLeft === 0) {
-      setIsTimeUp(true);
-    }
-  }, [isModalOpen, timeLeft, confirmationStatus]);
-
-  // Handle form submission
   const handleRegister = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setErrorMessages([]);
 
-    // Validation
-    const emailField = activeTab === "job-seeker" ? formData.email : formData.businessEmail;
-    if (!emailField || !validateEmail(emailField)) {
-      addErrorMessage("Email không hợp lệ.");
-      setIsLoading(false);
-
-      return;
-    }
-    if (!formData.password || !isStrongPassword(formData.password)) {
+    // Validate password
+    if (!isStrongPassword(formData.password)) {
       addErrorMessage(
-        "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt."
+        "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt"
       );
       setIsLoading(false);
       return;
     }
     if (formData.password !== formData.confirmPassword) {
-      addErrorMessage("Mật khẩu xác nhận không khớp.");
+      addErrorMessage("Mật khẩu xác nhận không khớp");
       setIsLoading(false);
       return;
     }
     if (activeTab === "job-seeker" && !formData.fullName) {
-      addErrorMessage("Vui lòng nhập họ và tên.");
+      addErrorMessage("Vui lòng nhập họ và tên");
       setIsLoading(false);
       return;
     }
     if (activeTab === "employer" && (!formData.taxCode || !taxCodeVerified)) {
-      addErrorMessage("Vui lòng xác thực mã số thuế hợp lệ.");
+      addErrorMessage("Vui lòng xác thực mã số thuế hợp lệ");
       setIsLoading(false);
       return;
     }
 
+    const emailField = activeTab === "job-seeker" ? formData.email : formData.businessEmail;
     const userData = {
       userName: activeTab === "employer" ? formData.companyName : formData.fullName,
       email: emailField,
       password: formData.password,
-      userType: { userTypeId: activeTab === "employer" ? 3 : 2 },
+      userType: {
+        userTypeId: activeTab === "employer" ? 3 : 2,
+      },
       provider: "LOCAL",
-
     };
 
     try {
@@ -145,73 +139,55 @@ export default function SignUpForm() {
         setIsModalOpen(true);
         setTimeLeft(120);
         setIsTimeUp(false);
+        setResendEmail(emailField); // Đặt email để gửi lại mã nếu cần
       }
     } catch (error) {
+      console.error("Signup error:", error.response?.data);
       addErrorMessage(error.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Verify tax code
-  const verifyTaxCode = async (taxCode) => {
-    if (!taxCode || !/^\d{10}(-\d{3})?$/.test(taxCode)) {
-      addErrorMessage("Mã số thuế không hợp lệ (10 hoặc 13 chữ số).");
-      return false;
-    }
-
+  const handleVerifyEmployer = async (email) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/company/validate-tax-info/${taxCode}`);
-      if (response.data) {
-        setCompanyInfo(response.data);
-        setTaxCodeVerified(true);
-        setFormData((prev) => ({
-          ...prev,
-          companyName: response.data.companyName,
-          taxCode,
-          address: response.data.address,
-        }));
+      if (!formData.companyName || !formData.taxCode || !taxCodeVerified) {
+        addErrorMessage("Vui lòng xác thực mã số thuế trước khi tiếp tục");
+        return false;
+      }
+
+      const company = {
+        companyName: formData.companyName,
+        taxCode: formData.taxCode,
+        address: companyInfo?.address || "",
+        industry: [{ industryId: 0 }],
+        city: { cityId: companyInfo?.cityId || 0 },
+      };
+
+      const response = await axios.post(
+        `${API_BASE_URL}/auth/verify-employer`,
+        company,
+        {
+          params: { email: email },
+        }
+      );
+
+      if (response.status === 200) {
         return true;
       }
-      addErrorMessage("Mã số thuế không tồn tại.");
+      addErrorMessage("Mã số thuế không tồn tại");
       return false;
     } catch (error) {
-      addErrorMessage("Lỗi khi xác thực mã số thuế. Vui lòng thử lại.");
+      console.error("Error verifying employer:", error);
+      if (error.response?.status === 404) {
+        addErrorMessage("Không tìm thấy tài khoản. Vui lòng thử lại sau.");
+      } else {
+        addErrorMessage("Lỗi xác thực thông tin công ty. Vui lòng thử lại.");
+      }
       return false;
     }
   };
 
-  // Verify employer
-  const handleVerifyEmployer = async (email) => {
-    if (!formData.companyName || !formData.taxCode || !taxCodeVerified) {
-      addErrorMessage("Vui lòng xác thực mã số thuế trước khi tiếp tục.");
-      return false;
-    }
-
-    const company = {
-      companyName: formData.companyName,
-      taxCode: formData.taxCode,
-      address: companyInfo?.address || "",
-      industry: [{ industryId: 0 }],
-      city: { cityId: companyInfo?.cityId || 0 },
-    };
-
-    try {
-      const response = await axios.post(`${API_BASE_URL}/auth/verify-employer`, company, {
-        params: { email },
-      });
-      return response.status === 200;
-    } catch (error) {
-      addErrorMessage(
-        error.response?.status === 404
-          ? "Không tìm thấy tài khoản."
-          : "Lỗi xác thực thông tin công ty."
-      );
-      return false;
-    }
-  };
-
-  // Handle OTP confirmation
   const handleConfirmation = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -235,24 +211,25 @@ export default function SignUpForm() {
         setTimeout(() => navigate("/auth/sign-in"), 2000);
       } else {
         setConfirmationStatus("failure");
-        addErrorMessage(response.data || "Mã xác nhận không đúng.");
+        setIsPaused(false);
+        addErrorMessage(response.data || "Xác thực thất bại. Vui lòng thử lại.");
       }
     } catch (error) {
+      console.error("Verification error:", error);
       setConfirmationStatus("failure");
-      addErrorMessage(error.response?.data?.message || "Xác thực thất bại.");
+      setIsPaused(false);
+      addErrorMessage(error.response?.data?.message || "Xác thực thất bại. Vui lòng thử lại.");
     } finally {
       setIsLoading(false);
-
     }
   };
 
-  // Resend OTP
   const handleResendCode = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     if (!resendEmail || !validateEmail(resendEmail)) {
-      addErrorMessage("Vui lòng nhập email hợp lệ.");
+      addErrorMessage("Vui lòng nhập email hợp lệ");
       setIsLoading(false);
       return;
     }
@@ -263,6 +240,7 @@ export default function SignUpForm() {
       });
       setTimeLeft(120);
       setIsTimeUp(false);
+      setIsPaused(false);
       addErrorMessage("Mã xác nhận đã được gửi lại!");
     } catch (error) {
       addErrorMessage("Không thể gửi lại mã xác nhận. Vui lòng thử lại.");
@@ -271,7 +249,6 @@ export default function SignUpForm() {
     }
   };
 
-  // Handle tab change
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     setFormData({
@@ -282,13 +259,13 @@ export default function SignUpForm() {
       companyName: "",
       businessEmail: "",
       taxCode: "",
+      address: "",
     });
     setTaxCodeVerified(false);
     setCompanyInfo(null);
     setErrorMessages([]);
   };
 
-  // Render confirmation modal content
   const renderConfirmationStatus = () => (
     <AnimatePresence mode="wait">
       {confirmationStatus === "success" && (
@@ -380,7 +357,6 @@ export default function SignUpForm() {
           <p className="mt-2 text-sm text-gray-600">
             Vui lòng nhập lại email để lấy mã xác nhận mới.
           </p>
-
           <motion.form
             key="resendForm"
             initial={{ opacity: 0, y: 20 }}
@@ -409,6 +385,36 @@ export default function SignUpForm() {
       )}
     </AnimatePresence>
   );
+
+  const verifyTaxCode = async (taxCode) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/company/validate-tax-info/${taxCode}`);
+      if (response.data) {
+        setCompanyInfo(response.data);
+        setTaxCodeVerified(true);
+        setFormData((prev) => ({
+          ...prev,
+          companyName: response.data.companyName,
+          taxCode: taxCode,
+          address: response.data.address || "",
+        }));
+        return true;
+      }
+      addErrorMessage("Mã số thuế không hợp lệ hoặc không tồn tại");
+      return false;
+    } catch (error) {
+      console.error("Error verifying tax code:", error);
+      addErrorMessage("Mã số thuế không hợp lệ hoặc không tồn tại");
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    if (taxCodeVerified) {
+      console.log("Tax code verified:", formData.taxCode);
+      console.log("Company info:", companyInfo);
+    }
+  }, [taxCodeVerified, formData.taxCode, companyInfo]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 flex items-center justify-center p-4">
@@ -448,7 +454,6 @@ export default function SignUpForm() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-
           <form className="space-y-4" onSubmit={handleRegister}>
             <div className="space-y-2">
               {fields.map((field) => (
@@ -470,7 +475,13 @@ export default function SignUpForm() {
                   {field.name === "taxCode" && activeTab === "employer" && (
                     <Button
                       type="button"
-                      onClick={() => verifyTaxCode(formData.taxCode)}
+                      onClick={async () => {
+                        console.log("Verifying tax code:", formData.taxCode);
+                        const verified = await verifyTaxCode(formData.taxCode);
+                        if (!verified) {
+                          addErrorMessage("Mã số thuế không hợp lệ hoặc không tồn tại");
+                        }
+                      }}
                       className="absolute right-0 top-0 h-full px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-r"
                       disabled={isLoading}
                     >
@@ -480,13 +491,13 @@ export default function SignUpForm() {
                 </div>
               ))}
             </div>
-            <AnimatePresence>
+            <AnimatePresence mode="sync">
               {errorMessages.map((error) => (
                 <motion.p
                   key={error.id}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: -10, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: "auto" }}
+                  exit={{ opacity: 0, y: 10, height: 0 }}
                   transition={{ duration: 0.2 }}
                   className="text-red-500 text-sm text-center bg-red-50 p-2 rounded-md border border-red-200"
                 >
@@ -514,9 +525,12 @@ export default function SignUpForm() {
           <p className="mt-4 text-center text-xs text-gray-500">
             Bằng cách nhấp vào 'Đăng ký', bạn xác nhận rằng bạn đã đọc và chấp nhận{" "}
             <Link to="/terms-of-service" className="underline text-indigo-600">
-              Điều khoản dịch vụ và Chính sách bảo mật
+              Điều khoản dịch vụ
             </Link>{" "}
-            của chúng tôi.
+            và{" "}
+            <Link to="/privacy-policy" className="underline text-indigo-600">
+              Chính sách bảo mật
+            </Link>
           </p>
         </CardContent>
       </Card>

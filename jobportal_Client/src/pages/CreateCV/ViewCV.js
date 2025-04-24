@@ -1,4 +1,6 @@
+
 import React, { useEffect, useState, useRef } from "react";
+
 import { Button } from "../../ui/button";
 import CVPreview from "../../components/CV/CVPreview";
 import { CVInfoContext } from "../../context/CVInfoContext";
@@ -11,6 +13,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { createCV } from "../../redux/CV/cv.thunk";
 import { toast } from "react-toastify";
+
 import { LoaderCircle } from "lucide-react";
 
 // Thêm CSS cho việc in ấn
@@ -153,7 +156,6 @@ const ViewCV = () => {
       setIsUploading(false);
       return;
     }
-
     try {
       toast.info("Đang tạo file PDF, vui lòng đợi...");
       
@@ -209,8 +211,7 @@ const ViewCV = () => {
       }
       
       const fileName = genCv?.cvName ? `${genCv.cvName}.pdf` : "cv.pdf";
-      
-      // Tạo và tải file PDF
+      // Tạo v tải file PDF
       const pdfBlob = pdf.output("blob");
       const pdfFile = new File([pdfBlob], fileName, {
         type: "application/pdf",
@@ -305,6 +306,7 @@ const ViewCV = () => {
         </div>
       </div>
       <style dangerouslySetInnerHTML={{ __html: printStyles }} />
+
     </CVInfoContext.Provider>
   );
 };

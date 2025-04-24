@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
 import { Checkbox } from "../../ui/checkbox";
+
 import Swal from "sweetalert2";
 import { getAllSkill } from "../../redux/Skills/skill.thunk";
 import { getSeekerByUser, updateSeekerAction } from "../../redux/Seeker/seeker.thunk";
@@ -248,6 +249,15 @@ const SkillModal = ({ open, handleClose }) => {
     } finally {
       setIsLoading(false);
       handleClose();
+      Swal.fire({
+        icon: "success",
+        title: "Cập nhật",
+        text: "Cập nhật kỹ năng thành công",
+        customClass: {
+          popup: "z-[9999]", // Sử dụng lớp z-index của Tailwind
+          backdrop: "bg-black bg-opacity-50",
+        },
+      });
     }
   };
 

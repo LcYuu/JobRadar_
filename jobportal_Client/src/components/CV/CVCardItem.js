@@ -8,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
+
 import {
   deleteCV,
   getGenCVBySeeker,
@@ -18,10 +19,11 @@ import { toast } from "react-toastify";
 
 const CVCardItem = ({ cv }) => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch()
 
   const handleDelete = async (genCvId) => {
-    console.log("🚀 ~ handleDelete ~ genCvId:", genCvId);
+    console.log("🚀 ~ handleDelete ~ genCvId:", genCvId)
+
     const result = await Swal.fire({
       title: "Xác nhận xóa CV này",
       text: "Bạn có chắc chắn muốn xóa CV này?",
@@ -34,7 +36,8 @@ const CVCardItem = ({ cv }) => {
     if (result.isConfirmed) {
       try {
         await dispatch(deleteCV(genCvId));
-        dispatch(getGenCVBySeeker());
+        dispatch(getGenCVBySeeker())
+
         toast.success("Xóa CV thành công!");
       } catch (error) {
         toast.error("Xóa CV thất bại. Vui lòng thử lại!");
@@ -42,14 +45,17 @@ const CVCardItem = ({ cv }) => {
     }
   };
   return (
+
     <div className="group transition-all duration-300 hover:scale-105 hover:shadow-2xl rounded-lg">
       <Link to={"/create-cv/detail-cv/" + cv.generatedCvId}>
         <div
           className="p-14 bg-gradient-to-b from-pink-100 via-purple-200 to-blue-200 h-[280px] rounded-t-lg border-t-4 transition-all duration-300 group-hover:brightness-105"
+
           style={{
             borderColor: cv?.themeColor,
           }}
         >
+
           <div className="flex items-center justify-center h-[180px] transition-transform duration-300 group-hover:scale-110">
             <img
               src={cvImage}
@@ -73,6 +79,7 @@ const CVCardItem = ({ cv }) => {
         <DropdownMenu>
           <DropdownMenuTrigger className="rounded-full p-1 hover:bg-white hover:bg-opacity-20 transition-all">
             <MoreVertical className="h-4 w-4 cursor-pointer text-black drop-shadow-md" />
+
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-white shadow-md rounded-md">
             <DropdownMenuItem

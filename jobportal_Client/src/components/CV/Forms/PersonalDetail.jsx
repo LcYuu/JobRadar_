@@ -4,16 +4,20 @@ import { Input } from "../../../ui/input";
 import { Button } from "../../../ui/button";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+
 import { getGenCVById, updateCV } from "../../../redux/GeneratedCV/generated_cv.thunk";
+
 import { ImageIcon, LoaderCircle } from "lucide-react";
 import { toast } from "react-toastify";
 import { Avatar } from "@mui/material";
 import { uploadToCloudinary } from "../../../utils/uploadToCloudinary";
 import ThemeColor from "../ThemeColor";
 
+
 const PersonalDetail = ({ enabledNext }) => {
   const { genCvId } = useParams();
   const dispatch = useDispatch();
+
   const { cvInfo, setCvInfo, onSaving } = useContext(CVInfoContext);
   const { genCv } = useSelector((store) => store.genCV);
   const [imageLoading, setImageLoading] = useState(false);
@@ -75,6 +79,7 @@ const PersonalDetail = ({ enabledNext }) => {
   const handleInputChange = (e) => {
     enabledNext(false);
     const { name, value } = e.target;
+
     setCvInfo((prev) => ({
       ...prev,
       [name]: value,
@@ -212,6 +217,7 @@ const PersonalDetail = ({ enabledNext }) => {
             )}
           </label>
         </div>
+
       </div>
 
       <div className="grid grid-cols-2 mt-5 gap-3">
@@ -286,5 +292,5 @@ const PersonalDetail = ({ enabledNext }) => {
     </div>
   );
 };
-
 export default PersonalDetail;
+

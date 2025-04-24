@@ -39,6 +39,7 @@ import com.job_portal.models.Notification;
 import com.job_portal.models.Seeker;
 import com.job_portal.models.UserAccount;
 import com.job_portal.projection.ApplicantProfileProjection;
+
 import com.job_portal.repository.CompanyRepository;
 import com.job_portal.repository.NotificationRepository;
 import com.job_portal.repository.SeekerRepository;
@@ -70,14 +71,11 @@ public class SeekerController {
 	private NotificationRepository notificationRepository;
 	
 	private static final Logger logger = LoggerFactory.getLogger(SeekerController.class);
-
-
 	@GetMapping("/get-all")
 	public ResponseEntity<List<Seeker>> getSeeker() {
 		List<Seeker> seekers = seekerRepository.findAll();
 		return new ResponseEntity<>(seekers, HttpStatus.OK);
 	}
-
 
 	@GetMapping("/candidate-skills")
 	public ResponseEntity<Seeker> getProfileCandidateById(@RequestParam("userId") UUID userId) throws AllExceptions {
@@ -100,7 +98,6 @@ public class SeekerController {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		}
 	}
-
 
 //	@DeleteMapping("/delete-social/{socialName}")
 //	public ResponseEntity<String> deleteSocialLink(@RequestHeader("Authorization") String jwt,

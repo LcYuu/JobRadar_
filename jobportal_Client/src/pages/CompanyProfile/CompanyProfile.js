@@ -35,6 +35,7 @@ import {
   fetchSocialLinks,
   fetchSocialLinksByUserId,
 } from "../../redux/SocialLink/socialLink.thunk";
+
 import { resetJobPost } from "../../redux/JobPost/jobPostSlice";
 const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
   return (
@@ -62,7 +63,6 @@ export default function CompanyProfile() {
   const { companyId } = useParams();
   const dispatch = useDispatch();
   const { jobPost = [], error } = useSelector((store) => store.jobPost);
-  console.log("🚀 ~ CompanyProfile ~ jobPost:", jobPost)
 
   const [loading, setLoading] = useState(true);
 
@@ -292,8 +292,6 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
       }
     }
   };
-
-  
 
   const navigate = useNavigate();
 

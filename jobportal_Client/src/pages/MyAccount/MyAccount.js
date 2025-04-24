@@ -36,7 +36,18 @@ export default function Dashboard() {
     if (user?.userType?.userTypeId === 2) {
       section = sectionMap.user[path] || "Dashboard";
     } else if (user?.userType?.userTypeId === 3) {
-      section = sectionMap.employer[path] || "Dashboard";
+      if (path.includes("employer/account-management/dashboard")) {
+        setSelectedSection("Dashboard");
+      } else if (path.includes("employer/account-management/company-profile")) {
+        setSelectedSection("Profile công ty");
+      } else if (path.includes("employer/account-management/applications")) {
+        setSelectedSection("Danh sách ứng tuyển");
+      } else if (path.includes("employer/account-management/jobs")) {
+        setSelectedSection("Danh sách công việc");
+      } else if (path.includes("employer/account-management/reviews")) {
+        setSelectedSection("Danh sách đánh giá");
+      }
+    
     }
 
     setSelectedSection(section);

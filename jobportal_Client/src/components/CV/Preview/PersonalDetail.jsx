@@ -3,9 +3,7 @@ import React from "react";
 const PersonalDetail = ({ cvInfo }) => {
   const defaultAvatar =
     "https://res.cloudinary.com/ddqygrb0g/image/upload/v1739714221/avatar_fa4cj7.jpg";
-  
   const themeColor = cvInfo?.themeColor || "#3357FF"; // Default theme color
-
   return (
     <div 
       className="flex flex-col items-center gap-6 my-3 p-6 w-full rounded-lg relative"
@@ -27,7 +25,6 @@ const PersonalDetail = ({ cvInfo }) => {
           }}
         />
       </div>
-
       {/* Personal Information */}
       <div className="flex flex-col items-center text-center w-full">
         <h3
