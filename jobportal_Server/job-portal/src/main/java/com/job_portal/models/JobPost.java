@@ -73,6 +73,7 @@ public class JobPost {
 	@Column(name = "type_of_work", length = 50, nullable = false)
 	private String typeOfWork;
 
+
 	@Column(name = "position", length = 50, nullable = false)
 	private String position;
 

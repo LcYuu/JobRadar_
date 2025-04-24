@@ -151,8 +151,12 @@ const App = () => {
     );
   }, [location.pathname]);
 
+
+
+
   return (
     <div className="app-container">
+      {/* <Background /> */}
       {/* <Background /> */}
       {showHeader && <Header />}
       {/* {showHeader && <Banner />}  */}
@@ -387,7 +391,7 @@ const App = () => {
       {showFooter && <Footer />}
     </div>
   );
-  
 };
 
 export default App;
+

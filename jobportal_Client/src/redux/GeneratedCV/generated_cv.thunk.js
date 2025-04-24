@@ -17,23 +17,29 @@ export const getGenCVBySeeker = createAsyncThunk(
     }
   }
 );
-      
-
 export const getGenCVById = createAsyncThunk(
   "genCV/getGenCVById",
   async (genCvId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/generated-cv/get-gencv-by-id/${genCvId}`);
-      console.log("🚀 ~ API Response:", response.data); // Kiểm tra dữ liệu từ API
+
+      const response = await axios.get(
+        `${API_BASE_URL}/generated-cv/get-gencv-by-id/${genCvId}?t=${Date.now()}`,
+        {
+          headers: {
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+            Expires: "0",
+          },
+        }
+      );
+      console.log("🚀 ~ API Response for genCvId:", genCvId, response.data);
       return response.data;
     } catch (error) {
-      console.error("🚀 ~ API Error:", error.response?.data || error.message);
+      console.error("🚀 ~ API Error for genCvId:", genCvId, error.response?.data || error.message);
       return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
-
-
 // Xóa CV
 export const deleteCV = createAsyncThunk(
   "genCV/deleteCV",
@@ -70,7 +76,8 @@ export const updateCV = createAsyncThunk(
         `/generated-cv/update-cv/${genCvId}`,
         cvData
       );
-      return response.data;
+      console.log("API response data:", response.data); // Log for debugging
+      return response.data; // Ensure API returns updated CV data
     } catch (error) {
       return rejectWithValue(
         error.response ? error.response.data : error.message

@@ -1,8 +1,8 @@
 
 import { useEffect, useState, useCallback } from "react";
+
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
-
 import { Checkbox } from "../../ui/checkbox";
 import JobList_AllJob from "../../components/common/JobList_AllJob/JobList_AllJob";
 import {
@@ -24,40 +24,43 @@ import { countJobByType, fetchSalaryRange, getAllJobAction, searchJobs, semantic
 import { getCity } from "../../redux/City/city.thunk";
 import { getIndustryCount } from "../../redux/Industry/industry.thunk";
 import { toast } from "react-toastify";
+
 import useWebSocket from "../../utils/useWebSocket";
 
 export default function JobSearchPage() {
   const dispatch = useDispatch();
-  useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }, []);
+  const location = useLocation();
+
+  // Redux state
   const {
     searchJob = [],
     jobPost = [],
     totalPages: totalPagesFromSearch = 0,
     totalPages: totalPagesFromAll = 0,
+  
     jobCountByType = [],
     minSalary,
     maxSalary,
   } = useSelector((store) => store.jobPost);
-
   const [currentPage, setCurrentPage] = useState(0);
   const [size] = useState(7);
 
   const [searchInput, setSearchInput] = useState(""); // State tạm thời để lưu input
   const [lastSearchQuery, setLastSearchQuery] = useState(""); // Lưu từ khóa tìm kiếm cuối cùng
 
+
   const { cities = [] } = useSelector((store) => store.city);
   const { industryCount = [] } = useSelector((store) => store.industry);
+
   const [filters, setFilters] = useState({
     title: "",
     selectedTypesOfWork: [],
     cityId: "",
     selectedIndustryIds: [],
+    minSalary: null,
+    maxSalary: null,
   });
+  const [isLoading, setIsLoading] = useState(false);
 
 
   const [isSemanticSearching, setIsSemanticSearching] = useState(false);
@@ -74,10 +77,13 @@ export default function JobSearchPage() {
     (filters.minSalary !== undefined && filters.minSalary !== null) ||
     (filters.maxSalary !== undefined && filters.maxSalary !== null);
 
-  const location = useLocation();
-
+  // Scroll to top on mount
   useEffect(() => {
-    // Check if there are selected industry IDs in the state
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+  // Handle industry IDs from location state
+  useEffect(() => {
     if (location.state?.selectedIndustryIds) {
       setFilters((prev) => ({
         ...prev,
@@ -110,6 +116,50 @@ export default function JobSearchPage() {
     dispatch(fetchSalaryRange());
   }, [dispatch]);
 
+  // Fetch jobs based on filters or all jobs
+  useEffect(() => {
+    setIsLoading(true);
+    if (isFilterApplied) {
+      dispatch(searchJobs({ filters, currentPage, size })).finally(() =>
+        setIsLoading(false)
+      );
+    } else {
+      dispatch(getAllJobAction({ currentPage, size })).finally(() =>
+        setIsLoading(false)
+      );
+    }
+  }, [dispatch, filters, currentPage, size, isFilterApplied]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [filters]);
+
+  // WebSocket handler
+  const handleMessage = useCallback(
+    (dispatch, _, topic) => {
+      if (topic === "/topic/job-updates") {
+        dispatch(countJobByType());
+        dispatch(getIndustryCount());
+        dispatch(fetchSalaryRange());
+        if (isFilterApplied) {
+          dispatch(searchJobs({ filters, currentPage, size }));
+        } else {
+          dispatch(getAllJobAction({ currentPage, size }));
+        }
+      } else if (topic === "/topic/industry-updates") {
+        dispatch(getIndustryCount());
+      }
+    },
+    [dispatch, filters, currentPage, size, isFilterApplied]
+  );
+
+  useWebSocket(
+    ["/topic/job-updates", "/topic/industry-updates"],
+    handleMessage
+  )(dispatch);
+
+  // Handlers
   const handlePageChange = (page) => {
     setCurrentPage(page);
     
@@ -126,12 +176,6 @@ export default function JobSearchPage() {
       dispatch(getAllJobAction({ page, size }));
     }
   };
-
-  useEffect(() => {
-    if (isFilterApplied) {
-      setCurrentPage(0); // Đặt lại trang về 0 khi bộ lọc thay đổi
-    }
-  }, [filters]);
 
   const handleSalaryChange = (newValues) => {
     handleFilterChange({
@@ -398,20 +442,20 @@ export default function JobSearchPage() {
   const totalPages = displayResults.totalPages;
   const totalResults = displayResults.totalElements;
 
-  const handleMessage = useCallback(
-    (dispatch, _, topic) => {
-      if (topic === "/topic/job-updates") {
-        dispatch(countJobByType());
-        dispatch(getIndustryCount());
-        dispatch(fetchSalaryRange());
-        dispatch(searchJobs({ filters, currentPage, size }));
-        dispatch(getAllJobAction({ currentPage, size }));
-      }
-      else if(topic === "/topic/industry-updates"){
-        dispatch(getIndustryCount());
-      }
-    },[]
-  );
+  // const handleMessage = useCallback(
+  //   (dispatch, _, topic) => {
+  //     if (topic === "/topic/job-updates") {
+  //       dispatch(countJobByType());
+  //       dispatch(getIndustryCount());
+  //       dispatch(fetchSalaryRange());
+  //       dispatch(searchJobs({ filters, currentPage, size }));
+  //       dispatch(getAllJobAction({ currentPage, size }));
+  //     }
+  //     else if(topic === "/topic/industry-updates"){
+  //       dispatch(getIndustryCount());
+  //     }
+  //   },[]
+  // );
 
   useWebSocket(["/topic/job-updates", "/topic/industry-updates"], (dispatch, message, topic) =>
     handleMessage(dispatch, message, topic)
@@ -422,7 +466,7 @@ export default function JobSearchPage() {
       <main className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-gray-800 text-center my-8">
           Tìm kiếm{" "}
-          <span className="relative inline-block text-primary text-blue-500">
+          <span className="relative inline-block text-blue-500">
             công việc trong mơ của bạn
             <span className="absolute bottom-0 left-0 w-full h-1 bg-blue-300 opacity-50"></span>
           </span>
@@ -504,9 +548,9 @@ export default function JobSearchPage() {
           </div>
         </div>
 
-        <div className="flex space-x-8 mt-20">
+        <div className="flex space-x-8 mt-8">
           <aside className="w-80 space-y-6 bg-white p-6 rounded-lg shadow-lg">
-            {/* Filter Section */}
+            {/* Job Type Filter */}
             <div>
               <h3 className="font-semibold mb-2 flex justify-between items-center text-gray-800 tracking-tight">
                 Loại công việc
@@ -521,14 +565,17 @@ export default function JobSearchPage() {
                       key={job.typeOfWork}
                     >
                       <Checkbox
+                        checked={filters.selectedTypesOfWork.includes(
+                          job.typeOfWork
+                        )}
                         onCheckedChange={(checked) => {
                           const updatedTypesOfWork = checked
                             ? [...filters.selectedTypesOfWork, job.typeOfWork]
                             : filters.selectedTypesOfWork.filter(
                                 (type) => type !== job.typeOfWork
                               );
-
                           handleFilterChange({
+
                             ...filters,
                             selectedTypesOfWork: updatedTypesOfWork,
                           });
@@ -542,7 +589,7 @@ export default function JobSearchPage() {
               </div>
             </div>
 
-            {/* Industry Section */}
+            {/* Industry Filter */}
             <div>
               <h3 className="font-semibold mb-2 flex justify-between items-center text-gray-800 tracking-tight">
                 Danh mục
@@ -569,8 +616,8 @@ export default function JobSearchPage() {
                             : filters.selectedIndustryIds.filter(
                                 (id) => id !== industry.industryId
                               );
-
                           handleFilterChange({
+
                             ...filters,
                             selectedIndustryIds: updatedIndustryIds,
                           });
@@ -585,10 +632,14 @@ export default function JobSearchPage() {
             </div>
 
             {/* Salary Range Filter */}
+
+            {/* Salary Range Filter */}
             <div>
+
               <h3 className="font-semibold mb-2 flex justify-between items-center text-gray-800 tracking-tight">
                 Mức lương
                 <ChevronDown size={20} className="text-gray-500" />
+
               </h3>
               <div className="px-2">
               <RangeSlider
@@ -612,6 +663,7 @@ export default function JobSearchPage() {
                   </span>
                 </div>
             </div>
+
             </div>
           </aside>
 
@@ -620,48 +672,14 @@ export default function JobSearchPage() {
               <div>
                 <h2 className="text-xl font-semibold">Tất cả công việc</h2>
                 <span className="text-sm font-bold text-gray-500">
+
                   Tổng số: {totalResults} kết quả
+
                 </span>
               </div>
-
-              {/* <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-500">Sắp xếp theo:</span>
-                <Select>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Chọn tiêu chí sắp xếp" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Sắp xếp theo</SelectLabel>
-                      <SelectItem value="Most relevant">
-                        Liên quan nhất
-                      </SelectItem>
-                      <SelectItem value="Newest">Mới nhất</SelectItem>
-                      <SelectItem value="Oldest">Cũ nhất</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-
-                <div className="flex border rounded">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-r-none"
-                  >
-                    <Grid size={20} />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-l-none bg-gray-100"
-                  >
-                    <List size={20} />
-                  </Button>
-                </div>
-              </div> */}
             </div>
-
             {results.length === 0 ? (
+
               <div className="text-center text-gray-500">
                 Không có kết quả nào phù hợp với tìm kiếm của bạn.
               </div>

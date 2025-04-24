@@ -36,7 +36,6 @@ import com.job_portal.repository.ApplyJobRepository;
 import com.job_portal.repository.UserAccountRepository;
 import com.job_portal.service.IApplyJobService;
 import com.job_portal.service.INotificationService;
-
 import com.job_portal.service.WebSocketService;
 import com.social.exceptions.AllExceptions;
 
@@ -133,7 +132,6 @@ public class ApplyJobController {
 			existingApply.setSave(true);
 			applyJobRepository.save(existingApply);
 			webSocketService.sendUpdate("/topic/apply-updates", "APPROVE APPLY");
-
 			return new ResponseEntity<>("Approve successfully", HttpStatus.OK);
 		} catch (Exception e) {
 			// Ghi log lỗi nếu cần thiết
@@ -262,6 +260,7 @@ public class ApplyJobController {
 	            System.out.println("Apply job not found for userId: " + userId + ", postId: " + postId);
 	            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 	        }
+
 
 	        return ResponseEntity.ok().build();
 	    } catch (Exception e) {
@@ -424,7 +423,6 @@ public class ApplyJobController {
 
 		}
 	}
-
 	private ApplyJob convertToEntity(ApplyJobDTO applyDTO, UUID userId, UUID postId) {
 		ApplyJob apply = new ApplyJob();
 		apply.setPostId(postId);

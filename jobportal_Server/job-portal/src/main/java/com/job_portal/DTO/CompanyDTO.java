@@ -1,11 +1,9 @@
 package com.job_portal.DTO;
 
 import java.time.LocalDate;
-
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.AllArgsConstructor;

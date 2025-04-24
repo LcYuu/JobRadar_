@@ -20,9 +20,9 @@ public interface ICompanyService {
 	public List<Company> searchCompaniesByCity(String cityName) throws AllExceptions;
 	public Company findCompanyById(UUID companyId) throws AllExceptions;
 	public Map<String, Object> followCompany(UUID companyId, UUID userId) throws AllExceptions;
-
 	public List<Integer> getIndustryIdsByCompanyId(UUID companyId);
-	public void blockCompany(UUID companyId, String reason, LocalDateTime until)  throws MessagingException;
+	public void blockCompany(UUID companyId, String reason, LocalDateTime until) throws MessagingException;
 	public void unblockCompany(UUID companyId) throws MessagingException;
+
 	
 }

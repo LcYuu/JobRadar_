@@ -49,4 +49,5 @@ public class ApplyJobEmployerDTO {
         this.isViewed = isViewed;
         this.matchingScore = matchingScore != null ? matchingScore : 0.0;
     }
+
 }

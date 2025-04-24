@@ -83,7 +83,6 @@ public class Company {
 	
 	@Column(name = "blocked_until", length = 200)
 	private LocalDateTime blockedUntil;
-	
 	@JsonIgnore
 	@OneToMany
 	private List<Review> reviews = new ArrayList<>();

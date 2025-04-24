@@ -204,7 +204,6 @@ const JobDetailEmployer = () => {
           district,
           province,
         });
-
         const matchingProvince = provinces.find((p) => p.name === province);
         if (matchingProvince) {
           setSelectedProvince(matchingProvince.code);
@@ -222,7 +221,6 @@ const JobDetailEmployer = () => {
           );
           const data = await response.json();
           setDistricts(data.districts);
-
           const selectedProvinceData = provinces.find(
             (p) => p.code === Number(selectedProvince)
           );
@@ -258,7 +256,6 @@ const JobDetailEmployer = () => {
           );
           const data = await response.json();
           setWards(data.wards);
-
           const selectedDistrictData = districts.find(
             (d) => d.code === Number(selectedDistrict)
           );
@@ -591,6 +588,7 @@ const JobDetailEmployer = () => {
             {detailJob?.approve === false ? (
               isEditing ? (
                 <Button variant="outline" onClick={handleSubmit}>
+
                   Lưu
                 </Button>
               ) : (
@@ -697,7 +695,7 @@ const JobDetailEmployer = () => {
             </ul>
           </Card>
 
-          {/* Trách nhiệm công việc */}
+          
           <Card className="p-6 bg-white shadow-lg">
             <h2 className="text-xl font-semibold mb-4">
               Trách nhiệm công việc
@@ -838,7 +836,8 @@ const JobDetailEmployer = () => {
                   <span className="font-medium">{detailJob?.position}</span>
                 )}
               </div>
-            </div> {/* Đóng thẻ div cho space-y-4 */}
+
+            </div>
           </Card>
 
           <Card className="p-6 bg-white shadow-lg">
@@ -892,7 +891,6 @@ const JobDetailEmployer = () => {
               />
             </section>
           </Card>
-
           <Card className="p-6 bg-white shadow-lg">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold">Kỹ năng yêu cầu</h3>

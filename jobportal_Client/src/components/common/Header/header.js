@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import { logoutAction } from "../../../redux/Auth/auth.thunk";
 
 export default function Header() {
+
   const dispatch = useDispatch();
   const { jwt, user } = useSelector((store) => store.auth);
   const navigate = useNavigate();
@@ -15,9 +16,12 @@ export default function Header() {
   const isAuthenticated = !!jwt && !!user;
   const isSeeker = user?.userType?.userTypeId === 2;
 
+
   const handleSignUpClick = () => {
     navigate("/auth/sign-up");
+    navigate("/auth/sign-up");
   };
+
 
   const handleSignInClick = () => {
     navigate("/auth/sign-in");
@@ -147,6 +151,7 @@ export default function Header() {
 
       </div>
 
+
       <div className="flex space-x-2">
         {isAuthenticated && user ? (
           <div className="flex items-center space-x-4">
@@ -178,7 +183,11 @@ export default function Header() {
             <Button variant="ghost" className="text-white hover:text-purple-200" onClick={handleSignInClick}>
               Login
             </Button>
+            <Button variant="ghost" className="text-white hover:text-purple-200" onClick={handleSignInClick}>
+              Login
+            </Button>
             <Button className="bg-purple-600 text-white hover:bg-purple-700" onClick={handleSignUpClick}>
+
 
               Sign Up
             </Button>
@@ -188,3 +197,4 @@ export default function Header() {
     </header>
   );
 }
+

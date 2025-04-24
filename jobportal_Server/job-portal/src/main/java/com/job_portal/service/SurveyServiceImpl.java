@@ -18,7 +18,6 @@ import com.job_portal.models.JobPost;
 import com.job_portal.models.Survey;
 import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.SurveyRepository;
-
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
