@@ -35,6 +35,7 @@ export default function JobSearchPage() {
     jobPost = [],
     totalPages: totalPagesFromSearch = 0,
     totalPages: totalPagesFromAll = 0,
+  
     jobCountByType = [],
     minSalary,
     maxSalary,
@@ -183,6 +184,7 @@ export default function JobSearchPage() {
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Chọn địa điểm" />
+                  <SelectValue placeholder="Chọn địa điểm" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -284,6 +286,8 @@ export default function JobSearchPage() {
                   ))}
               </div>
             </div>
+
+            {/* Salary Range Filter */}
 
             {/* Salary Range Filter */}
             <div>

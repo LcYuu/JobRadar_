@@ -54,4 +54,16 @@ public class Review {
 	@ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "company_id")
 	private Company company;
+
+	public boolean isAnonymous() {
+		return isAnonymous;
+	}
+
+	public void setAnonymous(boolean anonymous) {
+		this.isAnonymous = anonymous;
+	}
+
+	
+
+	
 }

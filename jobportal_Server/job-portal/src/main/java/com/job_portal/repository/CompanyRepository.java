@@ -131,11 +131,11 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 						""", nativeQuery = true)
 	Page<CompanyWithCountJob> findCompaniesByFilters(@Param("title") String title, @Param("cityId") Integer cityId,
 			@Param("industryId") Integer industryId, Pageable pageable);
+	
 //	@Query("SELECT new com.job_portal.DTO.CompanyWithCountJobDTO(c.companyId, c.companyName, i.industryId, c.description, i.industryName, c.city.cityId, COUNT(j)) "
 //			+ "FROM Company c " + "JOIN c.jobPosts j " + "JOIN c.industry i " + "WHERE j.isApprove = true "
 //			+ "GROUP BY c.companyId, c.companyName, c.description, i.industryName")
 //	Page<CompanyWithCountJobDTO> findCompanyWithCountJob(Specification<Company> spec, Pageable pageable);
-
 
 //	@Query("SELECT new com.job_portal.DTO.CompanyWithCountJobDTO(c.companyId, c.companyName, c.logo, i.industryId, "
 //			+ "c.description, i.industryName, c.city.cityId, COUNT(j)) " + "FROM Company c "

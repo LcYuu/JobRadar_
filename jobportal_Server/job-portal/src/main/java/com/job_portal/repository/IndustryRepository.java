@@ -36,18 +36,18 @@ public interface IndustryRepository extends JpaRepository<Industry, Integer> {
 		       "GROUP BY i.industryId, i.industryName")
 		List<CountJobByIndustry> countJobsByIndustry();
 
-//	@Query("SELECT new com.job_portal.DTO.CountJobByIndustry(i.industryId, i.industryName, COUNT(jp.postId)) " +
-//		       "FROM Industry i " +
-//		       "INNER JOIN i.jobPosts jp " +
-//		       "WITH jp.isApprove = true AND (jp.expireDate IS NULL OR jp.expireDate >= CURRENT_TIMESTAMP) " +
-//		       "GROUP BY i.industryId, i.industryName")
-//	List<CountJobByIndustry> countByIndustry();
-
-	@Query("SELECT new com.job_portal.DTO.CountJobByIndustry(i.industryId, i.industryName, COUNT(jp.postId)) "
-			+ "FROM Industry i " + "INNER JOIN Company c ON c.industry.industryId = i.industryId "
-			+ "INNER JOIN JobPost jp ON jp.company.companyId = c.companyId "
-			+ "WHERE (jp.expireDate > CURRENT_DATE OR jp.expireDate IS NULL) "
-			+ "AND (jp.isApprove = true OR jp.postId IS NULL) " + "GROUP BY i.industryId, i.industryName")
+	@Query("SELECT new com.job_portal.DTO.CountJobByIndustry(i.industryId, i.industryName, COUNT(jp.postId)) " +
+		       "FROM Industry i " +
+		       "INNER JOIN i.jobPosts jp " +
+		       "WITH jp.isApprove = true AND (jp.expireDate IS NULL OR jp.expireDate >= CURRENT_TIMESTAMP) " +
+		       "GROUP BY i.industryId, i.industryName")
 	List<CountJobByIndustry> countByIndustry();
+
+//	@Query("SELECT new com.job_portal.DTO.CountJobByIndustry(i.industryId, i.industryName, COUNT(jp.postId)) "
+//			+ "FROM Industry i " + "INNER JOIN Company c ON c.industry.industryId = i.industryId "
+//			+ "INNER JOIN JobPost jp ON jp.company.companyId = c.companyId "
+//			+ "WHERE (jp.expireDate > CURRENT_DATE OR jp.expireDate IS NULL) "
+//			+ "AND (jp.isApprove = true OR jp.postId IS NULL) " + "GROUP BY i.industryId, i.industryName")
+//	List<CountJobByIndustry> countByIndustry();
 
 }

@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import { logoutAction } from "../../../redux/Auth/auth.thunk";
 
 export default function Header() {
+
   const dispatch = useDispatch();
   const { jwt, user } = useSelector((store) => store.auth);
   const navigate = useNavigate();
@@ -114,10 +115,6 @@ export default function Header() {
       <div className="flex items-center space-x-6">
         <div className="flex items-center space-x-2">
           <img className="w-8 h-8 bg-purple-600 rounded-full" src={logo} alt="logo" />
-          {isSeeker &&(
-            <Link to="/" className="text-xl font-bold text-white">JobRadar</Link>
-          )}
-          
           {isSeeker &&(
             <Link to="/" className="text-xl font-bold text-white">JobRadar</Link>
           )}

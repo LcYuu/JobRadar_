@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.job_portal.DTO.BlockCompanyDTO;
+
 import com.job_portal.DTO.LoginDTO;
 import com.job_portal.config.JwtProvider;
 import com.job_portal.DTO.UserSignupDTO;
@@ -108,7 +109,6 @@ public class AuthController {
 
 	@Autowired
 	private ForgotPasswordRepository forgotPasswordRepository;
-
 
 	@Autowired
 	private TaxCodeValidation taxCodeValidation;
@@ -206,7 +206,6 @@ public class AuthController {
 				user.setActive(true);
 				user.setOtp(null);
 				user.setOtpGeneratedTime(null);
-
 				// Khởi tạo thông tin cơ bản cho người tìm việc
 				if (user.getUserType().getUserTypeId() == 2) {
 					Seeker seeker = new Seeker();
@@ -290,6 +289,7 @@ public class AuthController {
 		user.get().setOtp(otp);
 		user.get().setOtpGeneratedTime(LocalDateTime.now());
 		userAccountRepository.save(user.get());
+
 		return new ResponseEntity<>("Vui lòng check mail để nhận mã đăng ký", HttpStatus.OK); // Đổi mã trạng thái phù
 																								// hợp
 	}
@@ -297,11 +297,11 @@ public class AuthController {
 	private Authentication authenticate(String email, String password) {
 		UserDetails userDetails = accountDetailService.loadUserByUsername(email);
 		if (userDetails == null) {
+
 			throw new BadCredentialsException("Email hoặc mật khẩu không đúng");
 		}
 		if (!passwordEncoder.matches(password, userDetails.getPassword())) {
 			throw new BadCredentialsException("Email hoặc mật khẩu không đúng");
-
 		}
 		return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 	}
@@ -433,7 +433,7 @@ public class AuthController {
 	public AuthResponse loginWithGoogle(@RequestBody Map<String, String> requestBody) {
 		try {
 			String googleToken = requestBody.get("token"); // Lấy googleToken từ frontend
-
+			
 			// Giải mã token Google (JWT) để lấy thông tin người dùng
 			DecodedJWT decodedJWT = JWT.decode(googleToken);
 			String email = decodedJWT.getClaim("email").asString();

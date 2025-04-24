@@ -16,11 +16,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import SuccessIcon from "../../components/common/Icon/Sucess/Sucess";
 import FailureIcon from "../../components/common/Icon/Failed/Failed";
+
 import logo1 from "../../assets/images/common/logo1.jpg";
 import { isStrongPassword } from "../../utils/passwordValidator";
 
 // Environment variables
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+
 
 export default function SignUpForm() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,6 +39,7 @@ export default function SignUpForm() {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -101,6 +104,7 @@ export default function SignUpForm() {
     if (!emailField || !validateEmail(emailField)) {
       addErrorMessage("Email không hợp lệ.");
       setIsLoading(false);
+
       return;
     }
     if (!formData.password || !isStrongPassword(formData.password)) {
@@ -132,6 +136,7 @@ export default function SignUpForm() {
       password: formData.password,
       userType: { userTypeId: activeTab === "employer" ? 3 : 2 },
       provider: "LOCAL",
+
     };
 
     try {
@@ -237,6 +242,7 @@ export default function SignUpForm() {
       addErrorMessage(error.response?.data?.message || "Xác thực thất bại.");
     } finally {
       setIsLoading(false);
+
     }
   };
 
@@ -374,6 +380,7 @@ export default function SignUpForm() {
           <p className="mt-2 text-sm text-gray-600">
             Vui lòng nhập lại email để lấy mã xác nhận mới.
           </p>
+
           <motion.form
             key="resendForm"
             initial={{ opacity: 0, y: 20 }}
@@ -441,6 +448,7 @@ export default function SignUpForm() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
+
           <form className="space-y-4" onSubmit={handleRegister}>
             <div className="space-y-2">
               {fields.map((field) => (

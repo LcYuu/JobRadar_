@@ -103,7 +103,6 @@ public class UserAccount {
 	public void setProvider(String provider) {
 		this.provider = provider;
 	}
-
 	public Company getCompany() {
 		return company;
 	}

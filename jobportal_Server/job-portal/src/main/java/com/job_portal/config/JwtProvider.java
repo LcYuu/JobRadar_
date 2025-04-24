@@ -44,14 +44,12 @@ public class JwtProvider {
 		System.out.println("Email: " + email);
 
 		String jwt = Jwts.builder().setIssuer("GiaThuanSenpai").setIssuedAt(new Date())
-				.setExpiration(new Date(new Date().getTime() + 86400000)).claim("email", email).signWith(key)
-				.compact();
+				.setExpiration(new Date(new Date().getTime() + 86400000)).claim("email", email).signWith(key).compact();
 		return jwt;
-	 }
+	}
 
 	public static String getEmailFromJwtToken(String jwt) {
 		jwt = jwt.substring(7);
-
 		@SuppressWarnings("deprecation")
 		Claims claims = Jwts.parser().setSigningKey(key).build().parseClaimsJws(jwt).getBody();
 
@@ -80,27 +78,22 @@ public class JwtProvider {
 	}
 
 	public Date getExpirationDateFromJWT(String token) {
-	    // Sử dụng JwtParser để phân tích JWT
-	    JwtParser parser = ((JwtParserBuilder) Jwts.builder()).setSigningKey(key) // Đảm bảo `key` là kiểu Key, ví dụ: `Key key = Keys.hmacShaKeyFor(secretKey.getBytes());`
-	            .build();
-	    Claims claims = parser.parseClaimsJws(token).getBody();
-	    return claims.getExpiration();
+		// Sử dụng JwtParser để phân tích JWT
+		JwtParser parser = ((JwtParserBuilder) Jwts.builder()).setSigningKey(key) // Đảm bảo `key` là kiểu Key, ví dụ:
+																					// `Key key =
+																					// Keys.hmacShaKeyFor(secretKey.getBytes());`
+				.build();
+		Claims claims = parser.parseClaimsJws(token).getBody();
+		return claims.getExpiration();
 	}
-
 
 	public boolean isTokenExpired(String token) {
-	    try {
-	        Date expiration = ((JwtParserBuilder) Jwts.builder())
-	                .setSigningKey(key)
-	                .build()
-	                .parseClaimsJws(token)
-	                .getBody()
-	                .getExpiration();
-	        return expiration.before(new Date());
-	    } catch (Exception e) {
-	        return true; // Nếu lỗi , coi như token đã hết hạn
-	    }
+		try {
+			Date expiration = ((JwtParserBuilder) Jwts.builder()).setSigningKey(key).build().parseClaimsJws(token)
+					.getBody().getExpiration();
+			return expiration.before(new Date());
+		} catch (Exception e) {
+			return true; // Nếu lỗi , coi như token đã hết hạn
+		}
 	}
-
-
 }

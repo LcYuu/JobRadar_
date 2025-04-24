@@ -43,5 +43,4 @@ public class Survey {
     private String surveyStatus;
     private Boolean emailSent;
     private LocalDateTime submittedAt;
-
 }

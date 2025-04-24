@@ -48,5 +48,4 @@ public interface IJobPostService {
 //	public Page<JobWithApplicationCountDTO> getJobsWithFiltersAndSorting(String title, List<String> selectedTypesOfWork, Long minSalary,
 //			Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, Pageable pageable);
 	public Page<JobPost> searchJobs(String title, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, int page, int size);
-
 }

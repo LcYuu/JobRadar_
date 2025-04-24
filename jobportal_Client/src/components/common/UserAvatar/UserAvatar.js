@@ -59,6 +59,7 @@ const UserAvatar = () => {
         }}
       />
       <span className="text-white">{auth.user?.userName || 'User'}</span>
+      <span className="text-white">{auth.user?.userName || 'User'}</span>
     </div>
   );
 };

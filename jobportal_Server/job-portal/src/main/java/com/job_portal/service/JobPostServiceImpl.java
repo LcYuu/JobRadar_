@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 
 import org.springframework.data.domain.PageImpl;
-
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -270,7 +269,6 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 
 			dailyJobPostCounts.add(new DailyJobCount(date, count));
 		}
-
 		return dailyJobPostCounts;
 	}
 
@@ -278,7 +276,6 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 	public Page<JobPost> findByIsApprove(Pageable pageable) {
 		Page<JobPost> jobPost = jobPostRepository.findJobPostActive(pageable);
 		return jobPost;
-
 	}
 
 	@Override
@@ -434,7 +431,6 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 			LocalDateTime endDate) {
 		List<Map<String, Object>> stats = new ArrayList<>();
 		LocalDateTime currentDate = startDate;
-
 		while (!currentDate.isAfter(endDate)) {
 			// Đếm số lượng job theo trạng thái
 			long totalJobs = jobPostRepository.countJobsByCompanyAndDateRange(companyId, currentDate, currentDate);

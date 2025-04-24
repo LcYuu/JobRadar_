@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+
 import java.time.format.DateTimeParseException;
 
 import java.util.ArrayList;
@@ -61,7 +62,6 @@ import com.job_portal.models.Company;
 import com.job_portal.models.JobPost;
 import com.job_portal.models.Seeker;
 import com.job_portal.models.UserAccount;
-
 import com.job_portal.projection.JobWithApplicationCountProjection;
 
 import com.job_portal.repository.CityRepository;
@@ -75,7 +75,6 @@ import com.job_portal.service.IJobPostService;
 import com.job_portal.service.INotificationService;
 import com.job_portal.service.SearchHistoryServiceImpl;
 import com.job_portal.service.WebSocketService;
-
 import com.job_portal.specification.JobPostSpecification;
 import com.social.exceptions.AllExceptions;
 
@@ -105,6 +104,7 @@ public class JobPostController {
 
 	@Autowired
 	private SearchHistoryServiceImpl searchHistoryService;
+
 
 	@Autowired
 	private INotificationService notificationService;
@@ -173,6 +173,7 @@ public class JobPostController {
 
 			if (createdJob != null) {
 				webSocketService.sendUpdate("/topic/job-updates", "ADD JOB"); // Gửi JobPost qua WebSocket
+
 
 				return new ResponseEntity<>("Công việc được tạo thành công. Chờ Admin phê duyệt", HttpStatus.CREATED);
 			} else {
@@ -265,6 +266,7 @@ public class JobPostController {
 	}
 
 
+
 	@GetMapping("/search-by-company")
 	public ResponseEntity<List<JobPost>> getJobsByCompanyId(@RequestHeader("Authorization") String jwt) {
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
@@ -272,6 +274,52 @@ public class JobPostController {
 		List<JobPost> jobPosts = jobPostRepository.findJobByCompany(user.get().getCompany().getCompanyId());
 		return ResponseEntity.ok(jobPosts);
 	}
+
+
+//	@GetMapping("/min-salary/{minSalary}")
+//	public ResponseEntity<Object> findBySalaryGreaterThanEqual(@PathVariable("minSalary") Long minSalary) {
+//		try {
+//			List<JobPost> jobs = jobPostService.findBySalaryGreaterThanEqual(minSalary);
+//			return ResponseEntity.ok(jobs);
+//		} catch (AllExceptions e) {
+//			// Trả về thông báo từ service
+//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+//		} catch (Exception e) {
+//			// Trả về thông báo lỗi chung
+//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
+//		}
+//	}
+//
+//	@GetMapping("/max-salary/{maxSalary}")
+//	public ResponseEntity<Object> findBySalaryLessThanEqual(@PathVariable("maxSalary") Long maxSalary) {
+//		try {
+//			List<JobPost> jobs = jobPostService.findBySalaryLessThanEqual(maxSalary);
+//			return ResponseEntity.ok(jobs);
+//		} catch (AllExceptions e) {
+//			// Trả về thông báo từ service
+//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+//		} catch (Exception e) {
+//			// Trả về thông báo lỗi chung
+//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
+//		}
+//	}
+//
+//	@GetMapping("/salary-between")
+//	public ResponseEntity<Object> findBySalaryBetween(@RequestParam Long minSalary, @RequestParam Long maxSalary) {
+//		try {
+//			List<JobPost> jobs = jobPostService.findBySalaryBetween(minSalary, maxSalary);
+//			return ResponseEntity.ok(jobs);
+//		} catch (AllExceptions e) {
+//			// Trả về thông báo từ service
+//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+//		} catch (Exception e) {
+//			// Trả về thông báo lỗi chung
+//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
+//		}
+//	}
 
 	@GetMapping("/findJob/{postId}")
 	public ResponseEntity<JobPost> getJobById(@PathVariable("postId") UUID postId) throws AllExceptions {
@@ -291,6 +339,7 @@ public class JobPostController {
 
 		return jobPostService.getDailyJobPostCounts(start, end);
 	}
+
 
 	@PostMapping("/recommend-jobs/phobert")
 	public ResponseEntity<List<JobRecommendationDTO>> getJobRecommendations(
@@ -793,6 +842,7 @@ public class JobPostController {
 	}
 
 
+
 	@GetMapping("/admin/all-jobs")
 	public ResponseEntity<Page<JobPost>> getAllJobsForAdmin(
 			@RequestParam(required = false, defaultValue = "") String title,
@@ -809,6 +859,7 @@ public class JobPostController {
 	public ResponseEntity<Object> getSimilarJobs(@RequestParam UUID companyId,
 			@RequestParam(required = false) UUID excludePostId) {
 		try {
+
 			List<Integer> industryId = companyService.getIndustryIdsByCompanyId(companyId);
 
 			List<JobPost> similarJobs = jobPostService.getSimilarJobsByIndustry(industryId, excludePostId);

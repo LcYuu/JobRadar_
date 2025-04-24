@@ -54,6 +54,7 @@ public class AppConfig {
 		http.csrf(csrf -> csrf.disable());
 		http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
+
 		http.oauth2Login(oauth -> oauth.loginPage("/auth/login") 
 				.defaultSuccessUrl("/role-selection", true) 
 				.failureUrl("/login?error=true") 

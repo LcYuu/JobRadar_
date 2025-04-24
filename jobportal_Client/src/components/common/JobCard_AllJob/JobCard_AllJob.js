@@ -77,7 +77,6 @@ const industryStyles = {
 };
 
 function JobCard_AllJob({ job }) {
-
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -174,6 +173,18 @@ function JobCard_AllJob({ job }) {
             >
               {job.typeOfWork}
             </span>
+            <span
+              className="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
+              style={
+                typeOfWorkStyles[job.typeOfWork] || {
+                  backgroundColor: "rgba(0, 0, 0, 0.1)",
+                  color: "rgb(0, 0, 0)",
+                  border: "1px solid rgb(0, 0, 0)",
+                }
+              }
+            >
+              {job.typeOfWork}
+            </span>
           </div>
 
           {/* Industry tags and Apply button */}
@@ -225,6 +236,18 @@ function JobCard_AllJob({ job }) {
           </div>
         </div>
       </CardContent>
+
+      {isModalOpen && (
+        <ApplyModal
+          job={job}
+          isOpen={isModalOpen}
+          onClose={handleModalClose}
+          onSubmit={handleSubmit}
+          formData={formData}
+          handleInputChange={handleInputChange}
+          onFileChange={handleFileChange}
+        />
+      )}
 
       {isModalOpen && (
         <ApplyModal

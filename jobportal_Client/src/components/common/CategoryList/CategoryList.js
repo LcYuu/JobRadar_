@@ -39,21 +39,7 @@ const CategoryList = () => {
   }, [dispatch]);
   return (
     <>
-      <h2 className="text-2xl font-bold" style={{ color: "#43bfb3" }}>
-        Công việc theo danh mục
-      </h2>
-
-      <div className="category-list">
-        {industries.slice(1).map((industry, index) => (
-          <CategoryCard
-            key={industry.industryId}
-            icon={iconUrls[index]}
-            title={industry.industryName}
-            jobCount={industry.jobCount}
-            industryId={industry.industryId}
-          />
-        ))}
-      </div>
+      
       <h2 className="text-2xl font-bold" style={{ color: "#43bfb3" }}>
         Công việc theo danh mục
       </h2>
