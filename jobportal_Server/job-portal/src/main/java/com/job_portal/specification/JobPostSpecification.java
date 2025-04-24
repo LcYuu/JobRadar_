@@ -51,8 +51,9 @@ public class JobPostSpecification {
             }
 
             if (selectedIndustryIds != null && !selectedIndustryIds.isEmpty()) {
-                Join<JobPost, Industry> industryJoin = root.join("industry"); // jobPosts.industry
+                Join<JobPost, Industry> industryJoin = root.join("industry");
                 predicate = criteriaBuilder.and(predicate, industryJoin.get("industryId").in(selectedIndustryIds));
+
             }
 
 

@@ -18,7 +18,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+
 import org.springframework.http.HttpMethod;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,6 +46,7 @@ import com.job_portal.models.Industry;
 import com.job_portal.models.JobPost;
 import com.job_portal.models.Review;
 import com.job_portal.models.Seeker;
+
 import com.job_portal.models.UserAccount;
 import com.job_portal.projection.CompanyProjection;
 import com.job_portal.projection.CompanyWithCountJob;
@@ -74,8 +77,10 @@ public class CompanyController {
 	private RestTemplate restTemplate;
 	@Autowired
 	private UserAccountRepository userAccountRepository;
+
 	@Autowired
 	CityRepository cityRepository;
+
 	@Autowired
 	private IApplyJobService applyJobService;
 	@Autowired
@@ -123,6 +128,7 @@ public class CompanyController {
 		// Trả về true nếu hợp lệ, false nếu không hợp lệ
 		return ResponseEntity.ok(isTaxCodeValid);
 	}
+
 
 	@GetMapping("/validate-tax-info/{taxCode}")
 	public ResponseEntity<?> validateTaxInfo(@PathVariable String taxCode) {
@@ -196,30 +202,33 @@ public class CompanyController {
 	public List<CompanyDTO> getCompaniesWithSavedApplications() {
 	    List<CompanyProjection> projections = companyRepository.findCompaniesWithSavedApplications();
 	    
-	    return projections.stream().map(projection -> {
-	        List<Integer> industryIds = new ArrayList<>();
-	        if (projection.getIndustryIds() != null && !projection.getIndustryIds().isEmpty()) {
-	            industryIds = Arrays.stream(projection.getIndustryIds().split(","))
-	                                .map(Integer::parseInt)
-	                                .collect(Collectors.toList());
-	        }
+	    return projections.stream()
+	        .limit(9) // <-- Giới hạn tại đây
+	        .map(projection -> {
+	            List<Integer> industryIds = new ArrayList<>();
+	            if (projection.getIndustryIds() != null && !projection.getIndustryIds().isEmpty()) {
+	                industryIds = Arrays.stream(projection.getIndustryIds().split(","))
+	                                    .map(Integer::parseInt)
+	                                    .collect(Collectors.toList());
+	            }
 
-	        return new CompanyDTO(
-	            projection.getCompanyId(),
-	            projection.getCompanyName(),
-	            projection.getApplicationCount(),
-	            industryIds,
-	            projection.getCityId(),
-	            projection.getAddress(),
-	            projection.getDescription(),
-	            projection.getLogo(),
-	            projection.getContact(),
-	            projection.getEmail(),
-	            projection.getEstablishedTime() != null ? projection.getEstablishedTime().toLocalDate() : null,
-	            projection.getTaxCode()
-	        );
-	    }).collect(Collectors.toList());
+	            return new CompanyDTO(
+	                projection.getCompanyId(),
+	                projection.getCompanyName(),
+	                projection.getApplicationCount(),
+	                industryIds,
+	                projection.getCityId(),
+	                projection.getAddress(),
+	                projection.getDescription(),
+	                projection.getLogo(),
+	                projection.getContact(),
+	                projection.getEmail(),
+	                projection.getEstablishedTime() != null ? projection.getEstablishedTime().toLocalDate() : null,
+	                projection.getTaxCode()
+	            );
+	        }).collect(Collectors.toList());
 	}
+
 	
 	@GetMapping("/search-company-by-feature")
 	public Page<CompanyWithCountJobDTO> searchCompanies(
@@ -256,7 +265,6 @@ public class CompanyController {
 	                 .map(Integer::parseInt)
 	                 .collect(Collectors.toList());
 	}
-
 
 	@GetMapping("/find-all")
 	public ResponseEntity<List<Company>> findAllCompanies() {
@@ -359,6 +367,7 @@ public class CompanyController {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		}
 	}
+
 
 	@GetMapping("/can-rating/{companyId}")
 	public ResponseEntity<Boolean> checkIfSaved(@RequestHeader("Authorization") String jwt,

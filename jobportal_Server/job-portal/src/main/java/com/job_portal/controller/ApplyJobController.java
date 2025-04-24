@@ -68,6 +68,7 @@ public class ApplyJobController {
 		}
 	}
 
+
 	@GetMapping("/checkApply/{postId}")
 	public ResponseEntity<Boolean> checkIfApplied(@PathVariable("postId") UUID postId,
 			@RequestHeader("Authorization") String jwt) {
@@ -137,6 +138,7 @@ public class ApplyJobController {
 			return new ResponseEntity<>("Approve failed", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+
 
 	@PutMapping("/update-apply/{postId}")
 	public ResponseEntity<String> updateApply(@RequestBody ApplyJobDTO applyDTO,
@@ -233,8 +235,6 @@ public class ApplyJobController {
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 	    }
 	}
-
-
 	private ApplyJob convertToEntity(ApplyJobDTO applyDTO, UUID userId, UUID postId) {
 		ApplyJob apply = new ApplyJob();
 		apply.setPostId(postId);

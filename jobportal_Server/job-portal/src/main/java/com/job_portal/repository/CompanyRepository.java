@@ -41,7 +41,7 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 	List<Company> findTop6CompaniesByIndustryIds(@Param("industryIds") List<Integer> industryIds);
 
 	@Query(value = "SELECT \r\n" + "    BIN_TO_UUID(c.user_id) AS companyId, \r\n"
-			+ "    c.company_name AS companyName, \r\n" + "    COUNT(a.post_id) AS applicationCount, \r\n"
+			+ "    c.company_name AS companyName, \r\n" + "COUNT(a.post_id) AS applicationCount, \r\n"
 			+ "    GROUP_CONCAT(DISTINCT ci.industry_id SEPARATOR ',') AS industryIds,  -- Lấy từ company_industries\r\n"
 			+ "    c.city_id AS cityId, \r\n" + "    c.address, \r\n" + "    c.description, \r\n" + "    c.logo, \r\n"
 			+ "    c.contact, \r\n" + "    c.email, \r\n" + "    c.established_time, \r\n" + "    c.tax_code\r\n"
@@ -131,11 +131,11 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 						""", nativeQuery = true)
 	Page<CompanyWithCountJob> findCompaniesByFilters(@Param("title") String title, @Param("cityId") Integer cityId,
 			@Param("industryId") Integer industryId, Pageable pageable);
-
 //	@Query("SELECT new com.job_portal.DTO.CompanyWithCountJobDTO(c.companyId, c.companyName, i.industryId, c.description, i.industryName, c.city.cityId, COUNT(j)) "
 //			+ "FROM Company c " + "JOIN c.jobPosts j " + "JOIN c.industry i " + "WHERE j.isApprove = true "
 //			+ "GROUP BY c.companyId, c.companyName, c.description, i.industryName")
 //	Page<CompanyWithCountJobDTO> findCompanyWithCountJob(Specification<Company> spec, Pageable pageable);
+
 
 //	@Query("SELECT new com.job_portal.DTO.CompanyWithCountJobDTO(c.companyId, c.companyName, c.logo, i.industryId, "
 //			+ "c.description, i.industryName, c.city.cityId, COUNT(j)) " + "FROM Company c "
@@ -148,7 +148,6 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 //			+ "GROUP BY c.companyId, c.companyName, c.logo, c.description, i.industryId, i.industryName, c.city.cityId")
 //	Page<CompanyWithCountJobDTO> findCompaniesByFilters(@Param("title") String title, @Param("cityId") Integer cityId,
 //			@Param("industryId") Integer industryId, Pageable pageable);
-
 	@Query("SELECT new com.job_portal.DTO.FollowCompanyDTO(c.companyId, c.logo, c.companyName) " + "FROM Company c "
 			+ "JOIN c.follows s " + "WHERE s.userId = :seekerId")
 	List<FollowCompanyDTO> findCompaniesFollowedBySeeker(@Param("seekerId") UUID seekerId);

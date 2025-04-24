@@ -34,7 +34,7 @@ export const getRecommendJob = createAsyncThunk(
   "jobs/getRecommend",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.post(`/job-post/recommend-jobs/tfidf`);
+      const response = await api.post(`/job-post/recommend-jobs/phobert`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.message);

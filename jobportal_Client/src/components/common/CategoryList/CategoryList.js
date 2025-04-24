@@ -26,6 +26,7 @@ const iconUrls = [
   "https://cdn-icons-png.flaticon.com/128/4900/4900915.png",
   "https://cdn-icons-png.flaticon.com/128/9068/9068413.png",
   "https://cdn-icons-png.flaticon.com/128/2974/2974086.png",
+  "https://cdn-icons-png.flaticon.com/512/6702/6702322.png"
 
 ];
 
@@ -38,6 +39,21 @@ const CategoryList = () => {
   }, [dispatch]);
   return (
     <>
+      <h2 className="text-2xl font-bold" style={{ color: "#43bfb3" }}>
+        Công việc theo danh mục
+      </h2>
+
+      <div className="category-list">
+        {industries.slice(1).map((industry, index) => (
+          <CategoryCard
+            key={industry.industryId}
+            icon={iconUrls[index]}
+            title={industry.industryName}
+            jobCount={industry.jobCount}
+            industryId={industry.industryId}
+          />
+        ))}
+      </div>
       <h2 className="text-2xl font-bold" style={{ color: "#43bfb3" }}>
         Công việc theo danh mục
       </h2>

@@ -4,16 +4,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
-
-
-import logo1 from "../../assets/images/common/logo1.jpg";
-
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import axios from "axios";
 import Swal from "sweetalert2";
+
+import logo1 from "../../assets/images/common/logo1.jpg";
 import { loginAction } from "../../redux/Auth/auth.thunk";
 
-// Update Modal component
+// Modal component
 const Modal = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
 
@@ -42,153 +40,120 @@ export default function SignInForm() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loginStatus, setLoginStatus] = useState(null); // null, 'success', 'failure'
   const [isLoading, setIsLoading] = useState(false);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  // Environment variables or configuration for URLs
+  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+  const CLIENT_URL = process.env.REACT_APP_CLIENT_URL || "http://localhost:3000";
+
+  // Validate email format
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Handle email/password login
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
+    // Client-side validation
+    if (!email || !password) {
+      setError("Vui lòng nhập email và mật khẩu.");
+      return;
+    }
+    if (!validateEmail(email)) {
+      setError("Email không hợp lệ.");
+      return;
+    }
+
     setIsLoading(true);
-  
     try {
       const response = await dispatch(loginAction({ email, password }));
-      console.log("🚀 ~ handleSubmit ~ response:", response)
       const { payload } = response;
-      console.log("🚀 ~ handleSubmit ~ payload:", payload)
-      
-      if (payload && payload.success) {
-        const user = payload.user; 
-        console.log("🚀 ~ handleSubmit ~ user:", user)
-        // Điều hướng trước
-        if (user?.userType?.userTypeId === 3) {
-          navigate('/employer/account-management/dashboard');
-        } else if (user?.userType?.userTypeId === 1) {
-          navigate('/admin/dashboard');
-        } else {
-          navigate("/");
-        }
-        // Hiển thị thông báo sau khi chuyển hướng
-        setTimeout(async () => {
-          await Swal.fire({
-            icon: 'success',
-            title: 'Đăng nhập thành công!',
-            showConfirmButton: false,
-            timer: 1500
-          });
-        }, 500); // Trễ một chút để đảm bảo điều hướng đã xảy ra
+
+      if (payload?.success) {
+        const user = payload.user;
+        setIsModalOpen(true);
+        setLoginStatus("success");
+
+        // Navigate based on user type
+        setTimeout(() => {
+          if (user?.userType?.userTypeId === 3) {
+            navigate("/employer/account-management/dashboard");
+          } else if (user?.userType?.userTypeId === 1) {
+            navigate("/admin/dashboard");
+          } else {
+            navigate("/");
+          }
+          setIsModalOpen(false);
+        }, 1500);
       } else {
-        // Hiển thị lỗi nếu đăng nhập thất bại
-        await Swal.fire({
-          icon: 'error',
-          title: 'Đăng nhập thất bại',
-          text: payload || 'Có lỗi xảy ra khi đăng nhập',
-          confirmButtonText: 'Thử lại',
-          confirmButtonColor: '#3085d6'
-        });
+        setError(payload?.message || "Đăng nhập thất bại.");
+        setIsModalOpen(true);
+        setLoginStatus("failure");
       }
-    } catch (error) {
-      // Xử lý lỗi không mong muốn
-      await Swal.fire({
-        icon: 'error',
-        title: 'Lỗi',
-        text:  'Đã xảy ra lỗi không mong muốn',
-        confirmButtonText: 'Đóng',
-        confirmButtonColor: '#3085d6'
-      });
+    } catch (err) {
+      setError("Đã xảy ra lỗi không mong muốn.");
+      setIsModalOpen(true);
+      setLoginStatus("failure");
     } finally {
       setIsLoading(false);
     }
-  }    
-  
-  // const handleCloseModal = () => {
-  //   setIsModalOpen(false);
-  //   setLoginStatus(null);
-  // };
+  };
 
-  // const renderLoginStatus = () => {
-  //   if (!isModalOpen) return null;
-
-  //   if (loginStatus === "success") {
-  //     return (
-  //       <motion.div
-  //         initial={{ opacity: 0, y: 50 }}
-  //         animate={{ opacity: 1, y: 0 }}
-  //         exit={{ opacity: 0, y: -50 }}
-  //         className="flex flex-col items-center"
-  //       >
-  //         <SuccessIcon className="w-16 h-16 text-green-500 mb-4" />
-  //         <p className="text-lg font-semibold text-green-700">
-  //           Đăng nhập thành công
-  //         </p>
-  //       </motion.div>
-  //     );
-  //   } else if (loginStatus === "failure") {
-  //     return (
-  //       <motion.div
-  //         initial={{ opacity: 0, y: 50 }}
-  //         animate={{ opacity: 1, y: 0 }}
-  //         exit={{ opacity: 0, y: -50 }}
-  //         className="flex flex-col items-center"
-  //       >
-  //         <FailureIcon className="w-16 h-16 text-red-500 mb-4" />
-  //         <p className="text-lg font-semibold text-red-700">{error}</p>
-  //       </motion.div>
-  //     );
-  //   }
-
-  //   return null;
-  // };
-
+  // Handle Google login
   const handleGoogleLogin = async (response) => {
+    setIsLoading(true);
+    setError("");
+
     try {
       const googleToken = response.credential;
-      console.log("Google Token: ", googleToken);
-
-      // Gửi googleToken đến backend để xác thực
-      const res = await axios.post("http://localhost:8080/auth/login/google", {
+      const res = await axios.post(`${API_BASE_URL}/auth/login/google`, {
         token: googleToken,
       });
 
-      console.log("Response from server: ", res.data.token);
       const jwtToken = res?.data?.token;
-      console.log("Response from: ", jwtToken);
+      if (!jwtToken) {
+        throw new Error(res?.data?.message || "Không nhận được JWT token.");
+      }
 
-      localStorage.setItem("jwt", jwtToken);
+      // Store JWT in sessionStorage
+      sessionStorage.setItem("jwt", jwtToken);
+
+      // Check if email exists
       const emailExists = await axios.post(
-        "http://localhost:8080/auth/check-email",
+        `${API_BASE_URL}/auth/check-email`,
         { token: googleToken }
       );
 
-      if (!jwtToken) {
-        await Swal.fire({
-          icon: 'error',
-          title: 'Đăng nhập thất bại',
-          text: res?.data?.message || 'Có lỗi xảy ra khi đăng nhập',
-          confirmButtonText: 'Thử lại',
-          confirmButtonColor: '#3085d6'
-        });
-      } else if (emailExists.data) {
-        setTimeout(() => {
-          window.location.href = "http://localhost:3000/";
-        }, 1000);
-      } else {
-        const defaultAddress = {
-          specificAddress: "",
-          ward: "",
-          district: "",
-          province: ""
-        };
-        localStorage.setItem("defaultAddress", JSON.stringify(defaultAddress));
-        
-        setTimeout(() => {
-          window.location.href = "http://localhost:3000/role-selection";
-        }, 1000);
-      }
+      setIsModalOpen(true);
+      setLoginStatus("success");
+
+      setTimeout(() => {
+        setIsModalOpen(false);
+        if (emailExists.data) {
+          navigate("/");
+        } else {
+          const defaultAddress = {
+            specificAddress: "",
+            ward: "",
+            district: "",
+            province: "",
+          };
+          sessionStorage.setItem("defaultAddress", JSON.stringify(defaultAddress));
+          navigate("/role-selection");
+        }
+      }, 1500);
     } catch (err) {
-      console.error(
-        "Error during login: ",
-        err.response ? err.response.data : err.message
-      );
-      setError("Đăng nhập thất bại! Vui lòng thử lại.");
+      console.error("Google login error:", err);
+      setError(err.response?.data?.message || "Đăng nhập Google thất bại.");
+      setIsModalOpen(true);
+      setLoginStatus("failure");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -207,17 +172,16 @@ export default function SignInForm() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <GoogleOAuthProvider clientId="223710905248-cdn2agb2sgrv66dtgvo8osfcn3gin9er.apps.googleusercontent.com">
-                <div>
+                <div className="flex justify-center">
                   <GoogleLogin
-                    onSuccess={(response) => {
-                      console.log(response);
-                      handleGoogleLogin(response);
-                    }}
+                    onSuccess={handleGoogleLogin}
                     onError={(error) => {
-                      console.log(error);
-                      // Xử lý lỗi
+                      console.error("Google login error:", error);
+                      setError("Đăng nhập Google thất bại.");
+                      setIsModalOpen(true);
+                      setLoginStatus("failure");
                     }}
                   />
                 </div>
@@ -228,18 +192,21 @@ export default function SignInForm() {
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-white px-2 text-gray-500">
-                    Or sign in with email
+                    Hoặc đăng nhập bằng email
                   </span>
                 </div>
               </div>
+              {error && (
+                <p className="text-red-500 text-sm text-center">{error}</p>
+              )}
               <div className="space-y-2">
                 <Input
                   type="email"
-                
                   placeholder="Địa chỉ email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                  disabled={isLoading}
                 />
                 <Input
                   type="password"
@@ -247,11 +214,8 @@ export default function SignInForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleSubmit(e);
-                    }
-                  }}
+                  onKeyDown={(e) => e.key === "Enter" && handleSubmit(e)}
+                  disabled={isLoading}
                 />
               </div>
               <div className="flex justify-between items-center">
@@ -263,10 +227,11 @@ export default function SignInForm() {
                 </Link>
               </div>
               <Button
-                onClick={handleSubmit}
+                type="submit"
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                disabled={isLoading}
               >
-                Đăng nhập
+                {isLoading ? "Đang xử lý..." : "Đăng nhập"}
               </Button>
             </form>
             <p className="mt-4 text-center text-sm text-gray-600">
@@ -275,7 +240,7 @@ export default function SignInForm() {
                 to="/auth/sign-up"
                 className="font-medium text-indigo-600 hover:text-indigo-500"
               >
-                Đăng kí
+                Đăng ký
               </Link>
             </p>
           </CardContent>
@@ -283,9 +248,9 @@ export default function SignInForm() {
 
         <Modal
           isOpen={isModalOpen}
-          onClose={() => loginStatus === "failure" && setIsModalOpen(false)}
+          onClose={() => setIsModalOpen(false)}
         >
-          {loginStatus === "success" && (
+          {loginStatus === "success" ? (
             <div className="text-center">
               <svg
                 className="w-16 h-16 mx-auto text-green-500 mb-4"
@@ -304,8 +269,7 @@ export default function SignInForm() {
                 Đăng nhập thành công!
               </p>
             </div>
-          )}
-          {loginStatus === "failure" && (
+          ) : (
             <div className="text-center">
               <svg
                 className="w-16 h-16 mx-auto text-red-500 mb-4"

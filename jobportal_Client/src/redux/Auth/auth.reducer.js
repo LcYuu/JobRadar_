@@ -14,9 +14,17 @@ import {
   GET_USER_ROLE_REQUEST,
   GET_USER_ROLE_SUCCESS,
   GET_USER_ROLE_FAILURE,
+  LOGOUT_REQUEST,
+  LOGOUT_SUCCESS,
+  LOGOUT_FAILURE,
+  UPDATE_PROFILE_SUCCESS,
+  GET_USER_ROLE_REQUEST,
+  GET_USER_ROLE_SUCCESS,
+  GET_USER_ROLE_FAILURE,
 } from "./auth.actionType";
 
 const initialState = {
+  user: null,
   user: null,
   loading: false,
   error: null,
@@ -31,6 +39,7 @@ export const authReducer = (state = initialState, action) => {
     case LOGIN_REQUEST:
     case GET_PROFILE_REQUEST:
     case LOGOUT_REQUEST:
+    case LOGOUT_REQUEST:
       return { ...state, loading: true, error: null };
     
     case GET_PROFILE_SUCCESS:
@@ -40,7 +49,23 @@ export const authReducer = (state = initialState, action) => {
         loading: false
       };
     
+      return {
+        ...state,
+        user: action.payload,
+        loading: false
+      };
+    
     case LOGIN_SUCCESS:
+      return {
+        ...state,
+        jwt: action.payload,
+        isAuthenticated: true,
+        loading: false
+      };
+    
+    case LOGOUT_SUCCESS:
+      return initialState;
+    
       return {
         ...state,
         jwt: action.payload,
@@ -67,7 +92,22 @@ export const authReducer = (state = initialState, action) => {
         }
       };
     case GET_USER_ROLE_FAILURE:
+    case LOGOUT_FAILURE:
       return { ...state, loading: false, error: action.payload };
+    
+    case GET_USER_ROLE_REQUEST:
+      return { ...state, loading: true };
+    case GET_USER_ROLE_SUCCESS:
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          role: action.payload.role
+        }
+      };
+    case GET_USER_ROLE_FAILURE:
+      return { ...state, loading: false, error: action.payload };
+    
     
     default:
       return state;

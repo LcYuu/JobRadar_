@@ -24,7 +24,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.job_portal.DTO.CountReviewByCompanyDTO;
+
 import com.job_portal.DTO.CountReviewByStar;
+
 import com.job_portal.DTO.JobPostDTO;
 import com.job_portal.config.JwtProvider;
 import com.job_portal.models.JobPost;
@@ -73,13 +75,13 @@ public class ReviewController {
 	}
 
 	@PostMapping("/create-review/{companyId}")
+
 	public ResponseEntity<?> createReview(@RequestBody Review req, @PathVariable UUID companyId,
 			@RequestHeader("Authorization") String jwt) {
 		try {
 			String email = JwtProvider.getEmailFromJwtToken(jwt);
 			Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 			Optional<Seeker> seeker = seekerRepository.findById(user.get().getUserId());
-
 			Review review = new Review();
 			review.setStar(req.getStar());
 			review.setMessage(req.getMessage());
@@ -112,7 +114,6 @@ public class ReviewController {
 					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
 		}
 	}
-
 	@GetMapping("/findReviewByCompanyId")
 	public ResponseEntity<Object> findReviewByCompanyId(
 			@RequestHeader("Authorization") String jwt,
@@ -173,7 +174,6 @@ public class ReviewController {
 			return new ResponseEntity<>("Có lỗi xảy ra khi xóa đánh giá", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-
 	@GetMapping("/count-by-star")
 	public ResponseEntity<List<CountReviewByStar>> getReviewCounts(@RequestParam(required = false) UUID companyId) {
 		List<CountReviewByStar> result = reviewService.countReviewsByStar(companyId);
@@ -188,5 +188,6 @@ public class ReviewController {
 		List<CountReviewByStar> result = reviewService.countReviewsByStar(user.get().getCompany().getCompanyId());
 		return ResponseEntity.ok(result);
 	}
+
 
 }

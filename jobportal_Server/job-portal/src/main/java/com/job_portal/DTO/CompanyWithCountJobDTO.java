@@ -1,6 +1,7 @@
 package com.job_portal.DTO;
 
 import java.util.List;
+
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -13,6 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CompanyWithCountJobDTO {
+
     private UUID companyId;
     private String companyName;
     private String logo;

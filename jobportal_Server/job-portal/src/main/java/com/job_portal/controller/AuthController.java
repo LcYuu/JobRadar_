@@ -109,6 +109,7 @@ public class AuthController {
 	@Autowired
 	private ForgotPasswordRepository forgotPasswordRepository;
 
+
 	@Autowired
 	private TaxCodeValidation taxCodeValidation;
 
@@ -266,6 +267,7 @@ public class AuthController {
 		}
 	}
 
+
 	private boolean isValidPassword(String password) {
 		String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
 		return password.matches(passwordPattern);
@@ -299,6 +301,7 @@ public class AuthController {
 		}
 		if (!passwordEncoder.matches(password, userDetails.getPassword())) {
 			throw new BadCredentialsException("Email hoặc mật khẩu không đúng");
+
 		}
 		return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 	}
@@ -610,5 +613,103 @@ public class AuthController {
 		companyService.unblockCompany(companyId);
 		return ResponseEntity.ok("Mở khóa tài khoản thành công");
 	}
+
+
+
+//	@PostMapping("/login/google")
+//	public AuthResponse loginWithGoogle(@RequestBody Map<String, String> requestBody) {
+//		String googleToken = requestBody.get("token"); // Lấy googleToken từ frontend
+//
+//		// Giải mã token Google (JWT) để lấy thông tin người dùng
+//		DecodedJWT decodedJWT = JWT.decode(googleToken);
+//		String email = decodedJWT.getClaim("email").asString();
+//		
+//		String jwtToken = jwtProvider.generateTokenFromEmail(email); // Sử dụng auth trực tiếp
+//		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+//		
+////		user.get().setLastLogin(LocalDateTime.now());
+//
+//		// Trả về JWT token cho người dùng
+//		System.out.println("a" + jwtToken);
+//		AuthResponse res;
+//		res = new AuthResponse(jwtToken, "Đăng nhập thành công");
+//		return res;
+//	}
+
+//	@PostMapping("/update-role/{role}")
+//	public ResponseEntity<AuthResponse> updateRole(@RequestHeader("Authorization") String jwt, @PathVariable Integer role) {
+//		String email = JwtProvider.getEmailFromJwtToken(jwt);
+//		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+//		Optional<UserType> userType = userTypeRepository.findById(role);
+//		
+//		UserAccount newUser = user.get();
+//		newUser.setUserType(userType.orElse(null));
+//		if (newUser.getUserType().getUserTypeId() == 2) {
+//			Integer defaultIndustryId = 0;
+//			Optional<Industry> defaultIndustryOpt = industryRepository.findById(defaultIndustryId);
+//
+//			Industry defaultIndustry = defaultIndustryOpt.get();
+//			Seeker seeker = new Seeker();
+//			seeker.setUserAccount(newUser);
+//			seeker.setIndustry(defaultIndustry);
+//			user.get().setSeeker(seeker);
+//			userAccountRepository.save(newUser);
+//		} else if (newUser.getUserType().getUserTypeId() == 3) {
+//			Integer defaultIndustryId = 0;
+//			Optional<Industry> defaultIndustryOpt = industryRepository.findById(defaultIndustryId);
+//
+//			Integer defaultCityId = 0;
+//			Optional<City> defaultCityOpt = cityRepository.findById(defaultCityId);
+//
+//			Industry defaultIndustry = defaultIndustryOpt.get();
+//			City defaultCity = defaultCityOpt.get();
+//			Company company = new Company();
+//			company.setUserAccount(newUser);
+//			company.setIndustry(defaultIndustry);
+//			company.setCity(defaultCity);
+//			user.get().setCompany(company);
+//			userAccountRepository.save(newUser);
+//		}
+//		AuthResponse response = new AuthResponse(String.valueOf(role), "Cập nhật vai trò thành công");
+//		return ResponseEntity.ok(response);
+//	}
+//	
+//	// Backend (Spring Boot)
+//	@PostMapping("/check-email")
+//	public ResponseEntity<Boolean> checkEmailExists(@RequestBody Map<String, String> requestBody) {
+//		String googleToken = requestBody.get("token"); 
+//
+//		DecodedJWT decodedJWT = JWT.decode(googleToken);
+//		String email = decodedJWT.getClaim("email").asString();
+//	    Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+//	    System.out.println("d" + user.toString());
+//	    if (user.isPresent()) {
+//	        return ResponseEntity.ok(true); // Người dùng đã tồn tại
+//	    } else {
+//	    	String name = decodedJWT.getClaim("name").asString();
+//
+//			// Tìm người dùng trong cơ sở dữ liệu, nếu không có thì tạo mới
+//			Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
+//
+//			if (userOptional.isEmpty()) {
+//				UserAccount newUser = new UserAccount();
+//				newUser.setEmail(email);
+//				newUser.setUserName(name);
+//				newUser.setUserId(UUID.randomUUID());
+//				newUser.setUserType(null);
+//				newUser.setActive(true);
+//				newUser.setPassword("");
+//				newUser.setCreateDate(LocalDateTime.now());
+//				newUser.setOtp(null);
+//				newUser.setOtpGeneratedTime(null);
+//				newUser.setProvider("Google");
+//				newUser.setLastLogin(LocalDateTime.now());
+//				userAccountRepository.save(newUser);
+//
+//			}
+//			// Tạo JWT Token cho người dùng và truyền Authentication object
+//	        return ResponseEntity.ok(false); // Người dùng chưa tồn tại
+//	    }
+//	}
 
 }

@@ -48,7 +48,7 @@ public class JwtProvider {
 				.compact();
 		return jwt;
 	 }
-	
+
 	public static String getEmailFromJwtToken(String jwt) {
 		jwt = jwt.substring(7);
 
@@ -87,6 +87,7 @@ public class JwtProvider {
 	    return claims.getExpiration();
 	}
 
+
 	public boolean isTokenExpired(String token) {
 	    try {
 	        Date expiration = ((JwtParserBuilder) Jwts.builder())
@@ -100,5 +101,6 @@ public class JwtProvider {
 	        return true; // Nếu lỗi , coi như token đã hết hạn
 	    }
 	}
+
 
 }

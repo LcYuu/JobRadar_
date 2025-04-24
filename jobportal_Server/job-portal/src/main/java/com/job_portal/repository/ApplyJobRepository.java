@@ -18,6 +18,7 @@ import com.job_portal.models.IdApplyJob;
 
 @Repository
 public interface ApplyJobRepository extends JpaRepository<ApplyJob, IdApplyJob> {
+
 	@Query("SELECT a FROM ApplyJob a WHERE a.postId = :postId AND a.userId = :userId")
 	Optional<ApplyJob> findByPostIdAndUserId(@Param("postId") UUID postId, @Param("userId") UUID userId);
 
@@ -45,3 +46,7 @@ public interface ApplyJobRepository extends JpaRepository<ApplyJob, IdApplyJob> 
 			@Param("fullName") String fullName, @Param("isSave") Boolean isSave, @Param("title") String title,
 			Pageable pageable);
 }
+	
+	
+	
+

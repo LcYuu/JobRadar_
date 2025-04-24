@@ -13,7 +13,7 @@ import { isTokenExpired } from './utils/tokenUtils';
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <React.StrictMode>
+
     <Provider store={store}>
       <ErrorBoundary>
         <BrowserRouter future={{ v7_relativeSplatPath: true }}>
@@ -33,7 +33,7 @@ root.render(
         />
       </ErrorBoundary>
     </Provider>
-  </React.StrictMode>
+    
 );
 
 // Kiểm tra token hết hạn khi trang web được tải

@@ -1,5 +1,21 @@
 import { useEffect, useState } from "react";
-import { Book, Calendar, Delete, Edit, Mail, Phone, Plus } from "lucide-react";
+import {
+  Award,
+  Book,
+  BookOpen,
+  Briefcase,
+  Building,
+  Calendar,
+  Delete,
+  Edit,
+  FileText,
+  GraduationCap,
+  Mail,
+  Phone,
+  Plus,
+  School,
+  Tag,
+} from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 import { Button } from "../../ui/button";
@@ -551,20 +567,27 @@ export default function MyProfile() {
                   exp.map((experience, index) => (
                     <div
                       key={index}
-                      className="flex gap-4 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200"
+                      className="flex gap-4 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border-l-4 relative"
+                      style={{ borderLeftColor: getColorByIndex(index) }}
                     >
                       <div
                         className={`h-12 w-12 rounded-full ${getColorByIndex(
                           index
-                        )} shadow-md`}
-                      />
+                        )} shadow-md flex items-center justify-center`}
+                      >
+                        <span className="text-white font-bold">
+                          {index + 1}
+                        </span>
+                      </div>
                       <div className="flex-1">
                         <div className="flex items-start justify-between">
                           <div>
-                            <h4 className="font-semibold text-lg">
+                            <h4 className="font-semibold text-lg flex items-center">
+                              <Briefcase className="h-4 w-4 mr-2 text-gray-500" />
                               {experience.jobTitle}
                             </h4>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-muted-foreground flex items-center mt-1">
+                              <Building className="h-4 w-4 mr-2 text-gray-500" />
                               Công ty: {experience.companyName}
                             </p>
                           </div>
@@ -589,22 +612,44 @@ export default function MyProfile() {
                             </Button>
                           </div>
                         </div>
-                        <p className="mt-2 text-sm text-gray-600">
-                          {formatDate(experience.startDate)} -{" "}
-                          {experience.endDate
-                            ? formatDate(experience.endDate)
-                            : "Present"}
-                        </p>
-                        <p className="mt-2 text-sm text-gray-500">
-                          {experience.description}
-                        </p>
+                        <div className="flex items-center mt-2">
+                          <Calendar className="h-4 w-4 mr-2 text-gray-500" />
+                          <p className="text-sm text-gray-600">
+                            {formatDate(experience.startDate)} -{" "}
+                            <span
+                              className={
+                                experience.endDate
+                                  ? ""
+                                  : "font-medium text-green-600"
+                              }
+                            >
+                              {experience.endDate
+                                ? formatDate(experience.endDate)
+                                : "Present"}
+                            </span>
+                          </p>
+                        </div>
+                        <div className="mt-3 p-3 bg-gray-50 rounded border-l-2 border-gray-200">
+                          <div className="flex items-start">
+                            <FileText className="h-4 w-4 mr-2 text-gray-500 mt-0.5" />
+                            <p className="text-sm text-gray-600">
+                              {experience.description}
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-gray-500">
-                    Chưa cập nhật kinh nghiệm
-                  </p>
+                  <div className="text-center p-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                    <Briefcase className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">
+                      Chưa cập nhật kinh nghiệm
+                    </p>
+                    <Button variant="outline" size="sm" className="mt-2">
+                      <Plus className="h-4 w-4 mr-1" /> Thêm kinh nghiệm
+                    </Button>
+                  </div>
                 )}
               </CardContent>
 
@@ -634,20 +679,27 @@ export default function MyProfile() {
                   edu.map((education, index) => (
                     <div
                       key={index}
-                      className="flex gap-4 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200"
+                      className="flex gap-4 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border-l-4 relative"
+                      style={{ borderLeftColor: getCLByIndex(index) }}
                     >
                       <div
                         className={`h-12 w-12 rounded-full ${getCLByIndex(
                           index
-                        )} shadow-md`}
-                      />
+                        )} shadow-md flex items-center justify-center`}
+                      >
+                        <span className="text-white font-bold">
+                          {index + 1}
+                        </span>
+                      </div>
                       <div className="flex-1">
                         <div className="flex items-start justify-between">
                           <div>
-                            <h4 className="font-semibold text-lg">
+                            <h4 className="font-semibold text-lg flex items-center">
+                              <GraduationCap className="h-4 w-4 mr-2 text-gray-500" />
                               {education.certificateDegreeName}
                             </h4>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-muted-foreground flex items-center mt-1">
+                              <School className="h-4 w-4 mr-2 text-gray-500" />
                               {education.universityName}
                             </p>
                           </div>
@@ -672,25 +724,61 @@ export default function MyProfile() {
                             </Button>
                           </div>
                         </div>
-                        <p className="mt-2 text-sm text-gray-600">
-                          {formatDate(education.startDate)} -{" "}
-                          {education.endDate
-                            ? formatDate(education.endDate)
-                            : "Present"}
-                        </p>
-                        <p className="mt-2 text-sm text-gray-500">
-                          {education.major}
-                        </p>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          GPA: {education.gpa}
-                        </p>
+                        <div className="flex items-center mt-2">
+                          <Calendar className="h-4 w-4 mr-2 text-gray-500" />
+                          <p className="text-sm text-gray-600">
+                            {formatDate(education.startDate)} -{" "}
+                            <span
+                              className={
+                                education.endDate
+                                  ? ""
+                                  : "font-medium text-green-600"
+                              }
+                            >
+                              {education.endDate
+                                ? formatDate(education.endDate)
+                                : "Present"}
+                            </span>
+                          </p>
+                        </div>
+                        <div className="flex items-center mt-2">
+                          <BookOpen className="h-4 w-4 mr-2 text-gray-500" />
+                          <p className="text-sm text-gray-600">
+                            Chuyên ngành: {education.major}
+                          </p>
+                        </div>
+                        <div className="mt-2 bg-gray-50 p-2 rounded flex items-center">
+                          <Award className="h-4 w-4 mr-2 text-gray-500" />
+                          <p className="text-sm font-medium">
+                            GPA:{" "}
+                            <span className="text-blue-600">
+                              {education.gpa}
+                            </span>
+                          </p>
+                        </div>
+                        {education.description && (
+                          <div className="mt-3 p-3 bg-gray-50 rounded border-l-2 border-gray-200">
+                            <div className="flex items-start">
+                              <FileText className="h-4 w-4 mr-2 text-gray-500 mt-0.5" />
+                              <p className="text-sm text-gray-600">
+                                {education.description}
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-gray-500">
-                    Không có thông tin giáo dục nào.
-                  </p>
+                  <div className="text-center p-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                    <GraduationCap className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">
+                      Không có thông tin giáo dục nào.
+                    </p>
+                    <Button variant="outline" size="sm" className="mt-2">
+                      <Plus className="h-4 w-4 mr-1" /> Thêm học vấn
+                    </Button>
+                  </div>
                 )}
               </CardContent>
               <section>
