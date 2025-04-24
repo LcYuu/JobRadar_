@@ -24,7 +24,6 @@ public class TaxCodeValidation {
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(apiUrl, HttpMethod.GET, null, Map.class);
-
             Map<String, Object> responseBody = response.getBody();
             if (responseBody != null && "00".equals(responseBody.get("code"))) {
                 return true; // Mã số thuế hợp lệ

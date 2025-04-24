@@ -18,7 +18,6 @@ public interface SeekerRepository extends JpaRepository<Seeker, UUID> {
 
 	public Optional<Seeker> findById(UUID userId);
 
-
 	@Query(value = """
 		    SELECT 
 		        BIN_TO_UUID(p.post_id) AS postId, 

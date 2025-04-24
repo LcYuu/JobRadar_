@@ -54,5 +54,4 @@ public class Review {
 	@ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "company_id")
 	private Company company;
-
 }

@@ -40,7 +40,6 @@ public class CV {
     
     @Column(name = "create_time", nullable = false)
     private LocalDateTime createTime;
-
     
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")

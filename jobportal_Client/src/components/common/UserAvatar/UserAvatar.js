@@ -20,6 +20,10 @@ const UserAvatar = () => {
     fetchProfile();
   }, [dispatch, isAuthenticated]);
 
+  // Don't render if not authenticated or no user data
+  if (!isAuthenticated || !auth.user) {
+    return null;
+  }
   const handleAvatarClick = (e) => {
     e.preventDefault();
     if (isAuthenticated && auth.user) {

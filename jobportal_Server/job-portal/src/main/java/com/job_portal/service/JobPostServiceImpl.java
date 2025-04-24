@@ -20,7 +20,9 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+
 import org.springframework.data.domain.PageImpl;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -259,9 +261,8 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 
 	@Override
 	public List<DailyJobCount> getDailyJobPostCounts(LocalDateTime startDate, LocalDateTime endDate) {
-		List<Object[]> results = jobPostRepository.countNewJobsPerDay(startDate, endDate);
-		List<DailyJobCount> dailyJobPostCounts = new ArrayList<>();
-
+	    List<Object[]> results = jobPostRepository.countNewJobsPerDay(startDate, endDate);
+	    List<DailyJobCount> dailyJobPostCounts = new ArrayList<>();
 		for (Object[] result : results) {
 			String dateStr = (String) result[0];
 			LocalDateTime date = LocalDateTime.parse(dateStr.substring(0, 26)); // Cắt đến microseconds
@@ -271,7 +272,6 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 		}
 
 		return dailyJobPostCounts;
-
 	}
 
 	@Override
@@ -328,7 +328,6 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 
 	@Override
 	public List<JobPost> getTop8LatestJobPosts() {
-
 		List<JobPost> latestJobs = jobPostRepository.findTop8LatestJobPosts().stream().limit(8)
 				.collect(Collectors.toList());
 		return latestJobs;
@@ -525,4 +524,106 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 		return result;
 	}
 
+//	public Page<JobPost> findByCompanyId(UUID companyId, Pageable pageable) {
+//		return jobPostRepository.findByCompanyCompanyIdAndApproveTrue(companyId, pageable);
+//	}
+//
+//	@Override
+//	public Page<JobWithApplicationCountDTO> getTop5JobsWithApplications(UUID companyId, int page, int size) {
+////		Pageable pageable = PageRequest.of(page, size); // Trang bắt đầu từ 0
+////		return jobPostRepository.findTop5JobsWithApplicationCountStatusAndIndustryName(companyId, pageable);
+//		return null;
+//	}
+//
+//	public Page<JobPost> findJobsByCompany(UUID companyId, Pageable pageable) {
+//		return jobPostRepository.findByCompanyCompanyId(companyId, pageable);
+//	}
+//
+//	@Override
+//	public Page<JobPost> findApprovedJobsByCompany(UUID companyId, Pageable pageable) {
+//		return jobPostRepository.findByCompanyCompanyIdAndIsApproveTrue(companyId, pageable);
+//	}
+//
+//	@Override
+//	public Map<String, Long> countAllJobsByCompany(UUID companyId) {
+//		Map<String, Long> jobCounts = new HashMap<>();
+//		LocalDateTime now = LocalDateTime.now();
+//
+//		// Đếm tổng số công việc
+//		long totalJobs = jobPostRepository.countByCompanyCompanyId(companyId);
+//
+//		// Đếm số công việc đang hoạt động (đã approve và chưa hết hạn)
+//		long activeJobs = jobPostRepository
+//				.countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(companyId, now);
+//
+//		// Đếm số công việc đã đóng (chỉ đếm những tin đã hết hạn)
+//		long closedJobs = jobPostRepository.countByCompanyCompanyIdAndExpireDateLessThan(companyId, now);
+//
+//		// Đếm số công việc chưa được duyệt
+//		long pendingJobs = jobPostRepository.countByCompanyCompanyIdAndIsApproveFalse(companyId);
+//
+//		jobCounts.put("totalJobs", totalJobs);
+//		jobCounts.put("activeJobs", activeJobs);
+//		jobCounts.put("closedJobs", closedJobs);
+//		jobCounts.put("pendingJobs", pendingJobs);
+//
+//		return jobCounts;
+//	}
+//
+//	@Override
+//	public List<Map<String, Object>> getCompanyJobStats(UUID companyId, LocalDateTime startDate, LocalDateTime endDate) {
+//		List<Map<String, Object>> stats = new ArrayList<>();
+//		LocalDateTime currentDate = startDate;
+//		
+//		while (!currentDate.isAfter(endDate)) {
+//			// Đếm số lượng job theo trạng thái
+//			long totalJobs = jobPostRepository.countJobsByCompanyAndDateRange(companyId, currentDate, currentDate);
+//			long activeJobs = jobPostRepository.countActiveJobsByCompanyAndDateRange(companyId, currentDate,
+//					currentDate);
+//			long closedJobs = jobPostRepository.countClosedJobsByCompanyAndDateRange(companyId, currentDate,
+//					currentDate);
+//			long pendingJobs = jobPostRepository.countPendingJobsByCompanyAndDateRange(companyId, currentDate,
+//					currentDate);
+//
+//			Map<String, Object> dayStat = new HashMap<>();
+//			dayStat.put("date", currentDate.toString());
+//			dayStat.put("totalJobs", totalJobs);
+//			dayStat.put("activeJobs", activeJobs);
+//			dayStat.put("closedJobs", closedJobs);
+//			dayStat.put("pendingJobs", pendingJobs);
+//
+//			stats.add(dayStat);
+//			currentDate = currentDate.plusDays(1);
+//		}
+//
+//		return stats;
+//	}
+//
+//	@Override
+//	public List<JobPost> getSimilarJobsByIndustry(Integer industryId, UUID excludePostId) {
+//		return jobPostRepository.findSimilarJobsByIndustry(industryId, excludePostId);
+//	}
+//
+//	@Override
+//	public void updateExpiredJobs() {
+//		List<JobPost> expiredJobs = jobPostRepository.findAllByExpireDateBeforeAndStatus(LocalDateTime.now(), "Đang mở");
+//		// Cập nhật trạng thái thành EXPIRED
+//		for (JobPost job : expiredJobs) {
+//			job.setStatus("Hết hạn");
+//		}
+//
+//		// Lưu các thay đổi vào cơ sở dữ liệu
+//		jobPostRepository.saveAll(expiredJobs);
+//	}
+//
+//	@Override
+//	public boolean canPostJob(UUID companyId) {
+//		Optional<JobPost> latestJob = jobPostRepository.findTopByCompanyCompanyIdOrderByCreateDateDesc(companyId);
+//		if (latestJob.isPresent()) {
+//			LocalDateTime now = LocalDateTime.now();
+//			LocalDateTime lastPosted = latestJob.get().getCreateDate();
+//			return Duration.between(lastPosted, now).toHours() >= 1;
+//		}
+//		return true; // Nếu chưa có bài đăng nào, cho phép tạo bài
+//	}
 }
