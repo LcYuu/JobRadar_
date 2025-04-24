@@ -126,14 +126,6 @@ export const jobPostReducer = (state = initialState, action) => {
         loading: false, // Kết thúc trạng thái tải
         error: null, // Đặt lỗi về null
       };
-    case SEARCH_JOBS_SUCCESS:
-      return {
-        ...state,
-        searchJob: action.payload.content,
-        totalPages: action.payload.page.totalPages,
-        loading: false,
-        error: null,
-      };
     case GET_JOB_POST_BY_POST_ID_SUCCESS:
       return {
         ...state,
@@ -188,44 +180,6 @@ export const jobPostReducer = (state = initialState, action) => {
         loading: false, // Kết thúc trạng thái tải
         error: action.payload, // Lưu trữ lỗi nếu có
       };
-
-    // case GET_ALL_POST_SUCCESS:
-    //     return {
-    //         ...state,
-    //         jobPost: action.payload,
-    //         comments: action.payload.comment,
-    //         loading: false,
-    //         error: null
-    //     }
-    // case GET_USERS_POST_SUCCESS: // Thêm case này
-    //     return {
-    //         ...state,
-    //         jobPost: action.payload,
-    //         loading: false,
-    //         error: null
-    //     }
-    // case LIKE_POST_SUCCESS:
-    //     return {
-    //         ...state,
-    //         like: action.payload,
-    //         jobPost: state.jobPost.map((item) => item.post_id === action.payload.post_id ? action.payload : item),
-    //         loading: false,
-    //         error: null
-    //     }
-    // case CREATE_COMMENT_SUCCESS:
-    //     return {
-    //         ...state,
-    //         newComment: action.payload,
-    //         loading: false,
-    //         error: null
-    //     }
-    // case CREATE_POST_FAILURE:
-    // case GET_ALL_POST_FAILURE:
-    // case GET_USERS_POST_FAILURE:
-    //     return {
-    //         ...state, error: action.payload,
-    //         loading: false
-    //     }
     case GET_JOBS_BY_COMPANY_REQUEST:
       return {
         ...state,
@@ -330,6 +284,26 @@ export const jobPostReducer = (state = initialState, action) => {
         similarJobs: action.payload,
       };
     case "GET_SIMILAR_JOBS_FAILURE":
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+      };
+
+    case semanticSearchJobsWithGemini.pending:
+      return {
+        ...state,
+        loading: true,
+        error: null,
+      };
+    case semanticSearchJobsWithGemini.fulfilled:
+      return {
+        ...state,
+        loading: false,
+        searchJob: action.payload.content,
+        totalPages: action.payload.totalPages,
+      };
+    case semanticSearchJobsWithGemini.rejected:
       return {
         ...state,
         loading: false,

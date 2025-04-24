@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
@@ -8,13 +8,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import * as Yup from "yup";
-
-import {
-  createEducation,
-  getEduByUser,
-  updateEducation,
-} from "../../redux/Education/edu.action";
-import { formatDateForInput } from "../../utils/dateUtils";
+import { createEducation, getEduByUser, updateEducation } from "../../redux/Education/edu.thunk";
+import { toast } from "react-toastify";
 
 const style = {
   position: "absolute",
@@ -39,7 +34,6 @@ export default function EduModal({
   editingEducationId,
   setEditingEducationId,
   initialData,
-  showSuccessToast,
 }) {
   const validationSchema = Yup.object({
     certificateDegreeName: Yup.string().required("Bằng cấp là bắt buộc."),
@@ -83,12 +77,13 @@ export default function EduModal({
       setIsLoading(true);
       try {
         if (editingEducationId) {
-          await dispatch(updateEducation(editingEducationId, values));
+          await dispatch(updateEducation({educationId:editingEducationId, educationData:values}));
           setEditingEducationId(null);
-          showSuccessToast("Cập nhật học vấn thành công!");
+          toast.success("Cập nhật học vấn thành công!");
         } else {
-          await dispatch(createEducation(values));
-          showSuccessToast("Cập nhật học vấn thành công!");
+          const eduData = values
+          await dispatch(createEducation(eduData));
+          toast.success("Cập nhật học vấn thành công!");
         }
         handleClose();
         dispatch(getEduByUser()); // Refresh the education list

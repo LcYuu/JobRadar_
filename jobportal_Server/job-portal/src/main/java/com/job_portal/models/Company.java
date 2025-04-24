@@ -1,6 +1,7 @@
 package com.job_portal.models;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -41,9 +42,13 @@ public class Company {
 	@Column(name = "company_name", length = 500)
 	private String companyName;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "industry_id")
-	private Industry industry;
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+	@JoinTable(
+	    name = "company_industries",
+	    joinColumns = @JoinColumn(name = "company_id"),
+	    inverseJoinColumns = @JoinColumn(name = "industry_id")
+	)
+	private List<Industry> industry = new ArrayList<>();
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "city_id")
@@ -60,7 +65,7 @@ public class Company {
 
 	@Column(name = "contact", length = 15)
 	private String contact;
-	
+
 	@Column(name = "tax_code", length = 30)
 	private String taxCode;
 
@@ -70,6 +75,15 @@ public class Company {
 	@Column(name = "established_time", length = 50)
 	private LocalDate establishedTime;
 
+	@Column(name = "is_blocked")
+	private Boolean isBlocked = false;
+	
+	@Column(name = "blocked_reason", length = 200)
+	private String blockedReason;
+	
+	@Column(name = "blocked_until", length = 200)
+	private LocalDateTime blockedUntil;
+	
 	@JsonIgnore
 	@OneToMany
 	private List<Review> reviews = new ArrayList<>();
@@ -83,13 +97,12 @@ public class Company {
 	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<JobPost> jobPosts = new ArrayList<>();
 
-	@OneToOne
+	@OneToOne	
 	@MapsId
 	@JoinColumn(name = "user_id")
 	private UserAccount userAccount;
 
 //	@JsonIgnore
-	@OneToMany(mappedBy = "company", fetch = FetchType.EAGER, cascade = CascadeType.ALL , orphanRemoval = true)
+	@OneToMany(mappedBy = "company", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<ImageCompany> images = new ArrayList<>();
-
 }

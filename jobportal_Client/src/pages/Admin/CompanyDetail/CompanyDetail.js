@@ -4,16 +4,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "../../../ui/button";
 import { Card } from "../../../ui/card";
 import {
-  Building2,
   Users,
   Calendar,
   Lock,
   Unlock,
-  History,
   AlertTriangle,
   FileText,
   UserCheck,
-  UserX,
   MapPin,
   Briefcase,
   Users2,
@@ -21,6 +18,7 @@ import {
   Mail,
   Clock,
   ArrowLeft,
+  Link,
 } from "lucide-react";
 
 import { toast } from "react-toastify";
@@ -42,17 +40,25 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { Code2, Banknote } from "lucide-react";
+import { Banknote } from "lucide-react";
+
+import { StarRounded } from "@mui/icons-material";
 import {
-  getCompanyById,
-  updateCompanyStatus,
   deleteCompany,
+  getCompanyById,
   getCompanyJobCounts,
   getCompanyJobStats,
   getCompanyProfile,
-} from "../../../redux/Company/company.action";
-import { getReviewByCompany } from "../../../redux/Review/review.action";
-import { StarRounded } from "@mui/icons-material";
+  updateCompanyStatus,
+} from "../../../redux/Company/company.thunk";
+import { getReviewByCompany } from "../../../redux/Review/review.thunk";
+import { fetchSocialLinksByUserId } from "../../../redux/SocialLink/socialLink.thunk";
+import BlockedCompanyModal from "../../../components/BlockedCompany/BlockedCompanyModal";
+import Swal from "sweetalert2";
+import {
+  getProfileAction,
+  unblockCompany,
+} from "../../../redux/Auth/auth.thunk";
 
 export default function CompanyDetail() {
   const navigate = useNavigate();
@@ -61,6 +67,19 @@ export default function CompanyDetail() {
   const { companyProfile, jobCounts, jobStats, loading } = useSelector(
     (store) => store.company
   );
+
+  const [isBlocked, setIsBlocked] = useState(companyProfile?.isBlocked);
+
+  const [open, setOpen] = useState(false);
+  const handleOpenBlockModal = () => {
+    console.log("Đã nhấn nút khóa!"); // Kiểm tra sự kiện click
+    setOpen(true);
+  };
+
+  const handleClose = () => setOpen(false);
+
+  const { socialLinks } = useSelector((store) => store.socialLink);
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [chartDateRange, setChartDateRange] = useState(() => {
     const end = new Date();
@@ -83,6 +102,7 @@ export default function CompanyDetail() {
     dispatch(getCompanyProfile(companyId));
     dispatch(getCompanyJobCounts(companyId));
     dispatch(getReviewByCompany(companyId));
+    dispatch(fetchSocialLinksByUserId(companyId));
     return () => {
       setIsMounted(false);
     };
@@ -111,22 +131,28 @@ export default function CompanyDetail() {
       const formattedStartDate = start.toISOString().split("T")[0];
       const formattedEndDate = end.toISOString().split("T")[0];
 
-      dispatch(getCompanyJobStats(companyId, formattedStartDate, formattedEndDate))
-        .then((response) => {
-          console.log('API Response:', response);
-          if (!response?.data) {
+      dispatch(
+        getCompanyJobStats({
+          companyId,
+          startDate: formattedStartDate,
+          endDate: formattedEndDate,
+        })
+      )
+        .unwrap() // Lấy trực tiếp `payload` từ Redux Toolkit
+        .then((payload) => {
+          console.log("API Payload:", payload); // Đây là dữ liệu trả về từ API
+          if (!payload) {
             throw new Error("Không có dữ liệu từ API");
           }
           setIsChartLoading(false);
         })
         .catch((err) => {
-          console.error('Chart Error:', err);
+          console.error("Chart Error:", err);
           setError(err.message || "Có lỗi xảy ra khi tải dữ liệu");
           setIsChartLoading(false);
         });
     }
   }, [dispatch, companyId, chartDateRange]);
-
 
   useEffect(() => {
     if (!companyProfile || companyProfile.companyId !== companyId) {
@@ -137,15 +163,6 @@ export default function CompanyDetail() {
       setIsMounted(false);
     };
   }, [dispatch, companyId, companyProfile]);
-
-  const handleStatusChange = async () => {
-    try {
-      await dispatch(updateCompanyStatus(companyId, !companyProfile.isActive));
-      dispatch(getCompanyById(companyId));
-    } catch (error) {
-      toast.error("Không thể cập nhật trạng thái công ty");
-    }
-  };
 
   const handleDelete = async () => {
     try {
@@ -201,35 +218,37 @@ export default function CompanyDetail() {
 
   const chartData = useMemo(() => {
     if (!jobStats || !Array.isArray(jobStats)) {
-      console.log('No jobStats data available');
+      console.log("No jobStats data available");
       return [];
     }
 
-    console.log('Raw jobStats:', jobStats);
+    console.log("Raw jobStats:", jobStats);
 
-    return jobStats.map(stat => {
-      try {
-        if (!stat.date) return null;
+    return jobStats
+      .map((stat) => {
+        try {
+          if (!stat.date) return null;
 
-        const date = new Date(stat.date);
-        return {
-          date: date.toISOString().split('T')[0],
-          fullDate: date.toLocaleDateString('vi-VN', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-          }),
-          totalJobs: Number(stat.totalJobs) || 0,
-          activeJobs: Number(stat.activeJobs) || 0,
-          closedJobs: Number(stat.closedJobs) || 0,
-          pendingJobs: Number(stat.pendingJobs) || 0
-        };
-      } catch (error) {
-        console.error('Error processing stat:', stat, error);
-        return null;
-      }
-    }).filter(Boolean);
+          const date = new Date(stat.date);
+          return {
+            date: date.toISOString().split("T")[0],
+            fullDate: date.toLocaleDateString("vi-VN", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            }),
+            totalJobs: Number(stat.totalJobs) || 0,
+            activeJobs: Number(stat.activeJobs) || 0,
+            closedJobs: Number(stat.closedJobs) || 0,
+            pendingJobs: Number(stat.pendingJobs) || 0,
+          };
+        } catch (error) {
+          console.error("Error processing stat:", stat, error);
+          return null;
+        }
+      })
+      .filter(Boolean);
   }, [jobStats]);
 
   const ChartSkeleton = () => (
@@ -239,6 +258,36 @@ export default function CompanyDetail() {
   );
 
   if (loading) return <div>Loading...</div>;
+
+  const handleOpenUnBlockModal = async () => {
+    Swal.fire({
+      title: "Bạn có muốn mở khóa tài khoản không?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Có, mở khóa!",
+      cancelButtonText: "Hủy",
+      reverseButtons: true,
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        Swal.fire({
+          title: "Đang xử lý...",
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          },
+        });
+
+        try {
+          console.log("companyId khi mở khóa:", companyId);
+          await dispatch(unblockCompany({ companyId }));
+          Swal.fire("Thành công!", "Tài khoản đã được mở khóa.", "success");
+          dispatch(getCompanyProfile(companyId));
+        } catch (error) {
+          Swal.fire("Lỗi!", "Đã có lỗi xảy ra, vui lòng thử lại.", "error");
+        }
+      }
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -259,28 +308,36 @@ export default function CompanyDetail() {
 
           <div className="flex gap-3">
             <Button
-              variant={companyProfile?.isActive ? "destructive" : "success"}
-              onClick={handleStatusChange}
+              variant={companyProfile?.isBlocked ? "destructive" : "success"}
+              onClick={
+                !companyProfile?.isBlocked
+                  ? handleOpenBlockModal
+                  : handleOpenUnBlockModal
+              }
               className="flex items-center gap-2"
             >
-              {companyProfile?.isActive ? (
-                <>
-                  <Lock className="w-4 h-4" />
-                  Khóa tài khoản
-                </>
-              ) : (
+              {companyProfile?.isBlocked ? (
                 <>
                   <Unlock className="w-4 h-4" />
                   Mở khóa tài khoản
                 </>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4" />
+                  Khóa tài khoản
+                </>
               )}
             </Button>
-            <Button
-              variant="destructive"
-              onClick={() => setShowDeleteModal(true)}
-            >
-              Xóa công ty
-            </Button>
+
+            <section>
+              {open && (
+                <BlockedCompanyModal
+                  open={open}
+                  handleClose={handleClose}
+                  companyId={companyId}
+                />
+              )}
+            </section>
           </div>
         </div>
 
@@ -368,10 +425,17 @@ export default function CompanyDetail() {
                 <div className="flex items-center gap-2">
                   <h3 className="text-xl font-bold text-white">
                     {reviews.length > 0
-                      ? (reviews.reduce((total, review) => total + review.star, 0) / reviews.length).toFixed(1)
+                      ? (
+                          reviews.reduce(
+                            (total, review) => total + review.star,
+                            0
+                          ) / reviews.length
+                        ).toFixed(1)
                       : "0.0"}
                   </h3>
-                  <span className="text-sm text-white">({reviews.length} đánh giá)</span>
+                  <span className="text-sm text-white">
+                    ({reviews.length} đánh giá)
+                  </span>
                 </div>
               </div>
             </div>
@@ -408,7 +472,11 @@ export default function CompanyDetail() {
                 <div>
                   <p className="text-sm text-gray-600">Ngành nghề</p>
                   <p className="font-medium">
-                    {companyProfile?.industry?.industryName || "Chưa cập nhật"}
+                    {companyProfile?.industry?.length > 0
+                      ? companyProfile.industry
+                          .map((ind) => ind.industryName)
+                          .join(", ")
+                      : "Chưa cập nhật"}
                   </p>
                 </div>
               </div>
@@ -430,6 +498,51 @@ export default function CompanyDetail() {
                   <p className="font-medium">
                     {companyProfile?.email || "Chưa cập nhật"}
                   </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <Link className="w-5 h-5 text-gray-500" />
+                <div>
+                  <p className="text-sm text-gray-600">Liên kết xã hội</p>
+                  {socialLinks &&
+                  Array.isArray(socialLinks) &&
+                  socialLinks.length > 0 ? (
+                    <>
+                      {socialLinks.map((link, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          {/* Logo của nền tảng */}
+                          <div
+                            className="platform-icon-container"
+                            style={{
+                              width: "24px",
+                              height: "24px",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <img
+                              src={require(`../../../assets/images/platforms/${link.platform.toLowerCase()}.png`)}
+                              alt={link.platform.toLowerCase()}
+                              className="h-full w-full object-contain rounded-full shadow-md"
+                            />
+                          </div>
+
+                          {/* Liên kết */}
+                          <a
+                            href={link.url}
+                            className="text-sm text-blue-600 truncate"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ maxWidth: "calc(100% - 32px)" }} // Đảm bảo không tràn khi container hẹp
+                          >
+                            {link.url}
+                          </a>
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <p className="text-sm ">Không có liên kết xã hội nào</p>
+                  )}
                 </div>
               </div>
 
@@ -550,7 +663,7 @@ export default function CompanyDetail() {
               !dateError &&
               chartData.length > 0 && (
                 <ResponsiveContainer width="100%" height="100%">
-                  {console.log('Rendering chart with data:', chartData)}
+                  {console.log("Rendering chart with data:", chartData)}
                   <LineChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
@@ -558,14 +671,13 @@ export default function CompanyDetail() {
                       tick={{ fill: "#666" }}
                       tickLine={{ stroke: "#666" }}
                       tickFormatter={(value) => {
-                        console.log('Formatting X-axis value:', value);
                         try {
                           return new Date(value).toLocaleDateString("vi-VN", {
                             day: "2-digit",
-                            month: "2-digit"
+                            month: "2-digit",
                           });
                         } catch (error) {
-                          console.error('Error formatting date:', error);
+                          console.error("Error formatting date:", error);
                           return value;
                         }
                       }}

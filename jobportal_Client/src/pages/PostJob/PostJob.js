@@ -4,29 +4,18 @@ import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { Label } from "../../ui/label";
 import { Badge } from "../../ui/badge";
-import {
-  X,
-  ArrowLeft,
-  ChevronDown,
-  Clock,
-  Bold,
-  Italic,
-  List,
-  ListOrdered,
-  Link2,
-  Plus,
-} from "lucide-react";
+import { X, ArrowLeft, ChevronDown } from "lucide-react";
 import { Editor } from "react-draft-wysiwyg";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import { EditorState, convertToRaw, ContentState } from "draft-js";
-import { toast } from "react-toastify";
+import { EditorState } from "draft-js";
 import "react-toastify/dist/ReactToastify.css";
-import { getAllSkill } from "../../redux/Skills/skill.action";
 import { useDispatch, useSelector } from "react-redux";
-import { createJobPost } from "../../redux/JobPost/jobPost.action";
-import { store } from "../../redux/store";
-import { getCity } from "../../redux/City/city.action";
+
 import Swal from "sweetalert2";
+import { getAllSkill } from "../../redux/Skills/skill.thunk";
+import { getCity } from "../../redux/City/city.thunk";
+import { createJobPost } from "../../redux/JobPost/jobPost.thunk";
+import { getCompanyByJWT } from "../../redux/Company/company.thunk";
 
 const cityCodeMapping = {
   1: 16, // Hà Nội
@@ -103,7 +92,8 @@ const PostJob = () => {
   const dispatch = useDispatch();
   const [currentStep, setCurrentStep] = useState(1);
   const { skills } = useSelector((store) => store.skill);
-  const { cities } = useSelector((store) => store.city);
+  const { companyJwt } = useSelector((store) => store.company);
+
   const [errors, setErrors] = useState({});
   const [jobData, setJobData] = useState({
     expireDate: "",
@@ -119,7 +109,7 @@ const PostJob = () => {
     position: "",
     niceToHaves: "",
     benefit: "",
-    expireDate: "",
+    industryIds: [],
   });
 
   const typeOfWork = [
@@ -130,6 +120,7 @@ const PostJob = () => {
   ];
 
   const [isSkillDropdownOpen, setIsSkillDropdownOpen] = useState(false);
+  const [isIndustryDropdownOpen, setIsIndustryDropdownOpen] = useState(false);
   const [descriptionState, setDescriptionState] = useState();
 
   const [requirementsState, setRequirementsState] = useState();
@@ -155,6 +146,7 @@ const PostJob = () => {
   useEffect(() => {
     dispatch(getAllSkill());
     dispatch(getCity());
+    dispatch(getCompanyByJWT());
     setDescriptionState(EditorState.createEmpty());
     setRequirementsState(EditorState.createEmpty());
     setNiceToHavesState(EditorState.createEmpty());
@@ -256,10 +248,27 @@ const PostJob = () => {
     }
   };
 
+  const handleAddIndustry = (industry) => {
+    if (industry && !jobData.industryIds.includes(industry)) {
+      setJobData({
+        ...jobData,
+        industryIds: [...jobData.industryIds, industry],
+      });
+    }
+  };
+
   const handleRemoveSkill = (skillToRemove) => {
     setJobData({
       ...jobData,
       skillIds: jobData.skillIds.filter((skill) => skill !== skillToRemove),
+    });
+  };
+  const handleRemoveIndustry = (industryToRemove) => {
+    setJobData({
+      ...jobData,
+      industryIds: jobData.industryIds.filter(
+        (industry) => industry !== industryToRemove
+      ),
     });
   };
 
@@ -281,6 +290,7 @@ const PostJob = () => {
       experience: "",
       salary: "",
       skillIds: "",
+      industryIds: "",
       location: "",
       description: "",
       requirement: "",
@@ -327,6 +337,14 @@ const PostJob = () => {
 
       if (!Array.isArray(jobData.skillIds) || jobData.skillIds.length === 0) {
         tempErrors.skillIds = "Bạn cần chọn ít nhất một kỹ năng.";
+        isValid = false;
+      }
+
+      if (
+        !Array.isArray(jobData.industryIds) ||
+        jobData.industryIds.length === 0
+      ) {
+        tempErrors.skillIds = "Bạn cần chọn ít nhất một ngành";
         isValid = false;
       }
     }
@@ -385,45 +403,63 @@ const PostJob = () => {
     return { isValid, errors: tempErrors };
   };
 
+  const handleSubmitJob = async (e) => {
+    e.preventDefault();
+    try {
+      const fullAddress =
+        specificAddress +
+        ", " +
+        `${location.ward}, ${location.district}, ${location.province}`;
 
-const handleSubmitJob = async (e) => {
-  e.preventDefault();
+      const finalJobData = {
+        ...jobData,
+        cityId: cityCodeMapping[selectedProvince],
+        location: fullAddress,
+      };
+      const jobPostData = finalJobData;
 
-  try {
-    const fullAddress =
-      specificAddress +
-      ", " +
-      `${location.ward}, ${location.district}, ${location.province}`;
+      const result = await dispatch(createJobPost(jobPostData));
 
-    const finalJobData = {
-      ...jobData,
-      cityId: cityCodeMapping[selectedProvince],
-      location: fullAddress,
-    };
+      if (result?.payload?.success) {
+        // Hiển thị thông báo thành công
+        Swal.fire({
+          icon: "success",
+          title: "Tạo tin tuyển dụng thành công!",
+          text:
+            JSON.stringify(result?.payload?.message) ||
+            "Tin tuyển dụng đã được tạo thành công.",
+          confirmButtonText: "OK",
+        }).then((response) => {
+          if (response.isConfirmed) {
+            // Điều hướng khi người dùng nhấn OK
+            navigate("/employer/account-management/job-management");
+          }
+        });
 
-    const result = await dispatch(createJobPost(finalJobData));
-
-    if (result.success) {
-      // Hiển thị thông báo thành công
-      Swal.fire({
-        icon: "success",
-        title: "Tạo tin tuyển dụng thành công!",
-        text: result.message || "Tin tuyển dụng đã được tạo thành công.",
-        confirmButtonText: "OK",
-      }).then((response) => {
-        if (response.isConfirmed) {
-          // Điều hướng khi người dùng nhấn OK
-          navigate("/employer/account-management/job-management");
-        }
-      });
-
-      setShowSuccessModal(true); // Hiển thị modal khi thành công
-    } else {
-      // Hiển thị thông báo lỗi
+        setShowSuccessModal(true); // Hiển thị modal khi thành công
+      } else {
+        // Hiển thị thông báo lỗi
+        Swal.fire({
+          icon: "warning",
+          title: "Có lỗi xảy ra",
+          text:
+            JSON.stringify(result?.payload.error) ||
+            "Không thể tạo tin tuyển dụng.",
+          confirmButtonText: "OK",
+        }).then((response) => {
+          if (response.isConfirmed) {
+            // Điều hướng khi người dùng nhấn OK
+            navigate("/employer/account-management/job-management");
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      // Hiển thị thông báo lỗi khi có ngoại lệ
       Swal.fire({
         icon: "warning",
         title: "Có lỗi xảy ra",
-        text: result?.error || "Không thể tạo tin tuyển dụng.",
+        text: "Không thể tạo tin tuyển dụng. Vui lòng thử lại.",
         confirmButtonText: "OK",
       }).then((response) => {
         if (response.isConfirmed) {
@@ -432,23 +468,7 @@ const handleSubmitJob = async (e) => {
         }
       });
     }
-  } catch (error) {
-    console.error("Error:", error);
-    // Hiển thị thông báo lỗi khi có ngoại lệ
-    Swal.fire({
-      icon: "warning",
-      title: "Có lỗi xảy ra",
-      text: "Không thể tạo tin tuyển dụng. Vui lòng thử lại.",
-      confirmButtonText: "OK",
-    }).then((response) => {
-      if (response.isConfirmed) {
-        // Điều hướng khi người dùng nhấn OK
-        navigate("/employer/account-management/job-management");
-      }
-    });
-  }
-};
-
+  };
 
   const handleProvinceSelection = (provinceCode) => {
     setSelectedProvince(provinceCode);
@@ -581,6 +601,79 @@ const handleSubmitJob = async (e) => {
             </div>
 
             <div>
+              <Label>Chọn chuyên ngành</Label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {jobData?.industryIds.map((industryId) => {
+                  const industry = companyJwt?.industry.find(
+                    (i) => i.industryId === industryId
+                  );
+                  return (
+                    industry && (
+                      <Badge
+                        key={industry}
+                        variant="secondary"
+                        className="flex items-center gap-1 bg-purple-600 text-white"
+                      >
+                        {industry.industryName}
+                        <X
+                          className="w-3 h-3 cursor-pointer"
+                          onClick={() => handleRemoveIndustry(industryId)}
+                        />
+                      </Badge>
+                    )
+                  );
+                })}
+              </div>
+              <div className="relative mt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full text-left flex justify-between items-center"
+                  onClick={() =>
+                    setIsIndustryDropdownOpen(!isIndustryDropdownOpen)
+                  }
+                >
+                  <span>Thêm</span>
+                  <ChevronDown
+                    className={`w-4 h-4 transition-transform ${
+                      isIndustryDropdownOpen ? "transform rotate-180" : ""
+                    }`}
+                  />
+                </Button>
+
+                {isIndustryDropdownOpen && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
+                    {companyJwt?.industry.map((industry) => (
+                      <label
+                        key={industry.industryId}
+                        className="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 rounded border-gray-300 mr-3"
+                          checked={jobData.industryIds.includes(
+                            industry.industryId
+                          )}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              handleAddIndustry(industry.industryId);
+                            } else {
+                              handleRemoveIndustry(industry.industryId);
+                            }
+                          }}
+                        />
+                        <span className="text-sm">{industry.industryName}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {errors.industryIds && (
+                <p className="text-red-500 text-sm">{errors.industryIds}</p>
+              )}
+            </div>
+
+            <div>
               <Label>Các kỹ năng cần thiết</Label>
               <div className="flex flex-wrap gap-2 mt-2">
                 {jobData.skillIds.map((skillId) => {
@@ -590,7 +683,7 @@ const handleSubmitJob = async (e) => {
                       <Badge
                         key={skillId}
                         variant="secondary"
-                        className="flex items-center gap-1"
+                        className="flex items-center gap-1 bg-purple-600 text-white"
                       >
                         {skill.skillName}
                         <X
@@ -690,6 +783,7 @@ const handleSubmitJob = async (e) => {
                         options: ["unordered", "ordered"],
                       },
                     }}
+                    placeholder="Nhập mô tả công việc..."
                   />
                 </div>
                 {errors.description && (
@@ -730,6 +824,7 @@ const handleSubmitJob = async (e) => {
                         options: ["unordered", "ordered"],
                       },
                     }}
+                    placeholder="Nhập trách nhiệm công việc..."
                   />
                 </div>
                 {errors.requirement && (
@@ -799,6 +894,7 @@ const handleSubmitJob = async (e) => {
                         options: ["unordered", "ordered"],
                       },
                     }}
+                    placeholder="Nhập yêu cầu thêm..."
                   />
                 </div>
               </div>
@@ -850,6 +946,7 @@ const handleSubmitJob = async (e) => {
                         options: ["unordered", "ordered"],
                       },
                     }}
+                    placeholder="Nhập lợi ích..."
                   />
                 </div>
                 {errors.benefit && (
@@ -865,6 +962,7 @@ const handleSubmitJob = async (e) => {
                     required
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     value={selectedProvince}
+                    id="tinh"
                     onChange={(e) => handleProvinceSelection(e.target.value)}
                   >
                     <option value="">Chọn tỉnh/thành phố</option>
@@ -881,6 +979,7 @@ const handleSubmitJob = async (e) => {
                     Quận/Huyện
                   </label>
                   <select
+                    id="quan"
                     required
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     value={selectedDistrict}
@@ -901,6 +1000,7 @@ const handleSubmitJob = async (e) => {
                     Phường/Xã
                   </label>
                   <select
+                    id="xa"
                     required
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     value={selectedWard}

@@ -51,20 +51,8 @@ public class Review {
     @JoinColumn(name = "user_id")
     private Seeker seeker;
     
-    @JsonIgnore
 	@ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "company_id")
 	private Company company;
 
-	public boolean isAnonymous() {
-		return isAnonymous;
-	}
-
-	public void setAnonymous(boolean anonymous) {
-		this.isAnonymous = anonymous;
-	}
-
-	
-
-	
 }

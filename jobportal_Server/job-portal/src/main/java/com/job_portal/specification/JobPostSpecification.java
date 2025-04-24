@@ -2,9 +2,11 @@ package com.job_portal.specification;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
+
+import com.job_portal.models.Industry;
 import com.job_portal.models.JobPost;
 import com.opencsv.CSVWriter;
-
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 
 import java.io.File;
@@ -48,8 +50,10 @@ public class JobPostSpecification {
             }
 
             if (selectedIndustryIds != null && !selectedIndustryIds.isEmpty()) {
-                predicate = criteriaBuilder.and(predicate, root.join("company").get("industry").get("id").in(selectedIndustryIds));
+                Join<JobPost, Industry> industryJoin = root.join("industry"); // jobPosts.industry
+                predicate = criteriaBuilder.and(predicate, industryJoin.get("industryId").in(selectedIndustryIds));
             }
+
 
             // Chỉ lấy các job đã phê duyệt
             predicate = criteriaBuilder.and(predicate, criteriaBuilder.isTrue(root.get("isApprove")));

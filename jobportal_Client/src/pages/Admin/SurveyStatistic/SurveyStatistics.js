@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getSurveyStatistics } from "../../../redux/Survey/survey.action";
 import { Card } from "../../../ui/card";
 import { Button } from "../../../ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -17,6 +16,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import { getSurveyStatistics } from "../../../redux/Survey/survey.thunk";
 
 const COLORS = ["#0088FE", "#00C49F"];
 

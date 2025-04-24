@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
@@ -8,11 +8,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import * as Yup from "yup";
-import {
-  createExperience,
-  getExpByUser,
-  updateExperience,
-} from "../../redux/Experience/exp.action";
+import { createExperience, getExpByUser, updateExperience } from "../../redux/Experience/exp.thunk";
+import { toast } from "react-toastify";
 
 const style = {
   position: "absolute",
@@ -37,7 +34,6 @@ export default function ExpModal({
   editingExperienceId,
   setEditingExperienceId,
   initialData,
-  showSuccessToast,
 }) {
   const validationSchema = Yup.object({
     jobTitle: Yup.string().required("Vui lòng nhập tiêu đề công việc"),
@@ -73,12 +69,14 @@ export default function ExpModal({
       setIsLoading(true);
       try {
         if (editingExperienceId) {
-          await dispatch(updateExperience(editingExperienceId, values));
+          const experienceData = values
+          await dispatch(updateExperience({experienceId:editingExperienceId, experienceData}));
           setEditingExperienceId(null);
-          showSuccessToast("Cập nhật kinh nghiệm thành công!");
+          toast.success("Cập nhật kinh nghiệm thành công!");
         } else {
-          await dispatch(createExperience(values));
-          showSuccessToast("Cập nhật kinh nghiệm thành công!");
+          const expData = values
+          await dispatch(createExperience(expData));
+          toast.success("Cập nhật kinh nghiệm thành công!");
         }
         handleClose();
         dispatch(getExpByUser()); // Refresh the experience list

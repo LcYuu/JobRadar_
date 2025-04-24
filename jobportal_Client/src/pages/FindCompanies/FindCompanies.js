@@ -13,15 +13,14 @@ import {
   SelectValue,
 } from "../../ui/select";
 import { useDispatch, useSelector } from "react-redux";
-import { getCity } from "../../redux/City/city.action";
-import {
-  getCompanyFitSeeker,
-  searhCompanies,
-} from "../../redux/Company/company.action";
 import CompanyCard from "../../components/common/CompanyCard/CompanyCard";
 import { Link } from "react-router-dom";
-import axios from "axios";
-import { getAllIndustries } from "../../redux/Industry/industry.action";
+import {
+  getCompanyFitSeeker,
+  searchCompanies,
+} from "../../redux/Company/company.thunk";
+import { getCity } from "../../redux/City/city.thunk";
+import { getAllIndustries } from "../../redux/Industry/industry.thunk";
 
 export default function FindCompanies() {
   const industryStyles = {
@@ -72,6 +71,7 @@ export default function FindCompanies() {
       border: "1px solid #4682B4", // Viền màu xanh thép
     },
   };
+
   const dispatch = useDispatch();
   const {
     companyByFeature = [],
@@ -83,77 +83,71 @@ export default function FindCompanies() {
   const { allIndustries = [] } = useSelector((store) => store.industry);
 
   const [filters, setFilters] = useState({
+    
     title: "",
     cityId: "",
     industryId: "",
   });
-
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [size] = useState(20);
-  const isFilterApplied = filters.title || filters.cityId || filters.industryId;
-
-  const [selectedCategoryName, setSelectedCategoryName] =
-    useState("Tất cả công ty");
-
-  // Add new state for temporary filters
   const [tempFilters, setTempFilters] = useState({
     title: "",
     cityId: "",
     industryId: "",
   });
+  console.log('filters', filters)
+  console.log('tempFilters', tempFilters)
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [size] = useState(20);
+  const [selectedCategoryName, setSelectedCategoryName] =
+    useState("Tất cả công ty");
 
   useEffect(() => {
-    dispatch(searhCompanies(filters, currentPage, size));
-  }, [filters, currentPage, size, dispatch]);
-
-  useEffect(() => {
+    dispatch(searchCompanies({ filters, currentPage, size }));
     dispatch(getCity());
     dispatch(getCompanyFitSeeker());
-  }, [dispatch]);
-
-  useEffect(() => {
     dispatch(getAllIndustries());
-  }, [dispatch]);
+  }, [filters, currentPage, size, dispatch]);
 
-  // Replace current filter change handlers with:
+  useEffect(()=>{
+    dispatch(getCity());
+    dispatch(getCompanyFitSeeker());
+    dispatch(getAllIndustries());
+  }, [dispatch])
+
   const handleSearch = () => {
-    setFilters(tempFilters); // Update main filters with temp values
-    setCurrentPage(0); // Reset to first page when searching
+    setFilters(tempFilters);
+    setCurrentPage(0);
   };
 
   const handleCategoryChange = (industryId) => {
     setSelectedCategory(industryId);
-    if (industryId === null) {
-      setSelectedCategoryName("Tất cả công ty");
-    } else {
-      const selectedIndustry = allIndustries.find(
-        (industry) => industry.industryId === industryId
-      );
-      setSelectedCategoryName(
-        selectedIndustry?.industryName || "Tất cả công ty"
-      );
-    }
-    setTempFilters((prev) => ({
-      ...prev,
-      industryId: industryId || "",
-    }));
+    setSelectedCategoryName(
+      industryId === null
+        ? "Tất cả công ty"
+        : allIndustries.find((industry) => industry.industryId === industryId)
+            ?.industryName || "Tất cả công ty"
+    );
+    setTempFilters((prev) => ({ ...prev, industryId: industryId || "" }));
   };
 
   const filteredCompanies = selectedCategory
-    ? companyByFeature.filter(
-        (company) => company.industryId === selectedCategory
-      )
-    : companyByFeature;
+  ? companyByFeature.filter((company) =>
+      company.industryIds.includes(selectedCategory)
+    )
+  : companyByFeature;
 
   const hasFilteredCompanies = filteredCompanies.length > 0;
+
   const hasSuggestedCompanies = companyFitSeeker.length > 0;
 
-  const uniqueCompanies = [
-    ...new Map(
-      companyByFeature.map((company) => [company.industryId, company])
-    ).values(),
-  ];
+  // Hàm lấy danh sách ngành cho từng công ty
+  const getIndustryNames = (industryIds) => {
+    return (industryIds || [])
+      .map((id) =>
+        allIndustries.find((industry) => industry.industryId === id)?.industryName
+      )
+      .filter(Boolean);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -178,18 +172,18 @@ export default function FindCompanies() {
               placeholder="Nhập tên công ty hoặc từ khóa mong muốn"
               className="pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500"
               value={tempFilters.title}
-              onChange={(e) => {
-                setTempFilters({ ...tempFilters, title: e.target.value });
-              }}
+              onChange={(e) =>
+                setTempFilters({ ...tempFilters, title: e.target.value })
+              }
             />
           </div>
           <div className="relative w-64">
             <Select
-              onValueChange={(value) => {
-                setTempFilters({ ...tempFilters, cityId: value });
-              }}
+              onValueChange={(value) =>
+                setTempFilters({ ...tempFilters, cityId: value })
+              }
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full bg-white">
                 <SelectValue placeholder="Chọn địa điểm" />
               </SelectTrigger>
               <SelectContent>
@@ -203,7 +197,6 @@ export default function FindCompanies() {
               </SelectContent>
             </Select>
           </div>
-
           <Button
             className="bg-purple-600 text-white px-6 py-3 rounded-lg shadow hover:bg-purple-700 transition duration-200"
             onClick={handleSearch}
@@ -219,7 +212,9 @@ export default function FindCompanies() {
               variant={selectedCategory === null ? "default" : "outline"}
               onClick={() => handleCategoryChange(null)}
               className={`hover:bg-gray-200 transition duration-200 ${
-                selectedCategory === null ? "bg-purple-600 text-white" : ""
+                selectedCategory === null
+                  ? "bg-purple-600 text-white"
+                  : "bg-white"
               }`}
             >
               Tất cả ngành nghề
@@ -236,7 +231,7 @@ export default function FindCompanies() {
                 className={`hover:bg-gray-200 transition duration-200 ${
                   selectedCategory === industry.industryId
                     ? "bg-purple-600 text-white"
-                    : ""
+                    : "bg-white"
                 }`}
               >
                 {industry.industryName}
@@ -265,48 +260,59 @@ export default function FindCompanies() {
           </div>
           {hasFilteredCompanies ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredCompanies.map((company) => (
-                <Link
-                  to={`/companies/${company.companyId.toString()}`}
-                  className="block"
-                  key={company.companyId}
-                >
-                  <Card className="p-6 space-y-4 transition-transform duration-300 hover:scale-105 cursor-pointer shadow-lg bg-white hover:shadow-2xl">
-                    <div className="flex items-center gap-4">
-                      <img
-                        src={company.logo}
-                        alt={`${company.companyName} logo`}
-                        className="h-16 w-16 rounded-lg shadow-md"
-                      />
-                      <div>
-                        <h3 className="font-semibold text-lg">
-                          {company.companyName}
-                        </h3>
-                        <p className="text-sm text-primary">
-                          {company.countJob} công việc đang mở
-                        </p>
+              {filteredCompanies.map((company) => {
+                const industryNames = getIndustryNames(
+                  company.industryIds || [company.industryId]
+                ); // Điều chỉnh dựa trên cấu trúc dữ liệu thực tế
+                return (
+                  <Link
+                    to={`/companies/${company.companyId.toString()}`}
+                    className="block"
+                    key={company.companyId}
+                  >
+                    <Card className="p-6 space-y-4 transition-transform duration-300 hover:scale-105 cursor-pointer shadow-lg bg-white hover:shadow-2xl">
+                      <div className="flex items-center gap-4">
+                        <img
+                          src={company.logo || "default-logo.png"}
+                          alt={`${company.companyName || "Công ty"} logo`}
+                          className="h-16 w-16 rounded-lg shadow-md"
+                        />
+                        <div>
+                          <h3 className="font-semibold text-lg">
+                            {company.companyName || "Tên công ty không có"}
+                          </h3>
+                          <p className="text-sm text-primary">
+                            {company.countJob || 0} công việc đang mở
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <p className="text-sm text-gray-500 line-clamp-2">
-                      {company.description}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      <Badge
-                        className="text-xs"
-                        style={{
-                          backgroundColor:
-                            industryStyles[company.industryName]
-                              ?.backgroundColor,
-                          color: industryStyles[company.industryName]?.color,
-                          border: industryStyles[company.industryName]?.border,
-                        }}
-                      >
-                        {company.industryName}
-                      </Badge>
-                    </div>
-                  </Card>
-                </Link>
-              ))}
+                      <p className="text-sm text-gray-500 line-clamp-2">
+                        {company.description || "Không có mô tả"}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {industryNames.map((name, index) => (
+                          <Badge
+                            key={index}
+                            className="text-xs mr-1"
+                            style={{
+                              backgroundColor:
+                                industryStyles[name]?.backgroundColor ||
+                                "rgba(0, 0, 0, 0.1)",
+                              color:
+                                industryStyles[name]?.color || "#000000",
+                              border:
+                                industryStyles[name]?.border ||
+                                "1px solid #000000",
+                            }}
+                          >
+                            {name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </Card>
+                  </Link>
+                );
+              })}
             </div>
           ) : (
             <p className="text-center text-gray-500">

@@ -2,12 +2,16 @@ package com.job_portal.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,8 +28,10 @@ import com.job_portal.repository.CompanyRepository;
 import com.job_portal.repository.IndustryRepository;
 import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.SeekerRepository;
+import com.job_portal.utils.EmailUtil;
 import com.social.exceptions.AllExceptions;
 
+import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
@@ -42,6 +48,8 @@ public class CompanyServiceImpl implements ICompanyService {
 	@Autowired
 	ISeekerService seekerService;
 	
+	@Autowired
+	private EmailUtil emailUtil;
 	@Autowired
 	SeekerRepository seekerRepository;
 	@Autowired
@@ -60,8 +68,7 @@ public class CompanyServiceImpl implements ICompanyService {
 	}
 
 	@Override
-	public boolean updateCompany(CompanyDTO companyDTO, UUID companyId)
-			throws AllExceptions {
+	public boolean updateCompany(CompanyDTO companyDTO, UUID companyId) throws AllExceptions {
 		// Tìm kiếm Company theo id
 		Optional<Company> existingCompany = companyRepository.findById(companyId);
 
@@ -84,7 +91,7 @@ public class CompanyServiceImpl implements ICompanyService {
 			oldCompany.setDescription(companyDTO.getDescription());
 			isUpdated = true;
 		}
-		
+
 		if (companyDTO.getTaxCode() != null) {
 			oldCompany.setTaxCode(companyDTO.getTaxCode());
 			isUpdated = true;
@@ -104,27 +111,24 @@ public class CompanyServiceImpl implements ICompanyService {
 			oldCompany.setEmail(companyDTO.getEmail());
 			isUpdated = true;
 		}
-		
 		if (companyDTO.getEstablishedTime() != null) {
 			oldCompany.setEstablishedTime(companyDTO.getEstablishedTime());
 			isUpdated = true;
 		}
 
 		// Tìm Industry mới dựa trên industryId
-		if (companyDTO.getIndustryId() != null) {
-			Optional<Industry> newIndustry = industryRepository.findById(companyDTO.getIndustryId());
-	
-			// Cập nhật Industry nếu khác
-			if (!newIndustry.get().equals(oldCompany.getIndustry())) {
-				oldCompany.setIndustry(newIndustry.get());
-				isUpdated = true;
+		if (companyDTO.getIndustryIds() != null && !companyDTO.getIndustryIds().isEmpty()) {
+			List<Industry> newIndustries = new ArrayList<>();
+			for (Integer industryId : companyDTO.getIndustryIds()) {
+				Optional<Industry> industryOpt = industryRepository.findById(industryId);
+				industryOpt.ifPresent(newIndustries::add);
 			}
+			oldCompany.setIndustry(newIndustries);
+			isUpdated = true;
 		}
-
 		// Tìm City mới dựa trên cityId
 		if (companyDTO.getCityId() != null) {
 			Optional<City> newCity = cityRepository.findById(companyDTO.getCityId());
-	
 			// Cập nhật City nếu khác
 			if (!newCity.get().equals(oldCompany.getCity())) {
 				oldCompany.setCity(newCity.get());
@@ -172,7 +176,6 @@ public class CompanyServiceImpl implements ICompanyService {
 	@Override
 	public Company findCompanyById(UUID companyId) throws AllExceptions {
 		try {
-			// Tìm kiếm công ty dựa trên companyId
 			Optional<Company> companyOptional = companyRepository.findCompanyByCompanyId(companyId);
 
 			// Trả về công ty nếu tìm thấy
@@ -184,45 +187,75 @@ public class CompanyServiceImpl implements ICompanyService {
 	}
 
 	@Override
-	public List<Company> searchCompaniesByIndustry(String industryName) throws AllExceptions {
-		try {
+	public Map<String, Object> followCompany(UUID companyId, UUID userId) throws AllExceptions {
 
-			List<Company> companies = companyRepository.findCompaniesByIndustryName(industryName);
-			if (companies.isEmpty()) {
-				throw new AllExceptions("Không tìm thấy công ty nào với tên ngành: " + industryName);
-			}
-			return companies;
-		} catch (Exception e) {
-			throw new AllExceptions(e.getMessage());
+		Company company = findCompanyById(companyId);
+		Seeker seeker = seekerService.findSeekerById(userId);
+
+		Map<String, Object> result = new HashMap<>();
+
+		if (seeker.getFollowedCompanies().contains(company)) {
+			seeker.getFollowedCompanies().remove(company);
+			company.getFollows().remove(seeker);
+			result.put("action", "unfollow");
+			result.put("message", "Bỏ theo dõi công ty thành công");
+		} else {
+			seeker.getFollowedCompanies().add(company);
+			company.getFollows().add(seeker);
+			result.put("action", "follow");
+			result.put("message", "Theo dõi công ty thành công");
 		}
+		companyRepository.save(company);
+		seekerRepository.save(seeker);
+		return result;
 	}
 
 	@Override
-	public Map<String, Object> followCompany(UUID companyId, UUID userId) throws AllExceptions {
-	    
-	    Company company = findCompanyById(companyId);
-	    Seeker seeker = seekerService.findSeekerById(userId);
-
-	    Map<String, Object> result = new HashMap<>();
-	    
-	    if(seeker.getFollowedCompanies().contains(company)) {
-	    	seeker.getFollowedCompanies().remove(company);
-	    	company.getFollows().remove(seeker);
-	        result.put("action", "unfollow");
-	        result.put("message", "Bỏ theo dõi công ty thành công");
-	    } else {
-	    	seeker.getFollowedCompanies().add(company);
-	    	company.getFollows().add(seeker);
-	        result.put("action", "follow");
-	        result.put("message", "Theo dõi công ty thành công");
-	    }
-	    companyRepository.save(company);
-	    seekerRepository.save(seeker);
-	    return result;
+	public List<Integer> getIndustryIdsByCompanyId(UUID companyId) {
+		Company company = companyRepository.findById(companyId)
+				.orElseThrow(() -> new EntityNotFoundException("Company not found"));
+		List<Industry> industries = company.getIndustry();
+		if (industries == null || industries.isEmpty()) {
+			return Collections.emptyList();
+		}
+		return industries.stream().map(Industry::getIndustryId).collect(Collectors.toList());
 	}
-	   public Integer getIndustryIdByCompanyId(UUID companyId) {
-	       Company company = companyRepository.findById(companyId)
-	           .orElseThrow(() -> new EntityNotFoundException("Company not found"));
-	       return company.getIndustry().getIndustryId(); // Assuming you have a method to get the industry
-	   }
+
+	@Override
+	public void blockCompany(UUID companyId, String reason, LocalDateTime until) {
+		Company company = companyRepository.findById(companyId)
+				.orElseThrow(() -> new RuntimeException("Employer không tồn tại"));
+
+		company.setIsBlocked(true);
+		company.setBlockedReason(reason);
+		company.setBlockedUntil(until);
+
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+		String untilFormatted = until.format(formatter);
+
+		try {
+			emailUtil.sendBlockAccountEmail(company.getEmail(), company.getCompanyName(), untilFormatted, reason);
+		} catch (MessagingException e) {
+			// Ghi log lỗi nếu gửi email thất bại
+			Logger.getLogger(getClass().getName()).severe("Lỗi khi gửi email chặn công ty: " + e.getMessage());
+			// Hoặc có thể throw một exception tùy chỉnh nếu cần
+			throw new RuntimeException("Gửi email thất bại, vui lòng thử lại sau.");
+		}
+
+		companyRepository.save(company);
+	}
+
+	@Override
+	public void unblockCompany(UUID companyId) throws MessagingException {
+		Company company = companyRepository.findById(companyId)
+				.orElseThrow(() -> new RuntimeException("Employer không tồn tại"));
+
+		company.setIsBlocked(false);
+		company.setBlockedReason(null);
+		company.setBlockedUntil(null);
+		emailUtil.sendUnBlockAccountEmail(company.getEmail(), company.getCompanyName());
+
+		companyRepository.save(company);
+
+	}
 }

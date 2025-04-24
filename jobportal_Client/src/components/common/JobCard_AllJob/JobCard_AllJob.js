@@ -178,20 +178,20 @@ function JobCard_AllJob({ job }) {
           {/* Industry tags and Apply button */}
           <div className="flex justify-between items-center">
             <div className="flex flex-wrap gap-2">
-              {Array.isArray(job.company.industry.industryName) ? (
-                job?.company?.industry?.industryName.map((industry, index) => (
+              {Array.isArray(job.company.industry) ? (
+                job.company.industry.map((industry, index) => (
                   <span
                     key={index}
                     className="px-2 py-1 rounded-full text-xs font-medium"
                     style={
-                      industryStyles[industry] || {
+                      industryStyles[industry.industryName] || {
                         backgroundColor: "rgba(0, 0, 0, 0.1)",
                         color: "rgb(0, 0, 0)",
                         border: "1px solid rgb(0, 0, 0)",
                       }
                     }
                   >
-                    {industry}
+                    {industry.industryName}
                   </span>
                 ))
               ) : (
@@ -209,12 +209,18 @@ function JobCard_AllJob({ job }) {
                 </span>
               )}
             </div>
-            {/* <Button 
-        className="bg-purple-600 text-white hover:bg-purple-700 ml-2"
-        onClick={handleApplyClick}
-      >
-        Apply
-      </Button> */}
+            <span
+              className="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
+              style={
+                typeOfWorkStyles[job.typeOfWork] || {
+                  backgroundColor: "rgba(0, 0, 0, 0.1)",
+                  color: "rgb(0, 0, 0)",
+                  border: "1px solid rgb(0, 0, 0)",
+                }
+              }
+            >
+              {job.typeOfWork}
+            </span>
           </div>
         </div>
       </CardContent>

@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getAllJobsForAdmin,
-  approveJob,
-} from "../../../redux/JobPost/jobPost.action";
+
 import { Button } from "../../../ui/button";
 import {
   MoreVertical,
-  Filter,
-  ChevronLeft,
-  ChevronRight,
+
   Search,
 } from "lucide-react";
 import {
@@ -17,30 +12,31 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
+
 } from "../../../ui/dropdown-menu";
 import { Input } from "../../../ui/input";
 import { useNavigate } from "react-router-dom";
+import { approveJob, getAllJobsForAdmin } from "../../../redux/JobPost/jobPost.thunk";
 
 export default function AdminJobList() {
   const dispatch = useDispatch();
   const { jobPost, totalPages, totalElements, loading, error } = useSelector(
-    (state) => state.jobPost
+    (store) => store.jobPost
   );
   const [currentPage, setCurrentPage] = useState(0);
   const [size, setSize] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
   const [status, setStatus] = useState("");
   const [approve, setApprove] = useState("");
-  const [totalJobs, setTotalJobs] = useState(0);
+  // const [totalJobs, setTotalJobs] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(
-      getAllJobsForAdmin(searchTerm, status, approve, currentPage, size)
+      getAllJobsForAdmin({ title:searchTerm, status, isApprove:approve, page:currentPage, size })
     );
   }, [dispatch, currentPage, size]);
+  
 
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalPages) {
@@ -56,7 +52,7 @@ export default function AdminJobList() {
   const applyFilters = () => {
     setCurrentPage(0);
     dispatch(
-      getAllJobsForAdmin(searchTerm, status, approve, currentPage, size)
+      getAllJobsForAdmin({ title:searchTerm, status, isApprove:approve, page:currentPage, size })
     );
   };
 
@@ -67,7 +63,7 @@ export default function AdminJobList() {
   return (
     <div className="space-y-6 mt-8">
       <div className="bg-white rounded-lg shadow">
-        <div className="flex justify-between items-center p-4 border-b">Thông tin liên hệ trên form
+        <div className="flex justify-between items-center p-4 border-b">
           <h2 className="font-semibold">
             Tổng số công việc ({totalElements})
           </h2>
@@ -134,7 +130,7 @@ export default function AdminJobList() {
                 <tr key={job.jobPostId} className="border-b hover:bg-gray-50">
                   <td className="p-4">{index + 1 + currentPage * size}</td>
 
-                  <td className="p-4 truncate" title={job.title}>
+                  <td id="job-title" className="p-4 truncate" title={job.title}>
                     {job.title}
                   </td>
                   <td className="p-4 truncate" title={job.company?.companyName}>

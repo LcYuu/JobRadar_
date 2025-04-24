@@ -1,7 +1,6 @@
 package com.job_portal.DTO;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -14,12 +13,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CompanyWithCountJobDTO {
-	private UUID companyId;
-	private String companyName;
-	private String logo;
-	private Integer industryId;
-	private String description;
-	private String industryName;
-	private Integer cityId;
-	private Long countJob;
+    private UUID companyId;
+    private String companyName;
+    private String logo;
+    private List<Integer> industryIds; // chỉ lấy id
+    private String description;
+    private Integer cityId;
+    private Long countJob;
 }

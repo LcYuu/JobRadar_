@@ -43,7 +43,7 @@ export default function SignUpForm() {
     confirmPassword: "",
     taxCode:"",
   });
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessages, setErrorMessages] = useState([]);
   const [companyInfo, setCompanyInfo] = useState(null);
   const [taxCodeVerified, setTaxCodeVerified] = useState(false);
   // Countdown effect
@@ -75,10 +75,23 @@ export default function SignUpForm() {
 
   const fields = activeTab === "job-seeker" ? jobSeekerFields : employerFields;
 
+  const addErrorMessage = (message) => {
+    const id = Date.now();
+    setErrorMessages(prev => [...prev, { id, message }]);
+    
+    setTimeout(() => {
+      setErrorMessages(prev => prev.filter(msg => msg.id !== id));
+    }, 2000);
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
+    if (!isStrongPassword(formData.password)) {
+      addErrorMessage("Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
+      return;
+    }
     if (formData.password !== formData.confirmPassword) {
-      setErrorMessage("Mật khẩu xác nhận không khớp");
+      addErrorMessage("Mật khẩu xác nhận không khớp");
       return;
     }
     
@@ -101,34 +114,33 @@ export default function SignUpForm() {
         setIsModalOpen(true);
         setTimeLeft(120);
         setIsTimeUp(false);
-        setErrorMessage("");
       }
     } catch (error) {
       console.error("Signup error:", error.response?.data);
-      setErrorMessage(error.response?.data || "Đăng ký thất bại. Vui lòng thử lại.");
+      addErrorMessage(error.response?.data || "Đăng ký thất bại. Vui lòng thử lại.");
     }
   };
 
   const handleVerifyEmployer = async (email) => {
     try {
       if (!formData.companyName || !formData.taxCode || !taxCodeVerified) {
-        setErrorMessage("Vui lòng xác thực mã số thuế trước khi tiếp tục");
+        addErrorMessage("Vui lòng xác thực mã số thuế trước khi tiếp tục");
         return false;
       }
 
-      const companyData = {
+      const company = {
         companyName: formData.companyName,
         taxCode: formData.taxCode,
         address: companyInfo?.address || "",
-        industry: { industryId: 1 },
-        city: { cityId: companyInfo?.cityId || 1 }
+        industry: [{ industryId: 0 }],
+        city: { cityId: companyInfo?.cityId || 0 }
       };
       
-      console.log("Sending company data:", companyData); // Debug log
+      console.log("Sending company data:", company); // Debug log
       
       const response = await axios.post(
         `http://localhost:8080/auth/verify-employer`,  // Bỏ query param email
-        companyData,
+        company,
         {
           params: { email: email }  // Thêm email vào params
         }
@@ -141,9 +153,9 @@ export default function SignUpForm() {
     } catch (error) {
       console.error("Error verifying employer:", error);
       if (error.response?.status === 404) {
-        setErrorMessage("Không tìm thấy tài khoản. Vui lòng thử lại sau.");
+        addErrorMessage("Không tìm thấy tài khoản. Vui lòng thử lại sau.");
       } else {
-        setErrorMessage("Lỗi xác thực thông tin công ty. Vui lòng thử lại.");
+        addErrorMessage("Lỗi xác thực thông tin công ty. Vui lòng thử lại.");
       }
       return false;
     }
@@ -178,13 +190,13 @@ export default function SignUpForm() {
       } else {
         setConfirmationStatus("failure");
         setIsPaused(false);
-        setErrorMessage(response.data || "Xác thực thất bại. Vui lòng thử lại.");
+        addErrorMessage(response.data || "Xác thực thất bại. Vui lòng thử lại.");
       }
     } catch (error) {
       console.error("Verification error:", error);
       setConfirmationStatus("failure");
       setIsPaused(false);
-      setErrorMessage(error.response?.data || "Xác thực thất bại. Vui lòng thử lại.");
+      addErrorMessage(error.response?.data || "Xác thực thất bại. Vui lòng thử lại.");
     }
   };
 
@@ -364,7 +376,7 @@ export default function SignUpForm() {
       return false;
     } catch (error) {
       console.error("Error verifying tax code:", error);
-      setErrorMessage("Mã số thuế không hợp lệ hoặc không tồn tại");
+      addErrorMessage("Mã số thuế không hợp lệ hoặc không tồn tại");
       return false;
     }
   };
@@ -455,7 +467,7 @@ export default function SignUpForm() {
                         console.log("Verifying tax code:", formData.taxCode); // Debug log
                         const verified = await verifyTaxCode(formData.taxCode);
                         if (!verified) {
-                          setErrorMessage("Mã số thuế không hợp lệ hoặc không tồn tại");
+                          addErrorMessage("Mã số thuế không hợp lệ hoặc không tồn tại");
                         }
                       }}
                       className="absolute right-0 top-0 h-full px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-r"
@@ -466,19 +478,19 @@ export default function SignUpForm() {
                 </div>
               ))}
             </div>
-            <AnimatePresence>
-              {errorMessage && (
+            <AnimatePresence mode="sync">
+              {errorMessages.map((error) => (
                 <motion.p
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
+                  key={error.id}
+                  initial={{ opacity: 0, y: -10, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: "auto" }}
+                  exit={{ opacity: 0, y: 10, height: 0 }}
+                  transition={{ duration: 0.2 }}
                   className="text-red-500 text-sm text-center bg-red-50 p-2 rounded-md border border-red-200"
                 >
-                  {typeof errorMessage === "string"
-                    ? errorMessage
-                    : "Đã xảy ra lỗi. Vui lòng thử lại."}
+                  {error.message}
                 </motion.p>
-              )}
+              ))}
             </AnimatePresence>
             <Button
               onClick={handleRegister}
@@ -499,13 +511,11 @@ export default function SignUpForm() {
           <p className="mt-4 text-center text-xs text-gray-500">
           Bằng cách nhấp vào 'Đăng ký', bạn xác nhận rằng bạn đã đọc và chấp nhận
             {" "}
-            <a href="#" className="underline text-indigo-600">
-            Điều kho��n dịch vụ
-            </a>{" "}
-            và{" "}
-            <a href="#" className="underline text-indigo-600">
+            <Link to="/terms-of-service" className="underline text-indigo-600">
+            Điều khoản dịch vụ
+            {" "}và{" "}
             Chính sách bảo mật
-            </a>
+            </Link>
             {" "}của chúng tôi.
           </p>
         </CardContent>

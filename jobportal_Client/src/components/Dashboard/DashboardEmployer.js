@@ -1,28 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Button } from "../../ui/button";
 import { Card } from "../../ui/card";
-import {
-  BarChart,
-  Calendar,
-  Users,
-  Eye,
-  MoreVertical,
-  Pin,
-  MapPin,
-} from "lucide-react";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { Users, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
-import {
-  findEmployerCompany,
-  getTop5Lastest,
-} from "../../redux/JobPost/jobPost.action";
-import { countReviewByCompany } from "../../redux/Review/review.action";
-import { store } from "../../redux/store";
+import { getTop5Lastest } from "../../redux/JobPost/jobPost.thunk";
+import { countReviewByCompany } from "../../redux/Review/review.thunk";
 
 export default function Dashboard_Employer() {
   const dispatch = useDispatch();
-  const [currentDateRange, setCurrentDateRange] = useState("Jul 19 - Jul 25");
+  // const [currentDateRange, setCurrentDateRange] = useState("Jul 19 - Jul 25");
 
   const [visibleJobs, setVisibleJobs] = useState([]); // Lưu công việc hiển thị (mặc định 5)
   const { jobs = [] } = useSelector((store) => store.jobPost);
@@ -30,14 +16,14 @@ export default function Dashboard_Employer() {
   const [totalApplicationCount, setTotalApplicationCount] = useState(0);
 
   // Stats data (replace with actual data from Redux)
-  const stats = {
-    newCandidates: 76,
-    totalJobs: 12,
-    totalViews: 2342,
-    totalApplications: 654,
-    viewsChange: "+6.4%",
-    applicationsChange: "-0.5%",
-  };
+  // const stats = {
+  //   newCandidates: 76,
+  //   totalJobs: 12,
+  //   totalViews: 2342,
+  //   totalApplications: 654,
+  //   viewsChange: "+6.4%",
+  //   applicationsChange: "-0.5%",
+  // };
 
   useEffect(() => {
     dispatch(getTop5Lastest());
@@ -126,61 +112,72 @@ export default function Dashboard_Employer() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 gap-4">
-          {visibleJobs.map((job) => (
-            <Link
-              key={job.postId}
-              to={`/employer/jobs/${job.postId}`}
-              className="block"
-            >
-              <Card className="p-4 bg-white shadow-lg rounded-lg hover:shadow-xl transition-transform transform hover:scale-105 group">
-                <div className="flex items-start justify-between">
-                  <div className="flex gap-4">
-                    {/* Job Details */}
-                    <div className="flex flex-col">
-                      <h3 className="font-semibold text-lg text-gray-900 group-hover:text-indigo-600 transition-colors">
-                        {job.title}
-                      </h3>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                        <MapPin className="w-4 h-4" />
-                        <span>{job.location}</span>
-                        <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                        <span>{job.typeOfWork}</span>
-                      </div>
-                      <div className="flex gap-2 mt-2">
-                        <span className="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600 font-medium">
-                          {job.industryName}
-                        </span>
-                        <span className="px-3 py-1 text-xs rounded-full bg-green-50 text-green-600 font-medium">
-                          {job.salary
-                            ? `${job.salary.toLocaleString("vi-VN")} VNĐ`
-                            : "Thương lượng"}
-                        </span>
+        {visibleJobs.length === 0 ? (
+          <p className="text-gray-500 italic">
+            Bạn chưa đăng công việc nào gần đây.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {visibleJobs.map((job) => (
+              <Link
+                key={job.postId}
+                to={`/employer/jobs/${job.postId}`}
+                className="block"
+              >
+                <Card className="p-4 bg-white shadow-lg rounded-lg hover:shadow-xl transition-transform transform hover:scale-105 group">
+                  <div className="flex items-start justify-between">
+                    <div className="flex gap-4">
+                      {/* Job Details */}
+                      <div className="flex flex-col">
+                        <h3 className="font-semibold text-lg text-gray-900 group-hover:text-indigo-600 transition-colors">
+                          {job.title}
+                        </h3>
+                        <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                          <MapPin className="w-4 h-4" />
+                          <span>{job.location}</span>
+                          <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
+                          <span>{job.typeOfWork}</span>
+                        </div>
+                        <div className="flex gap-2 mt-2">
+                          {job.industryNames?.map((industryName, index) => (
+                            <span
+                              key={index}
+                              className="px-3 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600 font-medium mr-2"
+                            >
+                              {industryName}
+                            </span>
+                          ))}
+                          <span className="px-3 py-1 text-xs rounded-full bg-green-50 text-green-600 font-medium">
+                            {job.salary
+                              ? `${job.salary.toLocaleString("vi-VN")} VNĐ`
+                              : "Thương lượng"}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Application Count & Status */}
-                  <div className="flex flex-col items-end">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Users className="w-4 h-4" />
-                      <span>{job.applicationCount} ứng viên</span>
+                    {/* Application Count & Status */}
+                    <div className="flex flex-col items-end">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Users className="w-4 h-4" />
+                        <span>{job.applicationCount} ứng viên</span>
+                      </div>
+                      <span
+                        className={`mt-2 px-3 py-1 rounded-full text-xs font-medium ${
+                          job.approve
+                            ? "bg-green-100 text-green-600"
+                            : "bg-yellow-100 text-yellow-600"
+                        }`}
+                      >
+                        {job.approve ? "Đã duyệt" : "Chờ duyệt"}
+                      </span>
                     </div>
-                    <span
-                      className={`mt-2 px-3 py-1 rounded-full text-xs font-medium ${
-                        job.approve
-                          ? "bg-green-100 text-green-600"
-                          : "bg-yellow-100 text-yellow-600"
-                      }`}
-                    >
-                      {job.approve ? "Đã duyệt" : "Chờ duyệt"}
-                    </span>
                   </div>
-                </div>
-              </Card>
-            </Link>
-          ))}
-        </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
