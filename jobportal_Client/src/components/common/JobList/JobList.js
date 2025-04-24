@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import JobCard from "../JobCard/JobCard";
 import { useDispatch, useSelector } from "react-redux";
-import logo1 from "../../../assets/images/common/logo1.jpg";
-import { getAllJobAction } from "../../../redux/JobPost/jobPost.action";
 import { Button } from "../../../ui/button";
+import { getAllJobAction } from "../../../redux/JobPost/jobPost.thunk";
+import useWebSocket from "../../../utils/useWebSocket";
 
 export default function JobList() {
+  
   const dispatch = useDispatch();
   const {
     jobPost = [],
@@ -18,7 +19,7 @@ export default function JobList() {
 
   useEffect(() => {
     // Set loading state when fetching new data
-    dispatch(getAllJobAction(currentPage, size));
+    dispatch(getAllJobAction({currentPage, size}));
   }, [dispatch, currentPage, size]);
 
   const handlePageChange = (newPage) => {
@@ -26,6 +27,26 @@ export default function JobList() {
       setCurrentPage(newPage);
     }
   };
+
+  const handleMessage = useCallback(
+    (dispatch, message, topic) => {
+      if (topic === "/topic/job-updates") {
+        if (message === "ADD JOB") {
+          dispatch(getAllJobAction({ currentPage, size }));
+
+        } else if (message === "EXPIRE JOB") {
+          dispatch(getAllJobAction({ currentPage, size }));
+        } else if (message === "APPROVE JOB") {
+          dispatch(getAllJobAction({ currentPage, size }));
+        }
+      }
+    },
+    [currentPage, size] // Dependencies để cập nhật currentPage, size
+  );
+
+  useWebSocket(["/topic/job-updates"], (dispatch, message, topic) =>
+    handleMessage(dispatch, message, topic)
+  )(dispatch);
 
   const handleSizeChange = (e) => {
     setSize(Number(e.target.value));
@@ -54,7 +75,7 @@ export default function JobList() {
               jobTitle={job.title}
               company={job.company.companyName}
               location={job.city.cityName}
-              category={job.company.industry.industryName}
+              category={job?.industry ? job.industry.map(ind => ind.industryName) : []}
               jobType={job.typeOfWork}
               companyLogo={job.company.logo}
             />

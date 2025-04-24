@@ -1,19 +1,34 @@
-import React, { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFacebookF, faTwitter, faInstagram, faLinkedinIn } from '@fortawesome/free-brands-svg-icons'; 
-import logo from '../../../assets/images/common/logo.jpg';
-import { Input } from '../../../ui/input';
-import { Button } from '../../../ui/button';
+import React, { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faFacebookF,
+  faTwitter,
+  faInstagram,
+  faLinkedinIn,
+} from "@fortawesome/free-brands-svg-icons";
+import logo from "../../../assets/images/common/logo.jpg";
+import { Input } from "../../../ui/input";
+import { Button } from "../../../ui/button";
+import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  createSubscription,
+  deleteSubscription,
+  findSubscriptionBySeekerId,
+  updateSubscription,
+} from "../../../redux/Subscription/subscriptionthunk";
+import Swal from "sweetalert2";
 
 export default function Footer() {
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-
+  const [email, setEmail] = useState("");
+  const dispatch = useDispatch();
+  const { currentSubscription, loading, message, error } = useSelector(
+    (store) => store.subscription
+  );
   const socialIcons = [
-    { icon: faFacebookF, link: 'https://facebook.com' },
-    { icon: faTwitter, link: 'https://twitter.com' },
-    { icon: faInstagram, link: 'https://instagram.com' },
-    { icon: faLinkedinIn, link: 'https://linkedin.com' }
+    { icon: faTwitter, link: "https://twitter.com" },
+    { icon: faInstagram, link: "https://instagram.com" },
+    { icon: faLinkedinIn, link: "https://linkedin.com" },
   ];
 
   const validateEmail = (email) => {
@@ -21,22 +36,97 @@ export default function Footer() {
     return regex.test(email);
   };
 
-  const handleSubscribe = () => {
-    if (!email) {
-      setMessage('Vui lòng nhập email của bạn.');
-    } else if (!validateEmail(email)) {
-      setMessage('Email không hợp lệ.');
+  useEffect(() => {
+    dispatch(findSubscriptionBySeekerId());
+  }, [dispatch]);
+  
+  useEffect(() => {
+    if (currentSubscription?.email) {
+      setEmail(currentSubscription.email);
+    }
+  }, [currentSubscription]);
+
+const handleSubscribe = async () => {
+  if (!email) {
+    Swal.fire({
+      icon: "error",
+      title: "Lỗi!",
+      text: "Vui lòng nhập email của bạn.",
+    });
+    return;
+  }
+
+  if (!validateEmail(email)) {
+    Swal.fire({
+      icon: "error",
+      title: "Lỗi!",
+      text: "Email không hợp lệ.",
+    });
+    return;
+  }
+
+  try {
+    let response;
+    if (currentSubscription) {
+      const subId = currentSubscription.subscriptionId;
+      response = await dispatch(updateSubscription({ subId, email }));
     } else {
-      setMessage('Đăng ký nhận thông báo thành công!');
-      // Additional subscription logic goes here
+      response = await dispatch(createSubscription({ email }));
     }
 
-    // Clear message after 5 seconds and reset the form
-    setTimeout(() => {
-      setMessage('');
-      setEmail('');
-    }, 5000);
-  };
+    Swal.fire({
+      icon: "success",
+      title: "Thành công!",
+      text: response.message || "Cập nhật thành công!",
+    });
+  } catch (err) {
+    Swal.fire({
+      icon: "error",
+      title: "Lỗi!",
+      text: err.message || "Đã xảy ra lỗi. Vui lòng thử lại!",
+    });
+  }
+};
+
+const handleUnsubscribe = async () => {
+  if (!currentSubscription || !currentSubscription.subscriptionId) {
+    Swal.fire({
+      icon: "error",
+      title: "Lỗi!",
+      text: "Không tìm thấy thông tin đăng ký!",
+    });
+    return;
+  }
+
+  const result = await Swal.fire({
+    title: "Xác nhận hủy đăng ký?",
+    text: "Bạn có chắc chắn muốn hủy nhận thông báo không?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Đồng ý",
+    cancelButtonText: "Hủy",
+  });
+
+  if (result.isConfirmed) {
+    try {
+      const subId = currentSubscription.subscriptionId;
+      const response = await dispatch(deleteSubscription(subId)).unwrap();
+
+      Swal.fire({
+        icon: "success",
+        title: "Đã hủy đăng ký!",
+        text: response.message || "Hủy đăng ký thành công!",
+      });
+    } catch (err) {
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi!",
+        text: err.message || "Đã xảy ra lỗi. Vui lòng thử lại!",
+      });
+    }
+  }
+};
+
 
   return (
     <footer className="footer bg-gray-900 py-12">
@@ -44,7 +134,11 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between">
           <div className="mb-8 md:mb-0">
             <div className="flex items-center space-x-2 mb-4">
-              <img src={logo} alt="logo" className="w-8 h-8 bg-purple-600 rounded-full" />
+              <img
+                src={logo}
+                alt="logo"
+                className="w-8 h-8 bg-purple-600 rounded-full"
+              />
               <span className="text-xl font-bold text-white">JobRadar</span>
             </div>
             <p className="text-slate-200 text-sm">
@@ -55,7 +149,9 @@ export default function Footer() {
           </div>
 
           <div className="mb-8 md:mb-0 flex flex-col items-center justify-center">
-            <h4 className="font-semibold text-white mb-2">Đăng ký nhận thông báo việc làm</h4>
+            <h4 className="font-semibold text-white mb-2">
+              Đăng ký nhận thông báo việc làm
+            </h4>
             <div className="flex space-x-2">
               <Input
                 type="email"
@@ -64,11 +160,31 @@ export default function Footer() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              <Button className="bg-purple-600 text-white" onClick={handleSubscribe}>
-                Đăng ký
-              </Button>
+              {currentSubscription ? (
+                <Button
+                  className="bg-blue-600 text-white"
+                  onClick={handleSubscribe}
+                >
+                  Cập nhật email
+                </Button>
+              ) : (
+                <Button
+                  className="bg-purple-600 text-white"
+                  onClick={handleSubscribe}
+                >
+                  Đăng ký
+                </Button>
+              )}
             </div>
-            {message && <p className="text-sm mt-2 text-gray-200">{message}</p>}
+
+            {currentSubscription && (
+              <Button
+                className="bg-red-600 text-white mt-2"
+                onClick={handleUnsubscribe}
+              >
+                Hủy đăng ký
+              </Button>
+            )}
           </div>
 
           <div className="flex flex-col md:flex-row space-y-8 md:space-y-0 md:space-x-12">
@@ -77,9 +193,19 @@ export default function Footer() {
               <ul className="text-gray-400 text-sm space-y-2">
                 <li>Companies</li>
                 <li>Pricing</li>
-                <li>Terms</li>
+                <Link
+                  to="/terms-of-service"
+                  className="text-indigo-600 hover:underline"
+                >
+                  <li>Terms</li>
+                </Link>
                 <li>Advice</li>
-                <li>Privacy Policy</li>
+                <Link
+                  to="/privacy-policy"
+                  className="text-indigo-600 hover:underline"
+                >
+                  <li>Privacy Policy</li>
+                </Link>
               </ul>
             </div>
             <div>
@@ -95,7 +221,9 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-gray-700 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm mb-4 md:mb-0">© 2024 JobRadar. All rights reserved.</p>
+          <p className="text-gray-400 text-sm mb-4 md:mb-0">
+            © 2024 JobRadar. All rights reserved.
+          </p>
           <div className="flex space-x-4">
             {socialIcons.map((social, index) => (
               <a

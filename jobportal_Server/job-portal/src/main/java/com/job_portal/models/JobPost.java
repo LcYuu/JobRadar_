@@ -1,6 +1,11 @@
 package com.job_portal.models;
 
 import lombok.*;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.job_portal.utils.LocalDateTimeSerializer;
+import com.job_portal.utils.LocalDateTimeDeserializer;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,6 +14,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
@@ -19,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
 
 @Entity
 @Table(name = "job_posts")
@@ -32,7 +39,7 @@ public class JobPost {
 	@GeneratedValue(strategy = GenerationType.UUID)
 	@Column(name = "post_id")
 	private UUID postId;
-
+	
 	@Column(name = "create_date", nullable = false)
 	private LocalDateTime createDate;
 
@@ -72,11 +79,11 @@ public class JobPost {
 	@Column(name = "status", length = 50, nullable = false)
 	private String status;
 
-	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE) // Thêm CascadeType.REMOVE
+	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE) 
 	@JoinColumn(name = "city_id")
 	private City city;
 
-	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE) // Thêm CascadeType.REMOVE
+	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE) 
 	@JoinColumn(name = "company_id")
 	private Company company;
 
@@ -92,5 +99,16 @@ public class JobPost {
 
 	@Column(name = "survey_email_sent")
 	private Boolean surveyEmailSent = false;
+	
+	@Column(name = "view_count", nullable = false)
+	private Integer viewCount = 0;
+	
+	@ManyToMany
+	@JoinTable(
+	    name = "job_post_industry",
+	    joinColumns = @JoinColumn(name = "post_id"),
+	    inverseJoinColumns = @JoinColumn(name = "industry_id")
+	)
+	private List<Industry> industry = new ArrayList<>();
 
 }

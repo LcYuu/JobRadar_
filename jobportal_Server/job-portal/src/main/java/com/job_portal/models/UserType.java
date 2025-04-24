@@ -1,47 +1,31 @@
 package com.job_portal.models;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "user_type")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserType {
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_type_id")
 	private Integer userTypeId;
-	
+
 	private String user_type_name;
-
-	public UserType() {
-
-	}
-
-	public Integer getUserTypeId() {
-		return userTypeId;
-	}
-
-	public void setUserTypeId(Integer userTypeId) {
-		this.userTypeId = userTypeId;
-	}
-
-	public String getUser_type_name() {
-		return user_type_name;
-	}
-
-	public UserType(Integer userTypeId, String user_type_name) {
-		super();
-		this.userTypeId = userTypeId;
-		this.user_type_name = user_type_name;
-	}
-	
-	public void setUser_type_name(String user_type_name) {
-		this.user_type_name = user_type_name;
-	}
 	
 }

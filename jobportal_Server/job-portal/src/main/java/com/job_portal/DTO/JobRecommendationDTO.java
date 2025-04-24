@@ -2,8 +2,8 @@ package com.job_portal.DTO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,6 +26,6 @@ public class JobRecommendationDTO {
 	private UUID companyId;
 	private String companyName;
 	private String cityName;
-	private String industryName;
+	private List<String> industryNames;
 	private String logo;
 }

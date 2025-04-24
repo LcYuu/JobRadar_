@@ -51,7 +51,6 @@ public class CVController {
 			@RequestBody CVDTO cvdto) {
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-
 		boolean isCreated = cvService.createCV(cvdto, user.get().getUserId());
 		if (isCreated) {
 			return new ResponseEntity<>("Tạo CV thành công", HttpStatus.CREATED);

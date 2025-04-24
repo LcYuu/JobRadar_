@@ -15,16 +15,17 @@ import { Editor } from "react-draft-wysiwyg";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { ContentState, EditorState } from "draft-js";
 import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import { uploadToCloudinary } from "../../../utils/uploadToCloudinary";
+
+import { FaCheckCircle } from "react-icons/fa";
+import { getCVBySeeker } from "../../../redux/CV/cv.thunk";
 import {
   checkIfApplied,
   createApply,
   updateApply,
-} from "../../../redux/ApplyJob/applyJob.action";
-import { useParams } from "react-router-dom";
-import { toast } from "react-toastify";
-import { uploadToCloudinary } from "../../../utils/uploadToCloudinary";
-import { getCVBySeeker } from "../../../redux/CV/cv.action";
-import { FaCheckCircle } from "react-icons/fa";
+} from "../../../redux/ApplyJob/applyJob.thunk";
 
 const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
   const dispatch = useDispatch();
@@ -109,7 +110,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
               ...formData,
               pathCV: uploadedFile, // Gán URL file đã upload vào formData
             };
-            dispatch(updateApply(updatedFormData, postId));
+            dispatch(updateApply({ applyData: updatedFormData, postId }));
             toast.success("Cập nhật ứng tuyển thành công!");
           } else {
             toast.error("Đã có lỗi khi tải lên CV");
@@ -117,7 +118,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
           }
         } else {
           // Nếu không chọn file mới, chỉ gửi formData có sẵn
-          dispatch(updateApply(formData, postId));
+          dispatch(updateApply({ applyData: formData, postId }));
           toast.success("Cập nhật ứng tuyển thành công!");
         }
       } else {
@@ -130,8 +131,8 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
               ...formData,
               pathCV: uploadedFile, // Gán URL file đã upload vào formData
             };
-            await dispatch(createApply(updatedFormData, postId));
-            await dispatch(checkIfApplied(postId));
+            await dispatch(createApply({ applyData: updatedFormData, postId }));
+            dispatch(checkIfApplied(postId));
             toast.success("Ứng tuyển thành công!");
           } else {
             toast.error("Đã có lỗi khi tải lên CV");
@@ -139,7 +140,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
           }
         } else {
           // Nếu không chọn file mới, chỉ gửi formData có sẵn
-          dispatch(createApply(formData, postId));
+          dispatch(createApply({ applyData: formData, postId }));
           toast.success("Ứng tuyển thành công!");
         }
       }
@@ -187,9 +188,6 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
     setUploadOption(null);
     document.getElementById("cv-upload").value = "";
   };
-
-  console.log("a" + formData);
-  console.log("b" + selectedFile);
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

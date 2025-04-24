@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.job_portal.DTO.SeekerDTO;
-import com.job_portal.DTO.SocialLinkDTO;
 import com.job_portal.models.Industry;
 import com.job_portal.models.Seeker;
 import com.job_portal.models.Skills;
@@ -85,11 +84,15 @@ public class SeekerServiceImpl implements ISeekerService {
 	        isUpdated = true;
 	    }
 
-	    // Cập nhật Industry
-	    if (seekerDTO.getIndustryId() != null) {
-	        Optional<Industry> newIndustry = industryRepository.findById(seekerDTO.getIndustryId());
-	        if (!newIndustry.get().equals(oldSeeker.getIndustry())) {
-	            oldSeeker.setIndustry(newIndustry.get());
+	    if (seekerDTO.getIndustryIds() != null && !seekerDTO.getIndustryIds().isEmpty()) {
+	        List<Industry> industriesList = new ArrayList<>();
+	        for (Integer industryId : seekerDTO.getIndustryIds()) {
+	            Optional<Industry> industryOpt = industryRepository.findById(industryId);
+	            industryOpt.ifPresent(industriesList::add);
+	        }
+	        // Only update if the new list is different from the old one
+	        if (!industriesList.equals(oldSeeker.getIndustry())) {
+	            oldSeeker.setIndustry(industriesList);
 	            isUpdated = true;
 	        }
 	    }
@@ -105,47 +108,6 @@ public class SeekerServiceImpl implements ISeekerService {
 	        isUpdated = true;
 	    }
 
-	    // Cập nhật danh sách SocialLink
-	    if (seekerDTO.getSocialLinks() != null && !seekerDTO.getSocialLinks().isEmpty()) {
-	        List<SocialLink> existingSocialLinks = oldSeeker.getSocialLinks();
-	        
-	        // Tạo một set để kiểm tra sự tồn tại
-	        Set<String> newSocialNames = new HashSet<>();
-	        
-	        // Duyệt qua các liên kết mới từ seekerDTO
-	        for (SocialLinkDTO socialLinkDTO : seekerDTO.getSocialLinks()) {
-	            newSocialNames.add(socialLinkDTO.getSocialName());
-	            boolean found = false;
-
-	            // Kiểm tra xem liên kết đã tồn tại chưa
-	            for (SocialLink existingLink : existingSocialLinks) {
-	                if (existingLink.getSocialName().equals(socialLinkDTO.getSocialName())) {
-	                    existingLink.setLink(socialLinkDTO.getLink()); // Cập nhật liên kết hiện tại
-	                    found = true;
-	                    break;
-	                }
-	            }
-
-	            // Nếu không tìm thấy, thêm mới
-	            if (!found) {
-	                SocialLink newSocialLink = new SocialLink();
-	                newSocialLink.setUserId(userId);
-	                newSocialLink.setSocialName(socialLinkDTO.getSocialName());
-	                newSocialLink.setLink(socialLinkDTO.getLink());
-	                newSocialLink.setSeeker(oldSeeker); // Thiết lập lại mối quan hệ
-	                existingSocialLinks.add(newSocialLink);
-	            }
-	        }
-
-	        // Xóa các liên kết không còn tồn tại trong danh sách mới
-	        existingSocialLinks.removeIf(existingLink ->
-	            !newSocialNames.contains(existingLink.getSocialName())
-	        );
-
-	        isUpdated = true; 
-	    }
-
-	    // Lưu lại đối tượng Seeker đã cập nhật nếu có thay đổi
 	    if (isUpdated) {
 	        seekerRepository.save(oldSeeker);
 	    }
@@ -153,67 +115,12 @@ public class SeekerServiceImpl implements ISeekerService {
 	    return isUpdated;
 	}
 
-	
-	@Override
-	public boolean deleteSocialLink(UUID userId, String socialName) throws AllExceptions {
-	    // Tìm kiếm Seeker của người dùng
-	    Optional<Seeker> seekerOpt = seekerRepository.findById(userId);
-	    if (seekerOpt.isEmpty()) {
-	        throw new AllExceptions("Seeker not found with userId: " + userId);
-	    }
-	    
-	    Seeker seeker = seekerOpt.get();
-	    // Tìm kiếm và xóa SocialLink
-	    Iterator<SocialLink> iterator = seeker.getSocialLinks().iterator();
-	    while (iterator.hasNext()) {
-	        SocialLink socialLink = iterator.next();
-	        if (socialLink.getSocialName().equalsIgnoreCase(socialName)) {
-	            iterator.remove(); // Xóa SocialLink khỏi danh sách
-	            seekerRepository.save(seeker); // Lưu lại Seeker
-	            return true; // Đã xóa thành công
-	        }
-	    }
-	    return false; // Không tìm thấy SocialLink
-	}
-
-
-
-	@Override
-	public List<Seeker> searchSeekerByName(String userName) throws AllExceptions {
-		try {
-			List<Seeker> seekers = seekerRepository.findSeekerByUserName(userName);
-			if (seekers.isEmpty()) {
-				throw new AllExceptions("Không tìm thấy người tìm viêc nào với tên: " + userName);
-			}
-
-			return seekers;
-		} catch (Exception e) {
-			throw new AllExceptions(e.getMessage());
-		}
-	}
-
-	@Override
-	public List<Seeker> searchSeekerByIndustry(String industryName) throws AllExceptions {
-		try {
-			List<Seeker> seekers = seekerRepository.findSeekerByIndustryName(industryName);
-			if (seekers.isEmpty()) {
-				throw new AllExceptions("Không tìm thấy người tìm việc nào với tên ngành: " + industryName);
-			}
-			return seekers;
-		} catch (Exception e) {
-			throw new AllExceptions(e.getMessage());
-		}
-	}
-
 	@Override
 	public Seeker findSeekerById(UUID userId) throws AllExceptions {
 		try {
-			// Tìm kiếm công ty dựa trên companyId
 			Optional<Seeker> seeker = seekerRepository.findById(userId);
-			// Trả về công ty nếu tìm thấy
 			return seeker.get();
 		} catch (Exception e) {
-			// Ném ra ngoại lệ nếu có lỗi xảy ra
 			throw new AllExceptions(e.getMessage());
 		}
 	}

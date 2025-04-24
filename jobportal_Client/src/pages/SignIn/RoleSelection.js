@@ -1,45 +1,47 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./RoleSelection.css";
-import { FaUserTie, FaUserGraduate } from "react-icons/fa"; // Import icon từ react-icons
+import { FaUserTie, FaUserGraduate } from "react-icons/fa";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import SuccessIcon from "../../components/common/Icon/Sucess/Sucess";
 import FailureIcon from "../../components/common/Icon/Failed/Failed";
+import { useDispatch, useSelector } from "react-redux";
+import { updateRole } from "../../redux/Auth/auth.thunk";
 
 const RoleSelection = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch()
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loginStatus, setLoginStatus] = useState(null); // null, 'success', 'failure'
-  const token = sessionStorage.getItem("jwt"); // Lấy JWT token từ sessionStorage
+  const { user, loginStatus, loading } = useSelector((state) => state.auth);
+  const token = localStorage.getItem("jwt");
   const [error, setError] = useState("");
 
   const handleRoleSubmit = (role) => {
-    axios
-      .post(`http://localhost:8080/auth/update-role/${role}`, null, {
-        headers: {
-          Authorization: `Bearer ${token}`, // Gửi token trong header
-        },
-      })
-      .then((response) => {
-        const { message } = response?.data;
-        console.log(message);
-        setLoginStatus("success");
-        setIsModalOpen(true);
-
-        setTimeout(() => {
-          window.location.href = "http://localhost:3000/"; // Redirect về trang chủ
-        }, 1000);
-      })
-      .catch(() => {
-        setError(
-          "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt."
-        );
-        setLoginStatus("failure");
-        setIsModalOpen(true);
-      });
+    dispatch(updateRole(role)); // Dispatch async thunk
+    setIsModalOpen(true); // Mở modal ngay khi bắt đầu yêu cầu
   };
+
+  useEffect(() => {
+  if (loginStatus === "success") {
+    setTimeout(() => {
+      if (user?.userType?.userTypeId === 2) {
+        navigate("/");
+      } else if (user?.userType?.userTypeId === 3) {
+        navigate("/update-employer");
+      } else {
+        console.error("Unexpected userRole:", user?.userType);
+        navigate("/");
+      }
+      setIsModalOpen(false);
+    }, 2000);
+  } else if (loginStatus === "failure") {
+    setTimeout(() => {
+      setIsModalOpen(false);
+    }, 2000);
+  }
+}, [loginStatus, navigate, dispatch]);
 
   const renderLoginStatus = () => {
     if (loginStatus === "success") {
@@ -74,7 +76,6 @@ const RoleSelection = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setLoginStatus(null);
   };
 
   return (

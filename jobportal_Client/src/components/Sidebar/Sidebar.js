@@ -6,7 +6,7 @@ import {
   Building2,
   Users,
   FileText,
-  HelpCircle,
+  Star,
   LogOut,
 } from "lucide-react";
 import { Button } from "../../ui/button";
@@ -42,6 +42,11 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
       label: "Danh sách công việc",
       icon: FileText,
       path: "/admin/job-list",
+    },
+    {
+      label: "Danh sách đánh giá",
+      icon: Star,
+      path: "/admin/review-list",
     },
   ];
 
@@ -89,9 +94,15 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
       icon: FileText,
       path: "/employer/account-management/job-management",
     },
+    {
+      label: "Danh sách đánh giá",
+      icon: Star,
+      path: "/employer/account-management/review-management",
+    },
   ];
 
   let menuItems;
+  
   switch (user?.userType?.userTypeId) {
     case 1:
       menuItems = adminMenuItems;
@@ -105,6 +116,8 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
     default:
       menuItems = [];
   }
+
+  console.log("🚀 ~ Sidebar ~ menuItems:", menuItems)
 
   const handleMenuClick = (item) => {
     setSelectedSection(item.label);
@@ -224,3 +237,4 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
     </div>
   );
 }
+

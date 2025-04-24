@@ -89,7 +89,7 @@ export const getCompanyFitSeeker = () => async (dispatch) => {
   dispatch({ type: GET_COMPANY_FIT_SEEKER_REQUEST });
 
   try {
-    const jwt = sessionStorage.getItem("jwt"); // Lấy JWT từ sessionStorage
+    const jwt = localStorage.getItem("jwt"); // Lấy JWT từ localStorage
     if (!jwt) {
       throw new Error("No token found");
     }
@@ -169,7 +169,7 @@ export const getCompanyByJWT = () => async (dispatch) => {
   dispatch({ type: GET_COMPANY_REQUEST });
 
   try {
-    const jwt = sessionStorage.getItem("jwt"); // Lấy JWT từ sessionStorage
+    const jwt = localStorage.getItem("jwt"); // Lấy JWT từ localStorage
     if (!jwt) {
       throw new Error("No token found");
     }
@@ -210,7 +210,7 @@ export const updateCompanyProfile = (companyData) => async (dispatch) => {
 export const updateCompanyImages = (images) => async (dispatch) => {
   dispatch({ type: UPDATE_COMPANY_IMAGES_REQUEST });
   try {
-    const jwt = sessionStorage.getItem("jwt");
+    const jwt = localStorage.getItem("jwt");
     if (!jwt) {
       throw new Error("No token found");
     }
@@ -503,3 +503,4 @@ export const getAllCompaniesForAdmin = (companyName, industryName, page, size) =
     });
   }
 };
+

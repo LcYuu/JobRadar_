@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  Routes,
-  Route,
-  useLocation,
-} from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import "./App.css";
 import Header from "./components/common/Header/header";
 import Footer from "./components/common/Footer/Footer";
@@ -15,7 +11,6 @@ import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 import FindJobs from "./pages/FindJobs/FindJobs";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useMemo } from "react";
-import { getProfileAction } from "./redux/Auth/auth.action";
 import ChangePassword from "./pages/ForgotPassword/ChangePassword";
 import MyAccount from "./pages/MyAccount/MyAccount";
 import FindCompanies from "./pages/FindCompanies/FindCompanies";
@@ -48,17 +43,33 @@ import RoleSelection from "./pages/SignIn/RoleSelection";
 import CompanyDetail from "./pages/Admin/CompanyDetail/CompanyDetail";
 import JobDetailAdmin from "./pages/Admin/JobDetail/JobDetailAdmin";
 
-import Survey from './pages/Survey/Survey';
-import SurveyStatistics from './pages/Admin/SurveyStatistic/SurveyStatistics';
+import Survey from "./pages/Survey/Survey";
+import SurveyStatistics from "./pages/Admin/SurveyStatistic/SurveyStatistics";
+import { getProfileAction, logoutAction } from "./redux/Auth/auth.thunk";
+import { setUserFromStorage } from "./redux/Auth/authSlice";
+import { startInactivityTimer } from "./utils/session";
+import CompanyReview from "./pages/ReviewManagement/CompanyReview";
+import AdminReview from "./pages/ReviewManagement/AdminReview";
+import SeekerProfile from "./components/SeekerProfile/SeekerProfile";
+
+import TermsOfService from './pages/Legal/TermsOfService';
+import PrivacyPolicy from './pages/Legal/PrivacyPolicy';
+import CVEditor from "./pages/CreateCV/CVEditor";
+import CVSelection from "./pages/CreateCV/CVSelection";
+import ViewCV from "./pages/CreateCV/ViewCV";
+import { isTokenExpired } from './utils/tokenUtils';
+import VerifiedCompany from "./pages/SignIn/VerifiedCompany";
 const ProtectedHome = () => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user?.userType?.userTypeId === 1) { // Admin
-      navigate('/admin/dashboard');
-    } else if (user?.userType?.userTypeId === 3) { // Employer
-      navigate('/employer/account-management/dashboard');
+    if (user?.userType?.userTypeId === 1) {
+      // Admin
+      navigate("/admin/dashboard");
+    } else if (user?.userType?.userTypeId === 3) {
+      // Employer
+      navigate("/employer/account-management/dashboard");
     }
   }, [user, navigate]);
 
@@ -71,15 +82,44 @@ const App = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = sessionStorage.getItem("jwt");
-    if (token && !user) {
-      const fetchProfile = async () => {
-        const success = await dispatch(getProfileAction());
-        if (!success && !location.pathname.startsWith("/auth")) {
-          navigate("/auth/sign-in");
+    const checkAuth = () => {
+      const token = localStorage.getItem("jwt");
+      if (!token || isTokenExpired(token)) {
+        if (isAuthenticated) {
+          dispatch(logoutAction());
         }
-      };
-      fetchProfile();
+      }
+    };
+  
+    // Kiểm tra mỗi 1 giây
+    const interval = setInterval(checkAuth, 1000);
+  
+    // Cleanup
+    return () => clearInterval(interval);
+  }, [dispatch, isAuthenticated]);
+  
+  useEffect(() => {
+    const token = localStorage.getItem("jwt");
+    const savedUser = localStorage.getItem("user");
+    if (token) {
+      if (!user && savedUser) {
+        dispatch(setUserFromStorage(JSON.parse(savedUser)));
+      } else if (!user) {
+        const fetchProfile = async () => {
+          const success = await dispatch(getProfileAction());
+          if (success.payload) {
+            localStorage.setItem('user', JSON.stringify(success.payload));
+          } else if (!location.pathname.startsWith("/auth")) {
+            navigate("/auth/sign-in");
+          }
+        };
+        fetchProfile();
+      }
+    }
+
+    if (token && user) {
+      const stopInactivityTimer = startInactivityTimer(dispatch);
+      return () => stopInactivityTimer();
     }
   }, [dispatch, user, navigate, location.pathname]);
 
@@ -135,6 +175,9 @@ const App = () => {
           }
         />
         <Route path="/role-selection" element={<RoleSelection />} />
+
+        <Route path="/update-employer" element={<VerifiedCompany/>}/>
+        
         <Route
           path="/auth/forgot-password"
           element={
@@ -169,6 +212,33 @@ const App = () => {
             </PublicRoute>
           }
         />
+        <Route
+          path="/create-cv"
+          element={
+            <PublicRoute>
+              <CVSelection />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/create-cv/detail-cv/:genCvId"
+          element={
+            <PublicRoute>
+              <CVEditor />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/create-cv/view/:genCvId"
+          element={
+            <PublicRoute>
+              <ViewCV />
+            </PublicRoute>
+          }
+        />
+
         <Route
           path="/change-password"
           element={
@@ -246,21 +316,26 @@ const App = () => {
             path="candidate-management"
             element={<CandidateManagement />}
           />
+          <Route path="review-management" element={<CompanyReview />} />
+
           <Route
             path="candidate-management/applicants/:userId/:postId"
             element={<ApplicantDetail />}
+          />
+          <Route
+            path="review-detail/:companyId/:userId"
+            element={<SeekerProfile />}
           />
           <Route path="settings" element={<Settings />} />
         </Route>
         <Route path="/employer/jobs/:postId" element={<JobDetailEmployer />} />
         <Route path="/employer/jobs/post" element={<PostJob />} />
+
         {/* Admin Protected Routes */}
         <Route
           path="/admin"
           element={
-            <ProtectedRoute
-              isAuthenticated={isAuthenticated}
-            >
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
               <MyAccount />
             </ProtectedRoute>
           }
@@ -270,19 +345,42 @@ const App = () => {
           <Route path="company-list" element={<CompanyList />} />
           <Route path="user-list" element={<UserList />} />
           <Route path="job-list" element={<AdminJobList />} />
+          <Route path="review-list" element={<AdminReview />} />
+          <Route
+            path="review-detail/:companyId/:userId"
+            element={<SeekerProfile />}
+          />
           <Route path="settings" element={<Settings />} />
-        </Route>  
+        </Route>
 
         <Route path="/admin/jobs/:postId" element={<JobDetailAdmin />} />
         <Route path="/admin/survey-statistics" element={<SurveyStatistics />} />
         <Route
           path="/admin/*"
           element={
-            <ProtectedRoute isAuthenticated={
-              isAuthenticated && user?.userType?.userTypeId === 1
-            }>
+            <ProtectedRoute
+              isAuthenticated={
+                isAuthenticated && user?.userType?.userTypeId === 1
+              }
+            >
               <AdminDashboard />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/terms-of-service"
+          element={
+            <PublicRoute>
+              <TermsOfService />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/privacy-policy"
+          element={
+            <PublicRoute>
+              <PrivacyPolicy />
+            </PublicRoute>
           }
         />
       </Routes>

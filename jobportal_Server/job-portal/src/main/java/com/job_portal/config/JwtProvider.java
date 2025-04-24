@@ -86,4 +86,18 @@ public class JwtProvider {
 	    return claims.getExpiration();
 	}
 
+	public boolean isTokenExpired(String token) {
+	    try {
+	        Date expiration = ((JwtParserBuilder) Jwts.builder())
+	                .setSigningKey(key)
+	                .build()
+	                .parseClaimsJws(token)
+	                .getBody()
+	                .getExpiration();
+	        return expiration.before(new Date());
+	    } catch (Exception e) {
+	        return true; // Nếu lỗi , coi như token đã hết hạn
+	    }
+	}
+
 }

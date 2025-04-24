@@ -1,6 +1,9 @@
 package com.job_portal.DTO;
 
 import java.time.LocalDate;
+
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -20,7 +23,7 @@ public class CompanyDTO {
 	private UUID companyId;
     private String companyName;
     private Long applicationCount;
-    private Integer industryId;
+    private List<Integer> industryIds;
     private Integer cityId;
     private String address;
     private String description;

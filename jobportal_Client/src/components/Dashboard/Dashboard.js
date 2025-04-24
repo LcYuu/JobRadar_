@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { Button } from "../../ui/button";
+import React, { useCallback, useEffect, useState } from "react";
+
 import { Card, CardContent } from "../../ui/card";
-import { FileText, MoreVertical, ChevronRight, Pin } from "lucide-react";
+import { FileText} from "lucide-react";
 import { Link } from "react-router-dom";
 
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useDispatch, useSelector } from "react-redux";
-import { getApplyJobByUser } from "../../redux/ApplyJob/applyJob.action";
+
 import Pagination from "../layout/Pagination";
+import { getApplyJobByUser } from "../../redux/ApplyJob/applyJob.thunk";
+import useWebSocket from "../../utils/useWebSocket";
 export default function Dashboard_Seeker() {
   const dispatch = useDispatch();
   const {
@@ -16,12 +17,12 @@ export default function Dashboard_Seeker() {
     error,
     totalPages,
     totalElements,
-  } = useSelector((store) => store.applyJob);
+  } = useSelector(store => store.applyJob);
   const [currentPage, setCurrentPage] = useState(0);
   const [size] = useState(3);
 
   useEffect(() => {
-    dispatch(getApplyJobByUser(currentPage, size));
+    dispatch(getApplyJobByUser({currentPage, size}));
   }, [dispatch, currentPage, size]);
 
   // const handlePin = (id) => {
@@ -36,6 +37,17 @@ export default function Dashboard_Seeker() {
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
+
+  const handleMessage = useCallback(
+    (_, __, topic) => {
+      if (topic === "/topic/apply-updates") {
+        dispatch(getApplyJobByUser({ currentPage, size }));
+      }
+    },
+    [dispatch, currentPage, size]
+  );
+  
+  useWebSocket(["/topic/apply-updates"], handleMessage);
 
   return (
     <div>

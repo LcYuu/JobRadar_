@@ -1,55 +1,40 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { useParams, useNavigate } from "react-router-dom";
+
 import "swiper/swiper-bundle.css";
 import { Button } from "../../ui/button";
-import { Card } from "../../ui/card";
+
 import { Badge } from "../../ui/badge";
-import {
-  Calendar,
-  Users,
-  MapPin,
-  Briefcase,
-  Heart,
-  Clock,
-  GraduationCap,
-  Users2,
-  ChevronRight,
-  Star,
-  Phone,
-  Mail,
-  StarIcon,
-} from "lucide-react";
+import { Calendar, MapPin, Briefcase, Star, Phone, Mail } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import JobCard_AllJob from "../../components/common/JobCard_AllJob/JobCard_AllJob";
-import {
-  getAllJobAction,
-  getJobsByCompany,
-} from "../../redux/JobPost/jobPost.action";
-import logo from "../../assets/images/common/logo.jpg";
-import { getProfileAction } from "../../redux/Auth/auth.action";
-import { store } from "../../redux/store";
-import {
-  checkSaved,
-  getCompanyProfile,
-} from "../../redux/Company/company.action";
-import { StarBorder, StarRounded } from "@mui/icons-material";
+import { StarRounded } from "@mui/icons-material";
 import { toast } from "react-toastify";
 
+import "react-toastify/dist/ReactToastify.css";
+import anonymousIcon from "../../assets/icons/anonymous.png";
+import Swal from "sweetalert2";
+import {
+  createReview,
+  deleteReview,
+  getReviewByCompany,
+} from "../../redux/Review/review.thunk";
 import {
   followCompany,
   getSeekerByUser,
-} from "../../redux/Seeker/seeker.action";
-import "react-toastify/dist/ReactToastify.css";
-
-import { checkIfApplied } from "../../redux/ApplyJob/applyJob.action";
+} from "../../redux/Seeker/seeker.thunk";
 import {
-  createReview,
-  getReviewByCompany,
-  deleteReview,
-} from "../../redux/Review/review.action";
-import anonymousIcon from "../../assets/icons/anonymous.png";
-import Swal from "sweetalert2";
+  getAllJobAction,
+  getJobsByCompany,
+} from "../../redux/JobPost/jobPost.thunk";
+import {
+  checkSaved,
+  getCompanyProfile,
+} from "../../redux/Company/company.thunk";
+import {
+  fetchSocialLinks,
+  fetchSocialLinksByUserId,
+} from "../../redux/SocialLink/socialLink.thunk";
 const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
   return (
     <div className="flex">
@@ -75,15 +60,12 @@ const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
 export default function CompanyProfile() {
   const { companyId } = useParams();
   const dispatch = useDispatch();
-  const {
-    jobPost = [],
-    totalPages,
-    error,
-  } = useSelector((store) => store.jobPost);
+  const { jobPost = [], error } = useSelector((store) => store.jobPost);
 
   const [loading, setLoading] = useState(true);
 
   const { checkIfSaved } = useSelector((store) => store.company);
+  const { socialLinks } = useSelector((store) => store.socialLink);
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
@@ -98,9 +80,10 @@ export default function CompanyProfile() {
   };
 
   const { reviews } = useSelector((store) => store.review);
+  console.log("🚀 ~ CompanyProfile ~ reviews:", reviews);
 
   const { companyProfile } = useSelector((store) => store.company);
-  const { seeker, message } = useSelector((store) => store.seeker);
+  const { seeker } = useSelector((store) => store.seeker);
 
   const [isFollowing, setIsFollowing] = useState(false); // Trạng thái theo dõi ban đầu
 
@@ -183,19 +166,19 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         if (!result.isConfirmed) {
           return;
         }
-
-        await dispatch(deleteReview(existingReview.reviewId));
+        const reviewId = existingReview.reviewId;
+        await dispatch(deleteReview(reviewId));
       }
 
       await dispatch(
-        createReview(
-          {
+        createReview({
+          reviewData: {
             star: feedback.star,
             message: feedback.message,
             isAnonymous: feedback.isAnonymous,
           },
-          companyId
-        )
+          companyId,
+        })
       );
 
       await dispatch(getReviewByCompany(companyId));
@@ -241,14 +224,16 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
   }, [companyId]); // Chỉ cuộn khi companyId thay đổi
 
   useEffect(() => {
-    dispatch(getAllJobAction(currentPage, size, companyId)); // Assuming your action can accept companyId
-  }, [dispatch, currentPage, size, companyId]);
+    dispatch(getAllJobAction({ currentPage, size })); // Assuming your action can accept companyId
+  }, [dispatch, currentPage, size]);
 
   useEffect(() => {
+    const userId = companyId;
     dispatch(getCompanyProfile(companyId));
     dispatch(getReviewByCompany(companyId));
     dispatch(checkSaved(companyId));
-    dispatch(getJobsByCompany(companyId, currentPage, size));
+    dispatch(fetchSocialLinksByUserId(userId));
+    dispatch(getJobsByCompany({ companyId, currentPage, size }));
   }, [dispatch, currentPage, size, companyId]);
 
   const handleFollowClick = async () => {
@@ -272,7 +257,14 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
   // Tính trung bình
   const averageStars = reviews.length > 0 ? totalStars / reviews.length : 0;
 
-  console.log(checkIfSaved);
+  const validReviews = Array.isArray(reviews)
+    ? reviews.filter(
+        (item) =>
+          typeof item === "object" &&
+          item !== null &&
+          item.hasOwnProperty("reviewId")
+      )
+    : [];
 
   const handleDeleteReview = async (reviewId) => {
     // Sử dụng Swal để xác nhận
@@ -323,7 +315,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <path d="m15 18-6-6 6-6"/>
+          <path d="m15 18-6-6 6-6" />
         </svg>
         Quay lại
       </Button>
@@ -383,7 +375,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
               {company.website}
             </a> */}
 
-            {!sessionStorage.getItem("jwt") || checkIfSaved === false ? (
+            {!localStorage.getItem("jwt") || checkIfSaved === false ? (
               <div className="flex items-center p-3 border border-yellow-400 rounded-lg bg-yellow-50 shadow-sm">
                 <Star className="h-4 w-4 text-yellow-400 mr-2" />
                 <span className="text-gray-700 font-medium">
@@ -415,17 +407,33 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                 <MapPin className="w-4 h-4 text-gray-400" />
                 <span>{companyProfile?.address}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Briefcase className="w-4 h-4 text-gray-400" />
-                <span>{companyProfile?.industry?.industryName}</span>
+              <div className="flex flex-col gap-1 text-sm text-gray-600">
+                <div className="flex items-center gap-2">
+                  <Briefcase className="w-4 h-4 text-gray-400" />
+                  <span>
+                    {companyProfile?.industry
+                      ?.slice(0, 2)
+                      .map((ind) => ind.industryName)
+                      .join(" & ") || "Chưa có ngành"}
+                  </span>
+                </div>
+                {companyProfile?.industry?.length > 2 && (
+                  <div className="ml-6">
+                    {companyProfile.industry.slice(2).map((ind, index) => (
+                      <div key={index}>{ind.industryName}</div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
-            <Button
-              onClick={handleFollowClick}
-              className="mt-6 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-700"
-            >
-              {isFollowing ? "Bỏ theo dõi" : "Theo dõi"}
-            </Button>
+            {!localStorage.getItem("jwt") || checkIfSaved === false ? null : (
+              <Button
+                onClick={handleFollowClick}
+                className="mt-6 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-700"
+              >
+                {isFollowing ? "Bỏ theo dõi" : "Theo dõi"}
+              </Button>
+            )}
           </div>
         </div>
         {/* Company Profile, Tech Stack, and Office Location Grid */}
@@ -474,6 +482,50 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
               <span className="text-sm">{companyProfile?.contact}</span>
             </div>
           </div>
+        </div>
+
+        <div className="mb-8">
+          <h2 className="text-xl text-purple-600 font-semibold mb-4">
+            Địa chỉ liên kết
+          </h2>
+          {socialLinks &&
+          Array.isArray(socialLinks) &&
+          socialLinks.length > 0 ? (
+            <>
+              {socialLinks.map((link, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  {/* Logo của nền tảng */}
+                  <div
+                    className="platform-icon-container"
+                    style={{
+                      width: "24px",
+                      height: "24px",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <img
+                      src={require(`../../assets/images/platforms/${link.platform.toLowerCase()}.png`)}
+                      alt={link.platform.toLowerCase()}
+                      className="h-full w-full object-contain rounded-full shadow-md"
+                    />
+                  </div>
+
+                  {/* Liên kết */}
+                  <a
+                    href={link.url}
+                    className="text-sm text-blue-600 truncate"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ maxWidth: "calc(100% - 32px)" }} // Đảm bảo không tràn khi container hẹp
+                  >
+                    {link.url}
+                  </a>
+                </div>
+              ))}
+            </>
+          ) : (
+            <p className="text-sm ">Không có liên kết xã hội nào</p>
+          )}
         </div>
 
         {/* Company Images */}
@@ -533,10 +585,10 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
               Các đánh giá khác
             </h3>
 
-            {reviews.length === 0 ? (
+            {validReviews.length === 0 ? (
               <p className="text-gray-500">Chưa có đánh giá nào.</p>
             ) : (
-              reviews
+              validReviews
                 .sort((a, b) => new Date(b.createDate) - new Date(a.createDate))
                 .map((review, index) => (
                   <div

@@ -1,5 +1,6 @@
 package com.job_portal.DTO;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -11,8 +12,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SocialLinkDTO {
-	private UUID userId;
-    private String socialName;
-    private String link;
+public class GeneratedCVDTO {
+	private String cvName;
+    private String cvContent; 
+    private Integer userId;
+    private LocalDateTime createTime;
 }

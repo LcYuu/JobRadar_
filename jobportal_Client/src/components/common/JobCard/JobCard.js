@@ -27,7 +27,7 @@ const categoryStyles = {
   },
 };
 
-function JobCardContent({ company, location, category }) {
+function JobCardContent({ company, location, category = []  }) {
   return (
     <>
       <div className="flex items-center justify-between mb-2">
@@ -37,17 +37,20 @@ function JobCardContent({ company, location, category }) {
         <span className="text-muted-foreground text-sm">{location}</span>
       </div>
       <div className="flex space-x-2">
-        <Badge
-          style={
-            categoryStyles[category] || {
-              backgroundColor: "rgba(0, 0, 0, 0.1)",
-              color: "black",
+      {category.map((cat, index) => (
+          <Badge
+            key={index}
+            style={
+              categoryStyles[cat] || {
+                backgroundColor: "rgba(0, 0, 0, 0.1)",
+                color: "black",
+              }
             }
-          }
-          variant="secondary"
-        >
-          {category}
-        </Badge>
+            variant="secondary"
+          >
+            {cat}
+          </Badge>
+        ))}
       </div>
     </>
   );

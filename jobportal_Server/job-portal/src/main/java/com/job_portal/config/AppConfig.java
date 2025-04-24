@@ -43,7 +43,13 @@ public class AppConfig {
 	        });
 
 		http.authorizeHttpRequests(
-				Authorize -> Authorize.requestMatchers("/api/**").authenticated().anyRequest().permitAll())
+
+		        Authorize -> Authorize
+		            .requestMatchers("/ws/**").permitAll() // Cho phép WebSocket không cần JWT
+		            .requestMatchers("/api/**").authenticated()
+		            .anyRequest().permitAll()
+		    )
+
 				.addFilterBefore(new JwtValidator(), BasicAuthenticationFilter.class);
 
 		http.csrf(csrf -> csrf.disable());
@@ -60,7 +66,7 @@ public class AppConfig {
 	private CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration cfg = new CorsConfiguration();
 
-		cfg.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // Địa chỉ front-end
+		cfg.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://jobradar-one.vercel.app")); // Địa chỉ front-end
 		cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")); // Các phương thức HTTP cho
 																							// phép
 		cfg.setAllowCredentials(true); // Cho phép cookie

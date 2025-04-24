@@ -2,29 +2,25 @@ import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
-import { Avatar, IconButton, MenuItem, TextField } from "@mui/material";
+import {
+  Avatar,
+  Checkbox,
+  IconButton,
+  MenuItem,
+  TextField,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import * as Yup from "yup";
-import {
-  getProfileAction,
-  updateProfileAction,
-} from "../../redux/Auth/auth.action";
 import { uploadToCloudinary } from "../../utils/uploadToCloudinary";
-import {
-  getSeekerByUser,
-  updateSeekerAction,
-} from "../../redux/Seeker/seeker.action";
+import { getAllIndustries } from "../../redux/Industry/industry.thunk";
 import {
   getCompanyByJWT,
   updateCompanyProfile,
-} from "../../redux/Company/company.action";
-import {
-  getAllIndustries,
-  getIndustry,
-} from "../../redux/Industry/industry.action";
+} from "../../redux/Company/company.thunk";
+
 const cityCodeMapping = {
   1: 16, // Hà Nội
   2: 1, // Hà Giang
@@ -109,10 +105,16 @@ const style = {
 const validationSchema = Yup.object({
   companyName: Yup.string().required("Tên công ty là bắt buộc"),
   establishedTime: Yup.date()
+    .transform((value, originalValue) =>
+      originalValue ? new Date(originalValue) : null
+    )
     .required("Ngày thành lập là bắt buộc")
-    .max(new Date(), "Ngày thành lập không được trong tương lai"), // Kiểm tra ngày thành lập không được trong tương lai
+    .max(new Date(), "Ngày thành lập không được trong tương lai"),
   address: Yup.string().required("Địa chỉ là bắt buộc"),
-  industryId: Yup.string().required("Lĩnh vực là bắt buộc"), // Lĩnh vực phải được chọn từ dropdown
+  industryIds: Yup.array()
+    .of(Yup.string())
+    .min(1, "Vui lòng chọn ít nhất một ngành") // Bắt buộc chọn ít nhất 1 ngành
+    .required("Lĩnh vực hoạt động không được để trống"),
 });
 
 export default function CompanyProfileModal({ open, handleClose }) {
@@ -157,23 +159,25 @@ export default function CompanyProfileModal({ open, handleClose }) {
   useEffect(() => {
     const initializeAddress = async () => {
       if (companyJwt?.address) {
-        const addressParts = companyJwt.address.split(',').map(part => part.trim());
+        const addressParts = companyJwt.address
+          .split(",")
+          .map((part) => part.trim());
 
         if (addressParts.length >= 3) {
           const [ward, district, province] = addressParts.slice(-3);
-          const specificAddressPart = addressParts.slice(0, -3).join(', ');
+          const specificAddressPart = addressParts.slice(0, -3).join(", ");
 
           setSpecificAddress(specificAddressPart);
           setLocation({
             ward,
             district,
-            province
+            province,
           });
 
-          const matchingProvince = provinces.find(p => p.name === province);
+          const matchingProvince = provinces.find((p) => p.name === province);
           if (matchingProvince) {
             setSelectedProvince(matchingProvince.code);
-            
+
             try {
               const districtResponse = await fetch(
                 `https://provinces.open-api.vn/api/p/${matchingProvince.code}?depth=2`
@@ -181,7 +185,9 @@ export default function CompanyProfileModal({ open, handleClose }) {
               const districtData = await districtResponse.json();
               setDistricts(districtData.districts);
 
-              const matchingDistrict = districtData.districts.find(d => d.name === district);
+              const matchingDistrict = districtData.districts.find(
+                (d) => d.name === district
+              );
               if (matchingDistrict) {
                 setSelectedDistrict(matchingDistrict.code);
 
@@ -191,7 +197,9 @@ export default function CompanyProfileModal({ open, handleClose }) {
                 const wardData = await wardResponse.json();
                 setWards(wardData.wards);
 
-                const matchingWard = wardData.wards.find(w => w.name === ward);
+                const matchingWard = wardData.wards.find(
+                  (w) => w.name === ward
+                );
                 if (matchingWard) {
                   setSelectedWard(matchingWard.code);
                 }
@@ -216,25 +224,31 @@ export default function CompanyProfileModal({ open, handleClose }) {
         !isNaN(new Date(companyJwt?.establishedTime).getTime())
           ? new Date(companyJwt?.establishedTime).toISOString().split("T")[0] // Chuyển sang định dạng YYYY-MM-DD
           : "",
-
       address: companyJwt?.address || "",
-      industryId: companyJwt?.industry?.industryId || "",
+      industryIds:
+        companyJwt?.industry?.length > 0
+          ? companyJwt.industry.map((ind) => ind.industryId)
+          : [],
     },
+
     validationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
+      console.log("🔥 onSubmit called!", values); // Kiểm tra Formik có gọi không
       setIsLoading(true);
       try {
         const fullAddress =
           `${specificAddress}, ${location.ward}, ${location.district}, ${location.province}`.trim();
 
-        await dispatch(
-          updateCompanyProfile({
-            ...values,
-            address: fullAddress,
-            cityId: cityCodeMapping[selectedProvince],
-          })
-        );
+        const companyData = {
+          ...values,
+          address: fullAddress || "", // Đảm bảo chuỗi không bị null/undefined
+          cityId: cityCodeMapping[selectedProvince] || null, // Xử lý nếu không tìm thấy mã tỉnh
+          industryId: values.industryIds,
+        };
+        console.log("🚀 ~ onSubmit: ~ companyData:", companyData);
+
+        await dispatch(updateCompanyProfile(companyData));
         dispatch(getCompanyByJWT());
         handleClose();
       } catch (error) {
@@ -244,8 +258,6 @@ export default function CompanyProfileModal({ open, handleClose }) {
       }
     },
   });
-
-  console.log("asdasda" + companyJwt?.establishedTime);
 
   const handleSelectImage = async (event) => {
     setIsLoading(true);
@@ -264,11 +276,13 @@ export default function CompanyProfileModal({ open, handleClose }) {
           );
           const data = await response.json();
           setDistricts(data.districts);
-          setLocation(prev => ({ ...prev, province: data.name }));
+          setLocation((prev) => ({ ...prev, province: data.name }));
 
           // Tìm và thiết lập district ban đầu
           if (location.district) {
-            const matchingDistrict = data.districts.find(d => d.name === location.district);
+            const matchingDistrict = data.districts.find(
+              (d) => d.name === location.district
+            );
             if (matchingDistrict) {
               setSelectedDistrict(matchingDistrict.code);
             }
@@ -290,11 +304,13 @@ export default function CompanyProfileModal({ open, handleClose }) {
           );
           const data = await response.json();
           setWards(data.wards);
-          setLocation(prev => ({ ...prev, district: data.name }));
+          setLocation((prev) => ({ ...prev, district: data.name }));
 
           // Tìm và thiết lập ward ban đầu
           if (location.ward) {
-            const matchingWard = data.wards.find(w => w.name === location.ward);
+            const matchingWard = data.wards.find(
+              (w) => w.name === location.ward
+            );
             if (matchingWard) {
               setSelectedWard(matchingWard.code);
             }
@@ -306,6 +322,9 @@ export default function CompanyProfileModal({ open, handleClose }) {
     };
     fetchWards();
   }, [selectedDistrict, location.ward]);
+
+  console.log("isLoading:", isLoading, "imageLoading:", imageLoading);
+
 
   return (
     <Modal
@@ -427,13 +446,15 @@ export default function CompanyProfileModal({ open, handleClose }) {
                 setDistricts([]);
                 setWards([]);
                 // Find province name from code
-                const selectedProvinceData = provinces.find(p => p.code === Number(newProvinceCode));
+                const selectedProvinceData = provinces.find(
+                  (p) => p.code === Number(newProvinceCode)
+                );
                 if (selectedProvinceData) {
-                  setLocation(prev => ({
+                  setLocation((prev) => ({
                     ...prev,
                     province: selectedProvinceData.name,
                     district: "",
-                    ward: ""
+                    ward: "",
                   }));
                 }
               }}
@@ -458,12 +479,14 @@ export default function CompanyProfileModal({ open, handleClose }) {
                 setSelectedWard("");
                 setWards([]);
                 // Find district name from code
-                const selectedDistrictData = districts.find(d => d.code === Number(newDistrictCode));
+                const selectedDistrictData = districts.find(
+                  (d) => d.code === Number(newDistrictCode)
+                );
                 if (selectedDistrictData) {
-                  setLocation(prev => ({
+                  setLocation((prev) => ({
                     ...prev,
                     district: selectedDistrictData.name,
-                    ward: ""
+                    ward: "",
                   }));
                 }
               }}
@@ -513,21 +536,39 @@ export default function CompanyProfileModal({ open, handleClose }) {
 
             <TextField
               fullWidth
-              id="industryId"
-              name="industryId"
+              id="industryIds"
+              name="industryIds" // Đổi từ industryId -> industryIds
               label="Lĩnh vực hoạt động"
               variant="outlined"
-              value={formik.values.industryId}
-              onChange={formik.handleChange}
               select
+              SelectProps={{
+                multiple: true, // Cho phép chọn nhiều
+                renderValue: (selected) =>
+                  allIndustries
+                    ?.filter((industry) =>
+                      selected.includes(industry.industryId)
+                    )
+                    .map((industry) => industry.industryName)
+                    .join(", "), // Hiển thị tên ngành nghề được chọn
+              }}
+              value={formik.values.industryIds} // Đảm bảo industryIds đồng bộ với Formik
+              onChange={(event) => {
+                formik.setFieldValue("industryIds", event.target.value); // Đảm bảo cập nhật industryIds
+              }}
               error={
-                formik.touched.industryId && Boolean(formik.errors.industryId)
+                formik.touched.industryIds && Boolean(formik.errors.industryIds)
               }
-              helperText={formik.touched.industryId && formik.errors.industryId}
+              helperText={
+                formik.touched.industryIds && formik.errors.industryIds
+              }
             >
-              <MenuItem value="">Chọn chuyên ngành</MenuItem>
               {allIndustries?.map((industry) => (
                 <MenuItem key={industry.industryId} value={industry.industryId}>
+                  <Checkbox
+                    checked={formik.values.industryIds.includes(
+                      industry.industryId
+                    )}
+                  />
                   {industry.industryName}
                 </MenuItem>
               ))}
