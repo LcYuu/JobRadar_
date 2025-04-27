@@ -229,22 +229,17 @@ public class CompanyController {
 	}
 
 	@GetMapping("/search-company-by-feature")
-	public Page<CompanyWithCountJobDTO> searchCompanies(
+	public ResponseEntity<Map<String, Object>> searchCompanies(
 	        @RequestParam(required = false) String title,
 	        @RequestParam(required = false) Integer cityId,
 	        @RequestParam(required = false) Integer industryId,
 	        @RequestParam(defaultValue = "0") int page,
-	        @RequestParam(defaultValue = "6") int size) {
+	        @RequestParam(defaultValue = "12") int size) {
 
 	    Pageable pageable = PageRequest.of(page, size);
 	    Page<CompanyWithCountJob> projections = companyRepository.findCompaniesByFilters(title, cityId, industryId, pageable);
 
-
-	    // In ra danh sách industryIds dạng chuỗi trước khi chuyển đổi
-	    projections.forEach(proj -> System.out.println("IndustryIds (raw): " + proj.getIndustryIds()));
-
-
-	    return projections.map(proj -> new CompanyWithCountJobDTO(
+	    List<CompanyWithCountJobDTO> content = projections.getContent().stream().map(proj -> new CompanyWithCountJobDTO(
 	        proj.getCompanyId(),
 	        proj.getCompanyName(),
 	        proj.getLogo(),
@@ -253,7 +248,18 @@ public class CompanyController {
 	        proj.getDescription(),
 	        proj.getCityId(),
 	        proj.getCountJob()
+	    )).collect(Collectors.toList());
+	    
+	    Map<String, Object> response = new HashMap<>();
+	    response.put("content", content);
+	    response.put("page", Map.of(
+	        "totalPages", projections.getTotalPages(),
+	        "totalElements", projections.getTotalElements(),
+	        "currentPage", page,
+	        "size", size
 	    ));
+	    
+	    return ResponseEntity.ok(response);
 	}
 
 

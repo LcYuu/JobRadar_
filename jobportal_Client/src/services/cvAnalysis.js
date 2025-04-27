@@ -57,23 +57,38 @@ export const fetchCVFile = async (cvUrl) => {
 /**
  * Analyze CV against job description
  * @param {File} cvFile - CV file
- * @param {string} jobDescription - Job description text
+ * @param {Object|string} jobData - Complete job data object or just job description string
  * @returns {Promise<Object>} - Analysis results
  */
-export const analyzeCVWithJobDescription = async (cvFile, jobDescription) => {
+export const analyzeCVWithJobDescription = async (cvFile, jobData) => {
   try {
     // Validate inputs
     if (!cvFile) {
       throw new Error('File CV không hợp lệ hoặc trống');
     }
     
-    if (!jobDescription || jobDescription.trim().length < 50) {
+    // Determine if jobData is an object or string
+    const isJobObject = typeof jobData === 'object' && jobData !== null;
+    
+    // Validate job data
+    if (!jobData) {
+      throw new Error('Dữ liệu công việc không hợp lệ hoặc trống');
+    }
+    
+    if (!isJobObject && (typeof jobData !== 'string' || jobData.trim().length < 50)) {
       throw new Error('Mô tả công việc quá ngắn hoặc không có. Cần mô tả công việc chi tiết để phân tích chính xác.');
     }
     
     const formData = new FormData();
     formData.append('cv', cvFile);
-    formData.append('job_description', jobDescription);
+    
+    // Add job data appropriately based on type
+    if (isJobObject) {
+      formData.append('job_data', JSON.stringify(jobData));
+    } else {
+      // For backward compatibility
+      formData.append('job_description', jobData);
+    }
     
     // Add timeout to prevent hanging requests
     const response = await axios.post(CV_ANALYSIS_API_URL, formData, {

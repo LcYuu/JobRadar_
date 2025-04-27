@@ -241,16 +241,49 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	List<JobPost> findByExpireDateBeforeAndSurveyEmailSentFalse(LocalDateTime date);
 
 //	@Query(value = "SELECT new com.job_portal.DTO.JobWithApplicationCountDTO("
-//		    + "jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
-//		    + "jp.typeOfWork, jp.createDate, jp.expireDate, " + "COUNT(DISTINCT a.postId), jp.status, i.industryName, jp.isApprove) "
-//		    + "FROM JobPost jp " + "LEFT JOIN ApplyJob a ON jp.postId = a.postId "
-//		    + "JOIN Company c ON jp.company.companyId = c.companyId "
-//		    + "JOIN c.industry i "  // Join trực tiếp với collection industry
-//		    + "WHERE jp.company.companyId = :companyId "
-//		    + "AND (:status IS NULL OR jp.status = :status) "
-//		    + "AND (:typeOfWork IS NULL OR jp.typeOfWork = :typeOfWork) "
-//		    + "GROUP BY jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
-//		    + "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName, jp.isApprove ")
-//		List<JobWithApplicationCountDTO> findAllJobsWithFilters(@Param("companyId") UUID companyId,
-//		    @Param("status") String status, @Param("typeOfWork") String typeOfWork);
+//			+ "jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
+//			+ "jp.typeOfWork, jp.createDate, jp.expireDate, " + "COUNT(DISTINCT a.postId), jp.status, i.industryName, jp.isApprove) "
+//			+ "FROM JobPost jp " + "LEFT JOIN ApplyJob a ON jp.postId = a.postId "
+//			+ "JOIN Company c ON jp.company.companyId = c.companyId "
+//			+ "JOIN Industry i ON c.industry.industryId = i.industryId " + "WHERE jp.company.companyId = :companyId "
+//			+ "AND (:status IS NULL OR jp.status = :status) "
+//			+ "AND (:typeOfWork IS NULL OR jp.typeOfWork = :typeOfWork) "
+//			+ "GROUP BY jp.postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
+//			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName,  jp.isApprove ")
+//	List<JobWithApplicationCountDTO> findAllJobsWithFilters(@Param("companyId") UUID companyId,
+//			@Param("status") String status, @Param("typeOfWork") String typeOfWork);
+@Query(value = """
+		    SELECT BIN_TO_UUID(jp.post_id) AS postId, jp.title, jp.description, jp.location, jp.salary, 
+		           jp.experience, jp.type_of_work AS typeOfWork, jp.create_date AS createDate, 
+		           jp.expire_date AS expireDate, COUNT(DISTINCT a.post_id) AS applicationCount, 
+		           jp.status, GROUP_CONCAT(i.industry_name SEPARATOR ', ') AS industryNames, 
+		           jp.is_approve AS isApprove
+		    FROM job_posts jp
+		    LEFT JOIN apply_job a ON jp.post_id = a.post_id
+		    JOIN company c ON jp.company_id = c.user_id
+		    JOIN company_industries ci ON c.user_id = ci.company_id
+		    JOIN industry i ON ci.industry_id = i.industry_id
+		    WHERE jp.company_id = UUID_TO_BIN(:companyId)
+		      AND (:status IS NULL OR jp.status = :status)
+		      AND (:typeOfWork IS NULL OR jp.type_of_work = :typeOfWork)
+		    GROUP BY jp.post_id, jp.title, jp.description, jp.location, jp.salary, jp.experience, 
+		             jp.type_of_work, jp.create_date, jp.expire_date, jp.status, jp.is_approve
+		    ORDER BY jp.create_date DESC, jp.post_id
+		    """,
+		countQuery = """
+		    SELECT COUNT(DISTINCT jp.post_id)
+		    FROM job_posts jp
+		    JOIN company c ON jp.company_id = c.user_id
+		    JOIN company_industries ci ON c.user_id = ci.company_id
+		    JOIN industry i ON ci.industry_id = i.industry_id
+		    WHERE jp.company_id = UUID_TO_BIN(:companyId)
+		      AND (:status IS NULL OR jp.status = :status)
+		      AND (:typeOfWork IS NULL OR jp.type_of_work = :typeOfWork)
+		    """,
+		nativeQuery = true)
+List<JobWithApplicationCountProjection> findAllJobsWithFilters(
+		@Param("companyId") String companyId,
+		@Param("status") String status,
+		@Param("typeOfWork") String typeOfWork);
+
 }
