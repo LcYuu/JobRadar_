@@ -7,14 +7,15 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
-
 import com.job_portal.DTO.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.jpa.domain.Specification;
@@ -35,18 +36,22 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.job_portal.config.JwtProvider;
 import com.job_portal.models.Company;
 import com.job_portal.models.JobPost;
 import com.job_portal.models.Seeker;
 import com.job_portal.models.UserAccount;
 import com.job_portal.projection.JobWithApplicationCountProjection;
+
 import com.job_portal.repository.CityRepository;
 import com.job_portal.repository.CompanyRepository;
 import com.job_portal.repository.IndustryRepository;
@@ -88,6 +93,7 @@ public class JobPostController {
 	@Autowired
 	private SearchHistoryServiceImpl searchHistoryService;
 
+
 	@Autowired
 	private INotificationService notificationService;
 
@@ -95,6 +101,8 @@ public class JobPostController {
 	private WebSocketService webSocketService;
 
 	String filePath = "D:\\JobRadar_\\search.csv";
+	
+	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
 	@GetMapping("/get-all")
 	public ResponseEntity<List<JobPost>> getJob() {
@@ -150,6 +158,7 @@ public class JobPostController {
 			if (!jobPostService.canPostJob(user.get().getCompany().getCompanyId())) {
 				return new ResponseEntity<>("Công ty chỉ được đăng 1 bài trong vòng 1 giờ.", HttpStatus.FORBIDDEN);
 			}
+
 			JobPost createdJob = jobPostService.createJob(jobPostDTO, user.get().getCompany().getCompanyId());
 
 			if (createdJob != null) {
@@ -179,7 +188,8 @@ public class JobPostController {
 	}
 
 	@PutMapping("/update-job/{postId}")
-	public ResponseEntity<String> updateJobPost(@RequestHeader("Authorization") String jwt,
+	public ResponseEntity<String> updateJobPost(
+//			@RequestHeader("Authorization") String jwt,
 			@RequestBody JobPostDTO jobPost, @PathVariable("postId") UUID postId) throws AllExceptions {
 		Optional<JobPost> oldJobPost = jobPostRepository.findById(postId);
 		if (!oldJobPost.isPresent()) {
@@ -243,6 +253,8 @@ public class JobPostController {
 		return ResponseEntity.ok(jobPosts);
 	}
 
+
+
 	@GetMapping("/search-by-company")
 	public ResponseEntity<List<JobPost>> getJobsByCompanyId(@RequestHeader("Authorization") String jwt) {
 
@@ -251,6 +263,53 @@ public class JobPostController {
 		List<JobPost> jobPosts = jobPostRepository.findJobByCompany(user.get().getCompany().getCompanyId());
 		return ResponseEntity.ok(jobPosts);
 	}
+
+
+
+//	@GetMapping("/min-salary/{minSalary}")
+//	public ResponseEntity<Object> findBySalaryGreaterThanEqual(@PathVariable("minSalary") Long minSalary) {
+//		try {
+//			List<JobPost> jobs = jobPostService.findBySalaryGreaterThanEqual(minSalary);
+//			return ResponseEntity.ok(jobs);
+//		} catch (AllExceptions e) {
+//			// Trả về thông báo từ service
+//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+//		} catch (Exception e) {
+//			// Trả về thông báo lỗi chung
+//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
+//		}
+//	}
+//
+//	@GetMapping("/max-salary/{maxSalary}")
+//	public ResponseEntity<Object> findBySalaryLessThanEqual(@PathVariable("maxSalary") Long maxSalary) {
+//		try {
+//			List<JobPost> jobs = jobPostService.findBySalaryLessThanEqual(maxSalary);
+//			return ResponseEntity.ok(jobs);
+//		} catch (AllExceptions e) {
+//			// Trả về thông báo từ service
+//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+//		} catch (Exception e) {
+//			// Trả về thông báo lỗi chung
+//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
+//		}
+//	}
+//
+//	@GetMapping("/salary-between")
+//	public ResponseEntity<Object> findBySalaryBetween(@RequestParam Long minSalary, @RequestParam Long maxSalary) {
+//		try {
+//			List<JobPost> jobs = jobPostService.findBySalaryBetween(minSalary, maxSalary);
+//			return ResponseEntity.ok(jobs);
+//		} catch (AllExceptions e) {
+//			// Trả về thông báo từ service
+//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+//		} catch (Exception e) {
+//			// Trả về thông báo lỗi chung
+//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
+//		}
+//	}
 
 	@GetMapping("/findJob/{postId}")
 	public ResponseEntity<JobPost> getJobById(@PathVariable("postId") UUID postId) throws AllExceptions {
@@ -271,109 +330,159 @@ public class JobPostController {
 		return jobPostService.getDailyJobPostCounts(start, end);
 	}
 
-	@PostMapping("/recommend-jobs/tfidf")
+	@PostMapping("/recommend-jobs/phobert")
 	public ResponseEntity<List<JobRecommendationDTO>> getJobRecommendations(
-			@RequestHeader("Authorization") String jwt) {
-		// Lấy email từ JWT
-		String email = JwtProvider.getEmailFromJwtToken(jwt);
-
-		// Định dạng ngày giờ phù hợp
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+	        @RequestHeader("Authorization") String jwt) {
+	    // Lấy email từ JWT
+	    String email;
+	    try {
+	        email = JwtProvider.getEmailFromJwtToken(jwt);
+	    } catch (Exception e) {
+	        System.out.println("Lỗi giải mã JWT: " + e.getMessage());
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+	    }
 
 		// Tìm người dùng bằng email
 		Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
 		if (!userOptional.isPresent()) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 		}
+		
+		UUID userId = userOptional.get().getUserId();
 
-		UserAccount user = userOptional.get();
-		UUID userId = user.getUserId();
+	    // Gửi yêu cầu đến API Python
+	    String apiUrl = "http://localhost:5000/recommend-jobs/phobert";
+	    HttpHeaders headers = new HttpHeaders();
+	    headers.set("X-User-Id", userId.toString());
+	    headers.setContentType(MediaType.APPLICATION_JSON);
 
-		// Gửi yêu cầu đến API Python
-		String apiUrl = "http://localhost:5000/recommend-jobs/tfidf";
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("X-User-Id", userId.toString());
-		headers.setContentType(MediaType.APPLICATION_JSON);
+	    // Chuẩn bị request body (có thể bỏ trống vì API Python không yêu cầu body)
+	    HttpEntity<String> entity = new HttpEntity<>("{}", headers);
 
-		// Chuẩn bị request body
-		Map<String, String> requestBody = new HashMap<>();
-		requestBody.put("userId", userId.toString());
+	    // Định dạng ngày giờ phù hợp
+	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
-		ObjectMapper objectMapper = new ObjectMapper();
-		String jsonRequestBody;
+	    try {
+	        // Gửi request tới API Python
+	        ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, String.class);
+	        ObjectMapper objectMapper = new ObjectMapper();
+	        JsonNode jsonResponse = objectMapper.readTree(response.getBody());
+
+	        // Kiểm tra nếu phản hồi là một mảng
+	        if (!jsonResponse.isArray()) {
+	            System.out.println("Phản hồi từ API Python không phải là mảng JSON");
+	            return ResponseEntity.ok(new ArrayList<>());
+	        }
+
+	        List<JobRecommendationDTO> jobs = new ArrayList<>();
+
+	        // Duyệt qua từng phần tử trong mảng
+	        for (JsonNode jobNode : jsonResponse) {
+	            JobRecommendationDTO job = new JobRecommendationDTO();
+
+	            // Ánh xạ các trường từ JSON sang DTO
+	            JsonNode postIdNode = jobNode.get("postId");
+	            if (postIdNode != null && !postIdNode.isNull()) {
+	                try {
+	                    job.setPostId(UUID.fromString(postIdNode.asText()));
+	                } catch (IllegalArgumentException e) {
+	                    System.out.println("postId không hợp lệ: " + postIdNode.asText());
+	                    continue;
+	                }
+	            } else {
+	                System.out.println("postId bị thiếu hoặc null");
+	                continue;
+	            }
+
+	            job.setTitle(jobNode.get("title") != null ? jobNode.get("title").asText(null) : null);
+	            job.setDescription(jobNode.get("description") != null ? jobNode.get("description").asText(null) : null);
+	            job.setLocation(jobNode.get("location") != null ? jobNode.get("location").asText(null) : null);
+
+	            JsonNode salaryNode = jobNode.get("salary");
+	            job.setSalary(salaryNode != null && !salaryNode.isNull() ? salaryNode.asLong(0) : 0);
+
+	            job.setExperience(jobNode.get("experience") != null ? jobNode.get("experience").asText(null) : null);
+	            job.setTypeOfWork(jobNode.get("typeOfWork") != null ? jobNode.get("typeOfWork").asText(null) : null);
+
+	            JsonNode companyIdNode = jobNode.get("companyId");
+	            if (companyIdNode != null && !companyIdNode.isNull()) {
+	                try {
+	                    job.setCompanyId(UUID.fromString(companyIdNode.asText()));
+	                } catch (IllegalArgumentException e) {
+	                    System.out.println("companyId không hợp lệ: " + companyIdNode.asText());
+	                    continue;
+	                }
+	            } else {
+	                System.out.println("companyId bị thiếu hoặc null");
+	                continue;
+	            }
+
+	            job.setCompanyName(jobNode.get("companyName") != null ? jobNode.get("companyName").asText(null) : null);
+	            job.setCityName(jobNode.get("cityName") != null ? jobNode.get("cityName").asText(null) : null);
+	            job.setLogo(jobNode.get("logo") != null ? jobNode.get("logo").asText(null) : null);
+
+	            // Xử lý createDate
+	            String createDateStr = jobNode.get("createDate") != null ? jobNode.get("createDate").asText(null) : null;
+	            if (createDateStr != null && !createDateStr.isEmpty()) {
+	                try {
+	                    job.setCreateDate(LocalDateTime.parse(createDateStr, formatter));
+	                } catch (DateTimeParseException e) {
+	                    System.out.println("Lỗi chuyển đổi createDate: " + createDateStr + " - " + e.getMessage());
+	                }
+	            }
+
+	            // Xử lý expireDate
+	            String expireDateStr = jobNode.get("expireDate") != null ? jobNode.get("expireDate").asText(null) : null;
+	            if (expireDateStr != null && !expireDateStr.isEmpty()) {
+	                try {
+	                    job.setExpireDate(LocalDateTime.parse(expireDateStr, formatter));
+	                } catch (DateTimeParseException e) {
+	                    System.out.println("Lỗi chuyển đổi expireDate: " + expireDateStr + " - " + e.getMessage());
+	                }
+	            }
+
+	            // Xử lý danh sách industryNames
+	            JsonNode industriesNode = jobNode.get("industryNames");
+	            if (industriesNode != null && industriesNode.isArray()) {
+	                List<String> industryList = new ArrayList<>();
+	                for (JsonNode industry : industriesNode) {
+	                    industryList.add(industry.asText());
+	                }
+	                job.setIndustryNames(industryList);
+	            } else {
+	                job.setIndustryNames(new ArrayList<>());
+	            }
+	        }
+
+
+	        return ResponseEntity.ok(jobs);
+	    } catch (HttpClientErrorException e) {
+	        System.out.println("Lỗi gọi API Python: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+	        return ResponseEntity.status(e.getStatusCode()).body(null);
+	    } catch (JsonProcessingException e) {
+	        System.out.println("Lỗi xử lý JSON: " + e.getMessage());
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+	    } catch (Exception e) {
+	        System.out.println("Lỗi chung: " + e.getMessage());
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+	    }
+	}
+
+  
+	@GetMapping("/company/{companyId}/approved")
+	public ResponseEntity<Page<JobPost>> getApprovedJobsByCompany(@PathVariable UUID companyId,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
 		try {
-			jsonRequestBody = objectMapper.writeValueAsString(requestBody);
-		} catch (JsonProcessingException e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-		}
-
-		HttpEntity<String> entity = new HttpEntity<>(jsonRequestBody, headers);
-
-		try {
-			// Gửi request tới API Python
-			ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, String.class);
-			JsonNode jsonResponse = objectMapper.readTree(response.getBody());
-
-			List<JobRecommendationDTO> jobs = new ArrayList<>();
-
-			for (JsonNode jobNode : jsonResponse) {
-				JobRecommendationDTO job = new JobRecommendationDTO();
-
-				job.setPostId(UUID.fromString(jobNode.get("postId").asText()));
-				job.setTitle(jobNode.get("title").asText(null));
-				job.setDescription(jobNode.get("description").asText(null));
-				job.setLocation(jobNode.get("location").asText(null));
-				job.setSalary(jobNode.get("salary").asLong());
-				job.setExperience(jobNode.get("experience").asText(null));
-				job.setTypeOfWork(jobNode.get("typeOfWork").asText(null));
-				job.setCompanyId(UUID.fromString(jobNode.get("companyId").asText()));
-				job.setCompanyName(jobNode.get("companyName").asText(null));
-				job.setCityName(jobNode.get("cityName").asText(null));
-				job.setLogo(jobNode.get("logo").asText(null));
-
-				// Xử lý createDate
-				String createDateStr = jobNode.get("createDate").asText(null);
-				if (createDateStr != null && !createDateStr.isEmpty()) {
-					try {
-						job.setCreateDate(LocalDateTime.parse(createDateStr, formatter));
-					} catch (DateTimeParseException e) {
-						System.out.println("Lỗi chuyển đổi createDate: " + createDateStr + " - " + e.getMessage());
-					}
-				}
-
-				// Xử lý expireDate
-				String expireDateStr = jobNode.get("expireDate").asText(null);
-				if (expireDateStr != null && !expireDateStr.isEmpty()) {
-					try {
-						job.setExpireDate(LocalDateTime.parse(expireDateStr, formatter));
-					} catch (DateTimeParseException e) {
-						System.out.println("Lỗi chuyển đổi expireDate: " + expireDateStr + " - " + e.getMessage());
-					}
-				}
-
-				// Xử lý danh sách industryNames
-				JsonNode industriesNode = jobNode.get("industryNames");
-				if (industriesNode != null && industriesNode.isArray()) {
-					List<String> industryList = new ArrayList<>();
-					for (JsonNode industry : industriesNode) {
-						industryList.add(industry.asText());
-					}
-					job.setIndustryNames(industryList);
-				}
-
-				jobs.add(job);
-			}
-
+			Pageable pageable = PageRequest.of(page, size);
+			Page<JobPost> jobs = jobPostService.findApprovedJobsByCompany(companyId, pageable);
 			return ResponseEntity.ok(jobs);
-		} catch (JsonProcessingException e) {
-			System.out.println("Lỗi xử lý JSON: " + e.getMessage());
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 		} catch (Exception e) {
-			System.out.println("Lỗi chung: " + e.getMessage());
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 		}
 	}
 
+
+	       
 	@PostMapping("/recommend-jobs/collaborative")
 	public ResponseEntity<List<JobRecommendationDTO>> getJobRecommendationCollaborative(
 			@RequestHeader("Authorization") String jwt) {
@@ -408,7 +517,6 @@ public class JobPostController {
 		} catch (JsonProcessingException e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
 		}
-
 		HttpEntity<String> entity = new HttpEntity<>(jsonRequestBody, headers);
 
 		try {
@@ -489,7 +597,7 @@ public class JobPostController {
 			@RequestParam(required = false) Long minSalary, @RequestParam(required = false) Long maxSalary,
 			@RequestParam(required = false) Integer cityId,
 			@RequestParam(required = false) List<Integer> selectedIndustryIds,
-			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "7") int size) throws IOException {
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) throws IOException {
 
 		// Gom các thuộc tính tìm kiếm vào một chuỗi duy nhất
 		StringBuilder searchQuery = new StringBuilder();
@@ -540,6 +648,7 @@ public class JobPostController {
 
 		return jobPostService.searchJobs(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds,
 				page, size);
+
 	}
 
 	@GetMapping("/semantic-search")
@@ -660,6 +769,78 @@ public class JobPostController {
 	            .collect(Collectors.toList()));
 	}
 
+//	@GetMapping("/employer-company")
+//	public ResponseEntity<Page<JobWithApplicationCountDTO>> getFilteredJobs(@RequestHeader("Authorization") String jwt,
+//			@RequestParam(required = false) String status, @RequestParam(required = false) String typeOfWork,
+//			@RequestParam(required = false) String sortBy, @RequestParam(required = false) String sortDirection,
+//			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+//		String email = JwtProvider.getEmailFromJwtToken(jwt);
+//		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+//		// Xác định hướng sắp xếp (mặc định là giảm dần)
+//		Sort.Direction direction = Sort.Direction.DESC;
+//		if (sortDirection != null && sortDirection.equalsIgnoreCase("asc")) {
+//			direction = Sort.Direction.ASC;
+//		}
+//
+//		// Xác định trường sắp xếp (mặc định là createDate)
+//		String sortField = "createDate";
+//		if (sortBy != null) {
+//			switch (sortBy.toLowerCase()) {
+//				case "title":
+//					sortField = "title";
+//					break;
+//				case "createdate":
+//					sortField = "createDate";
+//					break;
+//				case "expiredate":
+//					sortField = "expireDate";
+//					break;
+//				case "applicationcount":
+//					// ApplicationCount được xử lý đặc biệt bên dưới
+//					break;
+//				default:
+//					sortField = "createDate";
+//			}
+//		}
+//
+//		// Lấy dữ liệu từ repository
+//		Page<JobWithApplicationCountDTO> jobs;
+//		
+//		if (sortBy != null && sortBy.equalsIgnoreCase("applicationcount")) {
+//			// Trường hợp đặc biệt: sắp xếp theo số lượng ứng viên
+//			// Ở đây chúng ta không thể sử dụng trực tiếp Pageable vì cần xử lý ở mức ứng dụng
+//			// Lấy tất cả jobs phù hợp với filter
+//			List<JobWithApplicationCountDTO> allJobs = jobPostRepository
+//				.findAllJobsWithFilters(user.get().getCompany().getCompanyId(), status, typeOfWork);
+//			
+//			// Sắp xếp theo applicationCount với hướng thích hợp
+//			if (direction == Sort.Direction.ASC) {
+//				allJobs.sort((job1, job2) -> Long.compare(job1.getApplicationCount(), job2.getApplicationCount()));
+//			} else {
+//				allJobs.sort((job1, job2) -> Long.compare(job2.getApplicationCount(), job1.getApplicationCount()));
+//			}
+//			
+//			// Tạo phân trang thủ công
+//			int start = (int) Math.min(page * size, allJobs.size());
+//			int end = (int) Math.min((page + 1) * size, allJobs.size());
+//			List<JobWithApplicationCountDTO> pageContent = allJobs.subList(start, end);
+//			
+//			jobs = new PageImpl<>(pageContent, PageRequest.of(page, size), allJobs.size());
+//		} else {
+//			// Trường hợp thông thường: sắp xếp theo các trường khác
+//			Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+//			jobs = jobPostRepository
+//					.findJobsWithFiltersAndSorting(user.get().getCompany().getCompanyId().toString(), status, typeOfWork, pageable);
+//      Page<JobWithApplicationCountDTO> jobDTOs = pro.map(p -> new JobWithApplicationCountDTO(
+//	    	    p.getPostId(), p.getTitle(), p.getDescription(), p.getLocation(),
+//	    	    p.getSalary(), p.getExperience(), p.getTypeOfWork(), p.getCreateDate(),
+//	    	    p.getExpireDate(), p.getApplicationCount(), p.getStatus(),
+//	    	    p.getIndustryNames() != null ? Arrays.asList(p.getIndustryNames().split(", ")) : null,
+//	    	    p.getIsApprove()
+//	    	));
+//		}
+//  return ResponseEntity.ok(jobs);
+//	}
 	@GetMapping("/employer-company")
 	public ResponseEntity<Page<JobWithApplicationCountDTO>> getFilteredJobs(
 			@RequestHeader("Authorization") String jwt,
@@ -745,8 +926,12 @@ public class JobPostController {
 		);
 	}
 
+	    	System.out.println("Total elements: " + jobDTOs.getTotalElements());
+	    	System.out.println("Total pages: " + jobDTOs.getTotalPages());
+	    	System.out.println("Number of jobs in page: " + jobDTOs.getContent().size());
 
-	
+	    return ResponseEntity.ok(jobDTOs);
+	}
 
 
 	@GetMapping("/stats/daily")
@@ -801,17 +986,17 @@ public class JobPostController {
 		}
 	}
 
-	@GetMapping("/company/{companyId}/approved")
-	public ResponseEntity<Page<JobPost>> getApprovedJobsByCompany(@PathVariable UUID companyId,
-			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
-		try {
-			Pageable pageable = PageRequest.of(page, size);
-			Page<JobPost> jobs = jobPostService.findApprovedJobsByCompany(companyId, pageable);
-			return ResponseEntity.ok(jobs);
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-		}
-	}
+//	@GetMapping("/company/{companyId}/approved")
+//	public ResponseEntity<Page<JobPost>> getApprovedJobsByCompany(@PathVariable UUID companyId,
+//			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+//		try {
+//			Pageable pageable = PageRequest.of(page, size);
+//			Page<JobPost> jobs = jobPostService.findApprovedJobsByCompany(companyId, pageable);
+//			return ResponseEntity.ok(jobs);
+//		} catch (Exception e) {
+//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+//		}
+//	}
 
 	@GetMapping("/count-jobs-by-company/{companyId}")
 	public ResponseEntity<Map<String, Long>> countJobsByCompanyStatus(@PathVariable UUID companyId) {
@@ -864,6 +1049,7 @@ public class JobPostController {
 	public ResponseEntity<Object> getSimilarJobs(@RequestParam UUID companyId,
 			@RequestParam(required = false) UUID excludePostId) {
 		try {
+
 			List<Integer> industryId = companyService.getIndustryIdsByCompanyId(companyId);
 			List<JobPost> similarJobs = jobPostService.getSimilarJobsByIndustry(industryId, excludePostId);
 			return ResponseEntity.ok(similarJobs);

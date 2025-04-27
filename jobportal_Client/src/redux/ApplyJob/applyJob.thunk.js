@@ -83,6 +83,7 @@ export const getApplyJobByCompany = createAsyncThunk(
       sortBy = "applyDate",
       sortDirection = "desc"
     },
+
     { rejectWithValue }
   ) => {
     try {
@@ -94,6 +95,7 @@ export const getApplyJobByCompany = createAsyncThunk(
         ...(title && { title }),
         sortBy,
         sortDirection,
+
       }).toString();
 
       const response = await api.get(
@@ -145,6 +147,7 @@ export const getNotificationViewJob = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to mark job as viewed"
+
       );
     }
   }

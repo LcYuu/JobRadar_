@@ -10,7 +10,9 @@ import {
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
 import { useDispatch, useSelector } from "react-redux";
+
 import Swal from "sweetalert2";
+
 
 import { toast } from "react-toastify";
 import {
@@ -19,9 +21,9 @@ import {
   updateApprove,
 } from "../../redux/ApplyJob/applyJob.thunk";
 import { getAllJobPost } from "../../redux/JobPost/jobPost.thunk";
-
 import useCVAnalysis from "../../hooks/useCVAnalysis";
 import useWebSocket from "../../utils/useWebSocket";
+
 
 const CandidateManagement = () => {
   const navigate = useNavigate();
@@ -65,6 +67,7 @@ const CandidateManagement = () => {
         title: filterPosition,
         sortBy,
         sortDirection,
+
       })
     );
   }, [dispatch, currentPage, size, searchTerm, filterStatus, filterPosition, sortBy, sortDirection]); // Thêm các tham số lọc và sắp xếp vào dependency array
@@ -79,7 +82,6 @@ const CandidateManagement = () => {
   
       toast.success("Đơn ứng tuyển đã được chấp thuận!");
 
-
       dispatch(getApplyJobByCompany({
         currentPage, 
         size,
@@ -89,6 +91,7 @@ const CandidateManagement = () => {
         sortBy,
         sortDirection,
       }));
+
     } catch (error) {
       toast.error("Có lỗi xảy ra khi chấp thuận đơn.");
       console.error("Lỗi updateApprove:", error);
@@ -131,6 +134,7 @@ const CandidateManagement = () => {
       <ChevronUp className="h-4 w-4 ml-1" />
     ) : (
       <ChevronDown className="h-4 w-4 ml-1" />
+
     );
   };
 
@@ -188,6 +192,7 @@ const CandidateManagement = () => {
   );
   
   useWebSocket(["/topic/apply-updates"], handleMessage);
+
 
   return (
     <div className="p-6">
@@ -382,6 +387,7 @@ const CandidateManagement = () => {
                                 getNotificationViewJob({
                                   userId: candidate?.userId,
                                   postId: candidate?.postId
+
                                 })
                               ); // Gọi API
                               navigate(

@@ -296,8 +296,8 @@ export default function JobDetailAdmin() {
                       Lĩnh vực
                     </h3>
                     <div className="flex flex-wrap gap-2">
-                      {job.company?.industry?.length > 0 ? (
-                        job.company.industry.map((ind) => (
+                      {job?.industry?.length > 0 ? (
+                        job.industry.map((ind) => (
                           <Badge
                             key={ind.industryId}
                             variant="outline"

@@ -99,5 +99,4 @@ public class ReviewServiceImpl implements IReviewService {
 		return reviewRepository.countReviewsByStar(companyId);
 	}
 
-
 }

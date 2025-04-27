@@ -179,6 +179,7 @@ public class ApplyJobController {
 			@RequestParam(required = false) String title, // Thêm filter theo title
 			@RequestParam(defaultValue = "applyDate") String sortBy, // Thêm sắp xếp theo trường
 			@RequestParam(defaultValue = "desc") String sortDirection // Thêm hướng sắp xếp
+
 	) {
 		// Lấy email từ JWT
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
@@ -189,6 +190,7 @@ public class ApplyJobController {
 		}
 
 		UUID companyId = user.get().getCompany().getCompanyId();
+		// Tạo pageable với sắp xếp mặc định
 
 		// Tạo hướng sắp xếp từ tham số
 		Sort.Direction direction = sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
@@ -258,6 +260,7 @@ public class ApplyJobController {
 	            System.out.println("Apply job not found for userId: " + userId + ", postId: " + postId);
 	            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 	        }
+
 
 	        return ResponseEntity.ok().build();
 	    } catch (Exception e) {
@@ -417,9 +420,9 @@ public class ApplyJobController {
 			e.printStackTrace();
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body("Error retrieving matching scores with details: " + e.getMessage());
+
 		}
 	}
-
 	private ApplyJob convertToEntity(ApplyJobDTO applyDTO, UUID userId, UUID postId) {
 		ApplyJob apply = new ApplyJob();
 		apply.setPostId(postId);

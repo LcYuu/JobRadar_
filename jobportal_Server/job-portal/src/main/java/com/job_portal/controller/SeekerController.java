@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.job_portal.DTO.ApplicantProfileDTO;
 import com.job_portal.DTO.FollowCompanyDTO;
 import com.job_portal.DTO.FollowSeekerDTO;
+
 import com.job_portal.DTO.SeekerDTO;
 import com.job_portal.config.JwtProvider;
 import com.job_portal.models.JobPost;
@@ -38,12 +39,14 @@ import com.job_portal.models.Notification;
 import com.job_portal.models.Seeker;
 import com.job_portal.models.UserAccount;
 import com.job_portal.projection.ApplicantProfileProjection;
+
 import com.job_portal.repository.CompanyRepository;
 import com.job_portal.repository.NotificationRepository;
 import com.job_portal.repository.SeekerRepository;
 import com.job_portal.repository.UserAccountRepository;
 import com.job_portal.service.ICompanyService;
 import com.job_portal.service.INotificationService;
+
 import com.job_portal.service.ISeekerService;
 import com.social.exceptions.AllExceptions;
 
@@ -61,15 +64,13 @@ public class SeekerController {
 	private UserAccountRepository userAccountRepository;
 	@Autowired
 	private CompanyRepository companyRepository;
+
 	@Autowired
 	private INotificationService notificationService;
 	@Autowired
 	private NotificationRepository notificationRepository;
 	
-	   private static final Logger logger = LoggerFactory.getLogger(SeekerController.class);
-
-
-
+	private static final Logger logger = LoggerFactory.getLogger(SeekerController.class);
 	@GetMapping("/get-all")
 	public ResponseEntity<List<Seeker>> getSeeker() {
 		List<Seeker> seekers = seekerRepository.findAll();
@@ -97,8 +98,6 @@ public class SeekerController {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		}
 	}
-
-
 
 //	@DeleteMapping("/delete-social/{socialName}")
 //	public ResponseEntity<String> deleteSocialLink(@RequestHeader("Authorization") String jwt,

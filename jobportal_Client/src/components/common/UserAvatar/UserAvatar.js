@@ -20,6 +20,10 @@ const UserAvatar = () => {
     fetchProfile();
   }, [dispatch, isAuthenticated]);
 
+  // Don't render if not authenticated or no user data
+  if (!isAuthenticated || !auth.user) {
+    return null;
+  }
   const handleAvatarClick = (e) => {
     e.preventDefault();
     if (isAuthenticated && auth.user) {
@@ -54,6 +58,7 @@ const UserAvatar = () => {
           e.target.src = '/default-avatar.png';
         }}
       />
+      <span className="text-white">{auth.user?.userName || 'User'}</span>
       <span className="text-white">{auth.user?.userName || 'User'}</span>
     </div>
   );

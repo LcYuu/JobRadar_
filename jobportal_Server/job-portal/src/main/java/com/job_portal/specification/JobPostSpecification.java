@@ -6,7 +6,6 @@ import org.springframework.data.jpa.domain.Specification;
 import com.job_portal.models.Industry;
 import com.job_portal.models.JobPost;
 import com.opencsv.CSVWriter;
-
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 
@@ -51,7 +50,7 @@ public class JobPostSpecification {
             }
 
             if (selectedIndustryIds != null && !selectedIndustryIds.isEmpty()) {
-                Join<JobPost, Industry> industryJoin = root.join("industry"); // jobPosts.industry
+                Join<JobPost, Industry> industryJoin = root.join("industry");
                 predicate = criteriaBuilder.and(predicate, industryJoin.get("industryId").in(selectedIndustryIds));
             }
 

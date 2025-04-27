@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
-    approveJob,
-    countJobByType,
+  approveJob,
+  countJobByType,
   createJobPost,
   fetchSalaryRange,
   findEmployerCompany,
@@ -50,6 +50,16 @@ const jobPostSlice = createSlice({
   name: "jobPost",
   initialState,
   reducers: {
+
+    // Thêm reducer để reset jobPost
+    resetJobPost: (state) => {
+      state.jobPost = [];
+      state.error = null;
+      state.totalPages = 0;
+      state.totalElements = 0;
+      state.loading = false;
+    },
+
   },
   extraReducers: (builder) => {
     builder
@@ -69,8 +79,6 @@ const jobPostSlice = createSlice({
         state.loading = false;
         state.error = null;
       })
-
-      // Handle getCompanyProfile actions
       .addCase(searchJobs.fulfilled, (state, action) => {
         state.loading = false;
         state.searchJob = action.payload.content;
@@ -79,15 +87,13 @@ const jobPostSlice = createSlice({
         state.currentPage = action.payload.page.currentPage;
         state.error = null;
       })
-
-      // Handle checkIfSaved actions
       .addCase(countJobByType.fulfilled, (state, action) => {
         state.jobCountByType = action.payload;
         state.loading = false; // Kết thúc trạng thái tải
         state.error = null; // Đặt lỗi về null
       })
 
-      // Handle getCompany actions
+
       .addCase(getJobPostByPostId.fulfilled, (state, action) => {
         state.loading = false;
         state.postByPostId = action.payload;
@@ -108,12 +114,12 @@ const jobPostSlice = createSlice({
       })
 
       // Handle updateCompanyProfile actions
+
       .addCase(getTotalJobsByCompany.fulfilled, (state, action) => {
         state.loading = false;
         state.totalJobs = action.payload;
         state.error = null;
       })
-
       // Handle updateCompanyImages actions
       .addCase(getAllJobPost.fulfilled, (state,action) => {
         state.loading = false;
@@ -125,8 +131,6 @@ const jobPostSlice = createSlice({
         state.jobs = action.payload;
         state.error = null;
       })
-
-      // Handle validateTaxCode actions
       .addCase(findEmployerCompany.fulfilled, (state, action) => {
         state.jobs = action.payload.jobs;
         state.totalPages = action.payload.totalPages;
@@ -134,19 +138,17 @@ const jobPostSlice = createSlice({
         state.loading = false;
         state.error = null;
       })
-
       .addCase(getDetailJobById.fulfilled, (state,action) => {
         state.loading = false;
         state.detailJob = action.payload;
         state.error = null;
       })
-
       .addCase(updateJob.fulfilled, (state,action) => {
+
         state.loading = false;
         state.detailJob = action.payload;
         state.error = null;
       })
-
       .addCase(createJobPost.fulfilled, (state,action) => {
         state.loading = false;
         state.detailJob = action.payload;
@@ -195,5 +197,8 @@ const jobPostSlice = createSlice({
       );
   },
 });
+// Export action resetJobPost
+export const { resetJobPost } = jobPostSlice.actions;
 
 export default jobPostSlice.reducer;
+

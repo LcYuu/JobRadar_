@@ -18,7 +18,6 @@ public interface IndustryRepository extends JpaRepository<Industry, Integer> {
 	
 	@Query("SELECT i.industryName FROM Industry i WHERE i.industryId IN :industryId")
 	List<String> findIndustryNamesByIds(@Param("industryId") List<Integer> industryId);
-
 	// Tìm theo tên được chọn từ Combobox
 	Industry findByIndustryName(String industryName);
 
@@ -44,5 +43,11 @@ public interface IndustryRepository extends JpaRepository<Industry, Integer> {
 		       "GROUP BY i.industryId, i.industryName")
 	List<CountJobByIndustry> countByIndustry();
 
+//	@Query("SELECT new com.job_portal.DTO.CountJobByIndustry(i.industryId, i.industryName, COUNT(jp.postId)) "
+//			+ "FROM Industry i " + "INNER JOIN Company c ON c.industry.industryId = i.industryId "
+//			+ "INNER JOIN JobPost jp ON jp.company.companyId = c.companyId "
+//			+ "WHERE (jp.expireDate > CURRENT_DATE OR jp.expireDate IS NULL) "
+//			+ "AND (jp.isApprove = true OR jp.postId IS NULL) " + "GROUP BY i.industryId, i.industryName")
+//	List<CountJobByIndustry> countByIndustry();
 
 }
