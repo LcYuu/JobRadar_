@@ -13,8 +13,10 @@ const generated_cvSlice = createSlice({
   initialState,
   reducers: {
     clearMessages: (state) => {
-      state.successMessage = null;
       state.error = null;
+    },
+    resetGenCv: (state) => {
+      state.genCv = null; // Reset genCv
     },
   },
   extraReducers: (builder) => {
@@ -37,8 +39,10 @@ const generated_cvSlice = createSlice({
         state.error = null;
       })
       .addCase(getGenCVById.fulfilled, (state, action) => {
+
+        console.log("🚀 ~ getGenCVById.fulfilled, action.payload:", action.payload);
         state.loading = false;
-        state.genCv = action.payload; // Cập nhật genCv
+        state.genCv = action.payload;
         state.error = null;
       })
       .addCase(getGenCVById.rejected, (state, action) => {
@@ -51,13 +55,13 @@ const generated_cvSlice = createSlice({
       })
       .addCase(deleteCV.fulfilled, (state, action) => {
         state.loading = false;
-        state.genCvs = state.genCvs.filter((cvs) => cvs.id !== action.payload);
+        state.genCvs = state.genCvs.filter((cvs) => cvs.generatedCvId !== action.payload);
+
       })
       .addCase(deleteCV.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-      // Create education
       .addCase(createCV.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -70,12 +74,11 @@ const generated_cvSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      // Update education
       .addCase(updateCV.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(updateCV.fulfilled, (state) => {
+      .addCase(updateCV.fulfilled, (state, action) => {
         state.loading = false;
       })
       .addCase(updateCV.rejected, (state, action) => {
@@ -85,6 +88,6 @@ const generated_cvSlice = createSlice({
   },
 });
 
-export const { clearMessages } = generated_cvSlice.actions;
-
+export const { clearMessages, resetGenCv } = generated_cvSlice.actions;
 export default generated_cvSlice.reducer;
+

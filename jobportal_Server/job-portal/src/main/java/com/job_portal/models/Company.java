@@ -83,7 +83,6 @@ public class Company {
 	
 	@Column(name = "blocked_until", length = 200)
 	private LocalDateTime blockedUntil;
-
 	@JsonIgnore
 	@OneToMany
 	private List<Review> reviews = new ArrayList<>();
@@ -97,7 +96,7 @@ public class Company {
 	@OneToMany(mappedBy = "company", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<JobPost> jobPosts = new ArrayList<>();
 
-	@OneToOne
+	@OneToOne	
 	@MapsId
 	@JoinColumn(name = "user_id")
 	private UserAccount userAccount;

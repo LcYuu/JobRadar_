@@ -101,7 +101,6 @@ const App = () => {
   useEffect(() => {
     const token = localStorage.getItem("jwt");
     const savedUser = localStorage.getItem("user");
-
     if (token) {
       if (!user && savedUser) {
         dispatch(setUserFromStorage(JSON.parse(savedUser)));
@@ -152,8 +151,12 @@ const App = () => {
     );
   }, [location.pathname]);
 
+
+
+
   return (
     <div className="app-container">
+      {/* <Background /> */}
       {/* <Background /> */}
       {showHeader && <Header />}
       {/* {showHeader && <Banner />}  */}
@@ -391,3 +394,4 @@ const App = () => {
 };
 
 export default App;
+

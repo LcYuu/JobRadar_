@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,10 @@ import com.job_portal.repository.IndustryRepository;
 import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.SeekerRepository;
 import com.job_portal.utils.EmailUtil;
+
 import com.social.exceptions.AllExceptions;
+import jakarta.mail.MessagingException;
+import jakarta.persistence.EntityNotFoundException;
 
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
@@ -47,7 +51,7 @@ public class CompanyServiceImpl implements ICompanyService {
 	IndustryRepository industryRepository;
 	@Autowired
 	ISeekerService seekerService;
-
+	
 	@Autowired
 	private EmailUtil emailUtil;
 	@Autowired
@@ -106,7 +110,6 @@ public class CompanyServiceImpl implements ICompanyService {
 			oldCompany.setContact(companyDTO.getContact());
 			isUpdated = true;
 		}
-
 		if (companyDTO.getEmail() != null) {
 			oldCompany.setEmail(companyDTO.getEmail());
 			isUpdated = true;
@@ -117,7 +120,6 @@ public class CompanyServiceImpl implements ICompanyService {
 			isUpdated = true;
 		}
 
-		// Tìm Industry mới dựa trên industryId
 		if (companyDTO.getIndustryIds() != null && !companyDTO.getIndustryIds().isEmpty()) {
 			List<Industry> newIndustries = new ArrayList<>();
 			for (Integer industryId : companyDTO.getIndustryIds()) {
@@ -130,8 +132,6 @@ public class CompanyServiceImpl implements ICompanyService {
 		// Tìm City mới dựa trên cityId
 		if (companyDTO.getCityId() != null) {
 			Optional<City> newCity = cityRepository.findById(companyDTO.getCityId());
-
-			// Cập nhật City nếu khác
 			if (!newCity.get().equals(oldCompany.getCity())) {
 				oldCompany.setCity(newCity.get());
 				isUpdated = true;
@@ -258,6 +258,5 @@ public class CompanyServiceImpl implements ICompanyService {
 		emailUtil.sendUnBlockAccountEmail(company.getEmail(), company.getCompanyName());
 
 		companyRepository.save(company);
-
 	}
 }

@@ -136,6 +136,7 @@ const [loading, setLoading] = useState(false);
     setTempFilters((prev) => ({ ...prev, industryId: industryId || "" }));
     setCurrentPage(0); // Reset về trang đầu tiên khi thay đổi danh mục
   };
+  
 
   const filteredCompanies = selectedCategory
   ? companyByFeature.filter((company) =>

@@ -17,8 +17,6 @@ import com.job_portal.projection.ApplicantProfileProjection;
 public interface SeekerRepository extends JpaRepository<Seeker, UUID> {
 
 	public Optional<Seeker> findById(UUID userId);
-
-
 	@Query(value = """
 		    SELECT 
 		        BIN_TO_UUID(p.post_id) AS postId, 
@@ -51,7 +49,6 @@ public interface SeekerRepository extends JpaRepository<Seeker, UUID> {
 		             a.full_name, c.user_id, ua.avatar, p.type_of_work, p.title
 		    """, nativeQuery = true)
 		ApplicantProfileProjection findCandidateDetails(@Param("userId") String userId, @Param("postId") String postId);
-
 
 
 	@Query("SELECT new com.job_portal.DTO.FollowSeekerDTO(s.userId, s.userAccount.userName) "

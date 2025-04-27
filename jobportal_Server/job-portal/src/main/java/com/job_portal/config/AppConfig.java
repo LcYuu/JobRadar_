@@ -48,6 +48,7 @@ public class AppConfig {
 		            .requestMatchers("/api/**").authenticated()
 		            .anyRequest().permitAll()
 		    )
+
 				.addFilterBefore(new JwtValidator(), BasicAuthenticationFilter.class);
 
 		http.csrf(csrf -> csrf.disable());
@@ -63,10 +64,9 @@ public class AppConfig {
 
 	private CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration cfg = new CorsConfiguration();
-
 		cfg.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://jobradar-one.vercel.app")); // Địa chỉ front-end
 		cfg.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")); // Các phương thức HTTP cho
-																							// phép
+																						// phép
 		cfg.setAllowCredentials(true); // Cho phép cookie
 		cfg.setAllowedHeaders(Collections.singletonList("*")); // Tất cả các header
 		cfg.setExposedHeaders(Arrays.asList("Authorization")); // Header được phép xuất hiện trong response

@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../ui/button";
-import { Filter, MoreVertical, ArrowUpDown, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Filter,
+  MoreVertical,
+  ArrowUpDown,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +15,6 @@ import {
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
 import { useDispatch, useSelector } from "react-redux";
-
 import { toast, ToastContainer } from "react-toastify";
 import Swal from "sweetalert2";
 import {
@@ -28,36 +33,23 @@ const JobManagement = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  // const [selectedDate, setSelectedDate] = useState("Jul 19 - Jul 25");
   const {
     jobs = [],
     totalPages,
     totalElements,
     expireJob,
   } = useSelector((store) => store.jobPost);
-
   const { isValid, loading, error } = useSelector((store) => store.company);
 
   const [currentPage, setCurrentPage] = useState(0);
   const [size, setSize] = useState(5);
   const [status, setStatus] = useState("");
   const [typeOfWork, setTypeOfWork] = useState("");
-  
-  // Thêm state cho sắp xếp
-  const [sortBy, setSortBy] = useState("createdate"); // Mặc định sắp xếp theo ngày tạo
-  const [sortDirection, setSortDirection] = useState("desc"); // Mặc định sắp xếp giảm dần
-  
-  const [filtered, setFiltered] = useState([]); // Kết quả sau lọc;
+  const [sortBy, setSortBy] = useState("createdate");
+  const [sortDirection, setSortDirection] = useState("desc");
+
   const handleViewDetails = (postId) => {
     navigate(`/employer/jobs/${postId}`);
-  };
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedJobId, setSelectedJobId] = useState(null);
-
-  const handleOpenModal = (postId) => {
-    setSelectedJobId(postId); // Lưu postId vào state
-    setIsModalOpen(true); // Mở modal
   };
 
   const handleOpenExpireConfirmation = (postId) => {
@@ -66,41 +58,35 @@ const JobManagement = () => {
       text: "Bạn có chắc chắn muốn dừng tuyển dụng công việc này?",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#28a745", // Màu nút "Có"
-      cancelButtonColor: "#dc3545", // Màu nút "Không"
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#dc3545",
       confirmButtonText: "Có",
       cancelButtonText: "Không",
     }).then((result) => {
       if (result.isConfirmed) {
-        handleConfirmExpire(postId); 
+        handleConfirmExpire(postId);
       }
     });
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false); // Đóng modal
-    setSelectedJobId(null); // Reset selectedJobId
-  };
-
   const handleConfirmExpire = async (postId) => {
     if (postId) {
-      await dispatch(updateExpireJob(postId)); // Gọi action để đánh dấu hết hạn
+      await dispatch(updateExpireJob(postId));
+      await dispatch(
+        findEmployerCompany({
+          status,
+          typeOfWork,
+          sortBy,
+          sortDirection,
+          currentPage,
+          size,
+        })
+      );
+      toast.success("Dừng tuyển dụng công việc thành công");
     }
-    await dispatch(
-      findEmployerCompany({
-        status,
-        typeOfWork,
-        sortBy,
-        sortDirection,
-        currentPage,
-        size
-      })
-    );
-    toast.success("Dừng tuyển dụng công việc thành công");
   };
 
   useEffect(() => {
-    // Gọi API để lấy công việc với các tham số lọc và sắp xếp
     dispatch(
       findEmployerCompany({
         status,
@@ -111,16 +97,10 @@ const JobManagement = () => {
         size,
       })
     );
-  }, [
-    dispatch,
-    currentPage,
-    size,
-    sortBy,
-    sortDirection,
-  ]);
+  }, [dispatch, currentPage, size, status, typeOfWork, sortBy, sortDirection]);
 
   useEffect(() => {
-    dispatch(validateTaxCode()); // Gọi action khi component được mount
+    dispatch(validateTaxCode());
   }, [dispatch]);
 
   const handlePageChange = (newPage) => {
@@ -131,22 +111,18 @@ const JobManagement = () => {
 
   const handleSizeChange = (e) => {
     setSize(Number(e.target.value));
-    setCurrentPage(0); // Reset về trang đầu khi thay đổi số lượng bản ghi mỗi trang
+    setCurrentPage(0);
   };
 
-  // Xử lý sắp xếp
   const handleSort = (field) => {
-    // Nếu đang sắp xếp theo field này rồi, đảo ngược hướng sắp xếp
     if (sortBy === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
-      // Nếu chuyển sang field khác, mặc định sắp xếp giảm dần
       setSortBy(field);
       setSortDirection("desc");
     }
   };
 
-  // Hiển thị icon sắp xếp
   const renderSortIcon = (field) => {
     if (sortBy !== field) {
       return <ArrowUpDown className="h-4 w-4 ml-1" />;
@@ -160,36 +136,48 @@ const JobManagement = () => {
 
   const applyFilters = () => {
     setCurrentPage(0);
-    dispatch(findEmployerCompany({status, typeOfWork, sortBy, sortDirection, currentPage: 0, size}));
+    dispatch(
+      findEmployerCompany({
+        status,
+        typeOfWork,
+        sortBy,
+        sortDirection,
+        currentPage: 0,
+        size,
+      })
+    );
   };
 
-  const displayData = filtered.length > 0 ? filtered : jobs;
   const handleClick = () => {
     if (isValid) {
-      navigate("/employer/jobs/post"); // Chuyển hướng nếu mã số thuế hợp lệ
+      navigate("/employer/jobs/post");
     } else {
       toast.error(
         "Mã số thuế không chính xác. Hãy cập nhật đúng để được đăng bài"
-      ); // Hiển thị toast lỗi nếu không hợp lệ
+      );
     }
   };
+
   return (
     <div className="p-6">
+      {/* Hiển thị trạng thái loading hoặc error nếu có */}
+      {loading && <div className="text-center">Đang tải...</div>}
+      {error && (
+        <div className="text-center text-red-500">
+          Lỗi: {error.message || "Có lỗi xảy ra!"}
+        </div>
+      )}
+
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-semibold"></h1>
-          {/* <p className="text-gray-500 mt-1">Đây là danh sách việc làm từ {selectedDate}.</p> */}
+          <h1 className="text-2xl font-semibold">Quản lý công việc</h1>
         </div>
 
         <div className="flex items-center gap-4">
-          {/* <div className="flex items-center border rounded-lg p-2">
-            <Calendar className="w-5 h-5 text-gray-500 mr-2" />
-            <span>{selectedDate}</span>
-          </div> */}
           <Button
             variant="default"
             className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-500 transition-colors"
-            onClick={handleClick} // Gọi hàm khi người dùng click
+            onClick={handleClick}
           >
             + Đăng bài
           </Button>
@@ -203,19 +191,18 @@ const JobManagement = () => {
             <select
               className="border rounded px-4 py-2"
               value={status}
-              onChange={(e) => setStatus(e.target.value)} // Lưu trạng thái được chọn
+              onChange={(e) => setStatus(e.target.value)}
             >
               <option value="">Tất cả trạng thái</option>
-              <option value="Đang mở">Đang mở</option> {/* isSave = 1 */}
-              <option value="Chưa duyệt">Chưa duyệt</option> {/* isSave = 0 */}
-              <option value="Hết hạn">Hết hạn</option> {/* isSave = 0 */}
+              <option value="Đang mở">Đang mở</option>
+              <option value="Chưa duyệt">Chưa duyệt</option>
+              <option value="Hết hạn">Hết hạn</option>
             </select>
 
-            {/* Lọc theo vị trí công việc */}
             <select
               className="border rounded px-4 py-2"
               value={typeOfWork}
-              onChange={(e) => setTypeOfWork(e.target.value)} // Lưu vị trí được chọn
+              onChange={(e) => setTypeOfWork(e.target.value)}
             >
               <option value="">Tất cả vị trí</option>
               {work.map((w, index) => (
@@ -234,8 +221,7 @@ const JobManagement = () => {
             </Button>
           </div>
         </div>
-        
-        {/* Thêm thanh sắp xếp */}
+
         <div className="bg-white p-4 border-b">
           <h3 className="font-medium text-gray-700 mb-2">Sắp xếp theo:</h3>
           <div className="flex flex-wrap gap-3">
@@ -275,29 +261,23 @@ const JobManagement = () => {
             <tr>
               <th className="text-left p-4">Tên công việc</th>
               <th className="text-left p-4">Trạng thái</th>
-              <th className="text-left p-4">
-                Ngày bắt đầu
-              </th>
-              <th className="text-left p-4">
-                Ngày kết thúc
-              </th>
+              <th className="text-left p-4">Ngày bắt đầu</th>
+              <th className="text-left p-4">Ngày kết thúc</th>
               <th className="text-left p-4">Loại công việc</th>
-              <th className="text-left p-4">
-                Số lượng ứng viên
-              </th>
+              <th className="text-left p-4">Số lượng ứng viên</th>
               <th className="text-left p-4 cursor-pointer">Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {displayData?.length > 0 ? (
-              displayData.map((job, index) => (
+            {jobs?.length > 0 ? (
+              jobs.map((job, index) => (
                 <tr key={index} className="border-b">
                   <td className="p-4">{job?.title}</td>
                   <td className="p-4">
                     <span
                       className={`px-3 py-1 rounded-full text-sm ${
                         job.status === "Đang mở"
-                          ? "bg-emerald-100 text-emerald-600" // Màu xanh lá cho "Đang mở"
+                          ? "bg-emerald-100 text-emerald-600"
                           : job.status === "Hết hạn"
                           ? "bg-red-100 text-red-600"
                           : job.status === "Chưa duyệt"
@@ -354,41 +334,12 @@ const JobManagement = () => {
                         >
                           Dừng tuyển dụng
                         </DropdownMenuItem>
-
-                        {isModalOpen && (
-                          <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50">
-                            <div className="bg-white p-6 rounded-lg w-1/3">
-                              <h3 className="text-lg font-semibold">
-                                Xác nhận
-                              </h3>
-                              <p className="mt-2">
-                                Bạn có chắc chắn muốn dừng tuyển dụng công việc
-                                này?
-                              </p>
-                              <div className="mt-4 flex justify-end space-x-4">
-                                <button
-                                  onClick={handleConfirmExpire} // Xác nhận và gọi action
-                                  className="px-4 py-2 bg-green-500 text-white rounded-lg"
-                                >
-                                  Có
-                                </button>
-                                <button
-                                  onClick={handleCloseModal} // Đóng modal mà không thực hiện hành động
-                                  className="px-4 py-2 bg-red-500 text-white rounded-lg"
-                                >
-                                  Không
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        )}
                         <DropdownMenuItem
                           className="hover:bg-gray-100 cursor-pointer"
                           onClick={() => handleViewDetails(job.postId)}
                         >
                           Xem chi tiết
                         </DropdownMenuItem>
-                        {/* <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem> */}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </td>
@@ -449,30 +400,6 @@ const JobManagement = () => {
         autoClose={5000}
         hideProgressBar={true}
       />
-      {/* {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg w-1/3">
-            <h3 className="text-lg font-semibold">Xác nhận</h3>
-            <p className="mt-2">
-              Bạn có chắc chắn muốn dừng tuyển dụng công việc này?
-            </p>
-            <div className="mt-4 flex justify-end space-x-4">
-              <button
-                onClick={handleConfirmExpire} // Xác nhận và gọi action
-                className="px-4 py-2 bg-green-500 text-white rounded-lg"
-              >
-                Có
-              </button>
-              <button
-                onClick={handleCloseModal} // Đóng modal mà không thực hiện hành động
-                className="px-4 py-2 bg-red-500 text-white rounded-lg"
-              >
-                Không
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
     </div>
   );
 };
