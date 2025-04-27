@@ -35,6 +35,7 @@ public interface IJobPostService {
 //	public Page<JobPost> findByCompanyId(UUID companyId, Pageable pageable);
 //	public Page<JobWithApplicationCountDTO> getTop5JobsWithApplications(UUID companyId, int page, int size);
 	public Page<JobPost> findJobsByCompany(UUID companyId, Pageable pageable);
+	public List<JobPost> findAllJobsByCompany(UUID companyId);
 	public Page<JobPost> findApprovedJobsByCompany(UUID companyId, Pageable pageable);
 	public Map<String, Long> countAllJobsByCompany(UUID companyId);
 	public List<Map<String, Object>> getCompanyJobStats(UUID companyId, LocalDateTime startDate, LocalDateTime endDate);
