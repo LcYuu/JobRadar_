@@ -82,18 +82,18 @@ const useCVAnalysis = () => {
   }, [cvAnalysisFromRedux]);
   
   /**
-   * Fetch job description by postId
+   * Fetch job details by postId
    * @param {string|number} postId - Job post ID
    * @param {Array} positions - Available positions from Redux
-   * @returns {Promise<string>} - Job description
+   * @returns {Promise<Object>} - Complete job object
    */
-  const fetchJobDescription = useCallback(async (postId, positions) => {
+  const fetchJobDetails = useCallback(async (postId, positions) => {
     try {
-      // Check if job description exists in positions from Redux
+      // Check if job exists in positions from Redux
       const jobPost = positions.find(position => position.postId === postId);
       
-      if (jobPost && jobPost.description) {
-        return jobPost.description;
+      if (jobPost) {
+        return jobPost;
       }
       
       // Fallback to API if not found in Redux
@@ -103,9 +103,9 @@ const useCVAnalysis = () => {
       }
       
       const jobData = await response.json();
-      return jobData.description;
+      return jobData;
     } catch (error) {
-      console.error('Error fetching job description:', error);
+      console.error('Error fetching job details:', error);
       throw error;
     }
   }, []);
@@ -181,15 +181,15 @@ const useCVAnalysis = () => {
         }
       }
       
-      // Get job description
-      const jobDescription = await fetchJobDescription(candidate.postId, positions);
-      if (!jobDescription) {
-        throw new Error('Không thể tải mô tả công việc');
+      // Get complete job data
+      const jobData = await fetchJobDetails(candidate.postId, positions);
+      if (!jobData) {
+        throw new Error('Không thể tải thông tin công việc');
       }
       
       // Fetch and analyze CV
       const cvFile = await fetchCVFile(candidate.pathCV);
-      const result = await analyzeCVWithJobDescription(cvFile, jobDescription);
+      const result = await analyzeCVWithJobDescription(cvFile, jobData);
       
       // Add timestamp before saving
       const resultWithTimestamp = {
@@ -232,7 +232,7 @@ const useCVAnalysis = () => {
         [candidateKey]: false
       }));
     }
-  }, [dispatch, analyzingCandidates, fetchJobDescription, fetchExistingAnalysis]);
+  }, [dispatch, analyzingCandidates, fetchJobDetails, fetchExistingAnalysis]);
   
   /**
    * Get cached analysis score for a candidate
