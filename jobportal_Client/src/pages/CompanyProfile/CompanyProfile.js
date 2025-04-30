@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import JobCard_AllJob from "../../components/common/JobCard_AllJob/JobCard_AllJob";
 import { StarRounded } from "@mui/icons-material";
 import { toast } from "react-toastify";
+import Pagination from "../../components/common/Pagination/Pagination";
 
 import "react-toastify/dist/ReactToastify.css";
 import anonymousIcon from "../../assets/icons/anonymous.png";
@@ -62,7 +63,7 @@ const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
 export default function CompanyProfile() {
   const { companyId } = useParams();
   const dispatch = useDispatch();
-  const { jobPost = [], error } = useSelector((store) => store.jobPost);
+  const { jobPost = [], error, totalPages = 0, totalElements = 0 } = useSelector((store) => store.jobPost);
 
   const [loading, setLoading] = useState(true);
 
@@ -90,7 +91,9 @@ export default function CompanyProfile() {
   const [isFollowing, setIsFollowing] = useState(false); // Trạng thái theo dõi ban đầu
 
   const [currentPage, setCurrentPage] = useState(0);
-  const [size] = useState(6);
+  const [jobsPerPage] = useState(5);
+  const [allJobs, setAllJobs] = useState([]);
+  const [displayedJobs, setDisplayedJobs] = useState([]);
 
   const [feedback, setFeedback] = useState({
     star: 0,
@@ -225,6 +228,35 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
     });
   }, [companyId]); // Chỉ cuộn khi companyId thay đổi
 
+  // Fetch all jobs from the company
+  useEffect(() => {
+    const fetchCompanyJobs = async () => {
+      try {
+        // Use the getAllJobs param to fetch all jobs at once
+        await dispatch(getJobsByCompany({ 
+          companyId, 
+          currentPage: 0,
+          size: 100,
+          getAllJobs: true 
+        }));
+      } catch (error) {
+        console.error("Error fetching jobs:", error);
+      }
+    };
+    
+    fetchCompanyJobs();
+  }, [dispatch, companyId]);
+
+  // Update displayed jobs when page changes or when all jobs are loaded
+  useEffect(() => {
+    if (jobPost && jobPost.length > 0) {
+      setAllJobs(jobPost);
+      const startIndex = currentPage * jobsPerPage;
+      const endIndex = startIndex + jobsPerPage;
+      setDisplayedJobs(jobPost.slice(startIndex, endIndex));
+    }
+  }, [jobPost, currentPage, jobsPerPage]);
+
   useEffect(() => {
     const userId = companyId;
     dispatch(resetJobPost());
@@ -232,8 +264,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
     dispatch(getReviewByCompany(companyId));
     dispatch(checkSaved(companyId));
     dispatch(fetchSocialLinksByUserId(userId));
-    dispatch(getJobsByCompany({ companyId, currentPage, size }));
-  }, [dispatch, currentPage, size, companyId]);
+  }, [dispatch, companyId]);
 
   const handleFollowClick = async () => {
     try {
@@ -294,6 +325,23 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
   };
 
   const navigate = useNavigate();
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    
+    // Calculate new displayed jobs
+    const startIndex = newPage * jobsPerPage;
+    const endIndex = startIndex + jobsPerPage;
+    setDisplayedJobs(allJobs.slice(startIndex, endIndex));
+    
+    window.scrollTo({
+      top: document.getElementById('job-listings').offsetTop - 100,
+      behavior: 'smooth'
+    });
+  };
+
+  // Calculate total pages based on all jobs and jobs per page
+  const calculatedTotalPages = Math.ceil(allJobs.length / jobsPerPage);
 
   return (
     <main className="container mx-auto px-4 py-8">
@@ -805,60 +853,54 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         </div> */}
 
         {/* Open Jobs */}
-        <div>
+        <div id="job-listings">
           <div className="flex items-center justify-between mb-6 mt-7">
             <h2 className="text-xl text-purple-600 font-semibold">
               Vị trí đang tuyển
             </h2>
-            {/* {totalPages > 1 && (
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(0, prev - 1))
-                  }
-                  disabled={currentPage === 0}
-                >
-                  Trước
-                </Button>
-                <span className="text-sm text-muted-foreground">
-                  Trang {currentPage + 1} / {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1))
-                  }
-                  disabled={currentPage >= totalPages - 1}
-                >
-                  Tiếp theo
-                </Button>
-              </div>
-            )} */}
+            {allJobs.length > 0 && (
+              <p className="text-sm text-gray-500">
+                Hiển thị {Math.min(displayedJobs.length, jobsPerPage)} / {allJobs.length} công việc
+              </p>
+            )}
           </div>
 
           {loading ? (
             <div className="text-center py-8">Đang tải...</div>
           ) : error ? (
             <div className="text-center py-8 text-red-500">{error}</div>
-          ) : jobPost.length > 0 ? (
-            <div className="grid gap-4">
-              {jobPost.map((job) => (
-                <JobCard_AllJob
-                  key={job.postId}
-                  job={{
-                    ...job,
-                    company: {
-                      ...job.company,
-                      logo: job.company.logo,
-                    },
-                  }}
-                />
-              ))}
-            </div>
+          ) : jobPost && jobPost.length > 0 ? (
+            <>
+              <div className="grid gap-4">
+                {displayedJobs.map((job) => (
+                  <JobCard_AllJob
+                    key={job.postId}
+                    job={{
+                      ...job,
+                      company: {
+                        ...job.company,
+                        logo: job.company.logo,
+                      },
+                    }}
+                  />
+                ))}
+              </div>
+              
+              {/* Thêm phần phân trang */}
+              {calculatedTotalPages > 1 && (
+                <div className="mt-8 flex justify-center">
+                  <Pagination 
+                    currentPage={currentPage}
+                    totalPages={calculatedTotalPages}
+                    onPageChange={handlePageChange}
+                    siblingCount={1}
+                  />
+                </div>
+              )}
+            </>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              Không có vị trí nào đang tuyển.
+            <div className="text-center py-8 text-gray-500">
+              Công ty này hiện không có vị trí đang tuyển dụng nào.
             </div>
           )}
         </div>

@@ -21,6 +21,8 @@ import {
 } from "../../redux/Company/company.thunk";
 import { getCity } from "../../redux/City/city.thunk";
 import { getAllIndustries } from "../../redux/Industry/industry.thunk";
+import Pagination from "../../components/common/Pagination/Pagination";
+
 
 export default function FindCompanies() {
   const industryStyles = {
@@ -76,14 +78,14 @@ export default function FindCompanies() {
   const {
     companyByFeature = [],
     companyFitSeeker = [],
-    loading,
     error,
+    totalPages = 1,
+    totalElements = 0
   } = useSelector((store) => store.company);
   const { cities = [] } = useSelector((store) => store.city);
   const { allIndustries = [] } = useSelector((store) => store.industry);
 
   const [filters, setFilters] = useState({
-    
     title: "",
     cityId: "",
     industryId: "",
@@ -93,13 +95,13 @@ export default function FindCompanies() {
     cityId: "",
     industryId: "",
   });
-  console.log('filters', filters)
-  console.log('tempFilters', tempFilters)
+  
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [size] = useState(20);
+  const [size] = useState(12); // Tăng số lượng hiển thị mỗi trang
   const [selectedCategoryName, setSelectedCategoryName] =
     useState("Tất cả công ty");
+const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     dispatch(searchCompanies({ filters, currentPage, size }));
@@ -115,7 +117,11 @@ export default function FindCompanies() {
   }, [dispatch])
 
   const handleSearch = () => {
-    setFilters(tempFilters);
+    const updatedFilters = {
+      ...tempFilters,
+      cityId: tempFilters.cityId === "all" ? "" : tempFilters.cityId
+    };
+    setFilters(updatedFilters);
     setCurrentPage(0);
   };
 
@@ -127,15 +133,8 @@ export default function FindCompanies() {
         : allIndustries.find((industry) => industry.industryId === industryId)
             ?.industryName || "Tất cả công ty"
     );
-
-  
-    const updatedFilters = {
-      ...tempFilters,
-      industryId: industryId || "",
-    };
-  
-    setTempFilters(updatedFilters);
-    setFilters(updatedFilters); // dùng updatedFilters mới
+    setTempFilters((prev) => ({ ...prev, industryId: industryId || "" }));
+    setCurrentPage(0); // Reset về trang đầu tiên khi thay đổi danh mục
   };
   
 
@@ -149,6 +148,11 @@ export default function FindCompanies() {
 
   const hasSuggestedCompanies = companyFitSeeker.length > 0;
 
+  // Filter out "None" from industries list
+  const filteredIndustries = allIndustries.filter(
+    industry => industry && industry.industryName !== "None" && industry.industryName.toLowerCase() !== "none"
+  );
+
   // Hàm lấy danh sách ngành cho từng công ty
   const getIndustryNames = (industryIds) => {
     return (industryIds || [])
@@ -156,6 +160,21 @@ export default function FindCompanies() {
         allIndustries.find((industry) => industry.industryId === id)?.industryName
       )
       .filter(Boolean);
+  };
+
+  // Xử lý phân trang
+  const handlePageChange = (newPage) => {
+    setLoading(true); // Start loading when page changes
+    setCurrentPage(newPage);
+    window.scrollTo({
+      top: document.getElementById('companies-list').offsetTop - 80,
+      behavior: 'smooth'
+    });
+    
+    // Add a small delay to show loading effect
+    setTimeout(() => {
+      setLoading(false);
+    }, 300);
   };
 
   return (
@@ -197,6 +216,7 @@ export default function FindCompanies() {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
+                  <SelectItem value="all">Tất cả địa điểm</SelectItem>
                   {cities.map((c) => (
                     <SelectItem key={c.cityId} value={c.cityId}>
                       {c.cityName}
@@ -228,7 +248,7 @@ export default function FindCompanies() {
             >
               Tất cả ngành nghề
             </Button>
-            {allIndustries.slice(1).map((industry) => (
+            {filteredIndustries.map((industry) => (
               <Button
                 key={industry.industryId}
                 variant={
@@ -249,7 +269,7 @@ export default function FindCompanies() {
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div id="companies-list" className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">
               {selectedCategory === null ? (
@@ -264,65 +284,85 @@ export default function FindCompanies() {
               )}
             </h2>
             <p className="text-gray-500">
-              {hasFilteredCompanies ? filteredCompanies.length : 0} kết quả
+              {hasFilteredCompanies ? 
+                selectedCategory ? filteredCompanies.length : totalElements 
+              : 0} kết quả
             </p>
           </div>
-          {hasFilteredCompanies ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredCompanies.map((company) => {
-                const industryNames = getIndustryNames(
-                  company.industryIds || [company.industryId]
-                ); // Điều chỉnh dựa trên cấu trúc dữ liệu thực tế
-                return (
-                  <Link
-                    to={`/companies/${company.companyId.toString()}`}
-                    className="block"
-                    key={company.companyId}
-                  >
-                    <Card className="p-6 space-y-4 transition-transform duration-300 hover:scale-105 cursor-pointer shadow-lg bg-white hover:shadow-2xl">
-                      <div className="flex items-center gap-4">
-                        <img
-                          src={company.logo || "default-logo.png"}
-                          alt={`${company.companyName || "Công ty"} logo`}
-                          className="h-16 w-16 rounded-lg shadow-md"
-                        />
-                        <div>
-                          <h3 className="font-semibold text-lg">
-                            {company.companyName || "Tên công ty không có"}
-                          </h3>
-                          <p className="text-sm text-primary">
-                            {company.countJob || 0} công việc đang mở
-                          </p>
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-500 line-clamp-2">
-                        {company.description || "Không có mô tả"}
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {industryNames.map((name, index) => (
-                          <Badge
-                            key={index}
-                            className="text-xs mr-1"
-                            style={{
-                              backgroundColor:
-                                industryStyles[name]?.backgroundColor ||
-                                "rgba(0, 0, 0, 0.1)",
-                              color:
-                                industryStyles[name]?.color || "#000000",
-                              border:
-                                industryStyles[name]?.border ||
-                                "1px solid #000000",
-                            }}
-                          >
-                            {name}
-                          </Badge>
-                        ))}
-                      </div>
-                    </Card>
-                  </Link>
-                );
-              })}
+          {loading ? (
+            <div className="flex justify-center py-10">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
             </div>
+          ) : hasFilteredCompanies ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
+                {filteredCompanies.map((company) => {
+                  const industryNames = getIndustryNames(
+                    company.industryIds || [company.industryId]
+                  );
+                  return (
+                    <Link
+                      to={`/companies/${company.companyId.toString()}`}
+                      className="block"
+                      key={company.companyId}
+                    >
+                      <Card className="p-6 space-y-4 transition-all duration-300 hover:scale-105 cursor-pointer shadow-lg bg-white hover:shadow-2xl card-company">
+                        <div className="flex items-center gap-4">
+                          <img
+                            src={company.logo || "default-logo.png"}
+                            alt={`${company.companyName || "Công ty"} logo`}
+                            className="h-16 w-16 rounded-lg shadow-md"
+                          />
+                          <div>
+                            <h3 className="font-semibold text-lg">
+                              {company.companyName || "Tên công ty không có"}
+                            </h3>
+                            <p className="text-sm text-primary">
+                              {company.countJob || 0} công việc đang mở
+                            </p>
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-500 line-clamp-2">
+                          {company.description || "Không có mô tả"}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {industryNames.map((name, index) => (
+                            <Badge
+                              key={index}
+                              className="text-xs mr-1"
+                              style={{
+                                backgroundColor:
+                                  industryStyles[name]?.backgroundColor ||
+                                  "rgba(0, 0, 0, 0.1)",
+                                color:
+                                  industryStyles[name]?.color || "#000000",
+                                border:
+                                  industryStyles[name]?.border ||
+                                  "1px solid #000000",
+                              }}
+                            >
+                              {name}
+                            </Badge>
+                          ))}
+                        </div>
+                      </Card>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* Hiển thị phân trang khi không chọn danh mục hoặc tổng số trang > 1 */}
+              {(selectedCategory === null && totalPages > 1) && (
+                <div className="mt-8 flex justify-center">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                    siblingCount={1}
+                  />
+                </div>
+              )}
+            </>
           ) : (
             <p className="text-center text-gray-500">
               Không có kết quả nào phù hợp với tìm kiếm của bạn.

@@ -1,0 +1,45 @@
+/* Animation for pagination transitions */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.pagination-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.pagination-fade-out {
+  animation: fadeOut 0.25s ease-in forwards;
+}
+
+/* Smooth hover transitions */
+button {
+  transition: all 0.2s ease;
+}
+
+/* Active page button glow effect */
+button[aria-current="page"] {
+  box-shadow: 0 0 10px rgba(147, 51, 234, 0.3);
+}
+
+/* Hover effect for buttons */
+button:not([disabled]):hover {
+  transform: translateY(-2px);
+} 
