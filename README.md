@@ -109,7 +109,6 @@ JobPortal is a full-stack web application designed to streamline the job search 
 - Post and manage job listings
 - Review and manage applicants
 - Search candidate database
-- Schedule interviews
 - Company analytics dashboard
 
 ### For Administrators
