@@ -1,4 +1,3 @@
-
 import os
 os.environ['PYTHONIOENCODING'] = 'utf-8'
 
@@ -90,7 +89,6 @@ IT_SOFTWARE_KEYWORDS = [
     'microservices', 'blockchain', 'machine learning', 'fullstack', 'backend',
     'frontend', 'phần mềm'
 ]
-
 HOSPITALITY_KEYWORDS = [
     'nhà hàng', 'khách sạn', 'đầu bếp', 'phục vụ', 'lễ tân', 'du lịch'
 ]
@@ -113,13 +111,13 @@ FINANCE_KEYWORDS = [
     'tài chính', 'ngân hàng', 'kế toán tài chính', 'phân tích tài chính', 'đầu tư'
 ]
 TELECOM_KEYWORDS = [
-    'viễn thông', 'mạng di động', 'cáp quang', '5g', 'kỹ thuật viễn thông'
+    'viễn thông', 'mạng di động', 'cáp quang', '5g', 'kỹ thuật viễn thông', "mạng"
 ]
 HEALTHCARE_KEYWORDS = [
     'bác sĩ', 'điều dưỡng', 'dược sĩ', 'chăm sóc bệnh nhân', 'y tế công cộng'
 ]
 LOGISTICS_KEYWORDS = [
-    'vận tải', 'chuỗi cung ứng', 'kho bãi', 'giao nhận hàng hóa', 'xuất nhập khẩu', 'hải quan'
+    'vận tải', 'chuỗi cung ứng', 'kho bãi', 'giao nhận hàng hóa', 'xuất nhập khẩu', 'hải quan',  'logistics'
 ]
 ACCOUNTING_KEYWORDS = [
     'kế toán', 'kiểm toán', 'báo cáo tài chính', 'thuế', 'quản lý ngân sách'
@@ -142,13 +140,12 @@ RELATED_INTENTS = {
     'it_software': ['it_hardware', 'embedded_iot'],
     'mechanical': ['it_hardware', 'manufacturing'],
     'embedded_iot': ['it_hardware', 'it_software'],
-    # Thêm các liên kết khác nếu cần
 }
 
 def normalize_keyword(keyword):
     """Chuẩn hóa từ khóa: lowercase, giữ dấu cách, tạo thêm phiên bản không dấu cách."""
     keyword = keyword.lower().strip()
-    no_space = re.sub(r'\s+', '', keyword)  # Phiên bản không dấu cách (e.g., "phần mềm" -> "phầnmềm")
+    no_space = re.sub(r'\s+', '', keyword)
     return keyword, no_space
 
 # Timeout decorator
@@ -267,12 +264,16 @@ def load_jobs_from_csv(filepath, max_jobs=1400):
         df = df.drop_duplicates(subset=['postId'], keep='first')
         logging.info(f"Số công việc sau khi loại bỏ trùng lặp: {len(df)}")
 
+        # Chuyển đổi ngày giờ
         df['createDate'] = pd.to_datetime(df['createDate'], errors='coerce')
         df['expireDate'] = pd.to_datetime(df['expireDate'], errors='coerce')
 
+        # Lọc công việc còn hiệu lực
         current_date = datetime.now()
         df_active = df[df['expireDate'].notna() & (df['expireDate'] > current_date)].copy()
         df_sorted = df_active.sort_values(by='createDate', ascending=False).head(max_jobs)
+
+        # Điền giá trị mặc định cho các cột
         df_sorted = df_sorted.fillna({
             'title': 'Không có tiêu đề',
             'description': '',
@@ -285,6 +286,11 @@ def load_jobs_from_csv(filepath, max_jobs=1400):
             'logo': '',
             'industryNames': ''
         })
+
+        # Định dạng lại createDate và expireDate thành yyyy-MM-dd'T'HH:mm:ss
+        df_sorted['createDate'] = df_sorted['createDate'].dt.strftime('%Y-%m-%dT%H:%M:%S')
+        df_sorted['expireDate'] = df_sorted['expireDate'].dt.strftime('%Y-%m-%dT%H:%M:%S')
+
         jobs = df_sorted.to_dict(orient='records')
 
         if TFIDF_VECTORIZER and jobs:
@@ -346,6 +352,7 @@ def load_jobs_from_csv(filepath, max_jobs=1400):
         logging.error(f"Lỗi khi tải công việc từ CSV: {str(e)}")
         traceback.print_exc()
         return []
+
 # Hàm tải lịch sử tìm kiếm từ CSV
 last_search_csv_modified = 0
 
@@ -403,7 +410,7 @@ def filter_jobs_by_category(jobs, user_queries, top_n=2000):
     for query in user_queries:
         cleaned_query = query.get('Search Query', '').replace('Title:', '').strip()
         processed_query = preprocess_text(cleaned_query, normalize_for_keywords=True)
-        no_space_query = re.sub(r'\s+', '', processed_query)  # Phiên bản không dấu cách
+        no_space_query = re.sub(r'\s+', '', processed_query)
         words = processed_query.split()
         keywords.update([word for word in words if word not in VIETNAMESE_STOP_WORDS])
         logging.debug(f"Truy vấn đã xử lý: {processed_query} | Không dấu cách: {no_space_query}")
@@ -561,7 +568,6 @@ def filter_jobs_by_category(jobs, user_queries, top_n=2000):
     logging.info(f"Đã lọc được {len(filtered_jobs)} công việc sau khi loại bỏ trùng lặp và kiểm tra nội dung")
     return filtered_jobs[:top_n]
 
-
 # Hàm tiền xử lý văn bản
 def preprocess_text(text, bypass_stop_words=False, normalize_for_keywords=False):
     if not isinstance(text, str):
@@ -575,7 +581,6 @@ def preprocess_text(text, bypass_stop_words=False, normalize_for_keywords=False)
         return ""
     words = text.split()
     if normalize_for_keywords:
-        # Giữ tất cả từ dài >= 2 ký tự, không lọc stop words để bảo toàn cụm từ như "phần mềm"
         words = [word for word in words if len(word) >= 2]
     elif not bypass_stop_words:
         words = [word for word in words if word not in VIETNAMESE_STOP_WORDS and len(word) >= 2]
@@ -652,7 +657,6 @@ def get_bert_vector(text, model, tokenizer, device, tfidf_vectorizer, bypass_tfi
     except Exception as e:
         logging.error(f"Lỗi khi tạo vector cho văn bản '{processed_text[:50]}...': {str(e)}")
         return np.zeros(768)
-
 
 @timeout(60)
 def get_bert_recommendations(user_history, all_jobs, model, tokenizer, device, tfidf_vectorizer, top_n=8):
@@ -839,7 +843,7 @@ def get_bert_recommendations(user_history, all_jobs, model, tokenizer, device, t
         if similarity > 0.3:
             job_title = job.get('title', '').lower()
             no_space_job_title = re.sub(r'\s+', '', job_title)
-            intent_boost = 1.2 if any(
+            intent_boost = 1.0 if any(
                 (intent == 'driver' and any(kw in job_title or kw_no_space in no_space_job_title for kw, kw_no_space in [normalize_keyword(k) for k in DRIVER_KEYWORDS])) or
                 (intent == 'tech' and any(kw in job_title or kw_no_space in no_space_job_title for kw, kw_no_space in [normalize_keyword(k) for k in TECH_KEYWORDS])) or
                 (intent == 'ecommerce' and any(kw in job_title or kw_no_space in no_space_job_title for kw, kw_no_space in [normalize_keyword(k) for k in ECOMMERCE_KEYWORDS])) or
@@ -880,6 +884,7 @@ def get_bert_recommendations(user_history, all_jobs, model, tokenizer, device, t
     logging.info(f"Đã chọn top {len(recommended_job_dicts)} gợi ý trong {total_time:.2f} giây.")
     log_resource_usage()
     return recommended_job_dicts, similarity_scores
+
 # Endpoint lưu tìm kiếm
 csv_write_lock = Lock()
 

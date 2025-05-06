@@ -294,37 +294,36 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 
 	@Override
 	public void exportJobPostToCSV(String filePath) throws IOException {
-		List<JobRecommendationProjection> jobProjections = jobPostRepository.findApprovedAndActiveJobs();
+	    List<JobRecommendationProjection> jobProjections = jobPostRepository.findJobPostSave();
 
-		try (FileWriter fileWriter = new FileWriter(filePath); CSVWriter writer = new CSVWriter(fileWriter)) {
+	    try (FileWriter fileWriter = new FileWriter(filePath); CSVWriter writer = new CSVWriter(fileWriter)) {
+	        // Viết tiêu đề
+	        String[] header = { "postId", "title", "description", "location", "salary", "experience", "typeOfWork",
+	                "companyId", "companyName", "cityName", "industryNames", "createDate", "expireDate", "logo" };
+	        writer.writeNext(header);
 
-			// Viết tiêu đề
-			String[] header = { "postId", "title", "description", "location", "salary", "experience", "typeOfWork",
-					"companyId", "companyName", "cityName", "industryNames", "createDate", "expireDate", "logo" };
-			writer.writeNext(header);
+	        // Viết dữ liệu
+	        for (JobRecommendationProjection job : jobProjections) {
 
-			// Viết dữ liệu
-			for (JobRecommendationProjection job : jobProjections) {
-				String[] data = {
-					Objects.toString(job.getPostId(), ""),
-					Objects.toString(job.getTitle(), ""),
-					cleanText(job.getDescription()),
-					Objects.toString(job.getLocation(), ""),
-					Objects.toString(job.getSalary(), ""),
-					Objects.toString(job.getExperience(), ""),
-					Objects.toString(job.getTypeOfWork(), ""),
-					Objects.toString(job.getCompanyId(), ""),
-					Objects.toString(job.getCompanyName(), ""),
-					Objects.toString(job.getCityName(), ""),
-					formatIndustryNames(Objects.toString(job.getIndustryNames(), "")),
-					Objects.toString(job.getCreateDate(), ""),
-					Objects.toString(job.getExpireDate(), ""),
-					Objects.toString(job.getLogo(), ""),
-				};
-				writer.writeNext(data);
-			}
-			
-		}
+	            String[] data = {
+	                Objects.toString(job.getPostId(), ""),
+	                Objects.toString(job.getTitle(), ""),
+	                cleanText(job.getDescription()),
+	                Objects.toString(job.getLocation(), ""),
+	                Objects.toString(job.getSalary(), ""),
+	                Objects.toString(job.getExperience(), ""),
+	                Objects.toString(job.getTypeOfWork(), ""),
+	                Objects.toString(job.getCompanyId(), ""),
+	                Objects.toString(job.getCompanyName(), ""),
+	                Objects.toString(job.getCityName(), ""),
+	                formatIndustryNames(Objects.toString(job.getIndustryNames(), "")),
+	                Objects.toString(job.getCreateDate(), ""),
+	                Objects.toString(job.getExpireDate(), ""),
+	                Objects.toString(job.getLogo(), ""),
+	            };
+	            writer.writeNext(data);
+	        }
+	    }
 	}
 
 	// Chuyển danh sách ngành nghề thành chuỗi phân tách bằng "|"

@@ -82,9 +82,11 @@ export default function JobSearchPage() {
     }
     return null;
   });
+  
   const [isUsingSemanticSearch, setIsUsingSemanticSearch] = useState(() => {
     return sessionStorage.getItem("isUsingSemanticSearch") === "true";
   });
+ 
   const [semanticSearchCache, setSemanticSearchCache] = useState({});
 
   const [allResults, setAllResults] = useState(() => {
@@ -197,9 +199,11 @@ export default function JobSearchPage() {
         } else {
           dispatch(getAllJobAction({ currentPage, size }));
         }
-      } else if (topic === "/topic/industry-updates") {
-        dispatch(getIndustryCount());
-      }
+      } 
+      // Commented out to prevent infinite recursion with server
+      // else if (topic === "/topic/industry-updates") {
+      //   dispatch(getIndustryCount());
+      // }
     },
     [dispatch, filters, currentPage, size, isFilterApplied]
   );
@@ -228,7 +232,7 @@ export default function JobSearchPage() {
       top: 0,
       behavior: "smooth"
     });
-  }, [isUsingSemanticSearch, semanticResults, isFilterApplied, filters, size, dispatch]);
+  };
 
   useEffect(() => {
     if (isFilterApplied) {
