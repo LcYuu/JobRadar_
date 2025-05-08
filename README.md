@@ -1,4 +1,4 @@
-# JobPortal Project
+# JobPortal Project http://localhost:3000/admin/company-list
 
 A comprehensive job portal platform connecting job seekers and employers with intelligent job matching, resume building, and company management features.
 
