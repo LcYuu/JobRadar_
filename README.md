@@ -143,5 +143,4 @@ JobPortal is a full-stack web application designed to streamline the job search 
 ## License
 
 This project is proprietary and confidential. 
-![image](https://github.com/user-attachments/assets/1a44a630-aac7-43a5-ad21-f5b7e1cbdc9a)
 
