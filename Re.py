@@ -1025,6 +1025,7 @@ def recommend_jobs_mbert():
         else:
             logging.info("Không có công việc nào được gợi ý.")
 
+
         total_time = time.time() - start_time
         logging.info(f"Quá trình gợi ý hoàn tất trong {total_time:.2f} giây.")
         return jsonify(top_recommended_jobs_list), 200, {
