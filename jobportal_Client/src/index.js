@@ -10,15 +10,15 @@ import ErrorBoundary from "./error";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { isTokenExpired } from './utils/tokenUtils';
+import Chatbot from "./components/ChatBot/ChatBot";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-
-
     <Provider store={store}>
       <ErrorBoundary>
         <BrowserRouter future={{ v7_relativeSplatPath: true }}>
           <App />
+          <Chatbot/>
         </BrowserRouter>
         <ToastContainer
           position="top-right"
@@ -34,8 +34,6 @@ root.render(
         />
       </ErrorBoundary>
     </Provider>
-    
-    
 );
 
 // Kiểm tra token hết hạn khi trang web được tải
