@@ -355,7 +355,7 @@ public class JobPostController {
 	    HttpEntity<String> entity = new HttpEntity<>("{}", headers);
 
 	    // Định dạng ngày giờ phù hợp
-	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss[.SSSSSS]");
 
 	    try {
 	        // Gửi request tới API Python

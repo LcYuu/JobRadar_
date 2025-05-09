@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -8,6 +8,8 @@ import {
   FileText,
   Star,
   LogOut,
+  Menu,
+  X,
 } from "lucide-react";
 import { Button } from "../../ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "../../ui/avatar";
@@ -16,11 +18,31 @@ import logo from "../../assets/images/common/logo.jpg";
 import { logoutAction } from "../../redux/Auth/auth.action";
 import Swal from "sweetalert2";
 import NotificationDropdown from '../Notification/NotificationDropdown';
+import "./Sidebar.css";
 
 export default function Sidebar({ selectedSection, setSelectedSection }) {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setIsOpen(false);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen);
+  };
 
   const adminMenuItems = [
     {
@@ -117,11 +139,12 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
       menuItems = [];
   }
 
-  console.log("🚀 ~ Sidebar ~ menuItems:", menuItems)
-
   const handleMenuClick = (item) => {
     setSelectedSection(item.label);
     navigate(item.path);
+    if (isMobile) {
+      setIsOpen(false); // Close sidebar on mobile after navigation
+    }
   };
 
   const handleLogout = async () => {
@@ -136,6 +159,9 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
   
     if (result.isConfirmed) {
       dispatch(logoutAction());
+      if (isMobile) {
+        setIsOpen(false);
+      }
     }
   };
   
@@ -145,96 +171,126 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
     }
   };
 
+  // Mobile menu button
+  const MobileMenuButton = () => (
+    <button 
+      className="mobile-menu-button" 
+      onClick={toggleSidebar}
+      aria-label={isOpen ? "Close menu" : "Open menu"}
+    >
+      {isOpen ? <X size={24} /> : <Menu size={24} />}
+    </button>
+  );
+
   return (
-    <div className="flex bg-gray-100 min-h-screen">
-      <nav className="w-80 bg-white pt-6 pr-6 pl-6 border-r shadow-lg">
-        {/* Logo Section */}
-        <div className="flex items-center gap-3 pb-8">
-          <img
-            src={logo}
-            alt="logo"
-            className="h-12 w-12 rounded-full bg-primary shadow-md"
-          />
-          <Link
-            to="/"
-            onClick={handleJobRadarClick}
-            className={`text-3xl font-bold ${
-              user?.userType?.userTypeId === 1 || user?.userType?.userTypeId === 3
-                ? "text-gray-400 cursor-not-allowed" 
-                : "text-primary hover:text-indigo-700 transition duration-200"
-            }`}
-          >
-            JobRadar
-          </Link>
-        </div>
-
-        {/* User Profile */}
-        <div className="mb-12 p-4 rounded-lg bg-gradient-to-r from-[#6441a5] via-[#2a0845] to-[#6441a5] hover:bg-gradient-to-l transition-all duration-300">
-          <div className="flex justify-between items-start mb-4">
-            <Avatar className="h-20 w-20 border-4 border-primary/20">
-              <AvatarImage src={user?.avatar} />
-              <AvatarFallback className="text-2xl font-semibold text-white">
-                {user?.userName?.charAt(0) || "U"}
-              </AvatarFallback>
-            </Avatar>
-            {user?.userType?.userTypeId === 2 && (
-              <NotificationDropdown />
-            )}
-          </div>
-          <div className="space-y-1">
-            <p className="text-xl font-semibold text-white">
-              {user?.userName || "Loading..."}
-            </p>
-            <p className="text-sm text-white break-words">
-              {user?.email || "Loading..."}
-            </p>
-          </div>
-        </div>
-
-        {/* Menu Items */}
-        <div className="space-y-2">
-          {menuItems.map((item) => (
-            <Button
-              key={item.label}
-              variant="ghost"
-              className={`w-full justify-start text-lg font-medium py-3 px-4 rounded-lg transition-all duration-300 hover:scale-105 
-                ${
-                  selectedSection === item.label
-                    ? "bg-primary/10 text-primary shadow-md"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-primary"
-                } 
-                focus:outline-none focus:ring-2 focus:ring-primary/20`}
-              onClick={() => handleMenuClick(item)}
+    <>
+      {isMobile && <MobileMenuButton />}
+      
+      {isMobile && isOpen && (
+        <div className="sidebar-overlay" onClick={toggleSidebar}></div>
+      )}
+      
+      <div className={`sidebar-container ${isMobile ? 'mobile' : ''} ${isOpen ? 'open' : ''}`}>
+        <nav className="sidebar-nav">
+          {/* Close button for mobile */}
+          {isMobile && (
+            <button 
+              className="close-sidebar-button"
+              onClick={toggleSidebar}
+              aria-label="Close menu"
             >
-              <item.icon className="mr-4 h-6 w-6" />
-              {item.label}
-            </Button>
-          ))}
-        </div>
+              <X size={24} />
+            </button>
+          )}
+          
+          {/* Logo Section */}
+          <div className="flex items-center gap-3 pb-8">
+            <img
+              src={logo}
+              alt="logo"
+              className="h-12 w-12 rounded-full bg-primary shadow-md"
+            />
+            <Link
+              to="/"
+              onClick={handleJobRadarClick}
+              className={`text-3xl font-bold ${
+                user?.userType?.userTypeId === 1 || user?.userType?.userTypeId === 3
+                  ? "text-gray-400 cursor-not-allowed" 
+                  : "text-primary hover:text-indigo-700 transition duration-200"
+              }`}
+            >
+              JobRadar
+            </Link>
+          </div>
 
-        {/* Logout Button */}
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-lg font-medium py-3 px-4 rounded-lg mt-4 transition-all duration-200 hover:bg-red-100 hover:text-red-500"
-          onClick={handleLogout}
-        >
-          <LogOut className="mr-4 h-6 w-6" />
-          Đăng xuất
-        </Button>
+          {/* User Profile */}
+          <div className="mb-12 p-4 rounded-lg bg-gradient-to-r from-[#6441a5] via-[#2a0845] to-[#6441a5] hover:bg-gradient-to-l transition-all duration-300">
+            <div className="flex justify-between items-start mb-4">
+              <Avatar className="h-20 w-20 border-4 border-primary/20">
+                <AvatarImage src={user?.avatar} />
+                <AvatarFallback className="text-2xl font-semibold text-white">
+                  {user?.userName?.charAt(0) || "U"}
+                </AvatarFallback>
+              </Avatar>
+              {user?.userType?.userTypeId === 2 && (
+                <NotificationDropdown />
+              )}
+            </div>
+            <div className="space-y-1">
+              <p className="text-xl font-semibold text-white">
+                {user?.userName || "Loading..."}
+              </p>
+              <p className="text-sm text-white break-words">
+                {user?.email || "Loading..."}
+              </p>
+            </div>
+          </div>
 
-        {/* Separator */}
-        <Separator className="my-8" />
+          {/* Menu Items */}
+          <div className="space-y-2">
+            {menuItems.map((item) => (
+              <Button
+                key={item.label}
+                variant="ghost"
+                className={`w-full justify-start text-lg font-medium py-3 px-4 rounded-lg transition-all duration-300 hover:scale-105 
+                  ${
+                    selectedSection === item.label
+                      ? "bg-primary/10 text-primary shadow-md"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-primary"
+                  } 
+                  focus:outline-none focus:ring-2 focus:ring-primary/20`}
+                onClick={() => handleMenuClick(item)}
+              >
+                <item.icon className="mr-4 h-6 w-6" />
+                {item.label}
+              </Button>
+            ))}
+          </div>
 
-        {/* Banner */}
-        <div className="mt-6">
-          <img
-            src="https://cdn-new.topcv.vn/unsafe/https://static.topcv.vn/img/Banner%202%20(1).png"
-            alt="Banner"
-            className="w-80 h-auto rounded-lg shadow-md"
-          />
-        </div>
-      </nav>
-    </div>
+          {/* Logout Button */}
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-lg font-medium py-3 px-4 rounded-lg mt-4 transition-all duration-200 hover:bg-red-100 hover:text-red-500"
+            onClick={handleLogout}
+          >
+            <LogOut className="mr-4 h-6 w-6" />
+            Đăng xuất
+          </Button>
+
+          {/* Separator */}
+          <Separator className="my-8" />
+
+          {/* Banner */}
+          <div className="mt-6">
+            <img
+              src="https://cdn-new.topcv.vn/unsafe/https://static.topcv.vn/img/Banner%202%20(1).png"
+              alt="Banner"
+              className="w-full h-auto rounded-lg shadow-md"
+            />
+          </div>
+        </nav>
+      </div>
+    </>
   );
 }
 

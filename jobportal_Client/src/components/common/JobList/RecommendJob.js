@@ -1,29 +1,34 @@
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
-import JobCard from '../JobCard/JobCard';
-import { getRecommendJob } from '../../../redux/JobPost/jobPost.thunk';
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import JobCard from "../JobCard/JobCard";
+import { getRecommendJob } from "../../../redux/JobPost/jobPost.thunk";
+import Container from "../Container/Container";
 
 const RecommendJob = () => {
-    const dispatch = useDispatch();
-    const { recommendJob = [], loading, error } = useSelector(store => store.jobPost);
-  
-    useEffect(() => {
-      dispatch(getRecommendJob());
-    }, [dispatch]);
-  
-    
-    if (loading) return <p>Đang tải...</p>;
-    if (error) return <p>{error}</p>;
-  
-    return (
+  const dispatch = useDispatch();
+  const {
+    recommendJob = [],
+    loading,
+    error,
+  } = useSelector((store) => store.jobPost);
+
+  useEffect(() => {
+    dispatch(getRecommendJob());
+  }, [dispatch]);
+
+  if (loading) return <p>Đang tải...</p>;
+  if (error) return <p>{error}</p>;
+
+  return (
+    <Container>
       <section className="py-12">
         <div className="flex justify-between items-center mb-6">
-        <h2
-          className="text-3xl font-bold text-center mb-8"
-          style={{ color: "#43bfb3" }}
-        >
-          Các công việc đề xuất
-        </h2>
+          <h2
+            className="text-3xl font-bold text-center mb-8"
+            style={{ color: "#43bfb3" }}
+          >
+            Các công việc đề xuất
+          </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {recommendJob.length > 0 ? (
@@ -43,9 +48,9 @@ const RecommendJob = () => {
             <p>Không có công việc nào để hiển thị.</p>
           )}
         </div>
-  
       </section>
-    );
-}
+    </Container>
+  );
+};
 
-export default RecommendJob
+export default RecommendJob;
