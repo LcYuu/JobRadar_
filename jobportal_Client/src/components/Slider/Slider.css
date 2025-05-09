@@ -49,6 +49,9 @@
   color: white;
   text-align: center;
 }
+.awssld__bullets {
+  display: none !important;
+}
 
 .caption h2 {
   font-size: 1.5rem;

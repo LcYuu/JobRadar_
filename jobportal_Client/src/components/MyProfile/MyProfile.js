@@ -452,26 +452,26 @@ export default function MyProfile() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 -ml-8 -mr-8 ">
-      <main className="container mx-auto p-6">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+      <main className="w-full max-w-full px-3 sm:px-6 mx-auto overflow-hidden">
         {/* Profile Header Card */}
-        <Card className="bg-white shadow-lg rounded-lg mb-6">
-          <div className={`relative h-48 ${selectedBackground}`}>
+        <Card className="bg-white shadow-lg rounded-lg mb-4 sm:mb-6 overflow-hidden w-full">
+          <div className={`relative h-32 sm:h-48 ${selectedBackground}`}>
             <Button
               size="icon"
-              className="absolute right-4 top-4 bg-white/20 hover:bg-white/30"
+              className="absolute right-2 top-2 sm:right-4 sm:top-4 bg-white/20 hover:bg-white/30"
               onClick={() => setShowColorPicker(!showColorPicker)}
             >
-              <Edit className="h-4 w-4" />
+              <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
 
             {showColorPicker && (
-              <div className="absolute right-4 top-16 bg-white p-3 rounded-lg shadow-lg z-10">
+              <div className="absolute right-2 top-10 sm:right-4 sm:top-16 bg-white p-2 sm:p-3 rounded-lg shadow-lg z-10">
                 <div className="grid grid-cols-1 gap-2">
                   {backgroundGradients.map((gradient, index) => (
                     <button
                       key={index}
-                      className={`h-8 w-32 rounded-md ${gradient} hover:opacity-80 transition-opacity`}
+                      className={`h-6 w-24 sm:h-8 sm:w-32 rounded-md ${gradient} hover:opacity-80 transition-opacity`}
                       onClick={() => handleBackgroundChange(gradient)}
                     />
                   ))}
@@ -480,20 +480,20 @@ export default function MyProfile() {
             )}
           </div>
 
-          <div className="relative px-6 pb-6">
-            <Avatar className="absolute -top-16 h-32 w-32 border-4 ring-4 ring-purple-500">
+          <div className="relative px-3 sm:px-6 pb-4 sm:pb-6">
+            <Avatar className="absolute -top-12 sm:-top-16 h-24 w-24 sm:h-32 sm:w-32 border-4 ring-4 ring-purple-500">
               <AvatarImage src={user?.avatar} />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-semibold">{user?.userName}</h2>
-                <p className="text-muted-foreground">{seeker?.address}</p>
+            <div className="ml-28 sm:ml-0 pt-3 sm:pt-0 mb-2 sm:mb-4 flex flex-col sm:flex-row sm:items-center justify-between">
+              <div className="mt-2 sm:mt-20 overflow-hidden">
+                <h2 className="text-xl sm:text-2xl font-semibold truncate">{user?.userName}</h2>
+                <p className="text-sm text-muted-foreground truncate">{seeker?.address}</p>
               </div>
               <Button
                 variant="outline"
                 onClick={handleOpenProfileModal}
-                className="bg-[#6441a5] text-white hover:bg-[#7f58af] transition-all duration-300 ease-in-out transform hover:scale-105"
+                className="bg-[#6441a5] text-white hover:bg-[#7f58af] transition-all duration-300 ease-in-out transform hover:scale-105 text-xs sm:text-sm mt-2 sm:mt-0 w-full sm:w-auto"
               >
                 Chỉnh sửa hồ sơ
               </Button>
@@ -506,13 +506,13 @@ export default function MyProfile() {
         </Card>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 w-full">
           {/* Left Column - 2/3 width */}
-          <div className="md:col-span-2 space-y-6">
+          <div className="md:col-span-2 space-y-4 sm:space-y-6 w-full">
             {/* About Me */}
-            <Card className="bg-white shadow-lg rounded-lg mb-6">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <h3 className="text-lg text-purple-600 font-semibold">
+            <Card className="bg-white shadow-lg rounded-lg mb-4 sm:mb-6 w-full overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between py-3 px-4 sm:p-6">
+                <h3 className="text-base sm:text-lg text-purple-600 font-semibold">
                   About Me
                 </h3>
                 <Button
@@ -520,11 +520,11 @@ export default function MyProfile() {
                   variant="ghost"
                   onClick={handleEditDesClick}
                 >
-                  <Edit className="h-4 w-4" />
+                  <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </CardHeader>
 
-              <CardContent>
+              <CardContent className="px-4 pb-4 sm:p-6 pt-0 sm:pt-0">
                 {isEditingDes ? (
                   <div>
                     <textarea
@@ -537,15 +537,15 @@ export default function MyProfile() {
                           handleSaveClick();
                         }
                       }}
-                      className="border p-2 w-full min-h-[100px] rounded-md resize-none"
+                      className="border p-2 w-full min-h-[80px] sm:min-h-[100px] rounded-md resize-none text-sm"
                       placeholder="Nhập mô tả về bản thân..."
                     />
                     <div className="mt-2 flex justify-end">
-                      <Button onClick={handleSaveClick}>Save</Button>
+                      <Button onClick={handleSaveClick} size="sm" className="text-xs sm:text-sm">Save</Button>
                     </div>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground whitespace-pre-line">
+                  <p className="text-xs sm:text-sm text-muted-foreground whitespace-pre-wrap break-words">
                     {seeker?.description
                       ? seeker.description
                       : "Chưa cập nhật mô tả về bản thân"}
@@ -555,69 +555,68 @@ export default function MyProfile() {
             </Card>
 
             {/* Experience */}
-            <Card className="bg-white shadow-lg rounded-lg mb-6">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <h3 className="text-lg text-purple-600 font-semibold">
+            <Card className="bg-white shadow-lg rounded-lg mb-4 sm:mb-6 w-full overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between py-3 px-4 sm:p-6">
+                <h3 className="text-base sm:text-lg text-purple-600 font-semibold">
                   Kinh nghiệm
                 </h3>
                 <Button size="icon" variant="ghost">
-                  <Plus className="h-4 w-4" onClick={handleOpenExpModal} />
+                  <Plus className="h-3 w-3 sm:h-4 sm:w-4" onClick={handleOpenExpModal} />
                 </Button>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="px-4 pb-4 sm:p-6 pt-0 sm:pt-0 space-y-4 sm:space-y-6">
                 {exp && exp.length > 0 ? (
                   exp.map((experience, index) => (
                     <div
                       key={index}
-                      className="flex gap-4 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border-l-4 relative"
+                      className="flex gap-2 sm:gap-4 p-3 sm:p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border-l-4 relative overflow-hidden w-full"
                       style={{ borderLeftColor: getColorByIndex(index) }}
                     >
                       <div
-                        className={`h-12 w-12 rounded-full ${getColorByIndex(
+                        className={`h-8 w-8 sm:h-12 sm:w-12 rounded-full ${getColorByIndex(
                           index
-
-                        )} shadow-md flex items-center justify-center`}
+                        )} shadow-md flex items-center justify-center flex-shrink-0`}
                       >
-                        <span className="text-white font-bold">
+                        <span className="text-white font-bold text-xs sm:text-base">
                           {index + 1}
                         </span>
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h4 className="font-semibold text-lg flex items-center">
-                              <Briefcase className="h-4 w-4 mr-2 text-gray-500" />
-                              {experience.jobTitle}
+                      <div className="flex-1 min-w-0 overflow-hidden">
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between w-full">
+                          <div className="mb-2 sm:mb-0 overflow-hidden">
+                            <h4 className="font-semibold text-sm sm:text-lg flex items-center">
+                              <Briefcase className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500 flex-shrink-0" />
+                              <span className="truncate">{experience.jobTitle}</span>
                             </h4>
-                            <p className="text-sm text-muted-foreground flex items-center mt-1">
-                              <Building className="h-4 w-4 mr-2 text-gray-500" />
+                            <p className="text-xs sm:text-sm text-muted-foreground flex items-center mt-1 truncate">
+                              <Building className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500 flex-shrink-0" />
                               Công ty: {experience.companyName}
                             </p>
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex gap-1 sm:gap-2 flex-shrink-0">
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="hover:bg-blue-100 transition-colors duration-200"
+                              className="h-6 w-6 sm:h-8 sm:w-8 hover:bg-blue-100 transition-colors duration-200"
                               onClick={() => handleEditExperience(experience)}
                             >
-                              <Edit className="h-4 w-4 text-blue-600" />
+                              <Edit className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
                             </Button>
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="hover:bg-red-100 transition-colors duration-200"
+                              className="h-6 w-6 sm:h-8 sm:w-8 hover:bg-red-100 transition-colors duration-200"
                               onClick={() =>
                                 handleDeleteExp(experience.experienceId)
                               }
                             >
-                              <Delete className="h-4 w-4 text-red-600" />
+                              <Delete className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
                             </Button>
                           </div>
                         </div>
-                        <div className="flex items-center mt-2">
-                          <Calendar className="h-4 w-4 mr-2 text-gray-500" />
-                          <p className="text-sm text-gray-600">
+                        <div className="flex items-center mt-1 sm:mt-2">
+                          <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500 flex-shrink-0" />
+                          <p className="text-xs sm:text-sm text-gray-600 truncate">
                             {formatDate(experience.startDate)} -{" "}
                             <span
                               className={
@@ -632,34 +631,25 @@ export default function MyProfile() {
                             </span>
                           </p>
                         </div>
-                        <div className="mt-3 p-3 bg-gray-50 rounded border-l-2 border-gray-200">
+                        <div className="mt-2 sm:mt-3 p-2 sm:p-3 bg-gray-50 rounded border-l-2 border-gray-200">
                           <div className="flex items-start">
-                            <FileText className="h-4 w-4 mr-2 text-gray-500 mt-0.5" />
-                            <p className="text-sm text-gray-600">
+                            <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500 mt-0.5 flex-shrink-0" />
+                            <p className="text-xs sm:text-sm text-gray-600 break-words">
                               {experience.description}
                             </p>
                           </div>
                         </div>
-                        <p className="mt-2 text-sm text-gray-600">
-                          {formatDate(experience.startDate)} -{" "}
-                          {experience.endDate
-                            ? formatDate(experience.endDate)
-                            : "Present"}
-                        </p>
-                        <p className="mt-2 text-sm text-gray-500">
-                          {experience.description}
-                        </p>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center p-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                    <Briefcase className="h-12 w-12 text-gray-300 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">
+                  <div className="text-center p-4 sm:p-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                    <Briefcase className="h-8 w-8 sm:h-12 sm:w-12 text-gray-300 mx-auto mb-2" />
+                    <p className="text-xs sm:text-sm text-gray-500">
                       Chưa cập nhật kinh nghiệm
                     </p>
-                    <Button variant="outline" size="sm" className="mt-2">
-                      <Plus className="h-4 w-4 mr-1" /> Thêm kinh nghiệm
+                    <Button variant="outline" size="sm" className="mt-2 text-xs sm:text-sm">
+                      <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Thêm kinh nghiệm
                     </Button>
                   </div>
                 )}
@@ -677,68 +667,68 @@ export default function MyProfile() {
             </Card>
 
             {/* Education */}
-            <Card className="bg-white shadow-lg rounded-lg mb-6">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <h3 className="text-lg  text-purple-600 font-semibold">
+            <Card className="bg-white shadow-lg rounded-lg mb-4 sm:mb-6 w-full overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between py-3 px-4 sm:p-6">
+                <h3 className="text-base sm:text-lg text-purple-600 font-semibold">
                   Học vấn
                 </h3>
                 <Button size="icon" variant="ghost">
-                  <Plus className="h-4 w-4" onClick={handleOpenEduModal} />
+                  <Plus className="h-3 w-3 sm:h-4 sm:w-4" onClick={handleOpenEduModal} />
                 </Button>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="px-4 pb-4 sm:p-6 pt-0 sm:pt-0 space-y-4 sm:space-y-6">
                 {edu && edu.length > 0 ? (
                   edu.map((education, index) => (
                     <div
                       key={index}
-                      className="flex gap-4 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border-l-4 relative"
+                      className="flex gap-2 sm:gap-4 p-3 sm:p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border-l-4 relative overflow-hidden w-full"
                       style={{ borderLeftColor: getCLByIndex(index) }}
                     >
                       <div
-                        className={`h-12 w-12 rounded-full ${getCLByIndex(
+                        className={`h-8 w-8 sm:h-12 sm:w-12 rounded-full ${getCLByIndex(
                           index
-                        )} shadow-md flex items-center justify-center`}
+                        )} shadow-md flex items-center justify-center flex-shrink-0`}
                       >
-                        <span className="text-white font-bold">
+                        <span className="text-white font-bold text-xs sm:text-base">
                           {index + 1}
                         </span>
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h4 className="font-semibold text-lg flex items-center">
-                              <GraduationCap className="h-4 w-4 mr-2 text-gray-500" />
+                      <div className="flex-1 min-w-0 overflow-hidden">
+                        <div className="flex flex-col sm:flex-row sm:items-start justify-between w-full">
+                          <div className="mb-2 sm:mb-0 overflow-hidden">
+                            <h4 className="font-semibold text-sm sm:text-lg flex items-center">
+                              <GraduationCap className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500 flex-shrink-0" />
                               {education.certificateDegreeName}
                             </h4>
-                            <p className="text-sm text-muted-foreground flex items-center mt-1">
-                              <School className="h-4 w-4 mr-2 text-gray-500" />
+                            <p className="text-xs sm:text-sm text-muted-foreground flex items-center mt-1 truncate">
+                              <School className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500 flex-shrink-0" />
                               {education.universityName}
                             </p>
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex gap-1 sm:gap-2 flex-shrink-0">
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="hover:bg-blue-100 transition-colors duration-200"
+                              className="h-6 w-6 sm:h-8 sm:w-8 hover:bg-blue-100 transition-colors duration-200"
                               onClick={() => handleEditEducation(education)}
                             >
-                              <Edit className="h-4 w-4 text-blue-600" />
+                              <Edit className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
                             </Button>
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="hover:bg-red-100 transition-colors duration-200"
+                              className="h-6 w-6 sm:h-8 sm:w-8 hover:bg-red-100 transition-colors duration-200"
                               onClick={() =>
                                 handleDeleteEdu(education.educationId)
                               }
                             >
-                              <Delete className="h-4 w-4 text-red-600" />
+                              <Delete className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
                             </Button>
                           </div>
                         </div>
-                        <div className="flex items-center mt-2">
-                          <Calendar className="h-4 w-4 mr-2 text-gray-500" />
-                          <p className="text-sm text-gray-600">
+                        <div className="flex items-center mt-1 sm:mt-2">
+                          <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500 flex-shrink-0" />
+                          <p className="text-xs sm:text-sm text-gray-600 truncate">
                             {formatDate(education.startDate)} -{" "}
                             <span
                               className={
@@ -754,14 +744,14 @@ export default function MyProfile() {
                           </p>
                         </div>
                         <div className="flex items-center mt-2">
-                          <BookOpen className="h-4 w-4 mr-2 text-gray-500" />
-                          <p className="text-sm text-gray-600">
+                          <BookOpen className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500" />
+                          <p className="text-xs sm:text-sm text-gray-600">
                             Chuyên ngành: {education.major}
                           </p>
                         </div>
                         <div className="mt-2 bg-gray-50 p-2 rounded flex items-center">
-                          <Award className="h-4 w-4 mr-2 text-gray-500" />
-                          <p className="text-sm font-medium">
+                          <Award className="h-3 w-3 sm:h-4 sm:w-4 mr-2 text-gray-500" />
+                          <p className="text-xs sm:text-sm font-medium">
                             GPA:{" "}
                             <span className="text-blue-600">
                               {education.gpa}
@@ -771,8 +761,8 @@ export default function MyProfile() {
                         {education.description && (
                           <div className="mt-3 p-3 bg-gray-50 rounded border-l-2 border-gray-200">
                             <div className="flex items-start">
-                              <FileText className="h-4 w-4 mr-2 text-gray-500 mt-0.5" />
-                              <p className="text-sm text-gray-600">
+                              <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-2 text-gray-500 mt-0.5" />
+                              <p className="text-xs sm:text-sm text-gray-600">
                                 {education.description}
                               </p>
                             </div>
@@ -782,13 +772,13 @@ export default function MyProfile() {
                     </div>
                   ))
                 ) : (
-                  <div className="text-center p-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                    <GraduationCap className="h-12 w-12 text-gray-300 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">
+                  <div className="text-center p-4 sm:p-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                    <GraduationCap className="h-8 w-8 sm:h-12 sm:w-12 text-gray-300 mx-auto mb-2" />
+                    <p className="text-xs sm:text-sm text-gray-500">
                       Không có thông tin giáo dục nào.
                     </p>
-                    <Button variant="outline" size="sm" className="mt-2">
-                      <Plus className="h-4 w-4 mr-1" /> Thêm học vấn
+                    <Button variant="outline" size="sm" className="mt-2 text-xs sm:text-sm">
+                      <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Thêm học vấn
                     </Button>
                   </div>
                 )}
@@ -805,10 +795,10 @@ export default function MyProfile() {
             </Card>
 
             {/* Skills */}
-            <Card className="bg-white shadow-lg rounded-lg">
-              <CardHeader className="flex flex-row items-center justify-between">
+            <Card className="bg-white shadow-lg rounded-lg w-full overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between py-3 px-4 sm:p-6">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg  text-purple-600 font-semibold">
+                  <h3 className="text-base sm:text-lg text-purple-600 font-semibold">
                     Kỹ năng
                   </h3>
                 </div>
@@ -818,24 +808,24 @@ export default function MyProfile() {
                   onClick={handleOpenSkillModal}
                   className="hover:bg-primary/10 transition-colors"
                 >
-                  <Edit className="h-4 w-4" />
+                  <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="px-4 pb-4 sm:p-6 pt-0 sm:pt-0 space-y-3 sm:space-y-4">
                 {seeker?.skills &&
                 Array.isArray(seeker.skills) &&
                 seeker.skills.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {seeker.skills.map((skill, index) => (
                       <div
                         key={skill.skillId}
                         className={`${getColorByIndex(
                           index
-                        )} bg-opacity-15 rounded-full px-4 py-2 text-sm 
-              flex items-center gap-2 transition-all duration-200 hover:bg-opacity-25`}
+                        )} bg-opacity-15 rounded-full px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm 
+              flex items-center gap-1 sm:gap-2 transition-all duration-200 hover:bg-opacity-25`}
                       >
                         <span
-                          className={`w-2 h-2 rounded-full ${getColorByIndex(
+                          className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${getColorByIndex(
                             index
                           )}`}
                         ></span>
@@ -850,11 +840,11 @@ export default function MyProfile() {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-6 text-gray-500">
+                  <div className="text-center py-4 sm:py-6 text-gray-500">
                     <div className="mb-2">
-                      <Plus className="h-12 w-12 mx-auto text-gray-400" />
+                      <Plus className="h-8 w-8 sm:h-12 sm:w-12 mx-auto text-gray-400" />
                     </div>
-                    <p className="text-sm">Chưa có kỹ năng nào được thêm</p>
+                    <p className="text-xs sm:text-sm">Chưa có kỹ năng nào được thêm</p>
                     <p className="text-xs mt-1">
                       Nhấn vào nút chỉnh sửa để thêm kỹ năng của bạn
                     </p>
@@ -868,11 +858,11 @@ export default function MyProfile() {
           </div>
 
           {/* Right Column - 1/3 width */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6 w-full">
             {/* Contact Info */}
-            <Card className="bg-white shadow-lg">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <h3 className="text-lg text-purple-600 font-semibold">
+            <Card className="bg-white shadow-lg w-full overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between py-3 px-4 sm:p-6">
+                <h3 className="text-base sm:text-lg text-purple-600 font-semibold">
                   Thông tin khác
                 </h3>
                 <Button
@@ -880,10 +870,10 @@ export default function MyProfile() {
                   variant="ghost"
                   onClick={handleEditInfoClick}
                 >
-                  <Edit className="h-4 w-4" />
+                  <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="px-4 pb-4 sm:p-6 pt-0 sm:pt-0 space-y-3 sm:space-y-4">
                 {isEditingInfo ? (
                   <div>
                     <Label className="text-sm font-medium whitespace-nowrap">
@@ -1115,16 +1105,16 @@ export default function MyProfile() {
                 )}
               </CardContent>
               {isEditingInfo && (
-                <div className="mt-4 mr-4 mb-4 flex justify-end">
-                  <Button onClick={handleSaveClick}>Lưu</Button>
+                <div className="mt-2 sm:mt-4 mr-3 sm:mr-4 mb-3 sm:mb-4 flex justify-end">
+                  <Button onClick={handleSaveClick} size="sm" className="text-xs sm:text-sm">Lưu</Button>
                 </div>
               )}
             </Card>
 
             {/* Social Links */}
-            <Card className="bg-white shadow-md">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <h3 className="text-lg text-purple-600 font-semibold">
+            <Card className="bg-white shadow-md w-full overflow-hidden">
+              <CardHeader className="flex flex-row items-center justify-between py-3 px-4 sm:p-6">
+                <h3 className="text-base sm:text-lg text-purple-600 font-semibold">
                   Liên kết xã hội
                 </h3>
                 <Button
@@ -1132,7 +1122,7 @@ export default function MyProfile() {
                   variant="ghost"
                   onClick={handleOpenSocialLinkModal}
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </CardHeader>
 
@@ -1185,7 +1175,7 @@ export default function MyProfile() {
                               className="hover:bg-blue-100 transition-colors duration-200"
                               onClick={() => handleEditSocialLink(link)}
                             >
-                              <Edit className="h-4 w-4 text-blue-600" />
+                              <Edit className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
                             </Button>
                             <Button
                               size="icon"
@@ -1193,7 +1183,7 @@ export default function MyProfile() {
                               className="hover:bg-red-100 transition-colors duration-200"
                               onClick={() => handleDeleteSocialLink(link.id)}
                             >
-                              <Delete className="h-4 w-4 text-red-600" />
+                              <Delete className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
                             </Button>
                           </div>
                         </div>
