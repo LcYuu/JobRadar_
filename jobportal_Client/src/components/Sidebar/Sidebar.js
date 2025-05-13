@@ -8,6 +8,7 @@ import {
   FileText,
   Star,
   LogOut,
+  BarChart,
   Menu,
   X,
 } from "lucide-react";
@@ -18,7 +19,7 @@ import logo from "../../assets/images/common/logo.jpg";
 import { logoutAction } from "../../redux/Auth/auth.action";
 import Swal from "sweetalert2";
 import NotificationDropdown from '../Notification/NotificationDropdown';
-import "./Sidebar.css";
+import "./Sidebhttps://github.com/LcYuu/JobRadar_/pull/134/conflict?name=jobportal_Server%252Fjob-portal%252Fsrc%252Fmain%252Fjava%252Fcom%252Fjob_portal%252Fcontroller%252FJobPostController.java&ancestor_oid=70b91328db1cf5bbb6f3affcd0b45bd8ae1a0a8b&base_oid=bf5d87b02d60ebfdd3b60f2ff3072cf348b81f8b&head_oid=39b30961b18d7f0b1391b75dbc28a099f25712fcar.css";
 
 export default function Sidebar({ selectedSection, setSelectedSection }) {
   const { user } = useSelector((state) => state.auth);
@@ -120,6 +121,11 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
       label: "Danh sách đánh giá",
       icon: Star,
       path: "/employer/account-management/review-management",
+    },
+    {
+      label: "Thống kê hiệu suất",
+      icon: BarChart,
+      path: "/employer/account-management/job-stats",
     },
   ];
 

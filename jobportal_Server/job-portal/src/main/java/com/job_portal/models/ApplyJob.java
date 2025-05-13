@@ -35,7 +35,7 @@ public class ApplyJob {
     @Column(name = "user_id", columnDefinition = "BINARY(16)")
     private UUID userId;
 
-    @Column(name = "path_CV", length = 100)
+    @Column(name = "path_CV", length = 1000)
     private String pathCV;
 
     @Column(name = "apply_date")

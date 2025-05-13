@@ -27,17 +27,42 @@ public class CVServiceImpl implements ICVService {
 	SeekerRepository seekerRepository;
 	@Override
 	public boolean createCV(CVDTO cvdto, UUID userId) {
-		Optional<Seeker> seeker = seekerRepository.findById(userId);
-		CV cv = new CV();
-		cv.setSeeker(seeker.get());
-		cv.setPathCV(cvdto.getPathCV());
-		cv.setCvName(cvdto.getCvName());
-		cv.setCreateTime(LocalDateTime.now());
-		cv.setIsMain(false);
 		try {
+			Optional<Seeker> seeker = seekerRepository.findById(userId);
+			if (seeker.isEmpty()) {
+				System.err.println("Không tìm thấy thông tin người dùng với ID: " + userId);
+				return false;
+			}
+			
+			// Validate data
+			if (cvdto.getPathCV() == null || cvdto.getPathCV().isEmpty()) {
+				System.err.println("Đường dẫn CV không hợp lệ");
+				return false;
+			}
+			
+			if (cvdto.getCvName() == null || cvdto.getCvName().isEmpty()) {
+				System.err.println("Tên CV không hợp lệ");
+				return false;
+			}
+			
+			// Check for URL length
+			if (cvdto.getPathCV().length() > 1000) {
+				System.err.println("Đường dẫn CV quá dài (> 1000 ký tự)");
+				return false;
+			}
+			
+			CV cv = new CV();
+			cv.setSeeker(seeker.get());
+			cv.setPathCV(cvdto.getPathCV());
+			cv.setCvName(cvdto.getCvName());
+			cv.setCreateTime(LocalDateTime.now());
+			cv.setIsMain(false);
+			
 			CV saveCV = cvRepository.save(cv);
 			return saveCV != null;
 		} catch (Exception e) {
+			System.err.println("Lỗi khi tạo CV: " + e.getMessage());
+			e.printStackTrace();
 			return false;
 		}
 	}

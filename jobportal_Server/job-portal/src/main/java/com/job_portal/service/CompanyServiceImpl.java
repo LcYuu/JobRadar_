@@ -120,7 +120,7 @@ public class CompanyServiceImpl implements ICompanyService {
 			isUpdated = true;
 		}
 
-		if (companyDTO.getIndustryIds() != null && !companyDTO.getIndustryIds().isEmpty()) {
+		if (companyDTO.getIndustryIds() != null) {
 			List<Industry> newIndustries = new ArrayList<>();
 			for (Integer industryId : companyDTO.getIndustryIds()) {
 				Optional<Industry> industryOpt = industryRepository.findById(industryId);

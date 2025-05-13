@@ -34,13 +34,43 @@ public class ApplyJobServiceImpl implements IApplyJobService {
 
 	@Override
 	public boolean updateApplyJob(ApplyJob applyJob) throws AllExceptions {
-		// Kiểm tra tồn tại của JobPosts và SeekerProfile
-		Optional<JobPost> jobPost = jobPostRepository.findById(applyJob.getPostId());
-		Optional<Seeker> seeker = seekerRepository.findById(applyJob.getUserId());
 		try {
-			ApplyJob saveApplyJob = applyJobRepository.save(applyJob);
-			return saveApplyJob != null;
+			// Tìm kiếm ApplyJob hiện có dựa trên postId và userId
+			Optional<ApplyJob> existingApplyJob = applyJobRepository.findByPostIdAndUserId(
+					applyJob.getPostId(), applyJob.getUserId());
+			
+			// Nếu không tìm thấy, trả về false
+			if (existingApplyJob.isEmpty()) {
+				System.err.println("Không tìm thấy đơn apply với postId: " + applyJob.getPostId() + 
+						" và userId: " + applyJob.getUserId());
+				return false;
+			}
+			
+			// Kiểm tra tồn tại của JobPosts và SeekerProfile
+			Optional<JobPost> jobPost = jobPostRepository.findById(applyJob.getPostId());
+			Optional<Seeker> seeker = seekerRepository.findById(applyJob.getUserId());
+			
+			if (jobPost.isEmpty() || seeker.isEmpty()) {
+				System.err.println("Không tìm thấy thông tin công việc hoặc người dùng");
+				return false;
+			}
+			
+			// Sao chép thuộc tính từ đối tượng mới sang đối tượng hiện có
+			ApplyJob updateApplyJob = existingApplyJob.get();
+			updateApplyJob.setFullName(applyJob.getFullName());
+			updateApplyJob.setEmail(applyJob.getEmail());
+			updateApplyJob.setDescription(applyJob.getDescription());
+			updateApplyJob.setPathCV(applyJob.getPathCV());
+			
+			// Cập nhật thời gian mới nhất khi sửa đơn
+			updateApplyJob.setApplyDate(java.time.LocalDateTime.now());
+			
+			// Lưu lại đối tượng đã cập nhật
+			ApplyJob savedApplyJob = applyJobRepository.save(updateApplyJob);
+			return savedApplyJob != null;
 		} catch (Exception e) {
+			System.err.println("Lỗi khi cập nhật đơn apply: " + e.getMessage());
+			e.printStackTrace();
 			return false;
 		}
 	}

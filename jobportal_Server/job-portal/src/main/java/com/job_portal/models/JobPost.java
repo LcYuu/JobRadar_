@@ -19,7 +19,6 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -111,5 +110,4 @@ public class JobPost {
 	    inverseJoinColumns = @JoinColumn(name = "industry_id")
 	)
 	private List<Industry> industry = new ArrayList<>();
-
 }
