@@ -41,6 +41,12 @@ module.exports = {
         'shimmer': 'shimmer 2s infinite',
         'fadeIn': 'fadeIn 0.5s ease-out',
       },
+      screens: {
+        'xs': '480px',
+        'sm': '640px',
+        'md': '768px',
+        'md-custom': '1000px',
+      },
     },
   },
   plugins: [],

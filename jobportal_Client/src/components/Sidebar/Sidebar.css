@@ -20,7 +20,7 @@
 }
 
 /* Mobile sidebar styling */
-@media (max-width: 767px) {
+@media (max-width: 800px) {
   .sidebar-container.mobile {
     position: fixed;
     top: 0;

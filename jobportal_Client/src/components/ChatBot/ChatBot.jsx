@@ -32,32 +32,25 @@ const defaultAvatar = defaultAvatarImage; // Sử dụng ảnh đã import
     }
   }, []);
 
-  // Kiểm tra xem người dùng có phải là seeker hoặc chưa đăng nhập không
-  // Sử dụng cả thông tin từ Redux và localStorage để đảm bảo tính nhất quán
   const userId = user?.userId || 'guest';
   const authUser = auth?.user || user;
   const isSeeker = !authUser || authUser.userType.userTypeId === 2;
 
-  // Scroll to bottom when new messages arrive
   useEffect(() => {
     if (isOpen && messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isOpen]);
 
-  // Handle sending message
   const handleSend = (e) => {
     e.preventDefault();
     if (input.trim()) {
-      // Thêm tin nhắn người dùng ngay lập tức
       dispatch(addUserMessage({ sender: userId, text: input }));
-      // Gửi yêu cầu tới backend
       dispatch(sendMessage({ text: input }));
       setInput('');
     }
   };
 
-  // Clear error after 3 seconds or redirect on token expiration
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => dispatch(clearError()), 3000);
@@ -68,24 +61,20 @@ const defaultAvatar = defaultAvatarImage; // Sử dụng ảnh đã import
     }
   }, [error, dispatch, navigate]);
 
-  // Toggle chat bubble
+
   const toggleChat = () => {
     setIsOpen(!isOpen);
   };
 
-  // Nếu không phải seeker hoặc chưa đăng nhập, không hiển thị ChatBot
   if (!isSeeker) {
     return null;
   }
 
-  // Lấy avatar của người dùng hoặc dùng avatar mặc định
   const userAvatar = user?.avatar || defaultAvatar;
-  // Avatar cho bot - sử dụng cùng ảnh mặc định
-  const botAvatar = defaultAvatar; // Cùng là avatar mặc định cho bot
+  const botAvatar = defaultAvatar; 
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
-      {/* Chat bubble button */}
       <button
         onClick={toggleChat}
         className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg hover:bg-blue-700 focus:outline-none transition-all duration-300"
@@ -101,10 +90,9 @@ const defaultAvatar = defaultAvatarImage; // Sử dụng ảnh đã import
         )}
       </button>
 
-      {/* Chat window */}
       {isOpen && (
         <div className="absolute bottom-20 right-0 w-80 md:w-96 h-96 bg-white rounded-lg shadow-xl flex flex-col overflow-hidden border border-gray-200 transition-all duration-300">
-          {/* Chat Header */}
+
           <div className="bg-blue-600 text-white p-3 flex justify-between items-center">
             <div className="flex items-center gap-2">
               <img 
