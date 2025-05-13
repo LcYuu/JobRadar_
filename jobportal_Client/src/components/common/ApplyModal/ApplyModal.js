@@ -25,6 +25,7 @@ import {
   checkIfApplied,
   createApply,
   updateApply,
+  getApplyJobByUser
 } from "../../../redux/ApplyJob/applyJob.thunk";
 
 const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
@@ -76,6 +77,10 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
           ContentState.createFromText(oneApplyJob.description || "")
         )
       );
+      // Set upload option to existing if a CV is already selected
+      if (oneApplyJob.pathCV) {
+        setUploadOption("existing");
+      }
     } else {
       // Reset form khi không có applicationData (nộp mới)
       setFormData({
@@ -104,50 +109,100 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
       if (oneApplyJob) {
         if (selectedFile) {
           // Nếu có chọn file mới, cần upload lên Cloudinary
-          const uploadedFile = await uploadToCloudinary(selectedFile);
-          if (uploadedFile) {
+          try {
+            toast.info("Đang tải CV lên, vui lòng đợi...");
+            
+            // Sanitize file name
+            const originalName = selectedFile.name;
+            const sanitizedName = originalName.replace(/[^\w.-]/g, '_');
+            
+            // Create a new File object with the sanitized name if needed
+            let fileToUpload = selectedFile;
+            if (sanitizedName !== originalName) {
+              fileToUpload = new File([selectedFile], sanitizedName, { type: selectedFile.type });
+            }
+            
+            const uploadedFile = await uploadToCloudinary(fileToUpload);
+            
             const updatedFormData = {
               ...formData,
               pathCV: uploadedFile, // Gán URL file đã upload vào formData
             };
-            dispatch(updateApply({ applyData: updatedFormData, postId }));
+            
+            await dispatch(updateApply({ applyData: updatedFormData, postId }));
+            // Refresh lại danh sách đơn apply để hiển thị thông tin mới nhất
+            await dispatch(getApplyJobByUser({ currentPage: 0, size: 10 }));
             toast.success("Cập nhật ứng tuyển thành công!");
-          } else {
-            toast.error("Đã có lỗi khi tải lên CV");
+            handleClose();
+          } catch (error) {
+            console.error("Upload error:", error);
+            toast.error("Đã có lỗi khi tải lên CV: " + (error.message || "Lỗi không xác định"));
             return;
           }
         } else {
           // Nếu không chọn file mới, chỉ gửi formData có sẵn
-          dispatch(updateApply({ applyData: formData, postId }));
-          toast.success("Cập nhật ứng tuyển thành công!");
+          try {
+            await dispatch(updateApply({ applyData: formData, postId }));
+            // Refresh lại danh sách đơn apply để hiển thị thông tin mới nhất
+            await dispatch(getApplyJobByUser({ currentPage: 0, size: 10 }));
+            toast.success("Cập nhật ứng tuyển thành công!");
+            handleClose();
+          } catch (error) {
+            console.error("Update error:", error);
+            toast.error("Lỗi khi cập nhật: " + (error.message || "Lỗi không xác định"));
+            return;
+          }
         }
       } else {
         // Nếu là create mới (không có ứng tuyển trước đó)
         if (selectedFile) {
           // Nếu có chọn file mới, cần upload lên Cloudinary
-          const uploadedFile = await uploadToCloudinary(selectedFile);
-          if (uploadedFile) {
+          try {
+            toast.info("Đang tải CV lên, vui lòng đợi...");
+            
+            // Sanitize file name
+            const originalName = selectedFile.name;
+            const sanitizedName = originalName.replace(/[^\w.-]/g, '_');
+            
+            // Create a new File object with the sanitized name if needed
+            let fileToUpload = selectedFile;
+            if (sanitizedName !== originalName) {
+              fileToUpload = new File([selectedFile], sanitizedName, { type: selectedFile.type });
+            }
+            
+            const uploadedFile = await uploadToCloudinary(fileToUpload);
+            
             const updatedFormData = {
               ...formData,
               pathCV: uploadedFile, // Gán URL file đã upload vào formData
             };
+            
             await dispatch(createApply({ applyData: updatedFormData, postId }));
             dispatch(checkIfApplied(postId));
             toast.success("Ứng tuyển thành công!");
-          } else {
-            toast.error("Đã có lỗi khi tải lên CV");
+            handleClose();
+          } catch (error) {
+            console.error("Upload error:", error);
+            toast.error("Đã có lỗi khi tải lên CV: " + (error.message || "Lỗi không xác định"));
             return;
           }
         } else {
           // Nếu không chọn file mới, chỉ gửi formData có sẵn
-          dispatch(createApply({ applyData: formData, postId }));
-          toast.success("Ứng tuyển thành công!");
+          try {
+            await dispatch(createApply({ applyData: formData, postId }));
+            dispatch(checkIfApplied(postId));
+            toast.success("Ứng tuyển thành công!");
+            handleClose();
+          } catch (error) {
+            console.error("Apply error:", error);
+            toast.error("Lỗi khi ứng tuyển: " + (error.message || "Lỗi không xác định"));
+            return;
+          }
         }
       }
-      handleClose();
     } catch (error) {
-      toast.error("Lỗiiiii");
-      return; // Nếu có lỗi, dừng quá trình submit
+      console.error("Submit error:", error);
+      toast.error("Có lỗi xảy ra: " + (error.message || "Lỗi không xác định"));
     }
   };
 
@@ -182,6 +237,11 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
     }));
     setUploadOption("existing"); // Chuyển sang chế độ chọn CV có sẵn
     setSelectedFile(null); // Đặt lại file đã chọn nếu có
+    
+    // Đặt lại giá trị của input file
+    if (document.getElementById("cv-upload")) {
+      document.getElementById("cv-upload").value = "";
+    }
   };
   const handleRemove = () => {
     setSelectedFile(null);
@@ -308,18 +368,15 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                           <li
                             key={cv.cvId}
                             className="flex items-center space-x-4 p-2 hover:bg-gray-100 rounded-md cursor-pointer"
+                            onClick={() => handleCVSelection(cv)}
                           >
                             <input
                               type="radio"
                               name="cvOption"
-                              onChange={(e) => {
-                                setUploadOption("existing"); // Chọn tùy chọn radio
-                                handleCVSelection(cv); // Gọi hàm xử lý
-                              }}
+                              onChange={() => handleCVSelection(cv)}
                               checked={
-                                (uploadOption === "existing" &&
-                                  formData.pathCV === cv.pathCV) ||
-                                cv.isMain
+                                uploadOption === "existing" &&
+                                formData.pathCV === cv.pathCV
                               }
                               className="form-radio text-indigo-600"
                             />

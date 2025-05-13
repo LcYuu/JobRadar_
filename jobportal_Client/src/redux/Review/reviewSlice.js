@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { countReviewByCompany, countReviewByStar, countStarByCompanyId, createReview, deleteReview, findAllReview, findReviewByCompany, findReviewByCompanyIdAndUserId, finđAllReview, getReviewByCompany } from "./review.thunk";
+import { countReviewByCompany, countReviewByStar, countStarByCompanyId, createReply, createReplyToReview, createReview, deleteReview, deleteReviewReply, findAllReview, findReviewByCompany, findReviewByCompanyIdAndUserId, getReviewByCompany, getReviewReactions, getReviewReplies, reactToReview, updateReview, updateReviewReply } from "./review.thunk";
 
 const reviewSlice = createSlice({
     name: 'review',
@@ -12,6 +12,8 @@ const reviewSlice = createSlice({
       error: null,
       totalPages: null,
       totalElements: null,
+      replies: {},
+      reactions: {}
     },
     reducers: {},
     extraReducers: (builder) => {
@@ -63,8 +65,9 @@ const reviewSlice = createSlice({
         })
         .addCase(deleteReview.fulfilled, (state, action) => {
           state.loading = false;
+          const reviewId = action.payload;
           state.reviews = state.reviews.filter(
-            (review) => review.id !== action.meta.arg
+            (review) => review.id !== reviewId
           );
         })
         .addCase(deleteReview.rejected, (state, action) => {
@@ -132,6 +135,252 @@ const reviewSlice = createSlice({
           state.countByStar = action.payload;
         })
         .addCase(countStarByCompanyId.rejected, (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+        })
+        // Create Reply to Review
+        .addCase(createReplyToReview.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(createReplyToReview.fulfilled, (state, action) => {
+          state.loading = false;
+          // Find the review in the state and add the reply to it
+          const { reviewId } = action.payload;
+          const reviewIndex = state.reviews.findIndex(review => review.reviewId === reviewId);
+          
+          if (reviewIndex !== -1) {
+            const updatedReview = { ...state.reviews[reviewIndex] };
+            if (!updatedReview.replies) updatedReview.replies = [];
+            updatedReview.replies.push(action.payload);
+            
+            state.reviews = [
+              ...state.reviews.slice(0, reviewIndex),
+              updatedReview,
+              ...state.reviews.slice(reviewIndex + 1)
+            ];
+          }
+        })
+        .addCase(createReplyToReview.rejected, (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+        })
+        // Get Review Replies
+        .addCase(getReviewReplies.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(getReviewReplies.fulfilled, (state, action) => {
+          state.loading = false;
+          // Extract reviewId from the first reply in the payload if available
+          // Otherwise use a fallback approach
+          let reviewId;
+          if (action.payload && action.payload.length > 0) {
+            reviewId = action.payload[0].reviewId;
+          }
+          
+          if (reviewId) {
+            // Store replies by reviewId for easier access
+            state.replies = {
+              ...state.replies,
+              [reviewId]: action.payload
+            };
+            
+            // Also update the review in the state
+            const reviewIndex = state.reviews.findIndex(review => review.reviewId === reviewId);
+            
+            if (reviewIndex !== -1) {
+              const updatedReview = { 
+                ...state.reviews[reviewIndex],
+                replies: action.payload
+              };
+              
+              state.reviews = [
+                ...state.reviews.slice(0, reviewIndex),
+                updatedReview,
+                ...state.reviews.slice(reviewIndex + 1)
+              ];
+            }
+          }
+        })
+        .addCase(getReviewReplies.rejected, (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+        })
+        // Review Reactions
+        .addCase(reactToReview.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(reactToReview.fulfilled, (state, action) => {
+          state.loading = false;
+          // Update the reactions count in state
+          const { reviewId, likeCount, dislikeCount, userReaction } = action.payload;
+          
+          state.reactions = {
+            ...state.reactions,
+            [reviewId]: {
+              likeCount,
+              dislikeCount,
+              userReaction
+            }
+          };
+        })
+        .addCase(reactToReview.rejected, (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+        })
+        // Get Review Reactions
+        .addCase(getReviewReactions.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(getReviewReactions.fulfilled, (state, action) => {
+          state.loading = false;
+          // Store reactions by reviewId
+          const reactionsMap = {};
+          action.payload.forEach(reaction => {
+            reactionsMap[reaction.reviewId] = {
+              likeCount: reaction.likeCount,
+              dislikeCount: reaction.dislikeCount,
+              userReaction: reaction.userReaction
+            };
+          });
+          
+          state.reactions = {
+            ...state.reactions,
+            ...reactionsMap
+          };
+        })
+        .addCase(getReviewReactions.rejected, (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+        })
+        // Delete Review Reply
+        .addCase(deleteReviewReply.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(deleteReviewReply.fulfilled, (state, action) => {
+          state.loading = false;
+          
+          // Get the replyId from the payload
+          const { replyId } = action.payload;
+          
+          // Update all reviews that have replies
+          state.reviews = state.reviews.map(review => {
+            if (review.replies && review.replies.length > 0) {
+              // Filter out the deleted reply
+              const updatedReplies = review.replies.filter(reply => 
+                reply.replyId !== replyId
+              );
+              
+              // If the reply count has changed, update the review
+              if (updatedReplies.length !== review.replies.length) {
+                return {
+                  ...review,
+                  replies: updatedReplies
+                };
+              }
+            }
+            return review;
+          });
+          
+          // Also update the replies in state
+          if (state.replies) {
+            Object.keys(state.replies).forEach(reviewId => {
+              if (state.replies[reviewId]) {
+                state.replies[reviewId] = state.replies[reviewId].filter(
+                  reply => reply.replyId !== replyId
+                );
+              }
+            });
+          }
+        })
+        .addCase(deleteReviewReply.rejected, (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+        })
+        // Update Review
+        .addCase(updateReview.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(updateReview.fulfilled, (state, action) => {
+          state.loading = false;
+          
+          // Find the review in the state and update it
+          const updatedReview = action.payload;
+          const reviewIndex = state.reviews.findIndex(review => 
+            review.reviewId === updatedReview.reviewId
+          );
+          
+          if (reviewIndex !== -1) {
+            state.reviews = [
+              ...state.reviews.slice(0, reviewIndex),
+              updatedReview,
+              ...state.reviews.slice(reviewIndex + 1)
+            ];
+          }
+        })
+        .addCase(updateReview.rejected, (state, action) => {
+          state.loading = false;
+          state.error = action.payload;
+        })
+        // Update Review Reply
+        .addCase(updateReviewReply.pending, (state) => {
+          state.loading = true;
+          state.error = null;
+        })
+        .addCase(updateReviewReply.fulfilled, (state, action) => {
+          state.loading = false;
+          
+          // Get the updated reply
+          const updatedReply = action.payload;
+          
+          // Update the reply in the review
+          state.reviews = state.reviews.map(review => {
+            if (review.replies && review.replies.length > 0) {
+              const replyIndex = review.replies.findIndex(reply => 
+                reply.replyId === updatedReply.replyId
+              );
+              
+              if (replyIndex !== -1) {
+                const updatedReplies = [
+                  ...review.replies.slice(0, replyIndex),
+                  updatedReply,
+                  ...review.replies.slice(replyIndex + 1)
+                ];
+                
+                return {
+                  ...review,
+                  replies: updatedReplies
+                };
+              }
+            }
+            return review;
+          });
+          
+          // Also update the reply in the replies state
+          if (state.replies) {
+            Object.keys(state.replies).forEach(reviewId => {
+              if (state.replies[reviewId]) {
+                const replyIndex = state.replies[reviewId].findIndex(reply => 
+                  reply.replyId === updatedReply.replyId
+                );
+                
+                if (replyIndex !== -1) {
+                  state.replies[reviewId] = [
+                    ...state.replies[reviewId].slice(0, replyIndex),
+                    updatedReply,
+                    ...state.replies[reviewId].slice(replyIndex + 1)
+                  ];
+                }
+              }
+            });
+          }
+        })
+        .addCase(updateReviewReply.rejected, (state, action) => {
           state.loading = false;
           state.error = action.payload;
         });

@@ -1,4 +1,4 @@
-# JobPortal Project 
+# JobPortal Project
 
 A comprehensive job portal platform connecting job seekers and employers with intelligent job matching, resume building, and company management features.
 
@@ -109,6 +109,7 @@ JobPortal is a full-stack web application designed to streamline the job search 
 - Post and manage job listings
 - Review and manage applicants
 - Search candidate database
+- Schedule interviews
 - Company analytics dashboard
 
 ### For Administrators
@@ -143,4 +144,5 @@ JobPortal is a full-stack web application designed to streamline the job search 
 ## License
 
 This project is proprietary and confidential. 
-
+"# JobRadar_" 
+"# JobRadar_" 

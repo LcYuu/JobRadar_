@@ -71,7 +71,9 @@ public interface ApplyJobRepository extends JpaRepository<ApplyJob, IdApplyJob> 
 	@Query("SELECT new map(a.postId as postId, a.userId as userId, a.matchingScore as matchingScore, a.applyDate as lastUpdated, a.analysisResult as analysisResult) " +
 		   "FROM ApplyJob a WHERE a.matchingScore > 0 AND a.analysisResult IS NOT NULL")
 	List<Map<String, Object>> findAllWithMatchingScoreAndAnalysis();
-
+	
+	@Query("SELECT COUNT(a) FROM ApplyJob a WHERE a.postId = :postId")
+	long countByPostId(@Param("postId") UUID postId);
 }
 	
 	

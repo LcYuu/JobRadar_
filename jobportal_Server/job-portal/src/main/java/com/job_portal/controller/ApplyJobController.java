@@ -143,15 +143,45 @@ public class ApplyJobController {
 	public ResponseEntity<String> updateApply(@RequestBody ApplyJobDTO applyDTO,
 			@RequestHeader("Authorization") String jwt, @PathVariable("postId") UUID postId) throws AllExceptions {
 
-		String email = JwtProvider.getEmailFromJwtToken(jwt);
-		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-		ApplyJob apply = convertToEntity(applyDTO, user.get().getUserId(), postId);
-		boolean isCreated = applyJobService.updateApplyJob(apply);
-		if (isCreated) {
-			webSocketService.sendUpdate("/topic/apply-updates", "UPDATE APPLY");
-			return new ResponseEntity<>("Update successfully.", HttpStatus.CREATED);
-		} else {
-			return new ResponseEntity<>("Failed to update.", HttpStatus.INTERNAL_SERVER_ERROR);
+		try {
+			// Validate input data
+			if (applyDTO.getPathCV() == null || applyDTO.getPathCV().isEmpty()) {
+				return new ResponseEntity<>("Đường dẫn CV không được để trống", HttpStatus.BAD_REQUEST);
+			}
+			
+			if (applyDTO.getPathCV().length() > 1000) {
+				return new ResponseEntity<>("Đường dẫn CV quá dài (> 1000 ký tự)", HttpStatus.BAD_REQUEST);
+			}
+			
+			// Lấy thông tin người dùng từ JWT
+			String email = JwtProvider.getEmailFromJwtToken(jwt);
+			Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+			
+			if (user.isEmpty()) {
+				return new ResponseEntity<>("Không tìm thấy thông tin người dùng", HttpStatus.NOT_FOUND);
+			}
+			
+			// Kiểm tra xem đơn apply đã tồn tại chưa
+			Optional<ApplyJob> existingApply = applyJobRepository.findByPostIdAndUserId(postId, user.get().getUserId());
+			if (existingApply.isEmpty()) {
+				return new ResponseEntity<>("Không tìm thấy đơn ứng tuyển để cập nhật", HttpStatus.NOT_FOUND);
+			}
+			
+			// Chuyển dữ liệu từ DTO sang Entity
+			ApplyJob apply = convertToEntity(applyDTO, user.get().getUserId(), postId);
+			
+			// Gọi service để cập nhật
+			boolean isUpdated = applyJobService.updateApplyJob(apply);
+			
+			if (isUpdated) {
+				webSocketService.sendUpdate("/topic/apply-updates", "UPDATE APPLY");
+				return new ResponseEntity<>("Cập nhật đơn ứng tuyển thành công", HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>("Cập nhật đơn ứng tuyển thất bại: Lỗi khi lưu dữ liệu", HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<>("Lỗi hệ thống: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 

@@ -100,8 +100,8 @@ public class JobPostController {
 	private WebSocketService webSocketService;
 
 	String filePath = "D:\\JobRadar_\\search.csv";
-
-	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+	
+	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss[.SSSSSS]");
 
 	@GetMapping("/get-all")
 	public ResponseEntity<List<JobPost>> getJob() {
@@ -307,10 +307,34 @@ public class JobPostController {
 //	}
 
 	@GetMapping("/findJob/{postId}")
-	public ResponseEntity<JobPost> getJobById(@PathVariable("postId") UUID postId) throws AllExceptions {
+	public ResponseEntity<JobPost> getJobById(
+			@PathVariable("postId") UUID postId,
+			@RequestHeader(value = "Authorization", required = false) String jwt) throws AllExceptions {
 		try {
 			JobPost jobPost = jobPostService.searchJobByPostId(postId);
-			jobPostService.increaseViewCount(postId);
+			
+			// Kiểm tra JWT và tăng lượt xem nếu hợp lệ
+			if (jwt != null && !jwt.isEmpty()) {
+				// Lấy thông tin người dùng từ token
+				String email = JwtProvider.getEmailFromJwtToken(jwt);
+				Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
+				
+				if (userOptional.isPresent()) {
+					UserAccount user = userOptional.get();
+					UUID userId = user.getUserId();
+					String userRole = user.getUserType() != null ? user.getUserType().getUser_type_name() : "USER";
+					
+					// Sử dụng phương thức mới với logic kiểm tra
+					jobPostService.increaseViewCountWithUserCheck(postId, userId, userRole);
+				} else {
+					// Nếu không có thông tin người dùng, tăng lượt xem thông thường
+					jobPostService.increaseViewCount(postId);
+				}
+			} else {
+				// Nếu không có JWT, tăng lượt xem thông thường (người dùng không đăng nhập)
+				jobPostService.increaseViewCount(postId);
+			}
+			
 			return new ResponseEntity<>(jobPost, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -324,6 +348,7 @@ public class JobPostController {
 
 		return jobPostService.getDailyJobPostCounts(start, end);
 	}
+
 
 	@PostMapping("/recommend-jobs/phobert")
 	public ResponseEntity<List<JobRecommendationDTO>> getJobRecommendations(
@@ -354,14 +379,19 @@ public class JobPostController {
 	    // Chuẩn bị request body (có thể bỏ trống vì API Python không yêu cầu body)
 	    HttpEntity<String> entity = new HttpEntity<>("{}", headers);
 
-	    // Định dạng ngày giờ phù hợp
+	    // Định dạng ngày giờ phù hợp - hỗ trợ nhiều định dạng
 	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss[.SSSSSS]");
 
 	    try {
 	        // Gửi request tới API Python
 	        ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, String.class);
+	        
+	        // Xử lý NaN trong JSON trước khi parse
 	        String jsonBody = response.getBody();
 	        System.out.println("JSON response from Python API: " + jsonBody); // In JSON
+	        
+	        jsonBody = jsonBody.replaceAll("\"createDate\":NaN", "\"createDate\":null")
+	                         .replaceAll("\"expireDate\":NaN", "\"expireDate\":null");
 	        ObjectMapper objectMapper = new ObjectMapper();
 	        JsonNode jsonResponse = objectMapper.readTree(jsonBody);
 
@@ -419,8 +449,17 @@ public class JobPostController {
 	            job.setLogo(jobNode.get("logo") != null ? jobNode.get("logo").asText(null) : null);
 
 	            // Xử lý createDate
-	            String createDateStr = jobNode.get("createDate") != null ? jobNode.get("createDate").asText(null) : null;
-	            if (createDateStr != null && !createDateStr.isEmpty()) {
+	            String createDateStr = null;
+	            try {
+	                JsonNode createDateNode = jobNode.get("createDate");
+	                createDateStr = createDateNode != null && !createDateNode.isNull() 
+	                    ? createDateNode.asText(null) : null;
+	            } catch (Exception e) {
+	                System.out.println("Lỗi khi lấy createDate từ JSON: " + e.getMessage());
+	                createDateStr = null;
+	            }
+	            
+	            if (createDateStr != null && !createDateStr.isEmpty() && !"null".equals(createDateStr) && !"NaN".equals(createDateStr)) {
 	                try {
 	                    job.setCreateDate(LocalDateTime.parse(createDateStr, formatter));
 	                } catch (DateTimeParseException e) {
@@ -432,8 +471,17 @@ public class JobPostController {
 	            }
 
 	            // Xử lý expireDate
-	            String expireDateStr = jobNode.get("expireDate") != null ? jobNode.get("expireDate").asText(null) : null;
-	            if (expireDateStr != null && !expireDateStr.isEmpty()) {
+	            String expireDateStr = null;
+	            try {
+	                JsonNode expireDateNode = jobNode.get("expireDate");
+	                expireDateStr = expireDateNode != null && !expireDateNode.isNull() 
+	                    ? expireDateNode.asText(null) : null;
+	            } catch (Exception e) {
+	                System.out.println("Lỗi khi lấy expireDate từ JSON: " + e.getMessage());
+	                expireDateStr = null;
+	            }
+	            
+	            if (expireDateStr != null && !expireDateStr.isEmpty() && !"null".equals(expireDateStr) && !"NaN".equals(expireDateStr)) {
 	                try {
 	                    job.setExpireDate(LocalDateTime.parse(expireDateStr, formatter));
 	                } catch (DateTimeParseException e) {
@@ -500,7 +548,7 @@ public class JobPostController {
 		// Lấy email từ JWT
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
 
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss[.SSSSSS]");
 
 		// Tìm người dùng bằng email
 		Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
@@ -533,7 +581,15 @@ public class JobPostController {
 		try {
 			// Gửi request tới API Python
 			ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, String.class);
-			JsonNode jsonResponse = objectMapper.readTree(response.getBody());
+			
+	        // Xử lý NaN trong JSON trước khi parse
+	        String jsonBody = response.getBody();
+	        System.out.println("JSON response from Python API: " + jsonBody); // In JSON
+	        
+	        jsonBody = jsonBody.replaceAll("\"createDate\":NaN", "\"createDate\":null")
+	                         .replaceAll("\"expireDate\":NaN", "\"expireDate\":null");
+			
+			JsonNode jsonResponse = objectMapper.readTree(jsonBody);
 
 			List<JobRecommendationDTO> jobs = new ArrayList<>();
 
@@ -553,23 +609,47 @@ public class JobPostController {
 				job.setLogo(jobNode.get("logo").asText(null));
 
 				// Xử lý createDate
-				String createDateStr = jobNode.get("createDate").asText(null);
-				if (createDateStr != null && !createDateStr.isEmpty()) {
+				String createDateStr = null;
+				try {
+					JsonNode createDateNode = jobNode.get("createDate");
+					createDateStr = createDateNode != null && !createDateNode.isNull() 
+						? createDateNode.asText(null) : null;
+				} catch (Exception e) {
+					System.out.println("Lỗi khi lấy createDate từ JSON: " + e.getMessage());
+					createDateStr = null;
+				}
+				
+				if (createDateStr != null && !createDateStr.isEmpty() && !"null".equals(createDateStr) && !"NaN".equals(createDateStr)) {
 					try {
 						job.setCreateDate(LocalDateTime.parse(createDateStr, formatter));
 					} catch (DateTimeParseException e) {
 						System.out.println("Lỗi chuyển đổi createDate: " + createDateStr + " - " + e.getMessage());
+						job.setCreateDate(null); // Set to null if parsing fails
 					}
+				} else {
+					job.setCreateDate(null);
 				}
 
 				// Xử lý expireDate
-				String expireDateStr = jobNode.get("expireDate").asText(null);
-				if (expireDateStr != null && !expireDateStr.isEmpty()) {
+				String expireDateStr = null;
+				try {
+					JsonNode expireDateNode = jobNode.get("expireDate");
+					expireDateStr = expireDateNode != null && !expireDateNode.isNull() 
+						? expireDateNode.asText(null) : null;
+				} catch (Exception e) {
+					System.out.println("Lỗi khi lấy expireDate từ JSON: " + e.getMessage());
+					expireDateStr = null;
+				}
+				
+				if (expireDateStr != null && !expireDateStr.isEmpty() && !"null".equals(expireDateStr) && !"NaN".equals(expireDateStr)) {
 					try {
 						job.setExpireDate(LocalDateTime.parse(expireDateStr, formatter));
 					} catch (DateTimeParseException e) {
 						System.out.println("Lỗi chuyển đổi expireDate: " + expireDateStr + " - " + e.getMessage());
+						job.setExpireDate(null); // Set to null if parsing fails
 					}
+				} else {
+					job.setExpireDate(null);
 				}
 
 				// Xử lý danh sách industryNames
