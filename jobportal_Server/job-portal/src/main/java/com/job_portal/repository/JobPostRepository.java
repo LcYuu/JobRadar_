@@ -125,7 +125,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 
 	@Query(value = "SELECT BIN_TO_UUID(jp.post_id) AS postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
 			+ "jp.type_of_work AS typeOfWork, jp.create_date AS createDate, jp.expire_date AS expireDate, "
-			+ "COUNT(DISTINCT a.post_id) AS applicationCount, jp.status, "
+			+ "COUNT(DISTINCT a.user_id) AS applicationCount, jp.status, "
 			+ "GROUP_CONCAT(DISTINCT i.industry_name SEPARATOR ', ') AS industryNames, jp.is_approve AS isApprove "
 			+ "FROM job_posts jp " + "LEFT JOIN apply_job a ON jp.post_id = a.post_id "
 			+ "JOIN company c ON jp.company_id = c.user_id "
@@ -141,7 +141,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	@Query(value = """
 		    SELECT BIN_TO_UUID(jp.post_id) AS postId, jp.title, jp.description, jp.location, jp.salary, 
 		           jp.experience, jp.type_of_work AS typeOfWork, jp.create_date AS createDate, 
-		           jp.expire_date AS expireDate, COUNT(DISTINCT a.post_id) AS applicationCount, 
+		           jp.expire_date AS expireDate, COUNT(DISTINCT a.user_id) AS applicationCount, 
 		           jp.status, GROUP_CONCAT(i.industry_name SEPARATOR ', ') AS industryNames, 
 		           jp.is_approve AS isApprove
 		    FROM job_posts jp
@@ -269,7 +269,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 @Query(value = """
 		    SELECT BIN_TO_UUID(jp.post_id) AS postId, jp.title, jp.description, jp.location, jp.salary, 
 		           jp.experience, jp.type_of_work AS typeOfWork, jp.create_date AS createDate, 
-		           jp.expire_date AS expireDate, COUNT(DISTINCT a.post_id) AS applicationCount, 
+		           jp.expire_date AS expireDate, COUNT(DISTINCT a.user_id) AS applicationCount, 
 		           jp.status, GROUP_CONCAT(i.industry_name SEPARATOR ', ') AS industryNames, 
 		           jp.is_approve AS isApprove
 		    FROM job_posts jp

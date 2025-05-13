@@ -602,8 +602,11 @@ export default function MyProfile() {
                           <div className="flex items-start">
                             <FileText className="h-4 w-4 xs:h-5 xs:w-5 mr-1 xs:mr-2 text-gray-500 mt-0.5 flex-shrink-0" />
                             <p className="text-xs sm:text-sm text-gray-600 break-words">
+                            Mô tả:{" "}
+                            <span className="text-blue-600">
                               {experience.description}
-                            </p>
+                            </span>
+                          </p>
                           </div>
                         </div>
                       </div>

@@ -47,6 +47,41 @@ const JobManagement = () => {
   const [typeOfWork, setTypeOfWork] = useState("");
   const [sortBy, setSortBy] = useState("createdate");
   const [sortDirection, setSortDirection] = useState("desc");
+  const [sortedJobs, setSortedJobs] = useState([]);
+
+  // Update sortedJobs whenever jobs or sorting changes
+  useEffect(() => {
+    if (jobs && jobs.length > 0) {
+      // Make a copy of jobs to avoid modifying the original array
+      const jobsCopy = [...jobs];
+      
+      // Sort the jobs based on the selected sort field and direction
+      const sorted = jobsCopy.sort((a, b) => {
+        if (sortBy === "title") {
+          return sortDirection === "asc"
+            ? a.title.localeCompare(b.title)
+            : b.title.localeCompare(a.title);
+        } else if (sortBy === "createdate") {
+          return sortDirection === "asc"
+            ? new Date(a.createDate) - new Date(b.createDate)
+            : new Date(b.createDate) - new Date(a.createDate);
+        } else if (sortBy === "expiredate") {
+          return sortDirection === "asc"
+            ? new Date(a.expireDate) - new Date(b.expireDate)
+            : new Date(b.expireDate) - new Date(a.expireDate);
+        } else if (sortBy === "applicationcount") {
+          return sortDirection === "asc"
+            ? a.applicationCount - b.applicationCount
+            : b.applicationCount - a.applicationCount;
+        }
+        return 0;
+      });
+      
+      setSortedJobs(sorted);
+    } else {
+      setSortedJobs([]);
+    }
+  }, [jobs, sortBy, sortDirection]);
 
   const handleViewDetails = (postId) => {
     navigate(`/employer/jobs/${postId}`);
@@ -97,7 +132,7 @@ const JobManagement = () => {
         size,
       })
     );
-  }, [dispatch, currentPage, size, status, typeOfWork, sortBy, sortDirection]);
+  }, [dispatch, currentPage, size, status, typeOfWork]);
 
   useEffect(() => {
     dispatch(validateTaxCode());
@@ -160,8 +195,6 @@ const JobManagement = () => {
 
   return (
     <div className="p-6">
-      {/* Hiển thị trạng thái loading hoặc error nếu có */}
-      {loading && <div className="text-center">Đang tải...</div>}
       {error && (
         <div className="text-center text-red-500">
           Lỗi: {error.message || "Có lỗi xảy ra!"}
@@ -269,8 +302,8 @@ const JobManagement = () => {
             </tr>
           </thead>
           <tbody>
-            {jobs?.length > 0 ? (
-              jobs.map((job, index) => (
+            {sortedJobs?.length > 0 ? (
+              sortedJobs.map((job, index) => (
                 <tr key={index} className="border-b">
                   <td className="p-4">{job?.title}</td>
                   <td className="p-4">

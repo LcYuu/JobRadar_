@@ -52,12 +52,36 @@ export const createCV = createAsyncThunk(
   "cv/createCV",
   async (cvData, { rejectWithValue }) => {
     try {
-      const response = await api.post(`/cv/create-cv`, cvData);
-      console.log("🚀 ~ response:", response)
+      console.log("📤 Sending CV data to API:", cvData);
+      if (!cvData.pathCV) {
+        return rejectWithValue("URL CV không hợp lệ");
+      }
+      
+      // Ensure the CV name doesn't contain special characters or spaces
+      const sanitizedCvName = cvData.cvName.replace(/[^\w.-]/g, '_');
+      const sanitizedData = {
+        ...cvData,
+        cvName: sanitizedCvName
+      };
+      
+      const response = await api.post(`/cv/create-cv`, sanitizedData);
+      console.log("📥 API Response:", response.data);
       return response.data;
       
     } catch (error) {
-      return rejectWithValue(error.response ? error.response.data : error.message);
+      console.error("❌ Create CV Error:", error);
+      
+      // Handle specific status codes
+      if (error.response?.status === 500) {
+        console.error("Server error details:", error.response.data);
+        return rejectWithValue("Lỗi máy chủ khi lưu CV. Vui lòng thử lại sau.");
+      }
+      
+      return rejectWithValue(
+        error.response?.data?.message || 
+        error.message || 
+        "Lỗi khi tạo CV"
+      );
     }
   }
 );

@@ -35,7 +35,7 @@ public class CV {
     @Column(name = "is_main", nullable = false)
     private Boolean isMain;
 
-    @Column(name = "path_cv", length = 100, nullable = false)
+    @Column(name = "path_cv", length = 1000, nullable = false)
     private String pathCV;
     
     @Column(name = "create_time", nullable = false)

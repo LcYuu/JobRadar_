@@ -83,6 +83,31 @@ const applyJobSlice = createSlice({
       .addCase(updateApply.fulfilled, (state, action) => {
         state.loading = false;
         state.updateApply = action.payload;
+        
+        // Cập nhật trạng thái oneApplyJob để hiển thị thông tin mới nhất
+        if (state.oneApplyJob) {
+          // Nếu có thông tin CV mới, cập nhật vào state để hiển thị ngay
+          state.oneApplyJob = {
+            ...state.oneApplyJob,
+            // Cập nhật thời gian apply mới
+            applyDate: new Date().toISOString(),
+          };
+        }
+        
+        // Cập nhật danh sách đơn đã apply nếu có
+        if (state.applyJobByUser && state.applyJobByUser.length > 0) {
+          state.applyJobByUser = state.applyJobByUser.map(job => {
+            // Tìm đơn đã được cập nhật và cập nhật thông tin
+            if (job.postId === state.oneApplyJob?.postId) {
+              return {
+                ...job,
+                // Cập nhật thời gian apply mới
+                applyDate: new Date().toISOString(),
+              };
+            }
+            return job;
+          });
+        }
       })
       .addCase(updateApply.rejected, (state, action) => {
         state.loading = false;
