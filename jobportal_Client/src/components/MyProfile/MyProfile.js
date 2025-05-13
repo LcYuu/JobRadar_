@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import {
   Award,
   Book,
@@ -15,19 +14,14 @@ import {
   Phone,
   Plus,
   School,
-  Tag,
 } from "lucide-react";
-
-
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 import { Button } from "../../ui/button";
 import { Card, CardContent, CardHeader } from "../../ui/card";
 import { Label } from "../../ui/label";
 import { useDispatch, useSelector } from "react-redux";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMars, faVenus } from "@fortawesome/free-solid-svg-icons";
-
 import ProfileModal from "./MyProfileModal";
 import SkillModal from "./SkillModal";
 import ExpModal from "./ExpModal";
@@ -60,25 +54,18 @@ export default function MyProfile() {
     "bg-green-500",
     "bg-orange-500",
   ];
-
   const color = [
-    "bg-pink-500", // màu hồng
-    "bg-teal-500", // màu xanh ngọc
-    "bg-indigo-500", // màu chàm
-    "bg-lime-500", // màu xanh lá sáng
-    "bg-amber-500", // màu hổ phách
-    "bg-fuchsia-500", // màu hồng tím
-    "bg-cyan-500", // màu lục lam
+    "bg-pink-500",
+    "bg-teal-500",
+    "bg-indigo-500",
+    "bg-lime-500",
+    "bg-amber-500",
+    "bg-fuchsia-500",
+    "bg-cyan-500",
   ];
 
-  // Hàm lấy màu sắc theo thứ tự
-  const getColorByIndex = (index) => {
-    return colors[index % colors.length]; // Quay lại đầu mảng khi đến cuối
-  };
-
-  const getCLByIndex = (index) => {
-    return color[index % color.length]; // Quay lại đầu mảng khi đến cuối
-  };
+  const getColorByIndex = (index) => colors[index % colors.length];
+  const getCLByIndex = (index) => color[index % color.length];
 
   const dispatch = useDispatch();
   const { industries = [] } = useSelector((store) => store.industry || {});
@@ -124,7 +111,6 @@ export default function MyProfile() {
   };
 
   const [socialLinkUpdated, setSocialLinkUpdated] = useState(false);
-
   const [expUpdated, setExpUpdated] = useState(false);
   const [eduUpdated, setEduUpdated] = useState(false);
   const [refreshData, setRefreshData] = useState(false);
@@ -157,6 +143,7 @@ export default function MyProfile() {
   const [errors, setErrors] = useState({
     emailContact: "",
     phoneNumber: "",
+    dateOfBirth: "",
   });
 
   const handleDeleteExp = async (experienceId) => {
@@ -176,7 +163,7 @@ export default function MyProfile() {
         toast.success("Xóa kinh nghiệm thành công!");
       } catch (error) {
         console.error("Có lỗi xảy ra khi xóa kinh nghiệm:", error);
-        toast.success("Xóa kinh nghiệm thất bại. Vui lòng thử lại!");
+        toast.error("Xóa kinh nghiệm thất bại. Vui lòng thử lại!");
       }
     }
   };
@@ -198,7 +185,7 @@ export default function MyProfile() {
         toast.success("Xóa học vấn thành công!");
       } catch (error) {
         console.error("Có lỗi xảy ra khi xóa học vấn:", error);
-        toast.error("Xóa học vấn thất bại. Vui lòng thử lại!", "error");
+        toast.error("Xóa học vấn thất bại. Vui lòng thử lại!");
       }
     }
   };
@@ -236,10 +223,9 @@ export default function MyProfile() {
         industryIds:
           seeker.industry && Array.isArray(seeker.industry)
             ? seeker.industry
-                .filter((ind) => ind?.industryId !== undefined) // Lọc phần tử lỗi
+                .filter((ind) => ind?.industryId !== undefined)
                 .map((ind) => ind.industryId)
             : [],
-
         background:
           seeker.background ||
           "bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700",
@@ -251,29 +237,11 @@ export default function MyProfile() {
     }
   }, [seeker]);
 
-  console.log("seeker.industry:", seeker.industry);
-  console.log("FormData.industry:", formData.industryIds);
-  console.log(
-    "Industry Ids:",
-    seeker.industry
-      ? Array.isArray(seeker.industry)
-        ? seeker.industry.map((ind) => ind.industryId)
-        : [seeker.industry.industryId]
-      : []
-  );
-
-  const handleEditDesClick = () => {
-    setIsEditingDes(true);
-  };
-
-  const handleEditInfoClick = () => {
-    setIsEditingInfo(true);
-  };
+  const handleEditDesClick = () => setIsEditingDes(true);
+  const handleEditInfoClick = () => setIsEditingInfo(true);
 
   const handleSaveClick = async () => {
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
     try {
       await dispatch(
         updateSeekerAction({
@@ -292,11 +260,7 @@ export default function MyProfile() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log(name, value); // Kiểm tra giá trị
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value, // Cập nhật giá trị cho trường tương ứng
-    }));
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
   const [editingEducationId, setEditingEducationId] = useState(null);
@@ -322,7 +286,6 @@ export default function MyProfile() {
       platform: socialLink.platform,
       url: socialLink.url,
     });
-
     handleOpenSocialLinkModal();
   };
 
@@ -378,47 +341,33 @@ export default function MyProfile() {
     }
   }, [openSocialLink]);
 
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-
   const validateForm = () => {
-    let tempErrors = {
-      emailContact: "",
-      phoneNumber: "",
-      dateOfBirth: "",
-    };
+    let tempErrors = { emailContact: "", phoneNumber: "", dateOfBirth: "" };
     let isValid = true;
 
-    // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (formData.emailContact && !emailRegex.test(formData.emailContact)) {
       tempErrors.emailContact = "Email không hợp lệ";
       isValid = false;
     }
 
-    // Validate phone number (số điện thoại Việt Nam)
     const phoneRegex = /(0[3|5|7|8|9])+([0-9]{8})\b/;
     if (formData.phoneNumber && !phoneRegex.test(formData.phoneNumber)) {
       tempErrors.phoneNumber = "Số điện thoại không hợp lệ";
       isValid = false;
     }
 
-    // Validate date of birth (must be at least 18 years old)
     if (formData.dateOfBirth) {
       const today = new Date();
       const birthDate = new Date(formData.dateOfBirth);
       let age = today.getFullYear() - birthDate.getFullYear();
       const monthDifference = today.getMonth() - birthDate.getMonth();
-
-      // Adjust age calculation if birthday hasn't occurred yet this year
       if (
         monthDifference < 0 ||
         (monthDifference === 0 && today.getDate() < birthDate.getDate())
       ) {
         age--;
       }
-
-      // Nếu tuổi nhỏ hơn 18 thì báo lỗi, nếu bằng 18 tuổi (hoặc lớn hơn) thì tính là đủ
       if (age < 18) {
         tempErrors.dateOfBirth = "Bạn phải đủ 18 tuổi";
         isValid = false;
@@ -445,33 +394,31 @@ export default function MyProfile() {
   const handleBackgroundChange = (gradient) => {
     setSelectedBackground(gradient);
     setShowColorPicker(false);
-    setFormData((prev) => ({
-      ...prev,
-      background: gradient,
-    }));
+    setFormData((prev) => ({ ...prev, background: gradient }));
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
-      <main className="w-full max-w-full px-3 sm:px-6 mx-auto overflow-hidden">
+    <div className="min-h-screen bg-gray-50">
+      <main className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 mx-auto">
         {/* Profile Header Card */}
-        <Card className="bg-white shadow-lg rounded-lg mb-4 sm:mb-6 overflow-hidden w-full">
-          <div className={`relative h-32 sm:h-48 ${selectedBackground}`}>
+        <Card className="bg-white shadow-lg rounded-lg mb-4 sm:mb-6 w-full">
+          <div
+            className={`relative h-24 sm:h-32 lg:h-48 ${selectedBackground}`}
+          >
             <Button
               size="icon"
-              className="absolute right-2 top-2 sm:right-4 sm:top-4 bg-white/20 hover:bg-white/30"
+              className="absolute right-2 top-2 sm:right-4 sm:top-4 bg-white/20 hover:bg-white/30 p-1 sm:p-2"
               onClick={() => setShowColorPicker(!showColorPicker)}
             >
-              <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+              <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
-
             {showColorPicker && (
-              <div className="absolute right-2 top-10 sm:right-4 sm:top-16 bg-white p-2 sm:p-3 rounded-lg shadow-lg z-10">
+              <div className="absolute right-2 top-10 sm:right-4 sm:top-12 bg-white p-2 sm:p-3 rounded-lg shadow-lg z-10">
                 <div className="grid grid-cols-1 gap-2">
                   {backgroundGradients.map((gradient, index) => (
                     <button
                       key={index}
-                      className={`h-6 w-24 sm:h-8 sm:w-32 rounded-md ${gradient} hover:opacity-80 transition-opacity`}
+                      className={`h-6 w-20 sm:h-8 sm:w-28 rounded-md ${gradient} hover:opacity-80 transition-opacity`}
                       onClick={() => handleBackgroundChange(gradient)}
                     />
                   ))}
@@ -479,40 +426,46 @@ export default function MyProfile() {
               </div>
             )}
           </div>
-
-          <div className="relative px-3 sm:px-6 pb-4 sm:pb-6">
-            <Avatar className="absolute -top-12 sm:-top-16 h-24 w-24 sm:h-32 sm:w-32 border-4 ring-4 ring-purple-500">
+          <div className="relative px-4 sm:px-6 pb-4 sm:pb-6">
+            <Avatar className="absolute -top-10 sm:-top-12 h-20 w-20 sm:h-24 sm:w-24 lg:h-28 lg:w-28 border-4 ring-4 ring-purple-500">
               <AvatarImage src={user?.avatar} />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
-            <div className="ml-28 sm:ml-0 pt-3 sm:pt-0 mb-2 sm:mb-4 flex flex-col sm:flex-row sm:items-center justify-between">
-              <div className="mt-2 sm:mt-20 overflow-hidden">
-                <h2 className="text-xl sm:text-2xl font-semibold truncate">{user?.userName}</h2>
-                <p className="text-sm text-muted-foreground truncate">{seeker?.address}</p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="">
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold line-clamp-2">
+                  {user?.userName}
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">
+                  {seeker?.address}
+                </p>
               </div>
               <Button
                 variant="outline"
                 onClick={handleOpenProfileModal}
-                className="bg-[#6441a5] text-white hover:bg-[#7f58af] transition-all duration-300 ease-in-out transform hover:scale-105 text-xs sm:text-sm mt-2 sm:mt-0 w-full sm:w-auto"
+                className="bg-[#6441a5] text-white hover:bg-[#7f58af] text-xs sm:text-sm px-3 sm:px-4 py-1 sm:py-2 min-w-[120px] sm:min-w-[140px] w-full sm:w-auto"
               >
                 Chỉnh sửa hồ sơ
               </Button>
             </div>
           </div>
-
           <section>
-            <ProfileModal open={open} handleClose={handleClose} />
+            <ProfileModal
+              open={open}
+              handleClose={handleClose}
+              className="w-full max-w-md sm:max-w-lg p-4 sm:p-6"
+            />
           </section>
         </Card>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 w-full">
-          {/* Left Column - 2/3 width */}
-          <div className="md:col-span-2 space-y-4 sm:space-y-6 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 xl:gap-8 w-full">
+          {/* Left Column */}
+          <div className="col-span-1 lg:col-span-2 space-y-4 sm:space-y-6">
             {/* About Me */}
-            <Card className="bg-white shadow-lg rounded-lg mb-4 sm:mb-6 w-full overflow-hidden">
-              <CardHeader className="flex flex-row items-center justify-between py-3 px-4 sm:p-6">
-                <h3 className="text-base sm:text-lg text-purple-600 font-semibold">
+            <Card className="bg-white shadow-lg rounded-lg w-full">
+              <CardHeader className="flex flex-row items-center justify-between py-2 sm:py-3 px-4 sm:px-6">
+                <h3 className="text-base sm:text-lg lg:text-xl text-purple-600 font-semibold">
                   About Me
                 </h3>
                 <Button
@@ -520,11 +473,10 @@ export default function MyProfile() {
                   variant="ghost"
                   onClick={handleEditDesClick}
                 >
-                  <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </CardHeader>
-
-              <CardContent className="px-4 pb-4 sm:p-6 pt-0 sm:pt-0">
+              <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6 pt-0">
                 {isEditingDes ? (
                   <div>
                     <textarea
@@ -537,85 +489,100 @@ export default function MyProfile() {
                           handleSaveClick();
                         }
                       }}
-                      className="border p-2 w-full min-h-[80px] sm:min-h-[100px] rounded-md resize-none text-sm"
+                      className="border p-2 sm:p-3 w-full min-h-[80px] sm:min-h-[100px] rounded-md resize-none text-sm sm:text-base"
                       placeholder="Nhập mô tả về bản thân..."
                     />
                     <div className="mt-2 flex justify-end">
-                      <Button onClick={handleSaveClick} size="sm" className="text-xs sm:text-sm">Save</Button>
+                      <Button
+                        onClick={handleSaveClick}
+                        size="sm"
+                        className="text-xs sm:text-sm px-3 sm:px-4 min-w-[80px]"
+                      >
+                        Save
+                      </Button>
                     </div>
                   </div>
                 ) : (
-                  <p className="text-xs sm:text-sm text-muted-foreground whitespace-pre-wrap break-words">
-                    {seeker?.description
-                      ? seeker.description
-                      : "Chưa cập nhật mô tả về bản thân"}
+                  <p className="text-sm sm:text-base text-muted-foreground whitespace-pre-wrap break-words">
+                    {seeker?.description || "Chưa cập nhật mô tả về bản thân"}
                   </p>
                 )}
               </CardContent>
             </Card>
 
             {/* Experience */}
-            <Card className="bg-white shadow-lg rounded-lg mb-4 sm:mb-6 w-full overflow-hidden">
-              <CardHeader className="flex flex-row items-center justify-between py-3 px-4 sm:p-6">
-                <h3 className="text-base sm:text-lg text-purple-600 font-semibold">
+            {/* Experience */}
+            <Card className="bg-white shadow-lg rounded-lg w-full">
+              <CardHeader className="flex flex-row items-center justify-between py-2 sm:py-3 px-4 sm:px-6">
+                <h3 className="text-base sm:text-lg lg:text-xl text-purple-600 font-semibold">
                   Kinh nghiệm
                 </h3>
                 <Button size="icon" variant="ghost">
-                  <Plus className="h-3 w-3 sm:h-4 sm:w-4" onClick={handleOpenExpModal} />
+                  <Plus
+                    className="h-4 w-4 sm:h-5 sm:w-5"
+                    onClick={handleOpenExpModal}
+                  />
                 </Button>
               </CardHeader>
-              <CardContent className="px-4 pb-4 sm:p-6 pt-0 sm:pt-0 space-y-4 sm:space-y-6">
+              <CardContent className="px-2 sm:px-3 md:px-4 pb-4 sm:pb-6 pt-0 space-y-3 sm:space-y-4">
                 {exp && exp.length > 0 ? (
                   exp.map((experience, index) => (
                     <div
                       key={index}
-                      className="flex gap-2 sm:gap-4 p-3 sm:p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border-l-4 relative overflow-hidden w-full"
+                      className="flex gap-1 xs:gap-2 sm:gap-3 p-2 xs:p-3 sm:p-4 bg-white rounded-lg shadow-md border-l-4 transition-all duration-300"
                       style={{ borderLeftColor: getColorByIndex(index) }}
                     >
                       <div
-                        className={`h-8 w-8 sm:h-12 sm:w-12 rounded-full ${getColorByIndex(
+                        className={`h-8 w-8 sm:h-10 sm:w-10 rounded-full ${getColorByIndex(
                           index
-                        )} shadow-md flex items-center justify-center flex-shrink-0`}
+                        )} flex items-center justify-center flex-shrink-0`}
                       >
-                        <span className="text-white font-bold text-xs sm:text-base">
+                        <span className="text-white font-bold text-xs sm:text-sm">
                           {index + 1}
                         </span>
                       </div>
-                      <div className="flex-1 min-w-0 overflow-hidden">
-                        <div className="flex flex-col sm:flex-row sm:items-start justify-between w-full">
-                          <div className="mb-2 sm:mb-0 overflow-hidden">
-                            <h4 className="font-semibold text-sm sm:text-lg flex items-center">
-                              <Briefcase className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500 flex-shrink-0" />
-                              <span className="truncate">{experience.jobTitle}</span>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 max-w-[65%] xs:max-w-[70%] sm:max-w-[75%]">
+                            <h4 className="font-semibold text-xs xs:text-sm sm:text-base flex items-center truncate">
+                              <Briefcase className="h-4 w-4 xs:h-5 xs:w-5 mr-1 xs:mr-2 text-gray-500 flex-shrink-0" />
+                              <span className="truncate">
+                                {experience.jobTitle}
+                              </span>
                             </h4>
                             <p className="text-xs sm:text-sm text-muted-foreground flex items-center mt-1 truncate">
-                              <Building className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500 flex-shrink-0" />
-                              Công ty: {experience.companyName}
+                              <Building className="h-4 w-4 xs:h-5 xs:w-5 mr-1 xs:mr-2 text-gray-500 flex-shrink-0" />
+                              Công ty:{" "}
+                              <span className="truncate">
+                                {experience.companyName}
+                              </span>
                             </p>
                           </div>
-                          <div className="flex gap-1 sm:gap-2 flex-shrink-0">
+                          <div className="flex gap-1 xs:gap-1.5 sm:gap-2 flex-shrink-0">
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="h-6 w-6 sm:h-8 sm:w-8 hover:bg-blue-100 transition-colors duration-200"
+                              className="h-6 w-6 hover:bg-blue-100"
                               onClick={() => handleEditExperience(experience)}
+                              title="Chỉnh sửa"
                             >
-                              <Edit className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                              <Edit className="h-4 w-4 text-blue-600" />
                             </Button>
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="h-6 w-6 sm:h-8 sm:w-8 hover:bg-red-100 transition-colors duration-200"
+                              className="h-6 w-6 hover:bg-red-100"
                               onClick={() =>
                                 handleDeleteExp(experience.experienceId)
                               }
+                              title="Xóa"
                             >
-                              <Delete className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
+                              <Delete className="h-4 w-4 text-red-600" />
                             </Button>
                           </div>
                         </div>
-                        <div className="flex items-center mt-1 sm:mt-2">
-                          <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500 flex-shrink-0" />
+                        <div className="flex items-center mt-1 xs:mt-2 truncate">
+                          <Calendar className="h-4 w-4 xs:h-5 xs:w-5 mr-1 xs:mr-2 text-gray-500 flex-shrink-0" />
                           <p className="text-xs sm:text-sm text-gray-600 truncate">
                             {formatDate(experience.startDate)} -{" "}
                             <span
@@ -631,10 +598,10 @@ export default function MyProfile() {
                             </span>
                           </p>
                         </div>
-                        <div className="mt-2 sm:mt-3 p-2 sm:p-3 bg-gray-50 rounded border-l-2 border-gray-200">
+                        <div className="mt-2 xs:mt-3 p-2 xs:p-3 bg-gray-50 rounded border-l-2 border-gray-200">
                           <div className="flex items-start">
-                            <FileText className="h-4 w-4 mr-2 text-gray-500 mt-0.5" />
-                            <p className="text-sm font-medium">
+                            <FileText className="h-4 w-4 xs:h-5 xs:w-5 mr-1 xs:mr-2 text-gray-500 mt-0.5 flex-shrink-0" />
+                            <p className="text-xs sm:text-sm text-gray-600 break-words">
                             Mô tả:{" "}
                             <span className="text-blue-600">
                               {experience.description}
@@ -651,13 +618,17 @@ export default function MyProfile() {
                     <p className="text-xs sm:text-sm text-gray-500">
                       Chưa cập nhật kinh nghiệm
                     </p>
-                    <Button variant="outline" size="sm" className="mt-2 text-xs sm:text-sm">
-                      <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Thêm kinh nghiệm
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 text-xs sm:text-sm min-w-[140px]"
+                    >
+                      <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-1" /> Thêm kinh
+                      nghiệm
                     </Button>
                   </div>
                 )}
               </CardContent>
-
               <section>
                 <ExpModal
                   open={openExp}
@@ -665,72 +636,82 @@ export default function MyProfile() {
                   editingExperienceId={editingExperienceId}
                   setEditingExperienceId={setEditingExperienceId}
                   initialData={formData}
+                  className="w-full max-w-md sm:max-w-lg p-4 sm:p-6"
                 />
               </section>
             </Card>
 
             {/* Education */}
-            <Card className="bg-white shadow-lg rounded-lg mb-4 sm:mb-6 w-full overflow-hidden">
-              <CardHeader className="flex flex-row items-center justify-between py-3 px-4 sm:p-6">
-                <h3 className="text-base sm:text-lg text-purple-600 font-semibold">
+            <Card className="bg-white shadow-lg rounded-lg w-full">
+              <CardHeader className="flex flex-row items-center justify-between py-2 sm:py-3 px-4 sm:px-6">
+                <h3 className="text-base sm:text-lg lg:text-xl text-purple-600 font-semibold">
                   Học vấn
                 </h3>
                 <Button size="icon" variant="ghost">
-                  <Plus className="h-3 w-3 sm:h-4 sm:w-4" onClick={handleOpenEduModal} />
+                  <Plus
+                    className="h-4 w-4 sm:h-5 sm:w-5"
+                    onClick={handleOpenEduModal}
+                  />
                 </Button>
               </CardHeader>
-              <CardContent className="px-4 pb-4 sm:p-6 pt-0 sm:pt-0 space-y-4 sm:space-y-6">
+              <CardContent className="px-2 sm:px-3 md:px-4 pb-4 sm:pb-6 pt-0 space-y-3 sm:space-y-4">
                 {edu && edu.length > 0 ? (
                   edu.map((education, index) => (
                     <div
                       key={index}
-                      className="flex gap-2 sm:gap-4 p-3 sm:p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border-l-4 relative overflow-hidden w-full"
+                      className="flex gap-1 xs:gap-2 sm:gap-3 p-2 xs:p-3 sm:p-4 bg-white rounded-lg shadow-md border-l-4 transition-all duration-300"
                       style={{ borderLeftColor: getCLByIndex(index) }}
                     >
                       <div
-                        className={`h-8 w-8 sm:h-12 sm:w-12 rounded-full ${getCLByIndex(
+                        className={`h-8 w-8 sm:h-10 sm:w-10 rounded-full ${getCLByIndex(
                           index
-                        )} shadow-md flex items-center justify-center flex-shrink-0`}
+                        )} flex items-center justify-center flex-shrink-0`}
                       >
-                        <span className="text-white font-bold text-xs sm:text-base">
+                        <span className="text-white font-bold text-xs sm:text-sm">
                           {index + 1}
                         </span>
                       </div>
-                      <div className="flex-1 min-w-0 overflow-hidden">
-                        <div className="flex flex-col sm:flex-row sm:items-start justify-between w-full">
-                          <div className="mb-2 sm:mb-0 overflow-hidden">
-                            <h4 className="font-semibold text-sm sm:text-lg flex items-center">
-                              <GraduationCap className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500 flex-shrink-0" />
-                              {education.certificateDegreeName}
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 max-w-[65%] xs:max-w-[70%] sm:max-w-[75%]">
+                            <h4 className="font-semibold text-xs xs:text-sm sm:text-base flex items-center truncate">
+                              <GraduationCap className="h-4 w-4 xs:h-5 xs:w-5 mr-1 xs:mr-2 text-gray-500 flex-shrink-0" />
+                              <span className="truncate">
+                                {education.certificateDegreeName}
+                              </span>
                             </h4>
                             <p className="text-xs sm:text-sm text-muted-foreground flex items-center mt-1 truncate">
-                              <School className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500 flex-shrink-0" />
-                              {education.universityName}
+                              <School className="h-4 w-4 xs:h-5 xs:w-5 mr-1 xs:mr-2 text-gray-500 flex-shrink-0" />
+                              <span className="truncate">
+                                {education.universityName}
+                              </span>
                             </p>
                           </div>
-                          <div className="flex gap-1 sm:gap-2 flex-shrink-0">
+                          <div className="flex gap-1 xs:gap-1.5 sm:gap-2 flex-shrink-0">
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="h-6 w-6 sm:h-8 sm:w-8 hover:bg-blue-100 transition-colors duration-200"
+                              className="h-6 w-6 hover:bg-blue-100"
                               onClick={() => handleEditEducation(education)}
+                              title="Chỉnh sửa"
                             >
-                              <Edit className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                              <Edit className="h-4 w-4 text-blue-600" />
                             </Button>
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="h-6 w-6 sm:h-8 sm:w-8 hover:bg-red-100 transition-colors duration-200"
+                              className="h-6 w-6 hover:bg-red-100"
                               onClick={() =>
                                 handleDeleteEdu(education.educationId)
                               }
+                              title="Xóa"
                             >
-                              <Delete className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
+                              <Delete className="h-4 w-4 text-red-600" />
                             </Button>
                           </div>
                         </div>
-                        <div className="flex items-center mt-1 sm:mt-2">
-                          <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500 flex-shrink-0" />
+                        <div className="flex items-center mt-1 xs:mt-2 truncate">
+                          <Calendar className="h-4 w-4 xs:h-5 xs:w-5 mr-1 xs:mr-2 text-gray-500 flex-shrink-0" />
                           <p className="text-xs sm:text-sm text-gray-600 truncate">
                             {formatDate(education.startDate)} -{" "}
                             <span
@@ -746,14 +727,15 @@ export default function MyProfile() {
                             </span>
                           </p>
                         </div>
-                        <div className="flex items-center mt-2">
-                          <BookOpen className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500" />
-                          <p className="text-xs sm:text-sm text-gray-600">
-                            Chuyên ngành: {education.major}
+                        <div className="flex items-center mt-1 xs:mt-2 truncate">
+                          <BookOpen className="h-4 w-4 xs:h-5 xs:w-5 mr-1 xs:mr-2 text-gray-500" />
+                          <p className="text-xs sm:text-sm text-gray-600 truncate">
+                            Chuyên ngành:{" "}
+                            <span className="truncate">{education.major}</span>
                           </p>
                         </div>
-                        <div className="mt-2 bg-gray-50 p-2 rounded flex items-center">
-                          <Award className="h-3 w-3 sm:h-4 sm:w-4 mr-2 text-gray-500" />
+                        <div className="mt-2 xs:mt-3 p-2 xs:p-3 bg-gray-50 rounded flex items-center">
+                          <Award className="h-4 w-4 xs:h-5 xs:w-5 mr-1 xs:mr-2 text-gray-500" />
                           <p className="text-xs sm:text-sm font-medium">
                             GPA:{" "}
                             <span className="text-blue-600">
@@ -762,10 +744,10 @@ export default function MyProfile() {
                           </p>
                         </div>
                         {education.description && (
-                          <div className="mt-3 p-3 bg-gray-50 rounded border-l-2 border-gray-200">
+                          <div className="mt-2 xs:mt-3 p-2 xs:p-3 bg-gray-50 rounded border-l-2 border-gray-200">
                             <div className="flex items-start">
-                              <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-2 text-gray-500 mt-0.5" />
-                              <p className="text-xs sm:text-sm text-gray-600">
+                              <FileText className="h-4 w-4 xs:h-5 xs:w-5 mr-1 xs:mr-2 text-gray-500 mt-0.5 flex-shrink-0" />
+                              <p className="text-xs sm:text-sm text-gray-600 break-words">
                                 {education.description}
                               </p>
                             </div>
@@ -780,8 +762,13 @@ export default function MyProfile() {
                     <p className="text-xs sm:text-sm text-gray-500">
                       Không có thông tin giáo dục nào.
                     </p>
-                    <Button variant="outline" size="sm" className="mt-2 text-xs sm:text-sm">
-                      <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> Thêm học vấn
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 text-xs sm:text-sm min-w-[140px]"
+                    >
+                      <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-1" /> Thêm học
+                      vấn
                     </Button>
                   </div>
                 )}
@@ -793,28 +780,26 @@ export default function MyProfile() {
                   editingEducationId={editingEducationId}
                   setEditingEducationId={setEditingEducationId}
                   initialData={formData}
+                  className="w-full max-w-md sm:max-w-lg p-4 sm:p-6"
                 />
               </section>
             </Card>
 
             {/* Skills */}
-            <Card className="bg-white shadow-lg rounded-lg w-full overflow-hidden">
-              <CardHeader className="flex flex-row items-center justify-between py-3 px-4 sm:p-6">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base sm:text-lg text-purple-600 font-semibold">
-                    Kỹ năng
-                  </h3>
-                </div>
+            <Card className="bg-white shadow-lg rounded-lg w-full">
+              <CardHeader className="flex flex-row items-center justify-between py-2 sm:py-3 px-4 sm:px-6">
+                <h3 className="text-base sm:text-lg lg:text-xl text-purple-600 font-semibold">
+                  Kỹ năng
+                </h3>
                 <Button
                   size="icon"
                   variant="ghost"
                   onClick={handleOpenSkillModal}
-                  className="hover:bg-primary/10 transition-colors"
                 >
-                  <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </CardHeader>
-              <CardContent className="px-4 pb-4 sm:p-6 pt-0 sm:pt-0 space-y-3 sm:space-y-4">
+              <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6 pt-0 space-y-3 sm:space-y-4">
                 {seeker?.skills &&
                 Array.isArray(seeker.skills) &&
                 seeker.skills.length > 0 ? (
@@ -824,8 +809,7 @@ export default function MyProfile() {
                         key={skill.skillId}
                         className={`${getColorByIndex(
                           index
-                        )} bg-opacity-15 rounded-full px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm 
-              flex items-center gap-1 sm:gap-2 transition-all duration-200 hover:bg-opacity-25`}
+                        )} bg-opacity-15 rounded-full px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm flex items-center gap-1 sm:gap-2`}
                       >
                         <span
                           className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${getColorByIndex(
@@ -844,28 +828,32 @@ export default function MyProfile() {
                   </div>
                 ) : (
                   <div className="text-center py-4 sm:py-6 text-gray-500">
-                    <div className="mb-2">
-                      <Plus className="h-8 w-8 sm:h-12 sm:w-12 mx-auto text-gray-400" />
-                    </div>
-                    <p className="text-xs sm:text-sm">Chưa có kỹ năng nào được thêm</p>
-                    <p className="text-xs mt-1">
+                    <Plus className="h-8 w-8 sm:h-12 sm:w-12 mx-auto text-gray-400 mb-2" />
+                    <p className="text-xs sm:text-sm">
+                      Chưa có kỹ năng nào được thêm
+                    </p>
+                    <p className="text-xs sm:text-sm mt-1">
                       Nhấn vào nút chỉnh sửa để thêm kỹ năng của bạn
                     </p>
                   </div>
                 )}
               </CardContent>
               <section>
-                <SkillModal open={openSkill} handleClose={handleCloseSkill} />
+                <SkillModal
+                  open={openSkill}
+                  handleClose={handleCloseSkill}
+                  className="w-full max-w-md sm:max-w-lg p-4 sm:p-6"
+                />
               </section>
             </Card>
           </div>
 
-          {/* Right Column - 1/3 width */}
-          <div className="space-y-4 sm:space-y-6 w-full">
+          {/* Right Column */}
+          <div className="col-span-1 space-y-4 sm:space-y-6">
             {/* Contact Info */}
-            <Card className="bg-white shadow-lg w-full overflow-hidden">
-              <CardHeader className="flex flex-row items-center justify-between py-3 px-4 sm:p-6">
-                <h3 className="text-base sm:text-lg text-purple-600 font-semibold">
+            <Card className="bg-white shadow-lg w-full">
+              <CardHeader className="flex flex-row items-center justify-between py-2 sm:py-3 px-4 sm:px-6">
+                <h3 className="text-base sm:text-lg lg:text-xl text-purple-600 font-semibold">
                   Thông tin khác
                 </h3>
                 <Button
@@ -873,25 +861,25 @@ export default function MyProfile() {
                   variant="ghost"
                   onClick={handleEditInfoClick}
                 >
-                  <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </CardHeader>
-              <CardContent className="px-4 pb-4 sm:p-6 pt-0 sm:pt-0 space-y-3 sm:space-y-4">
+              <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6 pt-0 space-y-3 sm:space-y-4">
                 {isEditingInfo ? (
                   <div>
-                    <Label className="text-sm font-medium whitespace-nowrap">
+                    <Label className="text-sm sm:text-base font-medium">
                       Email
                     </Label>
                     <input
                       name="emailContact"
                       value={formData.emailContact}
                       onChange={handleChange}
-                      className={`border p-2 w-full mt-1 ${
+                      className={`border p-2 sm:p-3 w-full rounded-md text-sm sm:text-base ${
                         errors.emailContact ? "border-red-500" : ""
                       }`}
                     />
                     {errors.emailContact && (
-                      <p className="text-red-500 text-xs mt-1">
+                      <p className="text-red-500 text-xs sm:text-sm">
                         {errors.emailContact}
                       </p>
                     )}
@@ -899,37 +887,33 @@ export default function MyProfile() {
                 ) : (
                   seeker?.emailContact && (
                     <div>
-                      <Label
-                        className="text-sm font-medium"
-                        style={{ whiteSpace: "nowrap" }}
-                      >
+                      <Label className="text-sm sm:text-base font-medium">
                         Email
                       </Label>
                       <div className="mt-1 flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{seeker.emailContact}</span>
+                        <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                        <span className="text-sm sm:text-base truncate">
+                          {seeker.emailContact}
+                        </span>
                       </div>
                     </div>
                   )
                 )}
                 {isEditingInfo ? (
-                  <div className="mb-4">
-                    <Label
-                      className="text-sm font-medium block mb-1"
-                      style={{ whiteSpace: "nowrap" }}
-                    >
+                  <div>
+                    <Label className="text-sm sm:text-base font-medium">
                       Số điện thoại
                     </Label>
                     <input
                       name="phoneNumber"
                       value={formData.phoneNumber}
                       onChange={handleChange}
-                      className={`border p-2 w-full ${
+                      className={`border p-2 sm:p-3 w-full rounded-md text-sm sm:text-base ${
                         errors.phoneNumber ? "border-red-500" : ""
                       }`}
                     />
                     {errors.phoneNumber && (
-                      <p className="text-red-500 text-xs mt-1">
+                      <p className="text-red-500 text-xs sm:text-sm">
                         {errors.phoneNumber}
                       </p>
                     )}
@@ -937,27 +921,28 @@ export default function MyProfile() {
                 ) : (
                   seeker?.phoneNumber && (
                     <div>
-                      <Label className="text-sm font-medium">
+                      <Label className="text-sm sm:text-base font-medium">
                         Số điện thoại
                       </Label>
                       <div className="mt-1 flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{seeker.phoneNumber}</span>
+                        <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                        <span className="text-sm sm:text-base truncate">
+                          {seeker.phoneNumber}
+                        </span>
                       </div>
                     </div>
                   )
                 )}
-
                 {isEditingInfo ? (
-                  <div className="mb-4">
-                    <Label className="text-sm font-medium block mb-1 whitespace-nowrap">
+                  <div>
+                    <Label className="text-sm sm:text-base font-medium">
                       Giới tính
                     </Label>
                     <select
                       name="gender"
                       value={formData.gender}
                       onChange={handleChange}
-                      className="border p-2 w-full"
+                      className="border p-2 sm:p-3 w-full rounded-md text-sm sm:text-base"
                     >
                       <option value="">Chọn giới tính</option>
                       <option value="Nam">Nam</option>
@@ -967,30 +952,32 @@ export default function MyProfile() {
                 ) : (
                   seeker?.gender && (
                     <div>
-                      <Label className="text-sm font-medium whitespace-nowrap">
+                      <Label className="text-sm sm:text-base font-medium">
                         Giới tính
                       </Label>
                       <div className="mt-1 flex items-center gap-2">
                         {seeker.gender === "Nam" && (
                           <FontAwesomeIcon
                             icon={faMars}
-                            className="h-4 w-4 text-muted-foreground"
+                            className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground"
                           />
                         )}
                         {seeker.gender === "Nữ" && (
                           <FontAwesomeIcon
                             icon={faVenus}
-                            className="h-4 w-4 text-muted-foreground"
+                            className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground"
                           />
                         )}
-                        <span className="text-sm">{seeker.gender}</span>
+                        <span className="text-sm sm:text-base">
+                          {seeker.gender}
+                        </span>
                       </div>
                     </div>
                   )
                 )}
                 {isEditingInfo ? (
-                  <div className="mb-4">
-                    <Label className="text-sm font-medium block mb-1 whitespace-nowrap">
+                  <div>
+                    <Label className="text-sm sm:text-base font-medium">
                       Ngày sinh
                     </Label>
                     <input
@@ -998,12 +985,12 @@ export default function MyProfile() {
                       name="dateOfBirth"
                       value={formData.dateOfBirth}
                       onChange={handleChange}
-                      className={`border p-2 w-full ${
+                      className={`border p-2 sm:p-3 w-full rounded-md text-sm sm:text-base ${
                         errors.dateOfBirth ? "border-red-500" : ""
                       }`}
                     />
                     {errors.dateOfBirth && (
-                      <p className="text-red-500 text-xs mt-1">
+                      <p className="text-red-500 text-xs sm:text-sm">
                         {errors.dateOfBirth}
                       </p>
                     )}
@@ -1011,12 +998,12 @@ export default function MyProfile() {
                 ) : (
                   seeker?.dateOfBirth && (
                     <div>
-                      <Label className="text-sm font-medium whitespace-nowrap">
+                      <Label className="text-sm sm:text-base font-medium">
                         Ngày sinh
                       </Label>
                       <div className="mt-1 flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">
+                        <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                        <span className="text-sm sm:text-base">
                           {formatDate(seeker.dateOfBirth)}
                         </span>
                       </div>
@@ -1024,12 +1011,12 @@ export default function MyProfile() {
                   )
                 )}
                 {isEditingInfo ? (
-                  <div className="relative mb-4">
-                    <Label className="text-sm font-medium block mb-1 whitespace-nowrap">
+                  <div className="relative">
+                    <Label className="text-sm sm:text-base font-medium">
                       Chuyên ngành
                     </Label>
                     <div
-                      className="border p-2 w-full rounded-md cursor-pointer"
+                      className="border p-2 sm:p-3 w-full rounded-md cursor-pointer truncate"
                       onClick={() =>
                         setIsIndustryDropdownOpen(!isIndustryDropdownOpen)
                       }
@@ -1045,42 +1032,35 @@ export default function MyProfile() {
                             .join(", ")
                         : "Chọn chuyên ngành"}
                     </div>
-
                     {isIndustryDropdownOpen && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
+                      <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-48 sm:max-h-60 overflow-auto">
                         {industries.slice(1).map((industry) => (
                           <label
                             key={industry.industryId}
-                            className="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer"
+                            className="flex items-center px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-gray-50 cursor-pointer"
                           >
                             <input
                               type="checkbox"
-                              className="w-4 h-4 rounded border-gray-300 mr-3"
+                              className="w-4 h-4 sm:w-5 sm:h-5 rounded border-gray-300 mr-2 sm:mr-3"
                               checked={(formData.industryIds ?? []).includes(
                                 industry.industryId
                               )}
                               onChange={(e) => {
-                                if (e.target.checked) {
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    industryIds: [
-                                      ...(prev.industryIds ?? []),
+                                const newIndustryIds = e.target.checked
+                                  ? [
+                                      ...(formData.industryIds ?? []),
                                       industry.industryId,
-                                    ], // 👈 Đảm bảo industryId luôn là mảng
-                                  }));
-                                } else {
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    industryIds: (
-                                      prev.industryIds ?? []
-                                    ).filter(
+                                    ]
+                                  : (formData.industryIds ?? []).filter(
                                       (id) => id !== industry.industryId
-                                    ),
-                                  }));
-                                }
+                                    );
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  industryIds: newIndustryIds,
+                                }));
                               }}
                             />
-                            <span className="text-sm">
+                            <span className="text-sm sm:text-base truncate">
                               {industry.industryName}
                             </span>
                           </label>
@@ -1092,12 +1072,12 @@ export default function MyProfile() {
                   seeker?.industry &&
                   seeker.industry.length > 0 && (
                     <div>
-                      <Label className="text-sm font-medium whitespace-nowrap">
-                        Major
+                      <Label className="text-sm sm:text-base font-medium">
+                        Chuyên ngành
                       </Label>
                       <div className="mt-1 flex items-center gap-2">
-                        <Book className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">
+                        <Book className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                        <span className="text-sm sm:text-base truncate">
                           {seeker.industry
                             .map((industry) => industry.industryName)
                             .join(", ")}
@@ -1109,15 +1089,21 @@ export default function MyProfile() {
               </CardContent>
               {isEditingInfo && (
                 <div className="mt-2 sm:mt-4 mr-3 sm:mr-4 mb-3 sm:mb-4 flex justify-end">
-                  <Button onClick={handleSaveClick} size="sm" className="text-xs sm:text-sm">Lưu</Button>
+                  <Button
+                    onClick={handleSaveClick}
+                    size="sm"
+                    className="text-xs sm:text-sm px-3 sm:px-4 min-w-[80px]"
+                  >
+                    Lưu
+                  </Button>
                 </div>
               )}
             </Card>
 
             {/* Social Links */}
-            <Card className="bg-white shadow-md w-full overflow-hidden">
-              <CardHeader className="flex flex-row items-center justify-between py-3 px-4 sm:p-6">
-                <h3 className="text-base sm:text-lg text-purple-600 font-semibold">
+            <Card className="bg-white shadow-lg w-full">
+              <CardHeader className="flex flex-row items-center justify-between py-2 sm:py-3 px-4 sm:px-6">
+                <h3 className="text-base sm:text-lg lg:text-xl text-purple-600 font-semibold">
                   Liên kết xã hội
                 </h3>
                 <Button
@@ -1125,25 +1111,21 @@ export default function MyProfile() {
                   variant="ghost"
                   onClick={handleOpenSocialLinkModal}
                 >
-                  <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               </CardHeader>
-
-              {/* Sử dụng Flexbox để hiển thị logo trên cùng hàng ngang */}
-              <CardContent className="space-y-6 overflow-auto">
+              <CardContent className="px-3 sm:px-4 md-custom:px-3.5 pb-4 sm:pb-6 pt-0 space-y-3 sm:space-y-4">
                 {socialLinks &&
                 Array.isArray(socialLinks) &&
                 socialLinks.length > 0 ? (
                   socialLinks.map((link, index) => (
                     <div
                       key={index}
-                      className="flex gap-4 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
-                      style={{ maxWidth: "100%" }} // Giới hạn chiều rộng tối đa
+                      className="flex gap-2 sm:gap-3 md-custom:gap-2.5 p-1.5 sm:p-2 md-custom:p-2 bg-white rounded-lg shadow-md social-link-container"
                     >
                       <div
-                        key={index}
                         className="platform-icon-container"
-                        style={{ width: "48px", height: "48px", flexShrink: 0 }}
+                        style={{ width: "28px", height: "28px", flexShrink: 0 }}
                       >
                         <img
                           src={require(`../../assets/images/platforms/${link.platform.toLowerCase()}.png`)}
@@ -1151,42 +1133,37 @@ export default function MyProfile() {
                           className="h-full w-full object-contain rounded-full shadow-md"
                         />
                       </div>
-                      <div className="flex-1 overflow-hidden">
-                        {" "}
-                        {/* Đảm bảo không bị tràn ra ngoài */}
-                        <div className="flex items-start justify-between">
-                          <div className="truncate">
-                            {" "}
-                            {/* Sử dụng truncate để cắt bớt văn bản nếu tràn */}
-                            <Label className="text-sm font-medium">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between w-full">
+                          <div className="truncate min-w-0 flex-1 max-w-[60%] sm:max-w-[65%] social-link-content">
+                            <Label className="text-xs sm:text-sm md-custom:text-sm font-medium">
                               {link.platform}
                             </Label>
-                            <br />
                             <a
                               href={link.url}
-                              className="text-sm text-blue-600 truncate" // Đảm bảo URL không tràn ra ngoài
+                              className="text-xs sm:text-sm md-custom:text-sm text-blue-600 truncate block"
                               target="_blank"
                               rel="noopener noreferrer"
                             >
                               {link.url}
                             </a>
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex gap-1 sm:gap-1.5 md-custom:gap-1 flex-shrink-0 ml-1.5 sm:ml-2 social-link-buttons">
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="hover:bg-blue-100 transition-colors duration-200"
+                              className="h-4 w-4 sm:h-5 sm:w-5 md-custom:h-5 md-custom:w-5 lg:h-6 lg:w-6 hover:bg-blue-100"
                               onClick={() => handleEditSocialLink(link)}
                             >
-                              <Edit className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                              <Edit className="h-2.5 w-2.5 sm:h-3 sm:w-3 md-custom:h-3 md-custom:w-3 lg:h-4 lg:w-4 text-blue-600" />
                             </Button>
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="hover:bg-red-100 transition-colors duration-200"
+                              className="h-4 w-4 sm:h-5 sm:w-5 md-custom:h-5 md-custom:w-5 lg:h-6 lg:w-6 hover:bg-red-100"
                               onClick={() => handleDeleteSocialLink(link.id)}
                             >
-                              <Delete className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
+                              <Delete className="h-2.5 w-2.5 sm:h-3 sm:w-3 md-custom:h-3 md-custom:w-3 lg:h-4 lg:w-4 text-red-600" />
                             </Button>
                           </div>
                         </div>
@@ -1194,13 +1171,13 @@ export default function MyProfile() {
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-gray-500">
-                    Không có liên kết xã hội nào
-                  </p>
+                  <div className="text-center py-4 sm:py-6 text-gray-500">
+                    <p className="text-xs sm:text-sm">
+                      Không có liên kết xã hội nào
+                    </p>
+                  </div>
                 )}
               </CardContent>
-
-              {/* Modal */}
               <section>
                 <SocialLinkModal
                   open={openSocialLink}
@@ -1208,12 +1185,102 @@ export default function MyProfile() {
                   editingSocialLinkId={editingSocialLinkId}
                   setEditingSocialLinkId={setEditingSocialLinkId}
                   initialData={formData}
+                  className="w-full max-w-md sm:max-w-lg p-4 sm:p-6"
                 />
               </section>
             </Card>
           </div>
         </div>
       </main>
+      <style jsx>{`
+        .experience-container,
+        .education-container {
+          transition: all 0.3s ease;
+        }
+        .experience-buttons,
+        .education-buttons {
+          transition: all 0.3s ease;
+        }
+        @media (min-width: 768px) and (max-width: 1000px) {
+          .experience-container,
+          .education-container {
+            padding: 0.75rem;
+            gap: 1rem;
+          }
+          .experience-content,
+          .education-content {
+            font-size: 0.875rem;
+            max-width: 70%;
+          }
+          .experience-buttons,
+          .education-buttons {
+            gap: 0.75rem;
+          }
+          .experience-buttons button,
+          .education-buttons button {
+            height: 1.5rem;
+            width: 1.5rem;
+            min-height: 1.5rem;
+            min-width: 1.5rem;
+          }
+          .experience-buttons svg,
+          .education-buttons svg {
+            height: 1rem;
+            width: 1rem;
+          }
+        }
+        @media (max-width: 767px) {
+          .experience-container,
+          .education-container {
+            padding: 0.5rem;
+            gap: 0.75rem;
+          }
+          .experience-content,
+          .education-content {
+            font-size: 0.75rem;
+            max-width: 65%;
+          }
+          .experience-buttons,
+          .education-buttons {
+            gap: 0.5rem;
+          }
+          .experience-buttons button,
+          .education-buttons button {
+            height: 1.5rem;
+            width: 1.5rem;
+            min-height: 1.5rem;
+            min-width: 1.5rem;
+            padding: 0.25rem;
+          }
+          .experience-buttons svg,
+          .education-buttons svg {
+            height: 1rem;
+            width: 1rem;
+          }
+        }
+        @media (max-width: 640px) {
+          .experience-container,
+          .education-container {
+            padding: 0.5rem;
+            gap: 0.5rem;
+          }
+          .experience-content,
+          .education-content {
+            font-size: 0.75rem;
+            max-width: 60%;
+          }
+          .experience-buttons,
+          .education-buttons {
+            gap: 0.5rem;
+          }
+        }
+        @media (min-width: 1280px) {
+          .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+          }
+        }
+      `}</style>
     </div>
   );
 }
