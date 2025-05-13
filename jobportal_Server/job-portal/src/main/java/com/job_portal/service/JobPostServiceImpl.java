@@ -294,37 +294,36 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 
 	@Override
 	public void exportJobPostToCSV(String filePath) throws IOException {
-		List<JobRecommendationProjection> jobProjections = jobPostRepository.findApprovedAndActiveJobs();
+	    List<JobRecommendationProjection> jobProjections = jobPostRepository.findJobPostSave();
 
-		try (FileWriter fileWriter = new FileWriter(filePath); CSVWriter writer = new CSVWriter(fileWriter)) {
+	    try (FileWriter fileWriter = new FileWriter(filePath); CSVWriter writer = new CSVWriter(fileWriter)) {
+	        // Viết tiêu đề
+	        String[] header = { "postId", "title", "description", "location", "salary", "experience", "typeOfWork",
+	                "companyId", "companyName", "cityName", "industryNames", "createDate", "expireDate", "logo" };
+	        writer.writeNext(header);
 
-			// Viết tiêu đề
-			String[] header = { "postId", "title", "description", "location", "salary", "experience", "typeOfWork",
-					"companyId", "companyName", "cityName", "industryNames", "createDate", "expireDate", "logo" };
-			writer.writeNext(header);
+	        // Viết dữ liệu
+	        for (JobRecommendationProjection job : jobProjections) {
 
-			// Viết dữ liệu
-			for (JobRecommendationProjection job : jobProjections) {
-				String[] data = {
-					Objects.toString(job.getPostId(), ""),
-					Objects.toString(job.getTitle(), ""),
-					cleanText(job.getDescription()),
-					Objects.toString(job.getLocation(), ""),
-					Objects.toString(job.getSalary(), ""),
-					Objects.toString(job.getExperience(), ""),
-					Objects.toString(job.getTypeOfWork(), ""),
-					Objects.toString(job.getCompanyId(), ""),
-					Objects.toString(job.getCompanyName(), ""),
-					Objects.toString(job.getCityName(), ""),
-					formatIndustryNames(Objects.toString(job.getIndustryNames(), "")),
-					Objects.toString(job.getCreateDate(), ""),
-					Objects.toString(job.getExpireDate(), ""),
-					Objects.toString(job.getLogo(), ""),
-				};
-				writer.writeNext(data);
-			}
-			
-		}
+	            String[] data = {
+	                Objects.toString(job.getPostId(), ""),
+	                Objects.toString(job.getTitle(), ""),
+	                cleanText(job.getDescription()),
+	                Objects.toString(job.getLocation(), ""),
+	                Objects.toString(job.getSalary(), ""),
+	                Objects.toString(job.getExperience(), ""),
+	                Objects.toString(job.getTypeOfWork(), ""),
+	                Objects.toString(job.getCompanyId(), ""),
+	                Objects.toString(job.getCompanyName(), ""),
+	                Objects.toString(job.getCityName(), ""),
+	                formatIndustryNames(Objects.toString(job.getIndustryNames(), "")),
+	                Objects.toString(job.getCreateDate(), ""),
+	                Objects.toString(job.getExpireDate(), ""),
+	                Objects.toString(job.getLogo(), ""),
+	            };
+	            writer.writeNext(data);
+	        }
+	    }
 	}
 
 	// Chuyển danh sách ngành nghề thành chuỗi phân tách bằng "|"
@@ -476,6 +475,37 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 				.orElseThrow(() -> new RuntimeException("Job post not found"));
 		jobPost.setViewCount(jobPost.getViewCount() + 1);
 		jobPostRepository.save(jobPost);
+	}
+
+	@Override
+	@Transactional
+	public boolean increaseViewCountWithUserCheck(UUID postId, UUID userId, String userRole) {
+		try {
+			JobPost jobPost = jobPostRepository.findById(postId)
+					.orElseThrow(() -> new RuntimeException("Job post not found"));
+					
+			// Kiểm tra vai trò người dùng
+			if ("ADMIN".equalsIgnoreCase(userRole)) {
+				// Admin xem không tính lượt xem
+				return false;
+			}
+			
+			// Kiểm tra xem người xem có phải chủ bài đăng không
+			if (jobPost.getCompany() != null && 
+				jobPost.getCompany().getCompanyId().equals(userId)) {
+				// Người đăng bài xem bài của mình, không tính lượt xem
+				return false;
+			}
+			
+			// Tăng lượt xem
+			jobPost.setViewCount(jobPost.getViewCount() + 1);
+			jobPostRepository.save(jobPost);
+			
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	public Page<JobPost> searchJobs(String title, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, int page, int size) {
@@ -644,132 +674,149 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 		return jobPostRepository.findJobByCompany(companyId);
 	}
 
-//	public Page<JobPost> searchJobs(String title, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary,
-//			Integer cityId, List<Integer> selectedIndustryIds, int page, int size) {
-//	    String redisKey = "searchJobs:" + title + ":" + selectedTypesOfWork + ":" + minSalary + ":" + maxSalary + ":"
-//	            + cityId + ":" + selectedIndustryIds + ":" + page + ":" + size;
-//
-//	    // Kiểm tra xem cache có kết quả không
-//	    Object cachedData = this.get(redisKey);
-//	    if (cachedData instanceof List<?>) {
-//	        List<JobPost> jobList = (List<JobPost>) cachedData;
-//	        Pageable pageable = PageRequest.of(page, size);
-//	        return new PageImpl<>(jobList, pageable, jobList.size());
-//	    }
-//	    
-//		System.out.print("selected "  + selectedIndustryIds);
-//		Specification<JobPost> spec = Specification.where(jobPostRepository.alwaysActiveJobs()).and(JobPostSpecification
-//				.withFilters(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds));
-//
-//		Page<JobPost> result = jobPostRepository.findAll(spec, PageRequest.of(page, size));
-//
-//	    // Lưu kết quả vào Redis
-//	    this.set(redisKey, result);
-//	    this.setTimeToLive(redisKey, TIME_OUT); // Cache hết hạn sau 1 ngày
-//
-//		return result;
-//	}
-
-//	public Page<JobPost> findByCompanyId(UUID companyId, Pageable pageable) {
-//		return jobPostRepository.findByCompanyCompanyIdAndApproveTrue(companyId, pageable);
-//	}
-//
-//	@Override
-//	public Page<JobWithApplicationCountDTO> getTop5JobsWithApplications(UUID companyId, int page, int size) {
-////		Pageable pageable = PageRequest.of(page, size); // Trang bắt đầu từ 0
-////		return jobPostRepository.findTop5JobsWithApplicationCountStatusAndIndustryName(companyId, pageable);
-//		return null;
-//	}
-//
-//	public Page<JobPost> findJobsByCompany(UUID companyId, Pageable pageable) {
-//		return jobPostRepository.findByCompanyCompanyId(companyId, pageable);
-//	}
-//
-//	@Override
-//	public Page<JobPost> findApprovedJobsByCompany(UUID companyId, Pageable pageable) {
-//		return jobPostRepository.findByCompanyCompanyIdAndIsApproveTrue(companyId, pageable);
-//	}
-//
-//	@Override
-//	public Map<String, Long> countAllJobsByCompany(UUID companyId) {
-//		Map<String, Long> jobCounts = new HashMap<>();
-//		LocalDateTime now = LocalDateTime.now();
-//
-//		// Đếm tổng số công việc
-//		long totalJobs = jobPostRepository.countByCompanyCompanyId(companyId);
-//
-//		// Đếm số công việc đang hoạt động (đã approve và chưa hết hạn)
-//		long activeJobs = jobPostRepository
-//				.countByCompanyCompanyIdAndIsApproveTrueAndExpireDateGreaterThanEqual(companyId, now);
-//
-//		// Đếm số công việc đã đóng (chỉ đếm những tin đã hết hạn)
-//		long closedJobs = jobPostRepository.countByCompanyCompanyIdAndExpireDateLessThan(companyId, now);
-//
-//		// Đếm số công việc chưa được duyệt
-//		long pendingJobs = jobPostRepository.countByCompanyCompanyIdAndIsApproveFalse(companyId);
-//
-//		jobCounts.put("totalJobs", totalJobs);
-//		jobCounts.put("activeJobs", activeJobs);
-//		jobCounts.put("closedJobs", closedJobs);
-//		jobCounts.put("pendingJobs", pendingJobs);
-//
-//		return jobCounts;
-//	}
-//
-//	@Override
-//	public List<Map<String, Object>> getCompanyJobStats(UUID companyId, LocalDateTime startDate, LocalDateTime endDate) {
-//		List<Map<String, Object>> stats = new ArrayList<>();
-//		LocalDateTime currentDate = startDate;
-//		
-//		while (!currentDate.isAfter(endDate)) {
-//			// Đếm số lượng job theo trạng thái
-//			long totalJobs = jobPostRepository.countJobsByCompanyAndDateRange(companyId, currentDate, currentDate);
-//			long activeJobs = jobPostRepository.countActiveJobsByCompanyAndDateRange(companyId, currentDate,
-//					currentDate);
-//			long closedJobs = jobPostRepository.countClosedJobsByCompanyAndDateRange(companyId, currentDate,
-//					currentDate);
-//			long pendingJobs = jobPostRepository.countPendingJobsByCompanyAndDateRange(companyId, currentDate,
-//					currentDate);
-//
-//			Map<String, Object> dayStat = new HashMap<>();
-//			dayStat.put("date", currentDate.toString());
-//			dayStat.put("totalJobs", totalJobs);
-//			dayStat.put("activeJobs", activeJobs);
-//			dayStat.put("closedJobs", closedJobs);
-//			dayStat.put("pendingJobs", pendingJobs);
-//
-//			stats.add(dayStat);
-//			currentDate = currentDate.plusDays(1);
-//		}
-//
-//		return stats;
-//	}
-//
-//	@Override
-//	public List<JobPost> getSimilarJobsByIndustry(Integer industryId, UUID excludePostId) {
-//		return jobPostRepository.findSimilarJobsByIndustry(industryId, excludePostId);
-//	}
-//
-//	@Override
-//	public void updateExpiredJobs() {
-//		List<JobPost> expiredJobs = jobPostRepository.findAllByExpireDateBeforeAndStatus(LocalDateTime.now(), "Đang mở");
-//		// Cập nhật trạng thái thành EXPIRED
-//		for (JobPost job : expiredJobs) {
-//			job.setStatus("Hết hạn");
-//		}
-//
-//		// Lưu các thay đổi vào cơ sở dữ liệu
-//		jobPostRepository.saveAll(expiredJobs);
-//	}
-//
-//	@Override
-//	public boolean canPostJob(UUID companyId) {
-//		Optional<JobPost> latestJob = jobPostRepository.findTopByCompanyCompanyIdOrderByCreateDateDesc(companyId);
-//		if (latestJob.isPresent()) {
-//			LocalDateTime now = LocalDateTime.now();
-//			LocalDateTime lastPosted = latestJob.get().getCreateDate();
-//			return Duration.between(lastPosted, now).toHours() >= 1;
-//		}
-//		return true; // Nếu chưa có bài đăng nào, cho phép tạo bài
-//	}
+	@Override
+	public List<Map<String, Object>> getBestPerformingJobs(UUID companyId) {
+		// Lấy tất cả các bài đăng của công ty
+		List<JobPost> companyJobs = jobPostRepository.findJobByCompany(companyId);
+		
+		// Tạo danh sách để lưu trữ kết quả
+		List<Map<String, Object>> bestPerformingJobs = new ArrayList<>();
+		
+		// Đối với mỗi bài đăng, tính toán hiệu suất
+		for (JobPost job : companyJobs) {
+			// Sử dụng viewCount thay vì đếm từ viewedBy
+			int viewCount = job.getViewCount() != null ? job.getViewCount() : 0;
+			
+			// Bỏ qua các bài đăng không có lượt xem
+			if (viewCount <= 0) continue;
+			
+			// Lấy số lượng ứng viên đã apply
+			long applicationCount = applyJobRepository.countByPostId(job.getPostId());
+			
+			// Tính tỉ lệ chuyển đổi dựa trên lượt xem
+			double conversionRate = (double) applicationCount / viewCount * 100;
+			
+			// Tạo map lưu thông tin
+			Map<String, Object> jobPerformance = new HashMap<>();
+			jobPerformance.put("jobId", job.getPostId());
+			jobPerformance.put("jobTitle", job.getTitle());
+			jobPerformance.put("viewCount", viewCount);
+			jobPerformance.put("applicationCount", applicationCount);
+			jobPerformance.put("conversionRate", Math.round(conversionRate * 100.0) / 100.0);
+			jobPerformance.put("createDate", job.getCreateDate());
+			jobPerformance.put("expireDate", job.getExpireDate());
+			jobPerformance.put("status", job.getStatus());
+			
+			bestPerformingJobs.add(jobPerformance);
+		}
+		
+		// Sắp xếp theo tỷ lệ chuyển đổi (cao -> thấp)
+		bestPerformingJobs.sort((a, b) -> {
+			Double rateA = (Double) a.get("conversionRate");
+			Double rateB = (Double) b.get("conversionRate");
+			return rateB.compareTo(rateA);
+		});
+		
+		// Trả về top 5 bài đăng có hiệu suất tốt nhất
+		int limit = Math.min(5, bestPerformingJobs.size());
+		return bestPerformingJobs.subList(0, limit);
+	}
+	
+	@Override
+	public List<Map<String, Object>> getJobPerformanceTrend(UUID companyId, String period) {
+		// Lấy tất cả các bài đăng của công ty
+		List<JobPost> companyJobs = jobPostRepository.findJobByCompany(companyId);
+		
+		// Xác định khoảng thời gian dựa trên tham số period
+		LocalDateTime endDate = LocalDateTime.now();
+		LocalDateTime startDate;
+		
+		if ("week".equals(period)) {
+			startDate = endDate.minusWeeks(1);
+		} else if ("month".equals(period)) {
+			startDate = endDate.minusMonths(1);
+		} else if ("quarter".equals(period)) {
+			startDate = endDate.minusMonths(3);
+		} else if ("year".equals(period)) {
+			startDate = endDate.minusYears(1);
+		} else {
+			// Mặc định là 7 ngày gần nhất
+			startDate = endDate.minusWeeks(1);
+		}
+		
+		// Tạo danh sách các ngày trong khoảng thời gian
+		List<LocalDate> datesInRange = new ArrayList<>();
+		LocalDate currentDate = startDate.toLocalDate();
+		LocalDate endLocalDate = endDate.toLocalDate();
+		
+		while (!currentDate.isAfter(endLocalDate)) {
+			datesInRange.add(currentDate);
+			currentDate = currentDate.plusDays(1);
+		}
+		
+		// Nhóm các bài đăng theo ngày và tính tổng số lượt xem, số lượt ứng tuyển và tỷ lệ chuyển đổi
+		Map<LocalDate, Map<String, Object>> dailyStats = new HashMap<>();
+		
+		// Tạo map thống kê trống cho mỗi ngày trong khoảng thời gian
+		for (LocalDate date : datesInRange) {
+			Map<String, Object> dayStats = new HashMap<>();
+			dayStats.put("date", date.toString());
+			dayStats.put("totalViews", 0);
+			dayStats.put("totalApplications", 0);
+			dayStats.put("jobCount", 0);
+			dayStats.put("avgConversionRate", 0.0);
+			dailyStats.put(date, dayStats);
+		}
+		
+		// Cập nhật thống kê cho mỗi bài đăng
+		for (JobPost job : companyJobs) {
+			// Sử dụng viewCount thay vì đếm từ viewedBy
+			int viewCount = job.getViewCount() != null ? job.getViewCount() : 0;
+			
+			// Đếm số lượng ứng viên đã apply cho bài đăng này
+			long applicationCount = applyJobRepository.countByPostId(job.getPostId());
+			
+			// Ngày tạo bài đăng
+			LocalDate jobCreateDate = job.getCreateDate().toLocalDate();
+			
+			// Thống kê bài đăng cho ngày tạo (nếu nằm trong khoảng thời gian)
+			if (dailyStats.containsKey(jobCreateDate)) {
+				Map<String, Object> createDayStats = dailyStats.get(jobCreateDate);
+				createDayStats.put("jobCount", (int) createDayStats.get("jobCount") + 1);
+			}
+			
+			// Cập nhật thống kê lượt xem và ứng tuyển cho tất cả các ngày sau ngày tạo bài đăng
+			for (LocalDate date : datesInRange) {
+				// Chỉ tính thống kê cho các ngày sau khi bài đăng được tạo
+				if (date.isAfter(jobCreateDate) || date.isEqual(jobCreateDate)) {
+					Map<String, Object> dayStats = dailyStats.get(date);
+					dayStats.put("totalViews", (int) dayStats.get("totalViews") + viewCount);
+					dayStats.put("totalApplications", (int) dayStats.get("totalApplications") + applicationCount);
+				}
+			}
+		}
+		
+		// Tính toán tỷ lệ chuyển đổi trung bình cho mỗi ngày
+		for (Map<String, Object> dayStats : dailyStats.values()) {
+			int totalViews = (int) dayStats.get("totalViews");
+			int totalApplications = (int) dayStats.get("totalApplications");
+			
+			double avgConversionRate = 0;
+			if (totalViews > 0) {
+				avgConversionRate = (double) totalApplications / totalViews * 100;
+			}
+			
+			dayStats.put("avgConversionRate", Math.round(avgConversionRate * 100.0) / 100.0);
+		}
+		
+		// Chuyển đổi Map thành List và sắp xếp theo ngày
+		List<Map<String, Object>> result = new ArrayList<>(dailyStats.values());
+		result.sort((a, b) -> {
+			String dateA = (String) a.get("date");
+			String dateB = (String) b.get("date");
+			return dateA.compareTo(dateB);
+		});
+		
+		return result;
+	}
 }

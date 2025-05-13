@@ -8,6 +8,7 @@
     "formik": "^2.4.6",
     "react-google-login": "^5.2.2",
     "react-hot-toast": "^2.4.1",
+    "recharts": "^2.15.3",
     "sweetalert2": "^11.14.5",
     "yup": "^1.4.0"
   }

@@ -43,10 +43,15 @@ public interface IJobPostService {
 	public void updateExpiredJobs();
 	public boolean canPostJob(UUID companyId);
 	public void increaseViewCount(UUID postId);
+	
+	// Thêm phương thức mới để tăng lượt xem với kiểm tra người dùng
+	public boolean increaseViewCountWithUserCheck(UUID postId, UUID userId, String userRole);
+	
 //	public Page<JobWithApplicationCountDTO> getJobsWithFiltersAndSorting(String title, List<String> selectedTypesOfWork, Long minSalary,
 //			Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, Pageable pageable);
 	public Page<JobPost> searchJobs(String title, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, int page, int size);
 	Map<String, List<CandidateWithScoreDTO>> getCandidatesByJobForCompany(UUID companyId, String sortDirection, String sortBy);
 	Page<JobPost> semanticSearchWithFilters(String query, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, int page, int size);
-
+	List<Map<String, Object>> getBestPerformingJobs(UUID companyId);
+	List<Map<String, Object>> getJobPerformanceTrend(UUID companyId, String period);
 }

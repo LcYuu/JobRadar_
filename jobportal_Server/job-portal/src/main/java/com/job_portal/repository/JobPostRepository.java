@@ -58,11 +58,10 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 
 	List<JobPost> findByIsApproveTrueAndExpireDateGreaterThanEqual(LocalDateTime currentDate);
 
-	@Query(value = "SELECT  BIN_TO_UUID(j.post_id) AS postId, j.title, j.description, j.location, j.salary, j.experience, "
+	@Query(value = "SELECT BIN_TO_UUID(j.post_id) AS postId, j.title, j.description, j.location, j.salary, j.experience, "
 			+ "j.type_of_work, j.create_date, j.expire_date,  BIN_TO_UUID(j.company_id), c.company_name, ci.city_name, "
 			+ "GROUP_CONCAT(DISTINCT i.industry_name) AS industryNames, c.logo " + "FROM job_posts j "
 			+ "JOIN company c ON j.company_id = c.user_id " + "JOIN city ci ON c.city_id = ci.city_id "
-
 			+ "JOIN company_industries ci2 ON c.user_id = ci2.company_id "
 			+ "JOIN industry i ON ci2.industry_id = i.industry_id "
 			+ "WHERE j.is_approve = true AND j.expire_date >= CURRENT_TIMESTAMP "
@@ -70,6 +69,21 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 			+ "j.create_date, j.expire_date, j.company_id, c.company_name, ci.city_name, c.logo",
 		nativeQuery = true)
 	List<JobRecommendationProjection> findApprovedAndActiveJobs();
+	
+	@Query(value = "SELECT BIN_TO_UUID(j.post_id) AS postId, j.title, j.description, j.location, j.salary, j.experience, "
+	        + "j.type_of_work, j.create_date, j.expire_date, "
+	        + "COALESCE(BIN_TO_UUID(j.company_id), '') AS companyId, c.company_name, ci.city_name, "
+	        + "GROUP_CONCAT(DISTINCT i.industry_name) AS industryNames, c.logo "
+	        + "FROM job_posts j "
+	        + "JOIN company c ON j.company_id = c.user_id "
+	        + "JOIN city ci ON c.city_id = ci.city_id "
+	        + "JOIN job_post_industry jp ON jp.post_id = j.post_id "
+	        + "JOIN industry i ON jp.industry_id = i.industry_id "
+	        + "WHERE j.is_approve = true AND j.expire_date >= CURRENT_TIMESTAMP "
+	        + "GROUP BY j.post_id, j.title, j.description, j.location, j.salary, j.experience, j.type_of_work, "
+	        + "j.create_date, j.expire_date, j.company_id, c.company_name, ci.city_name, c.logo",
+	        nativeQuery = true)
+	List<JobRecommendationProjection> findJobPostSave();
 
 	@Query("SELECT j FROM JobPost j WHERE j.isApprove = true AND j.expireDate >= CURRENT_TIMESTAMP ORDER BY j.createDate DESC")
 	Page<JobPost> findJobPostActive(Pageable pageable);
@@ -111,7 +125,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 
 	@Query(value = "SELECT BIN_TO_UUID(jp.post_id) AS postId, jp.title, jp.description, jp.location, jp.salary, jp.experience, "
 			+ "jp.type_of_work AS typeOfWork, jp.create_date AS createDate, jp.expire_date AS expireDate, "
-			+ "COUNT(DISTINCT a.post_id) AS applicationCount, jp.status, "
+			+ "COUNT(DISTINCT a.user_id) AS applicationCount, jp.status, "
 			+ "GROUP_CONCAT(DISTINCT i.industry_name SEPARATOR ', ') AS industryNames, jp.is_approve AS isApprove "
 			+ "FROM job_posts jp " + "LEFT JOIN apply_job a ON jp.post_id = a.post_id "
 			+ "JOIN company c ON jp.company_id = c.user_id "
@@ -127,7 +141,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	@Query(value = """
 		    SELECT BIN_TO_UUID(jp.post_id) AS postId, jp.title, jp.description, jp.location, jp.salary, 
 		           jp.experience, jp.type_of_work AS typeOfWork, jp.create_date AS createDate, 
-		           jp.expire_date AS expireDate, COUNT(DISTINCT a.post_id) AS applicationCount, 
+		           jp.expire_date AS expireDate, COUNT(DISTINCT a.user_id) AS applicationCount, 
 		           jp.status, GROUP_CONCAT(i.industry_name SEPARATOR ', ') AS industryNames, 
 		           jp.is_approve AS isApprove
 		    FROM job_posts jp
@@ -255,7 +269,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 @Query(value = """
 		    SELECT BIN_TO_UUID(jp.post_id) AS postId, jp.title, jp.description, jp.location, jp.salary, 
 		           jp.experience, jp.type_of_work AS typeOfWork, jp.create_date AS createDate, 
-		           jp.expire_date AS expireDate, COUNT(DISTINCT a.post_id) AS applicationCount, 
+		           jp.expire_date AS expireDate, COUNT(DISTINCT a.user_id) AS applicationCount, 
 		           jp.status, GROUP_CONCAT(i.industry_name SEPARATOR ', ') AS industryNames, 
 		           jp.is_approve AS isApprove
 		    FROM job_posts jp

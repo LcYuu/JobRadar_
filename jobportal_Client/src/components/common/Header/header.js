@@ -183,9 +183,6 @@ export default function Header() {
             <Button variant="ghost" className="text-white hover:text-purple-200" onClick={handleSignInClick}>
               Login
             </Button>
-            <Button variant="ghost" className="text-white hover:text-purple-200" onClick={handleSignInClick}>
-              Login
-            </Button>
             <Button className="bg-purple-600 text-white hover:bg-purple-700" onClick={handleSignUpClick}>
 
 

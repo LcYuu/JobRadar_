@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.job_portal.DTO.CountReviewByStar;
 import com.job_portal.models.Company;
@@ -19,6 +20,8 @@ import com.job_portal.models.JobPost;
 import com.job_portal.models.Review;
 import com.job_portal.models.Seeker;
 import com.job_portal.repository.CompanyRepository;
+import com.job_portal.repository.ReviewReactionRepository;
+import com.job_portal.repository.ReviewReplyRepository;
 import com.job_portal.repository.ReviewRepository;
 import com.social.exceptions.AllExceptions;
 
@@ -27,6 +30,13 @@ public class ReviewServiceImpl implements IReviewService {
 
 	@Autowired
 	ReviewRepository reviewRepository;
+	
+	@Autowired
+	ReviewReplyRepository reviewReplyRepository;
+	
+	@Autowired
+	ReviewReactionRepository reviewReactionRepository;
+	
 	@Autowired
 	CompanyRepository companyRepository;
 
@@ -64,6 +74,7 @@ public class ReviewServiceImpl implements IReviewService {
 	}
 
 	@Override
+	@Transactional
 	public boolean deleteReview(UUID reviewId) throws AllExceptions {
 		Optional<Review> review = reviewRepository.findById(reviewId);
 		
@@ -72,6 +83,12 @@ public class ReviewServiceImpl implements IReviewService {
 		}
 		
 		try {
+			// Xóa tất cả các phản hồi liên quan đến đánh giá này
+			reviewReplyRepository.deleteByReviewReviewId(reviewId);
+			
+			// Xóa tất cả các reaction liên quan đến đánh giá này
+			reviewReactionRepository.deleteByReviewReviewId(reviewId);
+			
 			Company company = review.get().getCompany();
 			
 			company.getReviews().remove(review.get());
@@ -98,5 +115,4 @@ public class ReviewServiceImpl implements IReviewService {
 	public List<CountReviewByStar> countReviewsByStar(UUID companyId) {
 		return reviewRepository.countReviewsByStar(companyId);
 	}
-
 }

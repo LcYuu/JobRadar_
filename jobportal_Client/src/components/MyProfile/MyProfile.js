@@ -635,20 +635,14 @@ export default function MyProfile() {
                         <div className="mt-3 p-3 bg-gray-50 rounded border-l-2 border-gray-200">
                           <div className="flex items-start">
                             <FileText className="h-4 w-4 mr-2 text-gray-500 mt-0.5" />
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm font-medium">
+                            Mô tả:{" "}
+                            <span className="text-blue-600">
                               {experience.description}
-                            </p>
+                            </span>
+                          </p>
                           </div>
                         </div>
-                        <p className="mt-2 text-sm text-gray-600">
-                          {formatDate(experience.startDate)} -{" "}
-                          {experience.endDate
-                            ? formatDate(experience.endDate)
-                            : "Present"}
-                        </p>
-                        <p className="mt-2 text-sm text-gray-500">
-                          {experience.description}
-                        </p>
                       </div>
                     </div>
                   ))

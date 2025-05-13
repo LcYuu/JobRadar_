@@ -31,26 +31,24 @@ export default function Dashboard() {
   // Update selected section based on route
   useEffect(() => {
     const path = location.pathname;
-    let section = "Dashboard"; // Default section
-
-    if (user?.userType?.userTypeId === 2) {
-      section = sectionMap.user[path] || "Dashboard";
-    } else if (user?.userType?.userTypeId === 3) {
-      if (path.includes("employer/account-management/dashboard")) {
-        setSelectedSection("Dashboard");
-      } else if (path.includes("employer/account-management/company-profile")) {
-        setSelectedSection("Profile công ty");
-      } else if (path.includes("employer/account-management/applications")) {
-        setSelectedSection("Danh sách ứng tuyển");
-      } else if (path.includes("employer/account-management/jobs")) {
-        setSelectedSection("Danh sách công việc");
-      } else if (path.includes("employer/account-management/reviews")) {
-        setSelectedSection("Danh sách đánh giá");
-      }
     
+    if (user?.userType?.userTypeId === 2) {
+      // For user type 2
+      for (const [route, section] of Object.entries(sectionMap.user)) {
+        if (path.includes(route)) {
+          setSelectedSection(section);
+          return;
+        }
+      }
+    } else if (user?.userType?.userTypeId === 3) {
+      // For user type 3
+      for (const [route, section] of Object.entries(sectionMap.employer)) {
+        if (path.includes(route)) {
+          setSelectedSection(section);
+          return;
+        }
+      }
     }
-
-    setSelectedSection(section);
   }, [location.pathname, user]);
 
   // Redirect to dashboard based on user role
