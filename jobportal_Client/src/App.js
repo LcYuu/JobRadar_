@@ -16,6 +16,7 @@ import MyAccount from "./pages/MyAccount/MyAccount";
 import FindCompanies from "./pages/FindCompanies/FindCompanies";
 import CompanyProfile from "./pages/CompanyProfile/CompanyProfile";
 import { useNavigate } from "react-router-dom";
+import ScrollToTop from "./components/ScrollToTop";
 
 import PublicRoute from "./components/PublicRoute/PublicRoute";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
@@ -59,6 +60,8 @@ import CVSelection from "./pages/CreateCV/CVSelection";
 import ViewCV from "./pages/CreateCV/ViewCV";
 import { isTokenExpired } from './utils/tokenUtils';
 import VerifiedCompany from "./pages/SignIn/VerifiedCompany";
+import JobStatsPage from "./components/JobStats/JobStatsPage";
+
 const ProtectedHome = () => {
   const { user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
@@ -321,7 +324,7 @@ const App = () => {
             element={<CandidateManagement />}
           />
           <Route path="review-management" element={<CompanyReview />} />
-
+          <Route path="job-stats" element={<JobStatsPage />} />
           <Route
             path="candidate-management/applicants/:userId/:postId"
             element={<ApplicantDetail />}
@@ -389,6 +392,7 @@ const App = () => {
         />
       </Routes>
       {showFooter && <Footer />}
+      <ScrollToTop />
     </div>
   );
 };

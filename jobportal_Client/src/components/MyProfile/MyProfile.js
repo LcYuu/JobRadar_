@@ -633,10 +633,13 @@ export default function MyProfile() {
                         </div>
                         <div className="mt-2 sm:mt-3 p-2 sm:p-3 bg-gray-50 rounded border-l-2 border-gray-200">
                           <div className="flex items-start">
-                            <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-gray-500 mt-0.5 flex-shrink-0" />
-                            <p className="text-xs sm:text-sm text-gray-600 break-words">
+                            <FileText className="h-4 w-4 mr-2 text-gray-500 mt-0.5" />
+                            <p className="text-sm font-medium">
+                            Mô tả:{" "}
+                            <span className="text-blue-600">
                               {experience.description}
-                            </p>
+                            </span>
+                          </p>
                           </div>
                         </div>
                       </div>

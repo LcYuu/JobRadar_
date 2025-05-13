@@ -133,17 +133,20 @@ const [loading, setLoading] = useState(false);
         : allIndustries.find((industry) => industry.industryId === industryId)
             ?.industryName || "Tất cả công ty"
     );
-    setTempFilters((prev) => ({ ...prev, industryId: industryId || "" }));
+    
+    // Update both tempFilters and actual filters to trigger API call
+    const newIndustryId = industryId || "";
+    setTempFilters((prev) => ({ ...prev, industryId: newIndustryId }));
+    
+    // Update filters to trigger API search with the selected industry
+    setFilters((prev) => ({ ...prev, industryId: newIndustryId }));
     setCurrentPage(0); // Reset về trang đầu tiên khi thay đổi danh mục
   };
   
 
-  const filteredCompanies = selectedCategory
-  ? companyByFeature.filter((company) =>
-      company.industryIds.includes(selectedCategory)
-    )
-  : companyByFeature;
-
+  // Replace with direct reference to API results
+  const filteredCompanies = companyByFeature;
+  
   const hasFilteredCompanies = filteredCompanies.length > 0;
 
   const hasSuggestedCompanies = companyFitSeeker.length > 0;
@@ -284,9 +287,7 @@ const [loading, setLoading] = useState(false);
               )}
             </h2>
             <p className="text-gray-500">
-              {hasFilteredCompanies ? 
-                selectedCategory ? filteredCompanies.length : totalElements 
-              : 0} kết quả
+              {totalElements > 0 ? totalElements : 0} kết quả
             </p>
           </div>
           {loading ? (
@@ -351,8 +352,8 @@ const [loading, setLoading] = useState(false);
                 })}
               </div>
 
-              {/* Hiển thị phân trang khi không chọn danh mục hoặc tổng số trang > 1 */}
-              {(selectedCategory === null && totalPages > 1) && (
+              {/* Hiển thị phân trang khi có nhiều trang */}
+              {totalPages > 1 && (
                 <div className="mt-8 flex justify-center">
                   <Pagination
                     currentPage={currentPage}
