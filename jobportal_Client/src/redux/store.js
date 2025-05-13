@@ -63,6 +63,7 @@ import generatedCvReducer from "./GeneratedCV/generated_cvSlice.js";
 import cvAnalysisReducer from "./CVAnalysis/cvAnalysisSlice.js";
 import subscriptionReducer from "./Subscription/subscriptionSlice.js";
 import notificationsReducer from "./Notifications/notificationSlice.js";
+import chatbotReducer from "./ChatBot/chatbotSlice.js";
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -86,6 +87,7 @@ export const store = configureStore({
     genCV: generatedCvReducer,
     cvAnalysis: cvAnalysisReducer,
     subscription: subscriptionReducer,
-    notifications: notificationsReducer
+    notifications: notificationsReducer,
+    chatbot: chatbotReducer, 
   },
 });
