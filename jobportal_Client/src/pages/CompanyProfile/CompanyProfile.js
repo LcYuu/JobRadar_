@@ -6,7 +6,15 @@ import { Badge } from "../../ui/badge";
 import { Calendar, MapPin, Briefcase, Star, Phone, Mail } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import JobCard_AllJob from "../../components/common/JobCard_AllJob/JobCard_AllJob";
-import { StarRounded, ThumbUpAlt, ThumbDownAlt, Reply, Close, Delete, Edit } from "@mui/icons-material";
+import {
+  StarRounded,
+  ThumbUpAlt,
+  ThumbDownAlt,
+  Reply,
+  Close,
+  Delete,
+  Edit,
+} from "@mui/icons-material";
 import { toast } from "react-toastify";
 import Pagination from "../../components/common/Pagination/Pagination";
 import "react-toastify/dist/ReactToastify.css";
@@ -22,7 +30,7 @@ import {
   getReviewReactions,
   deleteReviewReply,
   updateReview,
-  updateReviewReply
+  updateReviewReply,
 } from "../../redux/Review/review.thunk";
 import {
   followCompany,
@@ -65,45 +73,57 @@ const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
 });
 
 // Add a new EditReplyForm component before ReplyItem
-const EditReplyForm = ({ 
-  reply, 
-  editReplyData, 
-  setEditReplyData, 
-  handleCancelReplyEdit, 
-  handleSaveReplyEdit 
+const EditReplyForm = ({
+  reply,
+  editReplyData,
+  setEditReplyData,
+  handleCancelReplyEdit,
+  handleSaveReplyEdit,
 }) => {
   // Check if this is a reply to another comment
-  const isReplyToComment = reply.content.startsWith('@') && reply.content.includes(':');
-  
+  const isReplyToComment =
+    reply.content.startsWith("@") && reply.content.includes(":");
+
   return (
     <div className="mt-2 p-3 border border-blue-200 rounded-md bg-blue-50">
       {isReplyToComment && (
         <div className="mb-2 text-sm text-blue-600 bg-blue-100 p-2 rounded">
-          <span className="font-medium">Lưu ý:</span> Bạn đang chỉnh sửa phần nội dung phản hồi. Phần tag người dùng sẽ được giữ nguyên.
+          <span className="font-medium">Lưu ý:</span> Bạn đang chỉnh sửa phần
+          nội dung phản hồi. Phần tag người dùng sẽ được giữ nguyên.
         </div>
       )}
-      
+
       <textarea
         value={editReplyData.content}
-        onChange={(e) => setEditReplyData({...editReplyData, content: e.target.value})}
+        onChange={(e) =>
+          setEditReplyData({ ...editReplyData, content: e.target.value })
+        }
         className="w-full p-2 border border-gray-300 rounded-md mb-2 focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
         rows={2}
       />
-      
+
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <input
             type="checkbox"
             id={`edit-reply-anonymous-${reply.replyId}`}
             checked={editReplyData.anonymous}
-            onChange={(e) => setEditReplyData({...editReplyData, anonymous: e.target.checked})}
+            onChange={(e) =>
+              setEditReplyData({
+                ...editReplyData,
+                anonymous: e.target.checked,
+              })
+            }
             className="mr-2"
           />
-          <label htmlFor={`edit-reply-anonymous-${reply.replyId}`} className="text-sm">
+          <label
+            htmlFor={`edit-reply-anonymous-${reply.replyId}`}
+            className="text-sm"
+          >
             Ẩn danh
           </label>
         </div>
-        
+
         <div className="flex gap-2">
           <button
             onClick={handleCancelReplyEdit}
@@ -124,19 +144,19 @@ const EditReplyForm = ({
 };
 
 // Enhanced ReplyItem component to display a single reply with nested replies
-const ReplyItem = ({ 
-  reply, 
-  reviewId, 
-  onEdit, 
-  onDelete, 
-  onReply, 
+const ReplyItem = ({
+  reply,
+  reviewId,
+  onEdit,
+  onDelete,
+  onReply,
   currentUser,
   checkIfSaved,
   editingReplyId,
   editReplyData,
   handleCancelReplyEdit,
   handleSaveReplyEdit,
-  setEditReplyData
+  setEditReplyData,
 }) => {
   const [showNestedReplyForm, setShowNestedReplyForm] = useState(false);
   const [nestedReplyText, setNestedReplyText] = useState("");
@@ -147,12 +167,12 @@ const ReplyItem = ({
       toast.warning("Vui lòng đăng nhập để thực hiện thao tác này");
       return;
     }
-    
+
     if (checkIfSaved === false) {
       toast.warning("Bạn cần apply vào công ty để có thể phản hồi");
       return;
     }
-    
+
     setShowNestedReplyForm(true);
   };
 
@@ -161,26 +181,34 @@ const ReplyItem = ({
       toast.warning("Vui lòng nhập nội dung phản hồi");
       return;
     }
-    
+
     // Create a display name for the parent - either masked username or anonymous with number
-    const parentDisplayName = reply.anonymous 
-      ? `Người dùng ẩn danh ${reply.anonymousId || ''}`
-      : reply.userName 
-        ? `${reply.userName[0]}${"*".repeat(reply.userName.length - 2)}${reply.userName[reply.userName.length - 1]}`
-        : "Người dùng";
-    
+    const parentDisplayName = reply.anonymous
+      ? `Người dùng ẩn danh ${reply.anonymousId || ""}`
+      : reply.userName
+      ? `${reply.userName[0]}${"*".repeat(reply.userName.length - 2)}${
+          reply.userName[reply.userName.length - 1]
+        }`
+      : "Người dùng";
+
     // Add the reply tag to the beginning of the content
     const replyContent = `@${parentDisplayName}: ${nestedReplyText}`;
-    
+
     // Pass the parent user information to create a clear reference
     const parentUserInfo = {
       parentUserName: reply.userName,
       parentUserId: reply.userId,
       parentIsAnonymous: reply.anonymous,
-      parentAnonymousId: reply.anonymousId
+      parentAnonymousId: reply.anonymousId,
     };
-    
-    onReply(reviewId, reply.replyId, replyContent, isNestedReplyAnonymous, parentUserInfo);
+
+    onReply(
+      reviewId,
+      reply.replyId,
+      replyContent,
+      isNestedReplyAnonymous,
+      parentUserInfo
+    );
     setNestedReplyText("");
     setIsNestedReplyAnonymous(false);
     setShowNestedReplyForm(false);
@@ -194,25 +222,30 @@ const ReplyItem = ({
 
   // Calculate indentation based on level
   const indentationStyle = {
-    marginLeft: reply.level > 0 ? '24px' : '0',
-    borderLeft: reply.level > 0 ? '2px solid #a78bfa' : 'none',
-    paddingLeft: reply.level > 0 ? '16px' : '0',
+    marginLeft: reply.level > 0 ? "24px" : "0",
+    borderLeft: reply.level > 0 ? "2px solid #a78bfa" : "none",
+    paddingLeft: reply.level > 0 ? "16px" : "0",
   };
 
   // Add styling based on nesting level
-  const nestedReplyStyle = reply.level > 0 ? 
-    "bg-purple-50 border-purple-200" : 
-    "bg-white border-gray-200";
+  const nestedReplyStyle =
+    reply.level > 0
+      ? "bg-purple-50 border-purple-200"
+      : "bg-white border-gray-200";
 
   // Function to mask username
   const maskUsername = (username) => {
     if (!username) return "Người dùng";
-    return `${username[0]}${"*".repeat(username.length - 2)}${username[username.length - 1]}`;
+    return `${username[0]}${"*".repeat(username.length - 2)}${
+      username[username.length - 1]
+    }`;
   };
 
   return (
     <div className="reply-item" style={indentationStyle}>
-      <div className={`p-3 border ${nestedReplyStyle} rounded-lg shadow-sm hover:shadow-md transition-shadow mb-2`}>
+      <div
+        className={`p-3 border ${nestedReplyStyle} rounded-lg shadow-sm hover:shadow-md transition-shadow mb-2`}
+      >
         <div className="flex items-start">
           <img
             src={reply.anonymous ? anonymousIcon : reply.userAvatar}
@@ -223,38 +256,39 @@ const ReplyItem = ({
             <div className="flex items-center justify-between">
               <div>
                 <span className="font-medium text-sm text-purple-700">
-                  {reply.anonymous 
-                    ? `Người dùng ẩn danh ${reply.anonymousId || ''}` 
-                    : maskUsername(reply.userName)
-                  }
+                  {reply.anonymous
+                    ? `Người dùng ẩn danh ${reply.anonymousId || ""}`
+                    : maskUsername(reply.userName)}
                 </span>
                 {reply.parentReplyId && (
                   <span className="text-gray-600 text-sm ml-2 bg-gray-100 px-2 py-1 rounded-md">
                     <span className="text-gray-500 mr-1">trả lời</span>
                     <span className="font-medium text-purple-600">
-                      {reply.parentIsAnonymous 
-                        ? `Người dùng ẩn danh ${reply.parentAnonymousId || ''}` 
+                      {reply.parentIsAnonymous
+                        ? `Người dùng ẩn danh ${reply.parentAnonymousId || ""}`
                         : reply.parentUserName
-                          ? `${reply.parentUserName[0]}${"*".repeat(reply.parentUserName.length - 2)}${reply.parentUserName[reply.parentUserName.length - 1]}`
-                          : "Người dùng"
-                      }
+                        ? `${reply.parentUserName[0]}${"*".repeat(
+                            reply.parentUserName.length - 2
+                          )}${
+                            reply.parentUserName[
+                              reply.parentUserName.length - 1
+                            ]
+                          }`
+                        : "Người dùng"}
                     </span>
                   </span>
                 )}
                 <span className="text-xs text-gray-500 ml-2">
-                  {new Date(reply.createDate).toLocaleDateString(
-                    "vi-VN",
-                    {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }
-                  )}
+                  {new Date(reply.createDate).toLocaleDateString("vi-VN", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </span>
               </div>
-              
+
               {/* Edit and Delete buttons for own replies */}
               <div className="flex gap-2">
                 {currentUser && currentUser.userId === reply.userId && (
@@ -279,63 +313,80 @@ const ReplyItem = ({
                 )}
               </div>
             </div>
-            
-            <p className={`text-sm text-gray-700 mt-2 p-2 rounded-md ${reply.level > 0 ? 'bg-white' : 'bg-purple-50'}`}>
+
+            <p
+              className={`text-sm text-gray-700 mt-2 p-2 rounded-md ${
+                reply.level > 0 ? "bg-white" : "bg-purple-50"
+              }`}
+            >
               {/* Split content by @ mention if it exists */}
-              {reply.content.startsWith('@') ? (
+              {reply.content.startsWith("@") ? (
                 <>
                   <span className="font-medium text-purple-600 bg-purple-100 px-2 py-1 rounded mr-1 inline-block mb-1">
-                    {reply.content.split(':')[0]}
+                    {reply.content.split(":")[0]}
                   </span>
-                  <span>{reply.content.split(':').slice(1).join(':')}</span>
+                  <span>{reply.content.split(":").slice(1).join(":")}</span>
                 </>
               ) : (
                 reply.content
               )}
             </p>
-            
+
             {/* Edit reply form */}
-            {currentUser && currentUser.userId === reply.userId && editingReplyId === reply.replyId && (
-              <EditReplyForm
-                reply={reply}
-                editReplyData={editReplyData}
-                setEditReplyData={setEditReplyData}
-                handleCancelReplyEdit={handleCancelReplyEdit}
-                handleSaveReplyEdit={handleSaveReplyEdit}
-              />
-            )}
-            
+            {currentUser &&
+              currentUser.userId === reply.userId &&
+              editingReplyId === reply.replyId && (
+                <EditReplyForm
+                  reply={reply}
+                  editReplyData={editReplyData}
+                  setEditReplyData={setEditReplyData}
+                  handleCancelReplyEdit={handleCancelReplyEdit}
+                  handleSaveReplyEdit={handleSaveReplyEdit}
+                />
+              )}
+
             {/* Reply button - always show but disable if max level reached */}
             <div className="mt-2">
-              <button 
+              <button
                 onClick={handleNestedReplyClick}
-                className={`text-sm text-gray-600 hover:text-purple-700 flex items-center gap-1 ${reply.level >= 2 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`text-sm text-gray-600 hover:text-purple-700 flex items-center gap-1 ${
+                  reply.level >= 2 ? "opacity-50 cursor-not-allowed" : ""
+                }`}
                 disabled={checkIfSaved === false || reply.level >= 2}
-                title={reply.level >= 2 ? "Đã đạt giới hạn độ sâu phản hồi" : checkIfSaved === false ? "Bạn cần apply vào công ty để phản hồi" : "Phản hồi"}
+                title={
+                  reply.level >= 2
+                    ? "Đã đạt giới hạn độ sâu phản hồi"
+                    : checkIfSaved === false
+                    ? "Bạn cần apply vào công ty để phản hồi"
+                    : "Phản hồi"
+                }
               >
                 <Reply fontSize="small" />
                 <span>Phản hồi</span>
               </button>
             </div>
-            
+
             {/* Nested reply form */}
             {showNestedReplyForm && (
               <div className="mt-2 p-3 border border-purple-200 rounded-md bg-purple-50 shadow-sm">
                 <div className="flex justify-between items-center mb-2">
                   <h4 className="text-sm font-medium text-purple-700 flex items-center gap-1">
                     <Reply fontSize="small" />
-                    Phản hồi đến <span className="bg-gray-100 px-2 py-1 rounded-md text-purple-600">
-                      {reply.anonymous ? "Người dùng ẩn danh" : maskUsername(reply.userName)}
+                    Phản hồi đến{" "}
+                    <span className="bg-gray-100 px-2 py-1 rounded-md text-purple-600">
+                      {reply.anonymous
+                        ? "Người dùng ẩn danh"
+                        : maskUsername(reply.userName)}
                     </span>
                   </h4>
-                  <button 
+                  <button
                     onClick={handleCloseNestedReply}
                     className="text-gray-500 hover:text-gray-700 rounded-full p-1 hover:bg-gray-200"
                   >
                     <Close fontSize="small" />
                   </button>
                 </div>
-                
+
                 <textarea
                   value={nestedReplyText}
                   onChange={(e) => setNestedReplyText(e.target.value)}
@@ -343,24 +394,26 @@ const ReplyItem = ({
                   className="w-full p-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
                   rows={2}
                 />
-                
+
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
                       id={`anonymous-nested-reply-${reply.replyId}`}
                       checked={isNestedReplyAnonymous}
-                      onChange={(e) => setIsNestedReplyAnonymous(e.target.checked)}
+                      onChange={(e) =>
+                        setIsNestedReplyAnonymous(e.target.checked)
+                      }
                       className="w-4 h-4 rounded border-purple-300 text-purple-600 focus:ring-purple-500"
                     />
-                    <label 
+                    <label
                       htmlFor={`anonymous-nested-reply-${reply.replyId}`}
                       className="text-sm text-purple-600"
                     >
                       Phản hồi ẩn danh
                     </label>
                   </div>
-                  
+
                   <button
                     onClick={handleNestedReplySubmit}
                     className="px-3 py-1 bg-purple-500 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
@@ -370,34 +423,38 @@ const ReplyItem = ({
                 </div>
               </div>
             )}
-            
+
             {/* Render child replies */}
-            {reply.childReplies && Array.isArray(reply.childReplies) && reply.childReplies.length > 0 && (
-              <div className="mt-3 bg-purple-50 rounded-lg p-2">
-                <div className="border-l-2 border-purple-300 pl-3 ml-1">
-                  <div className="text-xs text-purple-600 mb-2 font-medium">Các phản hồi ({reply.childReplies.length})</div>
-                  <div className="space-y-2">
-                    {reply.childReplies.map((childReply) => (
-                      <ReplyItem 
-                        key={childReply.replyId}
-                        reply={childReply}
-                        reviewId={reviewId}
-                        onEdit={onEdit}
-                        onDelete={onDelete}
-                        onReply={onReply}
-                        currentUser={currentUser}
-                        checkIfSaved={checkIfSaved}
-                        editingReplyId={editingReplyId}
-                        editReplyData={editReplyData}
-                        handleCancelReplyEdit={handleCancelReplyEdit}
-                        handleSaveReplyEdit={handleSaveReplyEdit}
-                        setEditReplyData={setEditReplyData}
-                      />
-                    ))}
+            {reply.childReplies &&
+              Array.isArray(reply.childReplies) &&
+              reply.childReplies.length > 0 && (
+                <div className="mt-3 bg-purple-50 rounded-lg p-2">
+                  <div className="border-l-2 border-purple-300 pl-3 ml-1">
+                    <div className="text-xs text-purple-600 mb-2 font-medium">
+                      Các phản hồi ({reply.childReplies.length})
+                    </div>
+                    <div className="space-y-2">
+                      {reply.childReplies.map((childReply) => (
+                        <ReplyItem
+                          key={childReply.replyId}
+                          reply={childReply}
+                          reviewId={reviewId}
+                          onEdit={onEdit}
+                          onDelete={onDelete}
+                          onReply={onReply}
+                          currentUser={currentUser}
+                          checkIfSaved={checkIfSaved}
+                          editingReplyId={editingReplyId}
+                          editReplyData={editReplyData}
+                          handleCancelReplyEdit={handleCancelReplyEdit}
+                          handleSaveReplyEdit={handleSaveReplyEdit}
+                          setEditReplyData={setEditReplyData}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         </div>
       </div>
@@ -428,71 +485,133 @@ export default function CompanyProfile() {
   const [editReviewData, setEditReviewData] = useState({
     star: 0,
     message: "",
-    isAnonymous: false
+    isAnonymous: false,
   });
   const [editReplyData, setEditReplyData] = useState({
     content: "",
-    anonymous: false
+    anonymous: false,
   });
-  
+
   // Add a function to highlight potentially problematic words
   const highlightProblematicContent = (content) => {
     // List of common problematic words in Vietnamese and English
     const problematicWords = [
       // Vietnamese
-      "địt", "đụ", "đéo", "cặc", "lồn", "đĩ", "điếm", "chó", "ngu", "ngu ngốc",
-      "ngu si", "đần", "đần độn", "khốn nạn", "đồ khốn", "đồ ngu", "đồ chó",
-      "đồ điếm", "đồ đĩ", "đồ khốn nạn", "đồ vô dụng", "đồ vô tích sự",
-      "đồ bỏ đi", "đồ rác rưởi", "đồ hèn", "đồ hèn nhát", "đồ hèn mạt",
-      "đồ hèn hạ", "đồ hèn kém", "đồ hèn mọn", "đồ hèn nhược", "đồ hèn yếu",
+      "địt",
+      "đụ",
+      "đéo",
+      "cặc",
+      "lồn",
+      "đĩ",
+      "điếm",
+      "chó",
+      "ngu",
+      "ngu ngốc",
+      "ngu si",
+      "đần",
+      "đần độn",
+      "khốn nạn",
+      "đồ khốn",
+      "đồ ngu",
+      "đồ chó",
+      "đồ điếm",
+      "đồ đĩ",
+      "đồ khốn nạn",
+      "đồ vô dụng",
+      "đồ vô tích sự",
+      "đồ bỏ đi",
+      "đồ rác rưởi",
+      "đồ hèn",
+      "đồ hèn nhát",
+      "đồ hèn mạt",
+      "đồ hèn hạ",
+      "đồ hèn kém",
+      "đồ hèn mọn",
+      "đồ hèn nhược",
+      "đồ hèn yếu",
       // English
-      "fuck", "shit", "asshole", "bitch", "cunt", "dick", "pussy", "bastard",
-      "motherfucker", "retard", "idiot", "moron", "stupid", "dumb", "fool",
-      "loser", "jerk", "scum", "trash", "garbage", "worthless", "useless"
+      "fuck",
+      "shit",
+      "asshole",
+      "bitch",
+      "cunt",
+      "dick",
+      "pussy",
+      "bastard",
+      "motherfucker",
+      "retard",
+      "idiot",
+      "moron",
+      "stupid",
+      "dumb",
+      "fool",
+      "loser",
+      "jerk",
+      "scum",
+      "trash",
+      "garbage",
+      "worthless",
+      "useless",
     ];
-    
+
     if (!content) return "";
-    
+
     // Create a regex pattern to match any of the problematic words
-    const pattern = new RegExp(`\\b(${problematicWords.join('|')})\\b`, 'gi');
-    
+    const pattern = new RegExp(`\\b(${problematicWords.join("|")})\\b`, "gi");
+
     // Replace problematic words with highlighted versions
-    return content.replace(pattern, '<span class="bg-red-200 text-red-800 px-1 rounded">$1</span>');
+    return content.replace(
+      pattern,
+      '<span class="bg-red-200 text-red-800 px-1 rounded">$1</span>'
+    );
   };
 
   // Update the showModerationError function to highlight problematic content
   const showModerationError = (error, content) => {
     console.log("showModerationError called with:", error, content);
-    
+
     // Extract error message - handle different error formats
-    const errorMessage = error.message || (error.payload ? error.payload : "Lỗi không xác định");
+    const errorMessage =
+      error.message || (error.payload ? error.payload : "Lỗi không xác định");
     console.log("Extracted error message:", errorMessage);
-    
+
     // Extract score from error message if available
-    const scoreMatch = errorMessage && errorMessage.match(/score: (\d+(?:\.\d+)?)/);
+    const scoreMatch =
+      errorMessage && errorMessage.match(/score: (\d+(?:\.\d+)?)/);
     const score = scoreMatch ? parseFloat(scoreMatch[1]) : null;
     console.log("Extracted score:", score);
-    
+
     // Format score for display - if score is already a percentage (>=1), display as is, otherwise multiply by 100
-    const scoreDisplay = score !== null ? (score >= 1 ? score : score * 100).toFixed(1) : null;
-    
+    const scoreDisplay =
+      score !== null ? (score >= 1 ? score : score * 100).toFixed(1) : null;
+
     // Highlight potentially problematic content if provided
-    const highlightedContent = content ? highlightProblematicContent(content) : '';
-    
+    const highlightedContent = content
+      ? highlightProblematicContent(content)
+      : "";
+
     // Use SweetAlert2 for a more prominent and helpful message
     Swal.fire({
-      title: 'Nội dung không phù hợp',
+      title: "Nội dung không phù hợp",
       html: `
         <div class="text-left">
           <p>Hệ thống AI của chúng tôi đã phát hiện nội dung không phù hợp trong bình luận của bạn.</p>
-          ${scoreDisplay !== null ? `<p class="mt-2">Điểm không phù hợp: <strong>${scoreDisplay}%</strong> (ngưỡng cho phép: 50%)</p>` : ''}
+          ${
+            scoreDisplay !== null
+              ? `<p class="mt-2">Điểm không phù hợp: <strong>${scoreDisplay}%</strong> (ngưỡng cho phép: 50%)</p>`
+              : ""
+          }
           
-          ${highlightedContent ? `
+          ${
+            highlightedContent
+              ? `
             <div class="mt-3 p-3 bg-gray-100 rounded-md">
               <p class="font-semibold mb-1">Nội dung của bạn:</p>
               <p class="text-gray-700">${highlightedContent}</p>
             </div>
-          ` : ''}
+          `
+              : ""
+          }
           
           <p class="mt-3 font-semibold">Hướng dẫn:</p>
           <ul class="list-disc pl-5 mt-1">
@@ -504,31 +623,18 @@ export default function CompanyProfile() {
           <p class="mt-3">Vui lòng chỉnh sửa nội dung và thử lại.</p>
         </div>
       `,
-      icon: 'warning',
-      confirmButtonText: 'Đã hiểu',
-      confirmButtonColor: '#8B5CF6',
+      icon: "warning",
+      confirmButtonText: "Đã hiểu",
+      confirmButtonColor: "#8B5CF6",
     });
   };
 
-  const handleImageClick = (imagePath) => {
-    setSelectedImage(imagePath);
-    setIsOpen(true); // Mở modal
-  };
-
-  const closeModal = () => {
-    setIsOpen(false); // Đóng modal
-  };
-
   const { reviews, replies, reactions } = useSelector((store) => store.review);
-
-  const { companyProfile } = useSelector((store) => store.company);
 
   const { seeker } = useSelector((store) => store.seeker);
   const { user } = useSelector((store) => store.auth);
 
   const [loading, setLoading] = useState(true);
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState("");
   const [isFollowing, setIsFollowing] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [jobsPerPage] = useState(5);
@@ -593,11 +699,12 @@ export default function CompanyProfile() {
       return;
     }
     // Use a consistent anonymousId based on userId to ensure stability
-    const anonymousId = user ? parseInt(user.userId.replace(/-/g, '').substring(0, 4), 16) % 1000 : Math.floor(Math.random() * 1000);
+    const anonymousId = user
+      ? parseInt(user.userId.replace(/-/g, "").substring(0, 4), 16) % 1000
+      : Math.floor(Math.random() * 1000);
 
     // Show loading toast while checking content moderation
     const loadingToastId = toast.loading("Đang kiểm tra nội dung đánh giá...");
-    
 
     try {
       if (hasReviewed && existingReview) {
@@ -633,12 +740,11 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
             star: feedback.star,
             message: feedback.message,
             isAnonymous: feedback.isAnonymous,
-            anonymousId: anonymousId // Add random ID for anonymous reviews
+            anonymousId: anonymousId, // Add random ID for anonymous reviews
           },
           companyId,
         })
       );
-      ).unwrap();
 
       toast.dismiss(loadingToastId);
       await dispatch(getReviewByCompany(companyId));
@@ -647,31 +753,36 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
     } catch (error) {
       // Always dismiss the loading toast in case of error
       toast.dismiss(loadingToastId);
-      
+
       console.error("Error in review process:", error);
-      
+
       // Check for different error formats
       // Lỗi có thể là một chuỗi hoặc một đối tượng
-      const errorMessage = typeof error === 'string' ? error : 
-                          (error.message || (error.payload ? error.payload : "Có lỗi xảy ra trong quá trình xử lý"));
-      
+      const errorMessage =
+        typeof error === "string"
+          ? error
+          : error.message ||
+            (error.payload
+              ? error.payload
+              : "Có lỗi xảy ra trong quá trình xử lý");
+
       // Log detailed error information for debugging
       console.log("Error details:", {
         error,
         message: errorMessage,
         hasPayload: !!error.payload,
-        content: feedback.message
+        content: feedback.message,
       });
-      
+
       // Check if the error is from content moderation
-      if (errorMessage && errorMessage.includes('không phù hợp')) {
+      if (errorMessage && errorMessage.includes("không phù hợp")) {
         console.log("Moderation error detected:", errorMessage);
-        
+
         // Tạo một đối tượng lỗi đúng định dạng để truyền vào showModerationError
         const moderationError = {
-          message: errorMessage
+          message: errorMessage,
         };
-        
+
         // Hiển thị lỗi kiểm duyệt nội dung với nội dung thực tế - sử dụng feedback.message
         showModerationError(moderationError, feedback.message);
       } else {
@@ -776,28 +887,30 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
     if (result.isConfirmed) {
       try {
         // Store the reply data for this review before deleting
-        const reviewToDelete = reviews.find(r => r.reviewId === reviewId);
+        const reviewToDelete = reviews.find((r) => r.reviewId === reviewId);
         const replyData = reviewToDelete?.replies || [];
-        
+
         // Remove the reply data from the Redux store's 'replies' object for this reviewId
         if (replies && replies[reviewId]) {
           // Create a new replies object without the deleted review's replies
           const updatedReplies = { ...replies };
           delete updatedReplies[reviewId];
-          
+
           // No need to update this since we're deleting the review anyway which will remove its replies
         }
-        
+
         await dispatch(deleteReview(reviewId));
         toast.success("Xóa đánh giá thành công");
-        
+
         // Update reviews list without fetching from the server
-        const updatedReviews = reviews.filter(review => review.reviewId !== reviewId);
+        const updatedReviews = reviews.filter(
+          (review) => review.reviewId !== reviewId
+        );
         dispatch({
-          type: 'review/getReviewByCompany/fulfilled',
-          payload: updatedReviews
+          type: "review/getReviewByCompany/fulfilled",
+          payload: updatedReviews,
         });
-        
+
         setHasReviewed(false);
         setExistingReview(null);
         setFeedback({ star: 0, message: "", isAnonymous: false });
@@ -824,18 +937,20 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
   const [replyTo, setReplyTo] = useState(null);
   const [replyText, setReplyText] = useState("");
   const [isReplyAnonymous, setIsReplyAnonymous] = useState(false);
-  
+
   // Load review reactions when reviews load, but prevent infinite loops
   useEffect(() => {
     if (validReviews.length > 0) {
       // Avoid duplicate/excessive requests
-      const reviewIds = validReviews.map(review => review.reviewId);
-      const reviewIdsString = reviewIds.join(',');
-      
+      const reviewIds = validReviews.map((review) => review.reviewId);
+      const reviewIdsString = reviewIds.join(",");
+
       // Using a ref to track previous value to prevent unnecessary calls
-      const shouldFetch = !reactions || Object.keys(reactions).length === 0 || 
-        !reviewIds.every(id => Object.keys(reactions).includes(id));
-      
+      const shouldFetch =
+        !reactions ||
+        Object.keys(reactions).length === 0 ||
+        !reviewIds.every((id) => Object.keys(reactions).includes(id));
+
       if (shouldFetch) {
         dispatch(getReviewReactions(reviewIds));
       }
@@ -848,12 +963,12 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
       toast.warning("Vui lòng đăng nhập để thực hiện thao tác này");
       return;
     }
-    
+
     if (checkIfSaved === false) {
       toast.warning("Bạn cần apply vào công ty để có thể phản hồi đánh giá");
       return;
     }
-    
+
     // Toggle reply form - if it's already open for this review, close it
     if (replyTo === reviewId) {
       setReplyTo(null);
@@ -869,112 +984,138 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
   };
 
   // Update handleReplySubmit function to dismiss loading toast in error cases
-  const handleReplySubmit = async (reviewId, parentReplyId = null, replyContent = null, isAnonymous = null, parentUserInfo = null) => {
+  const handleReplySubmit = async (
+    reviewId,
+    parentReplyId = null,
+    replyContent = null,
+    isAnonymous = null,
+    parentUserInfo = null
+  ) => {
     if (!user) {
       toast.warning("Vui lòng đăng nhập để thực hiện thao tác này");
       return;
     }
-    
+
     if (checkIfSaved === false) {
       toast.warning("Bạn cần apply vào công ty để có thể phản hồi đánh giá");
       return;
     }
-    
+
     // Use provided content or from the state
     let content = replyContent || replyText;
-    
+
     // If it's a top-level reply (to review) and there's no parentReplyId, and the content doesn't already have a tag
-    if (!parentReplyId && !content.startsWith('@') && !replyContent) {
+    if (!parentReplyId && !content.startsWith("@") && !replyContent) {
       // Get the review from the reviews array
-      const targetReview = reviews.find(review => review.reviewId === reviewId);
+      const targetReview = reviews.find(
+        (review) => review.reviewId === reviewId
+      );
       if (targetReview) {
         // Create display name for review author
-        const reviewAuthorName = targetReview.anonymous 
-          ? `Người dùng ẩn danh ${targetReview.anonymousId || ''}`
-          : targetReview.seeker?.userAccount?.userName 
-            ? `${targetReview.seeker.userAccount.userName[0]}${"*".repeat(targetReview.seeker.userAccount.userName.length - 2)}${targetReview.seeker.userAccount.userName[targetReview.seeker.userAccount.userName.length - 1]}`
-            : "Người dùng";
-        
+        const reviewAuthorName = targetReview.anonymous
+          ? `Người dùng ẩn danh ${targetReview.anonymousId || ""}`
+          : targetReview.seeker?.userAccount?.userName
+          ? `${targetReview.seeker.userAccount.userName[0]}${"*".repeat(
+              targetReview.seeker.userAccount.userName.length - 2
+            )}${
+              targetReview.seeker.userAccount.userName[
+                targetReview.seeker.userAccount.userName.length - 1
+              ]
+            }`
+          : "Người dùng";
+
         // Add tag to the beginning
         content = `@${reviewAuthorName}: ${content}`;
       }
     }
-    
+
     if (!content || !content.trim()) {
       toast.warning("Vui lòng nhập nội dung phản hồi");
       return;
     }
-    
+
     // Use provided anonymous value or from the state
     const anonymous = isAnonymous !== null ? isAnonymous : isReplyAnonymous;
-    
+
     // Use a consistent anonymousId based on userId or create a stable one
     // This ensures the same user always gets the same anonymous ID
-    const anonymousId = user ? parseInt(user.userId.replace(/-/g, '').substring(0, 4), 16) % 1000 : Math.floor(Math.random() * 1000);
+    const anonymousId = user
+      ? parseInt(user.userId.replace(/-/g, "").substring(0, 4), 16) % 1000
+      : Math.floor(Math.random() * 1000);
 
     // Show loading toast while checking content moderation
     const loadingToastId = toast.loading("Đang kiểm tra nội dung phản hồi...");
-    
+
     try {
       console.log("Submitting reply:", {
         reviewId,
         parentReplyId,
         content,
         anonymous,
-        parentUserInfo
+        parentUserInfo,
       });
-      
+
       // Prepare the payload for the API
       const replyPayload = {
         reviewId,
         content,
         anonymous,
-        anonymousId // Add randomized ID for anonymous users
+        anonymousId, // Add randomized ID for anonymous users
       };
-      
+
       // Add parentReplyId if provided (for nested replies)
       if (parentReplyId) {
         replyPayload.parentReplyId = parentReplyId;
       }
-      
+
       // Add parent user information if available
       if (parentUserInfo) {
         replyPayload.parentUserName = parentUserInfo.parentUserName;
         replyPayload.parentUserId = parentUserInfo.parentUserId;
-        
+
         // Add anonymous information if parent is anonymous
         if (parentUserInfo.parentIsAnonymous) {
           replyPayload.parentIsAnonymous = true;
           // Use the existing anonymousId or generate a new one
-          replyPayload.parentAnonymousId = parentUserInfo.parentAnonymousId || Math.floor(Math.random() * 1000);
+          replyPayload.parentAnonymousId =
+            parentUserInfo.parentAnonymousId ||
+            Math.floor(Math.random() * 1000);
         }
       }
-      
+
       // Use the Redux action instead of direct API call
-      const response = await dispatch(createReplyToReview(replyPayload)).unwrap();
-      
+      const response = await dispatch(
+        createReplyToReview(replyPayload)
+      ).unwrap();
+
       // Dismiss the loading toast
       toast.dismiss(loadingToastId);
-      
+
       console.log("Reply creation response:", response);
-      
+
       // Find the review that we're replying to
-      const targetReview = reviews.find(review => review.reviewId === reviewId);
+      const targetReview = reviews.find(
+        (review) => review.reviewId === reviewId
+      );
       if (!targetReview) {
         toast.error("Không tìm thấy đánh giá để phản hồi");
         return;
       }
-      
+
       // Deep clone the reviews array to safely modify nested structure
       const updatedReviews = JSON.parse(JSON.stringify(reviews));
-      
+
       // Handle nested reply structure
       if (parentReplyId) {
         // Find the review and update its replies recursively
         for (let i = 0; i < updatedReviews.length; i++) {
           if (updatedReviews[i].reviewId === reviewId) {
             // Add the reply to the correct parent in the hierarchy
-            addReplyToParent(updatedReviews[i].replies || [], parentReplyId, response);
+            addReplyToParent(
+              updatedReviews[i].replies || [],
+              parentReplyId,
+              response
+            );
             break;
           }
         }
@@ -990,63 +1131,67 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
           }
         }
       }
-      
+
       // Update reviews in Redux store
       dispatch({
-        type: 'review/getReviewByCompany/fulfilled',
-        payload: updatedReviews
+        type: "review/getReviewByCompany/fulfilled",
+        payload: updatedReviews,
       });
-      
+
       // Also update the replies object in Redux if it exists
       if (replies) {
-        const updatedReplies = {...replies};
+        const updatedReplies = { ...replies };
         if (!updatedReplies[reviewId]) {
           updatedReplies[reviewId] = [];
         }
         updatedReplies[reviewId] = [...updatedReplies[reviewId], response];
-        
+
         dispatch({
-          type: 'review/getReviewReplies/fulfilled',
-          payload: updatedReplies
+          type: "review/getReviewReplies/fulfilled",
+          payload: updatedReplies,
         });
       }
-      
+
       // Reset reply form
       setReplyTo(null);
       setReplyText("");
       setIsReplyAnonymous(false);
-      
+
       // Show success message
       toast.success("Phản hồi đã được gửi thành công");
-      
     } catch (error) {
       // Always dismiss the loading toast in case of error
       toast.dismiss(loadingToastId);
-      
+
       console.error("Error submitting reply:", error);
-      
+
       // Check for different error formats
       // Lỗi có thể là một chuỗi hoặc một đối tượng
-      const errorMessage = typeof error === 'string' ? error : 
-                          (error.message || (error.payload ? error.payload : "Có lỗi xảy ra trong quá trình xử lý"));
-      
+      const errorMessage =
+        typeof error === "string"
+          ? error
+          : error.message ||
+            (error.payload
+              ? error.payload
+              : "Có lỗi xảy ra trong quá trình xử lý");
+
       // Log detailed error information for debugging
       console.log("Error details:", {
         error,
         message: errorMessage,
         hasPayload: !!error.payload,
-        content
+        content,
       });
-      
+
       // Check if the error is from content moderation
-      if (errorMessage && errorMessage.includes('không phù hợp')) {
+      if (errorMessage && errorMessage.includes("không phù hợp")) {
         console.log("Moderation error detected:", errorMessage);
-        
+
         // Tạo một đối tượng lỗi đúng định dạng để truyền vào showModerationError
         const moderationError = {
-          message: errorMessage
+          message: errorMessage,
         };
-        
+
         // Hiển thị lỗi kiểm duyệt nội dung với nội dung thực tế
         showModerationError(moderationError, content);
       } else {
@@ -1063,25 +1208,32 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         if (!repliesArray[i].childReplies) {
           repliesArray[i].childReplies = [];
         }
-        
+
         // Create a mutable copy of the newReply object
-        const mutableReply = {...newReply};
-        
+        const mutableReply = { ...newReply };
+
         // Set the correct level based on parent's level
         mutableReply.level = (repliesArray[i].level || 0) + 1;
-        
+
         // Add to child replies
         repliesArray[i].childReplies.push(mutableReply);
         return true;
       }
-      
+
       // Check in child replies recursively
-      if (repliesArray[i].childReplies && repliesArray[i].childReplies.length > 0) {
-        const found = addReplyToParent(repliesArray[i].childReplies, parentReplyId, newReply);
+      if (
+        repliesArray[i].childReplies &&
+        repliesArray[i].childReplies.length > 0
+      ) {
+        const found = addReplyToParent(
+          repliesArray[i].childReplies,
+          parentReplyId,
+          newReply
+        );
         if (found) return true;
       }
     }
-    
+
     return false;
   };
 
@@ -1091,16 +1243,18 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
       toast.warning("Vui lòng đăng nhập để thực hiện thao tác này");
       return;
     }
-    
+
     if (checkIfSaved === false) {
-      toast.warning("Bạn cần apply vào công ty để có thể thích/không thích đánh giá");
+      toast.warning(
+        "Bạn cần apply vào công ty để có thể thích/không thích đánh giá"
+      );
       return;
     }
 
     try {
       // Get the current reaction from Redux store
       const currentReaction = reactions[reviewId]?.userReaction;
-      
+
       // Determine if we're toggling the reaction off or changing reaction type
       let newReactionType = null;
       if (currentReaction === type) {
@@ -1110,15 +1264,17 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         // User clicked a different reaction or is adding a new one
         newReactionType = type;
       }
-      
+
       // Dispatch the reaction action
-      await dispatch(reactToReview({ 
-        reviewId, 
-        reactionType: newReactionType 
-      })).unwrap();
-      
+      await dispatch(
+        reactToReview({
+          reviewId,
+          reactionType: newReactionType,
+        })
+      ).unwrap();
+
       // Refresh all reactions
-      const reviewIds = validReviews.map(review => review.reviewId);
+      const reviewIds = validReviews.map((review) => review.reviewId);
       dispatch(getReviewReactions(reviewIds));
     } catch (error) {
       console.error("Error updating reaction:", error);
@@ -1143,7 +1299,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
     console.log("User:", user);
     console.log("Replies:", replies);
     if (validReviews.length > 0) {
-      validReviews.forEach(review => {
+      validReviews.forEach((review) => {
         // Always refresh replies to ensure we have the latest data
         loadRepliesForReview(review.reviewId);
       });
@@ -1169,23 +1325,27 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         confirmButtonText: "Xóa",
         cancelButtonText: "Hủy",
       });
-      
+
       if (result.isConfirmed) {
         console.log("Attempting to delete reply ID:", replyId);
-        
+
         // Find which review contains this reply and its location in the nested structure
         let foundReviewId = null;
-        
+
         // Function to check if a reply exists in the hierarchy
         const findReplyInHierarchy = (reviewId, repliesArray, replyId) => {
           for (const reply of repliesArray) {
             if (reply.replyId === replyId) {
               return { found: true, reviewId };
             }
-            
+
             // Look in child replies
             if (reply.childReplies && reply.childReplies.length > 0) {
-              const result = findReplyInHierarchy(reviewId, reply.childReplies, replyId);
+              const result = findReplyInHierarchy(
+                reviewId,
+                reply.childReplies,
+                replyId
+              );
               if (result.found) {
                 return result;
               }
@@ -1193,86 +1353,103 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
           }
           return { found: false };
         };
-        
+
         // Search in all reviews
         for (const review of reviews) {
           if (review.replies && review.replies.length > 0) {
-            const result = findReplyInHierarchy(review.reviewId, review.replies, replyId);
+            const result = findReplyInHierarchy(
+              review.reviewId,
+              review.replies,
+              replyId
+            );
             if (result.found) {
               foundReviewId = result.reviewId;
               break;
             }
           }
         }
-        
+
         if (!foundReviewId) {
           console.error("Could not find which review contains this reply");
           toast.error("Không tìm thấy phản hồi để xóa");
           return;
         }
-        
+
         console.log("Found reply in review ID:", foundReviewId);
-        
+
         // Call the API to delete the reply
-        const deleteResult = await dispatch(deleteReviewReply(replyId)).unwrap();
+        const deleteResult = await dispatch(
+          deleteReviewReply(replyId)
+        ).unwrap();
         console.log("Delete reply API response:", deleteResult);
-        
+
         // Deep clone the reviews array to safely modify nested structures
         const updatedReviews = JSON.parse(JSON.stringify(reviews));
-        
+
         // Recursive function to remove a reply from a nested structure
         const removeReplyRecursive = (repliesArray, replyId) => {
           // First check top level
-          const topLevelIndex = repliesArray.findIndex(r => r.replyId === replyId);
+          const topLevelIndex = repliesArray.findIndex(
+            (r) => r.replyId === replyId
+          );
           if (topLevelIndex !== -1) {
             // Remove this reply
             repliesArray.splice(topLevelIndex, 1);
             return true;
           }
-          
+
           // Check in child replies of each reply
           for (let i = 0; i < repliesArray.length; i++) {
-            if (repliesArray[i].childReplies && repliesArray[i].childReplies.length > 0) {
-              const removed = removeReplyRecursive(repliesArray[i].childReplies, replyId);
+            if (
+              repliesArray[i].childReplies &&
+              repliesArray[i].childReplies.length > 0
+            ) {
+              const removed = removeReplyRecursive(
+                repliesArray[i].childReplies,
+                replyId
+              );
               if (removed) return true;
             }
           }
-          
+
           return false;
         };
-        
+
         // Find the review and remove the reply from its structure
         for (let i = 0; i < updatedReviews.length; i++) {
-          if (updatedReviews[i].reviewId === foundReviewId && updatedReviews[i].replies) {
+          if (
+            updatedReviews[i].reviewId === foundReviewId &&
+            updatedReviews[i].replies
+          ) {
             removeReplyRecursive(updatedReviews[i].replies, replyId);
             break;
           }
         }
-        
+
         // Update reviews in Redux store
         dispatch({
-          type: 'review/getReviewByCompany/fulfilled',
-          payload: updatedReviews
+          type: "review/getReviewByCompany/fulfilled",
+          payload: updatedReviews,
         });
-        
+
         // Update the replies in the Redux store if they exist
         if (replies && replies[foundReviewId]) {
           // Create a deep copy of the replies object
           const updatedReplies = JSON.parse(JSON.stringify(replies));
-          
+
           // Remove the reply from the flat structure
           if (updatedReplies[foundReviewId]) {
-            updatedReplies[foundReviewId] = updatedReplies[foundReviewId].filter(
-              reply => reply.replyId !== replyId
-            );
+            updatedReplies[foundReviewId] = updatedReplies[
+              foundReviewId
+            ].filter((reply) => reply.replyId !== replyId);
           }
-          
+
           dispatch({
-            type: 'review/getReviewReplies/fulfilled',
-            payload: updatedReplies
+            type: "review/getReviewReplies/fulfilled",
+            payload: updatedReplies,
           });
         }
-        
+
         toast.success("Đã xóa phản hồi thành công");
       }
     } catch (error) {
@@ -1287,7 +1464,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
       toast.warning("Vui lòng đăng nhập để thực hiện thao tác này");
       return;
     }
-    
+
     // Ensure this is the user's review
     if (review?.seeker?.userAccount?.userId !== user?.userId) {
       toast.warning("Bạn chỉ có thể chỉnh sửa đánh giá của mình");
@@ -1298,91 +1475,98 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
     setEditReviewData({
       star: review.star,
       message: review.message,
-      isAnonymous: review.anonymous
+      isAnonymous: review.anonymous,
     });
   };
 
   // Function to save edited review
   const handleSaveReviewEdit = async () => {
     if (!editingReviewId) return;
-    
+
     // Show loading toast while checking content moderation
     const loadingToastId = toast.loading("Đang kiểm tra nội dung đánh giá...");
-    
+
     try {
       // Get the current review with its replies
-      const currentReview = reviews.find(r => r.reviewId === editingReviewId);
+      const currentReview = reviews.find((r) => r.reviewId === editingReviewId);
       if (!currentReview) {
         toast.dismiss(loadingToastId);
         toast.error("Không tìm thấy đánh giá để cập nhật");
         return;
       }
-    
+
       const currentReplies = currentReview?.replies || [];
       console.log("Current replies before update:", currentReplies);
-      
-      const updatedReview = await dispatch(updateReview({
-        reviewId: editingReviewId,
-        reviewData: {
-          star: editReviewData.star,
-          message: editReviewData.message,
-          anonymous: editReviewData.isAnonymous
-        }
-      })).unwrap();
-      
+
+      const updatedReview = await dispatch(
+        updateReview({
+          reviewId: editingReviewId,
+          reviewData: {
+            star: editReviewData.star,
+            message: editReviewData.message,
+            anonymous: editReviewData.isAnonymous,
+          },
+        })
+      ).unwrap();
+
       toast.dismiss(loadingToastId);
       console.log("API response for updated review:", updatedReview);
-      
+
       // Create a complete updated review object with replies preserved
       const completeUpdatedReview = {
         ...updatedReview,
-        replies: currentReplies // Make sure to keep the existing replies
+        replies: currentReplies, // Make sure to keep the existing replies
       };
-      
+
       // Update the reviews array directly with the new data
-      const updatedReviews = reviews.map(review => 
+      const updatedReviews = reviews.map((review) =>
         review.reviewId === editingReviewId ? completeUpdatedReview : review
       );
-      
+
       // Update Redux store without making a new API call
       dispatch({
-        type: 'review/getReviewByCompany/fulfilled',
-        payload: updatedReviews
+        type: "review/getReviewByCompany/fulfilled",
+        payload: updatedReviews,
       });
-      
+
       // Reset edit state
       setEditingReviewId(null);
       setEditReviewData({ star: 0, message: "", isAnonymous: false });
-      
+
       toast.success("Đánh giá đã được cập nhật thành công");
     } catch (error) {
       // Always dismiss the loading toast in case of error
       toast.dismiss(loadingToastId);
-      
+
       console.error("Error updating review:", error);
-      
+
       // Check for different error formats
       // Lỗi có thể là một chuỗi hoặc một đối tượng
-      const errorMessage = typeof error === 'string' ? error : 
-                          (error.message || (error.payload ? error.payload : "Có lỗi xảy ra khi cập nhật đánh giá"));
-      
+      const errorMessage =
+        typeof error === "string"
+          ? error
+          : error.message ||
+            (error.payload
+              ? error.payload
+              : "Có lỗi xảy ra khi cập nhật đánh giá");
+
       // Log detailed error information for debugging
       console.log("Error details:", {
         error,
         message: errorMessage,
         hasPayload: !!error.payload,
-        content: editReviewData.message
+        content: editReviewData.message,
       });
-      
+
       // Check if the error is from content moderation
-      if (errorMessage && errorMessage.includes('không phù hợp')) {
+      if (errorMessage && errorMessage.includes("không phù hợp")) {
         console.log("Moderation error detected:", errorMessage);
-        
+
         // Tạo một đối tượng lỗi đúng định dạng để truyền vào showModerationError
         const moderationError = {
-          message: errorMessage
+          message: errorMessage,
         };
-        
+
         // Hiển thị lỗi kiểm duyệt nội dung với nội dung thực tế
         showModerationError(moderationError, editReviewData.message);
       } else {
@@ -1403,7 +1587,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
       toast.warning("Vui lòng đăng nhập để thực hiện thao tác này");
       return;
     }
-    
+
     // Check if this reply belongs to the current user
     if (reply.userId !== user.userId) {
       toast.warning("Bạn chỉ có thể chỉnh sửa phản hồi của mình");
@@ -1412,30 +1596,30 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
 
     // Extract the actual content without the @username part
     let content = reply.content;
-    if (content.startsWith('@') && content.includes(':')) {
+    if (content.startsWith("@") && content.includes(":")) {
       // Remove the @username: part
-      content = content.split(':').slice(1).join(':').trim();
+      content = content.split(":").slice(1).join(":").trim();
     }
 
     setEditingReplyId(reply.replyId);
     setEditReplyData({
       content: content,
-      anonymous: reply.anonymous
+      anonymous: reply.anonymous,
     });
   };
 
   // Update handleSaveReplyEdit function to dismiss loading toast in error cases
   const handleSaveReplyEdit = async () => {
     if (!editingReplyId) return;
-    
+
     // Show loading toast while checking content moderation
     const loadingToastId = toast.loading("Đang kiểm tra nội dung phản hồi...");
-    
+
     try {
       // Find which review this reply belongs to
       let foundReviewId = null;
       let originalReply = null;
-      
+
       // Function to search for a reply in the nested structure and return the reply object
       const findReplyRecursive = (repliesArray, replyId) => {
         for (let i = 0; i < repliesArray.length; i++) {
@@ -1443,50 +1627,64 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
             originalReply = repliesArray[i];
             return true;
           }
-          
+
           // Check child replies if they exist
-          if (repliesArray[i].childReplies && repliesArray[i].childReplies.length > 0) {
-            const found = findReplyRecursive(repliesArray[i].childReplies, replyId);
+          if (
+            repliesArray[i].childReplies &&
+            repliesArray[i].childReplies.length > 0
+          ) {
+            const found = findReplyRecursive(
+              repliesArray[i].childReplies,
+              replyId
+            );
             if (found) return true;
           }
         }
         return false;
       };
-      
+
       // Search through all reviews to find which one contains this reply
       for (let i = 0; i < reviews.length; i++) {
-        if (reviews[i].replies && findReplyRecursive(reviews[i].replies, editingReplyId)) {
+        if (
+          reviews[i].replies &&
+          findReplyRecursive(reviews[i].replies, editingReplyId)
+        ) {
           foundReviewId = reviews[i].reviewId;
           break;
         }
       }
-      
+
       if (!foundReviewId || !originalReply) {
         toast.dismiss(loadingToastId);
         toast.error("Không tìm thấy phản hồi để cập nhật");
         return;
       }
-      
+
       // Preserve the @username tag if it exists in the original content
       let updatedContent = editReplyData.content;
-      if (originalReply.content.startsWith('@') && originalReply.content.includes(':')) {
-        const mentionPart = originalReply.content.split(':')[0] + ': ';
+      if (
+        originalReply.content.startsWith("@") &&
+        originalReply.content.includes(":")
+      ) {
+        const mentionPart = originalReply.content.split(":")[0] + ": ";
         updatedContent = mentionPart + editReplyData.content;
       }
-      
+
       // Update the reply via API
-      const updatedReply = await dispatch(updateReviewReply({
-        replyId: editingReplyId,
-        content: updatedContent,
-        anonymous: editReplyData.anonymous
-      })).unwrap();
-      
+      const updatedReply = await dispatch(
+        updateReviewReply({
+          replyId: editingReplyId,
+          content: updatedContent,
+          anonymous: editReplyData.anonymous,
+        })
+      ).unwrap();
+
       toast.dismiss(loadingToastId);
       console.log("API response for updated reply:", updatedReply);
-      
+
       // Deep clone the reviews array to safely modify nested structures
       const updatedReviews = JSON.parse(JSON.stringify(reviews));
-      
+
       // Update the reply in the deeply nested structure
       const updateReplyRecursive = (repliesArray, replyId, updatedData) => {
         for (let i = 0; i < repliesArray.length; i++) {
@@ -1495,85 +1693,100 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
             repliesArray[i] = {
               ...repliesArray[i],
               content: updatedData.content,
-              anonymous: updatedData.anonymous
+              anonymous: updatedData.anonymous,
             };
             return true;
           }
-          
+
           // Check child replies if they exist
-          if (repliesArray[i].childReplies && repliesArray[i].childReplies.length > 0) {
-            const updated = updateReplyRecursive(repliesArray[i].childReplies, replyId, updatedData);
+          if (
+            repliesArray[i].childReplies &&
+            repliesArray[i].childReplies.length > 0
+          ) {
+            const updated = updateReplyRecursive(
+              repliesArray[i].childReplies,
+              replyId,
+              updatedData
+            );
             if (updated) return true;
           }
         }
         return false;
       };
-      
+
       // Find the review and update its reply
       for (let i = 0; i < updatedReviews.length; i++) {
         if (updatedReviews[i].reviewId === foundReviewId) {
-          updateReplyRecursive(updatedReviews[i].replies, editingReplyId, updatedReply);
+          updateReplyRecursive(
+            updatedReviews[i].replies,
+            editingReplyId,
+            updatedReply
+          );
           break;
         }
       }
-      
+
       // Update reviews in Redux store
       dispatch({
-        type: 'review/getReviewByCompany/fulfilled',
-        payload: updatedReviews
+        type: "review/getReviewByCompany/fulfilled",
+        payload: updatedReviews,
       });
-      
+
       // Update the replies object in Redux if it exists
       if (replies && replies[foundReviewId]) {
         // Create a deep copy of the replies object
         const updatedReplies = JSON.parse(JSON.stringify(replies));
-        
+
         // Find and update the reply in the flat structure
         if (updatedReplies[foundReviewId]) {
-          const replyIndex = updatedReplies[foundReviewId].findIndex(r => r.replyId === editingReplyId);
+          const replyIndex = updatedReplies[foundReviewId].findIndex(
+            (r) => r.replyId === editingReplyId
+          );
           if (replyIndex !== -1) {
             updatedReplies[foundReviewId][replyIndex] = {
               ...updatedReplies[foundReviewId][replyIndex],
               content: updatedReply.content,
-              anonymous: updatedReply.anonymous
+              anonymous: updatedReply.anonymous,
             };
           }
         }
-        
+
         dispatch({
-          type: 'review/getReviewReplies/fulfilled',
-          payload: updatedReplies
+          type: "review/getReviewReplies/fulfilled",
+          payload: updatedReplies,
         });
       }
-      
+
       // Reset edit state
       setEditingReplyId(null);
       setEditReplyData({ content: "", anonymous: false });
-      
+
       toast.success("Phản hồi đã được cập nhật thành công");
     } catch (error) {
       // Always dismiss the loading toast in case of error
       toast.dismiss(loadingToastId);
-      
+
       console.error("Error updating reply:", error);
-      
+
       // Check for different error formats - Redux might wrap the error in a payload
-      const errorMessage = error.message || (error.payload ? error.payload : "Có lỗi xảy ra khi cập nhật phản hồi");
-      
+      const errorMessage =
+        error.message ||
+        (error.payload ? error.payload : "Có lỗi xảy ra khi cập nhật phản hồi");
+
       // Log detailed error information for debugging
       console.log("Error details:", {
         error,
         message: errorMessage,
         hasPayload: !!error.payload,
-        content: editReplyData.content
+        content: editReplyData.content,
       });
-      
+
       // Check if the error is from content moderation
-      if (errorMessage && errorMessage.includes('không phù hợp')) {
+      if (errorMessage && errorMessage.includes("không phù hợp")) {
         console.log("Moderation error detected:", errorMessage);
         // Use the error object with the correct message format
         const moderationError = {
-          message: errorMessage
+          message: errorMessage,
         };
         showModerationError(moderationError, editReplyData.content);
       } else {
@@ -1876,9 +2089,9 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
             ) : (
               validReviews
                 .sort((a, b) => new Date(b.createDate) - new Date(a.createDate))
-                .map((review, index) => (
+                .map((review) => (
                   <div
-                    key={index}
+                    key={review.reviewId} // Sửa từ key={index} thành key={review.reviewId}
                     className="mb-6 p-4 border-b border-gray-300 rounded-md hover:bg-purple-100 hover:shadow-lg"
                   >
                     <div className="flex items-start mb-4">
@@ -1886,7 +2099,8 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                         src={
                           review.anonymous
                             ? anonymousIcon
-                            : review?.seeker?.userAccount?.avatar
+                            : review?.seeker?.userAccount?.avatar ||
+                              anonymousIcon
                         }
                         alt="Avatar"
                         className="w-12 h-12 rounded-full object-cover mr-4"
@@ -1895,7 +2109,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-semibold text-gray-800">
                             {review.anonymous
-                              ? `Người dùng ẩn danh ${review.anonymousId || ''}`
+                              ? `Người dùng ẩn danh ${review.anonymousId || ""}`
                               : review?.seeker?.userAccount?.userName
                               ? `${
                                   review.seeker.userAccount.userName[0]
@@ -1907,7 +2121,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                                       1
                                   ]
                                 }`
-                              : ""}
+                              : "Người dùng không xác định"}
                           </span>
                           <div className="flex items-center gap-4">
                             <span className="text-sm text-gray-500">
@@ -1922,34 +2136,31 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                                 }
                               )}
                             </span>
-                            {user && review?.seeker?.userAccount?.userId === user?.userId && (
-                              <>
-                                <button
-                                  onClick={() => handleEditReviewClick(review)}
-                                  className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
-                                >
-                                  <Edit fontSize="small" />
-                                  <span>Chỉnh sửa</span>
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    handleDeleteReview(review.reviewId)
-                                  }
-                                  className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1"
-                                >
-                                  <Delete fontSize="small" />
-                                  <span>Xóa</span>
-                                </button>
-                              </>
-                            )}
-
+                            {user &&
+                              review?.seeker?.userAccount?.userId ===
+                                user?.userId && (
+                                <>
+                                  <button
+                                    onClick={() =>
+                                      handleEditReviewClick(review)
+                                    }
+                                    className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
+                                  >
+                                    <Edit fontSize="small" />
+                                    <span>Chỉnh sửa</span>
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      handleDeleteReview(review.reviewId)
+                                    }
+                                    className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1"
+                                  >
+                                    <Delete fontSize="small" />
+                                    <span>Xóa</span>
+                                  </button>
+                                </>
+                              )}
                           </div>
-                          <div className="mb-2">
-                            <RatingStars value={review.star} readOnly={true} />
-                          </div>
-                          <p className="text-xs xs:text-sm text-gray-700">
-                            {review?.message}
-                          </p>
                         </div>
                         <div className="flex items-center mb-2">
                           <RatingStars
@@ -1960,37 +2171,50 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                             edit={false}
                           />
                         </div>
-                        
-                        {/* Edit review form */}
                         {editingReviewId === review.reviewId ? (
                           <div className="mt-3 p-4 border border-blue-300 rounded-md bg-blue-50">
-                            <h4 className="text-lg font-semibold mb-2">Chỉnh sửa đánh giá</h4>
-                            
+                            <h4 className="text-lg font-semibold mb-2">
+                              Chỉnh sửa đánh giá
+                            </h4>
                             <div className="mb-3">
                               <RatingStars
                                 value={editReviewData.star}
-                                onChange={(newValue) => setEditReviewData({...editReviewData, star: newValue})}
+                                onChange={(newValue) =>
+                                  setEditReviewData({
+                                    ...editReviewData,
+                                    star: newValue,
+                                  })
+                                }
                               />
                             </div>
-                            
                             <textarea
                               value={editReviewData.message}
-                              onChange={(e) => setEditReviewData({...editReviewData, message: e.target.value})}
+                              onChange={(e) =>
+                                setEditReviewData({
+                                  ...editReviewData,
+                                  message: e.target.value,
+                                })
+                              }
                               className="w-full p-2 border border-gray-300 rounded-md mb-3"
                               rows={4}
                             />
-                            
                             <div className="flex items-center mb-3">
                               <input
                                 type="checkbox"
                                 id="edit-anonymous"
                                 checked={editReviewData.isAnonymous}
-                                onChange={(e) => setEditReviewData({...editReviewData, isAnonymous: e.target.checked})}
+                                onChange={(e) =>
+                                  setEditReviewData({
+                                    ...editReviewData,
+                                    isAnonymous: e.target.checked,
+                                  })
+                                }
                                 className="mr-2"
                               />
-                              <label htmlFor="edit-anonymous">Đánh giá ẩn danh</label>
+                              <label htmlFor="edit-anonymous">
+                                Đánh giá ẩn danh
+                              </label>
                             </div>
-                            
                             <div className="flex justify-end gap-2">
                               <button
                                 onClick={handleCancelReviewEdit}
@@ -2007,50 +2231,62 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                             </div>
                           </div>
                         ) : (
-                          <p className="text-gray-700 mt-2">{review?.message}</p>
+                          <p className="text-gray-700 mt-2">
+                            {review?.message}
+                          </p>
                         )}
-                        
-                        {/* Reaction buttons */}
                         <div className="flex items-center gap-4 mt-3">
-                          <button 
-                            onClick={() => handleReaction(review.reviewId, 'LIKE')}
+                          <button
+                            onClick={() =>
+                              handleReaction(review.reviewId, "LIKE")
+                            }
                             className={`flex items-center gap-1 px-2 py-1 rounded-md ${
-                              reactions[review.reviewId]?.userReaction === 'LIKE' 
-                                ? 'bg-blue-100 text-blue-600' 
-                                : 'text-gray-600 hover:bg-gray-200'
+                              reactions[review.reviewId]?.userReaction ===
+                              "LIKE"
+                                ? "bg-blue-100 text-blue-600"
+                                : "text-gray-600 hover:bg-gray-200"
                             }`}
                           >
                             <ThumbUpAlt fontSize="small" />
-                            <span>{reactions[review.reviewId]?.likeCount || 0}</span>
+                            <span>
+                              {reactions[review.reviewId]?.likeCount || 0}
+                            </span>
                           </button>
-                          
-                          <button 
-                            onClick={() => handleReaction(review.reviewId, 'DISLIKE')}
+                          <button
+                            onClick={() =>
+                              handleReaction(review.reviewId, "DISLIKE")
+                            }
                             className={`flex items-center gap-1 px-2 py-1 rounded-md ${
-                              reactions[review.reviewId]?.userReaction === 'DISLIKE' 
-                                ? 'bg-red-100 text-red-600' 
-                                : 'text-gray-600 hover:bg-gray-200'
+                              reactions[review.reviewId]?.userReaction ===
+                              "DISLIKE"
+                                ? "bg-red-100 text-red-600"
+                                : "text-gray-600 hover:bg-gray-200"
                             }`}
                           >
                             <ThumbDownAlt fontSize="small" />
-                            <span>{reactions[review.reviewId]?.dislikeCount || 0}</span>
+                            <span>
+                              {reactions[review.reviewId]?.dislikeCount || 0}
+                            </span>
                           </button>
-                          
                           {user && (
-                            <button 
+                            <button
                               onClick={() => handleReplyClick(review.reviewId)}
                               className={`flex items-center gap-1 px-2 py-1 rounded-md text-gray-600 hover:bg-gray-200 ${
-                                checkIfSaved === false ? 'opacity-60 cursor-not-allowed' : ''
+                                checkIfSaved === false
+                                  ? "opacity-60 cursor-not-allowed"
+                                  : ""
                               }`}
-                              title={checkIfSaved === false ? "Bạn cần apply vào công ty để có thể phản hồi đánh giá" : "Phản hồi"}
+                              title={
+                                checkIfSaved === false
+                                  ? "Bạn cần apply vào công ty để có thể phản hồi đánh giá"
+                                  : "Phản hồi"
+                              }
                             >
                               <Reply fontSize="small" />
                               <span>Phản hồi</span>
                             </button>
                           )}
                         </div>
-                        
-                        {/* Reply form */}
                         {replyTo === review.reviewId && (
                           <div className="mt-4 p-4 border border-purple-200 rounded-lg bg-purple-50 shadow-sm">
                             <div className="flex justify-between items-center mb-3">
@@ -2058,14 +2294,13 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                                 <Reply fontSize="small" />
                                 Phản hồi đánh giá
                               </h4>
-                              <button 
+                              <button
                                 onClick={handleCloseReply}
                                 className="text-gray-500 hover:text-gray-700 rounded-full p-1 hover:bg-gray-200"
                               >
                                 <Close fontSize="small" />
                               </button>
                             </div>
-                            
                             <textarea
                               value={replyText}
                               onChange={(e) => setReplyText(e.target.value)}
@@ -2073,26 +2308,28 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                               className="w-full p-3 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
                               rows={3}
                             />
-                            
                             <div className="flex items-center justify-between mt-3">
                               <div className="flex items-center gap-2">
                                 <input
                                   type="checkbox"
                                   id={`anonymous-reply-${review.reviewId}`}
                                   checked={isReplyAnonymous}
-                                  onChange={(e) => setIsReplyAnonymous(e.target.checked)}
+                                  onChange={(e) =>
+                                    setIsReplyAnonymous(e.target.checked)
+                                  }
                                   className="w-4 h-4 rounded border-purple-300 text-purple-600 focus:ring-purple-500"
                                 />
-                                <label 
+                                <label
                                   htmlFor={`anonymous-reply-${review.reviewId}`}
                                   className="text-sm text-purple-600"
                                 >
                                   Phản hồi ẩn danh
                                 </label>
                               </div>
-                              
                               <button
-                                onClick={() => handleReplySubmit(review.reviewId)}
+                                onClick={() =>
+                                  handleReplySubmit(review.reviewId)
+                                }
                                 className="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 flex items-center gap-1"
                               >
                                 <span>Gửi phản hồi</span>
@@ -2100,21 +2337,24 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                             </div>
                           </div>
                         )}
-                        
-                        {/* Display replies with improved UI */}
                         {review.replies && review.replies.length > 0 && (
                           <div className="mt-4 space-y-3 rounded-lg">
                             <div className="ml-4 pl-4 border-l-2 border-purple-300 py-2 bg-gray-50 rounded-lg">
                               <h4 className="text-sm font-medium text-purple-700 flex items-center gap-1 mb-3">
                                 <Reply fontSize="small" />
-                                Phản hồi ({review.replies.filter(reply => !reply.parentReplyId).length})
+                                Phản hồi (
+                                {
+                                  review.replies.filter(
+                                    (reply) => !reply.parentReplyId
+                                  ).length
+                                }
+                                )
                               </h4>
-                              
-                              {/* Only render top-level replies here (replies without a parent) */}
                               <div className="space-y-4">
-                                {review.replies && Array.isArray(review.replies) && 
+                                {review.replies &&
+                                  Array.isArray(review.replies) &&
                                   review.replies
-                                    .filter(reply => !reply.parentReplyId)
+                                    .filter((reply) => !reply.parentReplyId)
                                     .map((reply) => (
                                       <ReplyItem
                                         key={reply.replyId}
@@ -2127,21 +2367,23 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                                         checkIfSaved={checkIfSaved}
                                         editingReplyId={editingReplyId}
                                         editReplyData={editReplyData}
-                                        handleCancelReplyEdit={handleCancelReplyEdit}
-                                        handleSaveReplyEdit={handleSaveReplyEdit}
+                                        handleCancelReplyEdit={
+                                          handleCancelReplyEdit
+                                        }
+                                        handleSaveReplyEdit={
+                                          handleSaveReplyEdit
+                                        }
                                         setEditReplyData={setEditReplyData}
                                       />
-                                    ))
-                                }
+                                    ))}
                               </div>
                             </div>
                           </div>
                         )}
-
                       </div>
                     </div>
-                  ))}
-              </div>
+                  </div>
+                ))
             )}
           </div>
         </div>

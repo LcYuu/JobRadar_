@@ -18,8 +18,8 @@ import { Separator } from "../../ui/separator";
 import logo from "../../assets/images/common/logo.jpg";
 import { logoutAction } from "../../redux/Auth/auth.action";
 import Swal from "sweetalert2";
-import NotificationDropdown from '../Notification/NotificationDropdown';
-import "./Sidebhttps://github.com/LcYuu/JobRadar_/pull/134/conflict?name=jobportal_Server%252Fjob-portal%252Fsrc%252Fmain%252Fjava%252Fcom%252Fjob_portal%252Fcontroller%252FJobPostController.java&ancestor_oid=70b91328db1cf5bbb6f3affcd0b45bd8ae1a0a8b&base_oid=bf5d87b02d60ebfdd3b60f2ff3072cf348b81f8b&head_oid=39b30961b18d7f0b1391b75dbc28a099f25712fcar.css";
+import NotificationDropdown from "../Notification/NotificationDropdown";
+import "./Sidebar.css";
 
 export default function Sidebar({ selectedSection, setSelectedSection }) {
   const { user } = useSelector((state) => state.auth);
@@ -33,12 +33,14 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
       const mobile = window.innerWidth < 800;
       setIsMobile(mobile);
       if (!mobile) {
-        setIsOpen(false);
+        setIsOpen(false); // Đóng sidebar khi chuyển sang desktop
       }
     };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    // Gọi ngay lập tức để đảm bảo trạng thái ban đầu chính xác
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const toggleSidebar = () => {
@@ -130,7 +132,6 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
   ];
 
   let menuItems;
-  
   switch (user?.userType?.userTypeId) {
     case 1:
       menuItems = adminMenuItems;
@@ -149,20 +150,20 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
     setSelectedSection(item.label);
     navigate(item.path);
     if (isMobile) {
-      setIsOpen(false); // Close sidebar on mobile after navigation
+      setIsOpen(false);
     }
   };
 
   const handleLogout = async () => {
     const result = await Swal.fire({
-      title: 'Xác nhận đăng xuất',
-      text: 'Bạn có chắc chắn muốn đăng xuất?',
-      icon: 'warning',
+      title: "Xác nhận đăng xuất",
+      text: "Bạn có chắc chắn muốn đăng xuất?",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: 'Đăng xuất',
-      cancelButtonText: 'Hủy',
+      confirmButtonText: "Đăng xuất",
+      cancelButtonText: "Hủy",
     });
-  
+
     if (result.isConfirmed) {
       dispatch(logoutAction());
       if (isMobile) {
@@ -170,17 +171,16 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
       }
     }
   };
-  
+
   const handleJobRadarClick = (e) => {
     if (user?.userType?.userTypeId === 1 || user?.userType?.userTypeId === 3) {
-      e.preventDefault(); // Prevent navigation
+      e.preventDefault();
     }
   };
 
-  // Mobile menu button
   const MobileMenuButton = () => (
-    <button 
-      className="mobile-menu-button" 
+    <button
+      className="mobile-menu-button"
       onClick={toggleSidebar}
       aria-label={isOpen ? "Close menu" : "Open menu"}
     >
@@ -191,16 +191,19 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
   return (
     <>
       {isMobile && <MobileMenuButton />}
-      
+
       {isMobile && isOpen && (
         <div className="sidebar-overlay" onClick={toggleSidebar}></div>
       )}
-      
-      <div className={`sidebar-container ${isMobile ? 'mobile' : ''} ${isOpen ? 'open' : ''}`}>
+
+      <div
+        className={`sidebar-container ${isMobile ? "mobile" : ""} ${
+          isMobile && isOpen ? "open" : ""
+        }`}
+      >
         <nav className="sidebar-nav">
-          {/* Close button for mobile */}
           {isMobile && (
-            <button 
+            <button
               className="close-sidebar-button"
               onClick={toggleSidebar}
               aria-label="Close menu"
@@ -208,8 +211,7 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
               <X size={24} />
             </button>
           )}
-          
-          {/* Logo Section */}
+
           <div className="flex items-center gap-3 pb-8">
             <img
               src={logo}
@@ -221,7 +223,7 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
               onClick={handleJobRadarClick}
               className={`text-3xl font-bold ${
                 user?.userType?.userTypeId === 1 || user?.userType?.userTypeId === 3
-                  ? "text-gray-400 cursor-not-allowed" 
+                  ? "text-gray-400 cursor-not-allowed"
                   : "text-primary hover:text-indigo-700 transition duration-200"
               }`}
             >
@@ -229,7 +231,6 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
             </Link>
           </div>
 
-          {/* User Profile */}
           <div className="mb-12 p-4 rounded-lg bg-gradient-to-r from-[#6441a5] via-[#2a0845] to-[#6441a5] hover:bg-gradient-to-l transition-all duration-300">
             <div className="flex justify-between items-start mb-4">
               <Avatar className="h-20 w-20 border-4 border-primary/20">
@@ -238,9 +239,7 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
                   {user?.userName?.charAt(0) || "U"}
                 </AvatarFallback>
               </Avatar>
-              {user?.userType?.userTypeId === 2 && (
-                <NotificationDropdown />
-              )}
+              {user?.userType?.userTypeId === 2 && <NotificationDropdown />}
             </div>
             <div className="space-y-1">
               <p className="text-xl font-semibold text-white">
@@ -252,7 +251,6 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
             </div>
           </div>
 
-          {/* Menu Items */}
           <div className="space-y-2">
             {menuItems.map((item) => (
               <Button
@@ -273,7 +271,6 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
             ))}
           </div>
 
-          {/* Logout Button */}
           <Button
             variant="ghost"
             className="w-full justify-start text-lg font-medium py-3 px-4 rounded-lg mt-4 transition-all duration-200 hover:bg-red-100 hover:text-red-500"
@@ -283,10 +280,8 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
             Đăng xuất
           </Button>
 
-          {/* Separator */}
           <Separator className="my-8" />
 
-          {/* Banner */}
           <div className="mt-6">
             <img
               src="https://cdn-new.topcv.vn/unsafe/https://static.topcv.vn/img/Banner%202%20(1).png"
@@ -299,4 +294,3 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
     </>
   );
 }
-

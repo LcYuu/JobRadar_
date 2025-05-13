@@ -24,30 +24,27 @@
   .sidebar-container.mobile {
     position: fixed;
     top: 0;
-    left: -100%;
+    left: 0;
     width: 100%;
     height: 100%;
-    z-index: 50;
+    z-index: 1000; /* Tăng z-index để đảm bảo sidebar ở trên cùng */
     background-color: transparent;
-    transition: all 0.3s ease-in-out;
-  }
-
-  .sidebar-container.mobile.open {
-    left: 0;
+    transition: none; /* Không cần transition cho container */
   }
 
   .sidebar-nav {
     width: 85%;
     max-width: 320px;
+    background-color: white;
     transform: translateX(-100%);
     transition: transform 0.3s ease-in-out;
-    z-index: 60;
+    z-index: 1010; /* Đảm bảo nav ở trên overlay */
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
     overflow-y: auto;
-    padding-top: 3.5rem;
+    padding: 1.5rem;
   }
 
   .sidebar-container.mobile.open .sidebar-nav {
@@ -61,8 +58,14 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 40;
+    z-index: 1000; /* Đảm bảo overlay ở dưới sidebar-nav */
     cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  .sidebar-container.mobile.open .sidebar-overlay {
+    opacity: 1;
   }
 
   .mobile-menu-button {
@@ -79,7 +82,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 70;
+    z-index: 1020; /* Đảm bảo nút ở trên cùng */
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
@@ -91,7 +94,7 @@
     color: #4b5563;
     border: none;
     cursor: pointer;
-    z-index: 70;
+    z-index: 1010;
     border-radius: 50%;
     width: 32px;
     height: 32px;
@@ -103,4 +106,11 @@
   .close-sidebar-button:hover {
     background-color: #f3f4f6;
   }
-} 
+}
+
+/* Ẩn sidebar-nav trên mobile khi không mở */
+@media (max-width: 800px) {
+  .sidebar-container:not(.mobile) .sidebar-nav {
+    display: none;
+  }
+}
