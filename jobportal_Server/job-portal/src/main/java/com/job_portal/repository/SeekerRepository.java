@@ -17,6 +17,9 @@ import com.job_portal.projection.ApplicantProfileProjection;
 public interface SeekerRepository extends JpaRepository<Seeker, UUID> {
 
 	public Optional<Seeker> findById(UUID userId);
+	
+	Optional<Seeker> findByUserAccountEmail(String email);
+	
 	@Query(value = """
 		    SELECT 
 		        BIN_TO_UUID(p.post_id) AS postId, 

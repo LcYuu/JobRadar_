@@ -68,7 +68,6 @@ const industryStyles = {
     color: "#FF69B4", // Màu hồng đậm
     border: "1px solid #FF69B4", // Viền màu hồng đậm
   },
-
   "Điện - điện tử": {
     backgroundColor: "rgba(70, 130, 180, 0.1)", // Màu xanh thép nhạt
     color: "#4682B4", // Màu xanh thép
@@ -132,7 +131,7 @@ function JobCard_AllJob({ job }) {
 
   return (
     <Card
-      className="overflow-hidden cursor-pointer shadow-md hover:shadow-lg transition-all duration-300 bg-white group"
+      className="w-full overflow-hidden cursor-pointer shadow-md hover:shadow-lg transition-all duration-300 bg-white group"
       onClick={handleCardClick}
       style={{
         border: "none",
@@ -152,7 +151,7 @@ function JobCard_AllJob({ job }) {
               </div>
               <div>
                 <h3
-                  className="font-semibold text-lg group-hover:text-purple-600 transition-colors duration-300" // Thay đổi màu chữ khi hover vào card
+                  className="font-semibold text-lg group-hover:text-purple-600 transition-colors duration-300"
                 >
                   {job.title}
                 </h3>
@@ -173,18 +172,6 @@ function JobCard_AllJob({ job }) {
             >
               {job.typeOfWork}
             </span>
-            <span
-              className="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
-              style={
-                typeOfWorkStyles[job.typeOfWork] || {
-                  backgroundColor: "rgba(0, 0, 0, 0.1)",
-                  color: "rgb(0, 0, 0)",
-                  border: "1px solid rgb(0, 0, 0)",
-                }
-              }
-            >
-              {job.typeOfWork}
-            </span>
           </div>
 
           {/* Industry tags and Apply button */}
@@ -192,7 +179,6 @@ function JobCard_AllJob({ job }) {
             <div className="flex flex-wrap gap-2">
               {Array.isArray(job.industry) ? (
                 job.industry.map((industry, index) => (
-
                   <span
                     key={index}
                     className="px-2 py-1 rounded-full text-xs font-medium"
@@ -222,33 +208,9 @@ function JobCard_AllJob({ job }) {
                 </span>
               )}
             </div>
-            <span
-              className="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
-              style={
-                typeOfWorkStyles[job.typeOfWork] || {
-                  backgroundColor: "rgba(0, 0, 0, 0.1)",
-                  color: "rgb(0, 0, 0)",
-                  border: "1px solid rgb(0, 0, 0)",
-                }
-              }
-            >
-              {job.typeOfWork}
-            </span>
           </div>
         </div>
       </CardContent>
-
-      {isModalOpen && (
-        <ApplyModal
-          job={job}
-          isOpen={isModalOpen}
-          onClose={handleModalClose}
-          onSubmit={handleSubmit}
-          formData={formData}
-          handleInputChange={handleInputChange}
-          onFileChange={handleFileChange}
-        />
-      )}
 
       {isModalOpen && (
         <ApplyModal

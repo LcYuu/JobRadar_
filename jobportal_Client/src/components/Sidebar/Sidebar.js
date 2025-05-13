@@ -8,6 +8,7 @@ import {
   FileText,
   Star,
   LogOut,
+  BarChart,
 } from "lucide-react";
 import { Button } from "../../ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "../../ui/avatar";
@@ -98,6 +99,11 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
       label: "Danh sách đánh giá",
       icon: Star,
       path: "/employer/account-management/review-management",
+    },
+    {
+      label: "Thống kê hiệu suất",
+      icon: BarChart,
+      path: "/employer/account-management/job-stats",
     },
   ];
 

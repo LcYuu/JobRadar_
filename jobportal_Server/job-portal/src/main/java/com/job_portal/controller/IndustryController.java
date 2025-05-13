@@ -90,7 +90,6 @@ public class IndustryController {
 
 	@GetMapping("/industry/count-industry")
 	public List<CountJobByIndustry> getCountIndustry() {
-		webSocketService.sendUpdate("/topic/industry-updates", "COUNT INDUSTRY");
 		return industryService.getIndustryCount();
 	}
 }

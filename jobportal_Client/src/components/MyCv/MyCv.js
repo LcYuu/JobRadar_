@@ -15,6 +15,7 @@ export default function MyCV() {
   const [cvFiles, setCvFiles] = useState([]);
   const [selectedPdf, setSelectedPdf] = useState(null);
   const { cvs = [] } = useSelector((store) => store.cv);
+  const [isUploading, setIsUploading] = useState(false);
   
 
   useEffect(() => {
@@ -41,9 +42,11 @@ export default function MyCV() {
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
+    if (!file) return;
 
-    if (file) {
-      setCvFiles(file.name);
+    try {
+      setIsUploading(true);
+      
       // Kiểm tra file
       if (file.type !== "application/pdf") {
         toast.error("Chỉ chấp nhận file PDF");
@@ -54,21 +57,53 @@ export default function MyCV() {
         return;
       }
 
-      try {
-        // Tải file lên Cloudinary
-        const uploadedFile = await uploadToCloudinary(file);
-        if (uploadedFile) {
-          const cvData = { pathCV: uploadedFile, cvName: file.name }; // Đảm bảo gửi URL đúng
-
-          await dispatch(createCV(cvData));
-          dispatch(getCVBySeeker());
-          toast.success("CV đã được tải lên thành công");
-        }
-      } catch (error) {
-        toast.error("Đã có lỗi khi tải lên CV");
+      // Sanitize file name - remove special characters that might cause server issues
+      const originalName = file.name;
+      const sanitizedName = originalName.replace(/[^\w.-]/g, '_');
+      
+      // Create a new File object with the sanitized name if needed
+      let fileToUpload = file;
+      if (sanitizedName !== originalName) {
+        fileToUpload = new File([file], sanitizedName, { type: file.type });
       }
+      
+      setCvFiles(sanitizedName);
 
-      event.target.value = ""; 
+      // Hiển thị thông báo đang xử lý
+      toast.info("Đang tải CV lên, vui lòng đợi...");
+      
+      // Tải file lên Cloudinary
+      const uploadedFile = await uploadToCloudinary(fileToUpload);
+      
+      // Tạo CV mới
+      const cvData = { 
+        pathCV: uploadedFile, 
+        cvName: sanitizedName 
+      };
+
+      try {
+        await dispatch(createCV(cvData)).unwrap();
+        
+        // Reload danh sách CV sau khi tải lên thành công
+        await dispatch(getCVBySeeker());
+        toast.success("CV đã được tải lên thành công");
+      } catch (cvError) {
+        console.error("CV creation error:", cvError);
+        // If server failed but we uploaded to Cloudinary, we should let the user know
+        toast.error(`Lỗi khi lưu CV: ${cvError}. File đã được tải lên nhưng không lưu được vào hệ thống.`);
+      }
+      
+    } catch (error) {
+      console.error("Upload error:", error);
+      if (error.message.includes("Cloudinary")) {
+        toast.error("Lỗi khi tải lên: Không thể kết nối với máy chủ lưu trữ.");
+      } else {
+        toast.error("Đã có lỗi khi tải lên CV: " + (error.message || "Lỗi không xác định"));
+      }
+    } finally {
+      setIsUploading(false);
+      // Reset input file
+      event.target.value = "";
     }
   };
 
@@ -131,14 +166,25 @@ export default function MyCV() {
               onChange={handleFileUpload}
               className="hidden"
               id="cv-upload"
+              disabled={isUploading}
             />
             {/* Nút Upload CV */}
             <Button
-              className="cursor-pointer bg-purple-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-purple-700 transition-all duration-300"
-              onClick={() => document.getElementById("cv-upload").click()}
+              className={`cursor-pointer ${isUploading ? 'bg-gray-400' : 'bg-purple-500 hover:bg-purple-700'} text-white px-4 py-2 rounded-lg shadow-md transition-all duration-300`}
+              onClick={() => !isUploading && document.getElementById("cv-upload").click()}
+              disabled={isUploading}
             >
-              <Upload className="mr-2 h-4 w-4" />
-              Upload CV
+              {isUploading ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                  Đang tải lên...
+                </>
+              ) : (
+                <>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload CV
+                </>
+              )}
             </Button>
           </div>
         </div>

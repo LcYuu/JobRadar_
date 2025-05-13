@@ -91,14 +91,43 @@ export default function JobDetail() {
   const { user } = useSelector((store) => store.auth);
   const navigate = useNavigate();
 
+  const [open, setOpen] = useState(false);
+  const [modalClosed, setModalClosed] = useState(false);
+  
   useEffect(() => {
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
-  }, []);
+    
+    // Load dữ liệu khi component được mount
+    dispatch(getOneApplyJob(postId));
+    dispatch(checkIfApplied(postId));
+    if (!postByPostId || postByPostId.postId !== postId) {
+      dispatch(getJobPostByPostId(postId));
+    }
+  }, [dispatch, postId]); // Chỉ gọi API khi component được mount hoặc postId thay đổi
+  
+  // Cập nhật khi modal đóng
+  useEffect(() => {
+    if (modalClosed) {
+      // Cập nhật lại thông tin từ server
+      dispatch(getOneApplyJob(postId));
+      dispatch(checkIfApplied(postId));
+      // Reset để không trigger lại
+      setModalClosed(false);
+    }
+  }, [modalClosed, dispatch, postId]);
 
-  const [open, setOpen] = useState(false);
+  // API để lấy công việc tương tự
+  useEffect(() => {
+    if (postByPostId?.company?.companyId) {
+      const companyId = postByPostId?.company?.companyId;
+      const excludePostId = postId;
+      dispatch(getSimilarJobs({ companyId, excludePostId }));
+    }
+  }, [dispatch, postByPostId, postId]);
+
   const handleOpenModal = () => {
     if (!user) {
       toast.error("Vui lòng đăng nhập để ứng tuyển công việc", {
@@ -113,23 +142,11 @@ export default function JobDetail() {
     }
     setOpen(true);
   };
-  const handleClose = () => setOpen(false);
-
-  useEffect(() => {
-    dispatch(getOneApplyJob(postId));
-    dispatch(checkIfApplied(postId));
-    if (!postByPostId || postByPostId.postId !== postId) {
-      dispatch(getJobPostByPostId(postId));
-    }
-  }, [dispatch, postId, hasApplied, postByPostId]);
-
-  useEffect(() => {
-    if (postByPostId?.company?.companyId) {
-      const companyId = postByPostId?.company?.companyId;
-      const excludePostId = postId;
-      dispatch(getSimilarJobs({ companyId, excludePostId }));
-    }
-  }, [dispatch, postByPostId, postId]);
+  
+  const handleClose = () => {
+    setOpen(false);
+    setModalClosed(true);
+  };
 
   const handleJobCardClick = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -245,6 +262,7 @@ export default function JobDetail() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-black hover:text-purple-400 ml-4"
+                      key={oneApplyJob.pathCV}
                     >
                       Xem CV đã nộp
                     </a>

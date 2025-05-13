@@ -4,14 +4,14 @@ const upload_preset = "GiaThuan";
 export const uploadToCloudinary = async (file) => {
   if (!file) {
     console.log("❌ Error: Không có file để upload!");
-    return null;
+    throw new Error("Không có file để upload!");
   }
 
   // Kiểm tra file có vượt quá 10MB không (tài khoản miễn phí bị giới hạn)
   const MAX_SIZE = 10 * 1024 * 1024; // 10MB
   if (file.size > MAX_SIZE) {
     console.error("❌ File vượt quá 10MB, không thể upload!");
-    return null;
+    throw new Error("File vượt quá 10MB, không thể upload!");
   }
 
   try {
@@ -36,13 +36,18 @@ export const uploadToCloudinary = async (file) => {
     if (!res.ok) {
       console.error("❌ Upload failed! Status:", res.status, res.statusText);
       console.error("❌ Error details:", fileData);
-      return null;
+      throw new Error(fileData.error?.message || "Lỗi khi tải lên Cloudinary");
+    }
+
+    if (!fileData.secure_url) {
+      console.error("❌ Upload successful but no URL returned!");
+      throw new Error("Lỗi khi nhận URL từ Cloudinary");
     }
 
     console.log("✅ Uploaded File URL:", fileData.secure_url);
     return fileData.secure_url;
   } catch (error) {
     console.error("❌ Lỗi khi upload lên Cloudinary:", error);
-    return null;
+    throw error; // Re-throw error to be caught by caller
   }
 };
