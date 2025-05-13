@@ -23,7 +23,6 @@ import { getCity } from "../../redux/City/city.thunk";
 import { getAllIndustries } from "../../redux/Industry/industry.thunk";
 import Pagination from "../../components/common/Pagination/Pagination";
 
-
 export default function FindCompanies() {
   const industryStyles = {
     "Thiết kế": {
@@ -80,7 +79,7 @@ export default function FindCompanies() {
     companyFitSeeker = [],
     error,
     totalPages = 1,
-    totalElements = 0
+    totalElements = 0,
   } = useSelector((store) => store.company);
   const { cities = [] } = useSelector((store) => store.city);
   const { allIndustries = [] } = useSelector((store) => store.industry);
@@ -95,13 +94,13 @@ export default function FindCompanies() {
     cityId: "",
     industryId: "",
   });
-  
+
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [size] = useState(12); // Tăng số lượng hiển thị mỗi trang
   const [selectedCategoryName, setSelectedCategoryName] =
     useState("Tất cả công ty");
-const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     dispatch(searchCompanies({ filters, currentPage, size }));
@@ -110,16 +109,16 @@ const [loading, setLoading] = useState(false);
     dispatch(getAllIndustries());
   }, [filters, currentPage, size, dispatch]);
 
-  useEffect(()=>{
+  useEffect(() => {
     dispatch(getCity());
     dispatch(getCompanyFitSeeker());
     dispatch(getAllIndustries());
-  }, [dispatch])
+  }, [dispatch]);
 
   const handleSearch = () => {
     const updatedFilters = {
       ...tempFilters,
-      cityId: tempFilters.cityId === "all" ? "" : tempFilters.cityId
+      cityId: tempFilters.cityId === "all" ? "" : tempFilters.cityId,
     };
     setFilters(updatedFilters);
     setCurrentPage(0);
@@ -136,13 +135,12 @@ const [loading, setLoading] = useState(false);
     setTempFilters((prev) => ({ ...prev, industryId: industryId || "" }));
     setCurrentPage(0); // Reset về trang đầu tiên khi thay đổi danh mục
   };
-  
 
   const filteredCompanies = selectedCategory
-  ? companyByFeature.filter((company) =>
-      company.industryIds.includes(selectedCategory)
-    )
-  : companyByFeature;
+    ? companyByFeature.filter((company) =>
+        company.industryIds.includes(selectedCategory)
+      )
+    : companyByFeature;
 
   const hasFilteredCompanies = filteredCompanies.length > 0;
 
@@ -150,14 +148,19 @@ const [loading, setLoading] = useState(false);
 
   // Filter out "None" from industries list
   const filteredIndustries = allIndustries.filter(
-    industry => industry && industry.industryName !== "None" && industry.industryName.toLowerCase() !== "none"
+    (industry) =>
+      industry &&
+      industry.industryName !== "None" &&
+      industry.industryName.toLowerCase() !== "none"
   );
 
   // Hàm lấy danh sách ngành cho từng công ty
   const getIndustryNames = (industryIds) => {
     return (industryIds || [])
-      .map((id) =>
-        allIndustries.find((industry) => industry.industryId === id)?.industryName
+      .map(
+        (id) =>
+          allIndustries.find((industry) => industry.industryId === id)
+            ?.industryName
       )
       .filter(Boolean);
   };
@@ -167,10 +170,10 @@ const [loading, setLoading] = useState(false);
     setLoading(true); // Start loading when page changes
     setCurrentPage(newPage);
     window.scrollTo({
-      top: document.getElementById('companies-list').offsetTop - 80,
-      behavior: 'smooth'
+      top: document.getElementById("companies-list").offsetTop - 80,
+      behavior: "smooth",
     });
-    
+
     // Add a small delay to show loading effect
     setTimeout(() => {
       setLoading(false);
@@ -217,7 +220,7 @@ const [loading, setLoading] = useState(false);
               <SelectContent>
                 <SelectGroup>
                   <SelectItem value="all">Tất cả địa điểm</SelectItem>
-                  {cities.map((c) => (
+                  {cities.slice(1).map((c) => (
                     <SelectItem key={c.cityId} value={c.cityId}>
                       {c.cityName}
                     </SelectItem>
@@ -236,7 +239,9 @@ const [loading, setLoading] = useState(false);
 
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-blue-500">Danh mục</h2>
-          <div className="flex gap-4 flex-wrap">
+
+          {/* Desktop View (>=768px) */}
+          <div className="hidden md:flex md:gap-4 md:flex-wrap">
             <Button
               variant={selectedCategory === null ? "default" : "outline"}
               onClick={() => handleCategoryChange(null)}
@@ -267,6 +272,112 @@ const [loading, setLoading] = useState(false);
               </Button>
             ))}
           </div>
+
+          {/* Mobile View (<768px) - Horizontal Scrollable with Navigation Buttons */}
+          <div className="relative md:hidden">
+            <div className="flex items-center">
+              <button
+                onClick={() => {
+                  const container = document.getElementById(
+                    "category-scroll-container"
+                  );
+                  container.scrollLeft -= 200;
+                }}
+                className="absolute left-0 z-10 bg-purple-600 rounded-full p-1 shadow-md hover:bg-purple-700"
+                aria-label="Scroll left"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-5 h-5 text-white"
+                >
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+
+              <div
+                id="category-scroll-container"
+                className="flex gap-2 overflow-x-auto scrollbar-hide py-2 px-8 scroll-smooth"
+                style={{
+                  scrollBehavior: "smooth",
+                  msOverflowStyle: "none",
+                  scrollbarWidth: "none",
+                }}
+              >
+                <Button
+                  variant={selectedCategory === null ? "default" : "outline"}
+                  onClick={() => handleCategoryChange(null)}
+                  className={`flex-shrink-0 hover:bg-gray-200 transition duration-200 ${
+                    selectedCategory === null
+                      ? "bg-purple-600 text-white"
+                      : "bg-white"
+                  }`}
+                >
+                  Tất cả ngành nghề
+                </Button>
+                {filteredIndustries.map((industry) => (
+                  <Button
+                    key={industry.industryId}
+                    variant={
+                      selectedCategory === industry.industryId
+                        ? "default"
+                        : "outline"
+                    }
+                    onClick={() => handleCategoryChange(industry.industryId)}
+                    className={`flex-shrink-0 hover:bg-gray-200 transition duration-200 ${
+                      selectedCategory === industry.industryId
+                        ? "bg-purple-600 text-white"
+                        : "bg-white"
+                    }`}
+                  >
+                    {industry.industryName}
+                  </Button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => {
+                  const container = document.getElementById(
+                    "category-scroll-container"
+                  );
+                  container.scrollLeft += 200;
+                }}
+                className="absolute right-0 z-10 bg-purple-600 rounded-full p-1 shadow-md hover:bg-purple-700"
+                aria-label="Scroll right"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-5 h-5 text-white"
+                >
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+            </div>
+
+            {/* Optional: Add indicator dots or progress bar here if needed */}
+          </div>
+
+          <style jsx>{`
+            /* Hide scrollbar for Chrome, Safari and Opera */
+            #category-scroll-container::-webkit-scrollbar {
+              display: none;
+            }
+          `}</style>
         </div>
 
         <div id="companies-list" className="space-y-6">
@@ -284,9 +395,12 @@ const [loading, setLoading] = useState(false);
               )}
             </h2>
             <p className="text-gray-500">
-              {hasFilteredCompanies ? 
-                selectedCategory ? filteredCompanies.length : totalElements 
-              : 0} kết quả
+              {hasFilteredCompanies
+                ? selectedCategory
+                  ? filteredCompanies.length
+                  : totalElements
+                : 0}{" "}
+              kết quả
             </p>
           </div>
           {loading ? (
@@ -334,8 +448,7 @@ const [loading, setLoading] = useState(false);
                                 backgroundColor:
                                   industryStyles[name]?.backgroundColor ||
                                   "rgba(0, 0, 0, 0.1)",
-                                color:
-                                  industryStyles[name]?.color || "#000000",
+                                color: industryStyles[name]?.color || "#000000",
                                 border:
                                   industryStyles[name]?.border ||
                                   "1px solid #000000",
@@ -352,7 +465,7 @@ const [loading, setLoading] = useState(false);
               </div>
 
               {/* Hiển thị phân trang khi không chọn danh mục hoặc tổng số trang > 1 */}
-              {(selectedCategory === null && totalPages > 1) && (
+              {selectedCategory === null && totalPages > 1 && (
                 <div className="mt-8 flex justify-center">
                   <Pagination
                     currentPage={currentPage}

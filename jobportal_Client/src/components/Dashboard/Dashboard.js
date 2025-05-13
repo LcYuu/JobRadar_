@@ -133,7 +133,7 @@ export default function Dashboard_Seeker() {
                       }}
                       className="text-sm bg-purple-500 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-all duration-300 font-medium"
                     >
-                      Xem CV tải lên
+                      Xem CV
                     </button>
                   </div>
                 </div>

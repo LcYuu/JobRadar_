@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -24,6 +23,11 @@ const CVEditor = () => {
   // State để theo dõi trạng thái đang lưu
   const [globalSaving, setGlobalSaving] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Đang tải...");
+  
+  // State cho mobile view
+  const [showPreview, setShowPreview] = useState(false);
+  const touchStartX = useRef(null);
+  const touchEndX = useRef(null);
   
   console.log("CVEditor rendered, genCv:", genCv);
   
@@ -119,10 +123,68 @@ const CVEditor = () => {
     setLoadingMessage(message);
   };
 
+  // Handle touch events for swipe
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return;
+    
+    const swipeDistance = touchEndX.current - touchStartX.current;
+    const minSwipeDistance = 50; // Minimum swipe distance required (in px)
+    
+    if (swipeDistance > minSwipeDistance) {
+      // Swipe right-to-left (show form)
+      setShowPreview(false);
+    } else if (swipeDistance < -minSwipeDistance) {
+      // Swipe left-to-right (show preview)
+      setShowPreview(true);
+    }
+    
+    // Reset values
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
+  
+  // Toggle view button handler
+  const toggleView = () => {
+    setShowPreview(prev => !prev);
+  };
+
   return (
     <LoadingProvider>
       <CVInfoContext.Provider value={{ cvInfo, setCvInfo, onSaving: handleSaving }}>
-        <div className="relative grid grid-cols-1 md:grid-cols-2 p-10 gap-10 min-h-screen">
+        {/* Không có loading */}
+        {!loading && !minLoading && !error && (
+          <div className="md:hidden flex justify-center mb-4 z-10 sticky top-0 bg-white py-2 shadow-md">
+            <div className="flex space-x-2 bg-gray-200 p-1 rounded-full">
+              <button 
+                className={`px-4 py-2 rounded-full transition-colors ${!showPreview ? 'bg-purple-600 text-white' : 'text-gray-700'}`}
+                onClick={() => setShowPreview(false)}
+              >
+                Form
+              </button>
+              <button 
+                className={`px-4 py-2 rounded-full transition-colors ${showPreview ? 'bg-purple-600 text-white' : 'text-gray-700'}`}
+                onClick={() => setShowPreview(true)}
+              >
+                Preview
+              </button>
+            </div>
+          </div>
+        )}
+        
+        <div 
+          className="relative grid grid-cols-1 md:grid-cols-2 p-10 gap-10 min-h-screen"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           {/* Global loading overlay - chỉ hiển thị khi loading ban đầu hoặc khi không có form nào đang lưu */}
           {(loading || minLoading) && !globalSaving && (
             <LoadingOverlay 
@@ -141,11 +203,25 @@ const CVEditor = () => {
                 </div>
               ) : (
                 <>
-                  <FormSection />
-                  <CVPreview />
+                  {/* Responsive mobile view with swipe */}
+                  <div className={`md:block ${!showPreview ? 'block' : 'hidden'}`}>
+                    <FormSection />
+                  </div>
+                  <div className={`md:block ${showPreview ? 'block' : 'hidden'}`}>
+                    <CVPreview />
+                  </div>
                 </>
               )}
             </>
+          )}
+          
+          {/* Swipe indicator for mobile */}
+          {!loading && !minLoading && !error && (
+            <div className="fixed bottom-5 left-0 right-0 flex justify-center md:hidden">
+              <div className="text-sm text-gray-500 bg-white bg-opacity-70 px-3 py-1 rounded-full shadow">
+                {showPreview ? 'Quẹt sang trái để xem Form' : 'Quẹt sang phải để xem Preview'}
+              </div>
+            </div>
           )}
         </div>
       </CVInfoContext.Provider>
