@@ -24,12 +24,12 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 800);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth < 768;
+      const mobile = window.innerWidth < 800;
       setIsMobile(mobile);
       if (!mobile) {
         setIsOpen(false);
