@@ -1,0 +1,397 @@
+/* CandidateManagement.css */
+
+/* Base styles */
+.table-container {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+.responsive-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.container-padding {
+  padding: 1rem;
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* Filter bar base styles */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  max-width: 100%;
+}
+
+/* Table layout for ≥1491px */
+@media (min-width: 1491px) {
+  .responsive-table thead {
+    display: table-header-group;
+  }
+  .responsive-table tbody {
+    display: table-row-group;
+  }
+  .responsive-table tr {
+    display: table-row;
+  }
+  .responsive-table th,
+  .responsive-table td {
+    display: table-cell;
+    padding: 1rem;
+    font-size: 1rem;
+    word-break: break-word;
+    max-width: 100%;
+  }
+  .responsive-table .w-10.h-10 {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  .responsive-table button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  .filter-bar {
+    flex-direction: row;
+    gap: 0.5rem;
+    max-width: 800px;
+  }
+  .filter-bar > * {
+    flex-shrink: 1;
+  }
+  .filter-bar select,
+  .filter-bar button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  .pagination-bar select {
+    font-size: 0.9rem;
+  }
+  .action-cell .card-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+/* Card layout and filter adjustments for ≤1490px */
+@media (max-width: 1490px) {
+  .table-container {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+  .responsive-table {
+    display: block;
+    min-width: 0;
+    width: 100%;
+  }
+  .responsive-table thead {
+    display: none;
+  }
+  .responsive-table tbody {
+    display: block;
+  }
+  .responsive-table tbody tr {
+    display: block;
+    margin-bottom: 0.75rem;
+    border: 1px solid #e5e7eb; /* Tailwind's border-gray-200 */
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    background: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  .responsive-table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border-bottom:　　　　　1px solid #e5e7eb;
+    word-break: break-word;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .responsive-table tbody td:last-child {
+    border-bottom: none;
+  }
+  .responsive-table tbody td:before {
+    content: attr(before);
+    font-weight: 600;
+    color: #374151; /* Tailwind's text-gray-700 */
+    flex: 1 1 40%;
+    margin-right: 0.75rem;
+    font-size: 0.9rem;
+    word-break: break-word;
+    min-width: 0;
+  }
+  .responsive-table tbody td > * {
+    flex: 1 1 60%;
+    text-align: right;
+    min-width: 0;
+    word-break: break-word;
+    max-width: 100%;
+  }
+  .responsive-table tbody td .flex.items-center.gap-3 {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 100%;
+  }
+  .responsive-table tbody td .flex.items-center.gap-2 {
+    flex-direction: row;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 100%;
+  }
+  .responsive-table .w-10.h-10 {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+  .responsive-table button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+    max-width: 100%;
+  }
+  .action-cell .card-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .action-cell .card-actions button {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Filter bar stacking and sidebar hiding at ≤1024px */
+@media (max-width: 1024px) {
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    max-width: 100%;
+  }
+  .filter-bar > * {
+    width: 100%;
+    max-width: 100%;
+  }
+  .filter-bar .max-w-\[250px\] {
+    max-width: 100%;
+  }
+  .filter-bar select,
+  .filter-bar button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    max-width: 100%;
+  }
+  .responsive-table tbody td {
+    padding: 0.4rem 0.6rem;
+  }
+  .responsive-table tbody td:before {
+    font-size: 0.875rem;
+  }
+  .responsive-table tbody td > * {
+    font-size: 0.875rem;
+  }
+  .responsive-table .w-10.h-10 {
+    width: 2rem;
+    height: 2rem;
+  }
+  .responsive-table button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+  }
+  .action-cell .card-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .action-cell .card-actions button {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Sidebar hiding and content adjustment at ≤800px */
+@media (max-width: 800px) {
+  .sidebar {
+    display: none;
+  }
+  .main-content {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+  }
+  .responsive-table tbody tr {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .responsive-table tbody td {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.5rem 0.75rem;
+  }
+  .responsive-table tbody td:before {
+    font-size: 0.875rem;
+    margin-right: 0;
+    margin-bottom: 0.25rem;
+    flex: none;
+    width: 100%;
+  }
+  .responsive-table tbody td > * {
+    font-size: 0.875rem;
+    text-align: left;
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+  }
+  .responsive-table tbody td .flex.items-center.gap-3 {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .responsive-table tbody td .flex.items-center.gap-2 {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .responsive-table .w-10.h-10 {
+    width: 2rem;
+    height: 2rem;
+  }
+  .responsive-table button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    min-height: 2rem;
+    width: 100%;
+    max-width: 100%;
+  }
+  .pagination-bar {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .pagination-bar select {
+    font-size: 0.875rem;
+  }
+  .pagination-bar button {
+    width: 100%;
+    max-width: 120px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  .action-cell .card-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .action-cell .card-actions button {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Ultra-compact at ≤480px */
+@media (max-width: 480px) {
+  .responsive-table tbody tr {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .responsive-table tbody td {
+    padding: 0.5rem 0.75rem;
+  }
+  .responsive-table tbody td:before {
+    font-size: 0.85rem;
+  }
+  .responsive-table tbody td > * {
+    font-size: 0.85rem;
+  }
+  .responsive-table .w-10.h-10 {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+  .responsive-table button {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    min-height: 2rem;
+  }
+  .filter-bar select,
+  .filter-bar button {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  .pagination-bar select {
+    font-size: 0.85rem;
+  }
+  .pagination-bar button {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  .action-cell .card-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .action-cell .card-actions button {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* Ultra-narrow screens (e.g., 320px–360px) */
+@media (max-width: 360px) {
+  .container-padding {
+    padding: 0.5rem;
+  }
+  .responsive-table tbody tr {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .responsive-table tbody td {
+    padding: 0.5rem 0.75rem;
+  }
+  .responsive-table tbody td:before {
+    font-size: 0.8rem;
+  }
+  .responsive-table tbody td > * {
+    font-size: 0.8rem;
+  }
+  .responsive-table .w-10.h-10 {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  .responsive-table button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    min-height: 2rem;
+  }
+  .filter-bar select,
+  .filter-bar button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+  .pagination-bar select {
+    font-size: 0.8rem;
+  }
+  .pagination-bar button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+  .action-cell .card-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .action-cell .card-actions button {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+}
