@@ -20,16 +20,21 @@
 }
 
 /* Mobile sidebar styling */
-@media (max-width: 800px) {
+@media (max-width: 1000px) {
   .sidebar-container.mobile {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1000; /* Tăng z-index để đảm bảo sidebar ở trên cùng */
+    z-index: 40; /* Lower z-index so it doesn't overlap notifications */
     background-color: transparent;
-    transition: none; /* Không cần transition cho container */
+    transition: none;
+    pointer-events: none; /* Allow clicks to pass through when closed */
+  }
+
+  .sidebar-container.mobile.open {
+    pointer-events: auto; /* Capture clicks when open */
   }
 
   .sidebar-nav {
@@ -38,7 +43,7 @@
     background-color: white;
     transform: translateX(-100%);
     transition: transform 0.3s ease-in-out;
-    z-index: 1010; /* Đảm bảo nav ở trên overlay */
+    z-index: 50; /* Higher than container but lower than notifications */
     position: fixed;
     top: 0;
     left: 0;
@@ -58,14 +63,16 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000; /* Đảm bảo overlay ở dưới sidebar-nav */
+    z-index: 45; /* Between sidebar-nav and container */
     cursor: pointer;
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
+    pointer-events: none; /* Prevent clicks when closed */
   }
 
   .sidebar-container.mobile.open .sidebar-overlay {
     opacity: 1;
+    pointer-events: auto; /* Allow clicks when open */
   }
 
   .mobile-menu-button {
@@ -82,7 +89,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 1020; /* Đảm bảo nút ở trên cùng */
+    z-index: 55; /* Above sidebar but below notifications */
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   }
 
@@ -94,7 +101,7 @@
     color: #4b5563;
     border: none;
     cursor: pointer;
-    z-index: 1010;
+    z-index: 51;
     border-radius: 50%;
     width: 32px;
     height: 32px;
@@ -108,9 +115,13 @@
   }
 }
 
-/* Ẩn sidebar-nav trên mobile khi không mở */
-@media (max-width: 800px) {
-  .sidebar-container:not(.mobile) .sidebar-nav {
-    display: none;
-  }
+/* Ensure NotificationDropdown has the highest z-index */
+.notification-dropdown {
+  position: relative;
+  z-index: 100 !important; /* Higher than sidebar components */
+}
+
+/* Dropdown content inside notifications should be even higher */
+.notification-dropdown .dropdown-content {
+  z-index: 110 !important;
 }

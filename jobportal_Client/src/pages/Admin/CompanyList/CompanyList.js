@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "../../../ui/button";
 import { MoreVertical, Search } from "lucide-react";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "../../../ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
-
 import { toast } from "react-hot-toast";
 import { Input } from "../../../ui/input";
 import { StarRounded } from "@mui/icons-material";
@@ -28,7 +26,6 @@ const formatDate = (dateString) => {
   try {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "N/A";
-
     return new Intl.DateTimeFormat("vi-VN", {
       year: "numeric",
       month: "2-digit",
@@ -42,52 +39,52 @@ const formatDate = (dateString) => {
 export default function CompanyList() {
   const industryStyles = {
     "Thiết kế": {
-      backgroundColor: "rgba(255, 99, 71, 0.1)", // Màu đỏ san hô nhạt
-      color: "#FF6347", // Màu đỏ san hô
-      border: "1px solid #FF6347", // Viền màu đỏ san hô
+      backgroundColor: "rgba(255, 99, 71, 0.1)",
+      color: "#FF6347",
+      border: "1px solid #FF6347",
     },
     "Kinh doanh": {
-      backgroundColor: "rgba(138, 43, 226, 0.1)", // Màu tím nhạt
-      color: "#8A2BE2", // Màu tím
-      border: "1px solid #8A2BE2", // Viền màu tím
+      backgroundColor: "rgba(138, 43, 226, 0.1)",
+      color: "#8A2BE2",
+      border: "1px solid #8A2BE2",
     },
     Marketing: {
-      backgroundColor: "rgba(255, 140, 0, 0.1)", // Màu cam nhạt
-      color: "#FF8C00", // Màu cam
-      border: "1px solid #FF8C00", // Viền màu cam
+      backgroundColor: "rgba(255, 140, 0, 0.1)",
+      color: "#FF8C00",
+      border: "1px solid #FF8C00",
     },
     "Thương mại điện tử": {
-      backgroundColor: "rgba(30, 144, 255, 0.1)", // Màu xanh dương đậm nhạt
-      color: "#1E90FF", // Màu xanh dương đậm
-      border: "1px solid #1E90FF", // Viền màu xanh dương đậm
+      backgroundColor: "rgba(30, 144, 255, 0.1)",
+      color: "#1E90FF",
+      border: "1px solid #1E90FF",
     },
     "IT phần cứng": {
-      backgroundColor: "rgba(0, 0, 255, 0.1)", // Màu xanh dương nhạt
-      color: "#0000FF", // Màu xanh dương
-      border: "1px solid #0000FF", // Viền màu xanh dương
+      backgroundColor: "rgba(0, 0, 255, 0.1)",
+      color: "#0000FF",
+      border: "1px solid #0000FF",
     },
     "IT phần mềm": {
-      backgroundColor: "rgba(0, 255, 255, 0.1)", // Màu xanh dương ngọc nhạt
-      color: "#00FFFF", // Màu xanh dương ngọc
-      border: "1px solid #00FFFF", // Viền màu xanh dương ngọc
+      backgroundColor: "rgba(0, 255, 255, 0.1)",
+      color: "#00FFFF",
+      border: "1px solid #00FFFF",
     },
     "Công nghệ ô tô": {
-      backgroundColor: "rgba(255, 99, 71, 0.1)", // Màu cam đỏ nhạt
-      color: "#FF4500", // Màu cam đỏ
-      border: "1px solid #FF4500", // Viền màu cam đỏ
+      backgroundColor: "rgba(255, 99, 71, 0.1)",
+      color: "#FF4500",
+      border: "1px solid #FF4500",
     },
     "Nhà hàng/Khách sạn": {
-      backgroundColor: "rgba(255, 105, 180, 0.1)", // Màu hồng nhạt
-      color: "#FF69B4", // Màu hồng đậm
-      border: "1px solid #FF69B4", // Viền màu hồng đậm
+      backgroundColor: "rgba(255, 105, 180, 0.1)",
+      color: "#FF69B4",
+      border: "1px solid #FF69B4",
     },
-
     "Điện - điện tử": {
-      backgroundColor: "rgba(70, 130, 180, 0.1)", // Màu xanh thép nhạt
-      color: "#4682B4", // Màu xanh thép
-      border: "1px solid #4682B4", // Viền màu xanh thép
+      backgroundColor: "rgba(70, 130, 180, 0.1)",
+      color: "#4682B4",
+      border: "1px solid #4682B4",
     },
   };
+
   const dispatch = useDispatch();
   const { companies, loading, totalElements, totalPages } = useSelector(
     (store) => store.company
@@ -97,9 +94,8 @@ export default function CompanyList() {
   const [pageSize, setPageSize] = useState(5);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedIndustry, setSelectedIndustry] = useState("");
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const navigate = useNavigate();
-
-  // const [filteredCompanies, setFilteredCompanies] = useState([]);
   const [companyReviews, setCompanyReviews] = useState({});
 
   useEffect(() => {
@@ -111,9 +107,8 @@ export default function CompanyList() {
         size: pageSize,
       })
     );
-  }, [dispatch, currentPage, pageSize]);
+  }, [dispatch, currentPage, pageSize, searchTerm, selectedIndustry]);
 
-  // Xử lý tìm kiếm và lọc
   useEffect(() => {
     dispatch(getAllIndustries());
   }, [dispatch]);
@@ -126,15 +121,12 @@ export default function CompanyList() {
           try {
             await dispatch(getReviewByCompany(company.companyId));
             const reviews = store.getState().review.reviews;
-
-            // Tính trung bình đánh giá
             const totalStars = reviews.reduce(
               (total, review) => total + review.star,
               0
             );
             const averageRating =
               reviews.length > 0 ? totalStars / reviews.length : 0;
-
             reviewsData[company.companyId] = {
               reviews: reviews,
               averageRating: averageRating,
@@ -150,9 +142,14 @@ export default function CompanyList() {
         setCompanyReviews(reviewsData);
       }
     };
-
     fetchCompanyReviews();
   }, [companies, dispatch]);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const applyFilters = () => {
     setCurrentPage(0);
@@ -166,7 +163,6 @@ export default function CompanyList() {
     );
   };
 
-  // Function to get industry name by ID
   const getIndustryName = (industryId) => {
     if (!allIndustries || !industryId) return "N/A";
     const industry = allIndustries.find((ind) => ind.industryId === industryId);
@@ -181,13 +177,11 @@ export default function CompanyList() {
 
   const handlePageSizeChange = (e) => {
     setPageSize(Number(e.target.value));
-    setCurrentPage(0); // Reset về trang đầu khi thay đổi số lượng bản ghi mỗi trang
+    setCurrentPage(0);
   };
 
-  // Thêm hàm handleViewDetail
   const handleViewDetail = async (companyId) => {
     try {
-      // Pre-fetch data trước khi navigate
       await Promise.all([
         dispatch(getCompanyById(companyId)),
         dispatch(getCompanyJobCounts(companyId)),
@@ -198,23 +192,34 @@ export default function CompanyList() {
     }
   };
 
+  const isMobile = windowWidth < 800;
+  const isMidRange = windowWidth >= 800 && windowWidth <= 1485;
+  const isTableLayout = windowWidth > 1485;
+  const fontSize = isMobile ? "text-xs" : isMidRange ? "text-sm" : "text-sm";
+  const padding = isMobile ? "p-2" : isMidRange ? "p-3" : "p-4";
+  const logoSize = isMobile ? "h-8 w-8" : "h-10 w-10";
+  const starSize = isMobile ? "w-3 h-3" : "w-4 h-4";
+  const inputWidth = isMobile ? "w-full" : isMidRange ? "w-64" : "w-[300px]";
+  const cardPadding = isMobile ? "p-3" : "p-4";
+
   return (
-    <div className="space-y-6 mt-8">
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex justify-end items-center gap-4">
-          <div className="relative">
+    <div className="space-y-6 mt-8 px-4 sm:px-6 md:px-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+          <div className="relative w-full sm:w-auto">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
             <Input
               type="text"
               placeholder="Tìm kiếm theo tên..."
-              className="w-[300px] pl-8"
-              onChange={(e) => setSearchTerm(e.target.value)} // Lưu giá trị tìm kiếm
+              className={`${inputWidth} pl-8 ${fontSize}`}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <select
             value={selectedIndustry}
             onChange={(e) => setSelectedIndustry(e.target.value)}
-            className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            className={`border rounded-lg px-3 py-2 ${fontSize} focus:outline-none focus:ring-2 focus:ring-gray-500 w-full sm:w-auto`}
           >
             <option value="">Tất cả lĩnh vực</option>
             {allIndustries?.map((industry) => (
@@ -223,152 +228,316 @@ export default function CompanyList() {
               </option>
             ))}
           </select>
-          <button
-            onClick={applyFilters} // Thêm sự kiện áp dụng bộ lọc
-            className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          <Button
+            onClick={applyFilters}
+            className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 w-full sm:w-auto"
           >
             Áp dụng
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="p-4 border-b">
-          <p className="text-sm text-gray-600">
+      <div className="bg-white rounded-lg shadow overflow-hidden max-w-full">
+        <div className={`${padding} border-b`}>
+          <p className={`${fontSize} text-gray-600`}>
             Tổng số <span className="font-medium">{totalElements}</span> công ty
           </p>
         </div>
 
-        <table className="w-full">
-          <thead className="bg-purple-600 text-white">
-            <tr>
-              <th className="text-left p-4 w-16">STT</th>
-              <th className="text-left p-4 text-sm font-medium text-white">
-                Tên công ty
-              </th>
-              <th className="text-left p-4 text-sm font-medium text-white">
-                Địa chỉ
-              </th>
-              <th className="text-left p-4 text-sm font-medium text-white">
-                Lĩnh vực
-              </th>
-              <th className="text-left p-4 text-sm font-medium text-white">
-                Ngày thành lập
-              </th>
-              <th className="text-left p-4 text-sm font-medium text-white">
-                Số điện thoại
-              </th>
-              <th className="text-left p-4 text-sm font-medium text-white">
-                Đánh giá
-              </th>
-              <th className="w-20"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
+        {isTableLayout ? (
+          <div className="overflow-x-auto">
+            <table className="w-full table-auto">
+              <thead className="bg-purple-600 text-white sticky top-0 z-10">
+                <tr>
+                  <th className={`${padding} text-left w-16 ${fontSize}`}>
+                    STT
+                  </th>
+                  <th className={`${padding} text-left ${fontSize}`}>
+                    Tên công ty
+                  </th>
+                  <th className={`${padding} text-left ${fontSize}`}>
+                    Địa chỉ
+                  </th>
+                  <th className={`${padding} text-left ${fontSize}`}>
+                    Lĩnh vực
+                  </th>
+                  <th className={`${padding} text-left ${fontSize}`}>
+                    Ngày thành lập
+                  </th>
+                  <th className={`${padding} text-left ${fontSize}`}>
+                    Số điện thoại
+                  </th>
+                  <th className={`${padding} text-left ${fontSize}`}>
+                    Đánh giá
+                  </th>
+                  <th className={`${padding} w-20`}></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {loading ? (
+                  <tr>
+                    <td
+                      colSpan={8}
+                      className="text-center py-4 text-gray-500"
+                    >
+                      Đang tải...
+                    </td>
+                  </tr>
+                ) : companies.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={8}
+                      className="text-center text-gray-500 py-4"
+                    >
+                      Không có dữ liệu
+                    </td>
+                  </tr>
+                ) : (
+                  companies.map((company, index) => (
+                    <tr
+                      key={company.companyId}
+                      className="hover:bg-gray-50"
+                    >
+                      <td className={`${padding} ${fontSize}`}>
+                        {index + 1 + currentPage * pageSize}
+                      </td>
+                      <td className={`${padding}`}>
+                        <div className="flex items-center">
+                          <img
+                            src={company.logo || "/default-logo.png"}
+                            alt=""
+                            className={`${logoSize} rounded-full mr-2 sm:mr-3`}
+                          />
+                          <span className={`font-medium ${fontSize}`}>
+                            {company.companyName}
+                          </span>
+                        </div>
+                      </td>
+                      <td
+                        className={`${padding} text-gray-500 ${fontSize}`}
+                      >
+                        {company.address}
+                      </td>
+                      <td className={`${padding}`}>
+                        <div className="flex flex-col gap-1">
+                          {company.industry?.map((ind) => {
+                            const industryName = getIndustryName(
+                              ind.industryId
+                            );
+                            const style =
+                              industryStyles[industryName] || {};
+                            return (
+                              <span
+                                key={ind.industryId}
+                                className={`inline-flex items-center px-2 py-0.5 rounded-full font-medium ${fontSize}`}
+                                style={{
+                                  backgroundColor: style.backgroundColor,
+                                  color: style.color,
+                                  border: style.border,
+                                }}
+                              >
+                                {industryName}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </td>
+                      <td
+                        className={`${padding} text-gray-500 ${fontSize}`}
+                      >
+                        {formatDate(company.establishedTime)}
+                      </td>
+                      <td
+                        className={`${padding} text-gray-500 ${fontSize}`}
+                      >
+                        {company.contact}
+                      </td>
+                      <td className={`${padding}`}>
+                        <div className="flex items-center gap-1">
+                          <div className="flex items-center">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <StarRounded
+                                key={star}
+                                className={`${starSize} ${
+                                  star <=
+                                  (companyReviews[company.companyId]
+                                    ?.averageRating || 0)
+                                    ? "text-yellow-400"
+                                    : "text-gray-300"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className={`${fontSize} text-gray-500`}>
+                            (
+                            {companyReviews[company.companyId]
+                              ?.totalReviews || 0}
+                            )
+                          </span>
+                        </div>
+                      </td>
+                      <td className={`${padding}`}>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleViewDetail(company.companyId)
+                              }
+                            >
+                              Chi tiết
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-red-600">
+                              Xóa
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="space-y-4 p-4">
             {loading ? (
-              <tr>
-                <td colSpan="6" className="text-center py-4">
-                  Đang tải...
-                </td>
-              </tr>
+              <div className="text-center py-4 text-gray-500">
+                Đang tải...
+              </div>
             ) : companies.length === 0 ? (
-              <tr>
-                <td colSpan="6" className="text-center text-gray-500 py-4">
-                  Không có dữ liệu
-                </td>
-              </tr>
+              <div className="text-center py-4 text-gray-500">
+                Không có dữ liệu
+              </div>
             ) : (
               companies.map((company, index) => (
-                <tr key={company.companyId} className="hover:bg-gray-50">
-                  <td className="p-4">{index + 1 + currentPage * pageSize}</td>
-                  <td className="p-4">
-                    <div className="flex items-center">
-                      <img
-                        src={company.logo || "/default-logo.png"}
-                        alt=""
-                        className="h-10 w-10 rounded-full mr-3"
-                      />
-                      <span className="font-medium">{company.companyName}</span>
-                    </div>
-                  </td>
-                  <td className="p-4 text-gray-500">{company.address}</td>
-                  <td className="p-4">
-                    <div className="flex flex-col gap-2">
-                      {company.industry?.map((ind) => {
-                        const industryName = getIndustryName(ind.industryId);
-                        const style = industryStyles[industryName] || {};
-
-                        return (
-                          <span
-                            key={ind.industryId}
-                            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                            style={{
-                              backgroundColor: style.backgroundColor,
-                              color: style.color,
-                              border: style.border,
-                            }}
-                          >
-                            {industryName}
+                <div
+                  key={company.companyId}
+                  className="bg-gray-50 rounded-lg shadow-sm overflow-hidden"
+                >
+                  <div className={`${cardPadding} flex flex-col gap-3`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={company.logo || "/default-logo.png"}
+                          alt=""
+                          className={`${logoSize} rounded-full`}
+                        />
+                        <div>
+                          <span className={`font-medium ${fontSize}`}>
+                            {company.companyName}
                           </span>
-                        );
-                      })}
-                    </div>
-                  </td>
-                  <td className="p-4 text-gray-500">
-                    {formatDate(company.establishedTime)}
-                  </td>
-                  <td className="p-4 text-gray-500">{company.contact}</td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <StarRounded
-                            key={star}
-                            className={`w-4 h-4 ${
-                              star <=
-                              (companyReviews[company.companyId]
-                                ?.averageRating || 0)
-                                ? "text-yellow-400"
-                                : "text-gray-300"
-                            }`}
-                          />
-                        ))}
+                          <p className={`${fontSize} text-gray-500`}>
+                            #{index + 1 + currentPage * pageSize}
+                          </p>
+                        </div>
                       </div>
-                      <span className="text-sm text-gray-500">
-                        ({companyReviews[company.companyId]?.totalReviews || 0})
-                      </span>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleViewDetail(company.companyId)
+                            }
+                          >
+                            Chi tiết
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-red-600">
+                            Xóa
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
-                  </td>
-                  <td className="p-4">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => handleViewDetail(company.companyId)}
-                        >
-                          Chi tiết
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
-                          Xóa
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
-                </tr>
+                    <div className="space-y-2">
+                      <p className={`${fontSize} text-gray-500`}>
+                        <span className="font-medium">Địa chỉ:</span>{" "}
+                        {company.address}
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {company.industry?.map((ind) => {
+                          const industryName = getIndustryName(
+                            ind.industryId
+                          );
+                          const style = industryStyles[industryName] || {};
+                          return (
+                            <span
+                              key={ind.industryId}
+                              className={`inline-flex items-center px-2 py-0.5 rounded-full font-medium ${
+                                isMobile ? "text-[10px]" : fontSize
+                              }`}
+                              style={{
+                                backgroundColor: style.backgroundColor,
+                                color: style.color,
+                                border: style.border,
+                              }}
+                            >
+                              {industryName}
+                            </span>
+                          );
+                        })}
+                      </div>
+                      {!isMobile && (
+                        <p className={`${fontSize} text-gray-500`}>
+                          <span className="font-medium">
+                            Ngày thành lập:
+                          </span>{" "}
+                          {formatDate(company.establishedTime)}
+                        </p>
+                      )}
+                      {!isMobile && (
+                        <p className={`${fontSize} text-gray-500`}>
+                          <span className="font-medium">Số điện thoại:</span>{" "}
+                          {company.contact}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-1">
+                        <span className={`${fontSize} font-medium text-gray-600`}>
+                          Đánh giá:
+                        </span>
+                        <div className="flex items-center">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <StarRounded
+                              key={star}
+                              className={`${starSize} ${
+                                star <=
+                                (companyReviews[company.companyId]
+                                  ?.averageRating || 0)
+                                  ? "text-yellow-400"
+                                  : "text-gray-300"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className={`${fontSize} text-gray-500`}>
+                          (
+                          {companyReviews[company.companyId]?.totalReviews ||
+                            0}
+                          )
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               ))
             )}
-          </tbody>
-        </table>
+          </div>
+        )}
 
-        <div className="p-4 border-t flex items-center justify-between">
+        <div
+          className={`${padding} border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4`}
+        >
           <div className="flex items-center gap-2">
-            <span>Hiển thị</span>
+            <span className={fontSize}>Hiển thị</span>
             <select
-              className="border rounded p-1"
+              className={`border rounded p-1 ${fontSize}`}
               value={pageSize}
               onChange={handlePageSizeChange}
             >
@@ -376,7 +545,7 @@ export default function CompanyList() {
               <option value={10}>10</option>
               <option value={20}>20</option>
             </select>
-            <span>ứng viên mỗi trang</span>
+            <span className={fontSize}>công ty mỗi trang</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -384,13 +553,13 @@ export default function CompanyList() {
               variant="outline"
               disabled={currentPage === 0}
               onClick={() => handlePageChange(currentPage - 1)}
+              className={fontSize}
             >
               Previous
             </Button>
             <Button
               variant="outline"
-              className="bg-purple-600 text-white"
-              onClick={() => handlePageChange(currentPage)}
+              className={`bg-purple-600 text-white ${fontSize}`}
             >
               {currentPage + 1}
             </Button>
@@ -398,6 +567,7 @@ export default function CompanyList() {
               variant="outline"
               disabled={currentPage === totalPages - 1}
               onClick={() => handlePageChange(currentPage + 1)}
+              className={fontSize}
             >
               Next
             </Button>

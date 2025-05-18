@@ -1,0 +1,439 @@
+/* Base styles */
+.table-container {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+.responsive-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.container-padding {
+  padding: 1rem;
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* Filter bar base styles */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  max-width: 100%;
+  justify-content: flex-end; /* Right-align by default */
+}
+
+/* Dropdown trigger button */
+.dropdown-trigger {
+  background-color: rgb(147 51 234) !important; /* gray-100 */
+  border: 1px solid rgb(147 51 234) !important; /* gray-300 */
+}
+
+.dropdown-trigger:hover {
+  background-color: rgb(132, 15, 241) !important; /* gray-200 */
+}
+.dropdown-trigger svg {
+  stroke: white !important; /* Hoặc color: white !important nếu stroke không đủ */
+}
+
+/* Dropdown menu content */
+.dropdown-menu-content {
+  min-width: 150px;
+  z-index: 10;
+}
+
+/* Button and dropdown item colors */
+.action-button-stop {
+  background-color: #FEE2E2 !important; /* red-100 */
+  color: #DC2626 !important; /* red-600 */
+}
+
+.action-button-stop:hover {
+  background-color: #FECACA !important; /* red-200 */
+  color: #991B1B !important; /* red-800 */
+}
+
+.action-button-view {
+  background-color: #DBEAFE !important; /* blue-100 */
+  color: #2563EB !important; /* blue-600 */
+}
+
+.action-button-view:hover {
+  background-color: #BFDBFE !important; /* blue-200 */
+  color: #1E40AF !important; /* blue-800 */
+}
+
+.dropdown-item-stop {
+  color: #DC2626 !important; /* red-600 */
+}
+
+.dropdown-item-stop:hover {
+  color: #991B1B !important; /* red-800 */
+  background-color: #F3F4F6 !important; /* gray-100 */
+}
+
+.dropdown-item-view {
+  color: #2563EB !important; /* blue-600 */
+}
+
+.dropdown-item-view:hover {
+  color: #1E40AF !important; /* blue-800 */
+  background-color: #F3F4F6 !important; /* gray-100 */
+}
+
+/* Filter bar horizontal layout for ≥948px */
+@media (min-width: 948px) {
+  .filter-bar {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 100%;
+  }
+  .filter-bar > * {
+    flex-shrink: 1;
+    width: auto;
+  }
+  .filter-bar select.max-w-\[250px\] {
+    max-width: 250px; /* Respect Tailwind's max-w-[250px] */
+  }
+  .filter-bar button {
+    width: auto; /* Respect Tailwind's w-auto min-w-[100px] max-w-[120px] */
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Filter bar stacking at <948px */
+@media (max-width: 947px) {
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    max-width: 100%;
+    justify-content: flex-start; /* Stack vertically, no right alignment */
+  }
+  .filter-bar > * {
+    width: 100%;
+    max-width: 100%;
+  }
+  .filter-bar select.max-w-\[250px\] {
+    max-width: 250px; /* Respect Tailwind's max-w-[250px] */
+  }
+  .filter-bar button {
+    width: 100%; /* Button stretches full width */
+    max-width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  .responsive-table tbody td {
+    padding: 0.4rem 0.6rem;
+  }
+  .responsive-table tbody td:before {
+    font-size: 0.875rem;
+  }
+  .responsive-table tbody td > * {
+    font-size: 0.875rem;
+  }
+  .responsive-table button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+  }
+  .action-cell .card-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .action-cell .card-actions button {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Table layout for ≥1491px */
+@media (min-width: 1491px) {
+  .responsive-table thead {
+    display: table-header-group;
+  }
+  .responsive-table tbody {
+    display: table-row-group;
+  }
+  .responsive-table tr {
+    display: table-row;
+  }
+  .responsive-table th,
+  .responsive-table td {
+    display: table-cell;
+    padding: 1rem;
+    font-size: 1rem;
+    word-break: break-word;
+    max-width: 100%;
+  }
+  .responsive-table button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  .filter-bar {
+    flex-direction: row;
+    gap: 0.5rem;
+    max-width: 800px;
+  }
+  .filter-bar > * {
+    flex-shrink: 1;
+  }
+  .filter-bar select,
+  .filter-bar button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  .pagination-bar select {
+    font-size: 0.9rem;
+  }
+  .action-cell .card-actions {
+    flex-direction: row !important;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+/* Card layout and filter adjustments for ≤1490px */
+@media (max-width: 1490px) {
+  .table-container {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+  .responsive-table {
+    display: block;
+    min-width: 0;
+    width: 100%;
+  }
+  .responsive-table thead {
+    display: none;
+  }
+  .responsive-table tbody {
+    display: block;
+  }
+  .responsive-table tbody tr {
+    display: block;
+    margin-bottom: 0.75rem;
+    border: 1px solid #e5e7eb; /* Tailwind's border-gray-200 */
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    background: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  .responsive-table tbody td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+    word-break: break-word;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .responsive-table tbody td:last-child {
+    border-bottom: none;
+  }
+  .responsive-table tbody td:before {
+    content: attr(before);
+    font-weight: 600;
+    color: #374151; /* Tailwind's text-gray-700 */
+    flex: 1 1 40%;
+    margin-right: 0.75rem;
+    font-size: 0.9rem;
+    word-break: break-word;
+    min-width: 0;
+  }
+  .responsive-table tbody td > * {
+    flex: 1 1 60%;
+    text-align: right;
+    min-width: 0;
+    word-break: break-word;
+    max-width: 100%;
+  }
+  .responsive-table tbody td .flex.items-center.gap-2 {
+    flex-direction: row;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 100%;
+  }
+  .responsive-table button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+    max-width: 100%;
+  }
+  .action-cell .card-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .action-cell .card-actions button {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Sidebar hiding and content adjustment at ≤800px */
+@media (max-width: 800px) {
+  .sidebar {
+    display: none;
+  }
+  .main-content {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+  }
+  .responsive-table tbody tr {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .responsive-table tbody td {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.5rem 0.75rem;
+  }
+  .responsive-table tbody td:before {
+    font-size: 0.875rem;
+    margin-right: 0;
+    margin-bottom: 0.25rem;
+    flex: none;
+    width: 100%;
+  }
+  .responsive-table tbody td > * {
+    font-size: 0.875rem;
+    text-align: left;
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+  }
+  .responsive-table tbody td .flex.items-center.gap-2 {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .responsive-table button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    min-height: 2rem;
+    width: 100%;
+    max-width: 100%;
+  }
+  .pagination-bar {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .pagination-bar select {
+    font-size: 0.875rem;
+  }
+  .pagination-bar button {
+    width: 100%;
+    max-width: 120px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  .action-cell .card-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .action-cell .card-actions button {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Ultra-compact at ≤480px */
+@media (max-width: 480px) {
+  .responsive-table tbody tr {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .responsive-table tbody td {
+    padding: 0.5rem 0.75rem;
+  }
+  .responsive-table tbody td:before {
+    font-size: 0.85rem;
+  }
+  .responsive-table tbody td > * {
+    font-size: 0.85rem;
+  }
+  .responsive-table button {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    min-height: 2rem;
+  }
+  .filter-bar select,
+  .filter-bar button {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  .pagination-bar select {
+    font-size: 0.85rem;
+  }
+  .pagination-bar button {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  .action-cell .card-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .action-cell .card-actions button {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* Ultra-narrow screens (e.g., 320px–360px) */
+@media (max-width: 360px) {
+  .container-padding {
+    padding: 0.5rem;
+  }
+  .responsive-table tbody tr {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .responsive-table tbody td {
+    padding: 0.5rem 0.75rem;
+  }
+  .responsive-table tbody td:before {
+    font-size: 0.8rem;
+  }
+  .responsive-table tbody td > * {
+    font-size: 0.8rem;
+  }
+  .responsive-table button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    min-height: 2rem;
+  }
+  .filter-bar select,
+  .filter-bar button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+  .pagination-bar select {
+    font-size: 0.8rem;
+  }
+  .pagination-bar button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+  .action-cell .card-actions {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .action-cell .card-actions button {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+}

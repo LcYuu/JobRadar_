@@ -1,4 +1,3 @@
-import { Button } from "../../../ui/button";
 import { Card, CardContent } from "../../../ui/card";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -29,49 +28,49 @@ const typeOfWorkStyles = {
 
 const industryStyles = {
   "Thiết kế": {
-    backgroundColor: "rgba(255, 99, 71, 0.1)", // Màu đỏ san hô nhạt
-    color: "#FF6347", // Màu đỏ san hô
-    border: "1px solid #FF6347", // Viền màu đỏ san hô
+    backgroundColor: "rgba(255, 99, 71, 0.1)",
+    color: "#FF6347",
+    border: "1px solid #FF6347",
   },
   "Kinh doanh": {
-    backgroundColor: "rgba(138, 43, 226, 0.1)", // Màu tím nhạt
-    color: "#8A2BE2", // Màu tím
-    border: "1px solid #8A2BE2", // Viền màu tím
+    backgroundColor: "rgba(138, 43, 226, 0.1)",
+    color: "#8A2BE2",
+    border: "1px solid #8A2BE2",
   },
   Marketing: {
-    backgroundColor: "rgba(255, 140, 0, 0.1)", // Màu cam nhạt
-    color: "#FF8C00", // Màu cam
-    border: "1px solid #FF8C00", // Viền màu cam
+    backgroundColor: "rgba(255, 140, 0, 0.1)",
+    color: "#FF8C00",
+    border: "1px solid #FF8C00",
   },
   "Thương mại điện tử": {
-    backgroundColor: "rgba(30, 144, 255, 0.1)", // Màu xanh dương đậm nhạt
-    color: "#1E90FF", // Màu xanh dương đậm
-    border: "1px solid #1E90FF", // Viền màu xanh dương đậm
+    backgroundColor: "rgba(30, 144, 255, 0.1)",
+    color: "#1E90FF",
+    border: "1px solid #1E90FF",
   },
   "IT phần cứng": {
-    backgroundColor: "rgba(0, 0, 255, 0.1)", // Màu xanh dương nhạt
-    color: "#0000FF", // Màu xanh dương
-    border: "1px solid #0000FF", // Viền màu xanh dương
+    backgroundColor: "rgba(0, 0, 255, 0.1)",
+    color: "#0000FF",
+    border: "1px solid #0000FF",
   },
   "IT phần mềm": {
-    backgroundColor: "rgba(0, 255, 255, 0.1)", // Màu xanh dương ngọc nhạt
-    color: "#00FFFF", // Màu xanh dương ngọc
-    border: "1px solid #00FFFF", // Viền màu xanh dương ngọc
+    backgroundColor: "rgba(0, 255, 255, 0.1)",
+    color: "#00FFFF",
+    border: "1px solid #00FFFF",
   },
   "Công nghệ ô tô": {
-    backgroundColor: "rgba(255, 99, 71, 0.1)", // Màu cam đỏ nhạt
-    color: "#FF4500", // Màu cam đỏ
-    border: "1px solid #FF4500", // Viền màu cam đỏ
+    backgroundColor: "rgba(255, 99, 71, 0.1)",
+    color: "#FF4500",
+    border: "1px solid #FF4500",
   },
   "Nhà hàng/Khách sạn": {
-    backgroundColor: "rgba(255, 105, 180, 0.1)", // Màu hồng nhạt
-    color: "#FF69B4", // Màu hồng đậm
-    border: "1px solid #FF69B4", // Viền màu hồng đậm
+    backgroundColor: "rgba(255, 105, 180, 0.1)",
+    color: "#FF69B4",
+    border: "1px solid #FF69B4",
   },
   "Điện - điện tử": {
-    backgroundColor: "rgba(70, 130, 180, 0.1)", // Màu xanh thép nhạt
-    color: "#4682B4", // Màu xanh thép
-    border: "1px solid #4682B4", // Viền màu xanh thép
+    backgroundColor: "rgba(70, 130, 180, 0.1)",
+    color: "#4682B4",
+    border: "1px solid #4682B4",
   },
 };
 
@@ -133,35 +132,34 @@ function JobCard_AllJob({ job }) {
     <Card
       className="w-full overflow-hidden cursor-pointer shadow-md hover:shadow-lg transition-all duration-300 bg-white group"
       onClick={handleCardClick}
-      style={{
-        border: "none",
-      }}
+      style={{ border: "none" }}
     >
       <CardContent className="p-6">
-        <div className="flex flex-col">
+        <div className="flex flex-col h-full">
           {/* Top section with job type */}
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-gray-200 rounded-xl mr-4 flex items-center justify-center text-xl font-bold">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-2 mb-4">
+            <div className="flex items-center w-full overflow-hidden">
+              <div className="w-12 h-12 bg-gray-200 rounded-xl mr-4 flex items-center justify-center flex-shrink-0">
                 <img
                   src={job.company.logo || "/placeholder.svg"}
                   alt={`${job.company.companyName} logo`}
                   className="w-full h-full object-cover rounded-xl"
                 />
               </div>
-              <div>
-                <h3
-                  className="font-semibold text-lg group-hover:text-purple-600 transition-colors duration-300"
-                >
-                  {job.title}
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-lg group-hover:text-purple-600 transition-colors duration-300 line-clamp-1">
+                  {job.title || "Không có tiêu đề"}
                 </h3>
-                <p className="text-sm text-gray-500">
-                  {job.company.companyName} • {job.city.cityName}
+                <p className="text-sm text-gray-500 line-clamp-1">
+                  {job.company?.companyName || "Không có công ty"}
+                </p>
+                <p className="text-sm text-gray-500 line-clamp-1">
+                  {job.city?.cityName || "Không có địa điểm"}
                 </p>
               </div>
             </div>
             <span
-              className="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap"
+              className="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap self-start lg:self-center flex-shrink-0"
               style={
                 typeOfWorkStyles[job.typeOfWork] || {
                   backgroundColor: "rgba(0, 0, 0, 0.1)",
@@ -174,39 +172,39 @@ function JobCard_AllJob({ job }) {
             </span>
           </div>
 
-          {/* Industry tags and Apply button */}
-          <div className="flex justify-between items-center">
-            <div className="flex flex-wrap gap-2">
-              {Array.isArray(job.industry) ? (
-                job.industry.map((industry, index) => (
-                  <span
-                    key={index}
-                    className="px-2 py-1 rounded-full text-xs font-medium"
-                    style={
-                      industryStyles[industry.industryName] || {
-                        backgroundColor: "rgba(0, 0, 0, 0.1)",
-                        color: "rgb(0, 0, 0)",
-                        border: "1px solid rgb(0, 0, 0)",
+          {/* Industry tags */}
+          <div className="flex justify-between items-center overflow-hidden">
+            <div className="flex flex-wrap gap-2 overflow-hidden max-h-[40px]">
+              {Array.isArray(job.industry)
+                ? job.industry.slice(0, 3).map((industry, index) => (
+                    <span
+                      key={index}
+                      className="px-2 py-1 rounded-full text-xs font-medium truncate"
+                      style={
+                        industryStyles[industry.industryName] || {
+                          backgroundColor: "rgba(0, 0, 0, 0.1)",
+                          color: "rgb(0, 0, 0)",
+                          border: "1px solid rgb(0, 0, 0)",
+                        }
                       }
-                    }
-                  >
-                    {industry.industryName}
-                  </span>
-                ))
-              ) : (
-                <span
-                  className="px-2 py-1 rounded-full text-xs font-medium"
-                  style={
-                    industryStyles[job.company.industry.industryName] || {
-                      backgroundColor: "rgba(0, 0, 0, 0.1)",
-                      color: "rgb(0, 0, 0)",
-                      border: "1px solid rgb(0, 0, 0)",
-                    }
-                  }
-                >
-                  {job.company.industry.industryName}
-                </span>
-              )}
+                    >
+                      {industry.industryName}
+                    </span>
+                  ))
+                : (
+                    <span
+                      className="px-2 py-1 rounded-full text-xs font-medium truncate"
+                      style={
+                        industryStyles[job.company.industry.industryName] || {
+                          backgroundColor: "rgba(0, 0, 0, 0.1)",
+                          color: "rgb(0, 0, 0)",
+                          border: "1px solid rgb(0, 0, 0)",
+                        }
+                      }
+                    >
+                      {job.company.industry.industryName}
+                    </span>
+                  )}
             </div>
           </div>
         </div>
