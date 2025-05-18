@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { sendMessage } from '../../redux/ChatBot/chatbot.thunk';
 import { addUserMessage, clearError } from '../../redux/ChatBot/chatbotSlice';
-import defaultAvatarImage from '../../assets/images/common/avatar.jpg'; // Đường dẫn tương đối đến ảnh avatar
+import defaultAvatarImage from '../../assets/images/common/avatar.jpg';
 
 const Chatbot = () => {
   const [input, setInput] = useState('');
@@ -11,35 +11,22 @@ const Chatbot = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { messages, loading, error } = useSelector((state) => state.chatbot);
-  const auth = useSelector((state) => state.auth);
+  const authUser = useSelector((state) => state.auth.user);
   const messagesEndRef = useRef(null);
-  // Import ảnh đại diện từ thư mục assets
+  const defaultAvatar = defaultAvatarImage;
 
-const defaultAvatar = defaultAvatarImage; // Sử dụng ảnh đã import
-
-  // Lấy thông tin người dùng từ localStorage
-  // Sử dụng useEffect để tránh lỗi window not defined trong SSR
-  const [user, setUser] = useState(null);
-  
-  useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-    } catch (error) {
-      console.error('Lỗi khi lấy thông tin người dùng:', error);
-    }
-  }, []);
-
-  const userId = user?.userId || 'guest';
-  const authUser = auth?.user || user;
-  const isSeeker = !authUser || authUser.userType.userTypeId === 2;
+  const userId = authUser?.userId || 'guest';
+  const userAvatar = authUser?.avatar || defaultAvatar;
+  const botAvatar = defaultAvatar;
 
   useEffect(() => {
-    if (isOpen && messagesEndRef.current) {
+    let isMounted = true;
+    if (isOpen && messagesEndRef.current && isMounted) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
+    return () => {
+      isMounted = false;
+    };
   }, [messages, isOpen]);
 
   const handleSend = (e) => {
@@ -55,23 +42,15 @@ const defaultAvatar = defaultAvatarImage; // Sử dụng ảnh đã import
     if (error) {
       const timer = setTimeout(() => dispatch(clearError()), 3000);
       if (error.includes('Token expired')) {
-        navigate('/auth/sign-in');
+        navigate('/auth/sign-in', { replace: true });
       }
       return () => clearTimeout(timer);
     }
   }, [error, dispatch, navigate]);
 
-
   const toggleChat = () => {
     setIsOpen(!isOpen);
   };
-
-  if (!isSeeker) {
-    return null;
-  }
-
-  const userAvatar = user?.avatar || defaultAvatar;
-  const botAvatar = defaultAvatar; 
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
@@ -92,19 +71,18 @@ const defaultAvatar = defaultAvatarImage; // Sử dụng ảnh đã import
 
       {isOpen && (
         <div className="absolute bottom-20 right-0 w-80 md:w-96 h-96 bg-white rounded-lg shadow-xl flex flex-col overflow-hidden border border-gray-200 transition-all duration-300">
-
           <div className="bg-blue-600 text-white p-3 flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <img 
-                src={botAvatar} 
-                alt="RadarBot" 
+              <img
+                src={botAvatar}
+                alt="RadarBot"
                 className="w-8 h-8 rounded-full object-cover border-2 border-white"
                 onError={(e) => (e.target.src = defaultAvatar)}
               />
               <div>
                 <h1 className="text-lg font-semibold">RadarBot</h1>
                 <p className="text-xs">
-                  Đang trò chuyện với: {user?.userName || 'khách'}
+                  Đang trò chuyện với: {authUser?.userName || 'khách'}
                 </p>
               </div>
             </div>
@@ -118,93 +96,89 @@ const defaultAvatar = defaultAvatarImage; // Sử dụng ảnh đã import
             </button>
           </div>
 
-          {/* Messages Area */}
           <div className="flex-1 p-3 overflow-y-auto bg-gray-50">
             {(!messages || messages.length === 0) && (
               <div className="text-center text-gray-500 py-4">Bắt đầu cuộc trò chuyện với RadarBot...</div>
             )}
-            {messages && messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`mb-3 flex ${
-                  msg.sender !== 'bot' ? 'justify-end' : 'justify-start'
-                }`}
-              >
-                {msg.sender === 'bot' && (
-                  <img 
-                    src={botAvatar} 
-                    alt="RadarBot" 
-                    className="w-8 h-8 rounded-full object-cover mr-2 self-end"
-                    onError={(e) => (e.target.src = defaultAvatar)}
-                  />
-                )}
-                
+            {messages &&
+              messages.map((msg, index) => (
                 <div
-                  className={`max-w-xs p-2 rounded-lg ${
-                    msg.sender !== 'bot'
-                      ? 'bg-blue-500 text-white rounded-tr-none'
-                      : 'bg-white text-gray-800 shadow rounded-tl-none'
+                  key={index}
+                  className={`mb-3 flex ${
+                    msg.sender !== 'bot' ? 'justify-end' : 'justify-start'
                   }`}
                 >
-                  <div className="text-xs opacity-75 mb-1">
-                    {msg.sender === 'bot' ? 'RadarBot' : `${user?.userName || 'Bạn'}`}
-                  </div>
-                  {/* Hiển thị văn bản nếu có */}
-                  {msg.text && <div className="text-sm mb-1">{msg.text}</div>}
-                  {/* Hiển thị danh sách công việc nếu có */}
-                  {msg.jobs && (
-                    <div className="space-y-2">
-                      {msg.jobs.map((job, jobIndex) => (
-                        <div
-                          key={jobIndex}
-                          className="border rounded-lg p-2 bg-gray-50 shadow-sm"
-                        >
-                          <div className="flex items-center gap-2">
-                            <img
-                              src={job.logo}
-                              alt={job.companyName}
-                              className="w-8 h-8 object-contain rounded"
-                              onError={(e) => (e.target.src = '/fallback-logo.png')}
-                            />
-                            <div>
-                              <h3 className="text-xs font-semibold">{job.title}</h3>
-                              <p className="text-xs text-gray-600">{job.companyName}</p>
-                            </div>
-                          </div>
-                          <div className="mt-1 text-xs">
-                            <p><span className="font-medium">Địa điểm:</span> {job.cityName}</p>
-                            <p><span className="font-medium">Lương:</span> {(job.salary / 1000000).toFixed(1)} triệu VND</p>
-                            <p><span className="font-medium">Ngành:</span> {job.industryNames}</p>
-                          </div>
-                          <a
-                            href={job.job_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-1 inline-block bg-blue-600 text-white text-xs px-2 py-1 rounded hover:bg-blue-700"
-                          >
-                            Xem chi tiết
-                          </a>
-                        </div>
-                      ))}
+                  {msg.sender === 'bot' && (
+                    <img
+                      src={botAvatar}
+                      alt="RadarBot"
+                      className="w-8 h-8 rounded-full object-cover mr-2 self-end"
+                      onError={(e) => (e.target.src = defaultAvatar)}
+                    />
+                  )}
+                  <div
+                    className={`max-w-xs p-2 rounded-lg ${
+                      msg.sender !== 'bot'
+                        ? 'bg-blue-500 text-white rounded-tr-none'
+                        : 'bg-white text-gray-800 shadow rounded-tl-none'
+                    }`}
+                  >
+                    <div className="text-xs opacity-75 mb-1">
+                      {msg.sender === 'bot' ? 'RadarBot' : `${authUser?.userName || 'Bạn'}`}
                     </div>
+                    {msg.text && <div className="text-sm mb-1">{msg.text}</div>}
+                    {msg.jobs && (
+                      <div className="space-y-2">
+                        {msg.jobs.map((job, jobIndex) => (
+                          <div
+                            key={jobIndex}
+                            className="border rounded-lg p-2 bg-gray-50 shadow-sm"
+                          >
+                            <div className="flex items-center gap-2">
+                              <img
+                                src={job.logo}
+                                alt={job.companyName}
+                                className="w-8 h-8 object-contain rounded"
+                                onError={(e) => (e.target.src = '/fallback-logo.png')}
+                              />
+                              <div>
+                                <h3 className="text-xs font-semibold">{job.title}</h3>
+                                <p className="text-xs text-gray-600">{job.companyName}</p>
+                              </div>
+                            </div>
+                            <div className="mt-1 text-xs">
+                              <p><span className="font-medium">Địa điểm:</span> {job.cityName}</p>
+                              <p><span className="font-medium">Lương:</span> {(job.salary / 1000000).toFixed(1)} triệu VND</p>
+                              <p><span className="font-medium">Ngành:</span> {job.industryNames}</p>
+                            </div>
+                            <a
+                              href={job.job_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="mt-1 inline-block bg-blue-600 text-white text-xs px-2 py-1 rounded hover:bg-blue-700"
+                            >
+                              Xem chi tiết
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {msg.sender !== 'bot' && (
+                    <img
+                      src={userAvatar}
+                      alt={authUser?.userName || 'Bạn'}
+                      className="w-8 h-8 rounded-full object-cover ml-2 self-end"
+                      onError={(e) => (e.target.src = defaultAvatar)}
+                    />
                   )}
                 </div>
-                
-                {msg.sender !== 'bot' && (
-                  <img 
-                    src={userAvatar} 
-                    alt={user?.userName || 'Bạn'} 
-                    className="w-8 h-8 rounded-full object-cover ml-2 self-end"
-                    onError={(e) => (e.target.src = defaultAvatar)}
-                  />
-                )}
-              </div>
-            ))}
+              ))}
             {loading && (
               <div className="flex justify-start mb-3">
-                <img 
-                  src={botAvatar} 
-                  alt="RadarBot" 
+                <img
+                  src={botAvatar}
+                  alt="RadarBot"
                   className="w-8 h-8 rounded-full object-cover mr-2 self-end"
                   onError={(e) => (e.target.src = defaultAvatar)}
                 />
@@ -234,7 +208,6 @@ const defaultAvatar = defaultAvatarImage; // Sử dụng ảnh đã import
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input Area */}
           <div className="p-2 bg-white border-t">
             <form onSubmit={handleSend} className="flex gap-2">
               <input

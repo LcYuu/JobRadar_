@@ -1,14 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
-
 import { Card, CardContent } from "../../ui/card";
-import { FileText} from "lucide-react";
+import { FileText } from "lucide-react";
 import { Link } from "react-router-dom";
-
 import { useDispatch, useSelector } from "react-redux";
-
 import Pagination from "../layout/Pagination";
 import { getApplyJobByUser } from "../../redux/ApplyJob/applyJob.thunk";
 import useWebSocket from "../../utils/useWebSocket";
+
 export default function Dashboard_Seeker() {
   const dispatch = useDispatch();
   const {
@@ -17,22 +15,13 @@ export default function Dashboard_Seeker() {
     error,
     totalPages,
     totalElements,
-  } = useSelector(store => store.applyJob);
+  } = useSelector((store) => store.applyJob);
   const [currentPage, setCurrentPage] = useState(0);
   const [size] = useState(3);
 
   useEffect(() => {
-    dispatch(getApplyJobByUser({currentPage, size}));
+    dispatch(getApplyJobByUser({ currentPage, size }));
   }, [dispatch, currentPage, size]);
-
-  // const handlePin = (id) => {
-  //   setApplications(applications.map(app =>
-  //     app.id === id ? { ...app, pinned: !app.pinned } : app
-  //   ));
-  // };
-  // const sortedApplications = applications.sort((a, b) => {
-  //   return (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0);
-  // });
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -46,19 +35,17 @@ export default function Dashboard_Seeker() {
     },
     [dispatch, currentPage, size]
   );
-  
+
   useWebSocket(["/topic/apply-updates"], handleMessage);
 
   return (
-    <div>
-      <Card className="mb-8 shadow-lg rounded-lg bg-gradient-to-br from-purple-500 via-indigo-500 to-blue-500 text-white">
-        <CardContent className="p-6">
+    <div className="container mx-auto px-4 relative">
+      <Card className="mb-8 shadow-lg rounded-lg bg-gradient-to-br from-purple-500 via-indigo-500 to-blue-500 text-white overflow-visible">
+        <CardContent className="p-6 overflow-visible">
           <h2 className="text-lg font-medium mb-4">Tổng đơn đã ứng tuyển</h2>
           <div className="flex items-center">
             <div className="flex flex-col items-center justify-center">
-              <span className="text-6xl font-extrabold mb-2">
-                {totalElements}
-              </span>
+              <span className="text-6xl font-extrabold mb-2">{totalElements}</span>
               <span className="text-sm font-medium tracking-wide opacity-90">
                 Đơn đã gửi thành công
               </span>
@@ -70,8 +57,8 @@ export default function Dashboard_Seeker() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="p-6 bg-gray-50">
+      <Card className="overflow-visible">
+        <CardContent className="p-6 bg-gray-50 overflow-visible">
           <h2 className="text-lg font-semibold mb-4">Lịch sử ứng tuyển</h2>
           <div className="space-y-4">
             {applyJobByUser.map((app) => {
@@ -83,55 +70,62 @@ export default function Dashboard_Seeker() {
               });
 
               return (
-                <div key={app.postId} className="flex justify-between p-5 bg-gradient-to-r from-white via-gray-100 to-gray-50 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200">
-                  <Link
-                    to={`/jobs/job-detail/${app.postId}`}
-                    className="flex items-center flex-grow"
-                  >
-                    {/* Logo */}
-                    <div className="flex items-center">
-                      <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-200 shadow-sm mr-4">
-                        <img
-                          src={app.logo}
-                          alt="Logo"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      {/* Job Info */}
-                      <div className="flex flex-col space-y-4">
-                        <div className="flex items-center gap-3">
-                          <h3 className="font-bold text-lg text-indigo-800">
-                            {app.title}
-                          </h3>
-                          <span
-                            className={`px-3 py-1 rounded-full text-sm ${
-                              app.isSave
-                                ? "bg-green-100 text-green-600"
-                                : "bg-red-100 text-red-600"
-                            }`}
-                          >
-                            {app.isSave ? "Đã duyệt" : "Chờ duyệt"}
+                <div
+                  key={app.postId}
+                  className="flex flex-wrap items-center p-5 bg-gradient-to-r from-white via-gray-100 to-gray-50 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-200"
+                  style={{ overflow: "visible" }}
+                >
+                  <div className="flex-grow min-w-0">
+                    <Link
+                      to={`/jobs/job-detail/${app.postId}`}
+                      className="relative  flex items-center"
+                      style={{ pointerEvents: "auto", touchAction: "manipulation" }}
+                    >
+                      <div className="flex items-center">
+                        <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-200 shadow-sm mr-4 shrink-0">
+                          <img
+                            src={app.logo}
+                            alt="Logo"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex flex-col space-y-4">
+                          <div className="flex items-center gap-3">
+                            <h3 className="font-bold text-lg text-indigo-800">{app.title}</h3>
+                            <span
+                              className={`px-3 py-1 rounded-full text-sm ${
+                                app.isSave ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
+                              }`}
+                            >
+                              {app.isSave ? "Đã duyệt" : "Chờ duyệt"}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            {app.companyName} • {app.location} • {app.typeOfWork}
+                          </p>
+                          <span className="text-sm text-gray-500">
+                            Thời gian ứng tuyển: {formattedDate} {formattedTime}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600">
-                          {app.companyName} • {app.location} • {app.typeOfWork}
-                        </p>
-                        <span className="text-sm text-gray-500">
-                          Thời gian ứng tuyển: {formattedDate} {formattedTime}
-                        </span>
                       </div>
-                    </div>
-                  </Link>
-
-                  {/* Action Menu */}
-                  <div className="flex items-center ml-4">
+                    </Link>
+                  </div>
+                  <div className="flex items-center ml-4 sm:ml-0 sm:mt-4 shrink-0">
                     <button
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
+                        console.log("Xem CV clicked");
                         window.open(app.pathCV, "_blank");
                       }}
-                      className="text-sm bg-purple-500 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-all duration-300 font-medium"
+                      onTouchStart={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log("Xem CV touched");
+                        window.open(app.pathCV, "_blank");
+                      }}
+                      className="relative text-sm bg-purple-500 text-white py-2 px-4 min-w-[120px] min-h-[44px] rounded-lg hover:bg-purple-700 transition-all duration-300 font-medium"
+                      style={{ pointerEvents: "auto", touchAction: "manipulation" }}
                     >
                       Xem CV
                     </button>

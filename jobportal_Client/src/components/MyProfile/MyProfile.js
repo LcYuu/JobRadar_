@@ -399,7 +399,10 @@ export default function MyProfile() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 mx-auto">
+      <main
+        className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 mx-auto"
+        style={{ zIndex: 10 }}
+      >
         {/* Profile Header Card */}
         <Card className="bg-white shadow-lg rounded-lg mb-4 sm:mb-6 w-full">
           <div
@@ -409,6 +412,7 @@ export default function MyProfile() {
               size="icon"
               className="absolute right-2 top-2 sm:right-4 sm:top-4 bg-white/20 hover:bg-white/30 p-1 sm:p-2"
               onClick={() => setShowColorPicker(!showColorPicker)}
+              style={{ zIndex: 1000 }}
             >
               <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
@@ -450,11 +454,13 @@ export default function MyProfile() {
             </div>
           </div>
           <section>
-            <ProfileModal
-              open={open}
-              handleClose={handleClose}
-              className="w-full max-w-md sm:max-w-lg p-4 sm:p-6"
-            />
+            {open && (
+              <ProfileModal
+                open={open}
+                handleClose={handleClose}
+                className="w-full max-w-md sm:max-w-lg p-4 sm:p-6"
+              />
+            )}
           </section>
         </Card>
 
@@ -472,6 +478,7 @@ export default function MyProfile() {
                   size="icon"
                   variant="ghost"
                   onClick={handleEditDesClick}
+                  style={{ zIndex: 1000 }}
                 >
                   <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
@@ -497,6 +504,7 @@ export default function MyProfile() {
                         onClick={handleSaveClick}
                         size="sm"
                         className="text-xs sm:text-sm px-3 sm:px-4 min-w-[80px]"
+                        style={{ zIndex: 1000 }}
                       >
                         Save
                       </Button>
@@ -511,13 +519,12 @@ export default function MyProfile() {
             </Card>
 
             {/* Experience */}
-            {/* Experience */}
             <Card className="bg-white shadow-lg rounded-lg w-full">
               <CardHeader className="flex flex-row items-center justify-between py-2 sm:py-3 px-4 sm:px-6">
                 <h3 className="text-base sm:text-lg lg:text-xl text-purple-600 font-semibold">
                   Kinh nghiệm
                 </h3>
-                <Button size="icon" variant="ghost">
+                <Button size="icon" variant="ghost" style={{ zIndex: 1000 }}>
                   <Plus
                     className="h-4 w-4 sm:h-5 sm:w-5"
                     onClick={handleOpenExpModal}
@@ -558,13 +565,17 @@ export default function MyProfile() {
                               </span>
                             </p>
                           </div>
-                          <div className="flex gap-1 xs:gap-1.5 sm:gap-2 flex-shrink-0">
+                          <div
+                            className="flex gap-1 xs:gap-1.5 sm:gap-2 flex-shrink-0"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <Button
                               size="icon"
                               variant="ghost"
                               className="h-6 w-6 hover:bg-blue-100"
                               onClick={() => handleEditExperience(experience)}
                               title="Chỉnh sửa"
+                              style={{ zIndex: 1000 }}
                             >
                               <Edit className="h-4 w-4 text-blue-600" />
                             </Button>
@@ -576,6 +587,7 @@ export default function MyProfile() {
                                 handleDeleteExp(experience.experienceId)
                               }
                               title="Xóa"
+                              style={{ zIndex: 1000 }}
                             >
                               <Delete className="h-4 w-4 text-red-600" />
                             </Button>
@@ -602,11 +614,11 @@ export default function MyProfile() {
                           <div className="flex items-start">
                             <FileText className="h-4 w-4 xs:h-5 xs:w-5 mr-1 xs:mr-2 text-gray-500 mt-0.5 flex-shrink-0" />
                             <p className="text-xs sm:text-sm text-gray-600 break-words">
-                            Mô tả:{" "}
-                            <span className="text-blue-600">
-                              {experience.description}
-                            </span>
-                          </p>
+                              Mô tả:{" "}
+                              <span className="text-blue-600">
+                                {experience.description}
+                              </span>
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -622,6 +634,8 @@ export default function MyProfile() {
                       variant="outline"
                       size="sm"
                       className="mt-2 text-xs sm:text-sm min-w-[140px]"
+                      onClick={handleOpenExpModal}
+                      style={{ zIndex: 1000 }}
                     >
                       <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-1" /> Thêm kinh
                       nghiệm
@@ -630,14 +644,16 @@ export default function MyProfile() {
                 )}
               </CardContent>
               <section>
-                <ExpModal
-                  open={openExp}
-                  handleClose={handleCloseExp}
-                  editingExperienceId={editingExperienceId}
-                  setEditingExperienceId={setEditingExperienceId}
-                  initialData={formData}
-                  className="w-full max-w-md sm:max-w-lg p-4 sm:p-6"
-                />
+                {openExp && (
+                  <ExpModal
+                    open={openExp}
+                    handleClose={handleCloseExp}
+                    editingExperienceId={editingExperienceId}
+                    setEditingExperienceId={setEditingExperienceId}
+                    initialData={formData}
+                    className="w-full max-w-md sm:max-w-lg p-4 sm:p-6"
+                  />
+                )}
               </section>
             </Card>
 
@@ -647,7 +663,7 @@ export default function MyProfile() {
                 <h3 className="text-base sm:text-lg lg:text-xl text-purple-600 font-semibold">
                   Học vấn
                 </h3>
-                <Button size="icon" variant="ghost">
+                <Button size="icon" variant="ghost" style={{ zIndex: 1000 }}>
                   <Plus
                     className="h-4 w-4 sm:h-5 sm:w-5"
                     onClick={handleOpenEduModal}
@@ -687,13 +703,17 @@ export default function MyProfile() {
                               </span>
                             </p>
                           </div>
-                          <div className="flex gap-1 xs:gap-1.5 sm:gap-2 flex-shrink-0">
+                          <div
+                            className="flex gap-1 xs:gap-1.5 sm:gap-2 flex-shrink-0"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <Button
                               size="icon"
                               variant="ghost"
                               className="h-6 w-6 hover:bg-blue-100"
                               onClick={() => handleEditEducation(education)}
                               title="Chỉnh sửa"
+                              style={{ zIndex: 1000 }}
                             >
                               <Edit className="h-4 w-4 text-blue-600" />
                             </Button>
@@ -705,6 +725,7 @@ export default function MyProfile() {
                                 handleDeleteEdu(education.educationId)
                               }
                               title="Xóa"
+                              style={{ zIndex: 1000 }}
                             >
                               <Delete className="h-4 w-4 text-red-600" />
                             </Button>
@@ -766,6 +787,8 @@ export default function MyProfile() {
                       variant="outline"
                       size="sm"
                       className="mt-2 text-xs sm:text-sm min-w-[140px]"
+                      onClick={handleOpenEduModal}
+                      style={{ zIndex: 1000 }}
                     >
                       <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-1" /> Thêm học
                       vấn
@@ -774,14 +797,16 @@ export default function MyProfile() {
                 )}
               </CardContent>
               <section>
-                <EduModal
-                  open={openEdu}
-                  handleClose={handleCloseEdu}
-                  editingEducationId={editingEducationId}
-                  setEditingEducationId={setEditingEducationId}
-                  initialData={formData}
-                  className="w-full max-w-md sm:max-w-lg p-4 sm:p-6"
-                />
+                {openEdu && (
+                  <EduModal
+                    open={openEdu}
+                    handleClose={handleCloseEdu}
+                    editingEducationId={editingEducationId}
+                    setEditingEducationId={setEditingEducationId}
+                    initialData={formData}
+                    className="w-full max-w-md sm:max-w-lg p-4 sm:p-6"
+                  />
+                )}
               </section>
             </Card>
 
@@ -795,6 +820,7 @@ export default function MyProfile() {
                   size="icon"
                   variant="ghost"
                   onClick={handleOpenSkillModal}
+                  style={{ zIndex: 1000 }}
                 >
                   <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
@@ -839,11 +865,13 @@ export default function MyProfile() {
                 )}
               </CardContent>
               <section>
-                <SkillModal
-                  open={openSkill}
-                  handleClose={handleCloseSkill}
-                  className="w-full max-w-md sm:max-w-lg p-4 sm:p-6"
-                />
+                {openSkill && (
+                  <SkillModal
+                    open={openSkill}
+                    handleClose={handleCloseSkill}
+                    className="w-full max-w-md sm:max-w-lg p-4 sm:p-6"
+                  />
+                )}
               </section>
             </Card>
           </div>
@@ -860,6 +888,7 @@ export default function MyProfile() {
                   size="icon"
                   variant="ghost"
                   onClick={handleEditInfoClick}
+                  style={{ zIndex: 1000 }}
                 >
                   <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
@@ -1093,6 +1122,7 @@ export default function MyProfile() {
                     onClick={handleSaveClick}
                     size="sm"
                     className="text-xs sm:text-sm px-3 sm:px-4 min-w-[80px]"
+                    style={{ zIndex: 1000 }}
                   >
                     Lưu
                   </Button>
@@ -1110,6 +1140,7 @@ export default function MyProfile() {
                   size="icon"
                   variant="ghost"
                   onClick={handleOpenSocialLinkModal}
+                  style={{ zIndex: 1000 }}
                 >
                   <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
@@ -1148,12 +1179,16 @@ export default function MyProfile() {
                               {link.url}
                             </a>
                           </div>
-                          <div className="flex gap-1 sm:gap-1.5 md-custom:gap-1 flex-shrink-0 ml-1.5 sm:ml-2 social-link-buttons">
+                          <div
+                            className="flex gap-1 sm:gap-1.5 md-custom:gap-1 flex-shrink-0 ml-1.5 sm:ml-2 social-link-buttons"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <Button
                               size="icon"
                               variant="ghost"
                               className="h-4 w-4 sm:h-5 sm:w-5 md-custom:h-5 md-custom:w-5 lg:h-6 lg:w-6 hover:bg-blue-100"
                               onClick={() => handleEditSocialLink(link)}
+                              style={{ zIndex: 1000 }}
                             >
                               <Edit className="h-2.5 w-2.5 sm:h-3 sm:w-3 md-custom:h-3 md-custom:w-3 lg:h-4 lg:w-4 text-blue-600" />
                             </Button>
@@ -1162,6 +1197,7 @@ export default function MyProfile() {
                               variant="ghost"
                               className="h-4 w-4 sm:h-5 sm:w-5 md-custom:h-5 md-custom:w-5 lg:h-6 lg:w-6 hover:bg-red-100"
                               onClick={() => handleDeleteSocialLink(link.id)}
+                              style={{ zIndex: 1000 }}
                             >
                               <Delete className="h-2.5 w-2.5 sm:h-3 sm:w-3 md-custom:h-3 md-custom:w-3 lg:h-4 lg:w-4 text-red-600" />
                             </Button>
@@ -1179,27 +1215,33 @@ export default function MyProfile() {
                 )}
               </CardContent>
               <section>
-                <SocialLinkModal
-                  open={openSocialLink}
-                  handleClose={handleCloseSocialLink}
-                  editingSocialLinkId={editingSocialLinkId}
-                  setEditingSocialLinkId={setEditingSocialLinkId}
-                  initialData={formData}
-                  className="w-full max-w-md sm:max-w-lg p-4 sm:p-6"
-                />
+                {openSocialLink && (
+                  <SocialLinkModal
+                    open={openSocialLink}
+                    handleClose={handleCloseSocialLink}
+                    editingSocialLinkId={editingSocialLinkId}
+                    setEditingSocialLinkId={setEditingSocialLinkId}
+                    initialData={formData}
+                    className="w-full max-w-md sm:max-w-lg p-4 sm:p-6"
+                  />
+                )}
               </section>
             </Card>
           </div>
         </div>
       </main>
+      {/* Styled JSX for scoped styles */}
       <style jsx>{`
         .experience-container,
         .education-container {
           transition: all 0.3s ease;
         }
         .experience-buttons,
-        .education-buttons {
+        .education-buttons,
+        .social-link-buttons {
           transition: all 0.3s ease;
+          z-index: 1000;
+          position: relative;
         }
         @media (min-width: 768px) and (max-width: 1000px) {
           .experience-container,
@@ -1213,39 +1255,50 @@ export default function MyProfile() {
             max-width: 70%;
           }
           .experience-buttons,
-          .education-buttons {
+          .education-buttons,
+          .social-link-buttons {
             gap: 0.75rem;
           }
           .experience-buttons button,
-          .education-buttons button {
-            height: 1.5rem;
-            width: 1.5rem;
-            min-height: 1.5rem;
-            min-width: 1.5rem;
+          .education-buttons button,
+          .social-link-buttons button {
+            height: 2rem;
+            width: 2rem;
+            min-height: 2rem;
+            min-width: 2rem;
           }
           .experience-buttons svg,
-          .education-buttons svg {
-            height: 1rem;
-            width: 1rem;
+          .education-buttons svg,
+          .social-link-buttons svg {
+            height: 1.25rem;
+            width: 1.25rem;
           }
         }
         @media (max-width: 767px) {
           .experience-container,
           .education-container {
-            padding: 0.5rem;
+            padding: 0.75rem;
             gap: 0.75rem;
           }
           .experience-content,
           .education-content {
-            font-size: 0.75rem;
+            font-size: 0.875rem;
             max-width: 65%;
           }
           .experience-buttons,
-          .education-buttons {
-            gap: 0.5rem;
+          .education-buttons,
+          .social-link-buttons {
+            gap: 0.75rem;
           }
           .experience-buttons button,
           .education-buttons button {
+            height: 2rem;
+            width: 2rem;
+            min-height: 2rem;
+            min-width: 2rem;
+            padding: 0.5rem;
+          }
+          .social-link-buttons button {
             height: 1.5rem;
             width: 1.5rem;
             min-height: 1.5rem;
@@ -1254,6 +1307,10 @@ export default function MyProfile() {
           }
           .experience-buttons svg,
           .education-buttons svg {
+            height: 1.25rem;
+            width: 1.25rem;
+          }
+          .social-link-buttons svg {
             height: 1rem;
             width: 1rem;
           }
@@ -1261,17 +1318,42 @@ export default function MyProfile() {
         @media (max-width: 640px) {
           .experience-container,
           .education-container {
-            padding: 0.5rem;
+            padding: 0.75rem;
             gap: 0.5rem;
           }
           .experience-content,
           .education-content {
-            font-size: 0.75rem;
+            font-size: 0.875rem;
             max-width: 60%;
           }
           .experience-buttons,
-          .education-buttons {
+          .education-buttons,
+          .social-link-buttons {
             gap: 0.5rem;
+          }
+          .experience-buttons button,
+          .education-buttons button {
+            height: 1.75rem;
+            width: 1.75rem;
+            min-height: 1.75rem;
+            min-width: 1.75rem;
+            padding: 0.25rem;
+          }
+          .social-link-buttons button {
+            height: 1.25rem;
+            width: 1.25rem;
+            min-height: 1.25rem;
+            min-width: 1.25rem;
+            padding: 0.25rem;
+          }
+          .experience-buttons svg,
+          .education-buttons svg {
+            height: 1rem;
+            width: 1rem;
+          }
+          .social-link-buttons svg {
+            height: 0.875rem;
+            width: 0.875rem;
           }
         }
         @media (min-width: 1280px) {

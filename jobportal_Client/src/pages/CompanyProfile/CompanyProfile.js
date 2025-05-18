@@ -472,12 +472,8 @@ export default function CompanyProfile() {
     totalPages = 0,
     totalElements = 0,
   } = useSelector((store) => store.jobPost);
-  const { checkIfSaved, companyProfile } = useSelector(
-    (store) => store.company
-  );
+
   const { socialLinks } = useSelector((store) => store.socialLink);
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState("");
 
   // States for edit functionality
   const [editingReviewId, setEditingReviewId] = useState(null);
@@ -631,10 +627,14 @@ export default function CompanyProfile() {
 
   const { reviews, replies, reactions } = useSelector((store) => store.review);
 
+  const { checkIfSaved, companyProfile } = useSelector((store) => store.company);
+
   const { seeker } = useSelector((store) => store.seeker);
   const { user } = useSelector((store) => store.auth);
 
   const [loading, setLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState("");
   const [isFollowing, setIsFollowing] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [jobsPerPage] = useState(5);
@@ -2089,9 +2089,9 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
             ) : (
               validReviews
                 .sort((a, b) => new Date(b.createDate) - new Date(a.createDate))
-                .map((review) => (
+                .map((review, index) => (
                   <div
-                    key={review.reviewId} // Sửa từ key={index} thành key={review.reviewId}
+                    key={index}
                     className="mb-6 p-4 border-b border-gray-300 rounded-md hover:bg-purple-100 hover:shadow-lg"
                   >
                     <div className="flex items-start mb-4">
@@ -2099,13 +2099,13 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                         src={
                           review.anonymous
                             ? anonymousIcon
-                            : review?.seeker?.userAccount?.avatar ||
-                              anonymousIcon
+                            : review?.seeker?.userAccount?.avatar
                         }
                         alt="Avatar"
                         className="w-12 h-12 rounded-full object-cover mr-4"
                       />
                       <div className="flex-1">
+                        {/* Thông tin người dùng và thời gian */}
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-semibold text-gray-800">
                             {review.anonymous
@@ -2121,47 +2121,47 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                                       1
                                   ]
                                 }`
-                              : "Người dùng không xác định"}
+                              : ""}
                           </span>
-                          <div className="flex items-center gap-4">
-                            <span className="text-sm text-gray-500">
-                              {new Date(review?.createDate).toLocaleDateString(
-                                "vi-VN",
-                                {
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                }
-                              )}
-                            </span>
-                            {user &&
-                              review?.seeker?.userAccount?.userId ===
-                                user?.userId && (
-                                <>
-                                  <button
-                                    onClick={() =>
-                                      handleEditReviewClick(review)
-                                    }
-                                    className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
-                                  >
-                                    <Edit fontSize="small" />
-                                    <span>Chỉnh sửa</span>
-                                  </button>
-                                  <button
-                                    onClick={() =>
-                                      handleDeleteReview(review.reviewId)
-                                    }
-                                    className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1"
-                                  >
-                                    <Delete fontSize="small" />
-                                    <span>Xóa</span>
-                                  </button>
-                                </>
-                              )}
-                          </div>
+                          <span className="text-sm text-gray-500">
+                            {new Date(review?.createDate).toLocaleDateString(
+                              "vi-VN",
+                              {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
+                          </span>
                         </div>
+
+                        {/* Nút chỉnh sửa và xóa */}
+                        {user &&
+                          review?.seeker?.userAccount?.userId ===
+                            user?.userId && (
+                            <div className="flex items-center gap-4 mb-2">
+                              <button
+                                onClick={() => handleEditReviewClick(review)}
+                                className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
+                              >
+                                <Edit fontSize="small" />
+                                <span>Chỉnh sửa</span>
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleDeleteReview(review.reviewId)
+                                }
+                                className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1"
+                              >
+                                <Delete fontSize="small" />
+                                <span>Xóa</span>
+                              </button>
+                            </div>
+                          )}
+
+                        {/* Rating stars */}
                         <div className="flex items-center mb-2">
                           <RatingStars
                             count={5}
@@ -2171,11 +2171,21 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                             edit={false}
                           />
                         </div>
+
+                        {/* Review message */}
+                        {editingReviewId !== review.reviewId && (
+                          <p className="text-gray-700 mt-2">
+                            {review?.message}
+                          </p>
+                        )}
+
+                        {/* Edit review form */}
                         {editingReviewId === review.reviewId ? (
                           <div className="mt-3 p-4 border border-blue-300 rounded-md bg-blue-50">
                             <h4 className="text-lg font-semibold mb-2">
                               Chỉnh sửa đánh giá
                             </h4>
+
                             <div className="mb-3">
                               <RatingStars
                                 value={editReviewData.star}
@@ -2187,6 +2197,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                                 }
                               />
                             </div>
+
                             <textarea
                               value={editReviewData.message}
                               onChange={(e) =>
@@ -2198,6 +2209,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                               className="w-full p-2 border border-gray-300 rounded-md mb-3"
                               rows={4}
                             />
+
                             <div className="flex items-center mb-3">
                               <input
                                 type="checkbox"
@@ -2215,6 +2227,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                                 Đánh giá ẩn danh
                               </label>
                             </div>
+
                             <div className="flex justify-end gap-2">
                               <button
                                 onClick={handleCancelReviewEdit}
@@ -2230,11 +2243,9 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                               </button>
                             </div>
                           </div>
-                        ) : (
-                          <p className="text-gray-700 mt-2">
-                            {review?.message}
-                          </p>
-                        )}
+                        ) : null}
+
+                        {/* Reaction buttons */}
                         <div className="flex items-center gap-4 mt-3">
                           <button
                             onClick={() =>
@@ -2252,6 +2263,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                               {reactions[review.reviewId]?.likeCount || 0}
                             </span>
                           </button>
+
                           <button
                             onClick={() =>
                               handleReaction(review.reviewId, "DISLIKE")
@@ -2268,6 +2280,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                               {reactions[review.reviewId]?.dislikeCount || 0}
                             </span>
                           </button>
+
                           {user && (
                             <button
                               onClick={() => handleReplyClick(review.reviewId)}
@@ -2287,6 +2300,8 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                             </button>
                           )}
                         </div>
+
+                        {/* Reply form */}
                         {replyTo === review.reviewId && (
                           <div className="mt-4 p-4 border border-purple-200 rounded-lg bg-purple-50 shadow-sm">
                             <div className="flex justify-between items-center mb-3">
@@ -2301,6 +2316,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                                 <Close fontSize="small" />
                               </button>
                             </div>
+
                             <textarea
                               value={replyText}
                               onChange={(e) => setReplyText(e.target.value)}
@@ -2308,6 +2324,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                               className="w-full p-3 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
                               rows={3}
                             />
+
                             <div className="flex items-center justify-between mt-3">
                               <div className="flex items-center gap-2">
                                 <input
@@ -2326,6 +2343,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                                   Phản hồi ẩn danh
                                 </label>
                               </div>
+
                               <button
                                 onClick={() =>
                                   handleReplySubmit(review.reviewId)
@@ -2337,6 +2355,8 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                             </div>
                           </div>
                         )}
+
+                        {/* Display replies with improved UI */}
                         {review.replies && review.replies.length > 0 && (
                           <div className="mt-4 space-y-3 rounded-lg">
                             <div className="ml-4 pl-4 border-l-2 border-purple-300 py-2 bg-gray-50 rounded-lg">
@@ -2350,6 +2370,8 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                                 }
                                 )
                               </h4>
+
+                              {/* Only render top-level replies here (replies without a parent) */}
                               <div className="space-y-4">
                                 {review.replies &&
                                   Array.isArray(review.replies) &&
