@@ -122,9 +122,9 @@ export default function ExpModal({
                   <span>Saving...</span>
                 </div>
               ) : editingExperienceId ? (
-                "Update"
+                "Cập nhật"
               ) : (
-                "Create"
+                "Thêm mới"
               )}
             </Button>
           </div>
@@ -139,13 +139,13 @@ export default function ExpModal({
                 shrink: true,
                 className: "font-semibold",
               }}
-              label="Start Date"
+              label="Ngày bắt đầu"
               value={formik.values.startDate}
               onChange={formik.handleChange}
               error={
                 formik.touched.startDate && Boolean(formik.errors.startDate)
               }
-              helperText={formik.touched.startDate && formik.errors.startDate}
+              helperText={formik.touched.startDate ? formik.errors.startDate: "Ví dụ: 01/01/2021"}
               className="bg-white rounded-lg shadow-sm"
             />
             <TextField
@@ -157,11 +157,11 @@ export default function ExpModal({
                 shrink: true,
                 className: "font-semibold",
               }}
-              label="End Date"
+              label="Ngày kết thúc"
               value={formik.values.endDate}
               onChange={formik.handleChange}
               error={formik.touched.endDate && Boolean(formik.errors.endDate)}
-              helperText={formik.touched.endDate && formik.errors.endDate}
+              helperText={formik.touched.endDate ? formik.errors.endDate: "Ví dụ: 12/31/2023"}
               className="bg-white rounded-lg shadow-sm"
             />
           </div>
@@ -171,25 +171,25 @@ export default function ExpModal({
               fullWidth
               id="jobTitle"
               name="jobTitle"
-              label="Job Title"
+              label="Tên công việc"
               value={formik.values.jobTitle}
               onChange={formik.handleChange}
               error={formik.touched.jobTitle && Boolean(formik.errors.jobTitle)}
-              helperText={formik.touched.jobTitle && formik.errors.jobTitle}
+              helperText={formik.touched.jobTitle ? formik.errors.jobTitle: "Ví dụ: Lập trình viên Backend / Thực tập sinh Tester"}
               className="bg-white rounded-lg shadow-sm"
             />
             <TextField
               fullWidth
               id="companyName"
               name="companyName"
-              label="Company Name"
+              label="Tên công ty"
               value={formik.values.companyName}
               onChange={formik.handleChange}
               error={
                 formik.touched.companyName && Boolean(formik.errors.companyName)
               }
               helperText={
-                formik.touched.companyName && formik.errors.companyName
+                formik.touched.companyName ? formik.errors.companyName: "Ví dụ: FPT Software"
               }
               className="bg-white rounded-lg shadow-sm"
             />
@@ -197,7 +197,7 @@ export default function ExpModal({
               fullWidth
               id="description"
               name="description"
-              label="Description"
+              label="Mô tả"
               multiline
               rows={4}
               value={formik.values.description}
@@ -206,7 +206,7 @@ export default function ExpModal({
                 formik.touched.description && Boolean(formik.errors.description)
               }
               helperText={
-                formik.touched.description && formik.errors.description
+                formik.touched.description ? formik.errors.description: "Ví dụ: Phát triển API bằng Spring Boot, làm việc nhóm theo Agile, sử dụng Git để quản lý source code."
               }
               className="bg-white rounded-lg shadow-sm"
             />

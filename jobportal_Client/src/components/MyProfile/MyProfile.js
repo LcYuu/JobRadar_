@@ -541,7 +541,7 @@ export default function MyProfile() {
                       placeholder="Nhập mô tả về bản thân..."
                     />
                     <div className="mt-2 flex justify-end">
-                      <Button onClick={handleSaveClick}>Save</Button>
+                      <Button onClick={handleSaveClick}>Lưu</Button>
                     </div>
                   </div>
                 ) : (
@@ -652,7 +652,7 @@ export default function MyProfile() {
                     <p className="text-sm text-gray-500">
                       Chưa cập nhật kinh nghiệm
                     </p>
-                    <Button variant="outline" size="sm" className="mt-2">
+                    <Button variant="outline" size="sm" className="mt-2" onClick={exp.length === 0 ? handleOpenExpModal : undefined}>
                       <Plus className="h-4 w-4 mr-1" /> Thêm kinh nghiệm
                     </Button>
                   </div>
@@ -781,7 +781,7 @@ export default function MyProfile() {
                     <p className="text-sm text-gray-500">
                       Không có thông tin giáo dục nào.
                     </p>
-                    <Button variant="outline" size="sm" className="mt-2">
+                    <Button variant="outline" size="sm" className="mt-2" onClick={edu.length === 0 ? handleOpenEduModal : undefined}>
                       <Plus className="h-4 w-4 mr-1" /> Thêm học vấn
                     </Button>
                   </div>
