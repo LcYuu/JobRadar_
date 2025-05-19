@@ -748,6 +748,9 @@ export default function JobSearchPage() {
     }
   }, [isUsingSemanticSearch]);
 
+  const [isOpen, setIsOpen] = useState(true);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(true);
+  const [isSalaryOpen, setIsSalaryOpen] = useState(true);
   return (
     <div className="min-h-screen bg-transparent">
       <main className="container mx-auto px-4 py-8">
@@ -840,108 +843,110 @@ export default function JobSearchPage() {
             <div>
               <h3 className="font-semibold mb-2 flex justify-between items-center text-gray-800 tracking-tight">
                 Loại công việc
-                <ChevronDown size={20} className="text-gray-500" />
+                <ChevronDown 
+                  size={20} 
+                  className={`text-gray-500 cursor-pointer transform ${isOpen ? 'rotate-180' : ''}`} 
+                  onClick={() => setIsOpen(!isOpen)} 
+                />
               </h3>
-              <div className="space-y-2">
-                {jobCountByType
-                  .filter((job) => job.count > 0)
-                  .map((job) => (
-                    <div
-                      className="flex items-center hover:bg-purple-100 p-2 rounded-lg"
-                      key={job.typeOfWork}
-                    >
-                      <Checkbox
-                        checked={filters.selectedTypesOfWork.includes(job.typeOfWork)}
-                        onCheckedChange={(checked) => {
-                          const updatedTypesOfWork = checked
-                            ? [...filters.selectedTypesOfWork, job.typeOfWork]
-                            : filters.selectedTypesOfWork.filter(
-                                (type) => type !== job.typeOfWork
-                              );
-                          handleFilterChange({
-
-                            ...filters,
-                            selectedTypesOfWork: updatedTypesOfWork,
-                          });
-                        }}
-                      />
-                      <label className="ml-2 text-sm text-gray-700 tracking-tight">
-                        {job.typeOfWork} ({job.count} việc làm)
-                      </label>
-                    </div>
-                  ))}
-              </div>
+              {isOpen && (
+                <div className="space-y-2">
+                  {jobCountByType
+                    .filter((job) => job.count > 0)
+                    .map((job) => (
+                      <div
+                        className="flex items-center hover:bg-purple-100 p-2 rounded-lg"
+                        key={job.typeOfWork}
+                      >
+                        <Checkbox
+                          checked={filters.selectedTypesOfWork.includes(job.typeOfWork)}
+                          onCheckedChange={(checked) => {
+                            const updatedTypesOfWork = checked
+                              ? [...filters.selectedTypesOfWork, job.typeOfWork]
+                              : filters.selectedTypesOfWork.filter(
+                                  (type) => type !== job.typeOfWork
+                                );
+                            handleFilterChange({
+                              ...filters,
+                              selectedTypesOfWork: updatedTypesOfWork,
+                            });
+                          }}
+                        />
+                        <label className="ml-2 text-sm text-gray-700 tracking-tight">
+                          {job.typeOfWork} ({job.count} việc làm)
+                        </label>
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
             <div>
               <h3 className="font-semibold mb-2 flex justify-between items-center text-gray-800 tracking-tight">
                 Danh mục
-                <ChevronDown size={20} className="text-gray-500" />
+                <ChevronDown 
+                  size={20} 
+                  className={`text-gray-500 cursor-pointer transform ${isCategoryOpen ? 'rotate-180' : ''}`} 
+                  onClick={() => setIsCategoryOpen(!isCategoryOpen)} 
+                />
               </h3>
-              <div className="space-y-2">
-                {industryCount
-                  .filter((industry) => industry.jobCount > 0)
-                  .map((industry) => (
-                    <div
-                      className="flex items-center hover:bg-purple-100 p-2 rounded-lg"
-                      key={industry.industryId}
-                    >
-                      <Checkbox
-                        checked={filters.selectedIndustryIds.includes(
-                          industry.industryId
-                        )}
-                        onCheckedChange={(checked) => {
-                          const updatedIndustryIds = checked
-                            ? [
-                                ...filters.selectedIndustryIds,
-                                industry.industryId,
-                              ]
-                            : filters.selectedIndustryIds.filter(
-                                (id) => id !== industry.industryId
-                              );
-                          handleFilterChange({
-
-                            ...filters,
-                            selectedIndustryIds: updatedIndustryIds,
-                          });
-                        }}
-                      />
-                      <label className="ml-2 text-sm text-gray-700 tracking-tight">
-                        {industry.industryName} ({industry.jobCount} việc làm)
-                      </label>
-                    </div>
-                  ))}
-              </div>
+              {isCategoryOpen && (
+                <div className="space-y-2">
+                  {industryCount
+                    .filter((industry) => industry.jobCount > 0)
+                    .map((industry) => (
+                      <div
+                        className="flex items-center hover:bg-purple-100 p-2 rounded-lg"
+                        key={industry.industryId}
+                      >
+                        <Checkbox
+                          checked={filters.selectedIndustryIds.includes(industry.industryId)}
+                          onCheckedChange={(checked) => {
+                            const updatedIndustryIds = checked
+                              ? [...filters.selectedIndustryIds, industry.industryId]
+                              : filters.selectedIndustryIds.filter(
+                                  (id) => id !== industry.industryId
+                                );
+                            handleFilterChange({
+                              ...filters,
+                              selectedIndustryIds: updatedIndustryIds,
+                            });
+                          }}
+                        />
+                        <label className="ml-2 text-sm text-gray-700 tracking-tight">
+                          {industry.industryName} ({industry.jobCount} việc làm)
+                        </label>
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
             <div>
-
               <h3 className="font-semibold mb-2 flex justify-between items-center text-gray-800 tracking-tight">
                 Mức lương
-                <ChevronDown size={20} className="text-gray-500" />
-
-              </h3>
-              <div className="px-2">
-              <RangeSlider
-                  min={minSalary || 0}
-                  max={maxSalary || 50000000}
-                  step={1000000}
-                onChange={handleSalaryChange}
+                <ChevronDown 
+                  size={20} 
+                  className={`text-gray-500 cursor-pointer transform ${isSalaryOpen ? 'rotate-180' : ''}`} 
+                  onClick={() => setIsSalaryOpen(!isSalaryOpen)} 
                 />
-                <div className="flex justify-between mt-2 text-sm text-gray-600">
-                  <span>
-                    {minSalary
-                      ? `${(minSalary / 1000000).toFixed(0)}M`
-                      : "0M"}{" "}
-                    VNĐ
-                  </span>
-                  <span>
-                    {maxSalary
-                      ? `${(maxSalary / 1000000).toFixed(0)}M`
-                      : "50M"}{" "}
-                    VNĐ
-                  </span>
+              </h3>
+              {isSalaryOpen && (
+                <div className="px-2">
+                  <RangeSlider
+                    min={minSalary || 0}
+                    max={maxSalary || 50000000}
+                    step={1000000}
+                    onChange={handleSalaryChange}
+                  />
+                  <div className="flex justify-between mt-2 text-sm text-gray-600">
+                    <span>
+                      {minSalary ? `${(minSalary / 1000000).toFixed(0)}M` : "0M"} VNĐ
+                    </span>
+                    <span>
+                      {maxSalary ? `${(maxSalary / 1000000).toFixed(0)}M` : "50M"} VNĐ
+                    </span>
+                  </div>
                 </div>
-            </div>
-
+              )}
             </div>
           </aside>
 

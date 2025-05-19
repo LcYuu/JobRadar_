@@ -61,6 +61,7 @@ import ViewCV from "./pages/CreateCV/ViewCV";
 import { isTokenExpired } from './utils/tokenUtils';
 import VerifiedCompany from "./pages/SignIn/VerifiedCompany";
 import JobStatsPage from "./components/JobStats/JobStatsPage";
+import SavedJobs from "./components/SavedJobs/SavedJob";
 
 const ProtectedHome = () => {
   const { user } = useSelector((state) => state.auth);
@@ -269,6 +270,7 @@ const App = () => {
           <Route path="dashboard" element={<Dashboard_Seeker />} />
           <Route path="cv" element={<MyCV />} />
           <Route path="following-companies" element={<FavoriteCompanies />} />
+          <Route path="saved-jobs" element={<SavedJobs/>}/>
           <Route path="profile" element={<MyProfile />} />
           <Route path="settings" element={<Settings />} />
         </Route>

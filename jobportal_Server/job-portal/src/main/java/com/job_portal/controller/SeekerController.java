@@ -31,7 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.job_portal.DTO.ApplicantProfileDTO;
 import com.job_portal.DTO.FollowCompanyDTO;
 import com.job_portal.DTO.FollowSeekerDTO;
-
+import com.job_portal.DTO.SavedJobDTO;
 import com.job_portal.DTO.SeekerDTO;
 import com.job_portal.config.JwtProvider;
 import com.job_portal.models.JobPost;
@@ -141,7 +141,14 @@ public class SeekerController {
 
 		return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
 	}
-
+	
+	@PutMapping("/save-job/{postId}")
+	public ResponseEntity<Map<String, Object>> saveJob(@PathVariable("postId") UUID postId,@RequestHeader("Authorization") String jwt) throws Exception{
+		String email=JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> reqUser=userAccountRepository.findByEmail(email);
+		Map<String, Object> result=seekerService.saveJob(postId, reqUser.get().getUserId());
+		return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
+	}
 	@GetMapping("/followed-companies")
 	public ResponseEntity<List<FollowCompanyDTO>> findCompaniesBySeekerId(@RequestHeader("Authorization") String jwt) {
 
@@ -150,6 +157,15 @@ public class SeekerController {
 		List<FollowCompanyDTO> companies = companyRepository
 				.findCompaniesFollowedBySeeker(user.get().getSeeker().getUserId());
 		return ResponseEntity.ok(companies);
+	}
+	
+	@GetMapping("/saved-jobs")
+	public ResponseEntity<List<SavedJobDTO>> findSavedJobBySeekerId(@RequestHeader("Authorization") String jwt){
+		String email=JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+		List<SavedJobDTO> savedJobs=seekerService.findSavedJobsBySeeker(user.get().getSeeker().getUserId());
+		return ResponseEntity.ok(savedJobs);
+		
 	}
 
 	@GetMapping("/profile-apply")

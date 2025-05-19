@@ -1,9 +1,11 @@
 package com.job_portal.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -11,12 +13,15 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.job_portal.DTO.SavedJobDTO;
 import com.job_portal.DTO.SeekerDTO;
 import com.job_portal.models.Industry;
+import com.job_portal.models.JobPost;
 import com.job_portal.models.Seeker;
 import com.job_portal.models.Skills;
 import com.job_portal.models.SocialLink;
 import com.job_portal.repository.IndustryRepository;
+import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.SeekerRepository;
 import com.job_portal.repository.SkillRepository;
 import com.job_portal.repository.UserAccountRepository;
@@ -25,6 +30,9 @@ import com.social.exceptions.AllExceptions;
 @Service
 public class SeekerServiceImpl implements ISeekerService {
 
+	@Autowired
+	private JobPostRepository jobPostRepository;
+	
 	@Autowired
 	private SeekerRepository seekerRepository;
 
@@ -123,6 +131,34 @@ public class SeekerServiceImpl implements ISeekerService {
 		} catch (Exception e) {
 			throw new AllExceptions(e.getMessage());
 		}
+	}
+
+	@Override
+	public Map<String, Object> saveJob(UUID postId, UUID userId) throws Exception {
+		 Map<String, Object> result = new HashMap<>();
+		 Optional<JobPost> jobPost = jobPostRepository.findById(postId);
+		 Optional<Seeker> seeker = seekerRepository.findById(userId);
+		 if(jobPost.isEmpty() || seeker.isEmpty()) {
+	            throw new Exception("Không tìm thấy bài viết hoặc người dùng");
+	        }
+		 Seeker seekerObj=seeker.get();
+		 JobPost post=jobPost.get();
+		 if(seekerObj.getSavedJobs().contains(post)) {
+			 seekerObj.getSavedJobs().remove(post);
+			 result.put("action", "unsaved");
+	         result.put("message", "Đã bỏ lưu bài viết");
+		 }else {
+			 seekerObj.getSavedJobs().add(post);
+			 result.put("action", "saved"); 
+	         result.put("message", "Đã lưu bài viết");
+		 }
+		seekerRepository.save(seekerObj);
+		return result;
+	}
+
+	@Override
+	public List<SavedJobDTO> findSavedJobsBySeeker(UUID userId) {
+		return seekerRepository.findSavedJobsBySeeker(userId);
 	}
 
 }

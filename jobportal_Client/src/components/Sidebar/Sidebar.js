@@ -9,6 +9,7 @@ import {
   Star,
   LogOut,
   BarChart,
+  Bookmark,
 } from "lucide-react";
 import { Button } from "../../ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "../../ui/avatar";
@@ -71,6 +72,11 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
       label: "Hồ sơ cá nhân",
       icon: Users,
       path: "/user/account-management/profile",
+    },
+    {
+      label: "Công việc đã lưu",
+      icon: Bookmark,
+      path: "/user/account-management/saved-jobs",
     },
   ];
 
