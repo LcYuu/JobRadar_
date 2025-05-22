@@ -52,7 +52,7 @@ public class ApplyJobController {
 	INotificationService notificationService;
 
 	@Autowired
-    private WebSocketService webSocketService;
+	private WebSocketService webSocketService;
 
 	@PostMapping("/create-apply/{postId}")
 	public ResponseEntity<String> createApply(@RequestBody ApplyJobDTO applyDTO,
@@ -113,6 +113,10 @@ public class ApplyJobController {
 		// Tìm kiếm người dùng theo email
 		Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
 
+		if (userOptional.isEmpty()) {
+			return new ResponseEntity<>("Không tìm thấy người dùng", HttpStatus.NOT_FOUND);
+		}
+
 		UserAccount user = userOptional.get();
 
 		// Kiểm tra quyền của người dùng
@@ -148,36 +152,37 @@ public class ApplyJobController {
 			if (applyDTO.getPathCV() == null || applyDTO.getPathCV().isEmpty()) {
 				return new ResponseEntity<>("Đường dẫn CV không được để trống", HttpStatus.BAD_REQUEST);
 			}
-			
+
 			if (applyDTO.getPathCV().length() > 1000) {
 				return new ResponseEntity<>("Đường dẫn CV quá dài (> 1000 ký tự)", HttpStatus.BAD_REQUEST);
 			}
-			
+
 			// Lấy thông tin người dùng từ JWT
 			String email = JwtProvider.getEmailFromJwtToken(jwt);
 			Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-			
+
 			if (user.isEmpty()) {
 				return new ResponseEntity<>("Không tìm thấy thông tin người dùng", HttpStatus.NOT_FOUND);
 			}
-			
+
 			// Kiểm tra xem đơn apply đã tồn tại chưa
 			Optional<ApplyJob> existingApply = applyJobRepository.findByPostIdAndUserId(postId, user.get().getUserId());
 			if (existingApply.isEmpty()) {
 				return new ResponseEntity<>("Không tìm thấy đơn ứng tuyển để cập nhật", HttpStatus.NOT_FOUND);
 			}
-			
+
 			// Chuyển dữ liệu từ DTO sang Entity
 			ApplyJob apply = convertToEntity(applyDTO, user.get().getUserId(), postId);
-			
+
 			// Gọi service để cập nhật
 			boolean isUpdated = applyJobService.updateApplyJob(apply);
-			
+
 			if (isUpdated) {
 				webSocketService.sendUpdate("/topic/apply-updates", "UPDATE APPLY");
 				return new ResponseEntity<>("Cập nhật đơn ứng tuyển thành công", HttpStatus.OK);
 			} else {
-				return new ResponseEntity<>("Cập nhật đơn ứng tuyển thất bại: Lỗi khi lưu dữ liệu", HttpStatus.INTERNAL_SERVER_ERROR);
+				return new ResponseEntity<>("Cập nhật đơn ứng tuyển thất bại: Lỗi khi lưu dữ liệu",
+						HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -224,32 +229,32 @@ public class ApplyJobController {
 
 		// Tạo hướng sắp xếp từ tham số
 		Sort.Direction direction = sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
-		
+
 		// Tạo phương thức sắp xếp dựa trên trường và hướng
 		Sort sort;
-		
+
 		// Xử lý sắp xếp tùy chỉnh
 		switch (sortBy.toLowerCase()) {
-			case "matchingscore":
-				// Sắp xếp theo điểm tương đồng
-				sort = Sort.by(direction, "matchingScore").and(Sort.by(Sort.Direction.DESC, "applyDate"));
-				break;
-			case "applydate":
-				// Sắp xếp theo ngày nộp đơn
-				sort = Sort.by(direction, "applyDate");
-				break;
-			case "fullname":
-				// Sắp xếp theo tên
-				sort = Sort.by(direction, "fullName");
-				break;
-			case "title":
-				// Sắp xếp theo vị trí công việc
-				sort = Sort.by(direction, "title");
-				break;
-			default:
-				// Mặc định sắp xếp theo ngày nộp đơn
-				sort = Sort.by(Sort.Direction.DESC, "applyDate");
-				break;
+		case "matchingscore":
+			// Sắp xếp theo điểm tương đồng
+			sort = Sort.by(direction, "matchingScore").and(Sort.by(Sort.Direction.DESC, "applyDate"));
+			break;
+		case "applydate":
+			// Sắp xếp theo ngày nộp đơn
+			sort = Sort.by(direction, "applyDate");
+			break;
+		case "fullname":
+			// Sắp xếp theo tên
+			sort = Sort.by(direction, "fullName");
+			break;
+		case "title":
+			// Sắp xếp theo vị trí công việc
+			sort = Sort.by(direction, "title");
+			break;
+		default:
+			// Mặc định sắp xếp theo ngày nộp đơn
+			sort = Sort.by(Sort.Direction.DESC, "applyDate");
+			break;
 		}
 
 		// Tạo pageable với sắp xếp đã chọn
@@ -261,56 +266,56 @@ public class ApplyJobController {
 
 	@PostMapping("/viewApply/{userId}/{postId}")
 	public ResponseEntity<Void> viewApplyJob(@RequestHeader("Authorization") String jwt, @PathVariable UUID userId,
-	                                         @PathVariable UUID postId) {
-	    try {
-	        // Lấy email từ JWT
-	        String email = JwtProvider.getEmailFromJwtToken(jwt);
-	        Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+			@PathVariable UUID postId) {
+		try {
+			// Lấy email từ JWT
+			String email = JwtProvider.getEmailFromJwtToken(jwt);
+			Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 
-	        if (user.isEmpty()) {
-	            System.out.println("User not found with email: " + email);
-	            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-	        }
+			if (user.isEmpty()) {
+				System.out.println("User not found with email: " + email);
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+			}
 
-	        // Lấy thông tin ApplyJob
-	        Optional<ApplyJob> apply = applyJobRepository.findByPostIdAndUserId(postId, userId);
+			// Lấy thông tin ApplyJob
+			Optional<ApplyJob> apply = applyJobRepository.findByPostIdAndUserId(postId, userId);
 
-	        if (apply.isPresent()) {
-	            ApplyJob applyJob = apply.get();
-	            // Nếu chưa xem, đánh dấu là đã xem
-	            if (!applyJob.isViewed()) {
-	                applyJob.setViewed(true);
-	                applyJobRepository.save(applyJob);
-	                notificationService.notifyApplicationReviewed(userId, postId, user.get().getCompany().getCompanyId());
-	                System.out.println("Notification sent for userId: " + userId + ", postId: " + postId);
-	            } else {
-	                System.out.println("Already viewed, no notification sent.");
-	            }
-	        } else {
-	            System.out.println("Apply job not found for userId: " + userId + ", postId: " + postId);
-	            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-	        }
+			if (apply.isPresent()) {
+				ApplyJob applyJob = apply.get();
+				// Nếu chưa xem, đánh dấu là đã xem
+				if (!applyJob.isViewed()) {
+					applyJob.setViewed(true);
+					applyJobRepository.save(applyJob);
+					notificationService.notifyApplicationReviewed(userId, postId,
+							user.get().getCompany().getCompanyId());
+					System.out.println("Notification sent for userId: " + userId + ", postId: " + postId);
+				} else {
+					System.out.println("Already viewed, no notification sent.");
+				}
+			} else {
+				System.out.println("Apply job not found for userId: " + userId + ", postId: " + postId);
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+			}
 
-
-	        return ResponseEntity.ok().build();
-	    } catch (Exception e) {
-	        System.err.println("Error occurred while processing viewApplyJob: " + e.getMessage());
-	        e.printStackTrace();
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-	    }
+			return ResponseEntity.ok().build();
+		} catch (Exception e) {
+			System.err.println("Error occurred while processing viewApplyJob: " + e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
 	}
-
 
 	@PostMapping("/update-matching-score")
 	public ResponseEntity<?> updateMatchingScore(@RequestBody Map<String, Object> payload) {
 		try {
 			System.out.println("Received payload: " + payload);
-			
+
 			String postId = String.valueOf(payload.get("postId"));
 			String userId = String.valueOf(payload.get("userId"));
 			Double matchingScore = ((Number) payload.get("matchingScore")).doubleValue();
 
-			System.out.println("Extracted data - postId: " + postId + ", userId: " + userId + ", score: " + matchingScore);
+			System.out.println(
+					"Extracted data - postId: " + postId + ", userId: " + userId + ", score: " + matchingScore);
 
 			// Validate UUIDs
 			if (postId == null || userId == null || postId.equals("null") || userId.equals("null")) {
@@ -324,7 +329,7 @@ public class ApplyJobController {
 
 				// Gọi service để cập nhật điểm
 				applyJobService.updateMatchingScore(postUuid, userUuid, matchingScore);
-				
+
 				System.out.println("Successfully updated matching score");
 				return ResponseEntity.ok().build();
 			} catch (IllegalArgumentException e) {
@@ -357,13 +362,14 @@ public class ApplyJobController {
 	public ResponseEntity<?> updateFullAnalysis(@RequestBody Map<String, Object> payload) {
 		try {
 			System.out.println("Received full analysis payload");
-			
+
 			String postId = String.valueOf(payload.get("postId"));
 			String userId = String.valueOf(payload.get("userId"));
 			Double matchingScore = ((Number) payload.get("matchingScore")).doubleValue();
 			String analysisResult = (String) payload.get("analysisResult");
 
-			System.out.println("Extracted data - postId: " + postId + ", userId: " + userId + ", score: " + matchingScore);
+			System.out.println(
+					"Extracted data - postId: " + postId + ", userId: " + userId + ", score: " + matchingScore);
 
 			// Validate UUIDs
 			if (postId == null || userId == null || postId.equals("null") || userId.equals("null")) {
@@ -382,7 +388,7 @@ public class ApplyJobController {
 
 				// Gọi service để cập nhật điểm và kết quả phân tích
 				applyJobService.updateFullAnalysisResult(postUuid, userUuid, matchingScore, analysisResult);
-				
+
 				System.out.println("Successfully updated full analysis");
 				return ResponseEntity.ok().build();
 			} catch (IllegalArgumentException e) {
@@ -401,7 +407,7 @@ public class ApplyJobController {
 	public ResponseEntity<?> getAnalysisResult(@PathVariable String postId, @PathVariable String userId) {
 		try {
 			System.out.println("Getting analysis result for postId: " + postId + ", userId: " + userId);
-			
+
 			// Validate UUIDs
 			if (postId == null || userId == null || postId.isEmpty() || userId.isEmpty()) {
 				return ResponseEntity.badRequest().body("Invalid postId or userId");
@@ -414,19 +420,18 @@ public class ApplyJobController {
 
 				// Gọi service để lấy kết quả phân tích
 				String analysisResult = applyJobService.getAnalysisResult(postUuid, userUuid);
-				
+
 				if (analysisResult == null || analysisResult.isEmpty()) {
 					return ResponseEntity.ok().body(null);
 				}
-				
+
 				System.out.println("Successfully retrieved analysis result");
-				
-				// Sử dụng org.springframework.http.MediaType để đảm bảo trả về dữ liệu dạng JSON
+
+				// Sử dụng org.springframework.http.MediaType để đảm bảo trả về dữ liệu dạng
+				// JSON
 				// thay vì chuỗi văn bản
-				return ResponseEntity
-					.ok()
-					.contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-					.body(analysisResult);
+				return ResponseEntity.ok().contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+						.body(analysisResult);
 			} catch (IllegalArgumentException e) {
 				System.err.println("Invalid UUID format: " + e.getMessage());
 				return ResponseEntity.badRequest().body("Invalid UUID format: " + e.getMessage());
@@ -453,6 +458,7 @@ public class ApplyJobController {
 
 		}
 	}
+
 	private ApplyJob convertToEntity(ApplyJobDTO applyDTO, UUID userId, UUID postId) {
 		ApplyJob apply = new ApplyJob();
 		apply.setPostId(postId);

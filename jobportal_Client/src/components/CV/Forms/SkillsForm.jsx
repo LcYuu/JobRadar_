@@ -175,36 +175,32 @@ const SkillsForm = ({ enabledNext }) => {
   };
 
   const onSave = async () => {
-    // In log để debug
     console.log("SkillsForm: onSave bắt đầu");
-    
-    // Đặt trạng thái loading trước - cả local và global
+  
+    // Validate trước khi lưu
+    const invalidSkill = skillList.find(skill => !skill.name.trim() || skill.rating <= 0);
+    if (invalidSkill) {
+      toast.error("Vui lòng nhập đầy đủ tên và level cho mỗi kỹ năng");
+      return;
+    }
+  
     setLoading(true);
     setUpdateLoading(true);
     if (onSaving) onSaving(true, "Đang lưu kỹ năng...");
-    
-    // Đảm bảo loading hiển thị ít nhất 2 giây
+  
     const startTime = Date.now();
-
+  
     try {
-      // Set flag to prevent sync conflicts
       isUpdating.current = true;
-      
-      // Đợi một chút để đảm bảo loading được hiển thị
       await new Promise(resolve => setTimeout(resolve, 300));
-      
-      console.log("SkillsForm: Đang cập nhật dữ liệu...");
-      
-      // Create updated data
+  
       const updatedData = {
         ...cvInfo,
-        skills: skillList
+        skills: skillList,
       };
-
-      // Update context immediately
+  
       setCvInfo(updatedData);
-
-      // Update backend - now we await to ensure we get the updated data
+  
       const cvData = JSON.stringify(updatedData).replace(/"/g, '\\"');
       await dispatch(
         updateCV({
@@ -212,59 +208,35 @@ const SkillsForm = ({ enabledNext }) => {
           cvData: `{ \"cvContent\": \"${cvData}\" }`,
         })
       );
-      
-      console.log("SkillsForm: UpdateCV đã hoàn thành, đang tải lại dữ liệu...");
-      
-      // Force refresh by fetching the CV again
+  
       await dispatch(getGenCVById(genCvId));
-      
-      // Force re-render
       forceRerender();
-      
-      // Enable next button after successful save
+  
       if (enabledNext) enabledNext(true);
-      
-      // Đảm bảo loading hiển thị đủ lâu
+  
       const elapsedTime = Date.now() - startTime;
-      const minLoadingTime = 2000; // 2 giây
-      
-      console.log(`SkillsForm: Đã xử lý trong ${elapsedTime}ms, tối thiểu cần ${minLoadingTime}ms`);
-      
+      const minLoadingTime = 2000;
+  
       if (elapsedTime < minLoadingTime) {
-        const remainingTime = minLoadingTime - elapsedTime;
-        console.log(`SkillsForm: Đợi thêm ${remainingTime}ms để hiển thị loading`);
-        await new Promise(resolve => setTimeout(resolve, remainingTime));
+        await new Promise(resolve => setTimeout(resolve, minLoadingTime - elapsedTime));
       }
-      
-      // Tắt loading trước khi hiển thị toast
+  
       setLoading(false);
       setUpdateLoading(false);
       if (onSaving) onSaving(false);
-      
-      // Hiển thị toast thành công ngay lập tức không cần setTimeout
-      console.log("SkillsForm: Hoàn thành, hiển thị toast thành công");
       toast.success("Thông tin cập nhật thành công");
-      
     } catch (error) {
       console.error("Save error:", error);
-      
-      // Tắt loading trước khi hiển thị toast lỗi
       setLoading(false);
       setUpdateLoading(false);
       if (onSaving) onSaving(false);
-      
-      // Hiển thị toast lỗi ngay lập tức không cần setTimeout
       toast.error("Cập nhật thất bại");
-      
-      // Reset updating flag in case of error
       isUpdating.current = false;
     } finally {
-      // Reset updating flag
       isUpdating.current = false;
-      
-      // Các trạng thái loading đã được xử lý trong try/catch
     }
   };
+  
 
   return (
     <div

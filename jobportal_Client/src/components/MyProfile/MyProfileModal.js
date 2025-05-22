@@ -250,9 +250,15 @@ export default function ProfileModal({ open, handleClose }) {
               type="submit"
               variant="contained"
               disabled={isLoading || imageLoading}
-              className="bg-blue-600 hover:bg-blue-700"
+              sx={{
+                backgroundColor: "#7c3aed", // Màu tím
+                "&:hover": {
+                  backgroundColor: "#6d28d9", // Màu tím đậm khi hover
+                },
+              }}
+              className="text-white"
             >
-              {isLoading ? "Đang lưu" : "Lưu những thay đổi"}
+              {isLoading ? "Đang lưu" : "Lưu"}
             </Button>
           </div>
           <div className="flex flex-col items-center">

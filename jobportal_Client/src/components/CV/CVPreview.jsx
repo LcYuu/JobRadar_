@@ -1,6 +1,4 @@
-
-import React, { useContext, useEffect, useState, memo } from "react";
-
+import React, { useContext, memo } from "react";
 import { CVInfoContext } from "../../context/CVInfoContext";
 import PersonalDetail from "./Preview/PersonalDetail";
 import SummeryPreview from "./Preview/SummeryPreview";
@@ -17,21 +15,14 @@ const MemoizedSkillsPreview = memo(SkillsPreview);
 
 const CVPreview = () => {
   const { cvInfo } = useContext(CVInfoContext);
-  const [currentTheme, setCurrentTheme] = useState(cvInfo?.themeColor || "#3357FF");
-  const [localCvInfo, setLocalCvInfo] = useState(cvInfo || {});
   
-  // Update local state when context changes
-  useEffect(() => {
-    console.log("CVPreview: cvInfo changed", cvInfo);
-    setLocalCvInfo({...cvInfo});
-    
-    if (cvInfo?.themeColor) {
-      setCurrentTheme(cvInfo.themeColor);
-    }
-  }, [cvInfo]);
-
-  // Force re-render every time cvInfo changes
-  const previewKey = JSON.stringify(localCvInfo);
+  // Get the theme color directly from context each render
+  const currentTheme = cvInfo?.themeColor || "#3357FF";
+  
+  // Generate a unique key whenever cvInfo changes
+  const previewKey = JSON.stringify(cvInfo);
+  
+  console.log("Rendering CVPreview with theme:", currentTheme);
   
   return (
     <div
@@ -42,11 +33,11 @@ const CVPreview = () => {
         backgroundColor: 'white',
       }}
     >
-      <MemoizedPersonalDetail cvInfo={{...localCvInfo, themeColor: currentTheme}} />
-      <MemoizedSummeryPreview cvInfo={localCvInfo} />
-      <MemoizedExperiencePreview cvInfo={localCvInfo} />
-      <MemoizedEducationPreview cvInfo={localCvInfo} />
-      <MemoizedSkillsPreview cvInfo={localCvInfo} />
+      <MemoizedPersonalDetail cvInfo={{...cvInfo, themeColor: currentTheme}} />
+      <MemoizedSummeryPreview cvInfo={cvInfo} />
+      <MemoizedExperiencePreview cvInfo={cvInfo} />
+      <MemoizedEducationPreview cvInfo={cvInfo} />
+      <MemoizedSkillsPreview cvInfo={cvInfo} />
     </div>
   );
 };

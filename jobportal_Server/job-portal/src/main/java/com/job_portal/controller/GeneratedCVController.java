@@ -40,49 +40,55 @@ public class GeneratedCVController {
 	UserAccountRepository userAccountRepository;
 	@Autowired
 	IGeneratedCVService generatedCVService;
-	
+
 	@GetMapping("/get-all")
 	public ResponseEntity<List<GeneratedCV>> getCV() {
 		List<GeneratedCV> cvs = generatedCVRepository.findAll();
 		return new ResponseEntity<>(cvs, HttpStatus.OK);
 	}
-	
+
 	@GetMapping("/get-gencv-by-id/{genCvId}")
 	public ResponseEntity<GeneratedCV> getGenCVById(@PathVariable("genCvId") Integer genCvId) {
-	    Optional<GeneratedCV> cv = generatedCVRepository.findById(genCvId);
-	    
-	    if (cv.isPresent()) {
-	        return ResponseEntity.ok(cv.get());
-	    } else {
-	        return ResponseEntity.noContent().build();
-	    }
-	}
+		Optional<GeneratedCV> cv = generatedCVRepository.findById(genCvId);
 
-	
-	@PostMapping("/create-cv")
-	public ResponseEntity<GeneratedCV> createCV(@RequestHeader("Authorization") String jwt,
-			@RequestBody GeneratedCVDTO genCVdto) {
-		String email = JwtProvider.getEmailFromJwtToken(jwt);
-		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-		GeneratedCV savedCV = generatedCVService.createGeneratedCV(genCVdto, user.get().getUserId());
-		return ResponseEntity.ok(savedCV);
-	}
-	
-	@GetMapping("/search-cv")
-	public ResponseEntity<Object> searchCV(@RequestHeader("Authorization") String jwt) {
-		String email = JwtProvider.getEmailFromJwtToken(jwt);
-		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-		try {
-			List<GeneratedCV> cvs = generatedCVService.findGenCVBySeekerId(user.get().getUserId());
-			return ResponseEntity.ok(cvs);
-		} catch (AllExceptions e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
+		if (cv.isPresent()) {
+			return ResponseEntity.ok(cv.get());
+		} else {
+			return ResponseEntity.noContent().build();
 		}
 	}
-	
+
+	@PostMapping("/create-cv")
+	public ResponseEntity<?> createCV(@RequestHeader("Authorization") String jwt,
+			@RequestBody GeneratedCVDTO genCVdto) {
+		try {
+			String email = JwtProvider.getEmailFromJwtToken(jwt);
+			Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+			if (user.isEmpty()) {
+				return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+			}
+			GeneratedCV savedCV = generatedCVService.createGeneratedCV(genCVdto, user.get().getUserId());
+			return ResponseEntity.ok(savedCV);
+		} catch (Exception e) {
+			return new ResponseEntity<>("Failed to create CV: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+//	@GetMapping("/search-cv")
+//	public ResponseEntity<Object> searchCV(@RequestHeader("Authorization") String jwt) {
+//		String email = JwtProvider.getEmailFromJwtToken(jwt);
+//		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+//		try {
+//			List<GeneratedCV> cvs = generatedCVService.findGenCVBySeekerId(user.get().getUserId());
+//			return ResponseEntity.ok(cvs);
+//		} catch (AllExceptions e) {
+//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+//		} catch (Exception e) {
+//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
+//		}
+//	}
+
 	@DeleteMapping("/delete-cv/{genCvId}")
 	public ResponseEntity<String> deleteCV(@PathVariable("genCvId") Integer genCvId) {
 		try {
@@ -96,18 +102,15 @@ public class GeneratedCVController {
 			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
 		}
 	}
-	
+
 	@PutMapping("/update-cv/{genCvId}")
-	public ResponseEntity<String> updateCV(
-	        @PathVariable Integer genCvId,
-	        @RequestBody GeneratedCVDTO genCVdto) {
-	    boolean isUpdated = generatedCVService.updateGeneratedCV(genCvId, genCVdto);
+	public ResponseEntity<String> updateCV(@PathVariable Integer genCvId, @RequestBody GeneratedCVDTO genCVdto) {
+		boolean isUpdated = generatedCVService.updateGeneratedCV(genCvId, genCVdto);
 		if (isUpdated) {
 			return new ResponseEntity<>("Cập nhật thành công", HttpStatus.CREATED);
 		} else {
 			return new ResponseEntity<>("Cập nhật thất bại", HttpStatus.BAD_REQUEST);
 		}
 	}
-
 
 }

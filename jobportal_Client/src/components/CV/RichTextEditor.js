@@ -7,28 +7,19 @@ import {
   BtnLink,
   BtnNumberedList,
   BtnStrikeThrough,
-  BtnStyles,
   BtnUnderline,
   Editor,
   EditorProvider,
-  HtmlButton,
-  Separator,
   Toolbar,
 } from "react-simple-wysiwyg";
-import { Button } from "../../ui/button";
-import { Brain } from "lucide-react";
 import { CVInfoContext } from "../../context/CVInfoContext";
 
-const RichTextEditor = ({ onRichTextEditorChange, index, defaultValue }) => {
-  const [value, setValue] = useState(defaultValue);
-  const { cvInfo, setCvInfo } = useContext(CVInfoContext);
+const RichTextEditor = ({ onRichTextEditorChange, defaultValue }) => {
+  const [value, setValue] = useState(defaultValue || "");
+  const { cvInfo } = useContext(CVInfoContext);
 
   return (
-    <div>
-      <div>
-        <label className="text-xs">Summery</label>
-        {/* <Button><Brain/></Button> */}
-      </div>
+    <div className="mt-5">
       <EditorProvider>
         <Editor
           value={value}
@@ -36,16 +27,15 @@ const RichTextEditor = ({ onRichTextEditorChange, index, defaultValue }) => {
             setValue(e.target.value);
             onRichTextEditorChange(e);
           }}
+          containerProps={{ style: { minHeight: "100px", resize: "vertical" } }}
         >
           <Toolbar>
             <BtnBold />
             <BtnItalic />
             <BtnUnderline />
             <BtnStrikeThrough />
-            <Separator />
             <BtnNumberedList />
             <BtnBulletList />
-            <Separator />
             <BtnLink />
             <BtnClearFormatting />
           </Toolbar>

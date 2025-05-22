@@ -126,7 +126,7 @@ const IndustryPostModal = ({ open, handleClose, postId }) => {
                 <span>Đang lưu...</span>
               </div>
             ) : (
-              "Lưu những thay đổi"
+              "Lưu"
             )}
           </Button>
         </div>

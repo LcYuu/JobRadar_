@@ -1,6 +1,5 @@
 package com.job_portal.controller;
 
-
 import java.sql.Timestamp;
 
 import java.time.LocalDate;
@@ -14,6 +13,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -69,6 +70,8 @@ import com.social.exceptions.AllExceptions;
 @RestController
 @RequestMapping("/company")
 public class CompanyController {
+
+	private static final Logger log = LoggerFactory.getLogger(CompanyController.class);
 	@Autowired
 	CompanyRepository companyRepository;
 	@Autowired
@@ -199,78 +202,56 @@ public class CompanyController {
 
 	@GetMapping("/get-all")
 	public List<CompanyDTO> getCompaniesWithSavedApplications() {
-	    List<CompanyProjection> projections = companyRepository.findCompaniesWithSavedApplications();
-	    
-	    return projections.stream()
-	        .limit(9) // <-- Giới hạn tại đây
-	        .map(projection -> {
-	            List<Integer> industryIds = new ArrayList<>();
-	            if (projection.getIndustryIds() != null && !projection.getIndustryIds().isEmpty()) {
-	                industryIds = Arrays.stream(projection.getIndustryIds().split(","))
-	                                    .map(Integer::parseInt)
-	                                    .collect(Collectors.toList());
-	            }
+		List<CompanyProjection> projections = companyRepository.findCompaniesWithSavedApplications();
 
-	            return new CompanyDTO(
-	                projection.getCompanyId(),
-	                projection.getCompanyName(),
-	                projection.getApplicationCount(),
-	                industryIds,
-	                projection.getCityId(),
-	                projection.getAddress(),
-	                projection.getDescription(),
-	                projection.getLogo(),
-	                projection.getContact(),
-	                projection.getEmail(),
-	                projection.getEstablishedTime() != null ? projection.getEstablishedTime().toLocalDate() : null,
-	                projection.getTaxCode()
-	            );
-	        }).collect(Collectors.toList());
+		return projections.stream().limit(9) // <-- Giới hạn tại đây
+				.map(projection -> {
+					List<Integer> industryIds = new ArrayList<>();
+					if (projection.getIndustryIds() != null && !projection.getIndustryIds().isEmpty()) {
+						industryIds = Arrays.stream(projection.getIndustryIds().split(",")).map(Integer::parseInt)
+								.collect(Collectors.toList());
+					}
+
+					return new CompanyDTO(projection.getCompanyId(), projection.getCompanyName(),
+							projection.getApplicationCount(), industryIds, projection.getCityId(),
+							projection.getAddress(), projection.getDescription(), projection.getLogo(),
+							projection.getContact(), projection.getEmail(),
+							projection.getEstablishedTime() != null ? projection.getEstablishedTime().toLocalDate()
+									: null,
+							projection.getTaxCode());
+				}).collect(Collectors.toList());
 	}
 
 	@GetMapping("/search-company-by-feature")
-	public ResponseEntity<Map<String, Object>> searchCompanies(
-	        @RequestParam(required = false) String title,
-	        @RequestParam(required = false) Integer cityId,
-	        @RequestParam(required = false) Integer industryId,
-	        @RequestParam(defaultValue = "0") int page,
-	        @RequestParam(defaultValue = "12") int size) {
+	public ResponseEntity<Map<String, Object>> searchCompanies(@RequestParam(required = false) String title,
+			@RequestParam(required = false) Integer cityId, @RequestParam(required = false) Integer industryId,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "12") int size) {
 
-	    Pageable pageable = PageRequest.of(page, size);
-	    Page<CompanyWithCountJob> projections = companyRepository.findCompaniesByFilters(title, cityId, industryId, pageable);
+		Pageable pageable = PageRequest.of(page, size);
+		Page<CompanyWithCountJob> projections = companyRepository.findCompaniesByFilters(title, cityId, industryId,
+				pageable);
 
-	    List<CompanyWithCountJobDTO> content = projections.getContent().stream().map(proj -> new CompanyWithCountJobDTO(
-	        proj.getCompanyId(),
-	        proj.getCompanyName(),
-	        proj.getLogo(),
+		List<CompanyWithCountJobDTO> content = projections.getContent().stream()
+				.map(proj -> new CompanyWithCountJobDTO(proj.getCompanyId(), proj.getCompanyName(), proj.getLogo(),
 
-	        convertStringToList(proj.getIndustryIds()), // Ví dụ: "1,2,3" → List<Integer>
-	        proj.getDescription(),
-	        proj.getCityId(),
-	        proj.getCountJob()
-	    )).collect(Collectors.toList());
-	    
-	    Map<String, Object> response = new HashMap<>();
-	    response.put("content", content);
-	    response.put("page", Map.of(
-	        "totalPages", projections.getTotalPages(),
-	        "totalElements", projections.getTotalElements(),
-	        "currentPage", page,
-	        "size", size
-	    ));
-	    
-	    return ResponseEntity.ok(response);
+						convertStringToList(proj.getIndustryIds()), // Ví dụ: "1,2,3" → List<Integer>
+						proj.getDescription(), proj.getCityId(), proj.getCountJob()))
+				.collect(Collectors.toList());
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("content", content);
+		response.put("page", Map.of("totalPages", projections.getTotalPages(), "totalElements",
+				projections.getTotalElements(), "currentPage", page, "size", size));
+
+		return ResponseEntity.ok(response);
 	}
-
 
 	// Hàm chuyển đổi "1,2,3" -> List<Integer>
 	private List<Integer> convertStringToList(String industryIds) {
-	    if (industryIds == null || industryIds.isEmpty()) {
-	        return Collections.emptyList();
-	    }
-	    return Arrays.stream(industryIds.split(","))
-	                 .map(Integer::parseInt)
-	                 .collect(Collectors.toList());
+		if (industryIds == null || industryIds.isEmpty()) {
+			return Collections.emptyList();
+		}
+		return Arrays.stream(industryIds.split(",")).map(Integer::parseInt).collect(Collectors.toList());
 	}
 
 	@GetMapping("/find-all")
@@ -281,40 +262,47 @@ public class CompanyController {
 
 	@GetMapping("/find-companies-fit-userId")
 	public ResponseEntity<List<Company>> findTop6CompanyFitUserId(@RequestHeader("Authorization") String jwt)
-	        throws AllExceptions {
-	    String email = JwtProvider.getEmailFromJwtToken(jwt);
-	    Optional<UserAccount> userOpt = userAccountRepository.findByEmail(email);
+			throws AllExceptions {
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> userOpt = userAccountRepository.findByEmail(email);
 
-	    if (!userOpt.isPresent()) {
-	        throw new AllExceptions("User not found");
-	    }
+		if (!userOpt.isPresent()) {
+			throw new AllExceptions("User not found");
+		}
 
-	    UserAccount user = userOpt.get();
-	    Seeker seeker = user.getSeeker();
-	    if (seeker == null || seeker.getIndustry() == null || seeker.getIndustry().isEmpty()) {
-	        return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
-	    }
+		UserAccount user = userOpt.get();
+		Seeker seeker = user.getSeeker();
+		if (seeker == null || seeker.getIndustry() == null || seeker.getIndustry().isEmpty()) {
+			return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+		}
 
-	    // Lấy danh sách industry IDs từ Seeker
-	    List<Integer> industryIds = seeker.getIndustry().stream()
-	            .map(Industry::getIndustryId)
-	            .collect(Collectors.toList());
+		// Lấy danh sách industry IDs từ Seeker
+		List<Integer> industryIds = seeker.getIndustry().stream().map(Industry::getIndustryId)
+				.collect(Collectors.toList());
 
-	    // Tìm các công ty phù hợp dựa trên danh sách industry IDs
-	    List<Company> companies = companyRepository.findTop6CompaniesByIndustryIds(industryIds)
-	            .stream()
-	            .limit(6)
-	            .collect(Collectors.toList());
+		// Tìm các công ty phù hợp dựa trên danh sách industry IDs
+		List<Company> companies = companyRepository.findTop6CompaniesByIndustryIds(industryIds).stream().limit(6)
+				.collect(Collectors.toList());
 
-	    return new ResponseEntity<>(companies, HttpStatus.OK);
+		return new ResponseEntity<>(companies, HttpStatus.OK);
 	}
 
 	@PutMapping("/update-company")
 	public ResponseEntity<String> updateCompany(@RequestHeader("Authorization") String jwt,
 			@RequestBody CompanyDTO company) throws AllExceptions {
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
-		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-		boolean isUpdated = companyService.updateCompany(company, user.get().getCompany().getCompanyId());
+		Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
+		if (!userOptional.isPresent()) {
+			return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+		}
+
+		UserAccount user = userOptional.get();
+
+		// Check if user has a company
+		if (user.getCompany() == null) {
+			return new ResponseEntity<>("User has no company associated", HttpStatus.BAD_REQUEST);
+		}
+		boolean isUpdated = companyService.updateCompany(company, user.getCompany().getCompanyId());
 		if (isUpdated) {
 			return new ResponseEntity<>("Cập nhật thông tin thành công", HttpStatus.CREATED);
 		} else {
@@ -352,7 +340,6 @@ public class CompanyController {
 		}
 	}
 
-
 	@GetMapping("/profile-company/{companyId}")
 	public ResponseEntity<Company> getCompanyById(@PathVariable("companyId") UUID companyId) throws AllExceptions {
 		try {
@@ -365,23 +352,48 @@ public class CompanyController {
 
 	@GetMapping("/profile")
 	public ResponseEntity<Company> getProfileCompany(@RequestHeader("Authorization") String jwt) throws AllExceptions {
+		log.debug("Processing /company/profile with JWT: {}", jwt);
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
-		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-		try {
-			Company company = companyService.findCompanyById(user.get().getCompany().getCompanyId());
-			return new ResponseEntity<>(company, HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+		log.debug("Extracted email: {}", email);
+		Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
+		if (!userOptional.isPresent()) {
+			log.warn("User not found for email: {}", email);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
+		UserAccount user = userOptional.get();
+		if (user.getCompany() == null) {
+			log.warn("Company not found for user: {}", email);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		Company company = companyService.findCompanyById(user.getCompany().getCompanyId());
+		if (company == null) {
+			log.warn("Company not found for ID: {}", user.getCompany().getCompanyId());
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+
+		return new ResponseEntity<>(company, HttpStatus.OK);
 	}
 
 	@GetMapping("/can-rating/{companyId}")
 	public ResponseEntity<Boolean> checkIfSaved(@RequestHeader("Authorization") String jwt,
 			@PathVariable("companyId") UUID companyId) {
-		String email = JwtProvider.getEmailFromJwtToken(jwt);
-		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-		boolean isSaved = applyJobService.isEligibleForRating(user.get().getUserId(), companyId);
-		return ResponseEntity.ok(isSaved);
+		try {
+			String email = JwtProvider.getEmailFromJwtToken(jwt);
+			Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
+
+			if (!userOptional.isPresent()) {
+				System.out.println("Không tìm thấy user với email: " + email);
+				return ResponseEntity.notFound().build();
+			}
+
+			UserAccount user = userOptional.get();
+			boolean isSaved = applyJobService.isEligibleForRating(user.getUserId(), companyId);
+			return ResponseEntity.ok(isSaved);
+		} catch (Exception e) {
+			System.out.println("Lỗi trong checkIfSaved: " + e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity.badRequest().build(); // Trả về 400 Bad Request
+		}
 	}
 
 	@GetMapping("/get-industry-name/{industryId}")

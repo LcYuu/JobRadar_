@@ -27,15 +27,16 @@
 
 /* Dropdown trigger button */
 .dropdown-trigger {
-  background-color: rgb(147 51 234) !important; /* gray-100 */
-  border: 1px solid rgb(147 51 234) !important; /* gray-300 */
+  background-color: rgb(255, 255, 255) !important; /* gray-100 */
+  border: 1px solid rgb(0, 0, 0) !important; /* gray-300 */
 }
 
 .dropdown-trigger:hover {
-  background-color: rgb(132, 15, 241) !important; /* gray-200 */
+  background-color: rgb(65, 65, 65) !important; /* gray-200 */
 }
 .dropdown-trigger svg {
-  stroke: white !important; /* Hoặc color: white !important nếu stroke không đủ */
+  stroke: #9333EA !important;
+  color: #9333EA !important; /* Đảm bảo cả color cũng được áp dụng */
 }
 
 /* Dropdown menu content */
