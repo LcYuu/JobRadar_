@@ -1,6 +1,4 @@
-
 import React, { useContext, useState, useEffect } from "react";
-
 import { Button } from "../../ui/button";
 import { LayoutGrid } from "lucide-react";
 import { CVInfoContext } from "../../context/CVInfoContext";
@@ -10,14 +8,13 @@ import { updateCV } from "../../redux/GeneratedCV/generated_cv.thunk";
 
 const ThemeColor = () => {
   const colors = [
-
     "#FF5733", "#33FF57", "#3357FF", "#FF33A1", "#A133FF",
     "#33FFA1", "#FF7133", "#71FF33", "#7133FF", "#FF3371",
     "#33FF71", "#3371FF", "#A1FF33", "#33A1FF", "#FF5733",
     "#5733FF", "#33FF5A", "#5A33FF", "#FF335A", "#335AFF",
   ];
 
-  const { cvInfo, setCvInfo } = useContext(CVInfoContext);
+  const { cvInfo, setCvInfo, onSaving } = useContext(CVInfoContext);
   const [selectedColor, setSelectedColor] = useState(cvInfo?.themeColor || colors[0]);
   const [isOpen, setIsOpen] = useState(false);
   const { genCvId } = useParams();
@@ -30,6 +27,9 @@ const ThemeColor = () => {
   }, [cvInfo?.themeColor]);
 
   const onColorSelect = async (color) => {
+    // Use the global loading context
+    onSaving(true, "Đang cập nhật màu...");
+    
     // Update local state first for immediate feedback
     setSelectedColor(color);
     setIsOpen(false);
@@ -54,11 +54,17 @@ const ThemeColor = () => {
           cvData: `{ \"cvContent\": \"${cvData}\" }`,
         })
       );
+      
+      // Wait a small additional time to ensure UI updates have time to propagate
+      setTimeout(() => {
+        onSaving(false);
+      }, 300);
     } catch (error) {
       console.error("Error updating theme color:", error);
       // Revert to previous state if update fails
       setCvInfo(cvInfo);
       setSelectedColor(cvInfo?.themeColor || colors[0]);
+      onSaving(false);
     }
   };
 

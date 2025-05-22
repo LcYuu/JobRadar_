@@ -222,7 +222,7 @@ const JobManagement = () => {
                 >
                   <option value="">Tất cả trạng thái</option>
                   <option value="Đang mở">Đang mở</option>
-                  <option value="Chưa duyệt">Chưa duyệt</option>
+                  <option value="Chờ duyệt">Chờ duyệt</option>
                   <option value="Hết hạn">Hết hạn</option>
                 </select>
                 <select
@@ -322,7 +322,7 @@ const JobManagement = () => {
                               ? "bg-emerald-100 text-emerald-600"
                               : job.status === "Hết hạn"
                               ? "bg-red-100 text-red-600"
-                              : job.status === "Chưa duyệt"
+                              : job.status === "Chờ duyệt"
                               ? "bg-yellow-100 text-yellow-600"
                               : "bg-gray-100 text-gray-600"
                           }`}
@@ -408,9 +408,9 @@ const JobManagement = () => {
                               <DropdownMenuTrigger asChild>
                                 <Button
                                   variant="ghost"
-                                  className="dropdown-trigger h-8 w-8 p-0"
+                                  className="dropdown-trigger p-0 h-8 w-8 bg-transparent hover:bg-transparent"
                                 >
-                                  <MoreVertical className="h-4 w-4" style={{ stroke: 'white', color: 'white' }} />
+                                  <MoreVertical className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent
@@ -483,10 +483,7 @@ const JobManagement = () => {
               >
                 Previous
               </Button>
-              <Button
-                variant="outline"
-                className="bg-purple-600 text-white"
-              >
+              <Button variant="outline" className="bg-purple-600 text-white">
                 {currentPage + 1}
               </Button>
               <Button

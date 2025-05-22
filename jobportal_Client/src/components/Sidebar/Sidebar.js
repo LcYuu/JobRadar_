@@ -16,10 +16,11 @@ import { Button } from "../../ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "../../ui/avatar";
 import { Separator } from "../../ui/separator";
 import logo from "../../assets/images/common/logo.jpg";
-import { logoutAction } from "../../redux/Auth/auth.action";
 import Swal from "sweetalert2";
 import NotificationDropdown from "../Notification/NotificationDropdown";
 import "./Sidebar.css";
+import { logoutAction } from "../../redux/Auth/auth.thunk";
+
 
 export default function Sidebar({ selectedSection, setSelectedSection }) {
   const { user } = useSelector((state) => state.auth);
@@ -105,9 +106,19 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
     });
 
     if (result.isConfirmed) {
-      dispatch(logoutAction());
-      if (isMobile) {
-        setIsOpen(false);
+      try {
+        await dispatch(logoutAction());
+        // Chuyển hướng
+        window.location.href = '/auth/sign-in';
+      } catch (error) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Lỗi đăng xuất',
+          text: 'Có lỗi xảy ra khi đăng xuất. Vui lòng thử lại.',
+        });
+        if (isMobile) {
+          setIsOpen(false);
+        }
       }
     }
   };
