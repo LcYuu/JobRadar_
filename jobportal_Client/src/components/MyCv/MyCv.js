@@ -23,23 +23,6 @@ export default function MyCV() {
     
   }, [dispatch]);
 
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const Toast = ({ message, onClose }) => (
-    <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded shadow-lg flex items-center gap-2 animate-fade-in-down z-50">
-      <span>{message}</span>
-      <button onClick={onClose} className="text-white hover:text-gray-200">
-        ✕
-      </button>
-    </div>
-  ); 
-
-  const showSuccessToast = (message) => {
-    setToastMessage(message);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-  };
-
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -283,9 +266,6 @@ export default function MyCV() {
             />
           </div>
         </div>
-      )}
-      {showToast && (
-        <Toast message={toastMessage} onClose={() => setShowToast(false)} />
       )}
     </div>
   );

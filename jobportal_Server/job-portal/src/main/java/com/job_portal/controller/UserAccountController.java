@@ -2,6 +2,8 @@ package com.job_portal.controller;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,41 +92,44 @@ public class UserAccountController {
 		}
 	}
 
-	@DeleteMapping("/delete-user/{userId}")
-	public ResponseEntity<String> deleteUser(@PathVariable("userId") UUID userId) {
-		try {
-			boolean isDeleted = userAccountService.deleteUser(userId);
-			if (isDeleted) {
-				return new ResponseEntity<>("User deleted successfully", HttpStatus.OK);
-			} else {
-				return new ResponseEntity<>("User deletion failed", HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		} catch (Exception e) {
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-		}
-	}
+//	@DeleteMapping("/delete-user/{userId}")
+//	public ResponseEntity<String> deleteUser(@PathVariable("userId") UUID userId) {
+//		try {
+//			boolean isDeleted = userAccountService.deleteUser(userId);
+//			if (isDeleted) {
+//				return new ResponseEntity<>("User deleted successfully", HttpStatus.OK);
+//			} else {
+//				return new ResponseEntity<>("User deletion failed", HttpStatus.INTERNAL_SERVER_ERROR);
+//			}
+//		} catch (Exception e) {
+//			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+//		}
+//	}
 
-	@GetMapping("/search")
-	public List<UserAccount> searchUser(@RequestParam("query") String query) {
-		List<UserAccount> users = userAccountService.searchUser(query);
-		return users;
-	}
+//	@GetMapping("/search")
+//	public List<UserAccount> searchUser(@RequestParam("query") String query) {
+//		List<UserAccount> users = userAccountService.searchUser(query);
+//		return users;
+//	}
 
-	@GetMapping("/profile")
-	public ResponseEntity<UserAccount> getUserFromToken(@RequestHeader("Authorization") String jwt) {
-		UserAccount user = userAccountService.findUserByJwt(jwt);
-		if (user == null) {
-			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-		}
-		return new ResponseEntity<>(user, HttpStatus.OK);
-	}
+//	@GetMapping("/profile")
+//	public ResponseEntity<UserAccount> getUserFromToken(@RequestHeader("Authorization") String jwt) {
+//		UserAccount user = userAccountService.findUserByJwt(jwt);
+//		if (user == null) {
+//			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+//		}
+//		return new ResponseEntity<>(user, HttpStatus.OK);
+//	}
 
 	@PostMapping("/count-new-accounts-per-day")
-	public List<DailyAccountCount> countNewAccountsPerDay(@RequestParam String startDate,
-			@RequestParam String endDate) {
-		LocalDateTime start = LocalDateTime.parse(startDate);
-		LocalDateTime end = LocalDateTime.parse(endDate);
-
-		return userAccountService.getDailyAccountCounts(start, end);
+	public ResponseEntity<List<DailyAccountCount>> countNewAccountsPerDay(@RequestParam String startDate,
+	        @RequestParam String endDate) {
+	    try {
+	        LocalDateTime start = LocalDateTime.parse(startDate);
+	        LocalDateTime end = LocalDateTime.parse(endDate);
+	        return ResponseEntity.ok(userAccountService.getDailyAccountCounts(start, end));
+	    } catch (DateTimeParseException e) {
+	        return ResponseEntity.badRequest().body(Collections.emptyList());
+	    }
 	}
 }

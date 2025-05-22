@@ -108,20 +108,4 @@ public class CVController {
 		}
 	}
 
-	@GetMapping("/searchCV")
-	public ResponseEntity<Object> searchCV(@RequestHeader("Authorization") String jwt) {
-		String email = JwtProvider.getEmailFromJwtToken(jwt);
-		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-		try {
-			List<CV> cvs = cvService.findCVBySeekerId(user.get().getUserId());
-			return ResponseEntity.ok(cvs);
-		} catch (AllExceptions e) {
-			// Trả về thông báo từ service
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-		} catch (Exception e) {
-			// Trả về thông báo lỗi chung
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
-		}
-	}
 }

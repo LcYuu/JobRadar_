@@ -135,7 +135,6 @@ public class AuthController {
 
 			emailUtil.sendOtpEmail(newUser.getEmail(), otp);
 			newUser.setOtp(otp);
-			System.out.println("aa " + newUser.getOtp());
 			newUser.setOtpGeneratedTime(LocalDateTime.now());
 
 			userAccountRepository.save(newUser);
@@ -303,7 +302,7 @@ public class AuthController {
 		return new ResponseEntity<>("Mã xác nhận mới đã được gửi đến email của bạn", HttpStatus.OK);
 	}
 
-	private Authentication authenticate(String email, String password) {
+	public Authentication authenticate(String email, String password) {
 		UserDetails userDetails = accountDetailService.loadUserByUsername(email);
 		if (userDetails == null) {
 

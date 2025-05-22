@@ -37,6 +37,7 @@ import {
   fetchSocialLinks,
 } from "../../redux/SocialLink/socialLink.thunk";
 import SocialLinkModal from "../MyProfile/SocialLinkModal";
+import { toast } from "react-toastify";
 
 const CompanyProfile_Management = () => {
   const dispatch = useDispatch();
@@ -107,9 +108,9 @@ const CompanyProfile_Management = () => {
       try {
         await dispatch(deleteSocialLink(id));
         dispatch(fetchSocialLinks());
-        showSuccessToast("Xóa link thành công!");
+        toast.success("Xóa link thành công!");
       } catch (error) {
-        showSuccessToast("Xóa link thất bại. Vui lòng thử lại!");
+        toast.error("Xóa link thất bại. Vui lòng thử lại!");
       }
     }
   };
@@ -152,7 +153,7 @@ const CompanyProfile_Management = () => {
       setIsEditingDes(false);
       setIsEditingInfo(false);
       dispatch(getCompanyByJWT());
-      showSuccessToast("Cập nhật thông tin thành công!");
+      toast.success("Cập nhật thông tin thành công!");
     } catch (error) {
       console.error("Update failed: ", error);
     }
@@ -171,7 +172,7 @@ const CompanyProfile_Management = () => {
           await dispatch(createImageCompany(imageData));
         }
       }
-      showSuccessToast("Cập nhật thông tin thành công!");
+      toast.success("Cập nhật thông tin thành công!");
       setIsEditingImg(false);
       dispatch(getCompanyByJWT());
       setImages([]);
@@ -217,10 +218,10 @@ const CompanyProfile_Management = () => {
       try {
         await dispatch(deleteImageCompany(imgId));
         dispatch(getCompanyByJWT());
-        showSuccessToast("Xóa hình ảnh thành công!");
+        toast.success("Xóa hình ảnh thành công!");
       } catch (error) {
         console.error("Có lỗi xảy ra khi xóa hình ảnh:", error);
-        showSuccessToast("Xóa hình ảnh thất bại. Vui lòng thử lại!", "error");
+        toast.error("Xóa hình ảnh thất bại. Vui lòng thử lại!", "error");
       }
     }
   };
@@ -255,23 +256,8 @@ const CompanyProfile_Management = () => {
     return isValid;
   };
 
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
 
-  const Toast = ({ message, onClose }) => (
-    <div className="fixed top-4 right-4 bg-green-500 text-white px-3 sm:px-4 py-2 rounded shadow-lg flex items-center gap-2 animate-fade-in-down z-50">
-      <span className="text-xs sm:text-sm">{message}</span>
-      <button onClick={onClose} className="text-white hover:text-gray-200">
-        ✕
-      </button>
-    </div>
-  );
 
-  const showSuccessToast = (message) => {
-    setToastMessage(message);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-  };
 
   const totalStars = reviews.reduce((total, review) => total + review.star, 0);
   const averageStars = reviews.length > 0 ? totalStars / reviews.length : 0;
@@ -472,7 +458,10 @@ const CompanyProfile_Management = () => {
                 placeholder="Nhập mô tả về công ty..."
               />
               <div className="mt-1 sm:mt-2 flex justify-end">
-                <Button className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
+                <Button
+                  onClick={handleSaveClick}
+                  className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+                >
                   Lưu
                 </Button>
               </div>
@@ -610,7 +599,9 @@ const CompanyProfile_Management = () => {
         </div>
 
         <CardContent className="space-y-2 sm:space-y-3 overflow-x-hidden">
-          {socialLinks && Array.isArray(socialLinks) && socialLinks.length > 0 ? (
+          {socialLinks &&
+          Array.isArray(socialLinks) &&
+          socialLinks.length > 0 ? (
             socialLinks.map((link, index) => (
               <div
                 key={index}
@@ -669,7 +660,9 @@ const CompanyProfile_Management = () => {
               </div>
             ))
           ) : (
-            <p className="text-xs text-purple-500">Không có liên kết xã hội nào</p>
+            <p className="text-xs text-purple-500">
+              Không có liên kết xã hội nào
+            </p>
           )}
         </CardContent>
 
@@ -680,7 +673,6 @@ const CompanyProfile_Management = () => {
             editingSocialLinkId={editingSocialLinkId}
             setEditingSocialLinkId={setEditingSocialLinkId}
             initialData={formData}
-            showSuccessToast={showSuccessToast}
           />
         </section>
       </Card>
@@ -787,10 +779,6 @@ const CompanyProfile_Management = () => {
           )}
         </div>
       </Card>
-
-      {showToast && (
-        <Toast message={toastMessage} onClose={() => setShowToast(false)} />
-      )}
     </div>
   );
 };
