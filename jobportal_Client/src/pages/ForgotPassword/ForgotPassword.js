@@ -87,9 +87,7 @@ export default function ForgotPassword() {
 
   const handleResendOtp = async () => {
     try {
-      await axios.put("http://localhost:8080/auth/resend-otp", null, {
-        params: { email },
-      });
+      await axios.post(`http://localhost:8080/auth/forgot-password/verifyMail/${encodeURIComponent(email)}`);
       setTimeLeft(120);
       setIsTimeUp(false);
       setIsPaused(false);
