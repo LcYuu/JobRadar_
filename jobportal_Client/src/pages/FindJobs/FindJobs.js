@@ -235,6 +235,18 @@ export default function JobSearchPage() {
     }
   }, [filters]);
 
+  const updateJobCount = () => {
+    if (isFilterApplied) {
+      dispatch(searchJobs({ filters, page: 0, size }));
+    } else {
+      dispatch(getAllJobAction({ page: 0, size }));
+    }
+  };
+
+  useEffect(() => {
+    updateJobCount();
+  }, [filters]);
+
   const handleSalaryChange = (newValues) => {
     const newFilters = {
       ...filters,
@@ -242,6 +254,7 @@ export default function JobSearchPage() {
       maxSalary: newValues[1],
     };
     handleFilterChange(newFilters);
+    updateJobCount();
   };
 
   const createCacheKey = (query, filters) => {
@@ -386,6 +399,21 @@ export default function JobSearchPage() {
       console.log("Bộ lọc thay đổi:", newFilters);
       setFilters(newFilters);
       setHasUserInteracted(true);
+      
+      // Kiểm tra nếu không có filter nào được áp dụng
+      const hasActiveFilters = Object.values(newFilters).some((value) => {
+        if (Array.isArray(value)) {
+          return value.length > 0;
+        }
+        return value !== undefined && value !== null && value !== "";
+      });
+
+      if (!hasActiveFilters) {
+        // Reset về trạng thái mặc định
+        dispatch(getAllJobAction({ page: 0, size }));
+        return;
+      }
+
       if (isUsingSemanticSearch && allResults && allResults.content) {
         console.log("Áp dụng bộ lọc cho kết quả semantic search");
         const filteredResults = filterResultsLocally(
@@ -401,14 +429,7 @@ export default function JobSearchPage() {
         setSemanticResults(newSemanticResults);
         setCurrentPage(0);
       } else if (!isUsingSemanticSearch) {
-        if (
-          Object.values(newFilters).some((value) => {
-            if (Array.isArray(value)) {
-              return value.length > 0;
-            }
-            return value !== undefined && value !== null && value !== "";
-          })
-        ) {
+        if (hasActiveFilters) {
           console.log("Áp dụng bộ lọc thông thường");
           dispatch(searchJobs({ filters: newFilters, page: 0, size }));
         } else {
@@ -714,8 +735,14 @@ export default function JobSearchPage() {
   }, [isUsingSemanticSearch, totalPages, currentPage]);
 
   useEffect(() => {
-    setDisplayTotalElements(totalElements);
-  }, [totalElements]);
+    if (isUsingSemanticSearch && semanticResults) {
+      setDisplayTotalElements(semanticResults.totalElements || 0);
+    } else if (isFilterApplied) {
+      setDisplayTotalElements(totalElements);
+    } else {
+      setDisplayTotalElements(jobPost.length);
+    }
+  }, [isUsingSemanticSearch, semanticResults, isFilterApplied, totalElements, jobPost]);
 
   useEffect(() => {
     if (isFilterApplied) {
@@ -843,7 +870,7 @@ export default function JobSearchPage() {
           w-full md:w-80 space-y-6 bg-white p-6 rounded-lg shadow-lg 
           transition-all duration-300 ease-in-out
           ${isSidebarOpen ? "block" : "hidden"} md:block md:transform-none
-          relative z-[60]
+          relative z-[60] ${isSearching ? 'opacity-50 pointer-events-none' : ''}
         `}
           >
             <div>
@@ -971,11 +998,9 @@ export default function JobSearchPage() {
                 <h2 className="text-lg md:text-xl font-semibold">
                   Tất cả công việc
                 </h2>
-                {hasUserInteracted && (
-                  <span className="text-sm font-bold text-gray-500">
-                    Tổng số: {totalResults} kết quả
-                  </span>
-                )}
+                <span className="text-sm font-bold text-gray-500">
+                  Tổng số: {displayTotalElements} kết quả
+                </span>
               </div>
             </div>
             {results.length === 0 ? (

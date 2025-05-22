@@ -358,7 +358,7 @@ const SkillModal = ({ open, handleClose }) => {
               },
             }}
           >
-            Cancel
+            Hủy bỏ
           </Button>
           <Button
             variant="contained"
@@ -374,10 +374,10 @@ const SkillModal = ({ open, handleClose }) => {
             {isLoading ? (
               <div className="flex items-center gap-2">
                 <span className="animate-spin">⏳</span>
-                <span>Saving...</span>
+                <span>Đang lưu...</span>
               </div>
             ) : (
-              "Save Changes"
+              "Lưu thay đổi"
             )}
           </Button>
         </div>
