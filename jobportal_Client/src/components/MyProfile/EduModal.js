@@ -122,12 +122,12 @@ export default function EduModal({
               {isLoading ? (
                 <div className="flex items-center gap-2">
                   <span className="animate-spin">⏳</span>
-                  <span>Saving...</span>
+                  <span>Đang lưu...</span>
                 </div>
               ) : editingEducationId ? (
-                "Update"
+                "Cập nhật"
               ) : (
-                "Create"
+                "Thêm mới"
               )}
             </Button>
           </div>
@@ -142,13 +142,13 @@ export default function EduModal({
                 shrink: true,
                 className: "font-semibold",
               }}
-              label="Start Date"
+              label="Ngày bắt đầu"
               value={formik.values.startDate}
               onChange={formik.handleChange}
               error={
                 formik.touched.startDate && Boolean(formik.errors.startDate)
               }
-              helperText={formik.touched.startDate && formik.errors.startDate}
+              helperText={formik.touched.startDate ? formik.errors.startDate: "Ví dụ: 09/01/2019"}
               className="bg-white rounded-lg"
             />
             <TextField
@@ -160,11 +160,12 @@ export default function EduModal({
                 shrink: true,
                 className: "font-semibold",
               }}
-              label="End Date"
+              label="Ngày kết thúc"
               value={formik.values.endDate}
               onChange={formik.handleChange}
               error={formik.touched.endDate && Boolean(formik.errors.endDate)}
-              helperText={formik.touched.endDate && formik.errors.endDate}
+              helperText={formik.touched.endDate ? formik.errors.endDate: "Ví dụ: 06/30/2023"
+              }
               className="bg-white rounded-lg"
             />
           </div>
@@ -174,7 +175,7 @@ export default function EduModal({
               fullWidth
               id="certificateDegreeName"
               name="certificateDegreeName"
-              label="Certificate/Degree Name"
+              label="Tên bằng cấp/chứng chỉ"
               value={formik.values.certificateDegreeName}
               onChange={formik.handleChange}
               error={
@@ -183,7 +184,7 @@ export default function EduModal({
               }
               helperText={
                 formik.touched.certificateDegreeName &&
-                formik.errors.certificateDegreeName
+                formik.errors.certificateDegreeName ? formik.errors.certificateDegreeName : "Ví dụ: Bằng Cử nhân / CCNA"
               }
               className="bg-white rounded-lg"
             />
@@ -191,18 +192,18 @@ export default function EduModal({
               fullWidth
               id="major"
               name="major"
-              label="Major"
+              label="Chuyên ngành"
               value={formik.values.major}
               onChange={formik.handleChange}
               error={formik.touched.major && Boolean(formik.errors.major)}
-              helperText={formik.touched.major && formik.errors.major}
+              helperText={formik.touched.major ? formik.errors.major: "Ví dụ: Công nghệ thông tin"}
               className="bg-white rounded-lg"
             />
             <TextField
               fullWidth
               id="universityName"
               name="universityName"
-              label="Organization Name"
+              label="Tên trường/tên tổ chức"
               value={formik.values.universityName}
               onChange={formik.handleChange}
               error={
@@ -210,7 +211,7 @@ export default function EduModal({
                 Boolean(formik.errors.universityName)
               }
               helperText={
-                formik.touched.universityName && formik.errors.universityName
+                formik.touched.universityName ? formik.errors.universityName: "Ví dụ: Đại học Khoa học tự nhiên TPHCM/ Cisco Academy"
               }
               className="bg-white rounded-lg"
             />
@@ -218,12 +219,12 @@ export default function EduModal({
               fullWidth
               id="gpa"
               name="gpa"
-              label="Score"
+              label="Điểm"
               type="number"
               value={formik.values.gpa}
               onChange={formik.handleChange}
               error={formik.touched.gpa && Boolean(formik.errors.gpa)}
-              helperText={formik.touched.gpa && formik.errors.gpa}
+              helperText={formik.touched.gpa ? formik.errors.gpa: "Ví dụ: 3.5 / 4.0 hoặc 8.0 / 10"}
               inputProps={{
                 min: 0,
                 step: 0.01,

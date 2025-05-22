@@ -2,6 +2,10 @@ import { Card, CardContent } from "../../../ui/card";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import ApplyModal from "../ApplyModal/ApplyModal";
+import { saveJob } from "../../../redux/Seeker/seeker.thunk";
+import { useDispatch, useSelector } from "react-redux";
+import { Bookmark, BookmarkCheck } from "lucide-react";
+import Swal from "sweetalert2";
 
 const typeOfWorkStyles = {
   "Toàn thời gian": {
@@ -84,6 +88,10 @@ function JobCard_AllJob({ job }) {
     additionalInfo: "",
     cv: null,
   });
+  const dispatch = useDispatch();
+  const { savedJobs } = useSelector((store) => store.seeker);
+  const {user} = useSelector((store=>store.auth));
+  const isSaved = savedJobs?.some(savedJob => savedJob.postId === job.postId);
 
   const handleCardClick = () => {
     navigate(`/jobs/job-detail/${job.postId}`);
@@ -128,9 +136,58 @@ function JobCard_AllJob({ job }) {
     handleModalClose();
   };
 
+  const handleSaveJob = async (e) => {
+    e.stopPropagation();
+    if (!user) {
+      await Swal.fire({
+        title: "Yêu cầu đăng nhập",
+        text: "Vui lòng đăng nhập để thực hiện thao tác này",
+        icon: "warning",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "#9333ea",
+      });
+      return;
+    }
+
+    try {
+      const result = await dispatch(saveJob(job.postId)).unwrap();
+      if (result.action === "saved") {
+        await Swal.fire({
+          title: "Thành công",
+          text: "Đã lưu bài viết thành công",
+          icon: "success",
+          confirmButtonText: "Đóng",
+          confirmButtonColor: "#9333ea",
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false
+        });
+      } else {
+        await Swal.fire({
+          title: "Thành công",
+          text: "Đã bỏ lưu bài viết",
+          icon: "success",
+          confirmButtonText: "Đóng",
+          confirmButtonColor: "#9333ea",
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false
+        });
+      }
+    } catch (error) {
+      await Swal.fire({
+        title: "Lỗi",
+        text: "Có lỗi xảy ra khi thực hiện thao tác",
+        icon: "error",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "#9333ea"
+      });
+    }
+  };
+
   return (
     <Card
-      className="w-full overflow-hidden cursor-pointer shadow-md hover:shadow-lg transition-all duration-300 bg-white group"
+      className="w-full overflow-hidden cursor-pointer shadow-md hover:shadow-lg transition-all duration-300 bg-white group relative"
       onClick={handleCardClick}
       style={{ border: "none" }}
     >
@@ -158,6 +215,24 @@ function JobCard_AllJob({ job }) {
                 </p>
               </div>
             </div>
+            {user && (
+              <button
+                onClick={handleSaveJob}
+                className={`p-2 rounded-full transition-all duration-300 ${
+                  isSaved 
+                    ? 'bg-purple-100 text-purple-600 hover:bg-purple-200' 
+                    : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                }`}
+              >
+                {isSaved ? (
+                  <BookmarkCheck className="w-5 h-5" />
+                ) : (
+                  <Bookmark className="w-5 h-5" />
+                )}
+              </button>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2 mb-4">
             <span
               className="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap self-start lg:self-center flex-shrink-0"
               style={
@@ -200,6 +275,7 @@ function JobCard_AllJob({ job }) {
                           color: "rgb(0, 0, 0)",
                           border: "1px solid rgb(0, 0, 0)",
                         }
+
                       }
                     >
                       {job.company.industry.industryName}
