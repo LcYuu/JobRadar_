@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class CVServiceImpl implements ICVService {
 
 	@Autowired
 	SeekerRepository seekerRepository;
+	
 	@Override
 	public boolean createCV(CVDTO cvdto, UUID userId) {
 		try {
@@ -51,12 +53,16 @@ public class CVServiceImpl implements ICVService {
 				return false;
 			}
 			
+			// Đảm bảo encoding UTF-8 cho tên file
+			String cvName = new String(cvdto.getCvName().getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+			
 			CV cv = new CV();
 			cv.setSeeker(seeker.get());
 			cv.setPathCV(cvdto.getPathCV());
-			cv.setCvName(cvdto.getCvName());
+			cv.setCvName(cvName);
 			cv.setCreateTime(LocalDateTime.now());
 			cv.setIsMain(false);
+			
 			
 			CV saveCV = cvRepository.save(cv);
 			return saveCV != null;
@@ -104,7 +110,6 @@ public class CVServiceImpl implements ICVService {
 	    return false;
 	}
 
-
 	@Override
 	public List<CV> findCVBySeekerId(UUID userId) throws AllExceptions {
 		try {
@@ -114,7 +119,4 @@ public class CVServiceImpl implements ICVService {
 			throw new AllExceptions(e.getMessage());
 		}
 	}
-
-	
-
 }
