@@ -244,46 +244,25 @@ export default function JobDetail() {
                   </div>
                 </div>
 
-                {/* Nút Nộp đơn hoặc Cập nhật đơn */}
+                {/* Nút Lưu bài viết */}
                 <div className="flex-shrink-0">
-                  {oneApplyJob?.save ? (
-                    <Button
-                      variant="outline"
-                      className="text-green-600 font-bold border-green-700 cursor-not-allowed"
-                      disabled
-                    >
-                      Đã được duyệt
-                    </Button>
-                  ) : hasApplied ? (
-                    <button
-                      className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
-                      onClick={handleOpenModal}
-                    >
-                      Cập nhật đơn
-                    </button>
-                  ) : user ? (
-                    <Button
-                      variant="default"
-                      className="bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
-                      onClick={handleOpenModal}
-                    >
-                      Nộp đơn
-                    </Button>
-                  ) : (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="text-gray-400 cursor-not-allowed"
-                          disabled
+                  {user && (
+                        <button
+                        title={isSaved ? 'Bài viết đã được lưu' : 'Lưu bài viết để xem lại sau'}
+                          onClick={handleSaveJob}
+                          className={`p-3 rounded-full transition-all duration-300 ${
+                            isSaved 
+                              ? 'bg-purple-100 text-purple-600 hover:bg-purple-200' 
+                              : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                          }`}
                         >
-                          Nộp đơn
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Vui lòng đăng nhập để ứng tuyển</p>
-                      </TooltipContent>
-                    </Tooltip>
+                          {isSaved ? (
+                            <BookmarkCheck className="w-6 h-6" />
+                          ) : (
+                            <Bookmark className="w-6 h-6" />
+                          )}
+                        </button>
+                      
                   )}
                 </div>
 
@@ -605,34 +584,6 @@ export default function JobDetail() {
                   </div>
                 </div>
               </Card>
-
-              {/* Save Job Card */}
-              {user && (
-                <Card className="p-6 bg-white rounded-lg shadow-lg">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-2">
-                      <h3 className="text-lg font-semibold">Lưu bài viết</h3>
-                      <p className="text-sm text-gray-500">
-                        {isSaved ? 'Bài viết đã được lưu' : 'Lưu bài viết để xem lại sau'}
-                      </p>
-                    </div>
-                    <button
-                      onClick={handleSaveJob}
-                      className={`p-3 rounded-full transition-all duration-300 ${
-                        isSaved 
-                          ? 'bg-purple-100 text-purple-600 hover:bg-purple-200' 
-                          : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
-                      }`}
-                    >
-                      {isSaved ? (
-                        <BookmarkCheck className="w-6 h-6" />
-                      ) : (
-                        <Bookmark className="w-6 h-6" />
-                      )}
-                    </button>
-                  </div>
-                </Card>
-              )}
             </div>
           </div>
         </div>
