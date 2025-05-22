@@ -8,6 +8,7 @@ import logo1 from '../../assets/images/common/logo1.jpg';
 import { useDispatch, useSelector } from 'react-redux';
 import { changePasswordAction } from '../../redux/ForgotPassword/forgotPassword.action';
 import { isStrongPassword } from '../../utils/passwordValidator';
+import Swal from 'sweetalert2';
 
 export default function ChangePassword() {
   const [newPassword, setNewPassword] = useState('');
@@ -30,26 +31,39 @@ export default function ChangePassword() {
 
     // Kiểm tra độ mạnh của mật khẩu
     if (!isStrongPassword(newPassword)) {
-      setStatus('failure');
-      setErrorMessage('Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: 'Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.',
+      });
       return;
     }
 
     // Kiểm tra sự khớp của mật khẩu xác nhận
     if (newPassword !== confirmPassword) {
-      setStatus('failure');
-      setErrorMessage('Mật khẩu và xác nhận mật khẩu không khớp. Vui lòng thử lại.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: 'Mật khẩu và xác nhận mật khẩu không khớp. Vui lòng thử lại.',
+      });
       return;
     }
 
     // Gửi yêu cầu thay đổi mật khẩu
     const result = await dispatch(changePasswordAction(email, { password: newPassword, repeatPassword: confirmPassword }));
     if (result.success) {
-      setStatus('success');
-      setErrorMessage('');
+      Swal.fire({
+        icon: 'success',
+        title: 'Thành công',
+        text: message || "Mật khẩu đã được thay đổi thành công!",
+      });
+      navigate('/auth/sign-in'); // Redirect to sign-in page
     } else {
-      setStatus('failure');
-      setErrorMessage(result.error || 'Đã xảy ra lỗi. Vui lòng thử lại.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: result.error || 'Đã xảy ra lỗi. Vui lòng thử lại.',
+      });
     }
   };
 

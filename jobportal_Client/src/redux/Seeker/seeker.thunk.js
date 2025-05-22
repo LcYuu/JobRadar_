@@ -97,3 +97,29 @@ export const getCandidateSkills = createAsyncThunk(
     }
   }
 );
+
+export const saveJob = createAsyncThunk(
+  "seeker/saveJob",
+  async (postId, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await api.put(`/seeker/save-job/${postId}`);
+      // Sau khi lưu thành công, gọi API lấy danh sách saved jobs mới nhất
+      await dispatch(getSavedJobs());
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
+export const getSavedJobs = createAsyncThunk(
+  "seeker/getSavedJobs", 
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get("/seeker/saved-jobs");
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message); 
+    }
+  }
+);

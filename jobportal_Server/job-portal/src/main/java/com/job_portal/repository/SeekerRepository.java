@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.job_portal.DTO.ApplicantProfileDTO;
 import com.job_portal.DTO.FollowSeekerDTO;
+import com.job_portal.DTO.SavedJobDTO;
 import com.job_portal.models.Company;
 import com.job_portal.models.Seeker;
 import com.job_portal.projection.ApplicantProfileProjection;
@@ -57,4 +58,10 @@ public interface SeekerRepository extends JpaRepository<Seeker, UUID> {
 	@Query("SELECT new com.job_portal.DTO.FollowSeekerDTO(s.userId, s.userAccount.userName) "
 			+ "FROM Company c " + "JOIN c.follows s " + "WHERE c.companyId = :companyId")
 	List<FollowSeekerDTO> findSeekersFollowingCompany(@Param("companyId") UUID companyId);
+
+	@Query("SELECT new com.job_portal.DTO.SavedJobDTO(sj.postId, sj.title, sj.company.companyName, sj.company.logo) " +
+	       "FROM Seeker s " +
+	       "JOIN s.savedJobs sj " +
+	       "WHERE s.userId = :seekerId")
+	List<SavedJobDTO> findSavedJobsBySeeker(@Param("seekerId") UUID seekerId);
 }

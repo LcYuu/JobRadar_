@@ -506,7 +506,7 @@ export default function MyProfile() {
                         className="text-xs sm:text-sm px-3 sm:px-4 min-w-[80px]"
                         style={{ zIndex: 1000 }}
                       >
-                        Save
+                        Lưu
                       </Button>
                     </div>
                   </div>
@@ -634,7 +634,7 @@ export default function MyProfile() {
                       variant="outline"
                       size="sm"
                       className="mt-2 text-xs sm:text-sm min-w-[140px]"
-                      onClick={handleOpenExpModal}
+                      onClick={exp.length === 0 ? handleOpenExpModal : undefined}
                       style={{ zIndex: 1000 }}
                     >
                       <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-1" /> Thêm kinh
@@ -787,7 +787,7 @@ export default function MyProfile() {
                       variant="outline"
                       size="sm"
                       className="mt-2 text-xs sm:text-sm min-w-[140px]"
-                      onClick={handleOpenEduModal}
+                      onClick={edu.length === 0 ? handleOpenEduModal : undefined}
                       style={{ zIndex: 1000 }}
                     >
                       <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-1" /> Thêm học
@@ -906,6 +906,7 @@ export default function MyProfile() {
                       className={`border p-2 sm:p-3 w-full rounded-md text-sm sm:text-base ${
                         errors.emailContact ? "border-red-500" : ""
                       }`}
+                      placeholder="Nhập email liên hệ của bạn"
                     />
                     {errors.emailContact && (
                       <p className="text-red-500 text-xs sm:text-sm">
@@ -914,20 +915,23 @@ export default function MyProfile() {
                     )}
                   </div>
                 ) : (
-                  seeker?.emailContact && (
                     <div>
-                      <Label className="text-sm sm:text-base font-medium">
+                      <Label className="text-sm sm:text-base font-medium" style={{ whiteSpace: "nowrap" }}>
                         Email
                       </Label>
                       <div className="mt-1 flex items-center gap-2">
                         <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-                        <span className="text-sm sm:text-base truncate">
-                          {seeker.emailContact}
-                        </span>
+                        {seeker?.emailContact ? (
+                          <span className="text-sm sm:text-base truncate">{seeker.emailContact}</span>
+                        ) : (
+                          <span className="text-sm text-gray-400 italic">Chưa cập nhật email liên hệ</span>
+                        )}
                       </div>
                     </div>
-                  )
+                    </div>
+                  </div>
                 )}
+
                 {isEditingInfo ? (
                   <div>
                     <Label className="text-sm sm:text-base font-medium">
@@ -940,6 +944,7 @@ export default function MyProfile() {
                       className={`border p-2 sm:p-3 w-full rounded-md text-sm sm:text-base ${
                         errors.phoneNumber ? "border-red-500" : ""
                       }`}
+                      placeholder="Nhập số điện thoại của bạn"
                     />
                     {errors.phoneNumber && (
                       <p className="text-red-500 text-xs sm:text-sm">
@@ -948,19 +953,21 @@ export default function MyProfile() {
                     )}
                   </div>
                 ) : (
-                  seeker?.phoneNumber && (
-                    <div>
-                      <Label className="text-sm sm:text-base font-medium">
-                        Số điện thoại
-                      </Label>
-                      <div className="mt-1 flex items-center gap-2">
-                        <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-                        <span className="text-sm sm:text-base truncate">
-                          {seeker.phoneNumber}
-                        </span>
-                      </div>
+                  <div>
+                    <Label className="text-sm sm:text-base font-medium">
+                      Số điện thoại
+                    </Label>
+                    <div className="mt-1 flex items-center gap-2">
+                      <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                      {seeker?.phoneNumber ? (
+                        <span className="text-sm sm:text-base truncate">{seeker.phoneNumber}</span>
+                      ) : (
+                        <span className="text-sm text-gray-400 italic">Chưa cập nhật số điện thoại</span>
+                      )}
                     </div>
-                  )
+                  </div>
+                    </div>
+                  </div>
                 )}
                 {isEditingInfo ? (
                   <div>
@@ -979,31 +986,58 @@ export default function MyProfile() {
                     </select>
                   </div>
                 ) : (
-                  seeker?.gender && (
+                  <div>
+                    <Label className="text-sm font-medium whitespace-nowrap">
+                      Giới tính
+                    </Label>
+                    <div className="mt-1 flex items-center gap-2">
+                      {seeker?.gender ? (
+                        <>
+                          {seeker.gender === "Nam" ? (
+                            <FontAwesomeIcon
+                              icon={faMars}
+                              className="h-4 w-4 text-muted-foreground"
+                            />
+                          ) : (
+                            <FontAwesomeIcon
+                              icon={faVenus}
+                              className="h-4 w-4 text-muted-foreground"
+                            />
+                          )}
+                          <span className="text-sm">{seeker.gender}</span>
+                        </>
+                      ) : (
+                        <span className="text-sm text-gray-400 italic">Chưa cập nhật giới tính</span>
+                      )}
                     <div>
-                      <Label className="text-sm sm:text-base font-medium">
+                      <Label className="text-sm sm:text-base font-medium whitespace-nowrap">
                         Giới tính
                       </Label>
                       <div className="mt-1 flex items-center gap-2">
-                        {seeker.gender === "Nam" && (
-                          <FontAwesomeIcon
-                            icon={faMars}
-                            className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground"
-                          />
+                        {seeker?.gender ? (
+                          <>
+                            {seeker.gender === "Nam" ? (
+                              <FontAwesomeIcon
+                                icon={faMars}
+                                className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground"
+                              />
+                            ) : seeker.gender === "Nữ" ? (
+                              <FontAwesomeIcon
+                                icon={faVenus}
+                                className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground"
+                              />
+                            ) : null}
+                            <span className="text-sm sm:text-base">{seeker.gender}</span>
+                          </>
+                        ) : (
+                          <span className="text-sm text-gray-400 italic">Chưa cập nhật giới tính</span>
                         )}
-                        {seeker.gender === "Nữ" && (
-                          <FontAwesomeIcon
-                            icon={faVenus}
-                            className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground"
-                          />
-                        )}
-                        <span className="text-sm sm:text-base">
-                          {seeker.gender}
-                        </span>
                       </div>
                     </div>
-                  )
+                    </div>
+                  </div>
                 )}
+
                 {isEditingInfo ? (
                   <div>
                     <Label className="text-sm sm:text-base font-medium">
@@ -1025,26 +1059,28 @@ export default function MyProfile() {
                     )}
                   </div>
                 ) : (
-                  seeker?.dateOfBirth && (
-                    <div>
-                      <Label className="text-sm sm:text-base font-medium">
-                        Ngày sinh
-                      </Label>
-                      <div className="mt-1 flex items-center gap-2">
-                        <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-                        <span className="text-sm sm:text-base">
-                          {formatDate(seeker.dateOfBirth)}
-                        </span>
-                      </div>
+                <div>
+                  <Label className="text-sm sm:text-base font-medium whitespace-nowrap">
+                    Ngày sinh
+                  </Label>
+                  <div className="mt-1 flex items-center gap-2">
+                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                    {seeker?.dateOfBirth ? (
+                      <span className="text-sm sm:text-base">{seeker.dateOfBirth}</span>
+                    ) : (
+                        <span className="text-sm text-gray-400 italic">Chưa cập nhật ngày sinh</span>
+                      )}
                     </div>
-                  )
+                  </div>
                 )}
+
                 {isEditingInfo ? (
                   <div className="relative">
                     <Label className="text-sm sm:text-base font-medium">
                       Chuyên ngành
                     </Label>
                     <div
+
                       className="border p-2 sm:p-3 w-full rounded-md cursor-pointer truncate"
                       onClick={() =>
                         setIsIndustryDropdownOpen(!isIndustryDropdownOpen)
@@ -1059,7 +1095,7 @@ export default function MyProfile() {
                             )
                             .map((industry) => industry.industryName)
                             .join(", ")
-                        : "Chọn chuyên ngành"}
+                        : "Chưa cập nhật chuyên ngành"}
                     </div>
                     {isIndustryDropdownOpen && (
                       <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-48 sm:max-h-60 overflow-auto">
@@ -1079,8 +1115,14 @@ export default function MyProfile() {
                                   ? [
                                       ...(formData.industryIds ?? []),
                                       industry.industryId,
-                                    ]
-                                  : (formData.industryIds ?? []).filter(
+                                    ],
+                                  }));
+                                } else {
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    industryIds: (
+                                      prev.industryIds ?? []
+                                    ).filter(
                                       (id) => id !== industry.industryId
                                     );
                                 setFormData((prev) => ({
@@ -1098,22 +1140,19 @@ export default function MyProfile() {
                     )}
                   </div>
                 ) : (
-                  seeker?.industry &&
-                  seeker.industry.length > 0 && (
-                    <div>
-                      <Label className="text-sm sm:text-base font-medium">
-                        Chuyên ngành
-                      </Label>
-                      <div className="mt-1 flex items-center gap-2">
-                        <Book className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-                        <span className="text-sm sm:text-base truncate">
-                          {seeker.industry
-                            .map((industry) => industry.industryName)
-                            .join(", ")}
-                        </span>
-                      </div>
+                <div>
+                  <Label className="text-sm sm:text-base font-medium whitespace-nowrap">
+                    Chuyên ngành
+                  </Label>
+                  <div className="mt-1 flex items-center gap-2">
+                    <Book className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                    {seeker?.industry && seeker.industry.length > 0 ? (
+                      <span className="text-sm sm:text-base truncate">{seeker.industry.join(', ')}</span>
+                    ) : (
+                        <span className="text-sm text-gray-400 italic">Chưa cập nhật chuyên ngành</span>
+                      )}
                     </div>
-                  )
+                  </div>
                 )}
               </CardContent>
               {isEditingInfo && (

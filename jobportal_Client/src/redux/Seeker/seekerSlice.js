@@ -6,6 +6,8 @@ import {
   getFollowedCompany,
   getSeekerByUser,
   updateSeekerAction,
+  getSavedJobs,
+  saveJob,
 } from "./seeker.thunk";
 
 const seekerSlice = createSlice({
@@ -20,6 +22,7 @@ const seekerSlice = createSlice({
     action: null,
     follow: [],
     message: "",
+    savedJobs: [],
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -105,6 +108,19 @@ const seekerSlice = createSlice({
       .addCase(getCandidateSkills.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(getSavedJobs.fulfilled, (state, action) => {
+        state.savedJobs = action.payload;
+      })
+      .addCase(saveJob.fulfilled, (state, action) => {
+        const { postId, action: saveAction } = action.payload;
+        if (saveAction === "saved") {
+          // Add to saved jobs
+          state.savedJobs.push(action.payload);
+        } else {
+          // Remove from saved jobs
+          state.savedJobs = state.savedJobs.filter(job => job.postId !== postId);
+        }
       });
   },
 });

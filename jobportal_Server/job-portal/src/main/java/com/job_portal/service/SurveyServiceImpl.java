@@ -32,15 +32,15 @@ import java.util.UUID;
 
 @Service
 public class SurveyServiceImpl implements ISurveyService {
-    @Autowired
-    private SurveyRepository surveyRepository;
-    
-    @Autowired
-    private JobPostRepository jobPostRepository;
-    
-    @Autowired
-    private JavaMailSender mailSender;
-
+//    @Autowired
+//    private SurveyRepository surveyRepository;
+//    
+//    @Autowired
+//    private JobPostRepository jobPostRepository;
+//    
+//    @Autowired
+//    private JavaMailSender mailSender;
+//
 //    @Value("${frontend.url}")
 //    private String frontendUrl;
 //
@@ -72,7 +72,7 @@ public class SurveyServiceImpl implements ISurveyService {
 //            survey.setEmailSent(false);
 //            survey.setSurveyStatus("PENDING");
 //            survey.setCreatedAt(LocalDateTime.now());
-////            survey.setCompanyId(UUID.randomUUID());
+//            survey.setCompanyId(UUID.randomUUID());
 //            survey = surveyRepository.save(survey);
 //
 //            SimpleMailMessage message = new SimpleMailMessage();
@@ -87,32 +87,32 @@ public class SurveyServiceImpl implements ISurveyService {
 //        }
 //    }
 //
-////    @Override
-////    public String createEmailContent(JobPost job, String surveyId) {
-////        return String.format("""
-////            Xin chào %s,
-////            
-////            Cảm ơn bạn đã sử dụng JobRadar cho việc tuyển dụng "%s".
-////            
-////            Để giúp chúng tôi cải thiện dịch vụ, vui lòng hoàn thành khảo sát tại:
-////            %s/survey/%s
-////            
-////            Trân trọng,
-////            JobRadar Team
-////            """,
-////            job.getCompany().getCompanyName(),
-////            job.getTitle(),
-////            frontendUrl,
-////            surveyId
-////        );
-////    }
+//    @Override
+//    public String createEmailContent(JobPost job, String surveyId) {
+//        return String.format("""
+//            Xin chào %s,
+//            
+//            Cảm ơn bạn đã sử dụng JobRadar cho việc tuyển dụng "%s".
+//            
+//            Để giúp chúng tôi cải thiện dịch vụ, vui lòng hoàn thành khảo sát tại:
+//            %s/survey/%s
+//            
+//            Trân trọng,
+//            JobRadar Team
+//            """,
+//            job.getCompany().getCompanyName(),
+//            job.getTitle(),
+//            frontendUrl,
+//            surveyId
+//        );
+//    }
 //
 //    @Override
 //    public List<Survey> getSurveysByJobPost(JobPost jobPost) {
 //        return surveyRepository.findByJobPostAndEmailSentFalse(jobPost);
 //    }
 //
-//    // Add method to handle survey submission
+//     //Add method to handle survey submission
 //    public Survey submitSurvey(String surveyId, SurveyDTO surveyDTO) {
 //        Optional<Survey> existingSurvey = surveyRepository.findById(surveyId);
 //        if (existingSurvey.isPresent()) {
@@ -153,7 +153,7 @@ public class SurveyServiceImpl implements ISurveyService {
 //        List<CompanySurveyStatsDTO> companyStats = getCompanyStats(allSurveys);
 //        stats.setCompanySurveys(companyStats);
 //        
-//        // Phân bố đánh giá chất lượng
+//         //Phân bố đánh giá chất lượng
 //        Map<Integer, Integer> qualityDist = getQualityDistribution(allSurveys);
 //        stats.setCandidateQualityDistribution(qualityDist);
 //        
@@ -185,13 +185,13 @@ public class SurveyServiceImpl implements ISurveyService {
 //                    .filter(s -> s != null && "COMPLETED".equals(s.getSurveyStatus()))
 //                    .count());
 //                
-//                // Xử lý an toàn cho total hired
+//                 //Xử lý an toàn cho total hired
 //                dto.setTotalHired(companySurveys.stream()
 //                    .filter(s -> s != null && s.getHiredCount() != null)
 //                    .mapToInt(Survey::getHiredCount)
 //                    .sum());
 //                
-//                // Xử lý an toàn cho last submitted
+//                 //Xử lý an toàn cho last submitted
 //                companySurveys.stream()
 //                    .filter(s -> s != null && s.getCreatedAt() != null)
 //                    .max(Comparator.comparing(Survey::getCreatedAt))
@@ -221,7 +221,7 @@ public class SurveyServiceImpl implements ISurveyService {
 //            .sorted((s1, s2) -> {
 //                Duration d1 = Duration.between(s1.getCreatedAt(), s1.getSubmittedAt());
 //                Duration d2 = Duration.between(s2.getCreatedAt(), s2.getSubmittedAt());
-//                // Sắp xếp theo thời gian phản hồi nhanh nhất
+//                 //Sắp xếp theo thời gian phản hồi nhanh nhất
 //                return d1.compareTo(d2);
 //            })
 //            .limit(5)
@@ -254,19 +254,19 @@ public class SurveyServiceImpl implements ISurveyService {
 //    }
 //
 //    public void createNewSurvey(JobPost job) {
-//        // Generate a new UUID for companyId
+//         //Generate a new UUID for companyId
 //        UUID companyId = UUID.randomUUID();
 //
-//        // Assuming you have a method to create a survey
+//         Assuming you have a method to create a survey
 //        Survey survey = new Survey();
-////        survey.setCompanyId(companyId); // Set the newly generated companyId
+//        survey.setCompanyId(companyId);  //Set the newly generated companyId
 //        survey.setEmailSent(false);
 //        survey.setSurveyStatus("PENDING");
 //        survey.setCreatedAt(LocalDateTime.now());
 //        survey.setSubmittedAt(LocalDateTime.now());;
 //        survey = surveyRepository.save(survey);
 //
-//        // Send email logic...
+//         //Send email logic...
 //        SimpleMailMessage message = new SimpleMailMessage();
 //        message.setTo(job.getCompany().getEmail());
 //        message.setSubject("Khảo sát tuyển dụng - " + job.getTitle());

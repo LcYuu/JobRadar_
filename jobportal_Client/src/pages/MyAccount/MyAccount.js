@@ -18,6 +18,7 @@ export default function Dashboard() {
       "user/account-management/cv": "CV của tôi",
       "user/account-management/following-companies": "Công ty theo dõi",
       "user/account-management/profile": "Hồ sơ cá nhân",
+      "user/account-management/saved-jobs": "Công việc đã lưu"
     },
     employer: {
       "employer/account-management/dashboard": "Dashboard",

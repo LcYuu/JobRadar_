@@ -49,6 +49,7 @@ import {
   fetchSocialLinksByUserId,
 } from "../../redux/SocialLink/socialLink.thunk";
 import { resetJobPost } from "../../redux/JobPost/jobPostSlice";
+import { API_URL } from '../../configs/constants';
 
 const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
   return (
@@ -161,7 +162,7 @@ const ReplyItem = ({
   const [showNestedReplyForm, setShowNestedReplyForm] = useState(false);
   const [nestedReplyText, setNestedReplyText] = useState("");
   const [isNestedReplyAnonymous, setIsNestedReplyAnonymous] = useState(false);
-
+  const [reviews, setReviews] = useState([]);
   const handleNestedReplyClick = () => {
     if (!currentUser) {
       toast.warning("Vui lòng đăng nhập để thực hiện thao tác này");
@@ -465,13 +466,9 @@ const ReplyItem = ({
 export default function CompanyProfile() {
   const { companyId } = useParams();
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const {
-    jobPost = [],
-    error,
-    totalPages = 0,
-    totalElements = 0,
-  } = useSelector((store) => store.jobPost);
+  const { jobPost = [], error, totalPages = 0, totalElements = 0 } = useSelector((store) => store.jobPost);
+  const [reviewsList, setReviewsList] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const { socialLinks } = useSelector((store) => store.socialLink);
 
@@ -1610,188 +1607,130 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
 
   // Update handleSaveReplyEdit function to dismiss loading toast in error cases
   const handleSaveReplyEdit = async () => {
-    if (!editingReplyId) return;
-
-    // Show loading toast while checking content moderation
-    const loadingToastId = toast.loading("Đang kiểm tra nội dung phản hồi...");
-
     try {
-      // Find which review this reply belongs to
-      let foundReviewId = null;
-      let originalReply = null;
+      // Kiểm tra nội dung với AI
+      const response = await fetch('http://localhost:5000/check-comment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: editReplyData.content }),
+      });
 
-      // Function to search for a reply in the nested structure and return the reply object
-      const findReplyRecursive = (repliesArray, replyId) => {
-        for (let i = 0; i < repliesArray.length; i++) {
-          if (repliesArray[i].replyId === replyId) {
-            originalReply = repliesArray[i];
-            return true;
-          }
+      const result = await response.json();
 
-          // Check child replies if they exist
-          if (
-            repliesArray[i].childReplies &&
-            repliesArray[i].childReplies.length > 0
-          ) {
-            const found = findReplyRecursive(
-              repliesArray[i].childReplies,
-              replyId
-            );
-            if (found) return true;
-          }
-        }
-        return false;
-      };
+      if (result.is_toxic) {
+        // Hiển thị thông báo lỗi UI
+        toast.error('Nội dung bình luận không phù hợp. Vui lòng kiểm tra lại.', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
 
-      // Search through all reviews to find which one contains this reply
-      for (let i = 0; i < reviews.length; i++) {
-        if (
-          reviews[i].replies &&
-          findReplyRecursive(reviews[i].replies, editingReplyId)
-        ) {
-          foundReviewId = reviews[i].reviewId;
-          break;
-        }
-      }
-
-      if (!foundReviewId || !originalReply) {
-        toast.dismiss(loadingToastId);
-        toast.error("Không tìm thấy phản hồi để cập nhật");
+        // Highlight nội dung có vấn đề
+        const highlightedContent = highlightProblematicContent(editReplyData.content);
+        showModerationError(result.message, highlightedContent);
+        
         return;
       }
-
-      // Preserve the @username tag if it exists in the original content
-      let updatedContent = editReplyData.content;
-      if (
-        originalReply.content.startsWith("@") &&
-        originalReply.content.includes(":")
-      ) {
-        const mentionPart = originalReply.content.split(":")[0] + ": ";
-        updatedContent = mentionPart + editReplyData.content;
-      }
-
-      // Update the reply via API
-      const updatedReply = await dispatch(
-        updateReviewReply({
-          replyId: editingReplyId,
-          content: updatedContent,
-          anonymous: editReplyData.anonymous,
+      const token=localStorage.getItem('jwt');
+      // Gọi API cập nhật reply
+      const response2 = await fetch(`${API_URL}/review/update-reply/${editReplyData.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          content: editReplyData.content,
+          isAnonymous: editReplyData.isAnonymous,
+          parentReplyId: editReplyData.parentReplyId || null
         })
-      ).unwrap();
-
-      toast.dismiss(loadingToastId);
-      console.log("API response for updated reply:", updatedReply);
-
-      // Deep clone the reviews array to safely modify nested structures
-      const updatedReviews = JSON.parse(JSON.stringify(reviews));
-
-      // Update the reply in the deeply nested structure
-      const updateReplyRecursive = (repliesArray, replyId, updatedData) => {
-        for (let i = 0; i < repliesArray.length; i++) {
-          if (repliesArray[i].replyId === replyId) {
-            // Update the reply properties while preserving its structure
-            repliesArray[i] = {
-              ...repliesArray[i],
-              content: updatedData.content,
-              anonymous: updatedData.anonymous,
-            };
-            return true;
-          }
-
-          // Check child replies if they exist
-          if (
-            repliesArray[i].childReplies &&
-            repliesArray[i].childReplies.length > 0
-          ) {
-            const updated = updateReplyRecursive(
-              repliesArray[i].childReplies,
-              replyId,
-              updatedData
-            );
-            if (updated) return true;
-          }
-        }
-        return false;
-      };
-
-      // Find the review and update its reply
-      for (let i = 0; i < updatedReviews.length; i++) {
-        if (updatedReviews[i].reviewId === foundReviewId) {
-          updateReplyRecursive(
-            updatedReviews[i].replies,
-            editingReplyId,
-            updatedReply
-          );
-          break;
-        }
-      }
-
-      // Update reviews in Redux store
-      dispatch({
-        type: "review/getReviewByCompany/fulfilled",
-        payload: updatedReviews,
       });
 
-      // Update the replies object in Redux if it exists
-      if (replies && replies[foundReviewId]) {
-        // Create a deep copy of the replies object
-        const updatedReplies = JSON.parse(JSON.stringify(replies));
+      if (!response2.ok) {
+        throw new Error('Failed to update reply');
+      }
 
-        // Find and update the reply in the flat structure
-        if (updatedReplies[foundReviewId]) {
-          const replyIndex = updatedReplies[foundReviewId].findIndex(
-            (r) => r.replyId === editingReplyId
-          );
-          if (replyIndex !== -1) {
-            updatedReplies[foundReviewId][replyIndex] = {
-              ...updatedReplies[foundReviewId][replyIndex],
-              content: updatedReply.content,
-              anonymous: updatedReply.anonymous,
+      const updatedReply = await response2.json();
+
+      // Cập nhật state reviewsList với reply đã được cập nhật
+      setReviewsList(prevReviews => {
+        return prevReviews.map(review => {
+          if (review.replies && review.replies.length > 0) {
+            const findReplyRecursive = (repliesArray, replyId) => {
+              for (let reply of repliesArray) {
+                if (reply.id === replyId) {
+                  return reply;
+                }
+                if (reply.replies && reply.replies.length > 0) {
+                  const found = findReplyRecursive(reply.replies, replyId);
+                  if (found) return found;
+                }
+              }
+              return null;
             };
-          }
-        }
 
-        dispatch({
-          type: "review/getReviewReplies/fulfilled",
-          payload: updatedReplies,
+            const updateReplyRecursive = (repliesArray, replyId, updatedData) => {
+              return repliesArray.map(reply => {
+                if (reply.id === replyId) {
+                  return {
+                    ...reply,
+                    ...updatedData,
+                    replies: reply.replies || []
+                  };
+                }
+                if (reply.replies && reply.replies.length > 0) {
+                  return {
+                    ...reply,
+                    replies: updateReplyRecursive(reply.replies, replyId, updatedData)
+                  };
+                }
+                return reply;
+              });
+            };
+
+            const targetReply = findReplyRecursive(review.replies, editReplyData.id);
+            if (targetReply) {
+              return {
+                ...review,
+                replies: updateReplyRecursive(review.replies, editReplyData.id, updatedReply)
+              };
+            }
+          }
+
+          return review;
         });
-      }
-
-      // Reset edit state
-      setEditingReplyId(null);
-      setEditReplyData({ content: "", anonymous: false });
-
-      toast.success("Phản hồi đã được cập nhật thành công");
-    } catch (error) {
-      // Always dismiss the loading toast in case of error
-      toast.dismiss(loadingToastId);
-
-      console.error("Error updating reply:", error);
-
-      // Check for different error formats - Redux might wrap the error in a payload
-      const errorMessage =
-        error.message ||
-        (error.payload ? error.payload : "Có lỗi xảy ra khi cập nhật phản hồi");
-
-      // Log detailed error information for debugging
-      console.log("Error details:", {
-        error,
-        message: errorMessage,
-        hasPayload: !!error.payload,
-        content: editReplyData.content,
       });
 
-      // Check if the error is from content moderation
-      if (errorMessage && errorMessage.includes("không phù hợp")) {
-        console.log("Moderation error detected:", errorMessage);
-        // Use the error object with the correct message format
-        const moderationError = {
-          message: errorMessage,
-        };
-        showModerationError(moderationError, editReplyData.content);
-      } else {
-        toast.error(errorMessage);
-      }
+      setEditingReplyId(null);
+      setEditReplyData(null);
+
+      // Hiển thị thông báo thành công
+      toast.success('Đã cập nhật bình luận thành công!', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+
+    } catch (error) {
+      console.error('Error updating reply:', error);
+      // Hiển thị thông báo lỗi
+      toast.error('Có lỗi xảy ra khi cập nhật bình luận. Vui lòng thử lại sau.', {
+        position: "top-right", 
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+
     }
   };
 
@@ -1938,7 +1877,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                 )}
               </div>
             </div>
-            {!localStorage.getItem("jwt") || checkIfSaved === false ? null : (
+            {!localStorage.getItem("jwt") ? null : (
               <Button
                 onClick={handleFollowClick}
                 className="mt-4 xs:mt-6 px-3 py-1.5 xs:px-4 xs:py-2 text-xs xs:text-sm bg-purple-500 text-white rounded-lg hover:bg-purple-700 w-full xs:w-auto"

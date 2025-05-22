@@ -14,6 +14,8 @@ import {
   ArrowLeft,
   Briefcase,
   UserCheck,
+  Bookmark,
+  BookmarkCheck,
 } from "lucide-react";
 import ApplyModal from "../../components/common/ApplyModal/ApplyModal";
 import JobCard_AllJob from "../../components/common/JobCard_AllJob/JobCard_AllJob";
@@ -25,6 +27,8 @@ import {
   getJobPostByPostId,
   getSimilarJobs,
 } from "../../redux/JobPost/jobPost.thunk";
+import { saveJob } from "../../redux/Seeker/seeker.thunk";
+import Swal from "sweetalert2";
 
 export default function JobDetail() {
   const industryStyles = {
@@ -89,6 +93,8 @@ export default function JobDetail() {
   const { postByPostId, similarJobs } = useSelector((store) => store.jobPost);
   const { hasApplied, oneApplyJob } = useSelector((store) => store.applyJob);
   const { user } = useSelector((store) => store.auth);
+  const { savedJobs } = useSelector((store) => store.seeker);
+  const isSaved = savedJobs?.some((savedJob) => savedJob.postId === postId);
   const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
@@ -150,6 +156,55 @@ export default function JobDetail() {
 
   const handleJobCardClick = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleSaveJob = async (e) => {
+    e.stopPropagation();
+    if (!user) {
+      await Swal.fire({
+        title: "Yêu cầu đăng nhập",
+        text: "Vui lòng đăng nhập để thực hiện thao tác này",
+        icon: "warning",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "#9333ea",
+      });
+      return;
+    }
+
+    try {
+      const result = await dispatch(saveJob(postId)).unwrap();
+      if (result.action === "saved") {
+        await Swal.fire({
+          title: "Thành công",
+          text: "Đã lưu bài viết thành công",
+          icon: "success",
+          confirmButtonText: "Đóng",
+          confirmButtonColor: "#9333ea",
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false
+        });
+      } else {
+        await Swal.fire({
+          title: "Thành công",
+          text: "Đã bỏ lưu bài viết",
+          icon: "success",
+          confirmButtonText: "Đóng",
+          confirmButtonColor: "#9333ea",
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false
+        });
+      }
+    } catch (error) {
+      await Swal.fire({
+        title: "Lỗi",
+        text: "Có lỗi xảy ra khi thực hiện thao tác",
+        icon: "error",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "#9333ea"
+      });
+    }
   };
 
   console.log("hasApplied:", hasApplied);
@@ -550,6 +605,34 @@ export default function JobDetail() {
                   </div>
                 </div>
               </Card>
+
+              {/* Save Job Card */}
+              {user && (
+                <Card className="p-6 bg-white rounded-lg shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-semibold">Lưu bài viết</h3>
+                      <p className="text-sm text-gray-500">
+                        {isSaved ? 'Bài viết đã được lưu' : 'Lưu bài viết để xem lại sau'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleSaveJob}
+                      className={`p-3 rounded-full transition-all duration-300 ${
+                        isSaved 
+                          ? 'bg-purple-100 text-purple-600 hover:bg-purple-200' 
+                          : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                      }`}
+                    >
+                      {isSaved ? (
+                        <BookmarkCheck className="w-6 h-6" />
+                      ) : (
+                        <Bookmark className="w-6 h-6" />
+                      )}
+                    </button>
+                  </div>
+                </Card>
+              )}
             </div>
           </div>
         </div>

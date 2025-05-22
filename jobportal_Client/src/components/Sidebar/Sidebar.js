@@ -9,6 +9,7 @@ import {
   Star,
   LogOut,
   BarChart,
+  Bookmark,
   Menu,
   X,
 } from "lucide-react";
@@ -55,10 +56,31 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
   ];
 
   const seekerMenuItems = [
-    { label: "Dashboard", icon: LayoutDashboard, path: "/user/account-management/dashboard" },
-    { label: "CV của tôi", icon: FileText, path: "/user/account-management/cv" },
-    { label: "Công ty theo dõi", icon: Building2, path: "/user/account-management/following-companies" },
-    { label: "Hồ sơ cá nhân", icon: Users, path: "/user/account-management/profile" },
+    {
+      label: "Dashboard",
+      icon: LayoutDashboard,
+      path: "/user/account-management/dashboard",
+    },
+    {
+      label: "CV của tôi",
+      icon: FileText,
+      path: "/user/account-management/cv",
+    },
+    {
+      label: "Công ty theo dõi",
+      icon: Building2,
+      path: "/user/account-management/following-companies",
+    },
+    {
+      label: "Hồ sơ cá nhân",
+      icon: Users,
+      path: "/user/account-management/profile",
+    },
+    {
+      label: "Công việc đã lưu",
+      icon: Bookmark,
+      path: "/user/account-management/saved-jobs",
+    },
   ];
 
   const employerMenuItems = [

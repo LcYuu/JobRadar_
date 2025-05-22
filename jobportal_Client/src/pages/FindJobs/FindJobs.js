@@ -729,6 +729,9 @@ export default function JobSearchPage() {
     }
   }, [isUsingSemanticSearch]);
 
+  const [isOpen, setIsOpen] = useState(true);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(true);
+  const [isSalaryOpen, setIsSalaryOpen] = useState(true);
   return (
     <div className="min-h-screen bg-transparent">
       <main className="container mx-auto px-4 py-8">
@@ -846,8 +849,13 @@ export default function JobSearchPage() {
             <div>
               <h3 className="font-semibold mb-2 flex justify-between items-center text-gray-800 tracking-tight">
                 Loại công việc
-                <ChevronDown size={20} className="text-gray-500" />
+                <ChevronDown 
+                  size={20} 
+                  className={`text-gray-500 cursor-pointer transform ${isOpen ? 'rotate-180' : ''}`} 
+                  onClick={() => setIsOpen(!isOpen)} 
+                />
               </h3>
+              {isOpen && (
               <div className="space-y-2">
                 {jobCountByType
                   .filter((job) => job.count > 0)
@@ -878,12 +886,18 @@ export default function JobSearchPage() {
                     </div>
                   ))}
               </div>
+              )}
             </div>
             <div>
               <h3 className="font-semibold mb-2 flex justify-between items-center text-gray-800 tracking-tight">
                 Danh mục
-                <ChevronDown size={20} className="text-gray-500" />
+                <ChevronDown 
+                  size={20} 
+                  className={`text-gray-500 cursor-pointer transform ${isCategoryOpen ? 'rotate-180' : ''}`} 
+                  onClick={() => setIsCategoryOpen(!isCategoryOpen)} 
+                />
               </h3>
+                {isCategoryOpen && (
               <div className="space-y-2">
                 {industryCount
                   .filter((industry) => industry.jobCount > 0)
@@ -917,30 +931,38 @@ export default function JobSearchPage() {
                     </div>
                   ))}
               </div>
+               )}
+
             </div>
             <div>
               <h3 className="font-semibold mb-2 flex justify-between items-center text-gray-800 tracking-tight">
                 Mức lương
-                <ChevronDown size={20} className="text-gray-500" />
-              </h3>
-              <div className="px-2">
-                <RangeSlider
-                  min={minSalary || 0}
-                  max={maxSalary || 50000000}
-                  step={1000000}
-                  onChange={handleSalaryChange}
-                />
-                <div className="flex justify-between mt-2 text-sm text-gray-600">
-                  <span>
-                    {minSalary ? `${(minSalary / 1000000).toFixed(0)}M` : "0M"}{" "}
-                    VNĐ
-                  </span>
-                  <span>
-                    {maxSalary ? `${(maxSalary / 1000000).toFixed(0)}M` : "50M"}{" "}
-                    VNĐ
-                  </span>
-                </div>
-              </div>
+        <h3 className="flex items-center justify-between">
+          <span className="font-medium">Lương</span>
+          <ChevronDown 
+            size={20} 
+            className={`text-gray-500 cursor-pointer transform ${isSalaryOpen ? 'rotate-180' : ''}`} 
+            onClick={() => setIsSalaryOpen(!isSalaryOpen)} 
+          />
+        </h3>
+        {isSalaryOpen && (
+          <div className="px-2">
+            <RangeSlider
+              min={minSalary || 0}
+              max={maxSalary || 50000000}
+              step={1000000}
+              onChange={handleSalaryChange}
+            />
+            <div className="flex justify-between mt-2 text-sm text-gray-600">
+              <span>
+                {minSalary ? `${(minSalary / 1000000).toFixed(0)}M` : "0M"} VNĐ
+              </span>
+              <span>
+                {maxSalary ? `${(maxSalary / 1000000).toFixed(0)}M` : "50M"} VNĐ
+              </span>
+            </div>
+          </div>
+        )}
             </div>
           </aside>
 
