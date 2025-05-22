@@ -1,0 +1,84 @@
+/* TopListEmployer carousel styles */
+
+.employer-carousel-container {
+  position: relative;
+  margin: 0 30px;
+  padding: 10px 0;
+}
+
+.employer-carousel-item {
+  padding: 0 15px;
+  box-sizing: border-box;
+}
+
+/* Custom arrow styles */
+.employer-custom-next-arrow,
+.employer-custom-prev-arrow {
+  position: absolute !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 10 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 50% !important;
+  background-color: #43bfb3 !important;
+  color: white !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  border: none !important;
+  outline: none !important;
+}
+
+.employer-custom-next-arrow {
+  right: -15px !important;
+}
+
+.employer-custom-prev-arrow {
+  left: -15px !important;
+}
+
+.employer-custom-next-arrow:hover,
+.employer-custom-prev-arrow:hover {
+  background-color: #33a99e;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.employer-custom-next-arrow svg,
+.employer-custom-prev-arrow svg {
+  width: 18px;
+  height: 18px;
+  stroke: white;
+}
+
+.employer-custom-next-arrow:disabled,
+.employer-custom-prev-arrow:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Ensure the cards are evenly sized */
+.employer-carousel-item .card {
+  height: 100%;
+  margin: 0 auto;
+}
+
+/* Responsive styles */
+@media (max-width: 1023px) {
+  .employer-carousel-container {
+    margin: 0 25px;
+  }
+}
+
+@media (max-width: 767px) {
+  .employer-carousel-container {
+    margin: 0 20px;
+  }
+  
+  .employer-carousel-item {
+    padding: 0 10px;
+  }
+} 

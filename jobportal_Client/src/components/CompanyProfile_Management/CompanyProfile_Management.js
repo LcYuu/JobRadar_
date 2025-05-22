@@ -54,7 +54,7 @@ const CompanyProfile_Management = () => {
 
   useEffect(() => {
     if (companyJwt?.companyId) {
-      const companyId = companyJwt?.companyId; // Lấy giá trị cụ thể
+      const companyId = companyJwt?.companyId;
       dispatch(getReviewByCompany(companyId));
     }
   }, [dispatch, companyJwt]);
@@ -77,8 +77,7 @@ const CompanyProfile_Management = () => {
     imgPath: [],
   });
 
-  // const [image, setImage] = useState(companyJwt?.images || []);
-  const [images, setImages] = useState([]); // Lưu trữ nhiều hình ảnh
+  const [images, setImages] = useState([]);
   const [openSocialLink, setOpenSocialLink] = useState(false);
   const handleOpenSocialLinkModal = () => setOpenSocialLink(true);
   const handleCloseSocialLink = () => {
@@ -91,7 +90,6 @@ const CompanyProfile_Management = () => {
       platform: socialLink.platform,
       url: socialLink.url,
     });
-
     handleOpenSocialLinkModal();
   };
 
@@ -117,22 +115,18 @@ const CompanyProfile_Management = () => {
   };
 
   const handleSelectImage = (event) => {
-    const files = event.target.files; // Lấy tất cả các file ảnh
+    const files = event.target.files;
     if (files) {
-      const newFiles = Array.from(files); // Lấy file gốc
-
-      // Cập nhật formData với file gốc
+      const newFiles = Array.from(files);
       setFormData((prevData) => {
         const updatedImgPath = Array.isArray(prevData.imgPath)
           ? prevData.imgPath
           : [];
         return {
           ...prevData,
-          imgPath: [...updatedImgPath, ...newFiles], // Lưu file gốc vào imgPath
+          imgPath: [...updatedImgPath, ...newFiles],
         };
       });
-
-      // Nếu cần hiển thị trước, tạo URL tạm thời
       const previewUrls = newFiles.map((file) => URL.createObjectURL(file));
       setImages((prevImages) => [...prevImages, ...previewUrls]);
     }
@@ -170,15 +164,11 @@ const CompanyProfile_Management = () => {
 
       if (formData.imgPath && formData.imgPath.length > 0) {
         for (const file of formData.imgPath) {
-          // Upload từng file lên Cloudinary
           const uploadedUrl = await uploadToCloudinary(file);
-          console.log(uploadedUrl);
-          // Gửi URL đã upload đến API backend
           const imageData = {
-            pathImg: uploadedUrl, // Đây là URL của ảnh sau khi được upload
+            pathImg: uploadedUrl,
           };
-          const imgData = imageData;
-          await dispatch(createImageCompany(imgData)); // Gửi từng URL một
+          await dispatch(createImageCompany(imageData));
         }
       }
       showSuccessToast("Cập nhật thông tin thành công!");
@@ -205,23 +195,13 @@ const CompanyProfile_Management = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log(name, value); // Kiểm tra giá tr
     setFormData((prevData) => ({
       ...prevData,
-      [name]: value, // Cập nhật giá trị cho trường tương ứng
+      [name]: value,
     }));
   };
 
-  // const handleImageUpload = (e) => {
-  //   const files = Array.from(e.target.files);
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     workspaceImages: [...prev.workspaceImages, ...files],
-  //   }));
-  // };
-
   const removeImage = async (imgId) => {
-    // Sử dụng swal thay vì window.confirm
     const result = await Swal.fire({
       title: "Bạn có chắc chắn muốn xóa hình ảnh này?",
       text: "Hành động này không thể hoàn tác!",
@@ -257,14 +237,12 @@ const CompanyProfile_Management = () => {
     };
     let isValid = true;
 
-    // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (formData.email && !emailRegex.test(formData.email)) {
       tempErrors.email = "Email không hợp lệ";
       isValid = false;
     }
 
-    // Validate phone number (số điện thoại Việt Nam)
     const phoneRegex =
       /^(0[3|5|7|8|9])([0-9]{8})$|^(1900)[\s]?[0-9]{4,5}[\s]?[0-9]{2,3}$/;
 
@@ -281,8 +259,8 @@ const CompanyProfile_Management = () => {
   const [toastMessage, setToastMessage] = useState("");
 
   const Toast = ({ message, onClose }) => (
-    <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded shadow-lg flex items-center gap-2 animate-fade-in-down z-50">
-      <span>{message}</span>
+    <div className="fixed top-4 right-4 bg-green-500 text-white px-3 sm:px-4 py-2 rounded shadow-lg flex items-center gap-2 animate-fade-in-down z-50">
+      <span className="text-xs sm:text-sm">{message}</span>
       <button onClick={onClose} className="text-white hover:text-gray-200">
         ✕
       </button>
@@ -295,28 +273,11 @@ const CompanyProfile_Management = () => {
     setTimeout(() => setShowToast(false), 3000);
   };
 
-  // Tính trung bình đánh giá
   const totalStars = reviews.reduce((total, review) => total + review.star, 0);
   const averageStars = reviews.length > 0 ? totalStars / reviews.length : 0;
 
-  // const colors = [
-  //   "from-sky-500 to-sky-700",
-  //   "from-purple-500 to-purple-700",
-  //   "from-red-500 to-red-700",
-  //   "from-green-500 to-green-700",
-  //   "from-orange-500 to-orange-700",
-  // ];
-
-  // const [currentColorIndex, setCurrentColorIndex] = useState(0);
-
-  // const handleChangeBackground = () => {
-  //   setCurrentColorIndex((prevIndex) => (prevIndex + 1) % colors.length);
-  // };
-
-  // Thêm state để kiểm soát việc hiển thị menu màu sắc
   const [showColorMenu, setShowColorMenu] = useState(false);
 
-  // Định nghĩa mảng màu với tên và giá trị
   const colorOptions = [
     { name: "Sky Blue", value: "from-sky-500 to-sky-700" },
     { name: "Purple", value: "from-purple-500 to-purple-700" },
@@ -328,16 +289,13 @@ const CompanyProfile_Management = () => {
     { name: "Teal", value: "from-teal-500 to-teal-700" },
   ];
 
-  // Thêm state để lưu màu đã chọn
   const [selectedColor, setSelectedColor] = useState(colorOptions[0].value);
 
-  // Hàm xử lý khi chọn màu
   const handleColorSelect = (colorValue) => {
     setSelectedColor(colorValue);
     setShowColorMenu(false);
   };
 
-  // Thêm useEffect để xử lý click outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (showColorMenu && !event.target.closest(".color-picker-container")) {
@@ -352,37 +310,36 @@ const CompanyProfile_Management = () => {
   }, [showColorMenu]);
 
   return (
-    <div className="max-w-5xl mx-auto p-6 ">
+    <div className="max-w-7xl mx-auto p-3 sm:p-4 md:p-6 overflow-x-hidden">
       {/* Company Header */}
-      <Card className="mb-8 overflow-hidden">
-        {/* Cover Background with color picker */}
-        <div className={`h-32 relative bg-gradient-to-r ${selectedColor}`}>
-          <div className="absolute bottom-2 right-2">
+      <Card className="mb-4 sm:mb-6 md:mb-8 overflow-hidden max-w-full">
+        <div
+          className={`h-16 sm:h-20 md:h-24 relative bg-gradient-to-r ${selectedColor}`}
+        >
+          <div className="absolute bottom-1 sm:bottom-2 right-1 sm:right-2">
             <Button
-              variant="ghost"
+              className="bg-transparent text-white hover:bg-white/20 text-xs px-1 sm:px-2 py-0.5 sm:py-1 rounded flex items-center"
               onClick={() => setShowColorMenu(!showColorMenu)}
-              className="text-white hover:bg-white/20"
             >
-              <PenSquare className="w-4 h-4 mr-2" />
-              Đổi màu
+              <PenSquare className="w-3 h-3 mr-1" />
+              <span className="hidden sm:inline">Đổi màu</span>
             </Button>
 
-            {/* Color Picker Menu */}
             {showColorMenu && (
-              <div className="absolute top-full right-0 mt-2 p-2 bg-white rounded-lg shadow-lg w-48 color-picker-container animate-fade-in-down z-50">
-                <div className="grid grid-cols-2 gap-2 max-h-[200px] overflow-y-auto custom-scrollbar">
+              <div className="absolute top-full right-0 mt-1 sm:mt-2 p-1 sm:p-2 bg-white rounded-lg shadow-lg w-32 sm:w-40 z-50">
+                <div className="grid grid-cols-2 gap-1 sm:gap-2 max-h-24 sm:max-h-32 overflow-y-auto">
                   {colorOptions.map((color, index) => (
                     <button
                       key={index}
                       onClick={() => handleColorSelect(color.value)}
                       className={`
-                        w-full h-12 rounded-md transition-all duration-200
+                        w-full h-6 sm:h-8 rounded-md transition-all duration-200
                         bg-gradient-to-r ${color.value}
                         hover:scale-105 focus:outline-none
                         transform hover:shadow-md
                         ${
                           selectedColor === color.value
-                            ? "ring-2 ring-white ring-offset-2"
+                            ? "ring-2 ring-white ring-offset-1"
                             : ""
                         }
                       `}
@@ -390,7 +347,7 @@ const CompanyProfile_Management = () => {
                     >
                       {selectedColor === color.value && (
                         <div className="flex items-center justify-center h-full">
-                          <div className="w-2 h-2 bg-white rounded-full" />
+                          <div className="w-1.5 h-1.5 bg-white rounded-full" />
                         </div>
                       )}
                     </button>
@@ -401,41 +358,39 @@ const CompanyProfile_Management = () => {
           </div>
         </div>
 
-        {/* Profile Content */}
-        <div className="p-6 bg-white shadow-md rounded-lg">
-          <div className="flex flex-col md:flex-row gap-6">
-            {/* Avatar Section - Positioned slightly over the cover */}
-            <div className="md:w-48 -mt-16 flex flex-col items-center">
+        <div className="p-3 sm:p-4 md:p-6 bg-white shadow-md rounded-lg">
+          <div className="flex flex-col items-center text-center w-full">
+            <div className="-mt-10 sm:-mt-12 md:-mt-16 mb-3 sm:mb-4 md:mb-6">
               <Avatar
                 className="ring-4 ring-purple-500"
-                sx={{ width: "8rem", height: "8rem" }}
+                sx={{
+                  width: { xs: "5rem", sm: "6rem", md: "8rem" },
+                  height: { xs: "5rem", sm: "6rem", md: "8rem" },
+                }}
                 src={companyJwt?.logo}
               />
-
-              <Button
-                variant="outline"
-                className="mt-4 w-full bg-purple-500 text-white hover:bg-purple-600 hover:text-white border border-purple-500 rounded-lg transition-all"
-                onClick={handleOpenProfileModal}
-              >
-                Chỉnh sửa hồ sơ
-              </Button>
             </div>
 
-            {/* Company Info Section */}
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold mb-4">
-                {companyJwt?.companyName}
-              </h1>
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 sm:mb-3 md:mb-4 break-words max-w-full sm:max-w-2xl">
+              {companyJwt?.companyName}
+            </h1>
 
-              {/* Company Stats Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-50 rounded-lg">
-                    <Calendar className="w-5 h-5 text-purple-500" />
+            <Button
+              className="bg-purple-500 hover:bg-purple-600 text-white text-xs px-3 sm:px-4 py-1 sm:py-2 rounded-lg mb-3 sm:mb-4 md:mb-6 mx-auto"
+              onClick={handleOpenProfileModal}
+            >
+              Chỉnh sửa hồ sơ
+            </Button>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 w-full max-w-full">
+              <div className="bg-gray-50 rounded-lg p-2 sm:p-3 hover:bg-purple-50 transition-colors max-w-full">
+                <div className="flex items-start text-left">
+                  <div className="p-1 sm:p-2 bg-purple-50 rounded-lg mr-1 sm:mr-2 shrink-0">
+                    <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-purple-500" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Ngày thành lập</p>
-                    <p className="font-medium">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-gray-600">Ngày thành lập</p>
+                    <p className="font-medium text-xs sm:text-sm break-words">
                       {companyJwt?.establishedTime
                         ? new Date(
                             companyJwt.establishedTime
@@ -444,33 +399,44 @@ const CompanyProfile_Management = () => {
                     </p>
                   </div>
                 </div>
+              </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-50 rounded-lg">
-                    <MapPin className="w-5 h-5 text-purple-500" />
+              <div className="bg-gray-50 rounded-lg p-2 sm:p-3 hover:bg-purple-50 transition-colors max-w-full">
+                <div className="flex items-start text-left">
+                  <div className="p-1 sm:p-2 bg-purple-50 rounded-lg mr-1 sm:mr-2 shrink-0 mt-0.5 sm:mt-1">
+                    <MapPin className="w-3 h-3 sm:w-4 sm:h-4 text-purple-500" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Địa chỉ</p>
-                    <p className="font-medium">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-gray-600">Địa chỉ</p>
+                    <p className="font-medium text-xs sm:text-sm break-words">
                       {companyJwt?.address || "Chưa cập nhật"}
                     </p>
                   </div>
                 </div>
+              </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-50 rounded-lg">
-                    <Building2 className="w-5 h-5 text-purple-500" />
+              <div className="bg-gray-50 rounded-lg p-2 sm:p-3 hover:bg-purple-50 transition-colors max-w-full">
+                <div className="flex items-start text-left">
+                  <div className="p-1 sm:p-2 bg-purple-50 rounded-lg mr-1 sm:mr-2 shrink-0 mt-0.5 sm:mt-1">
+                    <Building2 className="w-3 h-3 sm:w-4 sm:h-4 text-purple-500" />
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-600">Ngành nghề</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs text-gray-600">Ngành nghề</p>
                     {companyJwt?.industry?.length > 0 ? (
-                      <ul className="font-medium">
+                      <div className="font-medium text-xs sm:text-sm">
                         {companyJwt.industry.map((ind, index) => (
-                          <li key={index}>{ind.industryName}</li>
+                          <div key={index} className="flex">
+                            <span className="mr-1">•</span>
+                            <span className="break-words">
+                              {ind.industryName}
+                            </span>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     ) : (
-                      <p className="font-medium">Chưa cập nhật</p>
+                      <p className="font-medium text-xs sm:text-sm">
+                        Chưa cập nhật
+                      </p>
                     )}
                   </div>
                 </div>
@@ -478,7 +444,6 @@ const CompanyProfile_Management = () => {
             </div>
           </div>
         </div>
-
         <section>
           <CompanyProfileModal open={open} handleClose={handleClose} />
         </section>
@@ -486,11 +451,13 @@ const CompanyProfile_Management = () => {
 
       {/* Company Description */}
       {companyJwt && (
-        <Card className="mb-6 p-6 bg-white shadow-md rounded-lg">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Hồ sơ công ty</h2>
+        <Card className="mb-3 sm:mb-4 md:mb-6 p-3 sm:p-4 md:p-6 bg-white shadow-md rounded-lg">
+          <div className="flex justify-between items-center mb-2 sm:mb-3 md:mb-4">
+            <h2 className="text-base sm:text-lg md:text-xl font-semibold">
+              Hồ sơ công ty
+            </h2>
             <Button onClick={() => handleEditDesClick()} variant="ghost">
-              <PenSquare className="w-4 h-4 mr-2" />
+              <PenSquare className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               Chỉnh sửa
             </Button>
           </div>
@@ -498,18 +465,20 @@ const CompanyProfile_Management = () => {
             <div>
               <textarea
                 name="description"
-                className="w-full p-3 border rounded-md"
+                className="w-full p-2 sm:p-3 border rounded-md text-xs sm:text-sm"
                 rows="4"
                 value={formData.description}
                 onChange={handleChange}
                 placeholder="Nhập mô tả về công ty..."
               />
-              <div className="mt-2 flex justify-end">
-                <Button onClick={handleSaveClick}>Lưu</Button>
+              <div className="mt-1 sm:mt-2 flex justify-end">
+                <Button className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
+                  Lưu
+                </Button>
               </div>
             </div>
           ) : (
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-xs sm:text-sm md:text-base">
               {companyJwt.description ||
                 "Chưa có mô tả về công ty. Nhấn chỉnh sửa để thêm mô tả."}
             </p>
@@ -518,80 +487,105 @@ const CompanyProfile_Management = () => {
       )}
 
       {/* Contact Information */}
-      <Card className="mb-6 p-6  bg-white shadow-md rounded-lg">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Contact</h2>
+      <Card className="mb-3 sm:mb-4 md:mb-6 p-3 sm:p-4 md:p-6 bg-white shadow-md rounded-lg">
+        <div className="flex justify-between items-center mb-2 sm:mb-3 md:mb-4">
+          <h2 className="text-base sm:text-lg md:text-xl font-semibold">
+            Contact
+          </h2>
           <Button onClick={() => handleEditInfoClick()} variant="ghost">
-            <PenSquare className="w-4 h-4 mr-2" />
+            <PenSquare className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
             Chỉnh sửa
           </Button>
         </div>
         {isEditingInfo ? (
-          <div className="space-y-4">
+          <div className="space-y-2 sm:space-y-3 md:space-y-4">
             <div>
-              <label className="block mb-2">Số điện thoại</label>
+              <label className="block mb-1 text-xs sm:text-sm md:text-base">
+                Số điện thoại
+              </label>
               <input
                 name="contact"
                 type="tel"
-                className={`border p-2 w-full mt-1 ${
+                className={`border p-1 sm:p-2 w-full mt-0.5 sm:mt-1 text-xs sm:text-sm md:text-base ${
                   errors.contact ? "border-red-500" : ""
                 }`}
                 value={formData.contact}
                 onChange={handleChange}
               />
               {errors.contact && (
-                <p className="text-red-500 text-xs mt-1">{errors.contact}</p>
+                <p className="text-red-500 text-xs mt-0.5 sm:mt-1">
+                  {errors.contact}
+                </p>
               )}
             </div>
             <div>
-              <label className="block mb-2">Email</label>
+              <label className="block mb-1 text-xs sm:text-sm md:text-base">
+                Email
+              </label>
               <input
                 name="email"
                 type="email"
-                className={`border p-2 w-full mt-1 ${
+                className={`border p-1 sm:p-2 w-full mt-0.5 sm:mt-1 text-xs sm:text-sm md:text-base ${
                   errors.email ? "border-red-500" : ""
                 }`}
                 value={formData.email}
                 onChange={handleChange}
               />
               {errors.email && (
-                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                <p className="text-red-500 text-xs mt-0.5 sm:mt-1">
+                  {errors.email}
+                </p>
               )}
             </div>
             <div>
-              <label className="block mb-2">TaxCode</label>
+              <label className="block mb-1 text-xs sm:text-sm md:text-base">
+                TaxCode
+              </label>
               <input
                 name="taxCode"
-                type="taxCode"
-                className={`border p-2 w-full mt-1 ${
+                type="text"
+                className={`border p-1 sm:p-2 w-full mt-0.5 sm:mt-1 text-xs sm:text-sm md:text-base ${
                   errors.email ? "border-red-500" : ""
                 }`}
                 value={formData.taxCode}
                 onChange={handleChange}
               />
               {errors.email && (
-                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                <p className="text-red-500 text-xs mt-0.5 sm:mt-1">
+                  {errors.email}
+                </p>
               )}
             </div>
-            <div className="mt-2 flex justify-end">
-              <Button onClick={handleSaveClick}>Lưu</Button>
+            <div className="mt-1 sm:mt-2 flex justify-end">
+              <Button
+                onClick={handleSaveClick}
+                className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+              >
+                Lưu
+              </Button>
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Phone className="w-4 h-4 text-gray-500" />
-              <span>{companyJwt?.contact}</span>
+          <div className="space-y-1 sm:space-y-2 md:space-y-3">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
+              <span className="text-xs sm:text-sm md:text-base">
+                {companyJwt?.contact}
+              </span>
             </div>
-            <div className="flex items-center gap-2">
-              <Mail className="w-4 h-4 text-gray-500" />
-              <span>{companyJwt?.email}</span>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
+              <span className="text-xs sm:text-sm md:text-base">
+                {companyJwt?.email}
+              </span>
             </div>
-            <div className="flex items-center gap-2">
-              <BanknoteIcon className="w-4 h-4 text-gray-500" />
-              <span>{companyJwt?.taxCode}</span>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <BanknoteIcon className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" />
+              <span className="text-xs sm:text-sm md:text-base">
+                {companyJwt?.taxCode}
+              </span>
             </div>
-            <p className="text-sm text-purple-500 mt-1">
+            <p className="text-xs text-purple-500 mt-0.5 sm:mt-1">
               Hãy tự giác cung cấp chính xác mã số thuế, nếu không bạn sẽ không
               thể tuyển dụng.
             </p>
@@ -599,34 +593,36 @@ const CompanyProfile_Management = () => {
         )}
       </Card>
 
-      <Card className="p-6 bg-white shadow-md rounded-lg mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Liên kết xã hội</h2>
+      {/* Social Links */}
+      <Card className="p-3 sm:p-4 md:p-6 bg-white shadow-md rounded-lg mb-3 sm:mb-4 md:mb-6">
+        <div className="flex justify-between items-center mb-2 sm:mb-3 md:mb-4">
+          <h2 className="text-base sm:text-lg md:text-xl font-semibold">
+            Liên kết xã hội
+          </h2>
           <Button
             size="icon"
             variant="ghost"
             onClick={handleOpenSocialLinkModal}
           >
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
             Thêm liên kết
           </Button>
         </div>
 
-        {/* Sử dụng Flexbox để hiển thị logo trên cùng hàng ngang */}
-        <CardContent className="space-y-3 overflow-auto">
-          {socialLinks &&
-          Array.isArray(socialLinks) &&
-          socialLinks.length > 0 ? (
+        <CardContent className="space-y-2 sm:space-y-3 overflow-x-hidden">
+          {socialLinks && Array.isArray(socialLinks) && socialLinks.length > 0 ? (
             socialLinks.map((link, index) => (
               <div
                 key={index}
-                className="flex gap-4 p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
-                style={{ maxWidth: "100%" }} // Giới hạn chiều rộng tối đa
+                className="flex gap-2 sm:gap-3 p-2 sm:p-3 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden max-w-full"
               >
                 <div
-                  key={index}
                   className="platform-icon-container"
-                  style={{ width: "48px", height: "48px", flexShrink: 0 }}
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    flexShrink: 0,
+                  }}
                 >
                   <img
                     src={require(`../../assets/images/platforms/${link.platform.toLowerCase()}.png`)}
@@ -635,33 +631,29 @@ const CompanyProfile_Management = () => {
                   />
                 </div>
                 <div className="flex-1 overflow-hidden">
-                  {" "}
-                  {/* Đảm bảo không bị tràn ra ngoài */}
                   <div className="flex items-start justify-between">
                     <div className="truncate">
-                      {" "}
-                      {/* Sử dụng truncate để cắt bớt văn bản nếu tràn */}
-                      <Label className="text-sm font-medium">
+                      <Label className="text-xs sm:text-sm font-medium">
                         {link.platform}
                       </Label>
                       <br />
                       <a
                         href={link.url}
-                        className="text-sm text-blue-600 truncate" // Đảm bảo URL không tràn ra ngoài
+                        className="text-xs text-blue-600 truncate block"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         {link.url}
                       </a>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1 sm:gap-2">
                       <Button
                         size="icon"
                         variant="ghost"
                         className="hover:bg-blue-100 transition-colors duration-200"
                         onClick={() => handleEditSocialLink(link)}
                       >
-                        <Edit2 className="h-4 w-4 text-blue-600" />
+                        <Edit2 className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
                       </Button>
                       <Button
                         size="icon"
@@ -669,7 +661,7 @@ const CompanyProfile_Management = () => {
                         className="hover:bg-red-100 transition-colors duration-200"
                         onClick={() => handleDeleteSocialLink(link.id)}
                       >
-                        <DeleteIcon className="h-4 w-4 text-red-600" />
+                        <DeleteIcon className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
                       </Button>
                     </div>
                   </div>
@@ -677,13 +669,10 @@ const CompanyProfile_Management = () => {
               </div>
             ))
           ) : (
-            <p className="text-sm text-purple-500">
-              Không có liên kết xã hội nào
-            </p>
+            <p className="text-xs text-purple-500">Không có liên kết xã hội nào</p>
           )}
         </CardContent>
 
-        {/* Modal */}
         <section>
           <SocialLinkModal
             open={openSocialLink}
@@ -696,50 +685,57 @@ const CompanyProfile_Management = () => {
         </section>
       </Card>
 
-      <Card className="p-6 bg-white shadow-md rounded-lg mb-6">
-        <h2 className="text-xl font-semibold mb-4">Đánh giá từ ứng viên</h2>
+      {/* Reviews */}
+      <Card className="p-3 sm:p-4 md:p-6 bg-white shadow-md rounded-lg mb-3 sm:mb-4 md:mb-6">
+        <h2 className="text-base sm:text-lg md:text-xl font-semibold mb-2 sm:mb-3 md:mb-4">
+          Đánh giá từ ứng viên
+        </h2>
 
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-4 mb-3 sm:mb-4 md:mb-6">
           <div className="text-center">
-            <div className="text-3xl font-bold text-purple-600">
+            <div className="text-xl sm:text-2xl md:text-3xl font-bold text-purple-600">
               {averageStars.toFixed(1)}
             </div>
             <div className="flex items-center justify-center">
               {[1, 2, 3, 4, 5].map((star) => (
                 <StarRounded
                   key={star}
-                  className={`w-5 h-5 ${
+                  className={`w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 ${
                     star <= averageStars ? "text-yellow-400" : "text-gray-300"
                   }`}
                 />
               ))}
             </div>
-            <div className="text-sm text-gray-500 mt-1">
+            <div className="text-xs text-gray-500 mt-0.5 sm:mt-1">
               {reviews.length} đánh giá
             </div>
           </div>
         </div>
       </Card>
 
-      <Card className="p-6  bg-white shadow-md rounded-lg">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Hình ảnh công ty</h2>
+      {/* Company Images */}
+      <Card className="p-3 sm:p-4 md:p-6 bg-white shadow-md rounded-lg">
+        <div className="flex justify-between items-center mb-2 sm:mb-3 md:mb-4">
+          <h2 className="text-base sm:text-lg md:text-xl font-semibold">
+            Hình ảnh công ty
+          </h2>
           {!isEditingImg ? (
             <Button onClick={() => handleEditImgClick()} variant="ghost">
-              <PenSquare className="w-4 h-4 mr-2" />
+              <PenSquare className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               Chỉnh sửa
             </Button>
           ) : (
             <Button
               onClick={() => handleSave()}
               variant="primary"
-              disabled={isLoading} // Vô hiệu hóa nút khi đang lưu
+              disabled={isLoading}
+              className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
             >
               {isLoading ? "Đang lưu..." : "Lưu"}
             </Button>
           )}
         </div>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
           {Array.isArray(companyJwt?.images) &&
             companyJwt?.images.map((image, index) => (
               <div key={image.imgId} className="relative aspect-video">
@@ -750,10 +746,10 @@ const CompanyProfile_Management = () => {
                 />
                 {isEditingImg && (
                   <button
-                    className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white"
+                    className="absolute top-1 right-1 p-0.5 sm:p-1 bg-red-500 rounded-full text-white"
                     onClick={() => removeImage(image?.imgId)}
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-2 h-2 sm:w-3 sm:h-3" />
                   </button>
                 )}
               </div>
@@ -763,7 +759,7 @@ const CompanyProfile_Management = () => {
               <input
                 type="file"
                 accept="image/*"
-                onChange={handleSelectImage} // Gọi hàm khi chọn file
+                onChange={handleSelectImage}
                 style={{ display: "none" }}
                 id="add-image-input"
               />
@@ -771,12 +767,12 @@ const CompanyProfile_Management = () => {
                 htmlFor="add-image-input"
                 className="aspect-video border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer"
               >
-                <Plus className="w-6 h-6 text-gray-400" />
+                <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
               </label>
             </>
           )}
-          {isEditingImg && (
-            <div className="mt-4">
+          {isEditingImg && images.length > 0 && (
+            <div className="mt-2 sm:mt-3 md:mt-4">
               <div className="relative aspect-video">
                 {images.map((image, index) => (
                   <img
@@ -791,6 +787,7 @@ const CompanyProfile_Management = () => {
           )}
         </div>
       </Card>
+
       {showToast && (
         <Toast message={toastMessage} onClose={() => setShowToast(false)} />
       )}

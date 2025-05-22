@@ -90,16 +90,16 @@ const cityCodeMapping = {
 const JobDetailEmployer = () => {
   const statusStyles = {
     "Hết hạn": {
-      backgroundColor: "rgba(255, 0, 0, 0.1)", // Màu đỏ nhạt cho Hết hạn
-      color: "red", // Màu chữ đỏ
+      backgroundColor: "rgba(255, 0, 0, 0.1)",
+      color: "red",
     },
     "Đang mở": {
-      backgroundColor: "rgba(0, 255, 0, 0.1)", // Màu xanh lá nhạt cho Đang mở
-      color: "green", // Màu chữ xanh lá
+      backgroundColor: "rgba(0, 255, 0, 0.1)",
+      color: "green",
     },
     "Chưa được duyệt": {
-      backgroundColor: "rgba(255, 165, 0, 0.1)", // Màu cam nhạt cho Chưa được duyệt
-      color: "orange", // Màu chữ cam
+      backgroundColor: "rgba(255, 165, 0, 0.1)",
+      color: "orange",
     },
   };
 
@@ -378,7 +378,7 @@ const JobDetailEmployer = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const Toast = ({ message, onClose }) => (
-    <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded shadow-lg flex items-center gap-2 animate-fade-in-down z-50">
+    <div className="fixed top-2 right-2 sm:top-4 sm:right-4 bg-green-500 text-white px-4 py-2 sm:px-6 sm:py-3 rounded shadow-lg flex items-center gap-2 animate-fade-in-down z-50 text-xs sm:text-sm">
       <span>{message}</span>
       <button onClick={onClose} className="text-white hover:text-gray-200">
         ✕
@@ -406,28 +406,30 @@ const JobDetailEmployer = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10">
       {/* Header Section */}
-      <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-6 mb-6">
+      <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 p-4 sm:p-6 mb-6">
         <Button
           variant="ghost"
-          className="flex items-center gap-2 mb-6 hover:bg-gray-100"
-          onClick={() => navigate("/employer/account-management/job-management")}
+          className="flex items-center gap-2 mb-4 sm:mb-6 text-sm sm:text-base hover:bg-gray-100"
+          onClick={() =>
+            navigate("/employer/account-management/job-management")
+          }
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" stroke="currentColor" />
           <span>Trở lại danh sách</span>
         </Button>
-        <div className="flex justify-between items-start">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start">
+          <div className="flex items-center space-x-4 w-full sm:w-auto">
             <img
               src={detailJob?.company?.logo}
               alt="Company Logo"
-              className="h-16 w-16 rounded-lg bg-indigo-100 flex items-center justify-center text-2xl font-bold text-indigo-600"
+              className="h-12 w-12 sm:h-16 sm:w-16 rounded-lg bg-indigo-100 flex items-center justify-center text-xl sm:text-2xl font-bold text-indigo-600"
             />
             {isEditing ? (
-              <div>
-                <div className="flex items-center mb-2">
-                  <label className="block text-gray-700 font-bold w-1/4">
+              <div className="w-full">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center mb-2">
+                  <label className="block text-gray-700 font-bold w-full sm:w-1/4 text-sm sm:text-base">
                     Tiêu đề:
                   </label>
                   <input
@@ -435,12 +437,12 @@ const JobDetailEmployer = () => {
                     name="title"
                     value={jobData.title}
                     onChange={handleChange}
-                    className="border border-gray-300 rounded px-3 py-2 w-3/4"
+                    className="border border-gray-300 rounded px-2 py-1 sm:px-3 sm:py-2 w-full text-sm sm:text-base mt-2 sm:mt-0"
                   />
                 </div>
 
-                <div className="flex items-center mb-2 mt-4">
-                  <label className="block text-gray-700 font-bold w-1/4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center mb-2 mt-4">
+                  <label className="block text-gray-700 font-bold w-full sm:w-1/4 text-sm sm:text-base">
                     Vị trí:
                   </label>
                   <input
@@ -448,11 +450,11 @@ const JobDetailEmployer = () => {
                     name="position"
                     value={jobData.position}
                     onChange={handleChange}
-                    className="border border-gray-300 rounded px-3 py-2 w-3/4 h-24"
+                    className="border border-gray-300 rounded px-2 py-1 sm:px-3 sm:py-2 w-full text-sm sm:text-base mt-2 sm:mt-0"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div className="grid grid-cols-1 gap-4 mb-4">
                   <div>
                     <label className="block text-gray-700 text-sm font-bold mb-2">
                       Tỉnh/Thành phố
@@ -478,7 +480,7 @@ const JobDetailEmployer = () => {
                           }));
                         }
                       }}
-                      className="w-full p-1 border rounded"
+                      className="w-full p-1 sm:p-2 border rounded text-sm sm:text-base"
                     >
                       <option value="">Chọn tỉnh/thành phố</option>
                       {provinces.map((province) => (
@@ -512,7 +514,7 @@ const JobDetailEmployer = () => {
                         }
                       }}
                       disabled={!selectedProvince}
-                      className="w-full p-1 border rounded"
+                      className="w-full p-1 sm:p-2 border rounded text-sm sm:text-base"
                     >
                       <option value="">Chọn quận/huyện</option>
                       {districts.map((district) => (
@@ -528,7 +530,7 @@ const JobDetailEmployer = () => {
                       Phường/Xã
                     </label>
                     <select
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      className="w-full p-1 sm:p-2 border rounded text-sm sm:text-base"
                       value={selectedWard}
                       onChange={(e) => {
                         setSelectedWard(e.target.value);
@@ -551,13 +553,13 @@ const JobDetailEmployer = () => {
                     </select>
                   </div>
 
-                  <div className="col-span-3">
+                  <div>
                     <label className="block text-gray-700 text-sm font-bold mb-2">
                       Số nhà, tên đường
                     </label>
                     <input
                       type="text"
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      className="w-full p-1 sm:p-2 border rounded text-sm sm:text-base"
                       value={specificAddress}
                       onChange={(e) => setSpecificAddress(e.target.value)}
                       placeholder="Nhập địa chỉ cụ thể"
@@ -567,16 +569,22 @@ const JobDetailEmployer = () => {
               </div>
             ) : (
               <div>
-                <h1 className="text-2xl text-purple-700 font-bold mb-2">
+                <h1 className="text-xl sm:text-2xl text-purple-700 font-bold mb-2">
                   {detailJob?.title}
                 </h1>
-                <div className="flex items-center gap-4 text-gray-600">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 text-gray-600 text-sm sm:text-base">
                   <span className="flex items-center gap-1">
-                    <User className="w-4 h-4" />
+                    <User
+                      className="w-4 h-4 sm:w-5 sm:h-5"
+                      stroke="currentColor"
+                    />
                     {detailJob?.position}
                   </span>
                   <span className="flex items-center gap-1">
-                    <MapPin className="w-4 h-4" />
+                    <MapPin
+                      className="w-4 h-4 sm:w-5 sm:h-5"
+                      stroke="currentColor"
+                    />
                     {detailJob?.location}
                   </span>
                 </div>
@@ -584,22 +592,29 @@ const JobDetailEmployer = () => {
             )}
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-0">
             {detailJob?.approve === false ? (
               isEditing ? (
-                <Button variant="outline" onClick={handleSubmit}>
-
+                <Button
+                  variant="outline"
+                  onClick={handleSubmit}
+                  className="text-sm sm:text-base px-3 py-1 sm:px-4 sm:py-2"
+                >
                   Lưu
                 </Button>
               ) : (
-                <Button variant="outline" onClick={() => setIsEditing(true)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditing(true)}
+                  className="text-sm sm:text-base px-3 py-1 sm:px-4 sm:py-2"
+                >
                   Chỉnh sửa
                 </Button>
               )
             ) : null}
           </div>
         </div>
-        <div className="mt-4 flex items-center gap-4 p-4">
+        <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 p-4">
           <Badge
             style={
               detailJob?.approve === false
@@ -615,6 +630,7 @@ const JobDetailEmployer = () => {
                 : { backgroundColor: "rgba(0, 0, 0, 0.1)", color: "black" }
             }
             variant="secondary"
+            className="text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5"
           >
             {detailJob?.approve === false
               ? "Chưa được duyệt"
@@ -623,15 +639,15 @@ const JobDetailEmployer = () => {
               : detailJob?.status}
           </Badge>
 
-          <span className="text-sm text-gray-500 flex items-center gap-1">
-            <Calendar className="w-4 h-4" />
+          <span className="text-xs sm:text-sm text-gray-500 flex items-center gap-1">
+            <Calendar className="w-4 h-4 sm:w-5 sm:h-5" stroke="currentColor" />
             Đã đăng:
             <span>
               {new Date(detailJob?.createDate).toLocaleDateString("vi-VN")}
             </span>
           </span>
 
-          <span className="text-sm text-gray-500">
+          <span className="text-xs sm:text-sm text-gray-500">
             {new Date(detailJob?.expireDate) < new Date()
               ? null
               : `Còn: ${Math.ceil(
@@ -642,25 +658,30 @@ const JobDetailEmployer = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         {/* Main Content */}
-        <div className="col-span-2 space-y-6">
+        <div className="md:col-span-2 space-y-6">
           {/* Job Description */}
-          <Card className="p-6 bg-white shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">Mô tả công việc</h2>
+          <Card className="p-4 sm:p-6 bg-white shadow-lg">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4">
+              Mô tả công việc
+            </h2>
             {isEditing ? (
               <textarea
-                className="w-full p-2 border rounded"
+                className="w-full p-2 sm:p-3 border rounded text-sm sm:text-base"
                 value={jobData.description}
                 onChange={handleChange}
                 name="description"
               />
             ) : (
-              <div className="text-gray-600">
+              <div className="text-gray-600 text-sm sm:text-base">
                 {detailJob?.description ? (
                   detailJob.description.split("\n").map((line, index) => (
                     <li key={index} className="flex items-start gap-2">
-                      <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5" />
+                      <CheckCircle2
+                        className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 mt-0.5"
+                        stroke="currentColor"
+                      />
                       <span className="flex-1">{line.trim()}</span>
                     </li>
                   ))
@@ -672,12 +693,12 @@ const JobDetailEmployer = () => {
           </Card>
 
           {/* Yêu cầu */}
-          <Card className="p-6 bg-white shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">Yêu cầu</h2>
+          <Card className="p-4 sm:p-6 bg-white shadow-lg">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4">Yêu cầu</h2>
             <ul className="space-y-2">
               {isEditing ? (
                 <textarea
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 sm:p-3 border rounded text-sm sm:text-base"
                   value={jobData.requirement}
                   onChange={handleChange}
                   name="requirement"
@@ -685,7 +706,10 @@ const JobDetailEmployer = () => {
               ) : detailJob?.requirement ? (
                 detailJob.requirement.split("\n").map((req, index) => (
                   <li key={index} className="flex items-start gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5" />
+                    <CheckCircle2
+                      className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 mt-0.5"
+                      stroke="currentColor"
+                    />
                     <span>
                       {req.charAt(0).toUpperCase() + req.slice(1).trim()}
                     </span>
@@ -695,15 +719,14 @@ const JobDetailEmployer = () => {
             </ul>
           </Card>
 
-          
-          <Card className="p-6 bg-white shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">
+          <Card className="p-4 sm:p-6 bg-white shadow-lg">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4">
               Trách nhiệm công việc
             </h2>
             <ul className="space-y-2">
               {isEditing ? (
                 <textarea
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 sm:p-3 border rounded text-sm sm:text-base"
                   value={jobData.niceToHaves}
                   onChange={handleChange}
                   name="niceToHaves"
@@ -711,7 +734,10 @@ const JobDetailEmployer = () => {
               ) : detailJob?.niceToHaves ? (
                 detailJob.niceToHaves.split("\n").map((nt, index) => (
                   <li key={index} className="flex items-start gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5" />
+                    <CheckCircle2
+                      className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 mt-0.5"
+                      stroke="currentColor"
+                    />
                     <span>
                       {nt.charAt(0).toUpperCase() + nt.slice(1).trim()}
                     </span>
@@ -722,12 +748,12 @@ const JobDetailEmployer = () => {
           </Card>
 
           {/* Quyền lợi */}
-          <Card className="p-6 bg-white shadow-lg">
-            <h2 className="text-xl font-semibold mb-4">Quyền lợi</h2>
+          <Card className="p-4 sm:p-6 bg-white shadow-lg">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4">Quyền lợi</h2>
             <ul className="space-y-2">
               {isEditing ? (
                 <textarea
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 sm:p-3 border rounded text-sm sm:text-base"
                   value={jobData.benefit}
                   onChange={handleChange}
                   name="benefit"
@@ -735,7 +761,10 @@ const JobDetailEmployer = () => {
               ) : detailJob?.benefit ? (
                 detailJob.benefit.split("\n").map((be, index) => (
                   <li key={index} className="flex items-start gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5" />
+                    <CheckCircle2
+                      className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 mt-0.5"
+                      stroke="currentColor"
+                    />
                     <span>
                       {be.charAt(0).toUpperCase() + be.slice(1).trim()}
                     </span>
@@ -749,14 +778,21 @@ const JobDetailEmployer = () => {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Job Stats */}
-          <Card className="p-6 bg-white shadow-lg">
-            <h3 className="font-semibold mb-4">Thông tin chung</h3>
-            <div className="space-y-4">
+          <Card className="p-4 sm:p-6 bg-white shadow-lg">
+            <h3 className="text-base sm:text-lg font-semibold mb-4">
+              Thông tin chung
+            </h3>
+            <div className="space-y-4 sm:space-y-6">
               {/* Hạn nộp hồ sơ */}
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-gray-500" />
-                  <span>Hạn nộp hồ sơ</span>
+              <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <Clock
+                    className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 flex-shrink-0"
+                    stroke="currentColor"
+                  />
+                  <span className="text-xs sm:text-sm lg:text-base truncate">
+                    Hạn nộp hồ sơ
+                  </span>
                 </div>
                 {isEditing ? (
                   <input
@@ -764,10 +800,10 @@ const JobDetailEmployer = () => {
                     value={jobData.expireDate}
                     onChange={handleChange}
                     name="expireDate"
-                    className="border p-1 rounded"
+                    className="border p-1.5 sm:p-2 rounded text-xs sm:text-sm lg:text-base w-full sm:w-auto max-w-[200px]"
                   />
                 ) : (
-                  <span className="font-medium">
+                  <span className="font-medium text-xs sm:text-sm lg:text-base min-w-0 truncate">
                     {new Date(detailJob?.expireDate).toLocaleDateString(
                       "vi-VN"
                     )}
@@ -776,10 +812,15 @@ const JobDetailEmployer = () => {
               </div>
 
               {/* Mức lương */}
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="w-5 h-5 text-gray-500" />
-                  <span>Mức lương</span>
+              <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <DollarSign
+                    className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 flex-shrink-0"
+                    stroke="currentColor"
+                  />
+                  <span className="text-xs sm:text-sm lg:text-base truncate">
+                    Mức lương
+                  </span>
                 </div>
                 {isEditing ? (
                   <input
@@ -787,10 +828,10 @@ const JobDetailEmployer = () => {
                     value={jobData.salary}
                     onChange={handleChange}
                     name="salary"
-                    className="border p-1 rounded"
+                    className="border p-1.5 sm:p-2 rounded text-xs sm:text-sm lg:text-base w-full sm:w-auto max-w-[200px]"
                   />
                 ) : (
-                  <span className="font-medium">
+                  <span className="font-medium text-xs sm:text-sm lg:text-base min-w-0 truncate">
                     {detailJob?.salary
                       ? detailJob.salary.toLocaleString("vi-VN", {
                           style: "currency",
@@ -801,10 +842,16 @@ const JobDetailEmployer = () => {
                 )}
               </div>
 
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <Hourglass className="w-5 h-5 text-gray-500" />
-                  <span>Số năm kinh nghiệm</span>
+              {/* Số năm kinh nghiệm */}
+              <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <Hourglass
+                    className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 flex-shrink-0"
+                    stroke="currentColor"
+                  />
+                  <span className="text-xs sm:text-sm lg:text-base truncate">
+                    Số năm kinh nghiệm
+                  </span>
                 </div>
                 {isEditing ? (
                   <input
@@ -812,17 +859,25 @@ const JobDetailEmployer = () => {
                     value={jobData.experience}
                     onChange={handleChange}
                     name="experience"
-                    className="border p-1 rounded"
+                    className="border p-1.5 sm:p-2 rounded text-xs sm:text-sm lg:text-base w-full sm:w-auto max-w-[200px]"
                   />
                 ) : (
-                  <span className="font-medium">{detailJob?.experience}</span>
+                  <span className="font-medium text-xs sm:text-sm lg:text-base min-w-0 truncate">
+                    {detailJob?.experience}
+                  </span>
                 )}
               </div>
 
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <Hourglass className="w-5 h-5 text-gray-500" />
-                  <span>Vị trí công việc</span>
+              {/* Vị trí công việc */}
+              <div className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <Hourglass
+                    className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 flex-shrink-0"
+                    stroke="currentColor"
+                  />
+                  <span className="text-xs sm:text-sm lg:text-base truncate">
+                    Vị trí công việc
+                  </span>
                 </div>
                 {isEditing ? (
                   <input
@@ -830,18 +885,22 @@ const JobDetailEmployer = () => {
                     value={jobData.position}
                     onChange={handleChange}
                     name="position"
-                    className="border p-1 rounded"
+                    className="border p-1.5 sm:p-2 rounded text-xs sm:text-sm lg:text-base w-full sm:w-auto max-w-[200px]"
                   />
                 ) : (
-                  <span className="font-medium">{detailJob?.position}</span>
+                  <span className="font-medium text-xs sm:text-sm lg:text-base min-w-0 truncate">
+                    {detailJob?.position}
+                  </span>
                 )}
               </div>
-              </div>
+            </div>
           </Card>
 
-          <Card className="p-6 bg-white shadow-lg">
+          <Card className="p-4 sm:p-6 bg-white shadow-lg">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold">Chuyên ngành</h3>
+              <h3 className="text-base sm:text-lg font-semibold">
+                Chuyên ngành
+              </h3>
               {detailJob?.status !== "Hết hạn" &&
               detailJob?.approve === false ? (
                 <Button
@@ -850,7 +909,10 @@ const JobDetailEmployer = () => {
                   onClick={handleOpenIndustryModal}
                   className="hover:bg-primary/10 transition-colors"
                 >
-                  <Edit className="h-4 w-4" />
+                  <Edit
+                    className="h-4 w-4 sm:h-5 sm:w-5"
+                    stroke="currentColor"
+                  />
                 </Button>
               ) : null}
             </div>
@@ -865,7 +927,7 @@ const JobDetailEmployer = () => {
                   return (
                     <div
                       key={industry.industryId || index}
-                      className={`${bgColor} bg-opacity-15 rounded-full px-4 py-2 text-sm 
+                      className={`${bgColor} bg-opacity-15 rounded-full px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm 
                         flex items-center gap-2 transition-all duration-200 hover:bg-opacity-25`}
                     >
                       <span
@@ -878,7 +940,9 @@ const JobDetailEmployer = () => {
                   );
                 })
               ) : (
-                <span>Không có chuyên ngành</span>
+                <span className="text-sm sm:text-base">
+                  Không có chuyên ngành
+                </span>
               )}
             </div>
 
@@ -887,12 +951,15 @@ const JobDetailEmployer = () => {
                 open={openIndustry}
                 handleClose={handleCloseIndustry}
                 postId={postId}
+                className="w-full max-w-[90%] sm:max-w-lg md:max-w-2xl"
               />
             </section>
           </Card>
-          <Card className="p-6 bg-white shadow-lg">
+          <Card className="p-4 sm:p-6 bg-white shadow-lg">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold">Kỹ năng yêu cầu</h3>
+              <h3 className="text-base sm:text-lg font-semibold">
+                Kỹ năng yêu cầu
+              </h3>
               {detailJob?.status !== "Hết hạn" &&
               detailJob?.approve === false ? (
                 <Button
@@ -901,7 +968,10 @@ const JobDetailEmployer = () => {
                   onClick={handleOpenSkillModal}
                   className="hover:bg-primary/10 transition-colors"
                 >
-                  <Edit className="h-4 w-4" />
+                  <Edit
+                    className="h-4 w-4 sm:h-5 sm:w-5"
+                    stroke="currentColor"
+                  />
                 </Button>
               ) : null}
             </div>
@@ -912,7 +982,7 @@ const JobDetailEmployer = () => {
                     key={skill.skillId}
                     className={`${getColorByIndex(
                       index
-                    )} bg-opacity-15 rounded-full px-4 py-2 text-sm 
+                    )} bg-opacity-15 rounded-full px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm 
                           flex items-center gap-2 transition-all duration-200 hover:bg-opacity-25`}
                   >
                     <span
@@ -930,7 +1000,9 @@ const JobDetailEmployer = () => {
                   </div>
                 ))
               ) : (
-                <span>Không có kỹ năng yêu cầu</span>
+                <span className="text-sm sm:text-base">
+                  Không có kỹ năng yêu cầu
+                </span>
               )}
             </div>
             <section>
@@ -938,6 +1010,7 @@ const JobDetailEmployer = () => {
                 open={openSkill}
                 handleClose={handleCloseSkill}
                 postId={postId}
+                className="w-full max-w-[90%] sm:max-w-lg md:max-w-2xl"
               />
             </section>
           </Card>
