@@ -890,6 +890,7 @@ export default function MyProfile() {
                       className={`border p-2 w-full mt-1 ${
                         errors.emailContact ? "border-red-500" : ""
                       }`}
+                      placeholder="Nhập email liên hệ của bạn"
                     />
                     {errors.emailContact && (
                       <p className="text-red-500 text-xs mt-1">
@@ -898,21 +899,24 @@ export default function MyProfile() {
                     )}
                   </div>
                 ) : (
-                  seeker?.emailContact && (
-                    <div>
-                      <Label
-                        className="text-sm font-medium"
-                        style={{ whiteSpace: "nowrap" }}
-                      >
-                        Email
-                      </Label>
-                      <div className="mt-1 flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <Label
+                      className="text-sm font-medium"
+                      style={{ whiteSpace: "nowrap" }}
+                    >
+                      Email
+                    </Label>
+                    <div className="mt-1 flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      {seeker?.emailContact ? (
                         <span className="text-sm">{seeker.emailContact}</span>
-                      </div>
+                      ) : (
+                        <span className="text-sm text-gray-400 italic">Chưa cập nhật email liên hệ</span>
+                      )}
                     </div>
-                  )
+                  </div>
                 )}
+
                 {isEditingInfo ? (
                   <div className="mb-4">
                     <Label
@@ -928,6 +932,7 @@ export default function MyProfile() {
                       className={`border p-2 w-full ${
                         errors.phoneNumber ? "border-red-500" : ""
                       }`}
+                      placeholder="Nhập số điện thoại của bạn"
                     />
                     {errors.phoneNumber && (
                       <p className="text-red-500 text-xs mt-1">
@@ -936,17 +941,19 @@ export default function MyProfile() {
                     )}
                   </div>
                 ) : (
-                  seeker?.phoneNumber && (
-                    <div>
-                      <Label className="text-sm font-medium">
-                        Số điện thoại
-                      </Label>
-                      <div className="mt-1 flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <Label className="text-sm font-medium">
+                      Số điện thoại
+                    </Label>
+                    <div className="mt-1 flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      {seeker?.phoneNumber ? (
                         <span className="text-sm">{seeker.phoneNumber}</span>
-                      </div>
+                      ) : (
+                        <span className="text-sm text-gray-400 italic">Chưa cập nhật số điện thoại</span>
+                      )}
                     </div>
-                  )
+                  </div>
                 )}
 
                 {isEditingInfo ? (
@@ -966,29 +973,33 @@ export default function MyProfile() {
                     </select>
                   </div>
                 ) : (
-                  seeker?.gender && (
-                    <div>
-                      <Label className="text-sm font-medium whitespace-nowrap">
-                        Giới tính
-                      </Label>
-                      <div className="mt-1 flex items-center gap-2">
-                        {seeker.gender === "Nam" && (
-                          <FontAwesomeIcon
-                            icon={faMars}
-                            className="h-4 w-4 text-muted-foreground"
-                          />
-                        )}
-                        {seeker.gender === "Nữ" && (
-                          <FontAwesomeIcon
-                            icon={faVenus}
-                            className="h-4 w-4 text-muted-foreground"
-                          />
-                        )}
-                        <span className="text-sm">{seeker.gender}</span>
-                      </div>
+                  <div>
+                    <Label className="text-sm font-medium whitespace-nowrap">
+                      Giới tính
+                    </Label>
+                    <div className="mt-1 flex items-center gap-2">
+                      {seeker?.gender ? (
+                        <>
+                          {seeker.gender === "Nam" ? (
+                            <FontAwesomeIcon
+                              icon={faMars}
+                              className="h-4 w-4 text-muted-foreground"
+                            />
+                          ) : (
+                            <FontAwesomeIcon
+                              icon={faVenus}
+                              className="h-4 w-4 text-muted-foreground"
+                            />
+                          )}
+                          <span className="text-sm">{seeker.gender}</span>
+                        </>
+                      ) : (
+                        <span className="text-sm text-gray-400 italic">Chưa cập nhật giới tính</span>
+                      )}
                     </div>
-                  )
+                  </div>
                 )}
+
                 {isEditingInfo ? (
                   <div className="mb-4">
                     <Label className="text-sm font-medium block mb-1 whitespace-nowrap">
@@ -1010,20 +1021,23 @@ export default function MyProfile() {
                     )}
                   </div>
                 ) : (
-                  seeker?.dateOfBirth && (
-                    <div>
-                      <Label className="text-sm font-medium whitespace-nowrap">
-                        Ngày sinh
-                      </Label>
-                      <div className="mt-1 flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <Label className="text-sm font-medium whitespace-nowrap">
+                      Ngày sinh
+                    </Label>
+                    <div className="mt-1 flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      {seeker?.dateOfBirth ? (
                         <span className="text-sm">
                           {formatDate(seeker.dateOfBirth)}
                         </span>
-                      </div>
+                      ) : (
+                        <span className="text-sm text-gray-400 italic">Chưa cập nhật ngày sinh</span>
+                      )}
                     </div>
-                  )
+                  </div>
                 )}
+
                 {isEditingInfo ? (
                   <div className="relative mb-4">
                     <Label className="text-sm font-medium block mb-1 whitespace-nowrap">
@@ -1031,9 +1045,7 @@ export default function MyProfile() {
                     </Label>
                     <div
                       className="border p-2 w-full rounded-md cursor-pointer"
-                      onClick={() =>
-                        setIsIndustryDropdownOpen(!isIndustryDropdownOpen)
-                      }
+                      onClick={() => setIsIndustryDropdownOpen(!isIndustryDropdownOpen)}
                     >
                       {(formData?.industryIds ?? []).length > 0
                         ? industries
@@ -1044,12 +1056,12 @@ export default function MyProfile() {
                             )
                             .map((industry) => industry.industryName)
                             .join(", ")
-                        : "Chọn chuyên ngành"}
+                        : "Chưa cập nhật chuyên ngành"}
                     </div>
 
                     {isIndustryDropdownOpen && (
                       <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
-                        {industries.slice(1).map((industry) => (
+                        {industries.map((industry) => (
                           <label
                             key={industry.industryId}
                             className="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer"
@@ -1067,7 +1079,7 @@ export default function MyProfile() {
                                     industryIds: [
                                       ...(prev.industryIds ?? []),
                                       industry.industryId,
-                                    ], // 👈 Đảm bảo industryId luôn là mảng
+                                    ],
                                   }));
                                 } else {
                                   setFormData((prev) => ({
@@ -1090,22 +1102,23 @@ export default function MyProfile() {
                     )}
                   </div>
                 ) : (
-                  seeker?.industry &&
-                  seeker.industry.length > 0 && (
-                    <div>
-                      <Label className="text-sm font-medium whitespace-nowrap">
-                        Major
-                      </Label>
-                      <div className="mt-1 flex items-center gap-2">
-                        <Book className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <Label className="text-sm font-medium whitespace-nowrap">
+                      Chuyên ngành
+                    </Label>
+                    <div className="mt-1 flex items-center gap-2">
+                      <Book className="h-4 w-4 text-muted-foreground" />
+                      {seeker?.industry && seeker.industry.length > 0 ? (
                         <span className="text-sm">
                           {seeker.industry
                             .map((industry) => industry.industryName)
                             .join(", ")}
                         </span>
-                      </div>
+                      ) : (
+                        <span className="text-sm text-gray-400 italic">Chưa cập nhật chuyên ngành</span>
+                      )}
                     </div>
-                  )
+                  </div>
                 )}
               </CardContent>
               {isEditingInfo && (

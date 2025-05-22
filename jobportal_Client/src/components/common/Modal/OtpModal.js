@@ -80,18 +80,18 @@ const OtpModal = ({ isOpen, onClose, email, onResendCode, onSubmitOtp }) => {
         </div>
         <AnimatePresence>
           {status === 'success' && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <SuccessIcon />
-              <p className="text-green-600 text-center">Xác nhận thành công!</p>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center flex flex-col items-center">
+              <SuccessIcon className="w-12 h-12" />
+              <p className="text-green-600">Xác nhận thành công!</p>
               <Button onClick={onClose} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">
                 Đóng
               </Button>
             </motion.div>
           )}
           {status === 'failure' && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <FailureIcon />
-              <p className="text-red-600 text-center">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center flex flex-col items-center">
+              <FailureIcon className="w-12 h-12" />
+              <p className="text-red-600">
                 {timeLeft === 0 ? 'Mã xác nhận đã hết hạn' : 'Mã xác nhận không chính xác'}. Vui lòng thử lại.
               </p>
               <Button 
@@ -100,6 +100,15 @@ const OtpModal = ({ isOpen, onClose, email, onResendCode, onSubmitOtp }) => {
                 disabled={isLoading}
               >
                 {isLoading ? 'Đang gửi...' : 'Gửi lại mã'}
+              </Button>
+              <Button 
+                onClick={() => {
+                  setOtp(''); // Reset OTP input
+                  setStatus(null); // Reset status to allow new input
+                }} 
+                className="w-full mt-2 bg-gray-300 hover:bg-gray-400 text-black"
+              >
+                Thử lại
               </Button>
             </motion.div>
           )}
