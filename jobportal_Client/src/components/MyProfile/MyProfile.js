@@ -1012,9 +1012,7 @@ export default function MyProfile() {
 
                 {isEditingInfo ? (
                   <div>
-                    <Label className="text-sm sm:text-base font-medium">
-                      Ngày sinh
-                    </Label>
+                    <Label className="text-sm sm:text-base font-medium">Ngày sinh</Label>
                     <input
                       type="date"
                       name="dateOfBirth"
@@ -1025,20 +1023,18 @@ export default function MyProfile() {
                       }`}
                     />
                     {errors.dateOfBirth && (
-                      <p className="text-red-500 text-xs sm:text-sm">
-                        {errors.dateOfBirth}
-                      </p>
+                      <p className="text-red-500 text-xs sm:text-sm">{errors.dateOfBirth}</p>
                     )}
                   </div>
                 ) : (
                   <div>
-                    <Label className="text-sm sm:text-base font-medium whitespace-nowrap">
-                      Ngày sinh
-                    </Label>
+                    <Label className="text-sm sm:text-base font-medium whitespace-nowrap">Ngày sinh</Label>
                     <div className="mt-1 flex items-center gap-2">
                       <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                       {seeker?.dateOfBirth ? (
-                        <span className="text-sm sm:text-base">{seeker.dateOfBirth}</span>
+                        <span className="text-sm sm:text-base">
+                          {new Date(seeker.dateOfBirth).toLocaleDateString("en-GB")}
+                        </span>
                       ) : (
                         <span className="text-sm text-gray-400 italic">Chưa cập nhật ngày sinh</span>
                       )}
@@ -1101,7 +1097,15 @@ export default function MyProfile() {
                     <div className="mt-1 flex items-center gap-2">
                       <Book className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                       {seeker?.industry && seeker.industry.length > 0 ? (
-                        <span className="text-sm sm:text-base truncate">{seeker.industry.join(', ')}</span>
+                        <span className="text-sm sm:text-base truncate">
+                          {seeker.industry
+                            .map((ind) => {
+                              if (typeof ind === "object" && ind.industryName) return ind.industryName;
+                              const found = industries.find((i) => i.industryId === ind || i.industryId === ind?.industryId);
+                              return found ? found.industryName : ind;
+                            })
+                            .join(", ")}
+                        </span>
                       ) : (
                         <span className="text-sm text-gray-400 italic">Chưa cập nhật chuyên ngành</span>
                       )}
