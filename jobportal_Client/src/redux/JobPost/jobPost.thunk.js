@@ -46,6 +46,22 @@ export const searchJobs = createAsyncThunk(
   "jobs/search",
   async ({ filters, currentPage, size }, { rejectWithValue }) => {
     try {
+      // Kiểm tra nếu không có filter nào được áp dụng
+      const hasActiveFilters = Object.values(filters).some((value) => {
+        if (Array.isArray(value)) {
+          return value.length > 0;
+        }
+        return value !== undefined && value !== null && value !== "";
+      });
+
+      if (!hasActiveFilters) {
+        // Nếu không có filter, gọi API lấy tất cả công việc
+        const response = await axios.get(
+          `http://localhost:8080/job-post/get-job-approve?page=${currentPage}&size=${size}`
+        );
+        return response.data;
+      }
+
       const params = {
         title: filters.title || undefined,
         selectedTypesOfWork:
