@@ -1,7 +1,18 @@
 import React from "react";
+import DOMPurify from "dompurify";
 
-const SummeryPreview = ({ cvInfo }) => {
-  if (!cvInfo?.summery) return null; // Ẩn nếu không có nội dung
+const SummaryPreview = ({ cvInfo }) => {
+  // Preprocess summery to replace &nbsp; with regular spaces
+  const preprocessSummary = (text) => {
+    if (!text) return "";
+    // Replace &nbsp; (including encoded forms) with a regular space
+    return text.replace(/&nbsp;|\u00A0/g, " ");
+  };
+
+  // Sanitize HTML to prevent XSS and render content
+  const sanitizedSummary = cvInfo?.summery
+    ? DOMPurify.sanitize(preprocessSummary(cvInfo.summery))
+    : "";
 
   return (
     <div className="my-6">
@@ -21,11 +32,12 @@ const SummeryPreview = ({ cvInfo }) => {
         }}
       />
       {/* Nội dung */}
-      <p className="text-sm text-gray-800 leading-relaxed text-justify">
-        {cvInfo.summery}
-      </p>
+      <div
+        className="text-sm text-gray-800 leading-relaxed text-justify"
+        dangerouslySetInnerHTML={{ __html: sanitizedSummary }}
+      />
     </div>
   );
 };
 
-export default SummeryPreview;
+export default SummaryPreview;

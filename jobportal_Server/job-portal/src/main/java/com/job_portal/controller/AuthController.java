@@ -135,7 +135,6 @@ public class AuthController {
 
 			emailUtil.sendOtpEmail(newUser.getEmail(), otp);
 			newUser.setOtp(otp);
-			System.out.println("aa " + newUser.getOtp());
 			newUser.setOtpGeneratedTime(LocalDateTime.now());
 
 			userAccountRepository.save(newUser);
@@ -292,7 +291,7 @@ public class AuthController {
 		return new ResponseEntity<>("Vui lòng check mail để nhận mã đăng ký", HttpStatus.OK); // Đổi mã trạng thái phù
 	}
 
-	private Authentication authenticate(String email, String password) {
+	public Authentication authenticate(String email, String password) {
 		UserDetails userDetails = accountDetailService.loadUserByUsername(email);
 		if (userDetails == null) {
 
