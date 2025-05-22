@@ -19,6 +19,7 @@ import FailureIcon from "../../components/common/Icon/Failed/Failed";
 import logo1 from "../../assets/images/common/logo1.jpg";
 import { isStrongPassword } from "../../utils/passwordValidator";
 import OTPModal from '../../components/common/Modal/OtpModal';
+import Swal from 'sweetalert2';
 
 // Environment variables
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
@@ -90,11 +91,12 @@ export default function SignUpForm() {
   const fields = activeTab === "job-seeker" ? jobSeekerFields : employerFields;
 
   const addErrorMessage = (message) => {
-    const id = Date.now();
-    setErrorMessages((prev) => [...prev, { id, message }]);
-    setTimeout(() => {
-      setErrorMessages((prev) => prev.filter((msg) => msg.id !== id));
-    }, 3000); // Tăng thời gian hiển thị lỗi lên 3 giây
+    Swal.fire({
+      icon: 'error',
+      title: 'Lỗi',
+      text: message,
+      confirmButtonText: 'OK'
+    });
   };
 
   const handleRegister = async (e) => {
@@ -104,46 +106,79 @@ export default function SignUpForm() {
     // Validate email
     const emailField = activeTab === "job-seeker" ? formData.email : formData.businessEmail;
     if (!emailField || !validateEmail(emailField)) {
-      addErrorMessage("Vui lòng nhập địa chỉ email hợp lệ");
+      Swal.fire({
+        icon: 'warning',
+        title: 'Chú ý',
+        text: "Vui lòng nhập địa chỉ email hợp lệ",
+        confirmButtonText: 'OK'
+      });
       setIsLoading(false);
       return;
     }
 
     // Validate password
     if (!formData.password) {
-      addErrorMessage("Vui lòng nhập mật khẩu");
+      Swal.fire({
+        icon: 'warning',
+        title: 'Chú ý',
+        text: "Vui lòng nhập mật khẩu",
+        confirmButtonText: 'OK'
+      });
       setIsLoading(false);
       return;
     }
 
     if (!isStrongPassword(formData.password)) {
-      addErrorMessage(
-        "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt"
-      );
+      Swal.fire({
+        icon: 'warning',
+        title: 'Chú ý',
+        text: "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt",
+        confirmButtonText: 'OK'
+      });
       setIsLoading(false);
       return;
     }
     
     if (!formData.confirmPassword) {
-      addErrorMessage("Vui lòng xác nhận mật khẩu");
+      Swal.fire({
+        icon: 'warning',
+        title: 'Chú ý',
+        text: "Vui lòng xác nhận mật khẩu",
+        confirmButtonText: 'OK'
+      });
       setIsLoading(false);
       return;
     }
     
     if (formData.password !== formData.confirmPassword) {
-      addErrorMessage("Mật khẩu xác nhận không khớp");
+      Swal.fire({
+        icon: 'warning',
+        title: 'Chú ý',
+        text: "Mật khẩu xác nhận không khớp",
+        confirmButtonText: 'OK'
+      });
       setIsLoading(false);
       return;
     }
     
     if (activeTab === "job-seeker" && !formData.fullName) {
-      addErrorMessage("Vui lòng nhập họ và tên");
+      Swal.fire({
+        icon: 'warning',
+        title: 'Chú ý',
+        text: "Vui lòng nhập họ và tên",
+        confirmButtonText: 'OK'
+      });
       setIsLoading(false);
       return;
     }
     
     if (activeTab === "employer" && (!formData.taxCode || !taxCodeVerified)) {
-      addErrorMessage("Vui lòng xác thực mã số thuế hợp lệ");
+      Swal.fire({
+        icon: 'warning',
+        title: 'Chú ý',
+        text: "Vui lòng xác thực mã số thuế hợp lệ",
+        confirmButtonText: 'OK'
+      });
       setIsLoading(false);
       return;
     }
@@ -161,19 +196,33 @@ export default function SignUpForm() {
     try {
       const response = await axios.post(`${API_BASE_URL}/auth/signup`, userData);
       console.log("Đăng ký thành công:", response);
-      
+      Swal.fire({
+        icon: 'success',
+        title: 'Thành công',
+        text: "Đăng ký thành công! Vui lòng kiểm tra email để lấy mã xác nhận",
+        confirmButtonText: 'OK'
+      });
       if (response.data) {
         setResendEmail(emailField);
         setTimeLeft(120);
         setIsTimeUp(false);
         setConfirmationStatus(null);
         setIsModalOpen(true);
-        addErrorMessage("Đăng ký thành công! Vui lòng kiểm tra email để lấy mã xác nhận");
       }
     } catch (error) {
       console.error("Lỗi đăng ký:", error);
       const errorMessage = error.response?.data || "Đăng ký thất bại. Vui lòng thử lại.";
-      addErrorMessage(errorMessage);
+      if (errorMessage.includes("Tài khoản đã tồn tại nhưng chưa xác thực")) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Thông báo',
+          text: errorMessage,
+          confirmButtonText: 'OK'
+        });
+        await handleResendCode();
+      } else {
+        addErrorMessage(errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -238,11 +287,21 @@ export default function SignUpForm() {
         params: { email },
       });
       if (response.status === 200) {
-        addErrorMessage("Mã xác nhận mới đã được gửi!");
+        Swal.fire({
+          icon: 'success',
+          title: 'Thành công',
+          text: "Mã xác nhận mới đã được gửi!",
+          confirmButtonText: 'OK'
+        });
       }
     } catch (error) {
       console.error("Error resending code:", error);
-      addErrorMessage("Không thể gửi lại mã xác nhận. Vui lòng thử lại.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: "Không thể gửi lại mã xác nhận. Vui lòng thử lại.",
+        confirmButtonText: 'OK'
+      });
       throw error;
     }
   };
@@ -276,14 +335,29 @@ export default function SignUpForm() {
           taxCode: taxCode,
           address: response.data.address || "",
         }));
-        addErrorMessage("Xác thực mã số thuế thành công!");
+        Swal.fire({
+          icon: 'success',
+          title: 'Thành công',
+          text: "Xác thực mã số thuế thành công!",
+          confirmButtonText: 'OK'
+        });
         return true;
       }
-      addErrorMessage("Mã số thuế không hợp lệ hoặc không tồn tại");
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: "Mã số thuế không hợp lệ hoặc không tồn tại",
+        confirmButtonText: 'OK'
+      });
       return false;
     } catch (error) {
       console.error("Error verifying tax code:", error);
-      addErrorMessage("Mã số thuế không hợp lệ hoặc không tồn tại");
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: "Mã số thuế không hợp lệ hoặc không tồn tại",
+        confirmButtonText: 'OK'
+      });
       return false;
     }
   };

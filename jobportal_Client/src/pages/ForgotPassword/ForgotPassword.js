@@ -32,6 +32,7 @@ export default function ForgotPassword() {
   const [isTimeUp, setIsTimeUp] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -47,6 +48,7 @@ export default function ForgotPassword() {
 
   const handleSubmitEmail = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     const result = await dispatch(forgotPasswordAction(email));
 
@@ -64,6 +66,8 @@ export default function ForgotPassword() {
 
       // setErrorMessage(result.error || "Yêu cầu gửi mã thất bại");
     }
+
+    setIsLoading(false);
   };
 
   const handleVerifyOtp = async (e) => {
@@ -95,8 +99,21 @@ export default function ForgotPassword() {
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setOtpStatus(null);
+    Swal.fire({
+      title: 'Bạn có chắc chắn muốn hủy?',
+      text: "Tất cả thông tin sẽ bị mất!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Có, hủy!',
+      cancelButtonText: 'Không, giữ lại'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setIsModalOpen(false);
+        setOtpStatus(null);
+      }
+    });
   };
 
   const renderOtpStatus = () => (
@@ -230,8 +247,9 @@ export default function ForgotPassword() {
             <Button
               type="submit"
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+              disabled={isLoading}
             >
-              Gửi mã xác nhận
+              {isLoading ? "Đang gửi..." : "Gửi mã xác nhận"}
             </Button>
             {errorMessage && (
               <p className="text-red-500 text-center mt-2">{errorMessage}</p>
@@ -241,7 +259,7 @@ export default function ForgotPassword() {
       </Card>
 
       {/* OTP Verification Modal */}
-      <Dialog isOpen={isModalOpen} onClose={handleCloseModal}>
+      <Dialog isOpen={isModalOpen} onClose={() => {}}>
         <DialogContent className="sm:max-w-[425px] bg-white shadow-lg rounded-lg p-6">
           <DialogHeader>
             <DialogTitle className="text-lg text-center font-semibold text-gray-900">
@@ -252,6 +270,12 @@ export default function ForgotPassword() {
             </DialogDescription>
           </DialogHeader>
           {renderOtpStatus()}
+          <Button
+            onClick={handleCloseModal}
+            className="mt-4 w-full bg-gray-300 hover:bg-gray-400 text-black"
+          >
+            Hủy
+          </Button>
         </DialogContent>
       </Dialog>
     </div>
