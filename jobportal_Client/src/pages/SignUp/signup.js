@@ -18,6 +18,8 @@ import SuccessIcon from "../../components/common/Icon/Sucess/Sucess";
 import FailureIcon from "../../components/common/Icon/Failed/Failed";
 import logo1 from "../../assets/images/common/logo1.jpg";
 import { isStrongPassword } from "../../utils/passwordValidator";
+import OTPModal from '../../components/common/Modal/OtpModal';
+import Swal from 'sweetalert2';
 
 // Environment variables
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
@@ -27,6 +29,8 @@ const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
+
+
 
 export default function SignUpForm() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -87,42 +91,98 @@ export default function SignUpForm() {
   const fields = activeTab === "job-seeker" ? jobSeekerFields : employerFields;
 
   const addErrorMessage = (message) => {
-    const id = Date.now();
-    setErrorMessages((prev) => [...prev, { id, message }]);
-    setTimeout(() => {
-      setErrorMessages((prev) => prev.filter((msg) => msg.id !== id));
-    }, 2000);
+    Swal.fire({
+      icon: 'error',
+      title: 'Lỗi',
+      text: message,
+      confirmButtonText: 'OK'
+    });
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    
+    // Validate email
+    const emailField = activeTab === "job-seeker" ? formData.email : formData.businessEmail;
+    if (!emailField || !validateEmail(emailField)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Chú ý',
+        text: "Vui lòng nhập địa chỉ email hợp lệ",
+        confirmButtonText: 'OK'
+      });
+      setIsLoading(false);
+      return;
+    }
 
     // Validate password
-    if (!isStrongPassword(formData.password)) {
-      addErrorMessage(
-        "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt"
-      );
-      setIsLoading(false);
-      return;
-    }
-    if (formData.password !== formData.confirmPassword) {
-      addErrorMessage("Mật khẩu xác nhận không khớp");
-      setIsLoading(false);
-      return;
-    }
-    if (activeTab === "job-seeker" && !formData.fullName) {
-      addErrorMessage("Vui lòng nhập họ và tên");
-      setIsLoading(false);
-      return;
-    }
-    if (activeTab === "employer" && (!formData.taxCode || !taxCodeVerified)) {
-      addErrorMessage("Vui lòng xác thực mã số thuế hợp lệ");
+    if (!formData.password) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Chú ý',
+        text: "Vui lòng nhập mật khẩu",
+        confirmButtonText: 'OK'
+      });
       setIsLoading(false);
       return;
     }
 
-    const emailField = activeTab === "job-seeker" ? formData.email : formData.businessEmail;
+    if (!isStrongPassword(formData.password)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Chú ý',
+        text: "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt",
+        confirmButtonText: 'OK'
+      });
+      setIsLoading(false);
+      return;
+    }
+    
+    if (!formData.confirmPassword) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Chú ý',
+        text: "Vui lòng xác nhận mật khẩu",
+        confirmButtonText: 'OK'
+      });
+      setIsLoading(false);
+      return;
+    }
+    
+    if (formData.password !== formData.confirmPassword) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Chú ý',
+        text: "Mật khẩu xác nhận không khớp",
+        confirmButtonText: 'OK'
+      });
+      setIsLoading(false);
+      return;
+    }
+    
+    if (activeTab === "job-seeker" && !formData.fullName) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Chú ý',
+        text: "Vui lòng nhập họ và tên",
+        confirmButtonText: 'OK'
+      });
+      setIsLoading(false);
+      return;
+    }
+    
+    if (activeTab === "employer" && (!formData.taxCode || !taxCodeVerified)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Chú ý',
+        text: "Vui lòng xác thực mã số thuế hợp lệ",
+        confirmButtonText: 'OK'
+      });
+      setIsLoading(false);
+      return;
+    }
+
     const userData = {
       userName: activeTab === "employer" ? formData.companyName : formData.fullName,
       email: emailField,
@@ -135,15 +195,34 @@ export default function SignUpForm() {
 
     try {
       const response = await axios.post(`${API_BASE_URL}/auth/signup`, userData);
-      if (response.status === 200) {
-        setIsModalOpen(true);
+      console.log("Đăng ký thành công:", response);
+      Swal.fire({
+        icon: 'success',
+        title: 'Thành công',
+        text: "Đăng ký thành công! Vui lòng kiểm tra email để lấy mã xác nhận",
+        confirmButtonText: 'OK'
+      });
+      if (response.data) {
+        setResendEmail(emailField);
         setTimeLeft(120);
         setIsTimeUp(false);
-        setResendEmail(emailField); // Đặt email để gửi lại mã nếu cần
+        setConfirmationStatus(null);
+        setIsModalOpen(true);
       }
     } catch (error) {
-      console.error("Signup error:", error.response?.data);
-      addErrorMessage(error.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại.");
+      console.error("Lỗi đăng ký:", error);
+      const errorMessage = error.response?.data || "Đăng ký thất bại. Vui lòng thử lại.";
+      if (errorMessage.includes("Tài khoản đã tồn tại nhưng chưa xác thực")) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Thông báo',
+          text: errorMessage,
+          confirmButtonText: 'OK'
+        });
+        await handleResendCode();
+      } else {
+        addErrorMessage(errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -188,64 +267,42 @@ export default function SignUpForm() {
     }
   };
 
-  const handleConfirmation = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    const email = activeTab === "job-seeker" ? formData.email : formData.businessEmail;
+  const handleConfirmation = async (otp) => {
     try {
+      const email = activeTab === "job-seeker" ? formData.email : formData.businessEmail;
       const response = await axios.put(
-        `${API_BASE_URL}/auth/verify-account?email=${encodeURIComponent(email)}&otp=${encodeURIComponent(confirmationCode)}`
+        `${API_BASE_URL}/auth/verify-account?email=${encodeURIComponent(email)}&otp=${encodeURIComponent(otp)}`
       );
-
-      if (response.data === "Xác thực tài khoản thành công") {
-        if (activeTab === "employer" && taxCodeVerified) {
-          const verifyResult = await handleVerifyEmployer(email);
-          if (!verifyResult) {
-            setConfirmationStatus("failure");
-            setIsLoading(false);
-            return;
-          }
-        }
-        setConfirmationStatus("success");
-        setTimeout(() => navigate("/auth/sign-in"), 2000);
-      } else {
-        setConfirmationStatus("failure");
-        setIsPaused(false);
-        addErrorMessage(response.data || "Xác thực thất bại. Vui lòng thử lại.");
-      }
+      return response;
     } catch (error) {
       console.error("Verification error:", error);
-      setConfirmationStatus("failure");
-      setIsPaused(false);
-      addErrorMessage(error.response?.data?.message || "Xác thực thất bại. Vui lòng thử lại.");
-    } finally {
-      setIsLoading(false);
+      throw error;
     }
   };
 
-  const handleResendCode = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    if (!resendEmail || !validateEmail(resendEmail)) {
-      addErrorMessage("Vui lòng nhập email hợp lệ");
-      setIsLoading(false);
-      return;
-    }
-
+  const handleResendCode = async () => {
     try {
-      await axios.put(`${API_BASE_URL}/auth/regenerate-otp`, null, {
-        params: { email: resendEmail },
+      const email = activeTab === "job-seeker" ? formData.email : formData.businessEmail;
+      const response = await axios.put(`${API_BASE_URL}/auth/regenerate-otp`, null, {
+        params: { email },
       });
-      setTimeLeft(120);
-      setIsTimeUp(false);
-      setIsPaused(false);
-      addErrorMessage("Mã xác nhận đã được gửi lại!");
+      if (response.status === 200) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Thành công',
+          text: "Mã xác nhận mới đã được gửi!",
+          confirmButtonText: 'OK'
+        });
+      }
     } catch (error) {
-      addErrorMessage("Không thể gửi lại mã xác nhận. Vui lòng thử lại.");
-    } finally {
-      setIsLoading(false);
+      console.error("Error resending code:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: "Không thể gửi lại mã xác nhận. Vui lòng thử lại.",
+        confirmButtonText: 'OK'
+      });
+      throw error;
     }
   };
 
@@ -266,126 +323,6 @@ export default function SignUpForm() {
     setErrorMessages([]);
   };
 
-  const renderConfirmationStatus = () => (
-    <AnimatePresence mode="wait">
-      {confirmationStatus === "success" && (
-        <motion.div
-          key="success"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-          className="text-center"
-        >
-          <SuccessIcon className="mx-auto mb-4" />
-          <h3 className="text-2xl font-semibold text-green-600">Đăng ký thành công!</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            Chúc mừng! Bạn đã đăng ký thành công.
-          </p>
-          <Button
-            onClick={() => navigate("/auth/sign-in")}
-            className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white"
-            disabled={isLoading}
-          >
-            Đóng
-          </Button>
-        </motion.div>
-      )}
-      {confirmationStatus === "failure" && (
-        <motion.div
-          key="failure"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-          className="text-center"
-        >
-          <FailureIcon className="mx-auto mb-4" />
-          <h3 className="text-2xl font-semibold text-red-600">Xác nhận thất bại!</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            Mã xác nhận không chính xác. Vui lòng thử lại.
-          </p>
-          <Button
-            onClick={() => setConfirmationStatus(null)}
-            className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white"
-            disabled={isLoading}
-          >
-            Thử lại
-          </Button>
-        </motion.div>
-      )}
-      {confirmationStatus === null && !isTimeUp && (
-        <motion.form
-          key="form"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-          onSubmit={handleConfirmation}
-          className="space-y-4 mt-2"
-        >
-          <Input
-            type="text"
-            placeholder="Nhập mã xác nhận"
-            value={confirmationCode}
-            onChange={(e) => setConfirmationCode(e.target.value)}
-            disabled={isLoading}
-          />
-          <Button
-            type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
-            disabled={isLoading}
-          >
-            {isLoading ? "Đang xử lý..." : "Xác nhận"}
-          </Button>
-          <p className="text-sm text-gray-500 text-center">
-            Còn lại {Math.floor(timeLeft / 60)}:
-            {timeLeft % 60 < 10 ? `0${timeLeft % 60}` : timeLeft % 60} để nhập mã
-          </p>
-        </motion.form>
-      )}
-      {isTimeUp && (
-        <motion.div
-          key="timeUp"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-          className="text-center"
-        >
-          <h3 className="text-2xl font-semibold text-red-600">Hết thời gian!</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            Vui lòng nhập lại email để lấy mã xác nhận mới.
-          </p>
-          <motion.form
-            key="resendForm"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            onSubmit={handleResendCode}
-            className="space-y-4 mt-4"
-          >
-            <Input
-              type="email"
-              placeholder="Nhập email của bạn"
-              value={resendEmail}
-              onChange={(e) => setResendEmail(e.target.value)}
-              disabled={isLoading}
-            />
-            <Button
-              type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
-              disabled={isLoading}
-            >
-              {isLoading ? "Đang gửi..." : "Gửi lại mã"}
-            </Button>
-          </motion.form>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-
   const verifyTaxCode = async (taxCode) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/company/validate-tax-info/${taxCode}`);
@@ -398,13 +335,29 @@ export default function SignUpForm() {
           taxCode: taxCode,
           address: response.data.address || "",
         }));
+        Swal.fire({
+          icon: 'success',
+          title: 'Thành công',
+          text: "Xác thực mã số thuế thành công!",
+          confirmButtonText: 'OK'
+        });
         return true;
       }
-      addErrorMessage("Mã số thuế không hợp lệ hoặc không tồn tại");
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: "Mã số thuế không hợp lệ hoặc không tồn tại",
+        confirmButtonText: 'OK'
+      });
       return false;
     } catch (error) {
       console.error("Error verifying tax code:", error);
-      addErrorMessage("Mã số thuế không hợp lệ hoặc không tồn tại");
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: "Mã số thuế không hợp lệ hoặc không tồn tại",
+        confirmButtonText: 'OK'
+      });
       return false;
     }
   };
@@ -476,7 +429,11 @@ export default function SignUpForm() {
                     <Button
                       type="button"
                       onClick={async () => {
-                        console.log("Verifying tax code:", formData.taxCode);
+                        if (!formData.taxCode || formData.taxCode.trim() === "") {
+                          addErrorMessage("Vui lòng nhập mã số thuế");
+                          return;
+                        }
+                        console.log("Đang xác thực mã số thuế:", formData.taxCode);
                         const verified = await verifyTaxCode(formData.taxCode);
                         if (!verified) {
                           addErrorMessage("Mã số thuế không hợp lệ hoặc không tồn tại");
@@ -499,7 +456,12 @@ export default function SignUpForm() {
                   animate={{ opacity: 1, y: 0, height: "auto" }}
                   exit={{ opacity: 0, y: 10, height: 0 }}
                   transition={{ duration: 0.2 }}
-                  className="text-red-500 text-sm text-center bg-red-50 p-2 rounded-md border border-red-200"
+                  className="text-sm p-3 rounded-md"
+                  style={{
+                    backgroundColor: error.message.includes("thành công") ? "#d1fae5" : "#fee2e2",
+                    color: error.message.includes("thành công") ? "#047857" : "#b91c1c",
+                    border: `1px solid ${error.message.includes("thành công") ? "#a7f3d0" : "#fecaca"}`,
+                  }}
                 >
                   {error.message}
                 </motion.p>
@@ -535,23 +497,16 @@ export default function SignUpForm() {
         </CardContent>
       </Card>
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[425px] bg-white shadow-lg rounded-lg p-6">
-          <DialogHeader>
-            {confirmationStatus === null && !isTimeUp && (
-              <>
-                <DialogTitle className="text-lg text-center font-semibold text-gray-900">
-                  Xác nhận đăng ký
-                </DialogTitle>
-                <DialogDescription className="text-sm text-center text-gray-600">
-                  Vui lòng nhập mã xác nhận đã được gửi đến email của bạn.
-                </DialogDescription>
-              </>
-            )}
-          </DialogHeader>
-          {renderConfirmationStatus()}
-        </DialogContent>
-      </Dialog>
+      <OTPModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          navigate("/auth/sign-in");
+        }}
+        email={resendEmail}
+        onResendCode={handleResendCode}
+        onSubmitOtp={handleConfirmation}
+      />
     </div>
   );
 }

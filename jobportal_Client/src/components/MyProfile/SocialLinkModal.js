@@ -131,9 +131,9 @@ export default function SocialLinkModal({
                   <span>Đang Lưu...</span>
                 </div>
               ) : editingSocialLinkId ? (
-                "Update"
+                "Cập nhật"
               ) : (
-                "Create"
+                "Thêm mới"
               )}
             </Button>
           </div>
@@ -142,9 +142,9 @@ export default function SocialLinkModal({
               fullWidth
               error={formik.touched.platform && Boolean(formik.errors.platform)}
             >
-              <InputLabel id="platform-label">Select Platform</InputLabel>
+              <InputLabel id="platform-label">Chọn nền tảng</InputLabel>
               <Select
-                label="Select Platform"
+                label="Chọn nền tảng"
                 id="platform"
                 name="platform"
                 value={formik.values.platform} // Đảm bảo giá trị là một trong các platform
@@ -171,7 +171,7 @@ export default function SocialLinkModal({
               fullWidth
               id="url"
               name="url"
-              label="url Name"
+              label="Link"
               value={formik.values.url}
               onChange={formik.handleChange}
               error={formik.touched.url && Boolean(formik.errors.url)}

@@ -40,28 +40,39 @@ export default function MyCV() {
         return;
       }
 
-      // Sanitize file name - remove special characters that might cause server issues
+      // Chuẩn hóa tên file tiếng Việt
+      const normalizeVietnamese = (str) => {
+        return str
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/đ/g, 'd')
+          .replace(/Đ/g, 'D')
+          .replace(/[^a-zA-Z0-9.-]/g, '_');
+      };
+
+      // Lấy tên file gốc và phần mở rộng
       const originalName = file.name;
-      const sanitizedName = originalName.replace(/[^\w.-]/g, '_');
+      const extension = originalName.split('.').pop();
+      const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.'));
       
-      // Create a new File object with the sanitized name if needed
-      let fileToUpload = file;
-      if (sanitizedName !== originalName) {
-        fileToUpload = new File([file], sanitizedName, { type: file.type });
-      }
+      // Chuẩn hóa tên file
+      const normalizedName = `${normalizeVietnamese(nameWithoutExt)}.${extension}`;
       
-      setCvFiles(sanitizedName);
+      // Tạo file mới với tên đã chuẩn hóa
+      const newFile = new File([file], normalizedName, { type: file.type });
+      
+      setCvFiles(normalizedName);
 
       // Hiển thị thông báo đang xử lý
       toast.info("Đang tải CV lên, vui lòng đợi...");
       
       // Tải file lên Cloudinary
-      const uploadedFile = await uploadToCloudinary(fileToUpload);
+      const uploadedFile = await uploadToCloudinary(newFile);
       
       // Tạo CV mới
       const cvData = { 
         pathCV: uploadedFile, 
-        cvName: sanitizedName 
+        cvName: normalizedName 
       };
 
       try {
@@ -72,7 +83,6 @@ export default function MyCV() {
         toast.success("CV đã được tải lên thành công");
       } catch (cvError) {
         console.error("CV creation error:", cvError);
-        // If server failed but we uploaded to Cloudinary, we should let the user know
         toast.error(`Lỗi khi lưu CV: ${cvError}. File đã được tải lên nhưng không lưu được vào hệ thống.`);
       }
       
@@ -206,7 +216,7 @@ export default function MyCV() {
                       Cập nhật ngày:{" "}
                       {formatDate(
                         new Date(cv.createTime),
-                        "dd/MM/yyyy HH:mm:ss"
+                        "dd/MM/yyyy HH:mm"
                       )}
                     </p>
                   </div>

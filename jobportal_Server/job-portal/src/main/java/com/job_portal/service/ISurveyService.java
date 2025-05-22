@@ -12,12 +12,12 @@ import org.springframework.data.domain.Pageable;
 
 
 public interface ISurveyService {
-//    void checkAndSendSurveys();
+//   void checkAndSendSurveys();
 //    void sendSurveyEmail(JobPost job);
 //    String createEmailContent(JobPost job, String surveyId);
 //    List<Survey> getSurveysByJobPost(JobPost jobPost);
-//    Survey submitSurvey(String surveyId, SurveyDTO surveyDTO);
-//    
+//   Survey submitSurvey(String surveyId, SurveyDTO surveyDTO);
+//   
 //    SurveyStatisticsDTO getSurveyStatistics();
 //    Page<Survey> getAllSurveys(Pageable pageable);
 //    Page<Survey> getSurveysByStatus(String status, Pageable pageable);

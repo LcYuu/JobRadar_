@@ -3,7 +3,9 @@ package com.job_portal.models;
 import java.time.LocalDate;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import jakarta.persistence.CascadeType;
@@ -77,5 +79,12 @@ public class Seeker {
     )
     private List<Skills> skills = new ArrayList<>();
     private boolean isSubcription  = false;
+	@ManyToMany
+	@JoinTable(
+			name="saved_jobs",
+			joinColumns = @JoinColumn(name="seeker_id"),
+			inverseJoinColumns = @JoinColumn(name="post_id")
+			)
+	private Set<JobPost> savedJobs=new HashSet<>();
 
 }
