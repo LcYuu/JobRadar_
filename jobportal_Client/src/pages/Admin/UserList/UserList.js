@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-
 import { Button } from "../../../ui/button";
 import { MoreVertical, Search } from "lucide-react";
 import {
@@ -9,7 +8,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../../ui/dropdown-menu";
-
 import Swal from "sweetalert2";
 import { Input } from "../../../ui/input";
 import { deleteUser, getAllUsers } from "../../../redux/User/user.thunk";
@@ -24,13 +22,25 @@ export default function UserList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [role, setRole] = useState("");
   const [status, setStatus] = useState("");
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   useEffect(() => {
-    if (searchTerm !== undefined && role !== undefined && status !== undefined) {
-      dispatch(getAllUsers({ userName: searchTerm, userTypeId: role, active: status, page : currentPage, size }));
-    }
-  }, [dispatch, currentPage, size]);
-  
+    dispatch(
+      getAllUsers({
+        userName: searchTerm,
+        userTypeId: role,
+        active: status,
+        page: currentPage,
+        size,
+      })
+    );
+  }, [dispatch, currentPage, size, searchTerm, role, status]);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalPages) {
@@ -55,7 +65,15 @@ export default function UserList() {
     }).then((result) => {
       if (result.isConfirmed) {
         dispatch(deleteUser(userId)).then(() => {
-          dispatch(getAllUsers({currentPage, size}));
+          dispatch(
+            getAllUsers({
+              userName: searchTerm,
+              userTypeId: role,
+              active: status,
+              page: currentPage,
+              size,
+            })
+          );
           Swal.fire("Đã xóa!", "Người dùng đã được xóa thành công.", "success");
         });
       }
@@ -64,35 +82,83 @@ export default function UserList() {
 
   const applyFilters = () => {
     setCurrentPage(0);
-    dispatch(getAllUsers({ userName: searchTerm, userTypeId: role, active: status, page : currentPage, size }));
-    
+    dispatch(
+      getAllUsers({
+        userName: searchTerm,
+        userTypeId: role,
+        active: status,
+        page: currentPage,
+        size,
+      })
+    );
   };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "Chưa đăng nhập";
+    try {
+      return new Date(dateString).toLocaleDateString("vi-VN", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return "N/A";
+    }
+  };
+
+  const getRoleName = (userTypeId) => {
+    const roles = { 1: "Admin", 2: "Seeker", 3: "Employer" };
+    return roles[userTypeId] || "N/A";
+  };
+
+  const isMobile = windowWidth < 800;
+  const isMidRange = windowWidth >= 800 && windowWidth <= 1005;
+  const isUpperMidRange = windowWidth > 1005 && windowWidth <= 1485;
+  const isTableLayout = windowWidth > 1485;
+  const fontSize = isMobile ? "text-xs" : isMidRange ? "text-xs" : "text-sm";
+  const padding = isMobile ? "p-2" : isMidRange ? "p-2" : "p-3";
+  const avatarSize = isMobile
+    ? "h-6 w-6"
+    : isMidRange
+    ? "h-8 w-8"
+    : "h-10 w-10";
+  const inputWidth = isMobile ? "w-full" : isMidRange ? "w-48" : "w-64";
+  const cardPadding = isMobile ? "p-2" : isMidRange ? "p-2" : "p-3";
+  const cardGap = isMobile ? "gap-2" : isMidRange ? "gap-2" : "gap-3";
+  const fieldSpacing = isMobile
+    ? "space-y-1"
+    : isMidRange
+    ? "space-y-1"
+    : "space-y-2";
+  const buttonPadding = isMobile || isMidRange ? "px-3 py-1" : "px-4 py-2";
 
   if (loading) return <div className="text-center py-8">Đang tải...</div>;
   if (error)
     return <div className="text-center py-8 text-red-500">{error}</div>;
 
   return (
-    <div className="space-y-6 mt-8">
-      <div className="flex justify-between items-center mb-4">
-        <div className="text-sm text-gray-600">
+    <div className="space-y-6 mt-8 px-4 sm:px-6 md:px-8 overflow-x-hidden max-w-full">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 max-w-full">
+        <div className={`${fontSize} text-gray-600`}>
           Tổng số người dùng: {totalElements || 0}
         </div>
-        <div className="flex items-center gap-4">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+          <div className="relative w-full sm:w-auto">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
             <Input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Tìm kiếm theo tên..."
-              className="pl-8 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 w-80"
+              className={`${inputWidth} pl-8 ${fontSize} max-w-full`}
             />
           </div>
           <select
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            className={`border rounded-lg px-2 py-1 ${fontSize} focus:outline-none focus:ring-2 focus:ring-gray-500 w-full sm:w-auto max-w-full`}
           >
             <option value="">Tất cả loại tài khoản</option>
             <option value="1">Admin</option>
@@ -102,7 +168,7 @@ export default function UserList() {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            className={`border rounded-lg px-2 py-1 ${fontSize} focus:outline-none focus:ring-2 focus:ring-gray-500 w-full sm:w-auto max-w-full`}
           >
             <option value="">Tất cả trạng thái</option>
             <option value="true">Còn hoạt động</option>
@@ -110,138 +176,276 @@ export default function UserList() {
           </select>
           <Button
             onClick={applyFilters}
-            className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className={`bg-purple-500 text-white ${buttonPadding} rounded-lg hover:bg-purple-600 w-full sm:w-auto ${fontSize}`}
           >
             Áp dụng
           </Button>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow">
-        <table className="w-full table-fixed">
-          <thead className="bg-purple-600 text-white text-sm">
-            <tr>
-              <th className="text-left p-4 w-16">STT</th>
-              <th className="text-left p-4 w-24">Avatar</th>
-              <th className="text-left p-4 w-80">Tên</th>
-              <th className="text-left p-4 w-64">Email</th>
-              <th className="text-left p-4">Loại tài khoản</th>
-              <th className="text-left p-4">Trạng thái tài khoản</th>
-              <th className="text-left p-4">Ngày tham gia</th>
-              <th className="text-left p-4">Lần đăng nhập cuối</th>
-              <th className="text-left p-4">Action</th>
-            </tr>
-          </thead>
+      <div className="bg-white rounded-lg shadow overflow-hidden max-w-full">
+        {isTableLayout ? (
+          <div className="overflow-x-auto max-w-full">
+            <table className="w-full table-auto">
+              <thead className="bg-purple-600 text-white sticky top-0 z-10">
+                <tr>
+                  <th className={`${padding} text-left w-16 ${fontSize}`}>
+                    STT
+                  </th>
+                  <th className={`${padding} text-left w-24 ${fontSize}`}>
+                    Avatar
+                  </th>
+                  <th className={`${padding} text-left ${fontSize}`}>Tên</th>
+                  <th className={`${padding} text-left ${fontSize}`}>Email</th>
+                  <th className={`${padding} text-left ${fontSize}`}>
+                    Loại tài khoản
+                  </th>
+                  <th className={`${padding} text-left ${fontSize}`}>
+                    Trạng thái
+                  </th>
+                  <th className={`${padding} text-left ${fontSize}`}>
+                    Ngày tham gia
+                  </th>
+                  <th className={`${padding} text-left ${fontSize}`}>
+                    Lần đăng nhập cuối
+                  </th>
+                  <th className={`${padding} w-20 ${fontSize}`}></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {users && users.length > 0 ? (
+                  users.map((user, index) => (
+                    <tr key={user.userId} className="hover:bg-gray-50">
+                      <td className={`${padding} ${fontSize}`}>
+                        {index + 1 + currentPage * size}
+                      </td>
+                      <td className={`${padding}`}>
+                        {user.avatar ? (
+                          <img
+                            src={user.avatar}
+                            alt={`Avatar của ${user.userName}`}
+                            className={`${avatarSize} rounded-full object-cover`}
+                          />
+                        ) : (
+                          <div
+                            className={`${avatarSize} rounded-full bg-gray-200 flex items-center justify-center`}
+                          >
+                            <span className="text-gray-500 text-lg uppercase">
+                              {user.userName?.charAt(0)}
+                            </span>
+                          </div>
+                        )}
+                      </td>
+                      <td
+                        className={`${padding} ${fontSize} max-w-[200px] truncate whitespace-nowrap overflow-hidden`}
+                      >
+                        {user.userName}
+                      </td>
 
-          <tbody>
+                      <td
+                        className={`${padding} ${fontSize} truncate max-w-[85%]`}
+                      >
+                        {user.email}
+                      </td>
+                      <td className={`${padding} ${fontSize}`}>
+                        <span className="px-1.5 py-0.5 rounded-full">
+                          {user?.userType?.user_type_name ||
+                            getRoleName(user.userTypeId)}
+                        </span>
+                      </td>
+                      <td className={`${padding}`}>
+                        <span
+                          className={`px-2 py-0.5 rounded-full ${fontSize} ${
+                            user.active
+                              ? "bg-emerald-100 text-emerald-600"
+                              : "bg-red-100 text-red-600"
+                          }`}
+                        >
+                          {user.active ? "Active" : "Inactive"}
+                        </span>
+                      </td>
+                      <td className={`${padding} ${fontSize}`}>
+                        {formatDate(user.createDate)}
+                      </td>
+                      <td className={`${padding} ${fontSize}`}>
+                        {formatDate(user.lastLogin)}
+                      </td>
+                      <td className={`${padding}`}>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="hover:bg-gray-200"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className={`${
+                              isMobile || isMidRange ? "text-xs" : "text-sm"
+                            }`}
+                          >
+                            <DropdownMenuItem>
+                              {user.active
+                                ? "Khóa tài khoản"
+                                : "Mở khóa tài khoản"}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteUser(user.userId)}
+                              className="text-red-600"
+                            >
+                              Xóa
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="9" className="text-center p-4 text-gray-500">
+                      Không có dữ liệu
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="space-y-4 p-3 max-w-full">
             {users && users.length > 0 ? (
               users.map((user, index) => (
-                <tr key={user.userId} className="border-b hover:bg-gray-50">
-                  <td className="p-4">{index + 1 + currentPage * size}</td>
-                  <td className="p-4 w-24">
-                    <div className="group relative">
-                      {user.avatar ? (
-                        <img
-                          src={user.avatar}
-                          alt={`Avatar của ${user.userName}`}
-                          className="w-10 h-10 rounded-full object-cover cursor-pointer"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer">
-                          <span className="text-gray-500 text-lg uppercase">
-                            {user.userName?.charAt(0)}
-                          </span>
-                        </div>
-                      )}
-                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        {user.userName}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4 truncate" title={user.userName}>
-                    {user.userName}
-                  </td>
-                  <td className="p-4 truncate" title={user.email}>
-                    {user.email}
-                  </td>
-                  <td
-                    className="p-4 truncate"
-                    title={user?.userType?.user_type_name}
+                <div
+                  key={user.userId}
+                  className="bg-gray-50 rounded-lg shadow-sm overflow-hidden max-w-full"
+                >
+                  <div
+                    className={`${cardPadding} flex flex-col ${cardGap} max-w-full`}
                   >
-                    <span className="px-2 py-1 rounded-full">
-                      {user?.userType?.user_type_name}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-sm ${
-                        user.active
-                          ? "bg-emerald-100 text-emerald-600"
-                          : "bg-red-100 text-red-600"
-                      }`}
-                    >
-                      {user.active ? "Active" : "Inactive"}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    {new Date(user.createDate).toLocaleDateString("vi-VN", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </td>
-                  <td className="p-4">
-                    {user.lastLogin ? (
-                      new Date(user.lastLogin).toLocaleDateString("vi-VN", {
-                        year: "numeric",
-                        month: "2-digit",
-                        day: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
-                    ) : (
-                      <span className="text-gray-400">Chưa đăng nhập</span>
-                    )}
-                  </td>
-                  <td className="p-4">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          {user.active ? "Khóa tài khoản" : "Mở khóa tài khoản"}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleDeleteUser(user.userId)}
-                          className="text-red-600"
+                    <div className="flex items-center justify-between max-w-full">
+                      <div className="flex items-center gap-2 max-w-[85%]">
+                        {user.avatar ? (
+                          <img
+                            src={user.avatar}
+                            alt={`Avatar của ${user.userName}`}
+                            className={`${avatarSize} rounded-full object-cover`}
+                          />
+                        ) : (
+                          <div
+                            className={`${avatarSize} rounded-full bg-gray-200 flex items-center justify-center`}
+                          >
+                            <span className="text-gray-500 text-lg uppercase">
+                              {user.userName?.charAt(0)}
+                            </span>
+                          </div>
+                        )}
+                        <div className="max-w-full">
+                          <span
+                            className={`font-medium ${fontSize} truncate block max-w-full`}
+                          >
+                            {user.userName}
+                          </span>
+                          <p className={`${fontSize} text-gray-500`}>
+                            #{index + 1 + currentPage * size}
+                          </p>
+                        </div>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="hover:bg-gray-200"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="end"
+                          className={`${
+                            isMobile || isMidRange ? "text-xs" : "text-sm"
+                          }`}
                         >
-                          Xóa
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </td>
-                </tr>
+                          <DropdownMenuItem>
+                            {user.active
+                              ? "Khóa tài khoản"
+                              : "Mở khóa tài khoản"}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteUser(user.userId)}
+                            className="text-red-600"
+                          >
+                            Xóa
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                    <div className={`${fieldSpacing} max-w-full`}>
+                      <p
+                        className={`${fontSize} text-gray-500 truncate max-w-[85%]`}
+                      >
+                        <span className="font-medium">Email:</span> {user.email}
+                      </p>
+                      <p className={`${fontSize} text-gray-500`}>
+                        <span className="font-medium">Loại tài khoản:</span>{" "}
+                        <span
+                          className={`inline-flex items-center px-1.5 py-0.5 rounded-full ${
+                            isMobile || isMidRange ? "text-[10px]" : fontSize
+                          }`}
+                        >
+                          {user?.userType?.user_type_name ||
+                            getRoleName(user.userTypeId)}
+                        </span>
+                      </p>
+                      <p className={`${fontSize} text-gray-500`}>
+                        <span className="font-medium">Trạng thái:</span>{" "}
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full ${
+                            isMobile || isMidRange ? "text-[10px]" : fontSize
+                          } ${
+                            user.active
+                              ? "bg-emerald-100 text-emerald-600"
+                              : "bg-red-100 text-red-600"
+                          }`}
+                        >
+                          {user.active ? "Active" : "Inactive"}
+                        </span>
+                      </p>
+                      {!isMobile && (
+                        <p className={`${fontSize} text-gray-500`}>
+                          <span className="font-medium">Ngày tham gia:</span>{" "}
+                          {formatDate(user.createDate)}
+                        </p>
+                      )}
+                      {!isMobile && (
+                        <p className={`${fontSize} text-gray-500`}>
+                          <span className="font-medium">
+                            Lần đăng nhập cuối:
+                          </span>{" "}
+                          {formatDate(user.lastLogin)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
               ))
             ) : (
-              <tr>
-                <td colSpan="8" className="text-center p-4 text-gray-500">
-                  Không có dữ liệu
-                </td>
-              </tr>
+              <div className="text-center py-4 text-gray-500">
+                Không có dữ liệu
+              </div>
             )}
-          </tbody>
-        </table>
+          </div>
+        )}
 
-        <div className="p-4 border-t flex items-center justify-between">
+        <div
+          className={`${padding} border-t flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 max-w-full`}
+        >
           <div className="flex items-center gap-2">
-            <span>Hiển thị</span>
+            <span className={fontSize}>Hiển thị</span>
             <select
-              className="border rounded p-1"
+              className={`border rounded p-1 ${fontSize} max-w-[60px]`}
               value={size}
               onChange={handleSizeChange}
             >
@@ -249,7 +453,7 @@ export default function UserList() {
               <option value={10}>10</option>
               <option value={20}>20</option>
             </select>
-            <span>người dùng mỗi trang</span>
+            <span className={fontSize}>người dùng mỗi trang</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -257,16 +461,21 @@ export default function UserList() {
               variant="outline"
               disabled={currentPage === 0}
               onClick={() => handlePageChange(currentPage - 1)}
+              className={`${fontSize} ${buttonPadding}`}
             >
               Previous
             </Button>
-            <Button variant="outline" className="bg-purple-600 text-white">
+            <Button
+              variant="outline"
+              className={`bg-purple-600 text-white ${fontSize} ${buttonPadding}`}
+            >
               {currentPage + 1}
             </Button>
             <Button
               variant="outline"
               disabled={currentPage >= totalPages - 1}
               onClick={() => handlePageChange(currentPage + 1)}
+              className={`${fontSize} ${buttonPadding}`}
             >
               Next
             </Button>
