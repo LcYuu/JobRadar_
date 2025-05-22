@@ -915,19 +915,17 @@ export default function MyProfile() {
                     )}
                   </div>
                 ) : (
-                    <div>
-                      <Label className="text-sm sm:text-base font-medium" style={{ whiteSpace: "nowrap" }}>
-                        Email
-                      </Label>
-                      <div className="mt-1 flex items-center gap-2">
-                        <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-                        {seeker?.emailContact ? (
-                          <span className="text-sm sm:text-base truncate">{seeker.emailContact}</span>
-                        ) : (
-                          <span className="text-sm text-gray-400 italic">Chưa cập nhật email liên hệ</span>
-                        )}
-                      </div>
-                    </div>
+                  <div>
+                    <Label className="text-sm sm:text-base font-medium" style={{ whiteSpace: "nowrap" }}>
+                      Email
+                    </Label>
+                    <div className="mt-1 flex items-center gap-2">
+                      <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                      {seeker?.emailContact ? (
+                        <span className="text-sm sm:text-base truncate">{seeker.emailContact}</span>
+                      ) : (
+                        <span className="text-sm text-gray-400 italic">Chưa cập nhật email liên hệ</span>
+                      )}
                     </div>
                   </div>
                 )}
@@ -966,9 +964,8 @@ export default function MyProfile() {
                       )}
                     </div>
                   </div>
-                    </div>
-                  </div>
                 )}
+
                 {isEditingInfo ? (
                   <div>
                     <Label className="text-sm sm:text-base font-medium">
@@ -1009,31 +1006,6 @@ export default function MyProfile() {
                       ) : (
                         <span className="text-sm text-gray-400 italic">Chưa cập nhật giới tính</span>
                       )}
-                    <div>
-                      <Label className="text-sm sm:text-base font-medium whitespace-nowrap">
-                        Giới tính
-                      </Label>
-                      <div className="mt-1 flex items-center gap-2">
-                        {seeker?.gender ? (
-                          <>
-                            {seeker.gender === "Nam" ? (
-                              <FontAwesomeIcon
-                                icon={faMars}
-                                className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground"
-                              />
-                            ) : seeker.gender === "Nữ" ? (
-                              <FontAwesomeIcon
-                                icon={faVenus}
-                                className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground"
-                              />
-                            ) : null}
-                            <span className="text-sm sm:text-base">{seeker.gender}</span>
-                          </>
-                        ) : (
-                          <span className="text-sm text-gray-400 italic">Chưa cập nhật giới tính</span>
-                        )}
-                      </div>
-                    </div>
                     </div>
                   </div>
                 )}
@@ -1059,15 +1031,15 @@ export default function MyProfile() {
                     )}
                   </div>
                 ) : (
-                <div>
-                  <Label className="text-sm sm:text-base font-medium whitespace-nowrap">
-                    Ngày sinh
-                  </Label>
-                  <div className="mt-1 flex items-center gap-2">
-                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-                    {seeker?.dateOfBirth ? (
-                      <span className="text-sm sm:text-base">{seeker.dateOfBirth}</span>
-                    ) : (
+                  <div>
+                    <Label className="text-sm sm:text-base font-medium whitespace-nowrap">
+                      Ngày sinh
+                    </Label>
+                    <div className="mt-1 flex items-center gap-2">
+                      <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                      {seeker?.dateOfBirth ? (
+                        <span className="text-sm sm:text-base">{seeker.dateOfBirth}</span>
+                      ) : (
                         <span className="text-sm text-gray-400 italic">Chưa cập nhật ngày sinh</span>
                       )}
                     </div>
@@ -1080,18 +1052,13 @@ export default function MyProfile() {
                       Chuyên ngành
                     </Label>
                     <div
-
                       className="border p-2 sm:p-3 w-full rounded-md cursor-pointer truncate"
-                      onClick={() =>
-                        setIsIndustryDropdownOpen(!isIndustryDropdownOpen)
-                      }
+                      onClick={() => setIsIndustryDropdownOpen(!isIndustryDropdownOpen)}
                     >
                       {(formData?.industryIds ?? []).length > 0
                         ? industries
                             .filter((industry) =>
-                              (formData?.industryIds ?? []).includes(
-                                industry.industryId
-                              )
+                              (formData?.industryIds ?? []).includes(industry.industryId)
                             )
                             .map((industry) => industry.industryName)
                             .join(", ")
@@ -1107,24 +1074,11 @@ export default function MyProfile() {
                             <input
                               type="checkbox"
                               className="w-4 h-4 sm:w-5 sm:h-5 rounded border-gray-300 mr-2 sm:mr-3"
-                              checked={(formData.industryIds ?? []).includes(
-                                industry.industryId
-                              )}
+                              checked={(formData.industryIds ?? []).includes(industry.industryId)}
                               onChange={(e) => {
                                 const newIndustryIds = e.target.checked
-                                  ? [
-                                      ...(formData.industryIds ?? []),
-                                      industry.industryId,
-                                    ],
-                                  }));
-                                } else {
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    industryIds: (
-                                      prev.industryIds ?? []
-                                    ).filter(
-                                      (id) => id !== industry.industryId
-                                    );
+                                  ? [...(formData.industryIds ?? []), industry.industryId]
+                                  : (formData.industryIds ?? []).filter((id) => id !== industry.industryId);
                                 setFormData((prev) => ({
                                   ...prev,
                                   industryIds: newIndustryIds,
@@ -1140,15 +1094,15 @@ export default function MyProfile() {
                     )}
                   </div>
                 ) : (
-                <div>
-                  <Label className="text-sm sm:text-base font-medium whitespace-nowrap">
-                    Chuyên ngành
-                  </Label>
-                  <div className="mt-1 flex items-center gap-2">
-                    <Book className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-                    {seeker?.industry && seeker.industry.length > 0 ? (
-                      <span className="text-sm sm:text-base truncate">{seeker.industry.join(', ')}</span>
-                    ) : (
+                  <div>
+                    <Label className="text-sm sm:text-base font-medium whitespace-nowrap">
+                      Chuyên ngành
+                    </Label>
+                    <div className="mt-1 flex items-center gap-2">
+                      <Book className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                      {seeker?.industry && seeker.industry.length > 0 ? (
+                        <span className="text-sm sm:text-base truncate">{seeker.industry.join(', ')}</span>
+                      ) : (
                         <span className="text-sm text-gray-400 italic">Chưa cập nhật chuyên ngành</span>
                       )}
                     </div>
@@ -1168,7 +1122,6 @@ export default function MyProfile() {
                 </div>
               )}
             </Card>
-
             {/* Social Links */}
             <Card className="bg-white shadow-lg w-full">
               <CardHeader className="flex flex-row items-center justify-between py-2 sm:py-3 px-4 sm:px-6">
@@ -1185,9 +1138,7 @@ export default function MyProfile() {
                 </Button>
               </CardHeader>
               <CardContent className="px-3 sm:px-4 md-custom:px-3.5 pb-4 sm:pb-6 pt-0 space-y-3 sm:space-y-4">
-                {socialLinks &&
-                Array.isArray(socialLinks) &&
-                socialLinks.length > 0 ? (
+                {socialLinks && Array.isArray(socialLinks) && socialLinks.length > 0 ? (
                   socialLinks.map((link, index) => (
                     <div
                       key={index}

@@ -163,6 +163,7 @@ const ReplyItem = ({
   const [nestedReplyText, setNestedReplyText] = useState("");
   const [isNestedReplyAnonymous, setIsNestedReplyAnonymous] = useState(false);
   const [reviews, setReviews] = useState([]);
+
   const handleNestedReplyClick = () => {
     if (!currentUser) {
       toast.warning("Vui lòng đăng nhập để thực hiện thao tác này");
@@ -465,6 +466,7 @@ const ReplyItem = ({
 
 export default function CompanyProfile() {
   const { companyId } = useParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { jobPost = [], error, totalPages = 0, totalElements = 0 } = useSelector((store) => store.jobPost);
   const [reviewsList, setReviewsList] = useState([]);
@@ -629,7 +631,6 @@ export default function CompanyProfile() {
   const { seeker } = useSelector((store) => store.seeker);
   const { user } = useSelector((store) => store.auth);
 
-  const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState("");
   const [isFollowing, setIsFollowing] = useState(false);
