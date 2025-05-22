@@ -345,19 +345,20 @@ public class AuthController {
 		Optional<UserAccount> userAccount = userAccountRepository.findByEmail(email);
 
 		if (userAccount.isEmpty()) {
-			// Trả về JSON thay vì plain text
 			Map<String, String> errorResponse = new HashMap<>();
 			errorResponse.put("error", "Email không tồn tại trong hệ thống");
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
 		}
 		try {
+			// XÓA OTP CŨ TRƯỚC KHI TẠO MỚI
+			forgotPasswordRepository.deleteByUserAccountEmail(email);
+
 			String otp = otpUtil.generateOtp();
 			emailUtil.sendForgotMail(email, otp);
 
 			LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(1);
 			ForgotPassword fp = ForgotPassword.builder().otp(otp).expirationTime(expirationTime)
 					.userAccount(userAccount.get()).build();
-
 
 			forgotPasswordRepository.save(fp);
 
