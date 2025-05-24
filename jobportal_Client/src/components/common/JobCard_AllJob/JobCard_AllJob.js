@@ -6,6 +6,7 @@ import { saveJob } from "../../../redux/Seeker/seeker.thunk";
 import { useDispatch, useSelector } from "react-redux";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import Swal from "sweetalert2";
+import { jobTypeColors } from "../../../configs/constants";
 
 const typeOfWorkStyles = {
   "Toàn thời gian": {
@@ -247,13 +248,21 @@ function JobCard_AllJob({ job }) {
 
   return (
     <Card
-      className="w-full overflow-hidden cursor-pointer shadow-md hover:shadow-lg transition-all duration-300 bg-white group relative"
+      className="w-full overflow-hidden cursor-pointer shadow-md hover:shadow-lg transition-all duration-300 bg-white group relative hover:bg-gray-100"
       onClick={handleCardClick}
       style={{ border: "none" }}
     >
       <CardContent className="p-6">
         <div className="flex flex-col h-full">
-          {/* Top section with job type */}
+          {/* Thêm tag typeOfWork ở đây */}
+          <div className="absolute top-4 right-4 p-1 rounded-md text-xs font-semibold uppercase"
+            style={{
+              backgroundColor: jobTypeColors[job.typeOfWork]?.backgroundColor || "rgba(0,0,0,0.1)",
+              color: jobTypeColors[job.typeOfWork]?.color || "rgb(0,0,0)",
+              border: jobTypeColors[job.typeOfWork]?.border || "1px solid rgb(0,0,0)",
+            }}>
+            {job.typeOfWork}
+          </div>
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-2 mb-4">
             <div className="flex items-center w-full overflow-hidden">
               <div className="w-12 h-12 bg-gray-200 rounded-xl mr-4 flex items-center justify-center flex-shrink-0">
@@ -275,38 +284,16 @@ function JobCard_AllJob({ job }) {
                 </p>
               </div>
             </div>
-            {user && (
-              <button
-                onClick={handleSaveJob}
-                className={`p-2 rounded-full transition-all duration-300 ${
-                  isSaved 
-                    ? 'bg-purple-100 text-purple-600 hover:bg-purple-200' 
-                    : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
-                }`}
-              >
-                {isSaved ? (
-                  <BookmarkCheck className="w-5 h-5" />
-                ) : (
-                  <Bookmark className="w-5 h-5" />
-                )}
-              </button>
-            )}
           </div>
-          <div className="flex flex-wrap gap-2 mb-4">
-            <span
-              className="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap self-start lg:self-center flex-shrink-0"
-              style={
-                typeOfWorkStyles[job.typeOfWork] || {
-                  backgroundColor: "rgba(0, 0, 0, 0.1)",
-                  color: "rgb(0, 0, 0)",
-                  border: "1px solid rgb(0, 0, 0)",
-                }
-              }
-            >
-              {job.typeOfWork}
-            </span>
+          
+          {/* Hiển thị lương trong một tag */}
+          <div className="absolute bottom-4 right-4 p-1 rounded-md text-xs font-semibold">
+            <div className="flex flex-wrap gap-2 overflow-hidden max-h-[40px]">
+              <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-200">
+                Lương: {job.salary ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(job.salary) : "Không có thông tin về lương"}
+              </span>
+            </div>
           </div>
-
           {/* Industry tags */}
           <div className="flex justify-between items-center overflow-hidden">
             <div className="flex flex-wrap gap-2 overflow-hidden max-h-[40px]">
@@ -357,6 +344,28 @@ function JobCard_AllJob({ job }) {
           onFileChange={handleFileChange}
         />
       )}
+
+<div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gray-200 bg-opacity-50">
+  <div className="flex flex-col gap-3">
+    <button
+      onClick={handleCardClick}
+      className="bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white font-medium px-5 py-2 rounded-full shadow-md transition duration-300 ease-in-out"
+    >
+      Xem chi tiết
+    </button>
+    <button
+      onClick={handleSaveJob}
+      className={`bg-gradient-to-r ${
+        isSaved
+          ? "from-red-400 to-red-600 hover:from-red-500 hover:to-red-700"
+          : "from-purple-400 to-purple-600 hover:from-purple-500 hover:to-purple-700"
+      } text-white font-medium px-5 py-2 rounded-full shadow-md transition duration-300 ease-in-out`}
+    >
+      {isSaved ? "Bỏ lưu" : "Lưu bài viết"}
+    </button>
+  </div>
+</div>
+
     </Card>
   );
 }
