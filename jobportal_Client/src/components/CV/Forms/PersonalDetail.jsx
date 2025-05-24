@@ -210,7 +210,7 @@ const PersonalDetail = ({ enabledNext }) => {
         </div>
         <ThemeColor />
       </div>
-
+  
       <div className="flex flex-col items-center mt-5">
         <Avatar
           className="mb-2"
@@ -237,14 +237,17 @@ const PersonalDetail = ({ enabledNext }) => {
           </label>
         </div>
       </div>
-
+  
       <div className="grid grid-cols-2 mt-5 gap-3">
         <div>
-          <label className="text-sm">First Name</label>
+          <label className="text-sm">
+            Tên <span className="text-red-500">*</span>
+          </label>
           <Input
             name="firstName"
             value={cvInfo?.firstName || ""}
             required
+            placeholder="Ví dụ: Thuận"
             onChange={handleInputChange}
             className={errors.firstName ? "border-red-500" : ""}
           />
@@ -253,11 +256,14 @@ const PersonalDetail = ({ enabledNext }) => {
           )}
         </div>
         <div>
-          <label className="text-sm">Last Name</label>
+          <label className="text-sm">
+            Họ <span className="text-red-500">*</span>
+          </label>
           <Input
             name="lastName"
             value={cvInfo?.lastName || ""}
             required
+            placeholder="Ví dụ: Đặng"
             onChange={handleInputChange}
             className={errors.lastName ? "border-red-500" : ""}
           />
@@ -266,11 +272,14 @@ const PersonalDetail = ({ enabledNext }) => {
           )}
         </div>
         <div className="col-span-2">
-          <label className="text-sm">Job Title</label>
+          <label className="text-sm">
+            Vị trí công việc <span className="text-red-500">*</span>
+          </label>
           <Input
             name="jobTitle"
             value={cvInfo?.jobTitle || ""}
             required
+            placeholder="Ví dụ: Software Engineering"
             onChange={handleInputChange}
             className={errors.jobTitle ? "border-red-500" : ""}
           />
@@ -279,25 +288,33 @@ const PersonalDetail = ({ enabledNext }) => {
           )}
         </div>
         <div className="col-span-2">
-          <label className="text-sm">Address</label>
+          <label className="text-sm">
+            Địa chỉ <span className="text-red-500">*</span>
+          </label>
           <Input
             name="address"
             value={cvInfo?.address || ""}
             required
+            placeholder="Ví dụ: Số 1, Võ Văn Ngân, Linh Chiểu, Thủ Đức, TPHCM"
             onChange={handleInputChange}
             className={errors.address ? "border-red-500" : ""}
           />
           {errors.address && (
-            <p className="text-red-500 text-xs mt-1">{errors.address}</p>
+            <p class人不10
+  
+            className="text-red-500 text-xs mt-1">{errors.address}</p>
           )}
         </div>
         <div>
-          <label className="text-sm">Phone</label>
+          <label className="text-sm">
+            Số điện thoại <span className="text-red-500">*</span>
+          </label>
           <Input
             name="phone"
             value={cvInfo?.phone || ""}
             required
             onChange={handleInputChange}
+            placeholder="Ví dụ: 0912345678"
             className={errors.phone ? "border-red-500" : ""}
           />
           {errors.phone && (
@@ -305,11 +322,14 @@ const PersonalDetail = ({ enabledNext }) => {
           )}
         </div>
         <div>
-          <label className="text-sm">Email</label>
+          <label className="text-sm">
+            Email <span className="text-red-500">*</span>
+          </label>
           <Input
             name="email"
             value={cvInfo?.email || ""}
             required
+            placeholder="Ví dụ: test@gmail.com"
             onChange={handleInputChange}
             className={errors.email ? "border-red-500" : ""}
           />
@@ -318,7 +338,7 @@ const PersonalDetail = ({ enabledNext }) => {
           )}
         </div>
       </div>
-
+  
       <div className="mt-3 flex justify-end">
         <Button disabled={saveLoading || updateLoading} onClick={onSave}>
           {saveLoading || updateLoading ? (

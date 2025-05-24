@@ -439,7 +439,7 @@ const EducationForm = ({ enabledNext }) => {
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-semibold text-gray-700 mb-1.5 flex items-center">
-                      Tên trường
+                      Tên trường 
                       <span className="text-red-500 ml-1">*</span>
                     </label>
                     <Input
@@ -448,7 +448,7 @@ const EducationForm = ({ enabledNext }) => {
                       onChange={(event) => handleChange(index, event)}
                       onBlur={() => handleBlur(index, "universityName")}
                       required
-                      placeholder="Nhập tên trường"
+                      placeholder="Ví dụ: HCMUTE"
                       className={`w-full border-gray-300 rounded-md focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition-colors h-10 ${
                         shouldShowError(index, "universityName") ? "border-red-500 focus:border-red-500 focus:ring-red-200" : ""
                       }`}
@@ -461,7 +461,7 @@ const EducationForm = ({ enabledNext }) => {
                   </div>
                   <div>
                     <label className="text-sm font-semibold text-gray-700 mb-1.5 flex items-center">
-                      Bằng cấp
+                      Ngành học (hoặc Tên bằng cấp)
                       <span className="text-red-500 ml-1">*</span>
                     </label>
                     <Input
@@ -470,7 +470,7 @@ const EducationForm = ({ enabledNext }) => {
                       onChange={(event) => handleChange(index, event)}
                       onBlur={() => handleBlur(index, "degree")}
                       required
-                      placeholder="Nhập bằng cấp"
+                      placeholder="Ví dụ: Software Engineering"
                       className={`w-full border-gray-300 rounded-md focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition-colors h-10 ${
                         shouldShowError(index, "degree") ? "border-red-500 focus:border-red-500 focus:ring-red-200" : ""
                       }`}
@@ -490,7 +490,7 @@ const EducationForm = ({ enabledNext }) => {
                     name="major"
                     value={item?.major || ""}
                     onChange={(event) => handleChange(index, event)}
-                    placeholder="Nhập lĩnh vực chuyên môn"
+                    placeholder="Ví dụ: Công nghệ thông tin"
                     className="w-full border-gray-300 rounded-md focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition-colors h-10"
                   />
                 </div>

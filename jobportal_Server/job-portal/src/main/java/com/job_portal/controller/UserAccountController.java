@@ -112,14 +112,14 @@ public class UserAccountController {
 //		return users;
 //	}
 
-//	@GetMapping("/profile")
-//	public ResponseEntity<UserAccount> getUserFromToken(@RequestHeader("Authorization") String jwt) {
-//		UserAccount user = userAccountService.findUserByJwt(jwt);
-//		if (user == null) {
-//			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-//		}
-//		return new ResponseEntity<>(user, HttpStatus.OK);
-//	}
+	@GetMapping("/profile")
+	public ResponseEntity<UserAccount> getUserFromToken(@RequestHeader("Authorization") String jwt) {
+		UserAccount user = userAccountService.findUserByJwt(jwt);
+		if (user == null) {
+			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(user, HttpStatus.OK);
+	}
 
 	@PostMapping("/count-new-accounts-per-day")
 	public ResponseEntity<List<DailyAccountCount>> countNewAccountsPerDay(@RequestParam String startDate,

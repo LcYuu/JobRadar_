@@ -260,6 +260,7 @@ const SkillsForm = ({ enabledNext }) => {
                 <label className="text-xs mb-1">Tên kỹ năng</label>
                 <Input
                   name="name"
+                  placeholder="Ví dụ: ReactJs"
                   value={item?.name || ""}
                   onChange={(event) => handleChange(index, event)}
                 />
