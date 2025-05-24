@@ -237,46 +237,57 @@ public class AuthController {
 
 	@PostMapping("/login")
 	public AuthResponse signin(@RequestBody LoginDTO login) {
-		if (login.getEmail() == null || login.getEmail().isEmpty()) {
-			return new AuthResponse("", "Email không được để trống");
-		}
-		if (login.getPassword() == null || login.getPassword().isEmpty()) {
-			return new AuthResponse("", "Mật khẩu không được để trống");
-		}
-		if (!isValidPassword(login.getPassword())) {
-			return new AuthResponse("",
-					"Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
-		}
-		Optional<UserAccount> userOpt = userAccountRepository.findByEmail(login.getEmail());
-		if (userOpt.isEmpty()) {
-			return new AuthResponse("", "Email hoặc mật khẩu không đúng");
-		}
-		UserAccount user = userOpt.get();
-		if (!user.isActive()) {
-			return new AuthResponse("", "Tài khoản của bạn chưa được xác thực. Vui lòng kiểm tra email và xác thực tài khoản");
-		}
-
-		if (user.getUserType().getUserTypeId() == 3) {
-			if (user.getCompany().getIsBlocked() && user.getCompany().getBlockedUntil() != null
-					&& user.getCompany().getBlockedUntil().isAfter(LocalDateTime.now())) {
-				return new AuthResponse("",
-						"Tài khoản của bạn đã bị khóa tạm thời. Vui lòng kiểm tra email để biết thêm chi tiết");
-			}
-		}
-
-		try {
-			Authentication authentication = authenticate(login.getEmail(), login.getPassword());
-			String token = JwtProvider.generateToken(authentication);
-			user.setLastLogin(LocalDateTime.now());
-			userAccountRepository.save(user);
-			return new AuthResponse(token, "Đăng nhập thành công");
-		} catch (Exception e) {
-			return new AuthResponse("", "Email hoặc mật khẩu không đúng");
-		}
+	    System.out.println("Received login request: " + login.getEmail());
+	    if (login.getEmail() == null || login.getEmail().isEmpty()) {
+	        System.out.println("Email is empty");
+	        return new AuthResponse("", "Email không được để trống");
+	    }
+	    if (login.getPassword() == null || login.getPassword().isEmpty()) {
+	        System.out.println("Password is empty");
+	        return new AuthResponse("", "Mật khẩu không được để trống");
+	    }
+	    if (!isValidPassword(login.getPassword())) {
+	        System.out.println("Invalid password format");
+	        return new AuthResponse("",
+	                "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
+	    }
+	    System.out.println("Checking user account for email: " + login.getEmail());
+	    Optional<UserAccount> userOpt = userAccountRepository.findByEmail(login.getEmail());
+	    if (userOpt.isEmpty()) {
+	        System.out.println("User not found");
+	        return new AuthResponse("", "Email hoặc mật khẩu không đúng");
+	    }
+	    UserAccount user = userOpt.get();
+	    if (!user.isActive()) {
+	        System.out.println("Account not active");
+	        return new AuthResponse("", "Tài khoản của bạn chưa được xác thực. Vui lòng kiểm tra email và xác thực tài khoản");
+	    }
+	    if (user.getUserType().getUserTypeId() == 3) {
+	        System.out.println("Checking employer account");
+	        if (user.getCompany().getIsBlocked() && user.getCompany().getBlockedUntil() != null
+	                && user.getCompany().getBlockedUntil().isAfter(LocalDateTime.now())) {
+	            System.out.println("Employer account is blocked");
+	            return new AuthResponse("",
+	                    "Tài khoản của bạn đã bị khóa tạm thời. Vui lòng kiểm tra email để biết thêm chi tiết");
+	        }
+	    }
+	    try {
+	        System.out.println("Attempting authentication");
+	        Authentication authentication = authenticate(login.getEmail(), login.getPassword());
+	        System.out.println("Authentication successful: " + authentication.getName());
+	        String token = JwtProvider.generateToken(authentication);
+	        user.setLastLogin(LocalDateTime.now());
+	        userAccountRepository.save(user);
+	        return new AuthResponse(token, "Đăng nhập thành công");
+	    } catch (Exception e) {
+	        System.out.println("Authentication failed: " + e.getMessage());
+	        e.printStackTrace();
+	        return new AuthResponse("", "Email hoặc mật khẩu không đúng");
+	    }
 	}
 
 
-	private boolean isValidPassword(String password) {
+	boolean isValidPassword(String password) {
 		String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
 		return password.matches(passwordPattern);
 	}
@@ -457,7 +468,7 @@ public class AuthController {
 	@PostMapping("/login/google")
 	public AuthResponse loginWithGoogle(@RequestBody Map<String, String> requestBody) {
 		try {
-			String googleToken = requestBody.get("token"); // Lấy googleToken từ frontend
+			String googleToken = requestBody.get("token"); 
 
 			// Giải mã token Google (JWT) để lấy thông tin người dùng
 			DecodedJWT decodedJWT = JWT.decode(googleToken);
@@ -569,15 +580,12 @@ public class AuthController {
 
 	@PostMapping("/check-email")
 	public ResponseEntity<Boolean> checkEmailExists(@RequestBody Map<String, String> requestBody) {
-		// 1. Token extraction and decoding
 		String googleToken = requestBody.get("token");
 		DecodedJWT decodedJWT = JWT.decode(googleToken);
 		String email = decodedJWT.getClaim("email").asString();
 
-		// 2. User lookup
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 
-		// 3. Check for associated seeker/company
 		if (user.isPresent()) {
 			UserAccount userAccount = user.get();
 			Optional<Seeker> seekerOptional = seekerRepository.findById(userAccount.getUserId());
@@ -589,12 +597,10 @@ public class AuthController {
 			}
 		}
 
-		// If user doesn't exist or has no seeker/company profile
 		String name = decodedJWT.getClaim("name").asString();
 		Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
 
 		if (userOptional.isEmpty()) {
-			// 5. New user creation
 			UserAccount newUser = new UserAccount();
 			newUser.setEmail(email);
 			newUser.setUserName(name);
@@ -609,7 +615,7 @@ public class AuthController {
 			newUser.setLastLogin(LocalDateTime.now());
 
 			String defaultAddress = ", , ";
-			if (newUser.getUserType() != null) { // Note: This will never execute due to null UserType
+			if (newUser.getUserType() != null) {
 				if (newUser.getUserType().getUserTypeId() == 2) {
 					Seeker seeker = new Seeker();
 					seeker.setUserAccount(newUser);

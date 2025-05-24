@@ -25,6 +25,7 @@ export const loginAction = createAsyncThunk(
     try {
       const { data } = await axios.post(`${API_BASE_URL}/auth/login`, loginData);
 
+      console.log("🚀 ~ data:", data)
       if (data.token) {
         localStorage.setItem('jwt', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));

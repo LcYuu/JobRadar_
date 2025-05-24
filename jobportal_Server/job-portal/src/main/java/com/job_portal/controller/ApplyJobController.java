@@ -44,6 +44,7 @@ import com.social.exceptions.AllExceptions;
 public class ApplyJobController {
 	@Autowired
 	ApplyJobRepository applyJobRepository;
+	
 	@Autowired
 	IApplyJobService applyJobService;
 	@Autowired

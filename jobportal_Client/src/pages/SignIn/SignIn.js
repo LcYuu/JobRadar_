@@ -76,6 +76,7 @@ export default function SignInForm() {
 
       if (payload?.success) {
         const user = payload.user;
+        console.log("🚀 ~ handleSubmit ~ user:", user)
         setIsModalOpen(true);
         setLoginStatus("success");
 
