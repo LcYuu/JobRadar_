@@ -488,7 +488,7 @@ const ExperienceForm = ({ enabledNext }) => {
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-semibold text-gray-700 mb-1.5 flex items-center">
-                      Tên công việc
+                      Tên công việc (hoặc Tên project)
                       <span className="text-red-500 ml-1">*</span>
                     </label>
                     <Input
@@ -497,7 +497,7 @@ const ExperienceForm = ({ enabledNext }) => {
                       onChange={(event) => handleChange(index, event)}
                       onBlur={() => handleBlur(index, "title")}
                       required
-                      placeholder="Nhập tên công việc"
+                      placeholder="Ví dụ: Backend Developer"
                       className={`w-full border-gray-300 rounded-md focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition-colors h-10 ${
                         shouldShowError(index, "title") ? "border-red-500 focus:border-red-500 focus:ring-red-200" : ""
                       }`}
@@ -510,7 +510,7 @@ const ExperienceForm = ({ enabledNext }) => {
                   </div>
                   <div>
                     <label className="text-sm font-semibold text-gray-700 mb-1.5 flex items-center">
-                      Tên công ty
+                      Tên công ty (hoặc Tên công nghệ)
                       <span className="text-red-500 ml-1">*</span>
                     </label>
                     <Input
@@ -519,7 +519,7 @@ const ExperienceForm = ({ enabledNext }) => {
                       onChange={(event) => handleChange(index, event)}
                       onBlur={() => handleBlur(index, "companyName")}
                       required
-                      placeholder="Nhập tên công ty"
+                      placeholder="Ví dụ: FPT Software"
                       className={`w-full border-gray-300 rounded-md focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition-colors h-10 ${
                         shouldShowError(index, "companyName") ? "border-red-500 focus:border-red-500 focus:ring-red-200" : ""
                       }`}
@@ -534,13 +534,13 @@ const ExperienceForm = ({ enabledNext }) => {
                 <div className="grid sm:grid-cols-3 gap-4">
                   <div>
                     <label className="text-sm font-semibold text-gray-700 mb-1.5">
-                      Vị trí
+                      Vị trí (hoặc Vai trò)
                     </label>
                     <Input
                       name="address"
                       value={item?.address || ""}
                       onChange={(event) => handleChange(index, event)}
-                      placeholder="Nhập vị trí làm việc"
+                      placeholder="Ví dụ: Thực tâp sinh"
                       className="w-full border-gray-300 rounded-md focus:ring-2 focus:ring-purple-300 focus:border-purple-500 transition-colors h-10"
                     />
                   </div>
@@ -611,7 +611,7 @@ const ExperienceForm = ({ enabledNext }) => {
                 </div>
                 <div>
                   <label className="text-sm font-semibold text-gray-700 mb-1.5 flex items-center">
-                    Mô tả công việc
+                    Mô tả công việc (hoặc Mô tả project)
                     <span className="text-red-500 ml-1">*</span>
                   </label>
                   <RichTextEditor

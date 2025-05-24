@@ -15,6 +15,7 @@ const SummaryForm = ({ enabledNext }) => {
   const [summery, setSummary] = useState(cvInfo?.summery || "");
   const [loading, setLoading] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
+  const [summeryError, setSummeryError] = useState("");
   const dispatch = useDispatch();
   const { genCv } = useSelector((store) => store.genCV);
 
@@ -33,6 +34,10 @@ const SummaryForm = ({ enabledNext }) => {
         if (content.summery !== undefined) {
           console.log("Syncing summery from Redux:", content.summery);
           setSummary(content.summery);
+          // Clear error if summary is valid
+          if (content.summery.trim()) {
+            setSummeryError("");
+          }
         }
       } catch (error) {
         console.error("Error parsing cvContent in SummaryForm:", error);
@@ -45,13 +50,30 @@ const SummaryForm = ({ enabledNext }) => {
     if (cvInfo?.summery !== undefined && !isUpdating.current) {
       console.log("Syncing summery from Context:", cvInfo.summery);
       setSummary(cvInfo.summery);
+      // Clear error if summary is valid
+      if (cvInfo.summery.trim()) {
+        setSummeryError("");
+      }
     }
   }, [cvInfo?.summery]);
+
+  const validateSummary = (value) => {
+    // Strip HTML tags if RichTextEditor returns HTML
+    const plainText = value.replace(/<[^>]+>/g, "").trim();
+    if (!plainText) {
+      return "Vui lòng nhập mô tả về bản thân";
+    }
+    return "";
+  };
 
   const handleSummaryChange = (e) => {
     const newSummary = e.target.value;
     console.log("New summery input:", newSummary);
     setSummary(newSummary);
+
+    // Real-time validation
+    const error = validateSummary(newSummary);
+    setSummeryError(error);
 
     // Set flag to prevent infinite loop
     isUpdating.current = true;
@@ -67,16 +89,23 @@ const SummaryForm = ({ enabledNext }) => {
       isUpdating.current = false;
     }, 0);
 
-    // Disable next button when changes are made
-    if (enabledNext) enabledNext(false);
+    // Enable/disable next button based on validation
+    if (enabledNext) enabledNext(!error && newSummary.trim());
+  };
+
+  const handleSummaryBlur = () => {
+    // Validate on blur
+    const error = validateSummary(summery);
+    setSummeryError(error);
   };
 
   const onSave = async () => {
     console.log("SummaryForm: onSave bắt đầu, summery:", summery);
 
     // Validate summery
-    if (!summery.trim()) {
-      toast.error("Vui lòng nhập mô tả về bản thân");
+    const error = validateSummary(summery);
+    if (error) {
+      setSummeryError(error);
       return;
     }
 
@@ -151,17 +180,23 @@ const SummaryForm = ({ enabledNext }) => {
 
         <LoadingOverlay isLoading={loading || updateLoading} message="Đang lưu thông tin..." />
 
-        <h3 className="font-bold text-lg">About me</h3>
+        <h3 className="font-bold text-lg">Giới thiệu</h3>
         <p>Thêm giới thiệu về bản thân</p>
 
         <div className="mt-7">
           <div className="flex justify-between items-end">
-            <label>Thêm giới thiệu</label>
+            <label>
+              Thêm giới thiệu <span className="text-red-500">*</span>
+            </label>
           </div>
           <RichTextEditor
             onRichTextEditorChange={handleSummaryChange}
+            onBlur={handleSummaryBlur}
             defaultValue={summery}
           />
+          {summeryError && (
+            <p className="text-red-500 text-xs mt-1">{summeryError}</p>
+          )}
         </div>
         <div className="mt-2 flex justify-end">
           <Button
@@ -175,7 +210,7 @@ const SummaryForm = ({ enabledNext }) => {
                 <span>Đang lưu...</span>
               </>
             ) : (
-              "Save"
+              "Lưu"
             )}
           </Button>
         </div>
