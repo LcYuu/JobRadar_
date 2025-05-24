@@ -2,13 +2,15 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
 import { Badge } from "../../../ui/badge";
 import { useNavigate } from "react-router-dom";
-import "./JobCard.css"; // Đảm bảo tệp CSS được import
-import { saveJob } from "../../../redux/Seeker/seeker.thunk"; // Đảm bảo import đúng
+import "./JobCard.css";
+import { saveJob } from "../../../redux/Seeker/seeker.thunk";
 import { useDispatch, useSelector } from "react-redux";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Swal from "sweetalert2";
+
 import { jobTypeColors } from "../../../configs/constants";
+
 
 const categoryStyles = {
   "Thiết kế": {
@@ -33,32 +35,59 @@ const categoryStyles = {
   },
 };
 
-function JobCardContent({ company, location, category = []  }) {
+const jobTypeColors = {
+  "Toàn thời gian": "#e68b0b",
+  "Bán thời gian": "#fbbf24",
+  "Từ xa": "#3b82f6",
+  "Thực tập sinh": "#7c3aed",
+};
+
+function JobCardContent({ company, location, category = [], jobType }) {
   return (
-    <>
+    <div className="relative">
       <div className="flex items-center justify-between mb-2">
         <span className="text-muted-foreground text-sm font-semibold inline-block max-w-[150px] truncate">
           {company}
         </span>
         <span className="text-muted-foreground text-sm">{location}</span>
       </div>
-      <div className="flex space-x-2">
-      {category.map((cat, index) => (
-          <Badge
-            key={index}
-            style={
-              categoryStyles[cat] || {
-                backgroundColor: "rgba(0, 0, 0, 0.1)",
-                color: "black",
+      <div className="relative flex justify-between items-start">
+        <div className="flex space-x-2">
+          {category.map((cat, index) => (
+            <Badge
+              key={index}
+              style={
+                categoryStyles[cat] || {
+                  backgroundColor: "rgba(0, 0, 0, 0.1)",
+                  color: "black",
+                }
               }
-            }
-            variant="secondary"
-          >
-            {cat}
-          </Badge>
-        ))}
+              variant="secondary"
+            >
+              {cat}
+            </Badge>
+          ))}
+        </div>
+        <div
+          className="text-white border px-2 py-1 rounded-md text-xs font-semibold uppercase"
+          style={{ backgroundColor: jobTypeColors[jobType] || "#6b7280" }}
+        >
+          {jobType}
+        </div>
       </div>
-    </>
+    </div>
+  );
+}
+
+function JobCardHeader({ companyLogo }) {
+  return (
+    <div className="mb-4">
+      <img
+        src={companyLogo}
+        alt="Company Logo"
+        className="w-12 h-12 rounded-lg"
+      />
+    </div>
   );
 }
 
@@ -75,7 +104,8 @@ export default function JobCard({
   const dispatch = useDispatch();
   const { savedJobs } = useSelector((store) => store.seeker);
   const isSaved = savedJobs?.some((savedJob) => savedJob.postId === postId);
-  const {user} = useSelector((store=>store.auth));
+  const { user } = useSelector((store) => store.auth);
+
   const handleCardClick = () => {
     navigate(`/jobs/job-detail/${postId}`);
   };
@@ -92,7 +122,7 @@ export default function JobCard({
       });
       return;
     }
-  
+
     try {
       const result = await dispatch(saveJob(postId)).unwrap();
       if (result.action === "saved") {
@@ -104,7 +134,7 @@ export default function JobCard({
           confirmButtonColor: "#9333ea",
           timer: 1500,
           timerProgressBar: true,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
       } else {
         await Swal.fire({
@@ -115,7 +145,7 @@ export default function JobCard({
           confirmButtonColor: "#9333ea",
           timer: 1500,
           timerProgressBar: true,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
       }
     } catch (error) {
@@ -124,7 +154,7 @@ export default function JobCard({
         text: "Có lỗi xảy ra khi thực hiện thao tác",
         icon: "error",
         confirmButtonText: "Đóng",
-        confirmButtonColor: "#9333ea"
+        confirmButtonColor: "#9333ea",
       });
     }
   };
@@ -135,18 +165,33 @@ export default function JobCard({
       className="card cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-500 ease-in-out relative group hover:bg-gray-100"
     >
       <CardHeader className="card-header">
-        <JobCardHeader
-          jobType={jobType}
-          companyLogo={companyLogo}
-          className="rounded-full"
-        />
+        <JobCardHeader companyLogo={companyLogo} />
         <CardTitle>{jobTitle}</CardTitle>
+
+        {user && (
+          <button
+            onClick={handleSaveJob}
+            className={`absolute top-4 right-4 p-2 rounded-full transition-all duration-300 ${
+              isSaved
+                ? "bg-purple-100 text-purple-600 hover:bg-purple-200"
+                : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+            }`}
+          >
+            {isSaved ? (
+              <BookmarkCheck className="w-5 h-5" />
+            ) : (
+              <Bookmark className="w-5 h-5" />
+            )}
+          </button>
+        )}
+
       </CardHeader>
       <CardContent className="card-content">
         <JobCardContent
           company={company}
           location={location}
           category={category}
+          jobType={jobType}
         />
       </CardContent>
       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gray-200 bg-opacity-50">
@@ -174,24 +219,3 @@ export default function JobCard({
   );
 }
 
-function JobCardHeader({ jobType, companyLogo }) {
-  return (
-    <div className="flex justify-between items-start mb-4">
-      <img
-        src={companyLogo}
-        alt="Company Logo"
-        className="w-12 h-12 rounded-lg"
-      />
-      <div
-        className={`border px-2 py-1 rounded-md text-xs font-semibold uppercase`}
-        style={{
-          backgroundColor: jobTypeColors[jobType]?.backgroundColor || "#6b7280",
-          color: jobTypeColors[jobType]?.color || "#6b7280",
-          border: jobTypeColors[jobType]?.border || "1px solid #6b7280"
-        }}
-      >
-        {jobType}
-      </div>  
-    </div>
-  );
-}

@@ -1,25 +1,31 @@
 import React, { useContext, useState } from "react";
 import {
   BtnBold,
-  BtnBulletList,
-  BtnClearFormatting,
   BtnItalic,
-  BtnLink,
-  BtnNumberedList,
-  BtnStrikeThrough,
   BtnUnderline,
+  BtnStrikeThrough,
+  BtnNumberedList,
+  BtnBulletList,
+  BtnLink,
+  BtnClearFormatting,
   Editor,
   EditorProvider,
   Toolbar,
 } from "react-simple-wysiwyg";
 import { CVInfoContext } from "../../context/CVInfoContext";
 
-const RichTextEditor = ({ onRichTextEditorChange, defaultValue }) => {
+const RichTextEditor = ({
+  onRichTextEditorChange,
+  defaultValue,
+  placeholder,
+  className,
+  onBlur,
+}) => {
   const [value, setValue] = useState(defaultValue || "");
   const { cvInfo } = useContext(CVInfoContext);
 
   return (
-    <div className="mt-5">
+    <div className={`mt-5 ${className}`}>
       <EditorProvider>
         <Editor
           value={value}
@@ -27,7 +33,11 @@ const RichTextEditor = ({ onRichTextEditorChange, defaultValue }) => {
             setValue(e.target.value);
             onRichTextEditorChange(e);
           }}
-          containerProps={{ style: { minHeight: "100px", resize: "vertical" } }}
+          onBlur={onBlur}
+          containerProps={{
+            style: { minHeight: "100px", resize: "vertical" },
+            className: "rs-wysiwyg-editor",
+          }}
         >
           <Toolbar>
             <BtnBold />
@@ -41,6 +51,13 @@ const RichTextEditor = ({ onRichTextEditorChange, defaultValue }) => {
           </Toolbar>
         </Editor>
       </EditorProvider>
+      <style jsx>{`
+        .rs-wysiwyg-editor:empty:before {
+          content: "${placeholder || "Nhập nội dung..."}";
+          color: #a0aec0; /* Màu xám nhạt giống placeholder */
+          font-style: italic;
+        }
+      `}</style>
     </div>
   );
 };
