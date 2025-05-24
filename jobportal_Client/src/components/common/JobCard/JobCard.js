@@ -9,6 +9,9 @@ import { Bookmark, BookmarkCheck } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Swal from "sweetalert2";
 
+import { jobTypeColors } from "../../../configs/constants";
+
+
 const categoryStyles = {
   "Thiết kế": {
     backgroundColor: "rgba(0, 128, 0, 0.1)",
@@ -159,11 +162,12 @@ export default function JobCard({
   return (
     <Card
       onClick={handleCardClick}
-      className="card cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-500 ease-in-out relative"
+      className="card cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-500 ease-in-out relative group hover:bg-gray-100"
     >
       <CardHeader className="card-header">
         <JobCardHeader companyLogo={companyLogo} />
         <CardTitle>{jobTitle}</CardTitle>
+
         {user && (
           <button
             onClick={handleSaveJob}
@@ -180,6 +184,7 @@ export default function JobCard({
             )}
           </button>
         )}
+
       </CardHeader>
       <CardContent className="card-content">
         <JobCardContent
@@ -189,6 +194,28 @@ export default function JobCard({
           jobType={jobType}
         />
       </CardContent>
+      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gray-200 bg-opacity-50">
+      <div className="flex flex-col gap-3">
+        <button
+          onClick={handleCardClick}
+          className="bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white font-medium px-5 py-2 rounded-full shadow-md transition duration-300 ease-in-out"
+        >
+          Xem chi tiết
+        </button>
+        <button
+          onClick={handleSaveJob}
+          className={`bg-gradient-to-r ${
+            isSaved
+              ? "from-red-400 to-red-600 hover:from-red-500 hover:to-red-700"
+              : "from-purple-400 to-purple-600 hover:from-purple-500 hover:to-purple-700"
+          } text-white font-medium px-5 py-2 rounded-full shadow-md transition duration-300 ease-in-out`}
+        >
+          {isSaved ? "Bỏ lưu" : "Lưu bài viết"}
+        </button>
+      </div>
+    </div>
+
     </Card>
   );
 }
+
