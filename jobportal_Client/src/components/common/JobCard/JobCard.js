@@ -35,12 +35,7 @@ const categoryStyles = {
   },
 };
 
-const jobTypeColors = {
-  "Toàn thời gian": "#e68b0b",
-  "Bán thời gian": "#fbbf24",
-  "Từ xa": "#3b82f6",
-  "Thực tập sinh": "#7c3aed",
-};
+
 
 function JobCardContent({ company, location, category = [], jobType }) {
   return (

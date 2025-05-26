@@ -48,14 +48,13 @@ public class GeneratedCVController {
 	}
 
 	@GetMapping("/get-gencv-by-id/{genCvId}")
-	public ResponseEntity<GeneratedCV> getGenCVById(@PathVariable("genCvId") Integer genCvId) {
-		Optional<GeneratedCV> cv = generatedCVRepository.findById(genCvId);
-
-		if (cv.isPresent()) {
-			return ResponseEntity.ok(cv.get());
-		} else {
-			return ResponseEntity.noContent().build();
-		}
+	public ResponseEntity<?> getGenCVById(@PathVariable("genCvId") Integer genCvId) {
+	    Optional<GeneratedCV> cv = generatedCVRepository.findById(genCvId);
+	    if (cv.isPresent()) {
+	        return ResponseEntity.ok(cv.get());
+	    } else {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("CV not found");
+	    }
 	}
 
 	@PostMapping("/create-cv")
@@ -107,7 +106,7 @@ public class GeneratedCVController {
 	public ResponseEntity<String> updateCV(@PathVariable Integer genCvId, @RequestBody GeneratedCVDTO genCVdto) {
 		boolean isUpdated = generatedCVService.updateGeneratedCV(genCvId, genCVdto);
 		if (isUpdated) {
-			return new ResponseEntity<>("Cập nhật thành công", HttpStatus.CREATED);
+			return new ResponseEntity<>("Cập nhật thành công", HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>("Cập nhật thất bại", HttpStatus.BAD_REQUEST);
 		}

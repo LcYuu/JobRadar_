@@ -44,11 +44,6 @@ public class ImageCompanyController {
 	@Autowired
 	private UserAccountRepository userAccountRepository;
 
-	@GetMapping("/get-all")
-	public ResponseEntity<List<ImageCompany>> getImage() {
-		List<ImageCompany> imgs = imageRepository.findAll();
-		return new ResponseEntity<>(imgs, HttpStatus.OK);
-	}
 
 	@PostMapping("/create-image")
 	public ResponseEntity<String> createImage(@RequestHeader("Authorization") String jwt, 
@@ -90,20 +85,5 @@ public class ImageCompanyController {
 		}
 	}
 
-	@GetMapping("/searchImage")
-	public ResponseEntity<Object> searchImage(@RequestHeader("Authorization") String jwt) {
-		String email = JwtProvider.getEmailFromJwtToken(jwt);
-		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-		try {
-			List<ImageCompany> imgs = imageCompanyService.findImgByCompanyId(user.get().getUserId());
-			return ResponseEntity.ok(imgs);
-		} catch (AllExceptions e) {
-			// Trả về thông báo từ service
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-		} catch (Exception e) {
-			// Trả về thông báo lỗi chung
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
-		}
-	}
+
 }

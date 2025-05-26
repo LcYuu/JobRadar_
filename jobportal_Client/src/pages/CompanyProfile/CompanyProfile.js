@@ -852,10 +852,10 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
       const mess = isFollowing
         ? "Bỏ theo dõi thành công!"
         : "Theo dõi thành công!";
-      toast(mess);
+      toast.success(mess);
     } catch (error) {
       console.error("Có lỗi xảy ra khi theo dõi công ty:", error);
-      toast("Có lỗi xảy ra, vui lòng thử lại!");
+      toast.error("Có lỗi xảy ra, vui lòng thử lại!");
     }
   };
 

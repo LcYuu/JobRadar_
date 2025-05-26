@@ -24,7 +24,7 @@ public interface IJobPostService {
 //	public List<JobPost> findBySalaryGreaterThanEqual(Long minSalary) throws AllExceptions;
 //	public List<JobPost> findBySalaryLessThanEqual(Long maxSalary) throws AllExceptions;
 //	public List<JobPost> findBySalaryBetween(Long minSalary, Long maxSalary) throws AllExceptions;
-	public JobPost approveJob(UUID postId);
+	public boolean approveJob(UUID postId);
 	public JobPost searchJobByPostId(UUID postId) throws AllExceptions;
 	public List<DailyJobCount> getDailyJobPostCounts(LocalDateTime startDate, LocalDateTime endDate);
 	public Page<JobPost>findByIsApprove(Pageable pageable);
