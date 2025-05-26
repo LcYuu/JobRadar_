@@ -344,4 +344,47 @@ public class SeekerControllerTest {
 
         verify(notificationService, times(1)).updateNotificationReadStatus(notificationId);
     }
+    
+    @Test
+    @WithMockUser(username = USER_EMAIL)
+    void testSaveJob_Success() throws Exception {
+        UUID postId = UUID.randomUUID();
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(userAccount));
+        when(seekerService.saveJob(postId, userId)).thenReturn(result);
+
+        // Perform the PUT request
+        mockMvc.perform(put("/seeker/save-job/{postId}", postId)
+                .with(jwt().jwt(jwt -> jwt.claim("email", USER_EMAIL)))
+                .header("Authorization", jwtToken)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.success").value(true));
+
+        // Verify interactions
+        verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(seekerService, times(1)).saveJob(postId, userId);
+    }
+    
+//    @Test
+//    @WithMockUser(username = USER_EMAIL)
+//    void testSaveJob_UserAccountNotFound() throws Exception {
+//        UUID postId = UUID.randomUUID();
+//
+//
+//        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.empty());
+//
+//        // Perform the PUT request
+//        mockMvc.perform(put("/seeker/save-job/{postId}", postId)
+//                .with(jwt().jwt(jwt -> jwt.claim("email", USER_EMAIL)))
+//                .header("Authorization", jwtToken)
+//                .contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isNotFound());
+//
+//        // Verify interactions
+//        verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+//        verify(seekerService, times(0)).saveJob(any(), any());
+//    }
 }

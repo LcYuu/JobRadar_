@@ -25,6 +25,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -125,13 +128,33 @@ public class CVControllerTest {
         user.setUserId(USER_ID);
         user.setEmail(USER_EMAIL);
 
-        try (var mockedStatic = mockStatic(JwtProvider.class)) {
-            mockedStatic.when(() -> JwtProvider.getEmailFromJwtToken(JWT_TOKEN.replace("Bearer ", "")))
-                    .thenReturn(USER_EMAIL);
-            when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
-            when(cvService.createCV(any(CVDTO.class), eq(USER_ID))).thenReturn(true);
+        // Mock File object
+        File file = mock(File.class);
+        when(file.exists()).thenReturn(true);
+        when(file.getAbsolutePath()).thenReturn(CV_PATH);
 
-            // Act & Assert
+        try (var mockedJwtStatic = mockStatic(JwtProvider.class);
+             var mockedFilesStatic = mockStatic(Files.class)) {
+            // Mock JwtProvider
+            mockedJwtStatic.when(() -> JwtProvider.getEmailFromJwtToken(JWT_TOKEN.replace("Bearer ", "")))
+                    .thenReturn(USER_EMAIL);
+
+            // Mock Files.size
+            mockedFilesStatic.when(() -> Files.size(any(Path.class)))
+                    .thenReturn(5 * 1024 * 1024L); // 5MB in bytes
+
+            // Mock repository and service
+            when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
+            when(cvService.createCV(any(CVDTO.class), eq(USER_ID))).thenAnswer(invocation -> {
+                CVDTO dto = invocation.getArgument(0);
+                // Giả lập logic kiểm tra tệp trong cvService
+                if (dto.getPathCV().equals(CV_PATH)) {
+                    return true;
+                }
+                throw new IllegalArgumentException("Đường dẫn CV không hợp lệ");
+            });
+
+            // Act
             ResultActions result = mockMvc.perform(post("/cv/create-cv")
                     .header("Authorization", JWT_TOKEN)
                     .with(csrf())
@@ -139,12 +162,14 @@ public class CVControllerTest {
                     .content(objectMapper.writeValueAsString(cvDto)))
                     .andDo(print());
 
+            // Assert
             result.andExpect(status().isCreated())
                     .andExpect(content().string("Tạo CV thành công"));
 
             // Log response
             System.out.println("Response Body: " + result.andReturn().getResponse().getContentAsString());
 
+            // Verify interactions
             verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
             verify(cvService, times(1)).createCV(any(CVDTO.class), eq(USER_ID));
         }
@@ -178,18 +203,36 @@ public class CVControllerTest {
 
     @Test
     @WithMockUser(username = USER_EMAIL, roles = {"USER"})
-    void testCreateCV_UserNotFound() throws Exception {
+    void testCreateCV_FileLargerThan5MB_Fails() throws Exception {
         // Arrange
         CVDTO cvDto = new CVDTO();
         cvDto.setCvName(CV_NAME);
         cvDto.setPathCV(CV_PATH);
 
-        try (var mockedStatic = mockStatic(JwtProvider.class)) {
-            mockedStatic.when(() -> JwtProvider.getEmailFromJwtToken(JWT_TOKEN.replace("Bearer ", "")))
-                    .thenReturn(USER_EMAIL);
-            when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.empty());
+        UserAccount user = new UserAccount();
+        user.setUserId(USER_ID);
+        user.setEmail(USER_EMAIL);
 
-            // Act & Assert
+        // Mock File object
+        File file = mock(File.class);
+        when(file.exists()).thenReturn(true);
+        when(file.getAbsolutePath()).thenReturn(CV_PATH);
+        when(file.toPath()).thenReturn(Path.of(CV_PATH));
+
+        try (var mockedJwtStatic = mockStatic(JwtProvider.class);
+             var mockedFilesStatic = mockStatic(Files.class)) {
+            // Mock JwtProvider
+            mockedJwtStatic.when(() -> JwtProvider.getEmailFromJwtToken(JWT_TOKEN.replace("Bearer ", "")))
+                    .thenReturn(USER_EMAIL);
+
+            // Mock Files.size to return 6MB
+            mockedFilesStatic.when(() -> Files.size(any(Path.class)))
+                    .thenReturn(6 * 1024 * 1024L); // 6MB in bytes
+
+            // Mock repository (cvService.createCV không được gọi vì lỗi kích thước)
+            when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
+
+            // Act
             ResultActions result = mockMvc.perform(post("/cv/create-cv")
                     .header("Authorization", JWT_TOKEN)
                     .with(csrf())
@@ -197,14 +240,14 @@ public class CVControllerTest {
                     .content(objectMapper.writeValueAsString(cvDto)))
                     .andDo(print());
 
-            result.andExpect(status().isNotFound())
-                    .andExpect(content().string("Không tìm thấy thông tin người dùng"));
+            // Assert
+            result.andExpect(status().isBadRequest())
+                    .andExpect(content().string("File CV phải có kích thước nhỏ hơn hoặc bằng 5MB"));
 
             // Log response
             System.out.println("Response Body: " + result.andReturn().getResponse().getContentAsString());
 
-            verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
-            verify(cvService, never()).createCV(any(), any());
+            verify(cvService, never()).createCV(any(CVDTO.class), eq(USER_ID)); // cvService không được gọi
         }
     }
 

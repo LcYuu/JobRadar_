@@ -247,18 +247,17 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 	}
 
 	@Override
-	public JobPost approveJob(UUID postId) {
+	public boolean approveJob(UUID postId) {
 		Optional<JobPost> jobPostOpt = jobPostRepository.findById(postId);
+		boolean isApprove = false;
 		if (jobPostOpt.isPresent()) {
 			JobPost jobPost = jobPostOpt.get();
 			jobPost.setApprove(true); // Đặt isApprove thành true
 			jobPost.setStatus("Đang mở");
-
-			// Lưu vào database
 			jobPostRepository.save(jobPost);
-			this.delete("searchJobs:*");
+			isApprove = true;
 		}
-		return null; 
+		return isApprove; 
 
 	}
 

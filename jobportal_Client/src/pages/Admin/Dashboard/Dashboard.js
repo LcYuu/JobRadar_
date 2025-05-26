@@ -13,7 +13,6 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-
 import { useNavigate } from "react-router-dom";
 import {
   getActiveJobs,
@@ -113,7 +112,7 @@ export default function AdminDashboard() {
     let sampleInterval;
 
     if (isMobile) {
-      sampleInterval = Math.ceil(dailyStats.length / 3); // ~3 points on mobile (pre-responsive)
+      sampleInterval = Math.ceil(dailyStats.length / 3); // ~3 points on mobile
     } else if (isMidRange) {
       // Linearly interpolate number of points between 1020px (~all points) and 800px (~4 points)
       const maxWidth = 1020;
@@ -254,13 +253,12 @@ export default function AdminDashboard() {
         </div>
 
         <Card className={`${cardPadding} mt-4 md:mt-6 max-w-full overflow-hidden`}>
-          <div className="space-y-4 md:space-y-6">
+          <div className="space-y-4 md:space-y-6 mb-3 sm:mb-4 md:mb-6">
             <h2 className={`${titleFontSize} font-semibold`}>
               Thống kê người dùng và bài viết mới
             </h2>
             <div className="flex flex-col md:flex-row md:items-center justify-between md:gap-4">
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-gray-500" />
                 <input
                   type="date"
                   name="startDate"

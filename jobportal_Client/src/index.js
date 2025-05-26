@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
-import { BrowserRouter, useLocation } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import reportWebVitals from "./reportWebVitals";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
@@ -10,10 +10,8 @@ import ErrorBoundary from "./error";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { isTokenExpired } from "./utils/tokenUtils";
-import Chatbot from "./components/ChatBot/ChatBot";
 import {
   ChatbotProvider,
-  useChatbot,
 } from "./components/ChatBot/ChatBotContext";
 
 // Lấy dữ liệu user từ localStorage
@@ -40,17 +38,6 @@ const checkTokenOnLoad = () => {
   return true;
 };
 
-// Thành phần kiểm tra hiển thị Chatbot
-const ChatbotWithRouteCheck = () => {
-  const { restrictedPaths } = useChatbot();
-  const location = useLocation();
-  const shouldShowChatbot = !restrictedPaths.includes(location.pathname);
-
-  return user === null || ((user && user.userType.userTypeId === 2) && shouldShowChatbot) ? (
-    <Chatbot />
-  ) : null;
-};
-
 // Render ứng dụng nếu token hợp lệ
 if (checkTokenOnLoad()) {
   const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -60,7 +47,6 @@ if (checkTokenOnLoad()) {
         <ChatbotProvider>
           <BrowserRouter future={{ v7_relativeSplatPath: true }}>
             <App />
-            <ChatbotWithRouteCheck />
             <ToastContainer
               position="top-right"
               autoClose={3000}
