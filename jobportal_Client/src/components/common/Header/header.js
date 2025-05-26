@@ -50,8 +50,15 @@ export default function Header() {
         // Xóa dữ liệu storage
         localStorage.removeItem('jwt');
         localStorage.removeItem('user');
+        await Swal.fire({
+          icon: 'success',
+          title: 'Đăng xuất thành công',
+          text: 'Bạn đã đăng xuất thành công.',
+          timer: 1500,
+          showConfirmButton: false
+        });
         // Chuyển hướng
-        window.location.href = '/auth/sign-in';
+        window.location.href = '/';
       } catch (error) {
         await Swal.fire({
           icon: 'error',
@@ -129,6 +136,11 @@ export default function Header() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Logic lấy tên hiển thị
+  const displayName = user?.userType?.userTypeId === 3 && user?.company?.companyName
+                     ? user.company.companyName
+                     : user?.userName || user?.email; 
+
   return (
     <header className="bg-gradient-to-r from-gray-900 to-purple-900 px-4 py-3 flex justify-between items-center relative">
       <div className="flex items-center space-x-6">
@@ -186,7 +198,7 @@ export default function Header() {
                   e.target.src = "/default-avatar.png";
                 }}
               />
-              <span className="text-white">{user?.userName || "User"}</span>
+              <span className="text-white">{displayName}</span>
             </div>
             <Button
               variant="ghost"
@@ -257,7 +269,7 @@ export default function Header() {
                         e.target.src = "/default-avatar.png";
                       }}
                     />
-                    <span className="text-white">{user?.userName || "User"}</span>
+                    <span className="text-white">{displayName}</span>
                   </div>
                   <button
                     className="text-white py-2 w-full text-left hover:text-red-200"

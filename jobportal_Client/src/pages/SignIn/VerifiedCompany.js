@@ -18,7 +18,7 @@ const VerifiedCompany = () => {
   const [errorMessages, setErrorMessages] = useState([]);
   const [companyData, setCompanyData] = useState({
     companyName: "",
-    businessEmail: "",
+    email: "",
     taxCode: "",
   });
 
@@ -30,7 +30,7 @@ const VerifiedCompany = () => {
       type: "text",
       disabled: true,
     },
-    { name: "businessEmail", placeholder: "Email doanh nghiệp", type: "email" },
+    { name: "email", placeholder: "Email doanh nghiệp", type: "email" },
   ];
 
   const addErrorMessage = (message) => {
@@ -56,47 +56,83 @@ const VerifiedCompany = () => {
           companyName: response.data.companyName,
           taxCode: taxCode,
         }));
+        Swal.fire({
+          icon: "success",
+          title: "Thành công",
+          text: "Xác thực mã số thuế thành công!",
+          confirmButtonText: "OK",
+        });
 
         return true;
       }
       return false;
     } catch (error) {
-      console.error("Error verifying tax code:", error);
-      addErrorMessage("Mã số thuế không hợp lệ hoặc không tồn tại");
+      await Swal.fire({
+        icon: "error",
+        title: "Lỗi xác thực mã số thuế",
+        text: "Mã số thuế không hợp lệ hoặc không tồn tại",
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "#3085d6",
+      });
       return false;
     }
   };
 
+  const validateFields = () => {
+    const errors = [];
+    if (!companyData.taxCode) errors.push("Vui lòng nhập mã số thuế.");
+    // Validate taxcode: chỉ cho phép số, độ dài 10-14 ký tự (tùy quy định)
+    if (companyData.taxCode && !/^[0-9\-]{10,15}$/.test(companyData.taxCode)) {
+      errors.push("Mã số thuế không hợp lệ.");
+    }
+    if (!taxCodeVerified) errors.push("Vui lòng xác thực mã số thuế.");
+    if (!companyData.companyName) errors.push("Vui lòng xác thực mã số thuế để lấy tên công ty.");
+    if (!companyData.email) errors.push("Vui lòng nhập email doanh nghiệp.");
+    // Kiểm tra định dạng email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (companyData.email && !emailRegex.test(companyData.email)) {
+      errors.push("Email doanh nghiệp không hợp lệ.");
+    }
+    return errors;
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
+    const errors = validateFields();
+    if (errors.length > 0) {
+      await Swal.fire({
+        icon: "error",
+        title: "Lỗi nhập liệu",
+        html: errors.map(msg => `<div style='text-align:left'>${msg}</div>`).join(""),
+        confirmButtonText: "Đóng",
+        confirmButtonColor: "#3085d6",
+      });
+      return;
+    }
 
     try {
       const response = await dispatch(updateEmployer(companyData));
       const { payload } = response;
-      console.log("🚀 ~ handleRegister ~ payload:", payload)
-
       if (payload.message === "Success") {
         setTimeout(async () => {
           await Swal.fire({
             icon: "success",
-            title: "Đăng nhập thành công!",
+            title: "Đăng ký thành công!",
             showConfirmButton: false,
             timer: 1500,
           });
-        }, 1000); // Trễ một chút để đảm bảo điều hướng đã xảy ra
-        navigate("/employer/account-management/dashboard");
+          navigate("/employer/account-management/dashboard");
+        }, 1000);
       } else {
-        // Hiển thị lỗi nếu đăng nhập thất bại
         await Swal.fire({
           icon: "error",
-          title: "Đăng nhập thất bại",
-          text: payload || "Có lỗi xảy ra khi đăng nhập",
+          title: "Đăng ký thất bại",
+          text: typeof payload === "string" ? payload : (payload?.message || "Có lỗi xảy ra khi đăng ký"),
           confirmButtonText: "Thử lại",
           confirmButtonColor: "#3085d6",
         });
       }
     } catch (error) {
-      // Xử lý lỗi không mong muốn
       await Swal.fire({
         icon: "error",
         title: "Lỗi",
@@ -104,8 +140,6 @@ const VerifiedCompany = () => {
         confirmButtonText: "Đóng",
         confirmButtonColor: "#3085d6",
       });
-    } finally {
-
     }
   };
 
@@ -123,12 +157,10 @@ const VerifiedCompany = () => {
                   value={companyData[field.name]}
                   onChange={(e) => {
                     const newValue = e.target.value;
-                    console.log(`Updating ${field.name} to:`, newValue);
-                    setCompanyData((prev) => {
-                      const updated = { ...prev, [field.name]: newValue };
-                      console.log("Updated companyData:", updated);
-                      return updated;
-                    });
+                    setCompanyData((prev) => ({
+                      ...prev,
+                      [field.name]: newValue,
+                    }));
                   }}
                   onBlur={(e) => {
                     if (field.name === "taxCode") {

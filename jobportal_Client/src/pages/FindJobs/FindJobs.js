@@ -22,6 +22,7 @@ import {
   getAllJobAction,
   searchJobs,
   semanticSearchJobsWithGemini,
+  getAllJobs,
 } from "../../redux/JobPost/jobPost.thunk";
 import { getCity } from "../../redux/City/city.thunk";
 import { getIndustryCount } from "../../redux/Industry/industry.thunk";
@@ -45,7 +46,7 @@ export default function JobSearchPage() {
     maxSalary,
   } = useSelector((store) => store.jobPost);
   const [currentPage, setCurrentPage] = useState(0);
-  const [size] = useState(7);
+  const [size] = useState();
   const [displayTotalElements, setDisplayTotalElements] = useState(0);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State để kiểm soát sidebar trên mobile
@@ -759,6 +760,9 @@ export default function JobSearchPage() {
   const [isOpen, setIsOpen] = useState(true);
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
   const [isSalaryOpen, setIsSalaryOpen] = useState(true);
+
+  
+
   return (
     <div className="min-h-screen bg-transparent">
       <main className="container mx-auto px-4 py-8">
