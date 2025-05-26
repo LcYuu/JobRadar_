@@ -20,6 +20,7 @@ import logo1 from "../../assets/images/common/logo1.jpg";
 import { isStrongPassword } from "../../utils/passwordValidator";
 import OTPModal from '../../components/common/Modal/OtpModal';
 import Swal from 'sweetalert2';
+import { signupAction } from '../../redux/Auth/auth.thunk';
 
 // Environment variables
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
@@ -97,6 +98,45 @@ export default function SignUpForm() {
       text: message,
       confirmButtonText: 'OK'
     });
+  };
+
+  const handleVerifyEmployer = async (email) => {
+    try {
+      if (!formData.companyName || !formData.taxCode || !taxCodeVerified) {
+        addErrorMessage("Vui lòng xác thực mã số thuế trước khi tiếp tục");
+        return false;
+      }
+
+      const company = {
+        companyName: formData.companyName,
+        taxCode: formData.taxCode,
+        address: companyInfo?.address || "",
+        industry: [{ industryId: 0 }],
+        city: { cityId: companyInfo?.cityId || 0 },
+      };
+
+      const response = await axios.post(
+        `${API_BASE_URL}/auth/verify-employer`,
+        company,
+        {
+          params: { email: email },
+        }
+      );
+
+      if (response.status === 200) {
+        return true;
+      }
+      addErrorMessage("Mã số thuế không tồn tại");
+      return false;
+    } catch (error) {
+      console.error("Error verifying employer:", error);
+      if (error.response?.status === 404) {
+        addErrorMessage("Không tìm thấy tài khoản. Vui lòng thử lại sau.");
+      } else {
+        addErrorMessage("Lỗi xác thực thông tin công ty. Vui lòng thử lại.");
+      }
+      return false;
+    }
   };
 
   const handleRegister = async (e) => {
@@ -183,6 +223,7 @@ export default function SignUpForm() {
       return;
     }
 
+    // Tạo tài khoản trước
     const userData = {
       userName: activeTab === "employer" ? formData.companyName : formData.fullName,
       email: emailField,
@@ -194,21 +235,45 @@ export default function SignUpForm() {
     };
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/signup`, userData);
+      const response = await dispatch(signupAction(userData));
       console.log("Đăng ký thành công:", response);
+
+      // Nếu là nhà tuyển dụng, xác thực thông tin công ty sau khi tạo tài khoản
+      if (activeTab === "employer") {
+        const company = {
+          companyName: formData.companyName,
+          taxCode: formData.taxCode,
+          address: companyInfo?.address || "",
+          industry: [{ industryId: 0 }],
+          city: { cityId: companyInfo?.cityId || 0 },
+        };
+
+        const verifyResponse = await axios.post(
+          `${API_BASE_URL}/auth/verify-employer`,
+          company,
+          {
+            params: { email: emailField },
+          }
+        );
+
+        if (verifyResponse.status !== 200) {
+          throw new Error("Xác thực thông tin công ty thất bại");
+        }
+      }
+
       Swal.fire({
         icon: 'success',
         title: 'Thành công',
         text: "Đăng ký thành công! Vui lòng kiểm tra email để lấy mã xác nhận",
         confirmButtonText: 'OK'
       });
-      if (response.data) {
-        setResendEmail(emailField);
-        setTimeLeft(120);
-        setIsTimeUp(false);
-        setConfirmationStatus(null);
-        setIsModalOpen(true);
-      }
+
+      setResendEmail(emailField);
+      setTimeLeft(120);
+      setIsTimeUp(false);
+      setConfirmationStatus(null);
+      setIsModalOpen(true);
+
     } catch (error) {
       console.error("Lỗi đăng ký:", error);
       const errorMessage = error.response?.data || "Đăng ký thất bại. Vui lòng thử lại.";
@@ -225,45 +290,6 @@ export default function SignUpForm() {
       }
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleVerifyEmployer = async (email) => {
-    try {
-      if (!formData.companyName || !formData.taxCode || !taxCodeVerified) {
-        addErrorMessage("Vui lòng xác thực mã số thuế trước khi tiếp tục");
-        return false;
-      }
-
-      const company = {
-        companyName: formData.companyName,
-        taxCode: formData.taxCode,
-        address: companyInfo?.address || "",
-        industry: [{ industryId: 0 }],
-        city: { cityId: companyInfo?.cityId || 0 },
-      };
-
-      const response = await axios.post(
-        `${API_BASE_URL}/auth/verify-employer`,
-        company,
-        {
-          params: { email: email },
-        }
-      );
-
-      if (response.status === 200) {
-        return true;
-      }
-      addErrorMessage("Mã số thuế không tồn tại");
-      return false;
-    } catch (error) {
-      console.error("Error verifying employer:", error);
-      if (error.response?.status === 404) {
-        addErrorMessage("Không tìm thấy tài khoản. Vui lòng thử lại sau.");
-      } else {
-        addErrorMessage("Lỗi xác thực thông tin công ty. Vui lòng thử lại.");
-      }
-      return false;
     }
   };
 

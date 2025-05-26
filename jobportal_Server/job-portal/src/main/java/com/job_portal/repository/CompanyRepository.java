@@ -18,6 +18,7 @@ import com.job_portal.DTO.CompanyWithCountJobDTO;
 import com.job_portal.DTO.FollowCompanyDTO;
 import com.job_portal.models.Company;
 import com.job_portal.models.JobPost;
+import com.job_portal.models.UserAccount;
 import com.job_portal.projection.CompanyProjection;
 import com.job_portal.projection.CompanyWithCountJob;
 
@@ -214,6 +215,8 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 		    @Param("industryName") String industryName,
 		    Pageable pageable
 		);
+
+	
 
 
 }

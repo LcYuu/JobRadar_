@@ -61,23 +61,52 @@ export default function SignInForm() {
 
     // Client-side validation
     if (!email || !password) {
-      setError("Vui lòng nhập email và mật khẩu.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: 'Vui lòng nhập email và mật khẩu.',
+        confirmButtonText: 'Đồng ý',
+        confirmButtonColor: '#3085d6'
+      });
       return;
     }
     if (!validateEmail(email)) {
-      setError("Email không hợp lệ.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: 'Email không hợp lệ.',
+        confirmButtonText: 'Đồng ý',
+        confirmButtonColor: '#3085d6'
+      });
       return;
     }
 
     setIsLoading(true);
     try {
       const response = await dispatch(loginAction({ email, password }));
-      const { payload } = response;
+      
+      if (response.error) {
+        // Xử lý lỗi từ loginAction
+        Swal.fire({
+          icon: 'error',
+          title: 'Đăng nhập thất bại',
+          text: response.payload || 'Đăng nhập thất bại.',
+          confirmButtonText: 'Thử lại',
+          confirmButtonColor: '#3085d6'
+        });
+        return;
+      }
 
+      const { payload } = response;
       if (payload?.success) {
         const user = payload.user;
-        setIsModalOpen(true);
-        setLoginStatus("success");
+        Swal.fire({
+          icon: 'success',
+          title: 'Thành công!',
+          text: 'Đăng nhập thành công!',
+          timer: 1500,
+          showConfirmButton: false
+        });
 
         // Navigate based on user type
         setTimeout(() => {
@@ -88,17 +117,24 @@ export default function SignInForm() {
           } else {
             navigate("/");
           }
-          setIsModalOpen(false);
         }, 1500);
       } else {
-        setError(payload?.message || "Đăng nhập thất bại.");
-        setIsModalOpen(true);
-        setLoginStatus("failure");
+        Swal.fire({
+          icon: 'error',
+          title: 'Đăng nhập thất bại',
+          text: payload?.message || 'Đăng nhập thất bại.',
+          confirmButtonText: 'Thử lại',
+          confirmButtonColor: '#3085d6'
+        });
       }
     } catch (err) {
-      setError("Đã xảy ra lỗi không mong muốn.");
-      setIsModalOpen(true);
-      setLoginStatus("failure");
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: err.message || 'Đã xảy ra lỗi không mong muốn.',
+        confirmButtonText: 'Thử lại',
+        confirmButtonColor: '#3085d6'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -119,25 +155,52 @@ export default function SignInForm() {
         throw new Error(res?.data?.message || "Không nhận được JWT token.");
       }
       localStorage.setItem("jwt", jwtToken);
-      // Check if email exists
-      const emailExists = await axios.post(
+
+      // Kiểm tra xem người dùng đã có profile chưa
+      const checkEmailResponse = await axios.post(
         `${API_BASE_URL}/auth/check-email`,
         { token: googleToken }
       );
 
-      if (!jwtToken) {
-        await Swal.fire({
-          icon: 'error',
-          title: 'Đăng nhập thất bại',
-          text: res?.data?.message || 'Có lỗi xảy ra khi đăng nhập',
-          confirmButtonText: 'Thử lại',
-          confirmButtonColor: '#3085d6'
+      if (checkEmailResponse.data) {
+        // Lấy profile và role
+        const profileResponse = await axios.get(`${API_BASE_URL}/users/profile`, {
+          headers: { Authorization: `Bearer ${jwtToken}` },
         });
-      } else if (emailExists.data) {
+        const roleResponse = await axios.get(`${API_BASE_URL}/auth/user-role`, {
+          headers: { Authorization: `Bearer ${jwtToken}` },
+        });
+
+        const user = {
+          ...profileResponse.data,
+          role: roleResponse.data.role,
+        };
+
+        // Cập nhật redux store
+        dispatch({
+          type: "auth/login/fulfilled",
+          payload: { success: true, user },
+        });
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Thành công!',
+          text: 'Đăng nhập bằng Google thành công!',
+          timer: 1500,
+          showConfirmButton: false
+        });
+
         setTimeout(() => {
-          window.location.href = "http://localhost:3000/";
-        }, 1000);
+          if (user?.role === 'ROLE_EMPLOYER') {
+            navigate("/employer/account-management/dashboard");
+          } else if (user?.role === 'ROLE_ADMIN') {
+            navigate("/admin/dashboard");
+          } else {
+            navigate("/");
+          }
+        }, 1500);
       } else {
+        // Người dùng chưa có profile, chuyển đến trang chọn role
         const defaultAddress = {
           specificAddress: "",
           ward: "",
@@ -147,15 +210,20 @@ export default function SignInForm() {
         localStorage.setItem("defaultAddress", JSON.stringify(defaultAddress));
         
         setTimeout(() => {
-          window.location.href = "http://localhost:3000/role-selection";
+          navigate("/role-selection");
         }, 1000);
       }
     } catch (err) {
-      console.error(
-        "Error during login: ",
-        err.response ? err.response.data : err.message
-      );
-      setError("Đăng nhập thất bại! Vui lòng thử lại.");
+      console.error("Error during login: ", err.response ? err.response.data : err.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: err.response?.data?.message || 'Đăng nhập thất bại! Vui lòng thử lại.',
+        confirmButtonText: 'Thử lại',
+        confirmButtonColor: '#3085d6'
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 

@@ -236,6 +236,11 @@ public class CompanyServiceImpl implements ICompanyService {
 		String untilFormatted = until.format(formatter);
 
 		try {
+			// Kiểm tra email trước khi gửi
+			if (company.getEmail() == null || company.getEmail().trim().isEmpty()) {
+				throw new RuntimeException("Email của công ty không tồn tại");
+			}
+			
 			emailUtil.sendBlockAccountEmail(company.getEmail(), company.getCompanyName(), untilFormatted, reason);
 		} catch (MessagingException e) {
 			// Ghi log lỗi nếu gửi email thất bại
@@ -255,6 +260,12 @@ public class CompanyServiceImpl implements ICompanyService {
 		company.setIsBlocked(false);
 		company.setBlockedReason(null);
 		company.setBlockedUntil(null);
+		
+		// Kiểm tra email trước khi gửi
+		if (company.getEmail() == null || company.getEmail().trim().isEmpty()) {
+			throw new RuntimeException("Email của công ty không tồn tại");
+		}
+		
 		emailUtil.sendUnBlockAccountEmail(company.getEmail(), company.getCompanyName());
 
 		companyRepository.save(company);

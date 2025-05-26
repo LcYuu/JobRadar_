@@ -127,7 +127,15 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
     });
 
     if (result.isConfirmed) {
+        await Swal.fire({
+        icon: 'success',
+        title: 'Đăng xuất thành công',
+        text: 'Bạn đã đăng xuất thành công.',
+        timer: 1500,
+        showConfirmButton: false
+      });
       dispatch(logoutAction());
+      
       if (isMobile) {
         setIsOpen(false);
       }
@@ -144,7 +152,9 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
   if (!user) {
     return <div className="sidebar-loading">Loading...</div>;
   }
-
+  const displayName = user?.userType?.userTypeId === 3 && user?.company?.companyName
+                     ? user.company.companyName
+                     : user?.userName || user?.email; 
   return (
     <>
       {isMobile && (
@@ -200,7 +210,7 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
           <div className="mb-12 p-4 rounded-lg bg-gradient-to-r from-[#6441a5] via-[#2a0845] to-[#6441a5] hover:bg-gradient-to-l transition-all duration-300 relative">
             <div className="flex justify-between items-start mb-4">
               <Avatar className="h-20 w-20 border-4 border-primary/20">
-                <AvatarImage src={user?.avatar} alt={user?.userName || "User"} />
+                <AvatarImage src={user?.avatar} alt={displayName|| "User"} />
                 <AvatarFallback className="text-2xl font-semibold text-white">
                   {user?.userName?.charAt(0) || "U"}
                 </AvatarFallback>
