@@ -149,6 +149,7 @@ public class SeekerController {
 		Map<String, Object> result=seekerService.saveJob(postId, reqUser.get().getUserId());
 		return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
 	}
+	
 	@GetMapping("/followed-companies")
 	public ResponseEntity<List<FollowCompanyDTO>> findCompaniesBySeekerId(@RequestHeader("Authorization") String jwt) {
 

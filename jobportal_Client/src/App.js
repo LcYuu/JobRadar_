@@ -49,6 +49,7 @@ import SurveyStatistics from "./pages/Admin/SurveyStatistic/SurveyStatistics";
 import { getProfileAction, logoutAction } from "./redux/Auth/auth.thunk";
 import { setUserFromStorage } from "./redux/Auth/authSlice";
 import { startInactivityTimer } from "./utils/session";
+import { setInitialized } from "./redux/Auth/authSlice";
 import CompanyReview from "./pages/ReviewManagement/CompanyReview";
 import AdminReview from "./pages/ReviewManagement/AdminReview";
 import SeekerProfile from "./components/SeekerProfile/SeekerProfile";
@@ -62,6 +63,10 @@ import { isTokenExpired } from './utils/tokenUtils';
 import VerifiedCompany from "./pages/SignIn/VerifiedCompany";
 import JobStatsPage from "./components/JobStats/JobStatsPage";
 import SavedJobs from "./components/SavedJobs/SavedJob";
+
+// Import Chatbot components and hooks
+import Chatbot from "./components/ChatBot/ChatBot";
+import { useChatbot } from "./components/ChatBot/ChatBotContext";
 
 const ProtectedHome = () => {
   const { user } = useSelector((state) => state.auth);
@@ -105,27 +110,31 @@ const App = () => {
   useEffect(() => {
     const token = localStorage.getItem("jwt");
     const savedUser = localStorage.getItem("user");
-    if (token) {
-      if (!user && savedUser) {
-        dispatch(setUserFromStorage(JSON.parse(savedUser)));
-      } else if (!user) {
-        const fetchProfile = async () => {
+    
+    const initializeAuth = async () => {
+      if (token) {
+        if (!user && savedUser) {
+          dispatch(setUserFromStorage(JSON.parse(savedUser)));
+        } else if (!user) {
           const success = await dispatch(getProfileAction());
           if (success.payload) {
             localStorage.setItem('user', JSON.stringify(success.payload));
           } else if (!location.pathname.startsWith("/auth")) {
             navigate("/auth/sign-in");
           }
-        };
-        fetchProfile();
+        }
       }
-    }
+      // Set isInitializing to false after checking
+      dispatch(setInitialized(false));
+    };
+
+    initializeAuth();
 
     if (token && user) {
       const stopInactivityTimer = startInactivityTimer(dispatch);
       return () => stopInactivityTimer();
     }
-  }, [dispatch, user, navigate, location.pathname]);
+  }, [dispatch, user, navigate, location.pathname, setInitialized]);
 
   const showHeader = useMemo(() => {
     const noHeaderPaths = [
@@ -155,8 +164,20 @@ const App = () => {
     );
   }, [location.pathname]);
 
+  // Component kiểm tra hiển thị Chatbot (Di chuyển từ index.js)
+  const ChatbotWithRouteCheck = () => {
+    const { restrictedPaths } = useChatbot();
+    const location = useLocation();
+    // Lấy user từ Redux state trong App.js
+    const { user } = useSelector((state) => state.auth);
 
+    const shouldShowChatbot = !restrictedPaths.includes(location.pathname);
 
+    // Hiển thị Chatbot cho khách (null user) hoặc user có userType là 2, và không nằm trong các path bị hạn chế
+    return (user === null || user?.userType?.userTypeId === 2) && shouldShowChatbot ? (
+      <Chatbot />
+    ) : null;
+  };
 
   return (
     <div className="app-container">
@@ -393,6 +414,10 @@ const App = () => {
           }
         />
       </Routes>
+
+      {/* Add Chatbot here */}
+      <ChatbotWithRouteCheck />
+
       {showFooter && <Footer />}
       <ScrollToTop />
     </div>

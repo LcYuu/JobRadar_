@@ -23,25 +23,32 @@ import com.job_portal.service.IReviewService;
 import com.social.exceptions.AllExceptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 
+import javax.crypto.SecretKey;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 @WebMvcTest(ReviewController.class)
 public class ReviewControllerTest {
@@ -73,10 +80,11 @@ public class ReviewControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private static final String USER_EMAIL = "giathuanhl@gmail.com";
-    private static final String JWT_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJHaWFUaHVhblNlbnBhaSIsImlhdCI6MTc0NzgzNDAyMSwiZXhwIjoxNzQ3OTIwNDIxLCJlbWFpbCI6ImdpYXRodWFuaGxAZ21haWwuY29tIn0.Q5fqfExrB8dXDm40gze-MwunQzhJY4BGbOTPUbirAAY";
-    private static final String JWT_HEADER = "Bearer " + JWT_TOKEN;
+    private static final String SECRET_KEY = "dsadasdhasuidhuasdyuiasydiuasasdasd"; // 64 chars
+    private static final SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+
     private static final UUID USER_ID = UUID.randomUUID();
+    private static final String USER_EMAIL = "giathuanhl@gmail.com";
     private static final UUID COMPANY_ID = UUID.randomUUID();
     private static final UUID REVIEW_ID = UUID.randomUUID();
     private static final UUID REPLY_ID = UUID.randomUUID();
@@ -86,6 +94,7 @@ public class ReviewControllerTest {
     private static final boolean ANONYMOUS = false;
     private static final String REPLY_CONTENT = "Thank you!";
     private static final LocalDateTime CREATE_DATE = LocalDateTime.of(2025, 5, 1, 10, 0);
+    private String jwtToken;
 
     private UserAccount user;
     private Seeker seeker;
@@ -101,6 +110,26 @@ public class ReviewControllerTest {
 
     @BeforeEach
     void setUp() {
+        Authentication authentication = Mockito.mock(Authentication.class);
+        when(authentication.getName()).thenReturn(USER_EMAIL);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        // Generate jwtToken
+        long expirationTime = 24 * 60 * 60 * 1000; // 24 hours
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expirationTime);
+        jwtToken = "Bearer " + Jwts.builder()
+                .setIssuer("GiaThuanSenpai")
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .claim("email", authentication.getName())
+                .signWith(key)
+                .compact();
+
+        when(JwtProvider.generateToken(authentication)).thenReturn(jwtToken);
+
         company = new Company();
         company.setCompanyId(COMPANY_ID);
 
@@ -162,7 +191,7 @@ public class ReviewControllerTest {
     }
 
     @Test
-    @WithMockUser(username = USER_EMAIL)
+    @WithMockUser(username = USER_EMAIL, roles = {"USER"})
     void testGetAllReviews_Success() throws Exception {
         // Arrange
         Pageable pageable = PageRequest.of(0, 5, Sort.by("createDate").descending());
@@ -171,14 +200,14 @@ public class ReviewControllerTest {
         when(reviewRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(reviewPage);
 
         // Act & Assert
-        ResultActions result = mockMvc.perform(get("/review/get-all")
+        mockMvc.perform(get("/review/get-all")
                 .param("page", "0")
                 .param("size", "5")
                 .param("companyId", COMPANY_ID.toString())
-                .param("star", "5"))
-                .andDo(print());
-
-        result.andExpect(status().isOk())
+                .param("star", "5")
+                .header("Authorization", jwtToken))
+                .andDo(print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].reviewId").value(REVIEW_ID.toString()))
                 .andExpect(jsonPath("$.content[0].star").value(STAR))
                 .andExpect(jsonPath("$.content[0].message").value(MESSAGE));
@@ -187,71 +216,61 @@ public class ReviewControllerTest {
     }
 
     @Test
-    @WithMockUser(username = USER_EMAIL)
+    @WithMockUser(username = USER_EMAIL, roles = {"USER"})
     void testCreateReview_Success() throws Exception {
         // Arrange
-        try (var mockedStatic = mockStatic(JwtProvider.class)) {
-            mockedStatic.when(() -> JwtProvider.getEmailFromJwtToken(JWT_HEADER))
-                    .thenReturn(USER_EMAIL);
-            when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
-            when(seekerRepository.findById(USER_ID)).thenReturn(Optional.of(seeker));
-            when(reviewService.createReview(eq(seeker), eq(COMPANY_ID), any(Review.class))).thenReturn(true);
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
+        when(seekerRepository.findById(USER_ID)).thenReturn(Optional.of(seeker));
+        when(reviewService.createReview(eq(seeker), eq(COMPANY_ID), any(Review.class))).thenReturn(true);
 
-            // Act & Assert
-            ResultActions result = mockMvc.perform(post("/review/create-review/" + COMPANY_ID)
-            		.with(csrf())
-                    .header("Authorization", JWT_HEADER)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(review)))
-                    .andDo(print());
+        // Act & Assert
+        mockMvc.perform(post("/review/create-review/" + COMPANY_ID)
+                .header("Authorization", jwtToken)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"star\": " + STAR + ", \"message\": \"" + MESSAGE + "\", \"anonymous\": " + ANONYMOUS + "}"))
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(content().string("Đánh giá thành công"));
 
-            result.andExpect(status().isCreated())
-                    .andExpect(content().string("Đánh giá thành công"));
-
-            verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
-            verify(seekerRepository, times(1)).findById(USER_ID);
-            verify(reviewService, times(1)).createReview(eq(seeker), eq(COMPANY_ID), any(Review.class));
-        }
+        verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(seekerRepository, times(1)).findById(USER_ID);
+        verify(reviewService, times(1)).createReview(eq(seeker), eq(COMPANY_ID), any(Review.class));
     }
 
     @Test
     @WithMockUser(username = USER_EMAIL)
     void testCreateReview_UserNotFound() throws Exception {
         // Arrange
-        try (var mockedStatic = mockStatic(JwtProvider.class)) {
-            mockedStatic.when(() -> JwtProvider.getEmailFromJwtToken(JWT_HEADER))
-                    .thenReturn(USER_EMAIL);
-            when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.empty());
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.empty());
 
-            // Act & Assert
-            ResultActions result = mockMvc.perform(post("/review/create-review/" + COMPANY_ID)
-            		.with(csrf())
-                    .header("Authorization", JWT_HEADER)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(review)))
-                    .andDo(print());
+        // Act & Assert
+        mockMvc.perform(post("/review/create-review/" + COMPANY_ID)
+                .header("Authorization", jwtToken)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"star\": " + STAR + ", \"message\": \"" + MESSAGE + "\", \"anonymous\": " + ANONYMOUS + "}"))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("User not found"));
 
-            result.andExpect(status().isInternalServerError())
-                    .andExpect(content().string("No value present"));
-
-            verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
-            verify(seekerRepository, never()).findById(any());
-            verify(reviewService, never()).createReview(any(), any(), any());
-        }
+        verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(seekerRepository, never()).findById(any());
+        verify(reviewService, never()).createReview(any(), any(), any());
     }
 
     @Test
-    @WithMockUser(username = USER_EMAIL)
+    @WithMockUser(username = USER_EMAIL, roles = {"USER"})
     void testSearchReviewByCompanyId_Success() throws Exception {
         // Arrange
         List<Review> reviews = Collections.singletonList(review);
         when(reviewService.findReviewByCompanyId(COMPANY_ID)).thenReturn(reviews);
 
         // Act & Assert
-        ResultActions result = mockMvc.perform(get("/review/findReviewByCompanyId/" + COMPANY_ID))
-                .andDo(print());
-
-        result.andExpect(status().isOk())
+        mockMvc.perform(get("/review/findReviewByCompanyId/" + COMPANY_ID)
+                .header("Authorization", jwtToken))
+                .andDo(print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].reviewId").value(REVIEW_ID.toString()))
                 .andExpect(jsonPath("$[0].star").value(STAR));
 
@@ -259,66 +278,60 @@ public class ReviewControllerTest {
     }
 
     @Test
-    @WithMockUser(username = USER_EMAIL)
+    @WithMockUser(username = USER_EMAIL, roles = {"USER"})
     void testSearchReviewByCompanyId_NotFound() throws Exception {
         // Arrange
         when(reviewService.findReviewByCompanyId(COMPANY_ID))
                 .thenThrow(new AllExceptions("No reviews found"));
 
         // Act & Assert
-        ResultActions result = mockMvc.perform(get("/review/findReviewByCompanyId/" + COMPANY_ID))
-                .andDo(print());
-
-        result.andExpect(status().isNotFound())
+        mockMvc.perform(get("/review/findReviewByCompanyId/" + COMPANY_ID)
+                .header("Authorization", jwtToken))
+                .andDo(print())
+                .andExpect(status().isNotFound())
                 .andExpect(content().string("No reviews found"));
 
         verify(reviewService, times(1)).findReviewByCompanyId(COMPANY_ID);
     }
 
     @Test
-    @WithMockUser(username = USER_EMAIL)
+    @WithMockUser(username = USER_EMAIL, roles = {"USER"})
     void testFindReviewByCompanyId_Success() throws Exception {
         // Arrange
         Pageable pageable = PageRequest.of(0, 5, Sort.by("createDate").descending());
         List<Review> reviewList = Collections.singletonList(review);
         Page<Review> reviewPage = new PageImpl<>(reviewList, pageable, reviewList.size());
-        try (var mockedStatic = mockStatic(JwtProvider.class)) {
-            mockedStatic.when(() -> JwtProvider.getEmailFromJwtToken(JWT_HEADER))
-                    .thenReturn(USER_EMAIL);
-            when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
-            when(reviewRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(reviewPage);
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
+        when(reviewRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(reviewPage);
 
-            // Act & Assert
-            ResultActions result = mockMvc.perform(get("/review/findReviewByCompanyId")
-            		.with(csrf())
-                    .header("Authorization", JWT_HEADER)
-                    .param("page", "0")
-                    .param("size", "5")
-                    .param("star", "5"))
-                    .andDo(print());
+        // Act & Assert
+        mockMvc.perform(get("/review/findReviewByCompanyId")
+                .header("Authorization", jwtToken)
+                .param("page", "0")
+                .param("size", "5")
+                .param("star", "5"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].reviewId").value(REVIEW_ID.toString()))
+                .andExpect(jsonPath("$.content[0].star").value(STAR));
 
-            result.andExpect(status().isOk())
-                    .andExpect(jsonPath("$.content[0].reviewId").value(REVIEW_ID.toString()))
-                    .andExpect(jsonPath("$.content[0].star").value(STAR));
-
-            verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
-            verify(reviewRepository, times(1)).findAll(any(Specification.class), eq(pageable));
-        }
+        verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(reviewRepository, times(1)).findAll(any(Specification.class), eq(pageable));
     }
 
     @Test
-    @WithMockUser(username = USER_EMAIL)
+    @WithMockUser(username = USER_EMAIL, roles = {"USER"})
     void testFindReviewByCompanyIdAndUserId_Success() throws Exception {
         // Arrange
         when(reviewService.findReviewByCompanyIdAndUserId(COMPANY_ID, USER_ID)).thenReturn(review);
 
         // Act & Assert
-        ResultActions result = mockMvc.perform(get("/review/review-detail")
+        mockMvc.perform(get("/review/review-detail")
+                .header("Authorization", jwtToken)
                 .param("companyId", COMPANY_ID.toString())
                 .param("userId", USER_ID.toString()))
-                .andDo(print());
-
-        result.andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reviewId").value(REVIEW_ID.toString()))
                 .andExpect(jsonPath("$.star").value(STAR));
 
@@ -326,65 +339,55 @@ public class ReviewControllerTest {
     }
 
     @Test
-    @WithMockUser(username = USER_EMAIL)
+    @WithMockUser(username = USER_EMAIL, roles = {"USER"})
     void testCountReviewByCompany_Success() throws Exception {
         // Arrange
-        try (var mockedStatic = mockStatic(JwtProvider.class)) {
-            mockedStatic.when(() -> JwtProvider.getEmailFromJwtToken(JWT_HEADER))
-                    .thenReturn(USER_EMAIL);
-            when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
-            when(reviewRepository.countReviewsByCompany(COMPANY_ID)).thenReturn(countReviewDTO);
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
+        when(reviewRepository.countReviewsByCompany(COMPANY_ID)).thenReturn(countReviewDTO);
 
-            // Act & Assert
-            ResultActions result = mockMvc.perform(get("/review/countReviewByCompany")
-            		.with(csrf())
-                    .header("Authorization", JWT_HEADER))
-                    .andDo(print());
+        // Act & Assert
+        mockMvc.perform(get("/review/countReviewByCompany")
+                .header("Authorization", jwtToken))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalReviews").value(10));
 
-            result.andExpect(status().isOk())
-                    .andExpect(jsonPath("$.totalReviews").value(10));
-
-            verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
-            verify(reviewRepository, times(1)).countReviewsByCompany(COMPANY_ID);
-        }
+        verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(reviewRepository, times(1)).countReviewsByCompany(COMPANY_ID);
     }
 
     @Test
-    @WithMockUser(username = USER_EMAIL)
+    @WithMockUser(username = USER_EMAIL, roles = {"USER"})
     void testDeleteReview_Success() throws Exception {
         // Arrange
-        try (var mockedStatic = mockStatic(JwtProvider.class)) {
-            mockedStatic.when(() -> JwtProvider.getEmailFromJwtToken(JWT_HEADER))
-                    .thenReturn(USER_EMAIL);
-            when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
-            when(reviewService.deleteReview(REVIEW_ID)).thenReturn(true);
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
+        when(reviewService.deleteReview(REVIEW_ID)).thenReturn(true);
 
-            // Act & Assert
-            ResultActions result = mockMvc.perform(delete("/review/delete/" + REVIEW_ID)
-                    .header("Authorization", JWT_HEADER)
-                    .with(csrf())) // Retain CSRF token
-                    .andDo(print());
+        // Act & Assert
+        mockMvc.perform(delete("/review/delete/" + REVIEW_ID)
+                .header("Authorization", jwtToken)
+                .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().string("Xóa đánh giá thành công"));
 
-            result.andExpect(status().isOk())
-                    .andExpect(content().string("Xóa đánh giá thành công"));
-
-            verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
-            verify(reviewService, times(1)).deleteReview(REVIEW_ID);
-        }
+        verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(reviewService, times(1)).deleteReview(REVIEW_ID);
     }
+
     @Test
-    @WithMockUser(username = USER_EMAIL)
+    @WithMockUser(username = USER_EMAIL, roles = {"USER"})
     void testCountReviewsByStar_Success() throws Exception {
         // Arrange
         List<CountReviewByStar> counts = Collections.singletonList(countReviewByStar);
         when(reviewService.countReviewsByStar(COMPANY_ID)).thenReturn(counts);
 
         // Act & Assert
-        ResultActions result = mockMvc.perform(get("/review/count-by-star")
+        mockMvc.perform(get("/review/count-by-star")
+                .header("Authorization", jwtToken)
                 .param("companyId", COMPANY_ID.toString()))
-                .andDo(print());
-
-        result.andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].star").value(5))
                 .andExpect(jsonPath("$[0].count").value(10));
 
@@ -392,65 +395,54 @@ public class ReviewControllerTest {
     }
 
     @Test
-    @WithMockUser(username = USER_EMAIL)
+    @WithMockUser(username = USER_EMAIL, roles = {"USER"})
     void testCountStarByCompanyId_Success() throws Exception {
         // Arrange
         List<CountReviewByStar> counts = Collections.singletonList(countReviewByStar);
-        try (var mockedStatic = mockStatic(JwtProvider.class)) {
-            mockedStatic.when(() -> JwtProvider.getEmailFromJwtToken(JWT_HEADER))
-                    .thenReturn(USER_EMAIL);
-            when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
-            when(reviewService.countReviewsByStar(COMPANY_ID)).thenReturn(counts);
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
+        when(reviewService.countReviewsByStar(COMPANY_ID)).thenReturn(counts);
 
-            // Act & Assert
-            ResultActions result = mockMvc.perform(get("/review/count-star-by-company-id")
-            		.with(csrf())
-                    .header("Authorization", JWT_HEADER))
-                    .andDo(print());
+        // Act & Assert
+        mockMvc.perform(get("/review/count-star-by-company-id")
+                .header("Authorization", jwtToken))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].star").value(5))
+                .andExpect(jsonPath("$[0].count").value(10));
 
-            result.andExpect(status().isOk())
-                    .andExpect(jsonPath("$[0].star").value(5))
-                    .andExpect(jsonPath("$[0].count").value(10));
-
-            verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
-            verify(reviewService, times(1)).countReviewsByStar(COMPANY_ID);
-        }
+        verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(reviewService, times(1)).countReviewsByStar(COMPANY_ID);
     }
 
     @Test
-    @WithMockUser(username = USER_EMAIL)
+    @WithMockUser(username = USER_EMAIL, roles = {"USER"})
     void testCreateReply_Success() throws Exception {
         // Arrange
         replyDTO.setParentReplyId(PARENT_REPLY_ID);
-        try (var mockedStatic = mockStatic(JwtProvider.class)) {
-            mockedStatic.when(() -> JwtProvider.getEmailFromJwtToken(JWT_HEADER))
-                    .thenReturn(USER_EMAIL);
-            when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
-            when(reviewRepository.findById(REVIEW_ID)).thenReturn(Optional.of(review));
-            when(reviewReplyRepository.findById(PARENT_REPLY_ID)).thenReturn(Optional.of(parentReply));
-            when(reviewReplyRepository.save(any(ReviewReply.class))).thenReturn(reply);
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
+        when(reviewRepository.findById(REVIEW_ID)).thenReturn(Optional.of(review));
+        when(reviewReplyRepository.findById(PARENT_REPLY_ID)).thenReturn(Optional.of(parentReply));
+        when(reviewReplyRepository.save(any(ReviewReply.class))).thenReturn(reply);
 
-            // Act & Assert
-            ResultActions result = mockMvc.perform(post("/review/create-reply")
-            		.with(csrf())
-                    .header("Authorization", JWT_HEADER)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(replyDTO)))
-                    .andDo(print());
+        // Act & Assert
+        mockMvc.perform(post("/review/create-reply")
+                .header("Authorization", jwtToken)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"reviewId\": \"" + REVIEW_ID + "\", \"content\": \"" + REPLY_CONTENT + "\", \"anonymous\": " + ANONYMOUS + ", \"parentReplyId\": \"" + PARENT_REPLY_ID + "\"}"))
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.replyId").value(REPLY_ID.toString()))
+                .andExpect(jsonPath("$.content").value(REPLY_CONTENT));
 
-            result.andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.replyId").value(REPLY_ID.toString()))
-                    .andExpect(jsonPath("$.content").value(REPLY_CONTENT));
-
-            verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
-            verify(reviewRepository, times(1)).findById(REVIEW_ID);
-            verify(reviewReplyRepository, times(1)).findById(PARENT_REPLY_ID);
-            verify(reviewReplyRepository, times(1)).save(any(ReviewReply.class));
-        }
+        verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(reviewRepository, times(1)).findById(REVIEW_ID);
+        verify(reviewReplyRepository, times(1)).findById(PARENT_REPLY_ID);
+        verify(reviewReplyRepository, times(1)).save(any(ReviewReply.class));
     }
 
     @Test
-    @WithMockUser(username = USER_EMAIL)
+    @WithMockUser(username = USER_EMAIL, roles = {"USER"})
     void testGetRepliesByReviewId_Success() throws Exception {
         // Arrange
         List<ReviewReply> replies = Arrays.asList(parentReply, reply);
@@ -459,10 +451,10 @@ public class ReviewControllerTest {
         when(reviewReplyRepository.findByReviewReviewIdOrderByCreateDateAsc(REVIEW_ID)).thenReturn(replies);
 
         // Act & Assert
-        ResultActions result = mockMvc.perform(get("/review/get-replies/" + REVIEW_ID))
-                .andDo(print());
-
-        result.andExpect(status().isOk())
+        mockMvc.perform(get("/review/get-replies/" + REVIEW_ID)
+                .header("Authorization", jwtToken))
+                .andDo(print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].replyId").value(PARENT_REPLY_ID.toString()))
                 .andExpect(jsonPath("$[0].childReplies[0].replyId").value(REPLY_ID.toString()));
 
@@ -471,162 +463,136 @@ public class ReviewControllerTest {
     }
 
     @Test
-    @WithMockUser(username = USER_EMAIL)
+    @WithMockUser(username = USER_EMAIL, roles = {"USER"})
     void testDeleteReply_Success() throws Exception {
         // Arrange
-        try (var mockedStatic = mockStatic(JwtProvider.class)) {
-            mockedStatic.when(() -> JwtProvider.getEmailFromJwtToken(JWT_HEADER))
-                    .thenReturn(USER_EMAIL);
-            when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
-            when(reviewReplyRepository.findById(REPLY_ID)).thenReturn(Optional.of(reply));
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
+        when(reviewReplyRepository.findById(REPLY_ID)).thenReturn(Optional.of(reply));
 
-            // Act & Assert
-            ResultActions result = mockMvc.perform(delete("/review/delete-reply/" + REPLY_ID)
-            		.with(csrf())
-                    .header("Authorization", JWT_HEADER))
-                    .andDo(print());
+        // Act & Assert
+        mockMvc.perform(delete("/review/delete-reply/" + REPLY_ID)
+                .header("Authorization", jwtToken)
+                .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().string("true"));
 
-            result.andExpect(status().isOk())
-                    .andExpect(content().string("true"));
-
-            verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
-            verify(reviewReplyRepository, times(1)).findById(REPLY_ID);
-            verify(reviewReplyRepository, times(1)).delete(reply);
-        }
+        verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(reviewReplyRepository, times(1)).findById(REPLY_ID);
+        verify(reviewReplyRepository, times(1)).delete(reply);
     }
 
     @Test
-    @WithMockUser(username = USER_EMAIL)
+    @WithMockUser(username = USER_EMAIL, roles = {"USER"})
     void testReactToReview_Success() throws Exception {
         // Arrange
-        try (var mockedStatic = mockStatic(JwtProvider.class)) {
-            mockedStatic.when(() -> JwtProvider.getEmailFromJwtToken(JWT_HEADER))
-                    .thenReturn(USER_EMAIL);
-            when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
-            when(reviewRepository.findById(REVIEW_ID)).thenReturn(Optional.of(review));
-            when(reviewReactionRepository.findByReviewReviewIdAndUserUserId(REVIEW_ID, USER_ID))
-                    .thenReturn(Optional.empty());
-            when(reviewReactionRepository.countByReviewReviewIdAndReactionType(REVIEW_ID, "LIKE"))
-                    .thenReturn(10L);
-            when(reviewReactionRepository.countByReviewReviewIdAndReactionType(REVIEW_ID, "DISLIKE"))
-                    .thenReturn(5L);
-            when(reviewReactionRepository.save(any(ReviewReaction.class))).thenReturn(new ReviewReaction());
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
+        when(reviewRepository.findById(REVIEW_ID)).thenReturn(Optional.of(review));
+        when(reviewReactionRepository.findByReviewReviewIdAndUserUserId(REVIEW_ID, USER_ID))
+                .thenReturn(Optional.empty());
+        when(reviewReactionRepository.countByReviewReviewIdAndReactionType(REVIEW_ID, "LIKE"))
+                .thenReturn(10L);
+        when(reviewReactionRepository.countByReviewReviewIdAndReactionType(REVIEW_ID, "DISLIKE"))
+                .thenReturn(5L);
+        when(reviewReactionRepository.save(any(ReviewReaction.class))).thenReturn(new ReviewReaction());
 
-            // Act & Assert
-            ResultActions result = mockMvc.perform(post("/review/react")
-            		.with(csrf())
-                    .header("Authorization", JWT_HEADER)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(reactionDTO)))
-                    .andDo(print());
+        // Act & Assert
+        mockMvc.perform(post("/review/react")
+                .header("Authorization", jwtToken)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"reviewId\": \"" + REVIEW_ID + "\", \"reactionType\": \"LIKE\"}"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reviewId").value(REVIEW_ID.toString()))
+                .andExpect(jsonPath("$.likeCount").value(10))
+                .andExpect(jsonPath("$.dislikeCount").value(5))
+                .andExpect(jsonPath("$.reactionType").value("LIKE"));
 
-            result.andExpect(status().isOk())
-                    .andExpect(jsonPath("$.reviewId").value(REVIEW_ID.toString()))
-                    .andExpect(jsonPath("$.likeCount").value(10))
-                    .andExpect(jsonPath("$.dislikeCount").value(5))
-                    .andExpect(jsonPath("$.reactionType").value("LIKE"));
-
-            verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
-            verify(reviewRepository, times(1)).findById(REVIEW_ID);
-            verify(reviewReactionRepository, times(1)).save(any(ReviewReaction.class));
-        }
+        verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(reviewRepository, times(1)).findById(REVIEW_ID);
+        verify(reviewReactionRepository, times(1)).save(any(ReviewReaction.class));
     }
 
     @Test
-    @WithMockUser(username = USER_EMAIL)
+    @WithMockUser(username = USER_EMAIL, roles = {"USER"})
     void testGetReactions_Success() throws Exception {
         // Arrange
         ReviewReaction reaction = new ReviewReaction();
         reaction.setReactionType("LIKE");
-        try (var mockedStatic = mockStatic(JwtProvider.class)) {
-            mockedStatic.when(() -> JwtProvider.getEmailFromJwtToken(JWT_HEADER))
-                    .thenReturn(USER_EMAIL);
-            when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
-            when(reviewReactionRepository.countByReviewReviewIdAndReactionType(REVIEW_ID, "LIKE"))
-                    .thenReturn(10L);
-            when(reviewReactionRepository.countByReviewReviewIdAndReactionType(REVIEW_ID, "DISLIKE"))
-                    .thenReturn(5L);
-            when(reviewReactionRepository.findByReviewReviewIdAndUserUserId(REVIEW_ID, USER_ID))
-                    .thenReturn(Optional.of(reaction));
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
+        when(reviewReactionRepository.countByReviewReviewIdAndReactionType(REVIEW_ID, "LIKE"))
+                .thenReturn(10L);
+        when(reviewReactionRepository.countByReviewReviewIdAndReactionType(REVIEW_ID, "DISLIKE"))
+                .thenReturn(5L);
+        when(reviewReactionRepository.findByReviewReviewIdAndUserUserId(REVIEW_ID, USER_ID))
+                .thenReturn(Optional.of(reaction));
 
-            // Act & Assert
-            ResultActions result = mockMvc.perform(get("/review/get-reactions")
-            		.with(csrf())
-                    .header("Authorization", JWT_HEADER)
-                    .param("reviewIds", REVIEW_ID.toString()))
-                    .andDo(print());
+        // Act & Assert
+        mockMvc.perform(get("/review/get-reactions")
+                .header("Authorization", jwtToken)
+                .param("reviewIds", REVIEW_ID.toString()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].reviewId").value(REVIEW_ID.toString()))
+                .andExpect(jsonPath("$[0].likeCount").value(10))
+                .andExpect(jsonPath("$[0].dislikeCount").value(5))
+                .andExpect(jsonPath("$[0].userReaction").value("LIKE"));
 
-            result.andExpect(status().isOk())
-                    .andExpect(jsonPath("$[0].reviewId").value(REVIEW_ID.toString()))
-                    .andExpect(jsonPath("$[0].likeCount").value(10))
-                    .andExpect(jsonPath("$[0].dislikeCount").value(5))
-                    .andExpect(jsonPath("$[0].userReaction").value("LIKE"));
-
-            verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
-            verify(reviewReactionRepository, times(1)).countByReviewReviewIdAndReactionType(REVIEW_ID, "LIKE");
-        }
+        verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(reviewReactionRepository, times(1)).countByReviewReviewIdAndReactionType(REVIEW_ID, "LIKE");
     }
 
     @Test
-    @WithMockUser(username = USER_EMAIL)
+    @WithMockUser(username = USER_EMAIL, roles = {"USER"})
     void testUpdateReview_Success() throws Exception {
         // Arrange
-        try (var mockedStatic = mockStatic(JwtProvider.class)) {
-            mockedStatic.when(() -> JwtProvider.getEmailFromJwtToken(JWT_HEADER))
-                    .thenReturn(USER_EMAIL);
-            when(seekerRepository.findByUserAccountEmail(USER_EMAIL)).thenReturn(Optional.of(seeker));
-            when(reviewRepository.findById(REVIEW_ID)).thenReturn(Optional.of(review));
-            when(reviewRepository.save(any(Review.class))).thenReturn(review);
+        when(seekerRepository.findByUserAccountEmail(USER_EMAIL)).thenReturn(Optional.of(seeker));
+        when(reviewRepository.findById(REVIEW_ID)).thenReturn(Optional.of(review));
+        when(reviewRepository.save(any(Review.class))).thenReturn(review);
 
-            // Act & Assert
-            ResultActions result = mockMvc.perform(put("/review/update-review/" + REVIEW_ID)
-            		.with(csrf())
-                    .header("Authorization", JWT_HEADER)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(reviewDTO)))
-                    .andDo(print());
+        // Act & Assert
+        mockMvc.perform(put("/review/update-review/" + REVIEW_ID)
+                .header("Authorization", jwtToken)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"star\": " + STAR + ", \"message\": \"" + MESSAGE + "\", \"anonymous\": " + ANONYMOUS + "}"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reviewId").value(REVIEW_ID.toString()))
+                .andExpect(jsonPath("$.star").value(STAR))
+                .andExpect(jsonPath("$.message").value(MESSAGE));
 
-            result.andExpect(status().isOk())
-                    .andExpect(jsonPath("$.reviewId").value(REVIEW_ID.toString()))
-                    .andExpect(jsonPath("$.star").value(STAR))
-                    .andExpect(jsonPath("$.message").value(MESSAGE));
-
-            verify(seekerRepository, times(1)).findByUserAccountEmail(USER_EMAIL);
-            verify(reviewRepository, times(1)).findById(REVIEW_ID);
-            verify(reviewRepository, times(1)).save(any(Review.class));
-        }
+        verify(seekerRepository, times(1)).findByUserAccountEmail(USER_EMAIL);
+        verify(reviewRepository, times(1)).findById(REVIEW_ID);
+        verify(reviewRepository, times(1)).save(any(Review.class));
     }
 
     @Test
-    @WithMockUser(username = USER_EMAIL)
+    @WithMockUser(username = USER_EMAIL, roles = {"USER"})
     void testUpdateReply_Success() throws Exception {
         // Arrange
         replyDTO.setParentReplyId(PARENT_REPLY_ID);
-        try (var mockedStatic = mockStatic(JwtProvider.class)) {
-            mockedStatic.when(() -> JwtProvider.getEmailFromJwtToken(JWT_HEADER))
-                    .thenReturn(USER_EMAIL);
-            when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
-            when(reviewReplyRepository.findById(REPLY_ID)).thenReturn(Optional.of(reply));
-            when(reviewReplyRepository.findById(PARENT_REPLY_ID)).thenReturn(Optional.of(parentReply));
-            when(reviewReplyRepository.save(any(ReviewReply.class))).thenReturn(reply);
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
+        when(reviewReplyRepository.findById(REPLY_ID)).thenReturn(Optional.of(reply));
+        when(reviewReplyRepository.findById(PARENT_REPLY_ID)).thenReturn(Optional.of(parentReply));
+        when(reviewReplyRepository.save(any(ReviewReply.class))).thenReturn(reply);
 
-            // Act & Assert
-            ResultActions result = mockMvc.perform(put("/review/update-reply/" + REPLY_ID)
-            		.with(csrf())
-                    .header("Authorization", JWT_HEADER)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(replyDTO)))
-                    .andDo(print());
+        // Act & Assert
+        mockMvc.perform(put("/review/update-reply/" + REPLY_ID)
+                .header("Authorization", jwtToken)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"reviewId\": \"" + REVIEW_ID + "\", \"content\": \"" + REPLY_CONTENT + "\", \"anonymous\": " + ANONYMOUS + ", \"parentReplyId\": \"" + PARENT_REPLY_ID + "\"}"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.replyId").value(REPLY_ID.toString()))
+                .andExpect(jsonPath("$.content").value(REPLY_CONTENT))
+                .andExpect(jsonPath("$.parentReplyId").value(PARENT_REPLY_ID.toString()));
 
-            result.andExpect(status().isOk())
-                    .andExpect(jsonPath("$.replyId").value(REPLY_ID.toString()))
-                    .andExpect(jsonPath("$.content").value(REPLY_CONTENT))
-                    .andExpect(jsonPath("$.parentReplyId").value(PARENT_REPLY_ID.toString()));
-
-            verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
-            verify(reviewReplyRepository, times(1)).findById(REPLY_ID);
-            verify(reviewReplyRepository, times(1)).findById(PARENT_REPLY_ID);
-            verify(reviewReplyRepository, times(1)).save(any(ReviewReply.class));
-        }
+        verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(reviewReplyRepository, times(1)).findById(REPLY_ID);
+        verify(reviewReplyRepository, times(1)).findById(PARENT_REPLY_ID);
+        verify(reviewReplyRepository, times(1)).save(any(ReviewReply.class));
     }
 }

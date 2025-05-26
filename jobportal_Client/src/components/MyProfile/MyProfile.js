@@ -412,7 +412,7 @@ export default function MyProfile() {
               size="icon"
               className="absolute right-2 top-2 sm:right-4 sm:top-4 bg-white/20 hover:bg-white/30 p-1 sm:p-2"
               onClick={() => setShowColorPicker(!showColorPicker)}
-              style={{ zIndex: 1000 }}
+              style={{ zIndex: 10 }}
             >
               <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
@@ -478,7 +478,7 @@ export default function MyProfile() {
                   size="icon"
                   variant="ghost"
                   onClick={handleEditDesClick}
-                  style={{ zIndex: 1000 }}
+                  style={{ zIndex: 10 }}
                 >
                   <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
@@ -504,7 +504,7 @@ export default function MyProfile() {
                         onClick={handleSaveClick}
                         size="sm"
                         className="text-xs sm:text-sm px-3 sm:px-4 min-w-[80px]"
-                        style={{ zIndex: 1000 }}
+                        style={{ zIndex: 10 }}
                       >
                         Lưu
                       </Button>
@@ -524,7 +524,7 @@ export default function MyProfile() {
                 <h3 className="text-base sm:text-lg lg:text-xl text-purple-600 font-semibold">
                   Kinh nghiệm
                 </h3>
-                <Button size="icon" variant="ghost" style={{ zIndex: 1000 }}>
+                <Button size="icon" variant="ghost" style={{ zIndex: 10 }}>
                   <Plus
                     className="h-4 w-4 sm:h-5 sm:w-5"
                     onClick={handleOpenExpModal}
@@ -575,7 +575,7 @@ export default function MyProfile() {
                               className="h-6 w-6 hover:bg-blue-100"
                               onClick={() => handleEditExperience(experience)}
                               title="Chỉnh sửa"
-                              style={{ zIndex: 1000 }}
+                              style={{ zIndex: 10 }}
                             >
                               <Edit className="h-4 w-4 text-blue-600" />
                             </Button>
@@ -587,7 +587,7 @@ export default function MyProfile() {
                                 handleDeleteExp(experience.experienceId)
                               }
                               title="Xóa"
-                              style={{ zIndex: 1000 }}
+                              style={{ zIndex: 10 }}
                             >
                               <Delete className="h-4 w-4 text-red-600" />
                             </Button>
@@ -635,7 +635,7 @@ export default function MyProfile() {
                       size="sm"
                       className="mt-2 text-xs sm:text-sm min-w-[140px]"
                       onClick={exp.length === 0 ? handleOpenExpModal : undefined}
-                      style={{ zIndex: 1000 }}
+                      style={{ zIndex: 10 }}
                     >
                       <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-1" /> Thêm kinh
                       nghiệm
@@ -663,7 +663,7 @@ export default function MyProfile() {
                 <h3 className="text-base sm:text-lg lg:text-xl text-purple-600 font-semibold">
                   Học vấn
                 </h3>
-                <Button size="icon" variant="ghost" style={{ zIndex: 1000 }}>
+                <Button size="icon" variant="ghost" style={{ zIndex: 10 }}>
                   <Plus
                     className="h-4 w-4 sm:h-5 sm:w-5"
                     onClick={handleOpenEduModal}
@@ -713,7 +713,7 @@ export default function MyProfile() {
                               className="h-6 w-6 hover:bg-blue-100"
                               onClick={() => handleEditEducation(education)}
                               title="Chỉnh sửa"
-                              style={{ zIndex: 1000 }}
+                              style={{ zIndex: 10 }}
                             >
                               <Edit className="h-4 w-4 text-blue-600" />
                             </Button>
@@ -725,7 +725,7 @@ export default function MyProfile() {
                                 handleDeleteEdu(education.educationId)
                               }
                               title="Xóa"
-                              style={{ zIndex: 1000 }}
+                              style={{ zIndex: 10 }}
                             >
                               <Delete className="h-4 w-4 text-red-600" />
                             </Button>
@@ -788,7 +788,7 @@ export default function MyProfile() {
                       size="sm"
                       className="mt-2 text-xs sm:text-sm min-w-[140px]"
                       onClick={edu.length === 0 ? handleOpenEduModal : undefined}
-                      style={{ zIndex: 1000 }}
+                      style={{ zIndex: 10 }}
                     >
                       <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-1" /> Thêm học
                       vấn
@@ -820,7 +820,7 @@ export default function MyProfile() {
                   size="icon"
                   variant="ghost"
                   onClick={handleOpenSkillModal}
-                  style={{ zIndex: 1000 }}
+                  style={{ zIndex: 10 }}
                 >
                   <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
@@ -888,7 +888,7 @@ export default function MyProfile() {
                   size="icon"
                   variant="ghost"
                   onClick={handleEditInfoClick}
-                  style={{ zIndex: 1000 }}
+                  style={{ zIndex: 10 }}
                 >
                   <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
@@ -1119,7 +1119,7 @@ export default function MyProfile() {
                     onClick={handleSaveClick}
                     size="sm"
                     className="text-xs sm:text-sm px-3 sm:px-4 min-w-[80px]"
-                    style={{ zIndex: 1000 }}
+                    style={{ zIndex: 10 }}
                   >
                     Lưu
                   </Button>
@@ -1136,7 +1136,7 @@ export default function MyProfile() {
                   size="icon"
                   variant="ghost"
                   onClick={handleOpenSocialLinkModal}
-                  style={{ zIndex: 1000 }}
+                  style={{ zIndex: 10 }}
                 >
                   <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
@@ -1182,7 +1182,7 @@ export default function MyProfile() {
                               variant="ghost"
                               className="h-4 w-4 sm:h-5 sm:w-5 md-custom:h-5 md-custom:w-5 lg:h-6 lg:w-6 hover:bg-blue-100"
                               onClick={() => handleEditSocialLink(link)}
-                              style={{ zIndex: 1000 }}
+                              style={{ zIndex: 10 }}
                             >
                               <Edit className="h-2.5 w-2.5 sm:h-3 sm:w-3 md-custom:h-3 md-custom:w-3 lg:h-4 lg:w-4 text-blue-600" />
                             </Button>
@@ -1191,7 +1191,7 @@ export default function MyProfile() {
                               variant="ghost"
                               className="h-4 w-4 sm:h-5 sm:w-5 md-custom:h-5 md-custom:w-5 lg:h-6 lg:w-6 hover:bg-red-100"
                               onClick={() => handleDeleteSocialLink(link.id)}
-                              style={{ zIndex: 1000 }}
+                              style={{ zIndex: 10 }}
                             >
                               <Delete className="h-2.5 w-2.5 sm:h-3 sm:w-3 md-custom:h-3 md-custom:w-3 lg:h-4 lg:w-4 text-red-600" />
                             </Button>

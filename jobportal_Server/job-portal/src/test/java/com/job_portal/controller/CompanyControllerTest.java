@@ -3,6 +3,7 @@ package com.job_portal.controller;
 import com.job_portal.DTO.CompanyDTO;
 import com.job_portal.DTO.CompanyWithCountJobDTO;
 import com.job_portal.config.JwtProvider;
+import java.util.Date;
 import com.job_portal.models.City;
 import com.job_portal.models.Company;
 import com.job_portal.models.Industry;
@@ -18,11 +19,16 @@ import com.job_portal.repository.UserAccountRepository;
 import com.job_portal.service.IApplyJobService;
 import com.job_portal.service.ICompanyService;
 import com.job_portal.service.TaxCodeValidation;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,16 +42,20 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestTemplate;
 
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.*;
+
+import javax.crypto.SecretKey;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.mockito.ArgumentMatchers.*;
@@ -85,37 +95,44 @@ class CompanyControllerTest {
 	@MockBean
 	private ReviewRepository reviewRepository;
 
-	private UserAccount user;
+	private UserAccount userSeeker;
+	private UserAccount userCompany;
 	private Company company;
+	
+	private static final String SECRET_KEY = "dsadasdhasuidhuasdyuiasydiuasasdasd";
+    private static final SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
 	@Autowired
 	private MockMvc mockMvc;
+	
+	private String jwtToken;
 
-	private static final String jwt = "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJHaWFUaHVhblNlbnBhaSIsImlhdCI6MTc0Nzc1MjA0MiwiZXhwIjoxNzQ3ODM4NDQyLCJlbWFpbCI6ImRhbmdnaWF0aHVhbmhsQGdtYWlsLmNvbSJ9.Ooi4talAjqDbG4Zinr_gfS-jV9xqijyCPja1Jc2bSr4";
-	private static final String jwt_seeker = "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJHaWFUaHVhblNlbnBhaSIsImlhdCI6MTc0NzczNDYzOSwiZXhwIjoxNzQ3ODIxMDM5LCJlbWFpbCI6ImdpYXRodWFuaGxAZ21haWwuY29tIn0.iYEamuMvZTJPWJx1BlO_GIwaSsd2kcWXXJ8WQZF_2_s";
-
-	private final String USER_EMAIL = "danggiathuanhl@gmail.com";
+	private static String jwt;
+	private static String jwt_seeker;
+	
+	private final String USER_EMAIL_COMPANY = "danggiathuanhl@gmail.com";
+	private final String USER_EMAIL_SEEKER = "giathuanhl@gmail.com";
 	private final UUID COMPANY_ID = UUID.randomUUID();
 	private final String TAX_CODE = "1234567890";
 	private final String COMPANY_NAME = "DangGiaThuan";
 
-	private String JWT_TOKEN;
-	private String JWT_SEEKER;
 
 	@BeforeEach
 	void setUp() {
 
-		user = new UserAccount();
-		user.setEmail(USER_EMAIL);
+		userSeeker = new UserAccount();
+		userSeeker.setEmail(USER_EMAIL_SEEKER);
+		
+		userCompany = new UserAccount();
+		userCompany.setEmail(USER_EMAIL_COMPANY);
 
 		company = new Company();
 		company.setCompanyId(COMPANY_ID);
 		company.setCompanyName(COMPANY_NAME);
 
-		user.setCompany(company);
-
-		JWT_TOKEN = "Bearer " + jwt;
-		JWT_SEEKER = "Bearer " + jwt_seeker;
+		userCompany.setCompany(company);
+		
+		
 	}
 
 	@Test
@@ -161,16 +178,36 @@ class CompanyControllerTest {
 		company.setCompanyId(COMPANY_ID);
 		company.setTaxCode(TAX_CODE);
 		user.setCompany(company);
+		
+		Authentication authentication = Mockito.mock(Authentication.class);
+        when(authentication.getName()).thenReturn("danggiathuanhl@gmail.com");
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
 
-		when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
+        long expirationTime = 24 * 60 * 60 * 1000; 
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expirationTime);
+        jwtToken = "Bearer " + Jwts.builder()
+                .setIssuer("GiaThuanSenpai")
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .claim("email", authentication.getName())
+                .signWith(key)
+                .compact();
+
+        when(JwtProvider.generateToken(authentication)).thenReturn(jwtToken);
+        when(userAccountRepository.findByEmail("danggiathuanhl@gmail.com")).thenReturn(Optional.of(userCompany));
+
+		when(userAccountRepository.findByEmail(USER_EMAIL_COMPANY)).thenReturn(Optional.of(user));
 		when(companyRepository.findById(COMPANY_ID)).thenReturn(Optional.of(company));
 		when(taxCodeValidation.checkTaxCode(TAX_CODE)).thenReturn(true);
 
 		// Act & Assert
-		mockMvc.perform(get("/company/validate-tax").header("Authorization", JWT_TOKEN)).andDo(print())
+		mockMvc.perform(get("/company/validate-tax").header("Authorization", jwtToken)).andDo(print())
 				.andExpect(status().isOk()).andExpect(content().string("true"));
 
-		verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+		verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL_COMPANY);
 		verify(companyRepository, times(1)).findById(COMPANY_ID);
 		verify(taxCodeValidation, times(1)).checkTaxCode(TAX_CODE);
 	}
@@ -183,15 +220,35 @@ class CompanyControllerTest {
 		company.setCompanyId(COMPANY_ID);
 		company.setTaxCode(TAX_CODE);
 		user.setCompany(company);
+		
+		Authentication authentication = Mockito.mock(Authentication.class);
+        when(authentication.getName()).thenReturn("danggiathuanhl@gmail.com");
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
 
-		when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
+        long expirationTime = 24 * 60 * 60 * 1000; 
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expirationTime);
+        jwtToken = "Bearer " + Jwts.builder()
+                .setIssuer("GiaThuanSenpai")
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .claim("email", authentication.getName())
+                .signWith(key)
+                .compact();
+
+        when(JwtProvider.generateToken(authentication)).thenReturn(jwtToken);
+        when(userAccountRepository.findByEmail("danggiathuanhl@gmail.com")).thenReturn(Optional.of(userCompany));
+
+		when(userAccountRepository.findByEmail(USER_EMAIL_COMPANY)).thenReturn(Optional.of(user));
 		when(companyRepository.findById(COMPANY_ID)).thenReturn(Optional.of(company));
 		when(taxCodeValidation.checkTaxCode(TAX_CODE)).thenReturn(false);
 
-		mockMvc.perform(get("/company/validate-tax").header("Authorization", JWT_TOKEN)).andDo(print())
+		mockMvc.perform(get("/company/validate-tax").header("Authorization", jwtToken)).andDo(print())
 				.andExpect(status().isOk()).andExpect(content().string("false"));
 
-		verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+		verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL_COMPANY);
 		verify(companyRepository, times(1)).findById(COMPANY_ID);
 		verify(taxCodeValidation, times(1)).checkTaxCode(TAX_CODE);
 	}
@@ -210,7 +267,7 @@ class CompanyControllerTest {
 	    when(projection.getDescription()).thenReturn("Description");
 	    when(projection.getLogo()).thenReturn("logo.png");
 	    when(projection.getContact()).thenReturn("contact");
-	    when(projection.getEmail()).thenReturn(USER_EMAIL);
+	    when(projection.getEmail()).thenReturn(USER_EMAIL_COMPANY);
 	    when(projection.getEstablishedTime()).thenReturn(java.sql.Date.valueOf("2023-01-01"));
 	    when(projection.getTaxCode()).thenReturn(TAX_CODE);
 
@@ -234,7 +291,7 @@ class CompanyControllerTest {
 	            .andExpect(jsonPath("$[0].description").value("Description"))
 	            .andExpect(jsonPath("$[0].logo").value("logo.png"))
 	            .andExpect(jsonPath("$[0].contact").value("contact"))
-	            .andExpect(jsonPath("$[0].email").value(USER_EMAIL))
+	            .andExpect(jsonPath("$[0].email").value(USER_EMAIL_COMPANY))
 	            .andExpect(jsonPath("$[0].establishedTime").value("2023-01-01"))
 	            .andExpect(jsonPath("$[0].taxCode").value(TAX_CODE));
 
@@ -314,12 +371,32 @@ class CompanyControllerTest {
 		Company company = new Company();
 		company.setCompanyId(COMPANY_ID);
 		company.setCompanyName(COMPANY_NAME);
+		
+		Authentication authentication = Mockito.mock(Authentication.class);
+        when(authentication.getName()).thenReturn("giathuanhl@gmail.com");
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        long expirationTime = 24 * 60 * 60 * 1000; 
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expirationTime);
+        jwtToken = "Bearer " + Jwts.builder()
+                .setIssuer("GiaThuanSenpai")
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .claim("email", authentication.getName())
+                .signWith(key)
+                .compact();
+
+        when(JwtProvider.generateToken(authentication)).thenReturn(jwtToken);
+        when(userAccountRepository.findByEmail("giathuanhl@gmail.com")).thenReturn(Optional.of(userCompany));
 
 		when(userAccountRepository.findByEmail("giathuanhl@gmail.com")).thenReturn(Optional.of(user));
 		when(companyRepository.findTop6CompaniesByIndustryIds(List.of(14))).thenReturn(List.of(company));
 
 		// Act & Assert
-		mockMvc.perform(get("/company/find-companies-fit-userId").header("Authorization", JWT_SEEKER))
+		mockMvc.perform(get("/company/find-companies-fit-userId").header("Authorization", jwtToken))
 				.andExpect(status().isOk());
 
 		verify(companyRepository, times(1)).findTop6CompaniesByIndustryIds(List.of(14));
@@ -336,18 +413,38 @@ class CompanyControllerTest {
 		CompanyDTO companyDTO = new CompanyDTO();
 		companyDTO.setCompanyId(COMPANY_ID);
 		companyDTO.setCompanyName(COMPANY_NAME);
+		
+		Authentication authentication = Mockito.mock(Authentication.class);
+        when(authentication.getName()).thenReturn("danggiathuanhl@gmail.com");
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
 
-		when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
+        long expirationTime = 24 * 60 * 60 * 1000; 
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expirationTime);
+        jwtToken = "Bearer " + Jwts.builder()
+                .setIssuer("GiaThuanSenpai")
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .claim("email", authentication.getName())
+                .signWith(key)
+                .compact();
+
+        when(JwtProvider.generateToken(authentication)).thenReturn(jwtToken);
+        when(userAccountRepository.findByEmail("danggiathuanhl@gmail.com")).thenReturn(Optional.of(userCompany));
+
+		when(userAccountRepository.findByEmail(USER_EMAIL_COMPANY)).thenReturn(Optional.of(user));
 		when(companyService.updateCompany(any(), eq(COMPANY_ID))).thenReturn(true);
 
 		// Act & Assert
-		mockMvc.perform(put("/company/update-company").header("Authorization", JWT_TOKEN).with(csrf())
+		mockMvc.perform(put("/company/update-company").header("Authorization", jwtToken).with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("{\"companyId\": \"" + COMPANY_ID + "\", \"companyName\": \"" + COMPANY_NAME + "\"}"))
 				.andDo(print()).andExpect(status().isCreated())
 				.andExpect(content().string("Cập nhật thông tin thành công"));
 
-		verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+		verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL_COMPANY);
 		verify(companyService, times(1)).updateCompany(any(), eq(COMPANY_ID));
 	}
 
@@ -362,18 +459,38 @@ class CompanyControllerTest {
 		CompanyDTO companyDTO = new CompanyDTO();
 		companyDTO.setCompanyId(COMPANY_ID);
 		companyDTO.setCompanyName(COMPANY_NAME);
+		
+		Authentication authentication = Mockito.mock(Authentication.class);
+        when(authentication.getName()).thenReturn("danggiathuanhl@gmail.com");
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
 
-		when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
+        long expirationTime = 24 * 60 * 60 * 1000; 
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expirationTime);
+        jwtToken = "Bearer " + Jwts.builder()
+                .setIssuer("GiaThuanSenpai")
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .claim("email", authentication.getName())
+                .signWith(key)
+                .compact();
+
+        when(JwtProvider.generateToken(authentication)).thenReturn(jwtToken);
+        when(userAccountRepository.findByEmail("danggiathuanhl@gmail.com")).thenReturn(Optional.of(userCompany));
+
+		when(userAccountRepository.findByEmail(USER_EMAIL_COMPANY)).thenReturn(Optional.of(user));
 		when(companyService.updateCompany(any(), eq(COMPANY_ID))).thenReturn(false);
 
 		// Act & Assert
-		mockMvc.perform(put("/company/update-company").header("Authorization", JWT_TOKEN).with(csrf())
+		mockMvc.perform(put("/company/update-company").header("Authorization", jwtToken).with(csrf())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content("{\"companyId\": \"" + COMPANY_ID + "\", \"companyName\": \"" + COMPANY_NAME + "\"}"))
 				.andDo(print()).andExpect(status().isBadRequest())
 				.andExpect(content().string("Cập nhật thông tin thất bại"));
 
-		verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+		verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL_COMPANY);
 		verify(companyService, times(1)).updateCompany(any(), eq(COMPANY_ID));
 	}
 
@@ -402,12 +519,32 @@ class CompanyControllerTest {
 		company.setCompanyId(COMPANY_ID);
 		company.setCompanyName(COMPANY_NAME);
 		user.setCompany(company);
+		
+		Authentication authentication = Mockito.mock(Authentication.class);
+        when(authentication.getName()).thenReturn("danggiathuanhl@gmail.com");
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
 
-		when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
+        long expirationTime = 24 * 60 * 60 * 1000; 
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expirationTime);
+        jwtToken = "Bearer " + Jwts.builder()
+                .setIssuer("GiaThuanSenpai")
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .claim("email", authentication.getName())
+                .signWith(key)
+                .compact();
+
+        when(JwtProvider.generateToken(authentication)).thenReturn(jwtToken);
+        when(userAccountRepository.findByEmail("danggiathuanhl@gmail.com")).thenReturn(Optional.of(userCompany));
+
+		when(userAccountRepository.findByEmail(USER_EMAIL_COMPANY)).thenReturn(Optional.of(user));
 		when(companyService.findCompanyById(COMPANY_ID)).thenReturn(company);
 
 		// Act
-		ResultActions result = mockMvc.perform(get("/company/profile").header("Authorization", JWT_TOKEN))
+		ResultActions result = mockMvc.perform(get("/company/profile").header("Authorization", jwtToken))
 				.andDo(print());
 
 		// Assert
@@ -419,7 +556,7 @@ class CompanyControllerTest {
 		String responseBody = result.andReturn().getResponse().getContentAsString();
 		System.out.println("Response Body: " + responseBody);
 
-		verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+		verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL_COMPANY);
 		verify(companyService, times(1)).findCompanyById(COMPANY_ID);
 	}
 
@@ -431,6 +568,26 @@ class CompanyControllerTest {
 		UUID userId = UUID.randomUUID();
 		user.setUserId(userId);
 		user.setEmail("giathuanhl@gmail.com");
+		
+		Authentication authentication = Mockito.mock(Authentication.class);
+        when(authentication.getName()).thenReturn("danggiathuanhl@gmail.com");
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        long expirationTime = 24 * 60 * 60 * 1000; 
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expirationTime);
+        jwtToken = "Bearer " + Jwts.builder()
+                .setIssuer("GiaThuanSenpai")
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .claim("email", authentication.getName())
+                .signWith(key)
+                .compact();
+
+        when(JwtProvider.generateToken(authentication)).thenReturn(jwtToken);
+        when(userAccountRepository.findByEmail("giathuanhl@gmail.com")).thenReturn(Optional.of(userCompany));
 
 		try (MockedStatic<JwtProvider> mockedStatic = mockStatic(JwtProvider.class)) {
 			// Sử dụng anyString() để khớp với bất kỳ token nào
@@ -440,7 +597,7 @@ class CompanyControllerTest {
 			when(applyJobService.isEligibleForRating(userId, COMPANY_ID)).thenReturn(true);
 
 			// Act & Assert
-			mockMvc.perform(get("/company/can-rating/" + COMPANY_ID).header("Authorization", JWT_SEEKER)).andDo(print())
+			mockMvc.perform(get("/company/can-rating/" + COMPANY_ID).header("Authorization", jwtToken)).andDo(print())
 					.andExpect(status().isOk()).andExpect(content().string("true"));
 
 			verify(applyJobService, times(1)).isEligibleForRating(userId, COMPANY_ID);

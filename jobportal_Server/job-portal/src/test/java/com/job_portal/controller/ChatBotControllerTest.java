@@ -14,24 +14,36 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
+
+import javax.crypto.SecretKey;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestTemplate;
 
 import com.job_portal.DTO.ChatRequest;
+import com.job_portal.config.JwtProvider;
 import com.job_portal.models.UserAccount;
 import com.job_portal.repository.UserAccountRepository;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 
 @WebMvcTest(ChatBotController.class)
 public class ChatBotControllerTest {
@@ -45,21 +57,45 @@ public class ChatBotControllerTest {
     @MockBean
     private UserAccountRepository userAccountRepository;
 
+    @Autowired
     private MockMvc mockMvc;
+    
+    private String jwtToken;
 
     private final String RASA_URL = "http://localhost:5005/webhooks/rest/webhook";
-    private static final String JWT_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJHaWFUaHVhblNlbnBhaSIsImlhdCI6MTc0NzczNDYzOSwiZXhwIjoxNzQ3ODIxMDM5LCJlbWFpbCI6ImdpYXRodWFuaGxAZ21haWwuY29tIn0.iYEamuMvZTJPWJx1BlO_GIwaSsd2kcWXXJ8WQZF_2_s";
+   
     private final String USER_EMAIL = "giathuanhl@gmail.com";
     private final String MESSAGE = "Xin chào";
     
-    private String jwt;
+    private static final String SECRET_KEY = "dsadasdhasuidhuasdyuiasydiuasasdasd";
+	private static final SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+    
     
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(chatBotController).build();
         
-        jwt = "Bearer " + JWT_TOKEN;
+        Authentication authentication = Mockito.mock(Authentication.class);
+        when(authentication.getName()).thenReturn(USER_EMAIL);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        // Generate jwtToken token
+        long expirationTime = 24 * 60 * 60 * 1000; // 24 hours
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expirationTime);
+        jwtToken = "Bearer " + Jwts.builder()
+                .setIssuer("GiaThuanSenpai")
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .claim("email", authentication.getName())
+                .signWith(key)
+                .compact();
+
+        when(JwtProvider.generateToken(authentication)).thenReturn(jwtToken);
+
     }
     
     @Test
@@ -74,6 +110,8 @@ public class ChatBotControllerTest {
         UserAccount user = new UserAccount();
         user.setUserId(userId);
         user.setEmail(USER_EMAIL);
+        
+       
 
         when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
         when(restTemplate.postForObject(eq(RASA_URL), any(), eq(Object[].class)))
@@ -81,7 +119,7 @@ public class ChatBotControllerTest {
 
         // Act & Assert
         mockMvc.perform(post("/chatbot/send")
-                .header("Authorization", jwt)
+                .header("Authorization", jwtToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"message\": \"" + MESSAGE + "\"}"))
         		.andDo(print())
@@ -102,7 +140,7 @@ public class ChatBotControllerTest {
 
         // Act & Assert
         mockMvc.perform(post("/chatbot/send")
-                .header("Authorization", jwt)
+                .header("Authorization", jwtToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"message\": \"" + MESSAGE + "\"}"))
         		.andDo(print())
@@ -131,7 +169,7 @@ public class ChatBotControllerTest {
 
         // Act & Assert
         mockMvc.perform(post("/chatbot/send")
-                .header("Authorization", jwt)
+                .header("Authorization", jwtToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"message\": \"" + MESSAGE + "\"}"))
         		.andDo(print())

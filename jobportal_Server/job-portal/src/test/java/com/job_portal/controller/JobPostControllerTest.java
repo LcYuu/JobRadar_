@@ -6,6 +6,7 @@ import com.job_portal.DTO.JobPostDTO;
 import com.job_portal.config.JwtProvider;
 import com.job_portal.models.Company;
 import com.job_portal.models.JobPost;
+import com.job_portal.models.Seeker;
 import com.job_portal.models.UserAccount;
 import com.job_portal.projection.JobWithApplicationCountProjection;
 import com.job_portal.repository.CityRepository;
@@ -14,197 +15,227 @@ import com.job_portal.repository.IndustryRepository;
 import com.job_portal.repository.JobPostRepository;
 import com.job_portal.repository.UserAccountRepository;
 import com.job_portal.service.AccountDetailServiceImpl;
+import com.job_portal.service.ICompanyService;
 import com.job_portal.service.IJobPostService;
+import com.job_portal.service.INotificationService;
 import com.job_portal.service.ISearchHistoryService;
 import com.job_portal.service.WebSocketService;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.RestTemplate;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-
-import org.mockito.ArgumentMatchers;
+import javax.crypto.SecretKey;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.hamcrest.CoreMatchers.containsString;
+import java.util.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@WebMvcTest(JobPostController.class)
 class JobPostControllerTest {
 
-	@Autowired
-	private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-	@Autowired
-	private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-	@MockBean
-	private JobPostRepository jobPostRepository;
+    @MockBean
+    private JobPostRepository jobPostRepository;
 
-	@MockBean
-	private UserAccountRepository userAccountRepository;
+    @MockBean
+    private UserAccountRepository userAccountRepository;
 
-	@MockBean
-	private CompanyRepository companyRepository;
+    @MockBean
+    private CompanyRepository companyRepository;
 
-	@MockBean
-	private IJobPostService jobPostService;
+    @MockBean
+    private IJobPostService jobPostService;
 
-	@MockBean
-	private CityRepository cityRepository;
+    @MockBean
+    private CityRepository cityRepository;
 
-	@MockBean
-	private IndustryRepository industryRepository;
+    @MockBean
+    private IndustryRepository industryRepository;
 
-	@MockBean
-	private ISearchHistoryService searchHistoryService;
+    @MockBean
+    private ISearchHistoryService searchHistoryService;
 
-	@MockBean
-	private WebSocketService webSocketService;
+    @MockBean
+    private WebSocketService webSocketService;
 
-	@MockBean
-	private JwtProvider jwtProvider;
+    @MockBean
+    private JwtProvider jwtProvider;
 
-	@MockBean
-	private AccountDetailServiceImpl accountDetailService;
+    @MockBean
+    private AccountDetailServiceImpl accountDetailService;
 
-	@MockBean
-	private RestTemplate restTemplate;
+    @MockBean
+    private RestTemplate restTemplate;
 
-	private UserAccount userAccount;
-	private Company company;
-	private JobPost jobPost;
-	private JobPostDTO jobPostDTO;
-	private UUID postId;
-	private String jwt;
-	private Authentication authentication;
-	private static final String JWT_TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJHaWFUaHVhblNlbnBhaSIsImlhdCI6MTc0NzY2MzY2NiwiZXhwIjoxNzQ3NzUwMDY2LCJlbWFpbCI6ImRhbmdnaWF0aHVhbmhsQGdtYWlsLmNvbSJ9.EENhWi5SWSDw2Wav2-p9s6xqxTPcs0SJQhoP6_Go4Tk";
+    @MockBean
+    private ICompanyService companyService;
 
-	@BeforeEach
-	void setUp() {
-		postId = UUID.randomUUID();
+    @MockBean
+    private INotificationService notificationService;
 
-		// Setup UserAccount
-		userAccount = new UserAccount();
-		userAccount.setUserId(UUID.randomUUID());
-		userAccount.setEmail("giathuan@gmail.com");
-		userAccount.setUserName("DangGiaThuan");
+    private static final String SECRET_KEY = "dsadasdhasuidhuasdyuiasydiuasasdasd";
+    private static final SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
-		// Setup Company
-		company = new Company();
-		company.setCompanyId(UUID.randomUUID());
-		company.setCompanyName("Test Company");
-		userAccount.setCompany(company);
+    private static final String USER_EMAIL = "danggiathuanhl@gmail.com";
 
-		// Setup JobPost
-		jobPost = new JobPost();
-		jobPost.setPostId(postId);
-		jobPost.setTitle("Software Engineer");
-		jobPost.setDescription("Develop software solutions");
-		jobPost.setSalary(50000L);
-		jobPost.setCreateDate(LocalDateTime.now());
-		jobPost.setCompany(company);
-		jobPost.setApprove(false);
-		jobPost.setStatus("Đang mở");
+    private UserAccount userAccount;
+    private Company company;
+    private JobPost jobPost;
+    private JobPostDTO jobPostDTO;
+    private UUID postId;
+    private String jwtToken;
 
-		// Setup JobPostDTO
-		jobPostDTO = new JobPostDTO();
-		jobPostDTO.setTitle("Software Engineer");
-		jobPostDTO.setDescription("Develop software solutions");
-		jobPostDTO.setSalary(50000L);
+    @BeforeEach
+    void setUp() {
+        postId = UUID.randomUUID();
 
-		jwt = "Bearer " + JWT_TOKEN;
-		
-		objectMapper = new ObjectMapper();
-        // Đăng ký module để xử lý LocalDateTime
+        // Setup UserAccount
+        userAccount = new UserAccount();
+        userAccount.setUserId(UUID.randomUUID());
+        userAccount.setEmail(USER_EMAIL);
+        userAccount.setUserName("DangGiaThuan");
+
+        // Setup Company
+        company = new Company();
+        company.setCompanyId(UUID.randomUUID());
+        company.setCompanyName("Test Company");
+        userAccount.setCompany(company);
+
+        // Setup JobPost
+        jobPost = new JobPost();
+        jobPost.setPostId(postId);
+        jobPost.setTitle("Software Engineer");
+        jobPost.setDescription("Develop software solutions");
+        jobPost.setSalary(50000L);
+        jobPost.setCreateDate(LocalDateTime.now());
+        jobPost.setCompany(company);
+        jobPost.setApprove(false);
+        jobPost.setStatus("Đang mở");
+
+        // Setup JobPostDTO
+        jobPostDTO = new JobPostDTO();
+        jobPostDTO.setTitle("Software Engineer");
+        jobPostDTO.setDescription("Develop software solutions");
+        jobPostDTO.setSalary(50000L);
+
+        // Mock Authentication object
+        Authentication authentication = Mockito.mock(Authentication.class);
+        when(authentication.getName()).thenReturn(USER_EMAIL);
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        // Generate JWT token
+        long expirationTime = 24 * 60 * 60 * 1000; // 24 hours
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + expirationTime);
+        jwtToken = "Bearer " + Jwts.builder()
+                .setIssuer("GiaThuanSenpai")
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .claim("email", authentication.getName())
+                .signWith(key)
+                .compact();
+
+        when(JwtProvider.generateToken(authentication)).thenReturn(jwtToken);
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(userAccount));
+
+        objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
-		List<Map<String, Object>> mockSemanticApiResponse = List.of(Map.of("postId", postId.toString()));
-		ResponseEntity<List<Map<String, Object>>> responseEntity = new ResponseEntity<>(mockSemanticApiResponse,
-				HttpStatus.OK);
+        List<Map<String, Object>> mockSemanticApiResponse = List.of(Map.of("postId", postId.toString()));
+        ResponseEntity<List<Map<String, Object>>> responseEntity = new ResponseEntity<>(mockSemanticApiResponse, HttpStatus.OK);
+        when(restTemplate.exchange(eq("http://localhost:5000/semantic-search"), eq(HttpMethod.POST),
+                any(HttpEntity.class), any(ParameterizedTypeReference.class))).thenReturn(responseEntity);
+    }
 
-		when(restTemplate.exchange(eq("http://localhost:5000/semantic-search"), eq(HttpMethod.POST),
-				any(HttpEntity.class), any(ParameterizedTypeReference.class))).thenReturn(responseEntity);
+    @Test
+    @WithMockUser(username = USER_EMAIL)
+    void testGetAllJobs_Success() throws Exception {
+        List<JobPost> jobPosts = Collections.singletonList(jobPost);
+        when(jobPostRepository.findAll()).thenReturn(jobPosts);
 
-	}
+        mockMvc.perform(get("/job-post/get-all")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].postId").value(postId.toString()))
+                .andExpect(jsonPath("$[0].title").value("Software Engineer"));
 
-	@Test
-	void testGetAllJobs_Success() throws Exception {
-		List<JobPost> jobPosts = Arrays.asList(jobPost);
-		when(jobPostRepository.findAll()).thenReturn(jobPosts);
+        verify(jobPostRepository, times(1)).findAll();
+    }
 
-		mockMvc.perform(get("/job-post/get-all").contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].postId").value(postId.toString()))
-				.andExpect(jsonPath("$[0].title").value("Software Engineer"));
-
-		verify(jobPostRepository).findAll();
-	}
-
-	@Test
+    @Test
+    @WithMockUser(username = USER_EMAIL)
     void testCreateJobPost_Success() throws Exception {
-        when(userAccountRepository.findByEmail("danggiathuanhl@gmail.com")).thenReturn(Optional.of(userAccount));
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(userAccount));
         when(jobPostService.canPostJob(company.getCompanyId())).thenReturn(true);
         when(jobPostService.createJob(any(JobPostDTO.class), eq(company.getCompanyId()))).thenReturn(jobPost);
         doNothing().when(webSocketService).sendUpdate(eq("/topic/job-updates"), eq("ADD JOB"));
 
         mockMvc.perform(post("/job-post/create-job")
-                .header("Authorization", jwt)
+                .header("Authorization", jwtToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(jobPostDTO)))
+                .content(objectMapper.writeValueAsString(jobPostDTO))
+                .with(csrf()))
+                .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(content().string("Công việc được tạo thành công. Chờ Admin phê duyệt"));
 
-        verify(jobPostService).createJob(any(JobPostDTO.class), eq(company.getCompanyId()));
-        verify(webSocketService).sendUpdate(eq("/topic/job-updates"), eq("ADD JOB"));
+        verify(jobPostService, times(1)).createJob(any(JobPostDTO.class), eq(company.getCompanyId()));
+        verify(webSocketService, times(1)).sendUpdate(eq("/topic/job-updates"), eq("ADD JOB"));
     }
 
-	@Test
+    @Test
+    @WithMockUser(username = USER_EMAIL)
     void testCreateJobPost_Forbidden_TooFrequent() throws Exception {
-        when(userAccountRepository.findByEmail("danggiathuanhl@gmail.com")).thenReturn(Optional.of(userAccount));
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(userAccount));
         when(jobPostService.canPostJob(company.getCompanyId())).thenReturn(false);
 
         mockMvc.perform(post("/job-post/create-job")
-                .header("Authorization", jwt)
+                .header("Authorization", jwtToken)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(jobPostDTO)))
+                .content(objectMapper.writeValueAsString(jobPostDTO))
+                .with(csrf()))
+                .andDo(print())
                 .andExpect(status().isForbidden())
                 .andExpect(content().string("Công ty chỉ được đăng 1 bài trong vòng 1 giờ."));
 
         verify(jobPostService, never()).createJob(any(JobPostDTO.class), any(UUID.class));
     }
 
-	@Test
+    @Test
+    @WithMockUser(username = USER_EMAIL)
     void testUpdateJobPost_Success() throws Exception {
         when(jobPostRepository.findById(postId)).thenReturn(Optional.of(jobPost));
         when(jobPostService.updateJob(any(JobPostDTO.class), eq(postId))).thenReturn(jobPost);
@@ -212,108 +243,146 @@ class JobPostControllerTest {
 
         mockMvc.perform(put("/job-post/update-job/{postId}", postId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(jobPostDTO)))
+                .content(objectMapper.writeValueAsString(jobPostDTO))
+                .with(csrf()))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string("Cập nhật thành công"));
 
-        verify(jobPostService).updateJob(any(JobPostDTO.class), eq(postId));
-        verify(webSocketService).sendUpdate(eq("/topic/job-updates"), eq("UPDATE JOB"));
+        verify(jobPostService, times(1)).updateJob(any(JobPostDTO.class), eq(postId));
+        verify(webSocketService, times(1)).sendUpdate(eq("/topic/job-updates"), eq("UPDATE JOB"));
     }
 
-	@Test
+    @Test
+    @WithMockUser(username = USER_EMAIL)
     void testUpdateJobPost_NotFound() throws Exception {
         when(jobPostRepository.findById(postId)).thenReturn(Optional.empty());
 
         mockMvc.perform(put("/job-post/update-job/{postId}", postId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(jobPostDTO)))
+                .content(objectMapper.writeValueAsString(jobPostDTO))
+                .with(csrf()))
+                .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("Công việc không tồn tại"));
 
         verify(jobPostService, never()).updateJob(any(JobPostDTO.class), any(UUID.class));
     }
 
-	@Test
+    @Test
+    @WithMockUser(username = USER_EMAIL)
+    void testUpdateJobPost_AlreadyApproved_Failure() throws Exception {
+        JobPost approvedJobPost = new JobPost();
+        approvedJobPost.setPostId(postId);
+        approvedJobPost.setTitle("Software Engineer");
+        approvedJobPost.setDescription("Develop software solutions");
+        approvedJobPost.setSalary(50000L);
+        approvedJobPost.setCreateDate(LocalDateTime.now());
+        approvedJobPost.setCompany(company);
+        approvedJobPost.setApprove(true);
+        approvedJobPost.setStatus("Đang mở");
+
+        when(jobPostRepository.findById(postId)).thenReturn(Optional.of(approvedJobPost));
+
+        mockMvc.perform(put("/job-post/update-job/{postId}", postId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(jobPostDTO))
+                .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Bài viết đã được chấp thuận, không được thay đổi"));
+
+        verify(jobPostService, never()).updateJob(any(JobPostDTO.class), any(UUID.class));
+    }
+
+    @Test
+    @WithMockUser(username = USER_EMAIL)
     void testDeleteJobPost_Success() throws Exception {
         when(jobPostService.deleteJob(postId)).thenReturn(true);
         doNothing().when(webSocketService).sendUpdate(eq("/topic/job-updates"), eq("DELETE JOB"));
 
         mockMvc.perform(delete("/job-post/delete-job/{postId}", postId)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf()))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string("Xóa thành công"));
 
-        verify(jobPostService).deleteJob(postId);
-        verify(webSocketService).sendUpdate(eq("/topic/job-updates"), eq("DELETE JOB"));
+        verify(jobPostService, times(1)).deleteJob(postId);
+        verify(webSocketService, times(1)).sendUpdate(eq("/topic/job-updates"), eq("DELETE JOB"));
     }
 
-	@Test
+    @Test
+    @WithMockUser(username = USER_EMAIL)
     void testDeleteJobPost_Failure() throws Exception {
         when(jobPostService.deleteJob(postId)).thenReturn(false);
 
         mockMvc.perform(delete("/job-post/delete-job/{postId}", postId)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf()))
+                .andDo(print())
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().string("Xóa thất bại"));
 
-        verify(jobPostService).deleteJob(postId);
+        verify(jobPostService, times(1)).deleteJob(postId);
     }
 
-	@Test
-	void testSearchJobs_Success_WithJwt() throws Exception {
-	    // Arrange
-	    String query = "AI"; // Đổi từ title thành query
-	    List<String> typesOfWork = Arrays.asList("Toàn thời gian");
-	    Long minSalary = 50000L;
-	    Long maxSalary = 100000L;
-	    Integer cityId = 1;
-	    List<Integer> industryIds = Arrays.asList(1, 2);
-	    int page = 0;
-	    int size = 10;
+    @Test
+    @WithMockUser(username = USER_EMAIL)
+    void testSearchJobs_Success_WithJwt() throws Exception {
+        String query = "AI";
+        List<String> typesOfWork = Arrays.asList("Toàn thời gian");
+        Long minSalary = 50000L;
+        Long maxSalary = 100000L;
+        Integer cityId = 1;
+        List<Integer> industryIds = Arrays.asList(1, 2);
+        int page = 0;
+        int size = 10;
 
-	    List<JobPost> jobPosts = Arrays.asList(jobPost);
-	    Page<JobPost> jobPostPage = new PageImpl<>(jobPosts, PageRequest.of(page, size), 1);
+        List<JobPost> jobPosts = Arrays.asList(jobPost);
+        Page<JobPost> jobPostPage = new PageImpl<>(jobPosts, PageRequest.of(page, size), 1);
 
-	    UUID seekerId = UUID.randomUUID();
-	    if (userAccount.getSeeker() == null) {
-	        com.job_portal.models.Seeker seeker = new com.job_portal.models.Seeker();
-	        seeker.setUserId(seekerId);
-	        userAccount.setSeeker(seeker);
-	    }
+        UUID seekerId = UUID.randomUUID();
+        if (userAccount.getSeeker() == null) {
+            Seeker seeker = new Seeker();
+            seeker.setUserId(seekerId);
+            userAccount.setSeeker(seeker);
+        }
 
-	    when(userAccountRepository.findByEmail("danggiathuanhl@gmail.com")).thenReturn(Optional.of(userAccount));
-	    when(cityRepository.findCityNameById(cityId)).thenReturn("Hà Nội");
-	    when(industryRepository.findIndustryNamesByIds(industryIds))
-	            .thenReturn(Arrays.asList("IT phần mềm", "IT phần cứng"));
-	    when(jobPostService.semanticSearchWithFilters(
-	            eq(query), eq(typesOfWork), eq(minSalary), eq(maxSalary), eq(cityId), eq(industryIds), eq(page), eq(size)))
-	            .thenReturn(jobPostPage);
-	    doNothing().when(searchHistoryService).exportSearchHistoryToCSV(anyString(), anyString(), any(UUID.class));
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(userAccount));
+        when(cityRepository.findCityNameById(cityId)).thenReturn("Hà Nội");
+        when(industryRepository.findIndustryNamesByIds(industryIds))
+                .thenReturn(Arrays.asList("IT phần mềm", "IT phần cứng"));
+        when(jobPostService.semanticSearchWithFilters(
+                eq(query), eq(typesOfWork), eq(minSalary), eq(maxSalary), eq(cityId), eq(industryIds), eq(page), eq(size)))
+                .thenReturn(jobPostPage);
+        doNothing().when(searchHistoryService).exportSearchHistoryToCSV(anyString(), anyString(), any(UUID.class));
 
-	    // Act & Assert
-	    mockMvc.perform(get("/job-post/semantic-search")
-	            .header("Authorization", jwt)
-	            .param("query", query)
-	            .param("selectedTypesOfWork", typesOfWork.get(0))
-	            .param("minSalary", minSalary.toString())
-	            .param("maxSalary", maxSalary.toString())
-	            .param("cityId", cityId.toString())
-	            .param("selectedIndustryIds", "1", "2")
-	            .param("page", String.valueOf(page))
-	            .param("size", String.valueOf(size))
-	            .contentType(MediaType.APPLICATION_JSON))
-	            .andDo(print())
-	            .andExpect(status().isOk());
+        mockMvc.perform(get("/job-post/semantic-search")
+                .header("Authorization", jwtToken)
+                .param("query", query)
+                .param("selectedTypesOfWork", typesOfWork.get(0))
+                .param("minSalary", minSalary.toString())
+                .param("maxSalary", maxSalary.toString())
+                .param("cityId", cityId.toString())
+                .param("selectedIndustryIds", "1", "2")
+                .param("page", String.valueOf(page))
+                .param("size", String.valueOf(size))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content[0].postId").value(jobPost.getPostId().toString()))
+                .andExpect(jsonPath("$.content[0].title").value(jobPost.getTitle()));
 
-	    // Xác minh tương tác
-	    verify(jobPostService).semanticSearchWithFilters(
-	            eq(query), eq(typesOfWork), eq(minSalary), eq(maxSalary), eq(cityId), eq(industryIds), eq(page), eq(size));
-	    verify(searchHistoryService).exportSearchHistoryToCSV(anyString(), anyString(), any(UUID.class));
-	}
-	
-	@Test
+        verify(jobPostService, times(1)).semanticSearchWithFilters(
+                eq(query), eq(typesOfWork), eq(minSalary), eq(maxSalary), eq(cityId), eq(industryIds), eq(page), eq(size));
+        verify(searchHistoryService, times(1)).exportSearchHistoryToCSV(anyString(), anyString(), any(UUID.class));
+    }
+
+    @Test
+    @WithMockUser(username = USER_EMAIL)
     void testGetJobsByCompanyId_Success() throws Exception {
-        // Arrange
         UUID companyId = UUID.randomUUID();
         int page = 0;
         int size = 6;
@@ -324,7 +393,6 @@ class JobPostControllerTest {
         when(jobPostService.findJobByCompanyId(eq(companyId), eq(page), eq(size)))
                 .thenReturn(jobPostPage);
 
-        // Act & Assert
         mockMvc.perform(get("/job-post/search-by-company/{companyId}", companyId)
                 .param("page", String.valueOf(page))
                 .param("size", String.valueOf(size))
@@ -335,43 +403,38 @@ class JobPostControllerTest {
                 .andExpect(jsonPath("$.content[0].postId").value(jobPost.getPostId().toString()))
                 .andExpect(jsonPath("$.content[0].title").value(jobPost.getTitle()));
 
-        // Xác minh tương tác
-        verify(jobPostService).findJobByCompanyId(eq(companyId), eq(page), eq(size));
+        verify(jobPostService, times(1)).findJobByCompanyId(eq(companyId), eq(page), eq(size));
     }
-	
-	@Test
-	void testGetJobsByCompanyId_InvalidCompanyId() throws Exception {
-	    // Arrange
-	    UUID companyId = UUID.randomUUID();
-	    int page = 0;
-	    int size = 6;
 
-	    when(jobPostService.findJobByCompanyId(eq(companyId), eq(page), eq(size)))
-	            .thenThrow(new IllegalArgumentException("Công ty không tồn tại"));
+    @Test
+    @WithMockUser(username = USER_EMAIL)
+    void testGetJobsByCompanyId_InvalidCompanyId() throws Exception {
+        UUID companyId = UUID.randomUUID();
+        int page = 0;
+        int size = 6;
 
-	    // Act & Assert
-	    mockMvc.perform(get("/job-post/search-by-company/{companyId}", companyId)
-	            .param("page", String.valueOf(page))
-	            .param("size", String.valueOf(size))
-	            .contentType(MediaType.APPLICATION_JSON))
-	            .andDo(print())
-	            .andExpect(status().isBadRequest()) // Cập nhật thành isBadRequest
-	            .andExpect(jsonPath("$.error").value("Đã xảy ra lỗi: Công ty không tồn tại"));
+        when(jobPostService.findJobByCompanyId(eq(companyId), eq(page), eq(size)))
+                .thenThrow(new IllegalArgumentException("Công ty không tồn tại"));
 
-	    // Xác minh tương tác
-	    verify(jobPostService).findJobByCompanyId(eq(companyId), eq(page), eq(size));
-	}
-	
-	@Test
+        mockMvc.perform(get("/job-post/search-by-company/{companyId}", companyId)
+                .param("page", String.valueOf(page))
+                .param("size", String.valueOf(size))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Đã xảy ra lỗi: Công ty không tồn tại"));
+
+        verify(jobPostService, times(1)).findJobByCompanyId(eq(companyId), eq(page), eq(size));
+    }
+
+    @Test
+    @WithMockUser(username = USER_EMAIL)
     void testGetJobRecommendations_Success() throws Exception {
-        // Arrange
         UUID userId = userAccount.getUserId();
         String apiUrl = "http://localhost:5000/recommend-jobs/phobert";
 
-        // Mock UserAccountRepository
-        when(userAccountRepository.findByEmail("danggiathuanhl@gmail.com")).thenReturn(Optional.of(userAccount));
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(userAccount));
 
-        // Mock RestTemplate
         List<Map<String, Object>> jobList = new ArrayList<>();
         Map<String, Object> job = new HashMap<>();
         job.put("postId", UUID.randomUUID().toString());
@@ -398,47 +461,29 @@ class JobPostControllerTest {
                 eq(String.class)))
                 .thenReturn(new ResponseEntity<>(jsonResponse, HttpStatus.OK));
 
-        // Act & Assert
         mockMvc.perform(post("/job-post/recommend-jobs/phobert")
-                .header("Authorization", jwt)
-                .contentType(MediaType.APPLICATION_JSON))
+                .header("Authorization", jwtToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0].postId").value(job.get("postId")))
-                .andExpect(jsonPath("$[0].title").value("Software Engineer"))
-                .andExpect(jsonPath("$[0].description").value("Develop software solutions"))
-                .andExpect(jsonPath("$[0].location").value("Hà Nội"))
-                .andExpect(jsonPath("$[0].salary").value(50000L))
-                .andExpect(jsonPath("$[0].experience").value("2 years"))
-                .andExpect(jsonPath("$[0].typeOfWork").value("Toàn thời gian"))
-                .andExpect(jsonPath("$[0].companyId").value(job.get("companyId")))
-                .andExpect(jsonPath("$[0].companyName").value("Tech Corp"))
-                .andExpect(jsonPath("$[0].cityName").value("Hà Nội"))
-                .andExpect(jsonPath("$[0].logo").value("logo.png"))
-                .andExpect(jsonPath("$[0].createDate").value("2025-05-20T10:00:00"))
-                .andExpect(jsonPath("$[0].expireDate").value("2025-06-20T10:00:00"))
-                .andExpect(jsonPath("$[0].industryNames").isArray())
-                .andExpect(jsonPath("$[0].industryNames[0]").value("IT phần mềm"))
-                .andExpect(jsonPath("$[0].industryNames[1]").value("Công nghệ"))
-        		.andDo(print())
-        		.andExpect(status().isOk());
+                .andExpect(jsonPath("$[0].title").value("Software Engineer"));
 
-        // Xác minh tương tác
-        verify(userAccountRepository).findByEmail("danggiathuanhl@gmail.com");
- 
-        verify(restTemplate).exchange(
+        verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(restTemplate, times(1)).exchange(
                 eq(apiUrl),
                 eq(HttpMethod.POST),
                 any(HttpEntity.class),
                 eq(String.class));
     }
-	
-	@Test
+
+    @Test
+    @WithMockUser(username = USER_EMAIL)
     void testGetJobRecommendations_InvalidJsonResponse() throws Exception {
-        // Arrange
         String apiUrl = "http://localhost:5000/recommend-jobs/phobert";
-        when(userAccountRepository.findByEmail("danggiathuanhl@gmail.com")).thenReturn(Optional.of(userAccount));
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(userAccount));
         when(restTemplate.exchange(
                 eq(apiUrl),
                 eq(HttpMethod.POST),
@@ -446,26 +491,25 @@ class JobPostControllerTest {
                 eq(String.class)))
                 .thenReturn(new ResponseEntity<>("{invalid-json}", HttpStatus.OK));
 
-        // Act & Assert
         mockMvc.perform(post("/job-post/recommend-jobs/phobert")
-                .header("Authorization", jwt)
-                .contentType(MediaType.APPLICATION_JSON))
+                .header("Authorization", jwtToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().string(""));
 
-        // Xác minh tương tác
-        verify(userAccountRepository).findByEmail("danggiathuanhl@gmail.com");
-        verify(restTemplate).exchange(
+        verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(restTemplate, times(1)).exchange(
                 eq(apiUrl),
                 eq(HttpMethod.POST),
                 any(HttpEntity.class),
                 eq(String.class));
     }
-	
-	@Test
+
+    @Test
+    @WithMockUser(username = USER_EMAIL)
     void testGetFilteredJobs_Success_WithDefaultSorting() throws Exception {
-        // Arrange
         String status = "Đang mở";
         String typeOfWork = "Bán thời gian";
         String sortBy = "createDate";
@@ -473,7 +517,7 @@ class JobPostControllerTest {
         int page = 0;
         int size = 5;
 
-        when(userAccountRepository.findByEmail("danggiathuanhl@gmail.com")).thenReturn(Optional.of(userAccount));
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(userAccount));
 
         JobWithApplicationCountProjection jobProjection = mock(JobWithApplicationCountProjection.class);
         when(jobProjection.getPostId()).thenReturn(UUID.randomUUID());
@@ -490,9 +534,8 @@ class JobPostControllerTest {
                 eq(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createDate")))))
                 .thenReturn(jobPage);
 
-        // Act & Assert
         mockMvc.perform(get("/job-post/employer-company")
-                .header("Authorization", jwt)
+                .header("Authorization", jwtToken)
                 .param("status", status)
                 .param("typeOfWork", typeOfWork)
                 .param("sortBy", sortBy)
@@ -507,16 +550,15 @@ class JobPostControllerTest {
                 .andExpect(jsonPath("$.content[0].title").value("Software Engineer"))
                 .andExpect(jsonPath("$.content[0].applicationCount").value(10));
 
-
-        verify(userAccountRepository).findByEmail("danggiathuanhl@gmail.com");
-        verify(jobPostRepository).findJobsWithFiltersAndSorting(
+        verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(jobPostRepository, times(1)).findJobsWithFiltersAndSorting(
                 eq(userAccount.getUserId().toString()), eq(status), eq(typeOfWork),
                 eq(PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createDate"))));
     }
 
     @Test
+    @WithMockUser(username = USER_EMAIL)
     void testGetFilteredJobs_Success_WithApplicationCountSorting() throws Exception {
-        // Arrange
         String status = "Đang mở";
         String typeOfWork = "Toàn thời gian";
         String sortBy = "applicationCount";
@@ -524,7 +566,7 @@ class JobPostControllerTest {
         int page = 0;
         int size = 5;
 
-        when(userAccountRepository.findByEmail("danggiathuanhl@gmail.com")).thenReturn(Optional.of(userAccount));
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(userAccount));
 
         JobWithApplicationCountProjection jobProjection = mock(JobWithApplicationCountProjection.class);
         when(jobProjection.getPostId()).thenReturn(UUID.randomUUID());
@@ -538,9 +580,8 @@ class JobPostControllerTest {
                 eq(userAccount.getCompany().getCompanyId().toString()), eq(status), eq(typeOfWork)))
                 .thenReturn(jobList);
 
-        // Act & Assert
         mockMvc.perform(get("/job-post/employer-company")
-                .header("Authorization", jwt)
+                .header("Authorization", jwtToken)
                 .param("status", status)
                 .param("typeOfWork", typeOfWork)
                 .param("sortBy", sortBy)
@@ -555,10 +596,198 @@ class JobPostControllerTest {
                 .andExpect(jsonPath("$.content[0].title").value("Software Engineer"))
                 .andExpect(jsonPath("$.content[0].applicationCount").value(10));
 
-
-
-        verify(userAccountRepository).findByEmail("danggiathuanhl@gmail.com");
-        verify(jobPostRepository).findAllJobsWithFilters(
+        verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(jobPostRepository, times(1)).findAllJobsWithFilters(
                 eq(userAccount.getCompany().getCompanyId().toString()), eq(status), eq(typeOfWork));
+    }
+
+    @Test
+    @WithMockUser(username = USER_EMAIL, roles = "ADMIN")
+    void testGetAllJobsForAdmin_Success() throws Exception {
+        int page = 0;
+        int size = 12;
+        String searchTerm = "Software";
+        String status = "Open";
+
+        List<JobPost> jobPosts = Collections.singletonList(jobPost);
+        Page<JobPost> jobPostPage = new PageImpl<>(jobPosts, PageRequest.of(page, size), 1);
+
+        when(jobPostRepository.findByTitleContainingAndStatusAndIsApproveTrue(eq(searchTerm), eq(status), any(Pageable.class)))
+                .thenReturn(jobPostPage);
+
+        mockMvc.perform(get("/job-post/admin-get-all")
+                .param("page", String.valueOf(page))
+                .param("size", String.valueOf(size))
+                .param("searchTerm", searchTerm)
+                .param("status", status)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content[0].postId").value(jobPost.getPostId().toString()))
+                .andExpect(jsonPath("$.currentPage").value(page))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.totalPages").value(1));
+
+        verify(jobPostRepository, times(1)).findByTitleContainingAndStatusAndIsApproveTrue(eq(searchTerm), eq(status), any(Pageable.class));
+    }
+
+    @Test
+    @WithMockUser(username = USER_EMAIL, roles = "ADMIN")
+    void testGetAllJobsForAdmin_EmptyResults() throws Exception {
+        int page = 0;
+        int size = 12;
+        String searchTerm = "NonExistent";
+        String status = "Open";
+
+        Page<JobPost> emptyPage = new PageImpl<>(Collections.emptyList(), PageRequest.of(page, size), 0);
+
+        when(jobPostRepository.findByTitleContainingAndStatusAndIsApproveTrue(eq(searchTerm), eq(status), any(Pageable.class)))
+                .thenReturn(emptyPage);
+
+        mockMvc.perform(get("/job-post/admin-get-all")
+                .param("page", String.valueOf(page))
+                .param("size", String.valueOf(size))
+                .param("searchTerm", searchTerm)
+                .param("status", status)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isEmpty())
+                .andExpect(jsonPath("$.currentPage").value(page))
+                .andExpect(jsonPath("$.totalElements").value(0))
+                .andExpect(jsonPath("$.totalPages").value(0));
+
+        verify(jobPostRepository, times(1)).findByTitleContainingAndStatusAndIsApproveTrue(eq(searchTerm), eq(status), any(Pageable.class));
+    }
+
+    @Test
+    @WithMockUser(username = USER_EMAIL)
+    void testGetTop8LatestJobPosts_Success() throws Exception {
+        List<JobPost> jobPosts = Collections.singletonList(jobPost);
+        when(jobPostService.getTop8LatestJobPosts()).thenReturn(jobPosts);
+
+        mockMvc.perform(get("/job-post/get-top8-lastest-job")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].postId").value(jobPost.getPostId().toString()))
+                .andExpect(jsonPath("$[0].title").value("Software Engineer"));
+
+        verify(jobPostService, times(1)).getTop8LatestJobPosts();
+    }
+
+    @Test
+    @WithMockUser(username = USER_EMAIL, roles = "ADMIN")
+    void testApproveJobPost_Success() throws Exception {
+        when(jobPostService.approveJob(postId)).thenReturn(true);
+        when(companyRepository.findCompanyByPostId(postId)).thenReturn(Optional.of(company));
+        doNothing().when(webSocketService).sendUpdate(eq("/topic/job-updates"), eq("APPROVE JOB"));
+
+        mockMvc.perform(post("/job-post/approve/{postId}", postId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().string("Chấp thuận thành công"));
+
+        verify(jobPostService, times(1)).approveJob(postId);
+        verify(companyRepository, times(1)).findCompanyByPostId(postId);
+        verify(notificationService, times(1)).notifyNewJobPost(any(UUID.class), eq(postId));
+        verify(webSocketService, times(1)).sendUpdate(eq("/topic/job-updates"), eq("APPROVE JOB"));
+    }
+
+    @Test
+    @WithMockUser(username = USER_EMAIL, roles = "ADMIN")
+    void testApproveJobPost_NotFound() throws Exception {
+        when(jobPostService.approveJob(postId)).thenReturn(null);
+
+        mockMvc.perform(post("/job-post/approve/{postId}", postId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Không thể tìm thấy công việc"));
+
+        verify(jobPostService, times(1)).approveJob(postId);
+        verify(companyRepository, never()).findCompanyByPostId(any(UUID.class));
+        verify(notificationService, never()).notifyNewJobPost(any(UUID.class), any(UUID.class));
+        verify(webSocketService, never()).sendUpdate(anyString(), anyString());
+    }
+
+    @Test
+    @WithMockUser(username = USER_EMAIL)
+    void testSetExpireJobPost_Success() throws Exception {
+        when(jobPostRepository.findById(postId)).thenReturn(Optional.of(jobPost));
+        when(jobPostRepository.save(any(JobPost.class))).thenReturn(jobPost);
+        doNothing().when(webSocketService).sendUpdate(eq("/topic/job-updates"), eq("EXPIRE JOB"));
+
+        mockMvc.perform(put("/job-post/set-expire/{postId}", postId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .with(csrf()))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+        verify(jobPostRepository, times(1)).findById(postId);
+        verify(jobPostRepository, times(1)).save(any(JobPost.class));
+        verify(webSocketService, times(1)).sendUpdate(eq("/topic/job-updates"), eq("EXPIRE JOB"));
+    }
+
+
+
+    @Test
+    @WithMockUser(username = USER_EMAIL)
+    void testGetJobById_Success_WithJwt() throws Exception {
+        when(jobPostService.searchJobByPostId(postId)).thenReturn(jobPost);
+        when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(userAccount));
+
+        mockMvc.perform(get("/job-post/findJob/{postId}", postId)
+                .header("Authorization", jwtToken)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.postId").value(postId.toString()))
+                .andExpect(jsonPath("$.title").value("Software Engineer"));
+
+        verify(jobPostService, times(1)).searchJobByPostId(postId);
+        verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
+        verify(jobPostService, times(1)).increaseViewCountWithUserCheck(eq(postId), any(UUID.class), anyString());
+    }
+
+    @Test
+    @WithMockUser(username = USER_EMAIL)
+    void testGetJobById_Success_WithoutJwt() throws Exception {
+        when(jobPostService.searchJobByPostId(postId)).thenReturn(jobPost);
+        doNothing().when(jobPostService).increaseViewCount(postId);
+
+        mockMvc.perform(get("/job-post/findJob/{postId}", postId)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.postId").value(postId.toString()))
+                .andExpect(jsonPath("$.title").value("Software Engineer"));
+
+        verify(jobPostService, times(1)).searchJobByPostId(postId);
+        verify(userAccountRepository, never()).findByEmail(anyString());
+        verify(jobPostService, times(1)).increaseViewCount(postId);
+        verify(jobPostService, never()).increaseViewCountWithUserCheck(any(UUID.class), any(UUID.class), anyString());
+    }
+
+    @Test
+    @WithMockUser(username = USER_EMAIL)
+    void testGetJobById_NotFound() throws Exception {
+        when(jobPostService.searchJobByPostId(postId)).thenThrow(new RuntimeException("Job not found"));
+
+        mockMvc.perform(get("/job-post/findJob/{postId}", postId)
+                .header("Authorization", jwtToken)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+
+        verify(jobPostService, times(1)).searchJobByPostId(postId);
+        verify(userAccountRepository, never()).findByEmail(anyString());
+        verify(jobPostService, never()).increaseViewCount(any(UUID.class));
+        verify(jobPostService, never()).increaseViewCountWithUserCheck(any(UUID.class), any(UUID.class), anyString());
     }
 }
