@@ -22,6 +22,7 @@ import {
 import { getCity } from "../../redux/City/city.thunk";
 import { getAllIndustries } from "../../redux/Industry/industry.thunk";
 import Pagination from "../../components/common/Pagination/Pagination";
+import Swal from "sweetalert2";
 
 export default function FindCompanies() {
   const industryStyles = {
@@ -139,6 +140,7 @@ export default function FindCompanies() {
     error,
     totalPages = 1,
     totalElements = 0,
+    companyLoading,
   } = useSelector((store) => store.company);
   const { cities = [] } = useSelector((store) => store.city);
   const { allIndustries = [] } = useSelector((store) => store.industry);
@@ -160,6 +162,7 @@ export default function FindCompanies() {
   const [selectedCategoryName, setSelectedCategoryName] =
     useState("Tất cả công ty");
   const [loading, setLoading] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
 
   useEffect(() => {
     dispatch(searchCompanies({ filters, currentPage, size }));
@@ -174,14 +177,47 @@ export default function FindCompanies() {
     dispatch(getAllIndustries());
   }, [dispatch]);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     const updatedFilters = {
       ...tempFilters,
       cityId: tempFilters.cityId === "all" ? "" : tempFilters.cityId,
     };
     setFilters(updatedFilters);
     setCurrentPage(0);
+    
+    // Gọi API để tìm kiếm công ty
+    await dispatch(searchCompanies({ filters: updatedFilters, currentPage, size }));
   };
+
+  useEffect(() => {
+    if (!companyLoading && filters.title !== "") {
+      if (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Lỗi tìm kiếm",
+          text: error.message || "Có lỗi xảy ra khi tìm kiếm công ty",
+          confirmButtonText: "Đóng",
+          confirmButtonColor: "#3085d6",
+        });
+      } else if (companyByFeature.length === 0) {
+        Swal.fire({
+          icon: "info",
+          title: "Không tìm thấy kết quả",
+          text: "Không có công ty nào phù hợp với tiêu chí tìm kiếm của bạn",
+          confirmButtonText: "Đóng",
+          confirmButtonColor: "#3085d6",
+        });
+      } else {
+        Swal.fire({
+          icon: "success",
+          title: "Tìm kiếm thành công",
+          text: `Đã tìm thấy ${totalElements} công ty phù hợp`,
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      }
+    }
+  }, [companyByFeature, error, totalElements, companyLoading, filters.title]);
 
   const handleCategoryChange = (industryId) => {
     setSelectedCategory(industryId);

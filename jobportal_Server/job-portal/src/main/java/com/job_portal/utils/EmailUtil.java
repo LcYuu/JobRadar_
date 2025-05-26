@@ -123,13 +123,13 @@ public class EmailUtil {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-        String subject = "Thông báo khóa tài khoản";
+        String subject = "Thông báo mở khóa tài khoản";
         String content = """
                 <!DOCTYPE html>
                 <html>
                 <head>
                     <meta charset="UTF-8">
-                    <title>Thông báo khóa tài khoản</title>
+                    <title>Thông báo mở khóa tài khoản</title>
                     <style>
                         body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 20px; padding: 0; }
                         .container { max-width: 600px; margin: 20px auto; background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1); border: 1px solid #ddd; } /* Added border */
