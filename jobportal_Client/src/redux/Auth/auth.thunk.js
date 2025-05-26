@@ -193,3 +193,50 @@ export const updateEmployer = createAsyncThunk(
     }
   }
 );
+
+export const googleLoginAction = createAsyncThunk(
+  'auth/googleLogin',
+  async (googleToken, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/auth/login/google`, {
+        token: googleToken,
+      });
+
+      if (response.data.token) {
+        localStorage.setItem('jwt', response.data.token);
+
+        const checkEmailResponse = await axios.post(
+          `${API_BASE_URL}/auth/check-email`,
+          { token: googleToken }
+        );
+
+        if (checkEmailResponse.data) {
+          const profileResponse = await axios.get(`${API_BASE_URL}/users/profile`, {
+            headers: {
+              Authorization: `Bearer ${response.data.token}`,
+            },
+          });
+
+          const roleResponse = await axios.get(`${API_BASE_URL}/auth/user-role`, {
+            headers: {
+              Authorization: `Bearer ${response.data.token}`,
+            },
+          });
+
+          const user = {
+            ...profileResponse.data,
+            role: roleResponse.data.role,
+          };
+
+          return { success: true, user };
+        } else {
+          return { success: true, needsRoleSelection: true };
+        }
+      } else {
+        throw new Error(response.data.message || 'Đăng nhập thất bại');
+      }
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
