@@ -87,10 +87,15 @@ export default function ForgotPassword() {
 
   const handleResendOtp = async () => {
     try {
-      await axios.post(`http://localhost:8080/auth/forgot-password/verifyMail/${encodeURIComponent(email)}`);
+      const result = await axios.post(`http://localhost:8080/auth/forgot-password/verifyMail/${encodeURIComponent(email)}`);
       setTimeLeft(120);
       setIsTimeUp(false);
       setIsPaused(false);
+      Swal.fire({
+        icon: "success",
+        title: "Thành công",
+        text: "Mã xác nhận mới đã được gửi đến email của bạn.",
+      });
     } catch (error) {
       setErrorMessage("Không thể gửi lại mã OTP. Vui lòng thử lại sau.");
     }
@@ -206,7 +211,7 @@ export default function ForgotPassword() {
             Hết thời gian!
           </h3>
           <p className="mt-2 text-sm text-gray-600">
-            Vui lòng nhập lại email để lấy mã xác nhận mới.
+            Vui lòng nhấn "Gửi lại mã" để lấy mã xác nhận mới.
           </p>
           <Button
             onClick={handleResendOtp}
