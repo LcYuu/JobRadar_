@@ -32,51 +32,110 @@ import Swal from "sweetalert2";
 
 export default function JobDetail() {
   const industryStyles = {
-    "Thiết kế": {
-      backgroundColor: "rgba(255, 99, 71, 0.1)", // Màu đỏ san hô nhạt
-      color: "#FF6347", // Màu đỏ san hô
-      border: "1px solid #FF6347", // Viền màu đỏ san hô
-    },
-    "Kinh doanh": {
-      backgroundColor: "rgba(138, 43, 226, 0.1)", // Màu tím nhạt
-      color: "#8A2BE2", // Màu tím
-      border: "1px solid #8A2BE2", // Viền màu tím
-    },
-    Marketing: {
-      backgroundColor: "rgba(255, 140, 0, 0.1)", // Màu cam nhạt
-      color: "#FF8C00", // Màu cam
-      border: "1px solid #FF8C00", // Viền màu cam
-    },
     "Thương mại điện tử": {
-      backgroundColor: "rgba(30, 144, 255, 0.1)", // Màu xanh dương đậm nhạt
-      color: "#1E90FF", // Màu xanh dương đậm
-      border: "1px solid #1E90FF", // Viền màu xanh dương đậm
+      backgroundColor: "rgba(30, 144, 255, 0.1)",
+      color: "#1E90FF",
+      border: "1px solid #1E90FF",
+    },
+    "Marketing/Truyền thông": {
+      backgroundColor: "rgba(255, 140, 0, 0.1)",
+      color: "#FF8C00",
+      border: "1px solid #FF8C00",
     },
     "IT phần cứng": {
-      backgroundColor: "rgba(0, 0, 255, 0.1)", // Màu xanh dương nhạt
-      color: "#0000FF", // Màu xanh dương
-      border: "1px solid #0000FF", // Viền màu xanh dương
-    },
-    "IT phần mềm": {
-      backgroundColor: "rgba(0, 255, 255, 0.1)", // Màu xanh dương ngọc nhạt
-      color: "#00FFFF", // Màu xanh dương ngọc
-      border: "1px solid #00FFFF", // Viền màu xanh dương ngọc
+      backgroundColor: "rgba(0, 0, 255, 0.1)",
+      color: "#0000FF",
+      border: "1px solid #0000FF",
     },
     "Công nghệ ô tô": {
-      backgroundColor: "rgba(255, 99, 71, 0.1)", // Màu cam đỏ nhạt
-      color: "#FF4500", // Màu cam đỏ
-      border: "1px solid #FF4500", // Viền màu cam đỏ
+      backgroundColor: "rgba(255, 99, 71, 0.1)",
+      color: "#FF4500",
+      border: "1px solid #FF4500",
+    },
+    "IT phần mềm": {
+      backgroundColor: "rgba(0, 255, 255, 0.1)",
+      color: "#00FFFF",
+      border: "1px solid #00FFFF",
     },
     "Nhà hàng/Khách sạn": {
-      backgroundColor: "rgba(255, 105, 180, 0.1)", // Màu hồng nhạt
-      color: "#FF69B4", // Màu hồng đậm
-      border: "1px solid #FF69B4", // Viền màu hồng đậm
+      backgroundColor: "rgba(255, 105, 180, 0.1)",
+      color: "#FF69B4",
+      border: "1px solid #FF69B4",
     },
-
-    "Điện - điện tử": {
-      backgroundColor: "rgba(70, 130, 180, 0.1)", // Màu xanh thép nhạt
-      color: "#4682B4", // Màu xanh thép
-      border: "1px solid #4682B4", // Viền màu xanh thép
+    "Thiết kế/In ấn": {
+      backgroundColor: "rgba(255, 99, 71, 0.1)",
+      color: "#FF6347",
+      border: "1px solid #FF6347",
+    },
+    "Cơ khí/Điện - điện tử": {
+      backgroundColor: "rgba(70, 130, 180, 0.1)",
+      color: "#4682B4",
+      border: "1px solid #4682B4",
+    },
+    "Kinh doanh": {
+      backgroundColor: "rgba(138, 43, 226, 0.1)",
+      color: "#8A2BE2",
+      border: "1px solid #8A2BE2",
+    },
+    "Giáo dục/Đào tạo": {
+      backgroundColor: "rgba(40, 167, 69, 0.1)",
+      color: "#28A745",
+      border: "1px solid #28A745",
+    },
+    "Kiến trúc/Xây dựng": {
+      backgroundColor: "rgba(255, 193, 7, 0.1)",
+      color: "#FFC107",
+      border: "1px solid #FFC107",
+    },
+    "Tài chính/Ngân hàng": {
+      backgroundColor: "rgba(23, 162, 184, 0.1)",
+      color: "#17A2B8",
+      border: "1px solid #17A2B8",
+    },
+    "Viễn thông": {
+      backgroundColor: "rgba(200, 35, 51, 0.1)",
+      color: "#C82333",
+      border: "1px solid #C82333",
+    },
+    "Y tế": {
+      backgroundColor: "rgba(107, 114, 128, 0.1)",
+      color: "#6B7280",
+      border: "1px solid #6B7280",
+    },
+    "Logistics": {
+      backgroundColor: "rgba(221, 160, 221, 0.1)",
+      color: "#DDA0DD",
+      border: "1px solid #DDA0DD",
+    },
+    "Kế toán/Kiểm toán": {
+      backgroundColor: "rgba(244, 162, 97, 0.1)",
+      color: "#F4A261",
+      border: "1px solid #F4A261",
+    },
+    "Sản xuất": {
+      backgroundColor: "rgba(43, 108, 176, 0.1)",
+      color: "#2B6CB0",
+      border: "1px solid #2B6CB0",
+    },
+    "Tài xế": {
+      backgroundColor: "rgba(233, 30, 99, 0.1)",
+      color: "#E91E63",
+      border: "1px solid #E91E63",
+    },
+    "Luật": {
+      backgroundColor: "rgba(72, 187, 120, 0.1)",
+      color: "#48BB78",
+      border: "1px solid #48BB78",
+    },
+    "Phiên dịch": {
+      backgroundColor: "rgba(75, 85, 99, 0.1)",
+      color: "#4B5563",
+      border: "1px solid #4B5563",
+    },
+    "Hệ thống nhúng và IoT": {
+      backgroundColor: "rgba(153, 27, 27, 0.1)",
+      color: "#991B1B",
+      border: "1px solid #991B1B",
     },
   };
 
@@ -99,28 +158,26 @@ export default function JobDetail() {
 
   const [open, setOpen] = useState(false);
   const [modalClosed, setModalClosed] = useState(false);
-  
+
   useEffect(() => {
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
-    
+
     // Load dữ liệu khi component được mount
     dispatch(getOneApplyJob(postId));
     dispatch(checkIfApplied(postId));
     if (!postByPostId || postByPostId.postId !== postId) {
       dispatch(getJobPostByPostId(postId));
     }
-  }, [dispatch, postId]); // Chỉ gọi API khi component được mount hoặc postId thay đổi
-  
+  }, [dispatch, postId]);
+
   // Cập nhật khi modal đóng
   useEffect(() => {
     if (modalClosed) {
-      // Cập nhật lại thông tin từ server
       dispatch(getOneApplyJob(postId));
       dispatch(checkIfApplied(postId));
-      // Reset để không trigger lại
       setModalClosed(false);
     }
   }, [modalClosed, dispatch, postId]);
@@ -148,7 +205,7 @@ export default function JobDetail() {
     }
     setOpen(true);
   };
-  
+
   const handleClose = () => {
     setOpen(false);
     setModalClosed(true);
@@ -182,7 +239,7 @@ export default function JobDetail() {
           confirmButtonColor: "#9333ea",
           timer: 1500,
           timerProgressBar: true,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
       } else {
         await Swal.fire({
@@ -193,7 +250,7 @@ export default function JobDetail() {
           confirmButtonColor: "#9333ea",
           timer: 1500,
           timerProgressBar: true,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
       }
     } catch (error) {
@@ -202,7 +259,7 @@ export default function JobDetail() {
         text: "Có lỗi xảy ra khi thực hiện thao tác",
         icon: "error",
         confirmButtonText: "Đóng",
-        confirmButtonColor: "#9333ea"
+        confirmButtonColor: "#9333ea",
       });
     }
   };
@@ -226,46 +283,91 @@ export default function JobDetail() {
           <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
             {/* Left column */}
             <div className="space-y-6">
-              <div className="bg-white shadow-md rounded-lg p-5 flex items-center justify-between">
-                <div className="flex items-center space-x-4 w-full pr-7">
-                  <img
-                    src={postByPostId?.company.logo}
-                    alt="Company Logo"
-                    className="h-16 w-16 rounded-lg bg-indigo-100 flex items-center justify-center text-2xl font-bold text-indigo-600"
-                  />
-                  <div className="flex-1">
-                    <h1 className="text-2xl font-bold break-words">
-                      {postByPostId?.title}
-                    </h1>
-                    <p className="text-sm text-gray-500 font-bold break-words">
-                      {postByPostId?.company.companyName} •{" "}
-                      {postByPostId?.location} • {postByPostId?.typeOfWork}
-                    </p>
+              <div className="bg-white shadow-md rounded-lg p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-4 w-full pr-7">
+                    <img
+                      src={postByPostId?.company.logo}
+                      alt="Company Logo"
+                      className="h-16 w-16 rounded-lg bg-indigo-100 flex items-center justify-center text-2xl font-bold text-indigo-600"
+                    />
+                    <div className="flex-1">
+                      <h1 className="text-2xl font-bold break-words">
+                        {postByPostId?.title}
+                      </h1>
+                      <p className="text-sm text-gray-500 font-bold break-words">
+                        {postByPostId?.company.companyName} •{" "}
+                        {postByPostId?.location} • {postByPostId?.typeOfWork}
+                      </p>
+                    </div>
+                  </div>
+                  {/* Nút Lưu bài viết */}
+                  <div className="flex-shrink-0">
+                    {user && (
+                      <button
+                        title={
+                          isSaved
+                            ? "Bài viết đã được lưu"
+                            : "Lưu bài viết để xem lại sau"
+                        }
+                        onClick={handleSaveJob}
+                        className={`p-3 rounded-full transition-all duration-300 ${
+                          isSaved
+                            ? "bg-purple-100 text-purple-600 hover:bg-purple-200"
+                            : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                        }`}
+                      >
+                        {isSaved ? (
+                          <BookmarkCheck className="w-6 h-6" />
+                        ) : (
+                          <Bookmark className="w-6 h-6" />
+                        )}
+                      </button>
+                    )}
                   </div>
                 </div>
-
-                {/* Nút Lưu bài viết */}
-                <div className="flex-shrink-0">
-                  {user && (
-                        <button
-                        title={isSaved ? 'Bài viết đã được lưu' : 'Lưu bài viết để xem lại sau'}
-                          onClick={handleSaveJob}
-                          className={`p-3 rounded-full transition-all duration-300 ${
-                            isSaved 
-                              ? 'bg-purple-100 text-purple-600 hover:bg-purple-200' 
-                              : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
-                          }`}
+                {/* Nút Nộp đơn */}
+                <div className="flex justify-end  mr-2">
+                  {oneApplyJob?.save ? (
+                    <Button
+                      variant="outline"
+                      className="text-green-600 font-bold border-green-700 cursor-not-allowed"
+                      disabled
+                    >
+                      Đã được duyệt
+                    </Button>
+                  ) : hasApplied ? (
+                    <button
+                      className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+                      onClick={handleOpenModal}
+                    >
+                      Cập nhật đơn
+                    </button>
+                  ) : user ? (
+                    <Button
+                      variant="default"
+                      className="bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+                      onClick={handleOpenModal}
+                    >
+                      Nộp đơn
+                    </Button>
+                  ) : (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="text-gray-400 cursor-not-allowed"
+                          disabled
                         >
-                          {isSaved ? (
-                            <BookmarkCheck className="w-6 h-6" />
-                          ) : (
-                            <Bookmark className="w-6 h-6" />
-                          )}
-                        </button>
-                      
+                          Nộp đơn
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Vui lòng đăng nhập để ứng tuyển</p>
+                      </TooltipContent>
+                    </Tooltip>
                   )}
                 </div>
-
                 <section>
                   <ApplyModal
                     job={postByPostId}
@@ -320,9 +422,7 @@ export default function JobDetail() {
 
                 {/* Card for Job Responsibilities */}
                 <div className="p-6 bg-white rounded-lg shadow-lg">
-                  <h2 className="text-lg font-semibold">
-                    Yêu cầu công việc
-                  </h2>
+                  <h2 className="text-lg font-semibold">Yêu cầu công việc</h2>
                   <ul className="space-y-2 text-sm text-gray-600">
                     {postByPostId?.requirement ? (
                       postByPostId.requirement
@@ -543,8 +643,6 @@ export default function JobDetail() {
                         : "N/A"}
                     </span>
                   </div>
-
-                  
                 </div>
               </Card>
 
@@ -572,7 +670,6 @@ export default function JobDetail() {
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {postByPostId?.skills?.map((skill, index) => (
-                      // Áp dụng màu ngẫu nhiên cho mỗi Badge
                       <Badge
                         key={index}
                         className="text-white"
