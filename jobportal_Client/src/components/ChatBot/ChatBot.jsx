@@ -15,18 +15,15 @@ const Chatbot = () => {
   const messagesEndRef = useRef(null);
   const defaultAvatar = defaultAvatarImage;
 
-  const userId = authUser?.userId || 'guest';
+  const userId = authUser ? authUser.userId : 'guest';
+  const userName = authUser ? authUser.userName : 'khách';
   const userAvatar = authUser?.avatar || defaultAvatar;
   const botAvatar = defaultAvatar;
 
   useEffect(() => {
-    let isMounted = true;
-    if (isOpen && messagesEndRef.current && isMounted) {
+    if (isOpen && messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-    return () => {
-      isMounted = false;
-    };
   }, [messages, isOpen]);
 
   const handleSend = (e) => {
@@ -59,12 +56,30 @@ const Chatbot = () => {
         className="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg hover:bg-blue-700 focus:outline-none transition-all duration-300"
       >
         {isOpen ? (
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-8 w-8"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
           </svg>
         ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-8 w-8"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z"
+              clipRule="evenodd"
+            />
           </svg>
         )}
       </button>
@@ -81,26 +96,30 @@ const Chatbot = () => {
               />
               <div>
                 <h1 className="text-lg font-semibold">RadarBot</h1>
-                <p className="text-xs">
-                  Đang trò chuyện với: {authUser?.userName || 'khách'}
-                </p>
+                <p className="text-xs">Đang trò chuyện với: {userName}</p>
               </div>
             </div>
             <button
               onClick={toggleChat}
               className="text-white hover:text-gray-200 focus:outline-none"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
               </svg>
             </button>
           </div>
 
           <div className="flex-1 p-3 overflow-y-auto bg-gray-50">
-            {(!messages || messages.length === 0) && (
-              <div className="text-center text-gray-500 py-4">Bắt đầu cuộc trò chuyện với RadarBot...</div>
-            )}
-            {messages &&
+            {messages && messages.length > 0 ? (
               messages.map((msg, index) => (
                 <div
                   key={index}
@@ -124,7 +143,7 @@ const Chatbot = () => {
                     }`}
                   >
                     <div className="text-xs opacity-75 mb-1">
-                      {msg.sender === 'bot' ? 'RadarBot' : `${authUser?.userName || 'Bạn'}`}
+                      {msg.sender === 'bot' ? 'RadarBot' : userName}
                     </div>
                     {msg.text && <div className="text-sm mb-1">{msg.text}</div>}
                     {msg.jobs && (
@@ -139,7 +158,7 @@ const Chatbot = () => {
                                 src={job.logo}
                                 alt={job.companyName}
                                 className="w-8 h-8 object-contain rounded"
-                                onError={(e) => (e.target.src = '/fallback-logo.png')}
+                                onError={(e) => (e.target.src = defaultAvatar)}
                               />
                               <div>
                                 <h3 className="text-xs font-semibold">{job.title}</h3>
@@ -147,9 +166,16 @@ const Chatbot = () => {
                               </div>
                             </div>
                             <div className="mt-1 text-xs">
-                              <p><span className="font-medium">Địa điểm:</span> {job.cityName}</p>
-                              <p><span className="font-medium">Lương:</span> {(job.salary / 1000000).toFixed(1)} triệu VND</p>
-                              <p><span className="font-medium">Ngành:</span> {job.industryNames}</p>
+                              <p>
+                                <span className="font-medium">Địa điểm:</span> {job.cityName}
+                              </p>
+                              <p>
+                                <span className="font-medium">Lương:</span>{' '}
+                                {(job.salary / 1000000).toFixed(1)} triệu VND
+                              </p>
+                              <p>
+                                <span className="font-medium">Ngành:</span> {job.industryNames}
+                              </p>
                             </div>
                             <a
                               href={job.job_url}
@@ -167,15 +193,20 @@ const Chatbot = () => {
                   {msg.sender !== 'bot' && (
                     <img
                       src={userAvatar}
-                      alt={authUser?.userName || 'Bạn'}
+                      alt={userName}
                       className="w-8 h-8 rounded-full object-cover ml-2 self-end"
                       onError={(e) => (e.target.src = defaultAvatar)}
                     />
                   )}
                 </div>
-              ))}
+              ))
+            ) : (
+              <div className="text-center text-gray-500 py-4">
+                Bắt đầu cuộc trò chuyện với RadarBot...
+              </div>
+            )}
             {loading && (
-              <div className="flex justify-start mb-3">
+              <div className="flex justifyshear justify-start mb-3">
                 <img
                   src={botAvatar}
                   alt="RadarBot"
@@ -186,8 +217,14 @@ const Chatbot = () => {
                   <div className="text-xs opacity-75 mb-1">RadarBot</div>
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                    <div
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: '0.2s' }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: '0.4s' }}
+                    ></div>
                   </div>
                 </div>
               </div>
@@ -223,8 +260,17 @@ const Chatbot = () => {
                 disabled={loading || !input.trim()}
                 className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </button>
             </form>

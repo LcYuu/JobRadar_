@@ -103,12 +103,9 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 	public JobPost createJob(JobPostDTO jobPostDTO, UUID companyId) {
 		JobPost savedJobPost = new JobPost();
 		try {
-			City city = cityRepository.findById(jobPostDTO.getCityId()).orElseThrow(
-					() -> new IllegalArgumentException("City with ID " + jobPostDTO.getCityId() + " does not exist"));
-
-			Company company = companyRepository.findById(companyId).orElseThrow(
-					() -> new IllegalArgumentException("Company with ID " + companyId + " does not exist"));
-
+			Optional<City> city = cityRepository.findById(jobPostDTO.getCityId());
+			Optional<Company> company = companyRepository.findById(companyId);
+			
 			JobPost jobPost = new JobPost();
 			jobPost.setCreateDate(LocalDateTime.now());
 			jobPost.setExpireDate(jobPostDTO.getExpireDate());
@@ -122,8 +119,8 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 			jobPost.setTypeOfWork(jobPostDTO.getTypeOfWork());
 			jobPost.setPosition(jobPostDTO.getPosition());
 			jobPost.setStatus("Chờ duyệt");
-			jobPost.setCompany(company);
-			jobPost.setCity(city);
+			jobPost.setCompany(company.get());
+			jobPost.setCity(city.get());
 			jobPost.setApprove(false);
 			jobPost.setNiceToHaves(jobPostDTO.getNiceToHaves());
 

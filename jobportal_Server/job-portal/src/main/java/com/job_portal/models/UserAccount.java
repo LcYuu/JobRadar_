@@ -27,53 +27,50 @@ public class UserAccount {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
 	@Column(name = "user_id")
-    private UUID userId;
+	private UUID userId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_type_id")
-    private UserType userType;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "user_type_id")
+	private UserType userType;
 
-    @Column(name = "is_active", columnDefinition = "BIT(1)")
-    private boolean isActive;
+	@Column(name = "is_active", columnDefinition = "BIT(1)")
+	private boolean isActive;
 
-   @Column(name = "user_name", length = 500, nullable = false)
-    private String userName;
+	@Column(name = "user_name", length = 500, nullable = false)
+	private String userName;
 
-    @Column(name = "avatar", length = 200)
-    private String avatar;
+	@Column(name = "avatar", length = 200)
+	private String avatar;
 
-    @Column(name = "email", length = 50, nullable = false, unique = true)
-    private String email;
+	@Column(name = "email", length = 50, nullable = false, unique = true)
+	private String email;
 
-    @Column(name = "password", length = 100, nullable = true) // Thay đổi nullable từ false thành true
-    private String password;
+	@Column(name = "password", length = 100, nullable = true) // Thay đổi nullable từ false thành true
+	private String password;
 
-    @Column(name = "create_date", nullable = true)
-    private LocalDateTime createDate;
-    
-    @Column(name = "last_login", nullable = true)
-    private LocalDateTime lastLogin;
-    
-    private String otp;
+	@Column(name = "create_date", nullable = true)
+	private LocalDateTime createDate;
+
+	@Column(name = "last_login", nullable = true)
+	private LocalDateTime lastLogin;
+
+	private String otp;
 	private LocalDateTime otpGeneratedTime;
-	
+
 	@Column(name = "provider", nullable = false)
-    private String provider;  // Trường provider để phân biệt cách đăng nhập
-	
+	private String provider; // Trường provider để phân biệt cách đăng nhập
+
 	@JsonIgnore
 	@OneToOne(mappedBy = "userAccount", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Seeker seeker;
-	
-	
+	private Seeker seeker;
+
 //	@JsonProperty("company")
 	@JsonIgnore
 	@OneToOne(mappedBy = "userAccount", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Company company;
-	
+	private Company company;
+
 	@OneToOne(mappedBy = "userAccount")
 	private ForgotPassword forgotPassword;
-
-	
 
 	public UserAccount(UUID userId, UserType userType, boolean isActive, String userName, String avatar, String email,
 			String password, LocalDateTime createDate, LocalDateTime lastLogin, String otp,
@@ -93,7 +90,7 @@ public class UserAccount {
 		this.seeker = seeker;
 		this.company = company;
 	}
-	
+
 	public String getProvider() {
 		return provider;
 	}
@@ -119,12 +116,12 @@ public class UserAccount {
 	}
 
 	// Constructors
-    public UserAccount() {
-    	this.avatar = DEFAULT_AVATAR_URL;
-    	this.isActive = false; // Hoặc true tùy theo yêu cầu của bạn
-    	this.provider = "LOCAL";
-    }
-    
+	public UserAccount() {
+		this.avatar = DEFAULT_AVATAR_URL;
+		this.isActive = false; // Hoặc true tùy theo yêu cầu của bạn
+		this.provider = "LOCAL";
+	}
+
 	public LocalDateTime getLastLogin() {
 		return lastLogin;
 	}
@@ -134,69 +131,69 @@ public class UserAccount {
 	}
 
 	// Getters and Setters
-    public UUID getUserId() {
-        return userId;
-    }
+	public UUID getUserId() {
+		return userId;
+	}
 
-    public void setUserId(UUID userId) {
-        this.userId = userId;
-    }
+	public void setUserId(UUID userId) {
+		this.userId = userId;
+	}
 
-    public UserType getUserType() {
-        return userType;
-    }
+	public UserType getUserType() {
+		return userType;
+	}
 
-    public void setUserType(UserType userType) {
-        this.userType = userType;
-    }
+	public void setUserType(UserType userType) {
+		this.userType = userType;
+	}
 
-    public boolean isActive() {
-        return isActive;
-    }
+	public boolean isActive() {
+		return isActive;
+	}
 
-    public void setActive(boolean active) {
-        isActive = active;
-    }
+	public void setActive(boolean active) {
+		isActive = active;
+	}
 
-    public String getUserName() {
-        return userName;
-    }
+	public String getUserName() {
+		return userName;
+	}
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
 
-    public String getAvatar() {
-        return avatar;
-    }
+	public String getAvatar() {
+		return avatar;
+	}
 
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-    public String getPassword() {
-        return password;
-    }
+	public String getPassword() {
+		return password;
+	}
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
-    public LocalDateTime getCreateDate() {
-        return createDate;
-    }
+	public LocalDateTime getCreateDate() {
+		return createDate;
+	}
 
-    public void setCreateDate(LocalDateTime createDate) {
-        this.createDate = createDate;
-    }
+	public void setCreateDate(LocalDateTime createDate) {
+		this.createDate = createDate;
+	}
 
 	public String getOtp() {
 		return otp;
@@ -213,20 +210,12 @@ public class UserAccount {
 	public void setOtpGeneratedTime(LocalDateTime otpGeneratedTime) {
 		this.otpGeneratedTime = otpGeneratedTime;
 	}
-    
+
 	@Override
-    public String toString() {
-        return "UserAccount{" +
-                "userId=" + userId +
-                ", email='" + email + '\'' +
-                ", userName='" + userName + '\'' +
-                ", password='" + password + '\'' +
-                ", createDate=" + createDate +
-                ", isActive=" + isActive +
-                ", otp='" + otp + '\'' +
-                ", otpGeneratedTime=" + otpGeneratedTime +
-                ", provider='" + provider + '\'' +
-                ", userType=" + userType +
-                '}';
-    }
+	public String toString() {
+		return "UserAccount{" + "userId=" + userId + ", email='" + email + '\'' + ", userName='" + userName + '\''
+				+ ", password='" + password + '\'' + ", createDate=" + createDate + ", isActive=" + isActive + ", otp='"
+				+ otp + '\'' + ", otpGeneratedTime=" + otpGeneratedTime + ", provider='" + provider + '\''
+				+ ", userType=" + userType + '}';
+	}
 }

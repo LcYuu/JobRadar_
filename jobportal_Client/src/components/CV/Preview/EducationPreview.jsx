@@ -19,17 +19,29 @@ const EducationPreview = ({ cvInfo }) => {
         }}
       />
       {(cvInfo?.education || []).map((education, index) => (
-        <div key={index} className="my-5 p-3 border-l-4 rounded-md shadow-sm" style={{ borderColor: cvInfo?.themeColor }}>
-          <h3 className="text-base font-bold" style={{ color: cvInfo?.themeColor }}>
+        <div
+          key={index}
+          className="my-5 p-4 border-l-4 rounded-md shadow-sm bg-gray-50"
+          style={{ borderColor: cvInfo?.themeColor }}
+        >
+          <h3
+            className="text-base font-bold"
+            style={{ color: cvInfo?.themeColor }}
+          >
             {education.universityName}
           </h3>
           <h4 className="text-sm font-semibold mt-1">
             {education?.degree} - {education?.major}
           </h4>
           <p className="text-xs text-gray-600 italic">
-            {education?.startDate} - {education?.endDate}
+            {education?.startDate} đến {education?.endDate}
           </p>
-          {education?.description && <p className="text-sm mt-2 text-gray-800">{education?.description}</p>}
+          {education?.description && (
+            <div
+              className="text-sm mt-2 text-gray-800 leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: education?.description }}
+            />
+          )}
         </div>
       ))}
     </div>

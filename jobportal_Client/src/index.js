@@ -1,64 +1,84 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import { BrowserRouter } from 'react-router-dom';
-import reportWebVitals from './reportWebVitals';
-import { Provider } from 'react-redux';
-import { store } from './redux/store';
-import ErrorBoundary from './error';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { isTokenExpired } from './utils/tokenUtils';
-import Chatbot from './components/ChatBot/ChatBot';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import App from "./App";
+import { BrowserRouter, useLocation } from "react-router-dom";
+import reportWebVitals from "./reportWebVitals";
+import { Provider } from "react-redux";
+import { store } from "./redux/store";
+import ErrorBoundary from "./error";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { isTokenExpired } from "./utils/tokenUtils";
+import Chatbot from "./components/ChatBot/ChatBot";
+import {
+  ChatbotProvider,
+  useChatbot,
+} from "./components/ChatBot/ChatBotContext";
 
+// Lấy dữ liệu user từ localStorage
 let user = null;
 try {
-  const userData = localStorage.getItem('user');
+  const userData = localStorage.getItem("user");
   if (userData) {
     user = JSON.parse(userData);
   }
 } catch (error) {
-  console.error('Error parsing user from localStorage:', error);
-  localStorage.removeItem('user');
-  user = null;
+  console.error("Lỗi khi parse user từ localStorage:", error);
+  localStorage.removeItem("user");
 }
 
+// Kiểm tra token hợp lệ
 const checkTokenOnLoad = () => {
-  const token = localStorage.getItem('jwt');
+  const token = localStorage.getItem("jwt");
   if (token && isTokenExpired(token)) {
-    localStorage.removeItem('jwt');
-    localStorage.removeItem('user');
-    window.location.href = '/auth/sign-in';
+    localStorage.removeItem("jwt");
+    localStorage.removeItem("user");
+    window.location.href = "/auth/sign-in";
     return false;
   }
   return true;
 };
 
+// Thành phần kiểm tra hiển thị Chatbot
+const ChatbotWithRouteCheck = () => {
+  const { restrictedPaths } = useChatbot();
+  const location = useLocation();
+  const shouldShowChatbot = !restrictedPaths.includes(location.pathname);
+
+  return user === null || ((user && user.userType.userTypeId === 2) && shouldShowChatbot) ? (
+    <Chatbot />
+  ) : null;
+};
+
+// Render ứng dụng nếu token hợp lệ
 if (checkTokenOnLoad()) {
-  const root = ReactDOM.createRoot(document.getElementById('root'));
+  const root = ReactDOM.createRoot(document.getElementById("root"));
   root.render(
     <Provider store={store}>
       <ErrorBoundary>
-        <BrowserRouter future={{ v7_relativeSplatPath: true }}>
-          <App />
-          {(user === null || (user && user.userType.userTypeId === 2)) && <Chatbot />}
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-          />
-        </BrowserRouter>
+        <ChatbotProvider>
+          <BrowserRouter future={{ v7_relativeSplatPath: true }}>
+            <App />
+            <ChatbotWithRouteCheck />
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="light"
+            />
+          </BrowserRouter>
+        </ChatbotProvider>
       </ErrorBoundary>
     </Provider>
   );
 }
 
+// Báo cáo hiệu suất
 reportWebVitals();
