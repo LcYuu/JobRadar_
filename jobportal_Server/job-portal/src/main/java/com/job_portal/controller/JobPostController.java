@@ -61,6 +61,7 @@ import com.job_portal.repository.UserAccountRepository;
 import com.job_portal.service.ICompanyService;
 import com.job_portal.service.IJobPostService;
 import com.job_portal.service.INotificationService;
+import com.job_portal.service.ISearchHistoryService;
 import com.job_portal.service.SearchHistoryServiceImpl;
 import com.job_portal.service.WebSocketService;
 import com.job_portal.specification.JobPostSpecification;
@@ -91,7 +92,7 @@ public class JobPostController {
 	private UserAccountRepository userAccountRepository;
 
 	@Autowired
-	private SearchHistoryServiceImpl searchHistoryService;
+	private ISearchHistoryService searchHistoryService;
 
 	@Autowired
 	private INotificationService notificationService;
@@ -245,11 +246,21 @@ public class JobPostController {
 	}
 
 	@GetMapping("/search-by-company/{companyId}")
-	public ResponseEntity<Page<JobPost>> getJobsByCompanyId(@PathVariable UUID companyId,
-			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "6") int size) {
-
-		Page<JobPost> jobPosts = jobPostService.findJobByCompanyId(companyId, page, size);
-		return ResponseEntity.ok(jobPosts);
+	public ResponseEntity<?> getJobsByCompanyId(@PathVariable UUID companyId,
+	        @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "6") int size) {
+	    try {
+	        Page<JobPost> jobPosts = jobPostService.findJobByCompanyId(companyId, page, size);
+	        if (jobPosts == null) {
+	            return ResponseEntity.ok(Map.of("error", "Không tìm thấy bài đăng nào"));
+	        }
+	        return ResponseEntity.ok(jobPosts);
+	    } catch (IllegalArgumentException e) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	                .body(Map.of("error", "Đã xảy ra lỗi: " + e.getMessage()));
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body(Map.of("error", "Đã xảy ra lỗi: " + e.getMessage()));
+	    }
 	}
 
 	@GetMapping("/search-by-company")
@@ -795,6 +806,11 @@ public class JobPostController {
 			Page<JobPost> results = jobPostService.semanticSearchWithFilters(query, selectedTypesOfWork, minSalary,
 					maxSalary, cityId, selectedIndustryIds, page, size);
 
+			// Kiểm tra null cho results
+	        if (results == null) {
+	            return ResponseEntity.status(HttpStatus.OK)
+	                    .body(Map.of("error", "Kết quả tìm kiếm rỗng"));
+	        }
 			Map<String, Object> response = new HashMap<>();
 			response.put("content", results.getContent());
 			response.put("currentPage", results.getNumber());

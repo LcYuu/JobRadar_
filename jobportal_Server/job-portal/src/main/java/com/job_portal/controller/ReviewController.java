@@ -172,19 +172,24 @@ public class ReviewController {
 	}
 
 	@DeleteMapping("/delete/{reviewId}")
-	public ResponseEntity<?> deleteReview(@PathVariable UUID reviewId) {
-		try {
-			boolean isDeleted = reviewService.deleteReview(reviewId);
-			if (isDeleted) {
-				return new ResponseEntity<>("Xóa đánh giá thành công", HttpStatus.OK);
-			} else {
-				return new ResponseEntity<>("Xóa đánh giá thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		} catch (AllExceptions e) {
-			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-		} catch (Exception e) {
-			return new ResponseEntity<>("Có lỗi xảy ra khi xóa đánh giá", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+	public ResponseEntity<?> deleteReview(@PathVariable UUID reviewId, @RequestHeader("Authorization") String jwt) {
+	    try {
+	        String email = JwtProvider.getEmailFromJwtToken(jwt);
+	        Optional<UserAccount> userOpt = userAccountRepository.findByEmail(email);
+	        if (!userOpt.isPresent()) {
+	            return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.UNAUTHORIZED);
+	        }
+	        boolean isDeleted = reviewService.deleteReview(reviewId);
+	        if (isDeleted) {
+	            return new ResponseEntity<>("Xóa đánh giá thành công", HttpStatus.OK);
+	        } else {
+	            return new ResponseEntity<>("Xóa đánh giá thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
+	        }
+	    } catch (AllExceptions e) {
+	        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>("Có lỗi xảy ra khi xóa đánh giá", HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
 	}
 
 	@GetMapping("/count-by-star")
