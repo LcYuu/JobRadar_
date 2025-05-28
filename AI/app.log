@@ -1,0 +1,583 @@
+2025-05-28 09:32:28,347 - INFO - Sentence Transformers version: 3.4.1
+2025-05-28 09:32:28,348 - INFO - Torch version: 2.0.1+cpu
+2025-05-28 09:32:28,351 - INFO - 
+=== Bắt đầu Dịch vụ Gợi ý Việc làm JobRadar ===
+2025-05-28 09:32:28,352 - INFO - Thời gian hiện tại: 2025-05-28 09:32:28.352484
+2025-05-28 09:32:28,352 - INFO - Tệp công việc: D:\2024-2025_HKI\TLCN\JobPortal_Project\job_post.csv
+2025-05-28 09:32:28,353 - INFO - Tệp lịch sử tìm kiếm: D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv
+2025-05-28 09:32:28,353 - INFO - Tải mô hình paraphrase-multilingual-mpnet-base-v2...
+2025-05-28 09:32:28,353 - INFO - Kiểm tra phiên bản thư viện...
+2025-05-28 09:32:28,354 - INFO - Sentence Transformers: 3.4.1
+2025-05-28 09:32:28,354 - INFO - PyTorch: 2.0.1+cpu
+2025-05-28 09:32:28,355 - INFO - CUDA khả dụng: False
+2025-05-28 09:32:28,356 - INFO - Tải mô hình từ cục bộ: D:\Recommendation\model_cache
+2025-05-28 09:32:28,361 - INFO - Use pytorch device_name: cpu
+2025-05-28 09:32:28,361 - INFO - Load pretrained SentenceTransformer: D:\Recommendation\model_cache
+2025-05-28 09:32:33,432 - INFO - Mô hình tải thành công!
+2025-05-28 09:32:33,433 - INFO - Tokenizer được đặt là None.
+2025-05-28 09:32:33,433 - INFO - CUDA không khả dụng. Sử dụng CPU.
+2025-05-28 09:32:33,433 - INFO - Chuyển mô hình sang thiết bị...
+2025-05-28 09:32:33,436 - INFO - Mô hình đã được chuyển sang cpu
+2025-05-28 09:32:33,436 - INFO - Khởi tạo TF-IDF vectorizer...
+2025-05-28 09:32:33,437 - INFO - TF-IDF vectorizer khởi tạo thành công!
+2025-05-28 09:32:33,437 - INFO - Kiểm tra mô hình...
+2025-05-28 09:32:33,809 - INFO - Kích thước vector kiểm tra: (768,)
+2025-05-28 09:32:34,813 - INFO - Sử dụng bộ nhớ: 1761.04 MB | CPU: 19.20%
+2025-05-28 09:32:34,815 - INFO - Tải mô hình hoàn tất.
+2025-05-28 09:32:34,817 - INFO - Mô hình paraphrase-multilingual-mpnet-base-v2 tải thành công trên cpu
+2025-05-28 09:32:34,819 - INFO - Tải dữ liệu ban đầu...
+2025-05-28 09:32:34,821 - INFO - Đang tải công việc từ D:\2024-2025_HKI\TLCN\JobPortal_Project\job_post.csv...
+2025-05-28 09:32:34,826 - ERROR - Lỗi khi tải công việc từ CSV: [Errno 2] No such file or directory: 'D:\\2024-2025_HKI\\TLCN\\JobPortal_Project\\job_post.csv'
+2025-05-28 09:32:34,841 - WARNING - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv không tồn tại.
+2025-05-28 09:32:34,841 - INFO - Khởi tạo dữ liệu hoàn tất - Công việc: 0, Lịch sử tìm kiếm: 0
+2025-05-28 09:32:34,841 - INFO - Khởi động Flask app...
+2025-05-28 09:32:34,842 - INFO - ==================================================
+2025-05-28 09:32:35,730 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.75:5000
+2025-05-28 09:32:35,731 - INFO - [33mPress CTRL+C to quit[0m
+2025-05-28 10:13:08,889 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 10:13:08,890 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 10:28:59,275 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 10:28:59,276 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 10:29:08,470 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 10:29:08,470 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 10:30:28,519 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 10:30:28,521 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 10:30:28,521 - __main__ - INFO - Đang tải công việc từ JobPortal_\job_post.csv...
+2025-05-28 10:30:28,523 - __main__ - ERROR - Lỗi khi tải công việc từ CSV: [Errno 2] No such file or directory: 'JobPortal_\\job_post.csv'
+2025-05-28 10:30:28,523 - __main__ - WARNING - Tệp JobPortal_\search.csv không tồn tại.
+2025-05-28 10:30:28,524 - __main__ - INFO - Đã lưu 0 embeddings vào file
+2025-05-28 10:30:28,546 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.75:5000
+2025-05-28 10:30:28,547 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-28 10:30:28,560 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 10:30:36,127 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 10:30:36,127 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 10:30:41,531 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 10:30:41,532 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 10:30:42,517 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 10:30:42,520 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 10:30:42,520 - __main__ - INFO - Đang tải công việc từ JobPortal_\job_post.csv...
+2025-05-28 10:30:42,521 - __main__ - ERROR - Lỗi khi tải công việc từ CSV: [Errno 2] No such file or directory: 'JobPortal_\\job_post.csv'
+2025-05-28 10:30:42,522 - __main__ - WARNING - Tệp JobPortal_\search.csv không tồn tại.
+2025-05-28 10:30:42,522 - __main__ - INFO - Đã lưu 0 embeddings vào file
+2025-05-28 10:30:42,531 - werkzeug - WARNING -  * Debugger is active!
+2025-05-28 10:30:42,541 - werkzeug - INFO -  * Debugger PIN: 646-913-458
+2025-05-28 10:31:12,474 - __main__ - WARNING - Tệp JobPortal_\search.csv không tồn tại.
+2025-05-28 10:31:12,474 - werkzeug - INFO - 127.0.0.1 - - [28/May/2025 10:31:12] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 10:31:39,315 - werkzeug - INFO -  * Detected change in 'd:\\AI\\Re.py', reloading
+2025-05-28 10:31:39,346 - werkzeug - INFO -  * Detected change in 'd:\\AI\\Re.py', reloading
+2025-05-28 10:31:40,924 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 10:31:51,565 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 10:31:51,566 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 10:31:58,115 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 10:31:58,115 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 10:31:59,303 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 10:31:59,306 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 10:31:59,307 - __main__ - INFO - Đang tải công việc từ JobRadar_\job_post.csv...
+2025-05-28 10:31:59,307 - __main__ - ERROR - Lỗi khi tải công việc từ CSV: [Errno 2] No such file or directory: 'JobRadar_\\job_post.csv'
+2025-05-28 10:31:59,308 - __main__ - WARNING - Tệp JobPortal_\search.csv không tồn tại.
+2025-05-28 10:31:59,308 - __main__ - INFO - Đã lưu 0 embeddings vào file
+2025-05-28 10:31:59,316 - werkzeug - WARNING -  * Debugger is active!
+2025-05-28 10:31:59,322 - werkzeug - INFO -  * Debugger PIN: 646-913-458
+2025-05-28 10:31:59,350 - __main__ - WARNING - Tệp JobPortal_\search.csv không tồn tại.
+2025-05-28 10:31:59,351 - werkzeug - INFO - 127.0.0.1 - - [28/May/2025 10:31:59] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 10:32:17,940 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 10:32:17,940 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 10:32:24,149 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 10:32:24,150 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 10:32:25,022 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 10:32:25,024 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 10:32:25,025 - __main__ - INFO - Đang tải công việc từ JobRadar_\job_post.csv...
+2025-05-28 10:32:25,026 - __main__ - ERROR - Lỗi khi tải công việc từ CSV: [Errno 2] No such file or directory: 'JobRadar_\\job_post.csv'
+2025-05-28 10:32:25,026 - __main__ - WARNING - Tệp JobRadar_\search.csv không tồn tại.
+2025-05-28 10:32:25,027 - __main__ - INFO - Đã lưu 0 embeddings vào file
+2025-05-28 10:32:25,043 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.75:5000
+2025-05-28 10:32:25,044 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-28 10:32:25,051 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 10:32:33,131 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 10:32:33,132 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 10:32:39,766 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 10:32:39,768 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 10:32:40,577 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 10:32:40,579 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 10:32:40,580 - __main__ - INFO - Đang tải công việc từ JobRadar_\job_post.csv...
+2025-05-28 10:32:40,580 - __main__ - ERROR - Lỗi khi tải công việc từ CSV: [Errno 2] No such file or directory: 'JobRadar_\\job_post.csv'
+2025-05-28 10:32:40,580 - __main__ - WARNING - Tệp JobRadar_\search.csv không tồn tại.
+2025-05-28 10:32:40,581 - __main__ - INFO - Đã lưu 0 embeddings vào file
+2025-05-28 10:32:40,587 - werkzeug - WARNING -  * Debugger is active!
+2025-05-28 10:32:40,592 - werkzeug - INFO -  * Debugger PIN: 646-913-458
+2025-05-28 10:32:40,613 - __main__ - WARNING - Tệp JobRadar_\search.csv không tồn tại.
+2025-05-28 10:32:40,614 - werkzeug - INFO - 127.0.0.1 - - [28/May/2025 10:32:40] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 10:33:44,138 - werkzeug - INFO -  * Detected change in 'c:\\Python310\\Lib\\site-packages\\flask\\globals.py', reloading
+2025-05-28 10:33:44,141 - werkzeug - INFO -  * Detected change in 'c:\\Python310\\Lib\\site-packages\\flask\\json\\__init__.py', reloading
+2025-05-28 10:33:44,148 - werkzeug - INFO -  * Detected change in 'c:\\Python310\\Lib\\site-packages\\transformers\\__init__.py', reloading
+2025-05-28 10:33:44,365 - werkzeug - INFO -  * Detected change in 'c:\\Python310\\Lib\\site-packages\\transformers\\utils\\dummy_sentencepiece_objects.py', reloading
+2025-05-28 10:33:44,369 - werkzeug - INFO -  * Detected change in 'c:\\Python310\\Lib\\site-packages\\transformers\\utils\\dummy_tokenizers_objects.py', reloading
+2025-05-28 10:33:44,375 - werkzeug - INFO -  * Detected change in 'c:\\Python310\\Lib\\site-packages\\transformers\\utils\\dummy_tensorflow_text_objects.py', reloading
+2025-05-28 10:33:44,376 - werkzeug - INFO -  * Detected change in 'c:\\Python310\\Lib\\site-packages\\transformers\\utils\\dummy_keras_nlp_objects.py', reloading
+2025-05-28 10:33:44,379 - werkzeug - INFO -  * Detected change in 'c:\\Python310\\Lib\\site-packages\\transformers\\utils\\dummy_vision_objects.py', reloading
+2025-05-28 10:33:44,388 - werkzeug - INFO -  * Detected change in 'c:\\Python310\\Lib\\site-packages\\transformers\\utils\\dummy_torchvision_objects.py', reloading
+2025-05-28 10:33:44,396 - werkzeug - INFO -  * Detected change in 'c:\\Python310\\Lib\\site-packages\\transformers\\utils\\dummy_pt_objects.py', reloading
+2025-05-28 10:33:44,483 - werkzeug - INFO -  * Detected change in 'c:\\Python310\\Lib\\site-packages\\transformers\\utils\\dummy_tf_objects.py', reloading
+2025-05-28 10:33:44,503 - werkzeug - INFO -  * Detected change in 'c:\\Python310\\Lib\\site-packages\\transformers\\utils\\dummy_essentia_and_librosa_and_pretty_midi_and_scipy_and_torch_objects.py', reloading
+2025-05-28 10:33:44,504 - werkzeug - INFO -  * Detected change in 'c:\\Python310\\Lib\\site-packages\\transformers\\utils\\dummy_torchaudio_objects.py', reloading
+2025-05-28 10:33:44,506 - werkzeug - INFO -  * Detected change in 'c:\\Python310\\Lib\\site-packages\\transformers\\utils\\dummy_flax_objects.py', reloading
+2025-05-28 10:33:44,515 - werkzeug - INFO -  * Detected change in 'c:\\Python310\\Lib\\site-packages\\transformers\\models\\auto\\__init__.py', reloading
+2025-05-28 10:33:44,523 - werkzeug - INFO -  * Detected change in 'c:\\Python310\\Lib\\site-packages\\transformers\\models\\auto\\modeling_auto.py', reloading
+2025-05-28 10:33:46,025 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 10:33:54,885 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 10:33:54,886 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 10:33:59,655 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 10:33:59,656 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 10:34:00,445 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 10:59:29,951 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 10:59:29,951 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 10:59:37,197 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 10:59:37,198 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 10:59:47,395 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 10:59:47,400 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 10:59:47,400 - __main__ - INFO - Đang tải công việc từ JobRadar_\job_post.csv...
+2025-05-28 10:59:47,402 - __main__ - ERROR - Lỗi khi tải công việc từ CSV: [Errno 2] No such file or directory: 'JobRadar_\\job_post.csv'
+2025-05-28 10:59:47,402 - __main__ - WARNING - Tệp JobRadar_\search.csv không tồn tại.
+2025-05-28 10:59:47,404 - __main__ - INFO - Đã lưu 0 embeddings vào file
+2025-05-28 10:59:47,434 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.75:5000
+2025-05-28 10:59:47,436 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-28 10:59:47,460 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 10:59:54,818 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 10:59:54,818 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:00:00,951 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 11:00:00,953 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 11:00:02,367 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 11:00:02,372 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 11:00:02,373 - __main__ - INFO - Đang tải công việc từ JobRadar_\job_post.csv...
+2025-05-28 11:00:02,374 - __main__ - ERROR - Lỗi khi tải công việc từ CSV: [Errno 2] No such file or directory: 'JobRadar_\\job_post.csv'
+2025-05-28 11:00:02,376 - __main__ - WARNING - Tệp JobRadar_\search.csv không tồn tại.
+2025-05-28 11:00:02,377 - __main__ - INFO - Đã lưu 0 embeddings vào file
+2025-05-28 11:00:02,393 - werkzeug - WARNING -  * Debugger is active!
+2025-05-28 11:00:02,430 - werkzeug - INFO -  * Debugger PIN: 646-913-458
+2025-05-28 11:00:57,822 - __main__ - WARNING - Tệp JobRadar_\search.csv không tồn tại.
+2025-05-28 11:00:57,824 - werkzeug - INFO - 127.0.0.1 - - [28/May/2025 11:00:57] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 11:08:29,664 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
+2025-05-28 11:08:29,665 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
+2025-05-28 11:08:31,497 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 11:08:48,428 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 11:08:48,429 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:08:56,769 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 11:08:56,769 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 11:08:58,573 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 11:08:58,577 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 11:08:58,578 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 11:08:58,686 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 11:08:58,686 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 11:08:58,712 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 11:10:27,053 - __main__ - INFO - Đã lưu 1310 embeddings vào file
+2025-05-28 11:10:27,147 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.75:5000
+2025-05-28 11:10:27,148 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-28 11:10:27,163 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 11:10:34,352 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 11:10:34,353 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:10:39,801 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 11:10:39,803 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 11:10:40,668 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 11:10:40,670 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 11:10:40,671 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 11:10:40,728 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 11:10:40,729 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 11:10:40,748 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 11:12:09,377 - __main__ - INFO - Đã lưu 1310 embeddings vào file
+2025-05-28 11:12:09,465 - werkzeug - WARNING -  * Debugger is active!
+2025-05-28 11:12:09,472 - werkzeug - INFO -  * Debugger PIN: 646-913-458
+2025-05-28 11:13:40,985 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-05-28 11:13:42,206 - werkzeug - INFO - 127.0.0.1 - - [28/May/2025 11:13:42] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 11:13:49,507 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-05-28 11:13:50,412 - werkzeug - INFO - 127.0.0.1 - - [28/May/2025 11:13:50] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 11:16:26,670 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
+2025-05-28 11:16:26,681 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
+2025-05-28 11:16:26,682 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
+2025-05-28 11:16:28,516 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 11:16:49,581 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 11:16:49,582 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:16:59,200 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 11:16:59,200 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 11:17:00,680 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 11:17:00,683 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 11:17:00,683 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 11:17:00,739 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 11:17:00,739 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 11:17:00,757 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 11:18:34,059 - __main__ - INFO - Đã lưu 1310 embeddings vào file
+2025-05-28 11:18:34,146 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.75:5000
+2025-05-28 11:18:34,146 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-28 11:18:34,154 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 11:18:41,819 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 11:18:41,819 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:18:48,727 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 11:18:48,729 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 11:18:49,584 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 11:18:49,586 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 11:18:49,587 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 11:18:49,643 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 11:18:49,644 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 11:18:49,663 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 11:20:35,200 - __main__ - INFO - Đã lưu 1310 embeddings vào file
+2025-05-28 11:20:35,300 - werkzeug - WARNING -  * Debugger is active!
+2025-05-28 11:20:35,308 - werkzeug - INFO -  * Debugger PIN: 646-913-458
+2025-05-28 11:20:35,351 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-05-28 11:20:36,668 - werkzeug - INFO - 127.0.0.1 - - [28/May/2025 11:20:36] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 11:21:08,821 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-05-28 11:21:09,774 - werkzeug - INFO - 127.0.0.1 - - [28/May/2025 11:21:09] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 11:21:47,274 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
+2025-05-28 11:21:47,285 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
+2025-05-28 11:21:50,116 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 11:22:01,348 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 11:22:01,348 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:22:09,661 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 11:22:09,664 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 11:22:11,402 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 11:22:11,405 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 11:22:11,406 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 11:22:11,479 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 11:22:11,481 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 11:22:11,500 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 11:24:43,838 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 11:24:43,839 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:24:51,323 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 11:24:51,323 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 11:24:52,226 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 11:24:52,228 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 11:24:52,229 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 11:24:52,287 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 11:24:52,288 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 11:24:52,306 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 11:26:11,169 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 11:26:11,170 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:26:16,217 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 11:26:16,218 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 11:26:17,127 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 11:26:17,133 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 11:26:17,134 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 11:26:17,205 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 11:26:17,206 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 11:26:17,225 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 11:28:18,075 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 11:28:18,075 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:28:23,266 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 11:28:23,266 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 11:28:24,151 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 11:28:24,153 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 11:28:24,164 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 11:28:24,221 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 11:28:24,222 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 11:28:24,238 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 11:28:24,255 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-05-28 11:28:24,318 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.75:5000
+2025-05-28 11:28:24,319 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-28 11:28:24,333 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 11:28:32,145 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 11:28:32,146 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:28:37,782 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 11:28:37,783 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 11:28:39,138 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 11:28:39,142 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 11:28:39,142 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 11:28:39,212 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 11:28:39,213 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 11:28:39,232 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 11:28:39,244 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-05-28 11:28:39,302 - werkzeug - WARNING -  * Debugger is active!
+2025-05-28 11:28:39,308 - werkzeug - INFO -  * Debugger PIN: 646-913-458
+2025-05-28 11:28:39,336 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-05-28 11:28:40,662 - werkzeug - INFO - 127.0.0.1 - - [28/May/2025 11:28:40] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 11:29:15,996 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-05-28 11:29:15,998 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: Marketing/Truyền thông
+2025-05-28 11:29:15,999 - werkzeug - INFO - 127.0.0.1 - - [28/May/2025 11:29:15] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 11:29:40,924 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
+2025-05-28 11:29:40,925 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
+2025-05-28 11:29:40,925 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
+2025-05-28 11:29:42,844 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 11:30:09,363 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 11:30:09,363 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:30:17,138 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 11:30:17,140 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 11:30:17,932 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 11:30:17,935 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 11:30:17,935 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 11:30:17,992 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 11:30:17,992 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 11:30:18,013 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 11:30:18,017 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-05-28 11:30:18,087 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.75:5000
+2025-05-28 11:30:18,088 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-28 11:30:18,096 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 11:30:25,660 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 11:30:25,662 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:30:31,901 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 11:30:31,901 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 11:30:34,003 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 11:30:34,005 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 11:30:34,006 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 11:30:34,062 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 11:30:34,063 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 11:30:34,082 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 11:30:34,093 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-05-28 11:30:34,150 - werkzeug - WARNING -  * Debugger is active!
+2025-05-28 11:30:34,158 - werkzeug - INFO -  * Debugger PIN: 646-913-458
+2025-05-28 11:30:34,183 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-05-28 11:30:35,455 - __main__ - ERROR - Lỗi trong recommend_jobs_mbert: unhashable type: 'list'
+Traceback (most recent call last):
+  File "d:\JobRadar_\AI\Re.py", line 1055, in recommend_jobs_mbert
+    result = {top_recommended_jobs_list}
+TypeError: unhashable type: 'list'
+2025-05-28 11:30:35,458 - werkzeug - INFO - 127.0.0.1 - - [28/May/2025 11:30:35] "[35m[1mPOST /recommend-jobs/phobert HTTP/1.1[0m" 500 -
+2025-05-28 11:31:03,269 - werkzeug - INFO -  * Detected change in 'c:\\Python310\\Lib\\site-packages\\werkzeug\\datastructures\\headers.py', reloading
+2025-05-28 11:31:05,430 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 11:31:15,362 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 11:31:15,362 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:31:25,674 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 11:31:25,674 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 11:31:28,011 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 11:31:28,015 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 11:31:28,015 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 11:31:28,090 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 11:31:28,091 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 11:31:28,113 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 11:31:28,124 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-05-28 11:31:28,193 - werkzeug - WARNING -  * Debugger is active!
+2025-05-28 11:31:28,199 - werkzeug - INFO -  * Debugger PIN: 646-913-458
+2025-05-28 11:32:04,855 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
+2025-05-28 11:32:04,865 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
+2025-05-28 11:32:07,353 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 11:32:17,665 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 11:32:17,665 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:32:34,519 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 11:32:34,519 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:32:42,770 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 11:32:42,771 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 11:32:45,090 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 11:32:45,093 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 11:32:45,093 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 11:32:45,151 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 11:32:45,152 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 11:32:45,171 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 11:32:45,182 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-05-28 11:32:45,245 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.75:5000
+2025-05-28 11:32:45,246 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-28 11:32:45,256 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 11:32:53,092 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 11:32:53,093 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:33:20,648 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 11:33:20,649 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:33:26,017 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 11:33:26,019 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 11:33:26,864 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 11:33:26,867 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 11:33:26,868 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 11:33:26,925 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 11:33:26,926 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 11:33:26,944 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 11:33:26,948 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-05-28 11:33:27,015 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.75:5000
+2025-05-28 11:33:27,016 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-28 11:33:27,026 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 11:33:34,926 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 11:33:34,927 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:33:40,214 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 11:33:40,214 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 11:33:41,287 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 11:33:41,289 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 11:33:41,290 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 11:33:41,351 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 11:33:41,352 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 11:33:41,372 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 11:33:41,384 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-05-28 11:33:41,444 - werkzeug - WARNING -  * Debugger is active!
+2025-05-28 11:33:41,451 - werkzeug - INFO -  * Debugger PIN: 646-913-458
+2025-05-28 11:33:41,476 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-05-28 11:33:42,829 - __main__ - ERROR - Lỗi trong recommend_jobs_mbert: unhashable type: 'list'
+Traceback (most recent call last):
+  File "d:\JobRadar_\AI\Re.py", line 1055, in recommend_jobs_mbert
+    result = {top_recommended_jobs_list}
+TypeError: unhashable type: 'list'
+2025-05-28 11:33:42,831 - werkzeug - INFO - 127.0.0.1 - - [28/May/2025 11:33:42] "[35m[1mPOST /recommend-jobs/phobert HTTP/1.1[0m" 500 -
+2025-05-28 11:36:55,821 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
+2025-05-28 11:36:55,831 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
+2025-05-28 11:36:55,832 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
+2025-05-28 11:36:55,832 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
+2025-05-28 11:36:57,811 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 11:37:14,018 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 11:37:14,019 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:37:22,451 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 11:37:22,452 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 11:37:23,710 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 11:37:23,713 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 11:37:23,714 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 11:37:23,775 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 11:37:23,776 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 11:37:23,797 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 11:37:23,803 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-05-28 11:37:23,948 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.75:5000
+2025-05-28 11:37:23,949 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-28 11:37:23,958 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 11:37:31,493 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 11:37:31,494 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 11:37:36,624 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 11:37:36,625 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 11:37:37,441 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 11:37:37,443 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 11:37:37,444 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 11:37:37,500 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 11:37:37,501 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 11:37:37,519 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 11:37:37,523 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-05-28 11:37:37,576 - werkzeug - WARNING -  * Debugger is active!
+2025-05-28 11:37:37,581 - werkzeug - INFO -  * Debugger PIN: 646-913-458
+2025-05-28 11:37:37,601 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-05-28 11:37:38,745 - werkzeug - INFO - 127.0.0.1 - - [28/May/2025 11:37:38] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 14:15:49,379 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 14:15:49,380 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 14:16:01,634 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 14:16:01,635 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 14:16:04,066 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 14:16:04,069 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 14:16:04,069 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 14:16:04,187 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 14:16:04,188 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 14:16:04,234 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 14:16:04,254 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-05-28 14:16:05,194 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.75:5000
+2025-05-28 14:16:05,195 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-28 14:16:05,213 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 14:16:18,169 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 14:16:18,170 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 14:17:00,533 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 14:17:00,533 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 14:17:08,466 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 14:17:08,466 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 14:17:09,591 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 14:17:09,593 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 14:17:09,594 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 14:17:09,686 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 14:17:09,687 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 14:17:09,710 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 14:17:09,724 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-05-28 14:17:10,650 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.75:5000
+2025-05-28 14:17:10,652 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-28 14:17:10,663 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 14:17:21,689 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 14:17:21,689 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 14:21:45,230 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 14:21:45,230 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 14:21:53,341 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 14:21:53,342 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 14:21:54,179 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 14:21:54,182 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 14:21:54,183 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 14:21:54,241 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 14:21:54,242 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 14:21:54,259 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 14:21:54,264 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-05-28 14:21:55,194 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.75:5000
+2025-05-28 14:21:55,196 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-28 14:21:55,204 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 14:22:03,092 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 14:22:03,092 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 14:22:11,815 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 14:22:11,816 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 14:22:13,984 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 14:22:13,986 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 14:22:13,986 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 14:22:14,046 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 14:22:14,047 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 14:22:14,066 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 14:22:14,080 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-05-28 14:22:14,135 - werkzeug - WARNING -  * Debugger is active!
+2025-05-28 14:22:14,141 - werkzeug - INFO -  * Debugger PIN: 646-913-458
+2025-05-28 14:22:14,181 - werkzeug - INFO -  * Detected change in 'c:\\Python310\\Lib\\encodings\\charmap.py', reloading
+2025-05-28 14:22:18,764 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 14:22:28,728 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 14:22:28,728 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 14:22:37,988 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 14:22:37,989 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 14:22:40,355 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 14:22:40,358 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 14:22:40,358 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 14:22:40,416 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 14:22:40,416 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 14:22:40,435 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 14:22:40,450 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-05-28 14:22:40,508 - werkzeug - WARNING -  * Debugger is active!
+2025-05-28 14:22:40,515 - werkzeug - INFO -  * Debugger PIN: 646-913-458
+2025-05-28 14:22:47,815 - werkzeug - INFO - 127.0.0.1 - - [28/May/2025 14:22:47] "POST /analyze HTTP/1.1" 200 -
+2025-05-28 14:23:39,851 - werkzeug - INFO - 127.0.0.1 - - [28/May/2025 14:23:39] "[31m[1mPOST /analyze HTTP/1.1[0m" 400 -
+2025-05-28 14:23:41,800 - werkzeug - INFO - 127.0.0.1 - - [28/May/2025 14:23:41] "[31m[1mPOST /analyze HTTP/1.1[0m" 400 -
+2025-05-28 14:24:13,781 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 14:24:13,781 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 14:24:22,439 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 14:24:22,440 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 14:24:23,488 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 14:24:23,491 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 14:24:23,492 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 14:24:23,547 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 14:24:23,548 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 14:24:23,565 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 14:24:23,570 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-05-28 14:24:24,499 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.75:5000
+2025-05-28 14:24:24,500 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-05-28 14:24:24,507 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-05-28 14:24:32,152 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 14:24:32,152 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-05-28 14:24:37,283 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-05-28 14:24:37,284 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-05-28 14:24:39,614 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-05-28 14:24:39,616 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-05-28 14:24:39,616 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-05-28 14:24:39,674 - __main__ - INFO - Đã tải 1310 công việc.
+2025-05-28 14:24:39,675 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-05-28 14:24:39,696 - __main__ - INFO - Đã tải 1756 mục lịch sử tìm kiếm.
+2025-05-28 14:24:39,711 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-05-28 14:24:39,768 - werkzeug - WARNING -  * Debugger is active!
+2025-05-28 14:24:39,777 - werkzeug - INFO -  * Debugger PIN: 646-913-458
