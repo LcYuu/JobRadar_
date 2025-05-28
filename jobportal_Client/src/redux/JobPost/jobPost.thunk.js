@@ -374,3 +374,15 @@ export const semanticSearchJobsWithGemini = createAsyncThunk(
   }
 );
 
+export const getAllJobs = createAsyncThunk(
+  "jobs/getAllJobs",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/job-post/get-all`);
+      return response.data; // Trả về danh sách công việc
+    } catch (error) {
+      return rejectWithValue(error.message); // Trả về lỗi nếu có
+    }
+  }
+);
+
