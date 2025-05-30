@@ -46,7 +46,7 @@ export default function JobSearchPage() {
     maxSalary,
   } = useSelector((store) => store.jobPost);
   const [currentPage, setCurrentPage] = useState(0);
-  const [size] = useState();
+  const [size, setSize] = useState(10);
   const [displayTotalElements, setDisplayTotalElements] = useState(0);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State để kiểm soát sidebar trên mobile
@@ -607,40 +607,34 @@ export default function JobSearchPage() {
 
   const getDisplayResults = useCallback(() => {
     try {
+      console.log("getDisplayResults được gọi với:", {
+        isUsingSemanticSearch,
+        semanticResults,
+        isFilterApplied,
+        searchJob,
+        jobPost,
+        currentPage,
+        size
+      });
+
       if (isUsingSemanticSearch && semanticResults) {
         console.log("Sử dụng kết quả từ tìm kiếm ngữ nghĩa:", semanticResults);
-        if (
-          !semanticResults.content ||
-          !Array.isArray(semanticResults.content)
-        ) {
-          console.error(
-            "semanticResults.content không hợp lệ:",
-            semanticResults.content
-          );
+        if (!semanticResults.content || !Array.isArray(semanticResults.content)) {
+          console.error("semanticResults.content không hợp lệ:", semanticResults.content);
           return {
             content: [],
             totalElements: 0,
             totalPages: 1,
           };
         }
-        const resultsArray = Array.isArray(semanticResults.content)
-          ? semanticResults.content
-          : [];
-        console.log(
-          "Số lượng kết quả trước khi phân trang:",
-          resultsArray.length
-        );
+        const resultsArray = Array.isArray(semanticResults.content) ? semanticResults.content : [];
+        console.log("Số lượng kết quả trước khi phân trang:", resultsArray.length);
         const totalResults = resultsArray.length || 0;
         const totalPages = Math.max(Math.ceil(totalResults / size) || 1, 1);
         const startIndex = currentPage * size;
         const endIndex = Math.min(startIndex + size, totalResults);
-        console.log("Thông số phân trang:", {
-          startIndex,
-          endIndex,
-          totalResults,
-        });
-        const paginatedContent =
-          totalResults > 0 ? resultsArray.slice(startIndex, endIndex) : [];
+        console.log("Thông số phân trang:", { startIndex, endIndex, totalResults });
+        const paginatedContent = totalResults > 0 ? resultsArray.slice(startIndex, endIndex) : [];
         console.log("Số lượng kết quả hiển thị:", paginatedContent.length);
         return {
           content: paginatedContent,
@@ -648,15 +642,25 @@ export default function JobSearchPage() {
           totalPages: totalPages,
         };
       }
+
       if (isFilterApplied) {
-        console.log("Sử dụng kết quả từ searchJobs với bộ lọc");
+        console.log("Sử dụng kết quả từ searchJobs với bộ lọc:", {
+          searchJob,
+          displayTotalElements,
+          totalPagesFromSearch
+        });
         return {
           content: searchJob || [],
           totalElements: displayTotalElements,
           totalPages: totalPagesFromSearch || 1,
         };
       }
-      console.log("Sử dụng tất cả công việc");
+
+      console.log("Sử dụng tất cả công việc:", {
+        jobPost,
+        displayTotalElements,
+        totalPagesFromAll
+      });
       return {
         content: jobPost || [],
         totalElements: displayTotalElements,
@@ -761,7 +765,15 @@ export default function JobSearchPage() {
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
   const [isSalaryOpen, setIsSalaryOpen] = useState(true);
 
-  
+  useEffect(() => {
+    console.log("Kết quả tìm kiếm đã thay đổi:", {
+      results,
+      totalPages,
+      totalResults,
+      isUsingSemanticSearch,
+      isFilterApplied
+    });
+  }, [results, totalPages, totalResults, isUsingSemanticSearch, isFilterApplied]);
 
   return (
     <div className="min-h-screen bg-transparent">
@@ -1007,11 +1019,7 @@ export default function JobSearchPage() {
                 </span>
               </div>
             </div>
-            {results.length === 0 ? (
-              <div className="text-center text-gray-500">
-                Không có kết quả nào phù hợp với tìm kiếm của bạn.
-              </div>
-            ) : (
+            {results && results.length > 0 ? (
               <JobList_AllJob
                 jobs={results}
                 currentPage={currentPage}
@@ -1019,6 +1027,16 @@ export default function JobSearchPage() {
                 totalPages={totalPages}
                 onPageChange={handlePageChange}
               />
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500 text-lg">
+                  {isSearching ? (
+                    "Đang tìm kiếm công việc phù hợp..."
+                  ) : (
+                    "Không tìm thấy công việc nào phù hợp với tiêu chí của bạn."
+                  )}
+                </p>
+              </div>
             )}
           </div>
         </div>
