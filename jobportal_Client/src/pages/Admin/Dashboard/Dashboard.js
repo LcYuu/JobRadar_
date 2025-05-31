@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card } from "../../../ui/card";
 import { Button } from "../../../ui/button";
 import { useDispatch, useSelector } from "react-redux";
-import { Users, Building2, FileText, TrendingUp, Calendar } from "lucide-react";
+import { Users, Building2, FileText, TrendingUp, Calendar, Send } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -13,7 +13,9 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import {
   getActiveJobs,
   getDailyStats,
@@ -48,6 +50,7 @@ export default function AdminDashboard() {
   const [activePeriod, setActivePeriod] = useState("week");
   const [dateError, setDateError] = useState("");
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [isTriggeringSurvey, setIsTriggeringSurvey] = useState(false);
 
   const handleChartDateChange = (e) => {
     const { name, value } = e.target;
@@ -193,6 +196,52 @@ export default function AdminDashboard() {
   const cardPadding = isMobile ? 'p-3 sm:p-4 md:p-6' : isMidRange ? 'p-2 sm:p-3' : 'p-3 sm:p-4 md:p-6';
   const titleFontSize = isMobile ? 'text-sm sm:text-base md:text-lg' : isMidRange ? 'text-sm' : 'text-base sm:text-lg md:text-xl';
   const chartHeight = isMobile ? 'h-56 sm:h-64 md:h-72 lg:h-80' : isMidRange ? 'h-52 sm:h-60' : 'h-56 sm:h-64 md:h-72 lg:h-80';
+
+  const handleTriggerSurvey = async () => {
+    try {
+      setIsTriggeringSurvey(true);
+      const response = await fetch('http://localhost:8080/surveys/trigger-survey-check', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Không thể kích hoạt gửi khảo sát');
+      }
+      
+      await Swal.fire({
+        title: 'Thành công!',
+        text: 'Đã kích hoạt gửi khảo sát thành công',
+        icon: 'success',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#3085d6',
+        customClass: {
+          popup: 'swal2-responsive',
+          title: 'swal2-title-responsive',
+          content: 'swal2-content-responsive',
+          confirmButton: 'swal2-confirm-button-responsive'
+        }
+      });
+    } catch (error) {
+      await Swal.fire({
+        title: 'Lỗi!',
+        text: error.message || 'Có lỗi xảy ra khi kích hoạt gửi khảo sát',
+        icon: 'error',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#d33',
+        customClass: {
+          popup: 'swal2-responsive',
+          title: 'swal2-title-responsive',
+          content: 'swal2-content-responsive',
+          confirmButton: 'swal2-confirm-button-responsive'
+        }
+      });
+    } finally {
+      setIsTriggeringSurvey(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col pb-20 bg-white mt-8 px-2 sm:px-4 md:px-6">
@@ -408,12 +457,23 @@ export default function AdminDashboard() {
           </div>
         </Card>
 
-        <Button
-          onClick={() => navigate("/admin/survey-statistics")}
-          className="mt-4 w-full sm:w-auto text-sm"
-        >
-          Xem Thống Kê Khảo Sát
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-3 mt-4">
+          <Button
+            onClick={() => navigate("/admin/survey-statistics")}
+            className="w-full sm:w-auto text-sm"
+          >
+            Xem Thống Kê Khảo Sát
+          </Button>
+          
+          <Button
+            onClick={handleTriggerSurvey}
+            disabled={isTriggeringSurvey}
+            className="w-full sm:w-auto text-sm bg-purple-600 hover:bg-purple-700 flex items-center gap-2"
+          >
+            <Send className="w-4 h-4" />
+            {isTriggeringSurvey ? 'Đang xử lý...' : 'Kích hoạt gửi khảo sát'}
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -2639,3 +2639,706 @@ RuntimeError: [enforce fail at ..\c10\core\impl\alloc_cpu.cpp:72] data. DefaultC
 2025-05-06 11:48:35,394 - INFO - - Chuyên viên Kiểm thử Phần mềm Tự động (ID: 3663efcd-51b6-42ff-978f-2cb912c2f769, CompanyID: f36d6c61-6c63-4504-8b71-589121519386, CreateDate: 2025-04-01T17:30:00, Tương đồng: 0.4836551547050476)
 2025-05-06 11:48:35,394 - INFO - Quá trình gợi ý hoàn tất trong 2.80 giây.
 2025-05-06 11:48:35,394 - INFO - 127.0.0.1 - - [06/May/2025 11:48:35] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:09:51,402 - INFO - Sentence Transformers version: 4.1.0
+2025-05-28 15:09:51,402 - INFO - Torch version: 2.7.0+cpu
+2025-05-28 15:09:51,410 - INFO - 
+=== Bắt đầu Dịch vụ Gợi ý Việc làm JobRadar ===
+2025-05-28 15:09:51,410 - INFO - Thời gian hiện tại: 2025-05-28 15:09:51.410233
+2025-05-28 15:09:51,412 - INFO - Tệp công việc: D:\2024-2025_HKI\TLCN\JobPortal_Project\job_post.csv
+2025-05-28 15:09:51,412 - INFO - Tệp lịch sử tìm kiếm: D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv
+2025-05-28 15:09:51,412 - INFO - Tải mô hình paraphrase-multilingual-mpnet-base-v2...
+2025-05-28 15:09:51,412 - INFO - Kiểm tra phiên bản thư viện...
+2025-05-28 15:09:51,414 - INFO - Sentence Transformers: 4.1.0
+2025-05-28 15:09:51,414 - INFO - PyTorch: 2.7.0+cpu
+2025-05-28 15:09:51,414 - INFO - CUDA khả dụng: False
+2025-05-28 15:09:51,414 - INFO - Tải mô hình từ cục bộ: D:\Recommendation\model_cache
+2025-05-28 15:09:51,418 - INFO - Use pytorch device_name: cpu
+2025-05-28 15:09:51,418 - INFO - Load pretrained SentenceTransformer: D:\Recommendation\model_cache
+2025-05-28 15:09:55,078 - INFO - Mô hình tải thành công!
+2025-05-28 15:09:55,079 - INFO - Tokenizer được đặt là None.
+2025-05-28 15:09:55,079 - INFO - CUDA không khả dụng. Sử dụng CPU.
+2025-05-28 15:09:55,080 - INFO - Chuyển mô hình sang thiết bị...
+2025-05-28 15:09:55,085 - INFO - Mô hình đã được chuyển sang cpu
+2025-05-28 15:09:55,085 - INFO - Khởi tạo TF-IDF vectorizer...
+2025-05-28 15:09:55,086 - INFO - TF-IDF vectorizer khởi tạo thành công!
+2025-05-28 15:09:55,086 - INFO - Kiểm tra mô hình...
+2025-05-28 15:09:56,437 - INFO - Kích thước vector kiểm tra: (768,)
+2025-05-28 15:09:57,442 - INFO - Sử dụng bộ nhớ: 866.80 MB | CPU: 22.00%
+2025-05-28 15:09:57,442 - INFO - Tải mô hình hoàn tất.
+2025-05-28 15:09:57,442 - INFO - Mô hình paraphrase-multilingual-mpnet-base-v2 tải thành công trên cpu
+2025-05-28 15:09:57,442 - INFO - Tải dữ liệu ban đầu...
+2025-05-28 15:09:57,442 - INFO - Đang tải công việc từ D:\2024-2025_HKI\TLCN\JobPortal_Project\job_post.csv...
+2025-05-28 15:09:57,528 - INFO - Số công việc sau khi loại bỏ trùng lặp: 1310
+2025-05-28 15:09:57,736 - INFO - TF-IDF vectorizer đã được fit với dữ liệu công việc.
+2025-05-28 15:09:57,736 - INFO - Tải JOB_VECTOR_CACHE từ D:\Recommendation\job_vector_cache.pkl...
+2025-05-28 15:09:57,752 - ERROR - Lỗi khi tải cache: No module named 'numpy._core'. Xóa và tạo lại cache.
+2025-05-28 15:09:57,752 - INFO - Tính trước vector cho công việc...
+2025-05-28 15:11:50,365 - INFO - Đã lưu JOB_VECTOR_CACHE vào D:\Recommendation\job_vector_cache.pkl
+2025-05-28 15:11:50,368 - INFO - Đã tải 1301 công việc trong 112.92 giây.
+2025-05-28 15:11:51,380 - INFO - Sử dụng bộ nhớ: 465.43 MB | CPU: 11.40%
+2025-05-28 15:11:51,385 - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-05-28 15:11:51,506 - INFO - Đã tải 1589 mục lịch sử tìm kiếm trong 0.12 giây.
+2025-05-28 15:11:51,511 - INFO - Khởi tạo dữ liệu hoàn tất - Công việc: 1301, Lịch sử tìm kiếm: 1589
+2025-05-28 15:11:51,511 - INFO - Khởi động Flask app...
+2025-05-28 15:11:51,511 - INFO - ==================================================
+2025-05-28 15:11:51,726 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.23:5000
+2025-05-28 15:11:51,728 - INFO - [33mPress CTRL+C to quit[0m
+2025-05-28 15:12:09,045 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:12:09.045554 ---
+2025-05-28 15:12:09,055 - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi, sử dụng search_history hiện tại.
+2025-05-28 15:12:09,056 - INFO - Đã tải lại lịch sử tìm kiếm: 1589 mục
+2025-05-28 15:12:09,059 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:12:09.059653 ---
+2025-05-28 15:12:09,059 - INFO - Đã tìm thấy 0 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.01 giây
+2025-05-28 15:12:09,062 - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi, sử dụng search_history hiện tại.
+2025-05-28 15:12:09,062 - INFO - Không tìm thấy lịch sử tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a
+2025-05-28 15:12:09,063 - INFO - Đã tải lại lịch sử tìm kiếm: 1589 mục
+2025-05-28 15:12:09,098 - INFO - Đã tìm thấy 0 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.04 giây
+2025-05-28 15:12:09,130 - INFO - Không tìm thấy lịch sử tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a
+2025-05-28 15:12:09,360 - INFO - 127.0.0.1 - - [28/May/2025 15:12:09] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:12:09,360 - INFO - 127.0.0.1 - - [28/May/2025 15:12:09] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:12:20,712 - INFO - 127.0.0.1 - - [28/May/2025 15:12:20] "[33mPOST /semantic-search HTTP/1.1[0m" 404 -
+2025-05-28 15:12:30,665 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:12:30.665189 ---
+2025-05-28 15:12:30,667 - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi, sử dụng search_history hiện tại.
+2025-05-28 15:12:30,667 - INFO - Đã tải lại lịch sử tìm kiếm: 1589 mục
+2025-05-28 15:12:30,669 - INFO - Đã tìm thấy 0 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.00 giây
+2025-05-28 15:12:30,669 - INFO - Không tìm thấy lịch sử tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a
+2025-05-28 15:12:30,669 - INFO - 127.0.0.1 - - [28/May/2025 15:12:30] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:13:00,318 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:13:00.318923 ---
+2025-05-28 15:13:00,319 - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi, sử dụng search_history hiện tại.
+2025-05-28 15:13:00,321 - INFO - Đã tải lại lịch sử tìm kiếm: 1589 mục
+2025-05-28 15:13:00,321 - INFO - Đã tìm thấy 0 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.00 giây
+2025-05-28 15:13:00,322 - INFO - Không tìm thấy lịch sử tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a
+2025-05-28 15:13:00,323 - INFO - 127.0.0.1 - - [28/May/2025 15:13:00] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:15:26,134 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:15:26.133440 ---
+2025-05-28 15:15:26,160 - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi, sử dụng search_history hiện tại.
+2025-05-28 15:15:26,160 - INFO - Đã tải lại lịch sử tìm kiếm: 1589 mục
+2025-05-28 15:15:26,162 - INFO - Đã tìm thấy 0 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.03 giây
+2025-05-28 15:15:26,163 - INFO - Không tìm thấy lịch sử tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a
+2025-05-28 15:15:26,169 - INFO - 127.0.0.1 - - [28/May/2025 15:15:26] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:15:48,784 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:15:48.784405 ---
+2025-05-28 15:15:48,784 - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi, sử dụng search_history hiện tại.
+2025-05-28 15:15:48,785 - INFO - Đã tải lại lịch sử tìm kiếm: 1589 mục
+2025-05-28 15:15:48,785 - INFO - Đã tìm thấy 0 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.00 giây
+2025-05-28 15:15:48,786 - INFO - Không tìm thấy lịch sử tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a
+2025-05-28 15:15:48,787 - INFO - 127.0.0.1 - - [28/May/2025 15:15:48] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:17:24,253 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:17:24.253893 ---
+2025-05-28 15:17:24,256 - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi, sử dụng search_history hiện tại.
+2025-05-28 15:17:24,256 - INFO - Đã tải lại lịch sử tìm kiếm: 1589 mục
+2025-05-28 15:17:24,257 - INFO - Đã tìm thấy 0 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.00 giây
+2025-05-28 15:17:24,257 - INFO - Không tìm thấy lịch sử tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a
+2025-05-28 15:17:24,259 - INFO - 127.0.0.1 - - [28/May/2025 15:17:24] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:18:20,417 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:18:20.417056 ---
+2025-05-28 15:18:20,418 - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi, sử dụng search_history hiện tại.
+2025-05-28 15:18:20,418 - INFO - Đã tải lại lịch sử tìm kiếm: 1589 mục
+2025-05-28 15:18:20,418 - INFO - Đã tìm thấy 0 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.00 giây
+2025-05-28 15:18:20,419 - INFO - Không tìm thấy lịch sử tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a
+2025-05-28 15:18:20,420 - INFO - 127.0.0.1 - - [28/May/2025 15:18:20] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:19:06,112 - INFO - 127.0.0.1 - - [28/May/2025 15:19:06] "[33mPOST /semantic-search HTTP/1.1[0m" 404 -
+2025-05-28 15:19:16,044 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:19:16.044759 ---
+2025-05-28 15:19:16,045 - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi, sử dụng search_history hiện tại.
+2025-05-28 15:19:16,045 - INFO - Đã tải lại lịch sử tìm kiếm: 1589 mục
+2025-05-28 15:19:16,046 - INFO - Đã tìm thấy 0 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.00 giây
+2025-05-28 15:19:16,046 - INFO - Không tìm thấy lịch sử tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a
+2025-05-28 15:19:16,046 - INFO - 127.0.0.1 - - [28/May/2025 15:19:16] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:19:29,513 - INFO - 127.0.0.1 - - [28/May/2025 15:19:29] "[33mPOST /semantic-search HTTP/1.1[0m" 404 -
+2025-05-28 15:19:48,047 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:19:48.047336 ---
+2025-05-28 15:19:48,055 - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi, sử dụng search_history hiện tại.
+2025-05-28 15:19:48,057 - INFO - Đã tải lại lịch sử tìm kiếm: 1589 mục
+2025-05-28 15:19:48,058 - INFO - Đã tìm thấy 0 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.01 giây
+2025-05-28 15:19:48,060 - INFO - Không tìm thấy lịch sử tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a
+2025-05-28 15:19:48,062 - INFO - 127.0.0.1 - - [28/May/2025 15:19:48] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:23:19,542 - INFO - Sentence Transformers version: 4.1.0
+2025-05-28 15:23:19,550 - INFO - Torch version: 2.7.0+cpu
+2025-05-28 15:23:19,553 - INFO - 
+=== Bắt đầu Dịch vụ Gợi ý Việc làm JobRadar ===
+2025-05-28 15:23:19,554 - INFO - Thời gian hiện tại: 2025-05-28 15:23:19.554372
+2025-05-28 15:23:19,554 - INFO - Tệp công việc: D:\JobRadar_\job_post.csv
+2025-05-28 15:23:19,554 - INFO - Tệp lịch sử tìm kiếm: D:\JobRadar_\search.csv
+2025-05-28 15:23:19,554 - INFO - Tải mô hình paraphrase-multilingual-mpnet-base-v2...
+2025-05-28 15:23:19,554 - INFO - Kiểm tra phiên bản thư viện...
+2025-05-28 15:23:19,554 - INFO - Sentence Transformers: 4.1.0
+2025-05-28 15:23:19,554 - INFO - PyTorch: 2.7.0+cpu
+2025-05-28 15:23:19,554 - INFO - CUDA khả dụng: False
+2025-05-28 15:23:19,554 - INFO - Tải mô hình từ cục bộ: D:\Recommendation\model_cache
+2025-05-28 15:23:19,555 - INFO - Use pytorch device_name: cpu
+2025-05-28 15:23:19,555 - INFO - Load pretrained SentenceTransformer: D:\Recommendation\model_cache
+2025-05-28 15:23:21,422 - INFO - Mô hình tải thành công!
+2025-05-28 15:23:21,428 - INFO - Tokenizer được đặt là None.
+2025-05-28 15:23:21,428 - INFO - CUDA không khả dụng. Sử dụng CPU.
+2025-05-28 15:23:21,428 - INFO - Chuyển mô hình sang thiết bị...
+2025-05-28 15:23:21,435 - INFO - Mô hình đã được chuyển sang cpu
+2025-05-28 15:23:21,435 - INFO - Khởi tạo TF-IDF vectorizer...
+2025-05-28 15:23:21,435 - INFO - TF-IDF vectorizer khởi tạo thành công!
+2025-05-28 15:23:21,436 - INFO - Kiểm tra mô hình...
+2025-05-28 15:23:22,606 - INFO - Kích thước vector kiểm tra: (768,)
+2025-05-28 15:23:23,610 - INFO - Sử dụng bộ nhớ: 483.22 MB | CPU: 34.10%
+2025-05-28 15:23:23,612 - INFO - Tải mô hình hoàn tất.
+2025-05-28 15:23:23,612 - INFO - Mô hình paraphrase-multilingual-mpnet-base-v2 tải thành công trên cpu
+2025-05-28 15:23:23,612 - INFO - Tải dữ liệu ban đầu...
+2025-05-28 15:23:23,612 - INFO - Đang tải công việc từ D:\JobRadar_\job_post.csv...
+2025-05-28 15:23:23,755 - ERROR - Lỗi khi tải công việc từ CSV: Error tokenizing data. C error: EOF inside string starting at row 456
+2025-05-28 15:23:23,896 - INFO - Đang tải lịch sử tìm kiếm từ D:\JobRadar_\search.csv...
+2025-05-28 15:23:24,114 - INFO - Đã tải 9000 mục lịch sử tìm kiếm trong 0.22 giây.
+2025-05-28 15:23:24,114 - INFO - Khởi tạo dữ liệu hoàn tất - Công việc: 0, Lịch sử tìm kiếm: 9000
+2025-05-28 15:23:24,114 - INFO - Khởi động Flask app...
+2025-05-28 15:23:24,118 - INFO - ==================================================
+2025-05-28 15:23:24,178 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.23:5000
+2025-05-28 15:23:24,178 - INFO - [33mPress CTRL+C to quit[0m
+2025-05-28 15:24:40,242 - INFO - 127.0.0.1 - - [28/May/2025 15:24:40] "[33mPOST /semantic-search HTTP/1.1[0m" 404 -
+2025-05-28 15:25:08,400 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:25:08.395803 ---
+2025-05-28 15:25:08,400 - INFO - Đang tải lịch sử tìm kiếm từ D:\JobRadar_\search.csv...
+2025-05-28 15:25:08,687 - INFO - Đã tải 9003 mục lịch sử tìm kiếm trong 0.28 giây.
+2025-05-28 15:25:08,688 - INFO - Đã tải lại lịch sử tìm kiếm: 9003 mục
+2025-05-28 15:25:08,692 - INFO - Đã tìm thấy 4489 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.30 giây
+2025-05-28 15:25:08,695 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:25:08,695 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:25:08,695 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:25:08,695 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:25:08,701 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:25:08,701 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:25:08,705 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 0 công việc...
+2025-05-28 15:25:08,712 - WARNING - Danh sách công việc trống.
+2025-05-28 15:25:08,712 - INFO - Không có công việc nào được gợi ý.
+2025-05-28 15:25:08,712 - INFO - Quá trình gợi ý hoàn tất trong 0.32 giây.
+2025-05-28 15:25:08,715 - INFO - 127.0.0.1 - - [28/May/2025 15:25:08] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:25:17,491 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:25:17.477337 ---
+2025-05-28 15:25:17,507 - INFO - Tệp D:\JobRadar_\search.csv chưa thay đổi, sử dụng search_history hiện tại.
+2025-05-28 15:25:17,510 - INFO - Đã tải lại lịch sử tìm kiếm: 9003 mục
+2025-05-28 15:25:17,519 - INFO - Đã tìm thấy 4489 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.04 giây
+2025-05-28 15:25:17,522 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:25:17.522023 ---
+2025-05-28 15:25:17,538 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:25:17,539 - INFO - Tệp D:\JobRadar_\search.csv chưa thay đổi, sử dụng search_history hiện tại.
+2025-05-28 15:25:17,541 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:25:17,541 - INFO - Đã tải lại lịch sử tìm kiếm: 9003 mục
+2025-05-28 15:25:17,541 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:25:17,547 - INFO - Đã tìm thấy 4489 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.03 giây
+2025-05-28 15:25:17,554 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:25:17,561 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:25:17,561 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:25:17,561 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:25:17,562 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:25:17,562 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:25:17,562 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:25:17,563 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:25:17,563 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:25:17,564 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 0 công việc...
+2025-05-28 15:25:17,564 - WARNING - Danh sách công việc trống.
+2025-05-28 15:25:17,565 - INFO - Không có công việc nào được gợi ý.
+2025-05-28 15:25:17,565 - INFO - Quá trình gợi ý hoàn tất trong 0.09 giây.
+2025-05-28 15:25:17,566 - INFO - 127.0.0.1 - - [28/May/2025 15:25:17] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:25:17,567 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 0 công việc...
+2025-05-28 15:25:17,568 - WARNING - Danh sách công việc trống.
+2025-05-28 15:25:17,572 - INFO - Không có công việc nào được gợi ý.
+2025-05-28 15:25:17,574 - INFO - Quá trình gợi ý hoàn tất trong 0.05 giây.
+2025-05-28 15:25:17,576 - INFO - 127.0.0.1 - - [28/May/2025 15:25:17] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:25:27,250 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:25:27.250002 ---
+2025-05-28 15:25:27,250 - INFO - Đang tải lịch sử tìm kiếm từ D:\JobRadar_\search.csv...
+2025-05-28 15:25:27,397 - INFO - Đã tải 9015 mục lịch sử tìm kiếm trong 0.15 giây.
+2025-05-28 15:25:27,397 - INFO - Đã tải lại lịch sử tìm kiếm: 9015 mục
+2025-05-28 15:25:27,399 - INFO - Đã tìm thấy 4501 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.15 giây
+2025-05-28 15:25:27,404 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:25:27,404 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:25:27,405 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:25:27,405 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:25:27,405 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:25:27,405 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:25:27,407 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 0 công việc...
+2025-05-28 15:25:27,407 - WARNING - Danh sách công việc trống.
+2025-05-28 15:25:27,407 - INFO - Không có công việc nào được gợi ý.
+2025-05-28 15:25:27,408 - INFO - Quá trình gợi ý hoàn tất trong 0.16 giây.
+2025-05-28 15:25:27,408 - INFO - 127.0.0.1 - - [28/May/2025 15:25:27] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:25:56,314 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:25:56.314644 ---
+2025-05-28 15:25:56,342 - INFO - Tệp D:\JobRadar_\search.csv chưa thay đổi, sử dụng search_history hiện tại.
+2025-05-28 15:25:56,380 - INFO - Đã tải lại lịch sử tìm kiếm: 9015 mục
+2025-05-28 15:25:56,395 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:25:56.395632 ---
+2025-05-28 15:25:56,400 - INFO - Đã tìm thấy 4501 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.09 giây
+2025-05-28 15:25:56,401 - INFO - Tệp D:\JobRadar_\search.csv chưa thay đổi, sử dụng search_history hiện tại.
+2025-05-28 15:25:56,406 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:25:56,407 - INFO - Đã tải lại lịch sử tìm kiếm: 9015 mục
+2025-05-28 15:25:56,408 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:25:56,413 - INFO - Đã tìm thấy 4501 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.02 giây
+2025-05-28 15:25:56,414 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:25:56,427 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:25:56,427 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:25:56,429 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:25:56,429 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:25:56,429 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:25:56,429 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:25:56,430 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:25:56,430 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:25:56,432 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:25:56,434 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 0 công việc...
+2025-05-28 15:25:56,521 - WARNING - Danh sách công việc trống.
+2025-05-28 15:25:56,522 - INFO - Không có công việc nào được gợi ý.
+2025-05-28 15:25:56,522 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 0 công việc...
+2025-05-28 15:25:56,525 - INFO - Quá trình gợi ý hoàn tất trong 0.21 giây.
+2025-05-28 15:25:56,542 - INFO - 127.0.0.1 - - [28/May/2025 15:25:56] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:25:56,553 - WARNING - Danh sách công việc trống.
+2025-05-28 15:25:56,554 - INFO - Không có công việc nào được gợi ý.
+2025-05-28 15:25:56,564 - INFO - Quá trình gợi ý hoàn tất trong 0.17 giây.
+2025-05-28 15:25:56,567 - INFO - 127.0.0.1 - - [28/May/2025 15:25:56] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:26:17,995 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:26:17.994096 ---
+2025-05-28 15:26:17,995 - INFO - Đang tải lịch sử tìm kiếm từ D:\JobRadar_\search.csv...
+2025-05-28 15:26:18,190 - INFO - Đã tải 9027 mục lịch sử tìm kiếm trong 0.20 giây.
+2025-05-28 15:26:18,192 - INFO - Đã tải lại lịch sử tìm kiếm: 9027 mục
+2025-05-28 15:26:18,195 - INFO - Đã tìm thấy 4513 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.20 giây
+2025-05-28 15:26:18,195 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:26:18,197 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:26:18,197 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:26:18,197 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:26:18,197 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:26:18,197 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:26:18,197 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 0 công việc...
+2025-05-28 15:26:18,199 - WARNING - Danh sách công việc trống.
+2025-05-28 15:26:18,199 - INFO - Không có công việc nào được gợi ý.
+2025-05-28 15:26:18,200 - INFO - Quá trình gợi ý hoàn tất trong 0.21 giây.
+2025-05-28 15:26:18,200 - INFO - 127.0.0.1 - - [28/May/2025 15:26:18] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:26:33,447 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:26:33.447987 ---
+2025-05-28 15:26:33,450 - INFO - Đang tải lịch sử tìm kiếm từ D:\JobRadar_\search.csv...
+2025-05-28 15:26:33,602 - INFO - Đã tải 9039 mục lịch sử tìm kiếm trong 0.15 giây.
+2025-05-28 15:26:33,603 - INFO - Đã tải lại lịch sử tìm kiếm: 9039 mục
+2025-05-28 15:26:33,608 - INFO - Đã tìm thấy 4525 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.16 giây
+2025-05-28 15:26:33,611 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:26:33,611 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:26:33,612 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:26:33,614 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:26:33,614 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:26:33,614 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:26:33,622 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 0 công việc...
+2025-05-28 15:26:33,622 - WARNING - Danh sách công việc trống.
+2025-05-28 15:26:33,622 - INFO - Không có công việc nào được gợi ý.
+2025-05-28 15:26:33,622 - INFO - Quá trình gợi ý hoàn tất trong 0.17 giây.
+2025-05-28 15:26:33,622 - INFO - 127.0.0.1 - - [28/May/2025 15:26:33] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:27:25,872 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:27:25.872688 ---
+2025-05-28 15:27:25,972 - INFO - Đang tải lịch sử tìm kiếm từ D:\JobRadar_\search.csv...
+2025-05-28 15:27:26,174 - INFO - Đã tải 9051 mục lịch sử tìm kiếm trong 0.16 giây.
+2025-05-28 15:27:26,174 - INFO - Đã tải lại lịch sử tìm kiếm: 9051 mục
+2025-05-28 15:27:26,182 - INFO - Đã tìm thấy 4537 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.31 giây
+2025-05-28 15:27:26,182 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:27:26,187 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:27:26,187 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:27:26,187 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:27:26,187 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:27:26,187 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:27:26,187 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 0 công việc...
+2025-05-28 15:27:26,187 - WARNING - Danh sách công việc trống.
+2025-05-28 15:27:26,187 - INFO - Không có công việc nào được gợi ý.
+2025-05-28 15:27:26,187 - INFO - Quá trình gợi ý hoàn tất trong 0.31 giây.
+2025-05-28 15:27:26,187 - INFO - 127.0.0.1 - - [28/May/2025 15:27:26] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:28:41,223 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:28:41.223851 ---
+2025-05-28 15:28:41,223 - INFO - Đang tải lịch sử tìm kiếm từ D:\JobRadar_\search.csv...
+2025-05-28 15:28:41,349 - INFO - Đã tải 9071 mục lịch sử tìm kiếm trong 0.12 giây.
+2025-05-28 15:28:41,350 - INFO - Đã tải lại lịch sử tìm kiếm: 9071 mục
+2025-05-28 15:28:41,351 - INFO - Đã tìm thấy 4557 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.13 giây
+2025-05-28 15:28:41,355 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:28:41,356 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:28:41,356 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:28:41,356 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:28:41,356 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:28:41,356 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:28:41,358 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 0 công việc...
+2025-05-28 15:28:41,358 - WARNING - Danh sách công việc trống.
+2025-05-28 15:28:41,358 - INFO - Không có công việc nào được gợi ý.
+2025-05-28 15:28:41,359 - INFO - Quá trình gợi ý hoàn tất trong 0.14 giây.
+2025-05-28 15:28:41,359 - INFO - 127.0.0.1 - - [28/May/2025 15:28:41] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:29:04,000 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:29:04.000663 ---
+2025-05-28 15:29:04,004 - INFO - Đang tải lịch sử tìm kiếm từ D:\JobRadar_\search.csv...
+2025-05-28 15:29:04,146 - INFO - Đã tải 9091 mục lịch sử tìm kiếm trong 0.14 giây.
+2025-05-28 15:29:04,147 - INFO - Đã tải lại lịch sử tìm kiếm: 9091 mục
+2025-05-28 15:29:04,149 - INFO - Đã tìm thấy 4577 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.15 giây
+2025-05-28 15:29:04,152 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:29:04,152 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:29:04,153 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:29:04,153 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:29:04,153 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:29:04,153 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:29:04,154 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 0 công việc...
+2025-05-28 15:29:04,154 - WARNING - Danh sách công việc trống.
+2025-05-28 15:29:04,154 - INFO - Không có công việc nào được gợi ý.
+2025-05-28 15:29:04,154 - INFO - Quá trình gợi ý hoàn tất trong 0.15 giây.
+2025-05-28 15:29:04,154 - INFO - 127.0.0.1 - - [28/May/2025 15:29:04] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:30:47,160 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:30:47.160755 ---
+2025-05-28 15:30:47,162 - INFO - Đang tải lịch sử tìm kiếm từ D:\JobRadar_\search.csv...
+2025-05-28 15:30:47,339 - INFO - Đã tải 9103 mục lịch sử tìm kiếm trong 0.18 giây.
+2025-05-28 15:30:47,342 - INFO - Đã tải lại lịch sử tìm kiếm: 9103 mục
+2025-05-28 15:30:47,342 - INFO - Đã tìm thấy 4589 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.18 giây
+2025-05-28 15:30:47,346 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:30:47,348 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:30:47,348 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:30:47,348 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:30:47,348 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:30:47,348 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:30:47,352 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 0 công việc...
+2025-05-28 15:30:47,353 - WARNING - Danh sách công việc trống.
+2025-05-28 15:30:47,353 - INFO - Không có công việc nào được gợi ý.
+2025-05-28 15:30:47,353 - INFO - Quá trình gợi ý hoàn tất trong 0.19 giây.
+2025-05-28 15:30:47,355 - INFO - 127.0.0.1 - - [28/May/2025 15:30:47] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:31:44,170 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:31:44.166959 ---
+2025-05-28 15:31:44,184 - INFO - Đang tải lịch sử tìm kiếm từ D:\JobRadar_\search.csv...
+2025-05-28 15:31:44,298 - INFO - Đã tải 9123 mục lịch sử tìm kiếm trong 0.11 giây.
+2025-05-28 15:31:44,302 - INFO - Đã tải lại lịch sử tìm kiếm: 9123 mục
+2025-05-28 15:31:44,303 - INFO - Đã tìm thấy 4609 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.14 giây
+2025-05-28 15:31:44,307 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:31:44,307 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:31:44,307 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:31:44,307 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:31:44,307 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:31:44,307 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:31:44,307 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 0 công việc...
+2025-05-28 15:31:44,307 - WARNING - Danh sách công việc trống.
+2025-05-28 15:31:44,307 - INFO - Không có công việc nào được gợi ý.
+2025-05-28 15:31:44,307 - INFO - Quá trình gợi ý hoàn tất trong 0.14 giây.
+2025-05-28 15:31:44,307 - INFO - 127.0.0.1 - - [28/May/2025 15:31:44] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:34:53,968 - INFO - Sentence Transformers version: 4.1.0
+2025-05-28 15:34:53,968 - INFO - Torch version: 2.7.0+cpu
+2025-05-28 15:34:53,972 - INFO - 
+=== Bắt đầu Dịch vụ Gợi ý Việc làm JobRadar ===
+2025-05-28 15:34:53,972 - INFO - Thời gian hiện tại: 2025-05-28 15:34:53.972737
+2025-05-28 15:34:53,972 - INFO - Tệp công việc: D:\JobRadar_\job_post.csv
+2025-05-28 15:34:53,972 - INFO - Tệp lịch sử tìm kiếm: D:\JobRadar_\search.csv
+2025-05-28 15:34:53,972 - INFO - Tải mô hình paraphrase-multilingual-mpnet-base-v2...
+2025-05-28 15:34:53,972 - INFO - Kiểm tra phiên bản thư viện...
+2025-05-28 15:34:53,972 - INFO - Sentence Transformers: 4.1.0
+2025-05-28 15:34:53,972 - INFO - PyTorch: 2.7.0+cpu
+2025-05-28 15:34:53,972 - INFO - CUDA khả dụng: False
+2025-05-28 15:34:53,972 - INFO - Tải mô hình từ cục bộ: D:\Recommendation\model_cache
+2025-05-28 15:34:53,975 - INFO - Use pytorch device_name: cpu
+2025-05-28 15:34:53,975 - INFO - Load pretrained SentenceTransformer: D:\Recommendation\model_cache
+2025-05-28 15:34:56,377 - INFO - Mô hình tải thành công!
+2025-05-28 15:34:56,377 - INFO - Tokenizer được đặt là None.
+2025-05-28 15:34:56,377 - INFO - CUDA không khả dụng. Sử dụng CPU.
+2025-05-28 15:34:56,377 - INFO - Chuyển mô hình sang thiết bị...
+2025-05-28 15:34:56,382 - INFO - Mô hình đã được chuyển sang cpu
+2025-05-28 15:34:56,382 - INFO - Khởi tạo TF-IDF vectorizer...
+2025-05-28 15:34:56,382 - INFO - TF-IDF vectorizer khởi tạo thành công!
+2025-05-28 15:34:56,382 - INFO - Kiểm tra mô hình...
+2025-05-28 15:34:57,218 - INFO - Kích thước vector kiểm tra: (768,)
+2025-05-28 15:34:58,222 - INFO - Sử dụng bộ nhớ: 1088.77 MB | CPU: 20.80%
+2025-05-28 15:34:58,222 - INFO - Tải mô hình hoàn tất.
+2025-05-28 15:34:58,222 - INFO - Mô hình paraphrase-multilingual-mpnet-base-v2 tải thành công trên cpu
+2025-05-28 15:34:58,222 - INFO - Tải dữ liệu ban đầu...
+2025-05-28 15:34:58,222 - INFO - Đang tải công việc từ D:\JobRadar_\job_post.csv...
+2025-05-28 15:34:58,346 - INFO - Số công việc sau khi loại bỏ trùng lặp: 1309
+2025-05-28 15:34:58,512 - INFO - TF-IDF vectorizer đã được fit với dữ liệu công việc.
+2025-05-28 15:34:58,514 - INFO - Tải JOB_VECTOR_CACHE từ D:\Recommendation\job_vector_cache.pkl...
+2025-05-28 15:34:58,562 - INFO - Tính trước vector cho công việc...
+2025-05-28 15:34:58,572 - INFO - Đã lưu JOB_VECTOR_CACHE vào D:\Recommendation\job_vector_cache.pkl
+2025-05-28 15:34:58,572 - INFO - Đã tải 1300 công việc trong 0.35 giây.
+2025-05-28 15:34:59,575 - INFO - Sử dụng bộ nhớ: 1101.85 MB | CPU: 8.90%
+2025-05-28 15:34:59,575 - INFO - Đang tải lịch sử tìm kiếm từ D:\JobRadar_\search.csv...
+2025-05-28 15:34:59,709 - INFO - Đã tải 9164 mục lịch sử tìm kiếm trong 0.13 giây.
+2025-05-28 15:34:59,709 - INFO - Khởi tạo dữ liệu hoàn tất - Công việc: 1300, Lịch sử tìm kiếm: 9164
+2025-05-28 15:34:59,709 - INFO - Khởi động Flask app...
+2025-05-28 15:34:59,709 - INFO - ==================================================
+2025-05-28 15:34:59,756 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.23:5000
+2025-05-28 15:34:59,759 - INFO - [33mPress CTRL+C to quit[0m
+2025-05-28 15:35:29,347 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:35:29.347413 ---
+2025-05-28 15:35:29,353 - INFO - Đang tải lịch sử tìm kiếm từ D:\JobRadar_\search.csv...
+2025-05-28 15:35:29,560 - INFO - Đã tải 9168 mục lịch sử tìm kiếm trong 0.21 giây.
+2025-05-28 15:35:29,561 - INFO - Đã tải lại lịch sử tìm kiếm: 9168 mục
+2025-05-28 15:35:29,565 - INFO - Đã tìm thấy 4654 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.22 giây
+2025-05-28 15:35:29,571 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:35:29,571 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:35:29,572 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:35:29,572 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:35:29,573 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:35:29,573 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:35:29,576 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 1300 công việc...
+2025-05-28 15:35:29,578 - INFO - Ý định truy vấn: {'it_software', 'marketing'}
+2025-05-28 15:35:29,741 - INFO - Đã tạo vector truy vấn trong 0.16 giây.
+2025-05-28 15:35:29,742 - INFO - Ý định truy vấn: {'it_software', 'marketing'}
+2025-05-28 15:35:32,985 - INFO - Đã lọc được 72 công việc sau khi loại bỏ trùng lặp và kiểm tra nội dung
+2025-05-28 15:35:32,986 - INFO - Đã lọc được 72 công việc.
+2025-05-28 15:35:33,013 - INFO - Đã chọn top 8 gợi ý trong 3.44 giây.
+2025-05-28 15:35:34,017 - INFO - Sử dụng bộ nhớ: 848.64 MB | CPU: 9.00%
+2025-05-28 15:35:34,020 - INFO - Các công việc được gợi ý:
+2025-05-28 15:35:34,021 - INFO - - Kỹ Sư Phần Mềm Ô Tô (ID: 6a97b781-1363-11f0-8a60-0a0027000011, Tương đồng: 0.757266104221344)
+2025-05-28 15:35:34,021 - INFO - - Lập trình viên Perl (ID: 7d1dd215-ce04-4a34-a9db-03f53c90410a, Tương đồng: 0.6388888359069824)
+2025-05-28 15:35:34,021 - INFO - - Chuyên viên Thiết kế Nội dung Quảng cáo (ID: 145b8420-154c-11f0-b0af-0a0027000011, Tương đồng: 0.5967038869857788)
+2025-05-28 15:35:34,021 - INFO - - Kỹ Sư Lập Trình Hệ Thống GPS Ô Tô (ID: 6a97e467-1363-11f0-8a60-0a0027000011, Tương đồng: 0.5811911821365356)
+2025-05-28 15:35:34,022 - INFO - - Lập trình viên Toàn diện (ID: 8c19fd6d-259c-4f9a-8cd1-072e9c247d24, Tương đồng: 0.5722552537918091)
+2025-05-28 15:35:34,022 - INFO - - Kỹ sư Phần mềm Scala (ID: 9869853a-49f8-4f36-b47f-8bfd12a80a9f, Tương đồng: 0.5629758834838867)
+2025-05-28 15:35:34,023 - INFO - - Thực tập sinh Hỗ trợ DevOps (ID: 3d4aa9ba-53ca-4607-9716-8df0907a4b4d, Tương đồng: 0.5143022537231445)
+2025-05-28 15:35:34,023 - INFO - - Chuyên gia Triển khai Giải pháp Phần mềm (ID: 2f3e7b1c-5d9a-4f0d-8a6a-1b7c4d2e9f58, Tương đồng: 0.5102918148040771)
+2025-05-28 15:35:34,023 - INFO - Quá trình gợi ý hoàn tất trong 4.68 giây.
+2025-05-28 15:35:34,032 - INFO - 127.0.0.1 - - [28/May/2025 15:35:34] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:35:53,878 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:35:53.878390 ---
+2025-05-28 15:35:53,878 - INFO - Tệp D:\JobRadar_\search.csv chưa thay đổi, sử dụng search_history hiện tại.
+2025-05-28 15:35:53,879 - INFO - Đã tải lại lịch sử tìm kiếm: 9168 mục
+2025-05-28 15:35:53,881 - INFO - Đã tìm thấy 4654 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.00 giây
+2025-05-28 15:35:53,884 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:35:53,885 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:35:53,885 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:35:53,891 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:35:53,892 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:35:53,894 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:35:53,897 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 1300 công việc...
+2025-05-28 15:35:53,900 - INFO - Ý định truy vấn: {'it_software', 'marketing'}
+2025-05-28 15:35:53,920 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:35:53.920126 ---
+2025-05-28 15:35:53,921 - INFO - Tệp D:\JobRadar_\search.csv chưa thay đổi, sử dụng search_history hiện tại.
+2025-05-28 15:35:53,922 - INFO - Đã tải lại lịch sử tìm kiếm: 9168 mục
+2025-05-28 15:35:53,925 - INFO - Đã tìm thấy 4654 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.01 giây
+2025-05-28 15:35:53,929 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:35:53,930 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:35:53,931 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:35:53,932 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:35:53,932 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:35:53,932 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:35:53,935 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 1300 công việc...
+2025-05-28 15:35:53,936 - INFO - Ý định truy vấn: {'it_software', 'marketing'}
+2025-05-28 15:35:54,118 - INFO - Đã tạo vector truy vấn trong 0.22 giây.
+2025-05-28 15:35:54,121 - INFO - Ý định truy vấn: {'it_software', 'marketing'}
+2025-05-28 15:35:54,618 - INFO - Đã tạo vector truy vấn trong 0.68 giây.
+2025-05-28 15:35:54,646 - INFO - Ý định truy vấn: {'it_software', 'marketing'}
+2025-05-28 15:35:59,458 - INFO - Đã lọc được 72 công việc sau khi loại bỏ trùng lặp và kiểm tra nội dung
+2025-05-28 15:35:59,487 - INFO - Đã lọc được 72 công việc.
+2025-05-28 15:35:59,866 - INFO - Đã chọn top 8 gợi ý trong 5.97 giây.
+2025-05-28 15:36:00,192 - INFO - Đã lọc được 72 công việc sau khi loại bỏ trùng lặp và kiểm tra nội dung
+2025-05-28 15:36:00,202 - INFO - Đã lọc được 72 công việc.
+2025-05-28 15:36:00,237 - INFO - Đã chọn top 8 gợi ý trong 6.30 giây.
+2025-05-28 15:36:00,899 - INFO - Sử dụng bộ nhớ: 616.43 MB | CPU: 10.20%
+2025-05-28 15:36:00,899 - INFO - Các công việc được gợi ý:
+2025-05-28 15:36:00,899 - INFO - - Kỹ Sư Phần Mềm Ô Tô (ID: 6a97b781-1363-11f0-8a60-0a0027000011, Tương đồng: 0.757266104221344)
+2025-05-28 15:36:00,899 - INFO - - Lập trình viên Perl (ID: 7d1dd215-ce04-4a34-a9db-03f53c90410a, Tương đồng: 0.6388888359069824)
+2025-05-28 15:36:00,899 - INFO - - Chuyên viên Thiết kế Nội dung Quảng cáo (ID: 145b8420-154c-11f0-b0af-0a0027000011, Tương đồng: 0.5967038869857788)
+2025-05-28 15:36:00,899 - INFO - - Kỹ Sư Lập Trình Hệ Thống GPS Ô Tô (ID: 6a97e467-1363-11f0-8a60-0a0027000011, Tương đồng: 0.5811911821365356)
+2025-05-28 15:36:00,899 - INFO - - Lập trình viên Toàn diện (ID: 8c19fd6d-259c-4f9a-8cd1-072e9c247d24, Tương đồng: 0.5722552537918091)
+2025-05-28 15:36:00,899 - INFO - - Kỹ sư Phần mềm Scala (ID: 9869853a-49f8-4f36-b47f-8bfd12a80a9f, Tương đồng: 0.5629758834838867)
+2025-05-28 15:36:00,902 - INFO - - Thực tập sinh Hỗ trợ DevOps (ID: 3d4aa9ba-53ca-4607-9716-8df0907a4b4d, Tương đồng: 0.5143022537231445)
+2025-05-28 15:36:00,902 - INFO - - Chuyên gia Triển khai Giải pháp Phần mềm (ID: 2f3e7b1c-5d9a-4f0d-8a6a-1b7c4d2e9f58, Tương đồng: 0.5102918148040771)
+2025-05-28 15:36:00,902 - INFO - Quá trình gợi ý hoàn tất trong 7.02 giây.
+2025-05-28 15:36:00,904 - INFO - 127.0.0.1 - - [28/May/2025 15:36:00] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:36:01,248 - INFO - Sử dụng bộ nhớ: 616.46 MB | CPU: 8.60%
+2025-05-28 15:36:01,248 - INFO - Các công việc được gợi ý:
+2025-05-28 15:36:01,249 - INFO - - Kỹ Sư Phần Mềm Ô Tô (ID: 6a97b781-1363-11f0-8a60-0a0027000011, Tương đồng: 0.757266104221344)
+2025-05-28 15:36:01,249 - INFO - - Lập trình viên Perl (ID: 7d1dd215-ce04-4a34-a9db-03f53c90410a, Tương đồng: 0.6388888359069824)
+2025-05-28 15:36:01,249 - INFO - - Chuyên viên Thiết kế Nội dung Quảng cáo (ID: 145b8420-154c-11f0-b0af-0a0027000011, Tương đồng: 0.5967038869857788)
+2025-05-28 15:36:01,249 - INFO - - Kỹ Sư Lập Trình Hệ Thống GPS Ô Tô (ID: 6a97e467-1363-11f0-8a60-0a0027000011, Tương đồng: 0.5811911821365356)
+2025-05-28 15:36:01,249 - INFO - - Lập trình viên Toàn diện (ID: 8c19fd6d-259c-4f9a-8cd1-072e9c247d24, Tương đồng: 0.5722552537918091)
+2025-05-28 15:36:01,249 - INFO - - Kỹ sư Phần mềm Scala (ID: 9869853a-49f8-4f36-b47f-8bfd12a80a9f, Tương đồng: 0.5629758834838867)
+2025-05-28 15:36:01,250 - INFO - - Thực tập sinh Hỗ trợ DevOps (ID: 3d4aa9ba-53ca-4607-9716-8df0907a4b4d, Tương đồng: 0.5143022537231445)
+2025-05-28 15:36:01,250 - INFO - - Chuyên gia Triển khai Giải pháp Phần mềm (ID: 2f3e7b1c-5d9a-4f0d-8a6a-1b7c4d2e9f58, Tương đồng: 0.5102918148040771)
+2025-05-28 15:36:01,250 - INFO - Quá trình gợi ý hoàn tất trong 7.33 giây.
+2025-05-28 15:36:01,252 - INFO - 127.0.0.1 - - [28/May/2025 15:36:01] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:39:22,880 - INFO - 127.0.0.1 - - [28/May/2025 15:39:22] "[33mPOST /semantic-search HTTP/1.1[0m" 404 -
+2025-05-28 15:39:30,282 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:39:30.282617 ---
+2025-05-28 15:39:30,283 - INFO - Đang tải lịch sử tìm kiếm từ D:\JobRadar_\search.csv...
+2025-05-28 15:39:30,524 - INFO - Đã tải 9175 mục lịch sử tìm kiếm trong 0.24 giây.
+2025-05-28 15:39:30,532 - INFO - Đã tải lại lịch sử tìm kiếm: 9175 mục
+2025-05-28 15:39:30,535 - INFO - Đã tìm thấy 4661 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.25 giây
+2025-05-28 15:39:30,538 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:39:30,538 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:39:30,542 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:39:30,542 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:39:30,542 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:39:30,542 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:39:30,543 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 1300 công việc...
+2025-05-28 15:39:30,547 - INFO - Ý định truy vấn: {'it_software', 'marketing'}
+2025-05-28 15:39:31,515 - INFO - Đã tạo vector truy vấn trong 0.97 giây.
+2025-05-28 15:39:31,515 - INFO - Ý định truy vấn: {'it_software', 'marketing'}
+2025-05-28 15:39:34,094 - INFO - Đã lọc được 72 công việc sau khi loại bỏ trùng lặp và kiểm tra nội dung
+2025-05-28 15:39:34,094 - INFO - Đã lọc được 72 công việc.
+2025-05-28 15:39:34,132 - INFO - Đã chọn top 8 gợi ý trong 3.59 giây.
+2025-05-28 15:39:35,146 - INFO - Sử dụng bộ nhớ: 389.79 MB | CPU: 7.30%
+2025-05-28 15:39:35,146 - INFO - Các công việc được gợi ý:
+2025-05-28 15:39:35,146 - INFO - - Kỹ Sư Phần Mềm Ô Tô (ID: 6a97b781-1363-11f0-8a60-0a0027000011, Tương đồng: 0.757266104221344)
+2025-05-28 15:39:35,146 - INFO - - Lập trình viên Perl (ID: 7d1dd215-ce04-4a34-a9db-03f53c90410a, Tương đồng: 0.6388888359069824)
+2025-05-28 15:39:35,146 - INFO - - Chuyên viên Thiết kế Nội dung Quảng cáo (ID: 145b8420-154c-11f0-b0af-0a0027000011, Tương đồng: 0.5967038869857788)
+2025-05-28 15:39:35,146 - INFO - - Kỹ Sư Lập Trình Hệ Thống GPS Ô Tô (ID: 6a97e467-1363-11f0-8a60-0a0027000011, Tương đồng: 0.5811911821365356)
+2025-05-28 15:39:35,146 - INFO - - Lập trình viên Toàn diện (ID: 8c19fd6d-259c-4f9a-8cd1-072e9c247d24, Tương đồng: 0.5722552537918091)
+2025-05-28 15:39:35,146 - INFO - - Kỹ sư Phần mềm Scala (ID: 9869853a-49f8-4f36-b47f-8bfd12a80a9f, Tương đồng: 0.5629758834838867)
+2025-05-28 15:39:35,146 - INFO - - Thực tập sinh Hỗ trợ DevOps (ID: 3d4aa9ba-53ca-4607-9716-8df0907a4b4d, Tương đồng: 0.5143022537231445)
+2025-05-28 15:39:35,146 - INFO - - Chuyên gia Triển khai Giải pháp Phần mềm (ID: 2f3e7b1c-5d9a-4f0d-8a6a-1b7c4d2e9f58, Tương đồng: 0.5102918148040771)
+2025-05-28 15:39:35,146 - INFO - Quá trình gợi ý hoàn tất trong 4.86 giây.
+2025-05-28 15:39:35,160 - INFO - 127.0.0.1 - - [28/May/2025 15:39:35] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:40:36,072 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:40:36.072541 ---
+2025-05-28 15:40:36,084 - INFO - Đang tải lịch sử tìm kiếm từ D:\JobRadar_\search.csv...
+2025-05-28 15:40:36,276 - INFO - Đã tải 9179 mục lịch sử tìm kiếm trong 0.19 giây.
+2025-05-28 15:40:36,276 - INFO - Đã tải lại lịch sử tìm kiếm: 9179 mục
+2025-05-28 15:40:36,276 - INFO - Đã tìm thấy 4665 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.20 giây
+2025-05-28 15:40:36,282 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:40:36,282 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:40:36,282 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:40:36,282 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:40:36,282 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:40:36,285 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:40:36,286 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 1300 công việc...
+2025-05-28 15:40:36,286 - INFO - Ý định truy vấn: {'it_software', 'marketing'}
+2025-05-28 15:40:36,422 - INFO - Đã tạo vector truy vấn trong 0.14 giây.
+2025-05-28 15:40:36,425 - INFO - Ý định truy vấn: {'it_software', 'marketing'}
+2025-05-28 15:40:39,816 - INFO - Đã lọc được 72 công việc sau khi loại bỏ trùng lặp và kiểm tra nội dung
+2025-05-28 15:40:39,816 - INFO - Đã lọc được 72 công việc.
+2025-05-28 15:40:39,837 - INFO - Đã chọn top 8 gợi ý trong 3.55 giây.
+2025-05-28 15:40:40,842 - INFO - Sử dụng bộ nhớ: 387.11 MB | CPU: 4.20%
+2025-05-28 15:40:40,842 - INFO - Các công việc được gợi ý:
+2025-05-28 15:40:40,842 - INFO - - Kỹ Sư Phần Mềm Ô Tô (ID: 6a97b781-1363-11f0-8a60-0a0027000011, Tương đồng: 0.757266104221344)
+2025-05-28 15:40:40,842 - INFO - - Lập trình viên Perl (ID: 7d1dd215-ce04-4a34-a9db-03f53c90410a, Tương đồng: 0.6388888359069824)
+2025-05-28 15:40:40,842 - INFO - - Chuyên viên Thiết kế Nội dung Quảng cáo (ID: 145b8420-154c-11f0-b0af-0a0027000011, Tương đồng: 0.5967038869857788)
+2025-05-28 15:40:40,842 - INFO - - Kỹ Sư Lập Trình Hệ Thống GPS Ô Tô (ID: 6a97e467-1363-11f0-8a60-0a0027000011, Tương đồng: 0.5811911821365356)
+2025-05-28 15:40:40,842 - INFO - - Lập trình viên Toàn diện (ID: 8c19fd6d-259c-4f9a-8cd1-072e9c247d24, Tương đồng: 0.5722552537918091)
+2025-05-28 15:40:40,842 - INFO - - Kỹ sư Phần mềm Scala (ID: 9869853a-49f8-4f36-b47f-8bfd12a80a9f, Tương đồng: 0.5629758834838867)
+2025-05-28 15:40:40,842 - INFO - - Thực tập sinh Hỗ trợ DevOps (ID: 3d4aa9ba-53ca-4607-9716-8df0907a4b4d, Tương đồng: 0.5143022537231445)
+2025-05-28 15:40:40,842 - INFO - - Chuyên gia Triển khai Giải pháp Phần mềm (ID: 2f3e7b1c-5d9a-4f0d-8a6a-1b7c4d2e9f58, Tương đồng: 0.5102918148040771)
+2025-05-28 15:40:40,842 - INFO - Quá trình gợi ý hoàn tất trong 4.77 giây.
+2025-05-28 15:40:40,842 - INFO - 127.0.0.1 - - [28/May/2025 15:40:40] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:41:09,682 - INFO - 127.0.0.1 - - [28/May/2025 15:41:09] "[33mPOST /semantic-search HTTP/1.1[0m" 404 -
+2025-05-28 15:41:16,544 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:41:16.544102 ---
+2025-05-28 15:41:16,545 - INFO - Đang tải lịch sử tìm kiếm từ D:\JobRadar_\search.csv...
+2025-05-28 15:41:16,672 - INFO - Đã tải 9186 mục lịch sử tìm kiếm trong 0.13 giây.
+2025-05-28 15:41:16,672 - INFO - Đã tải lại lịch sử tìm kiếm: 9186 mục
+2025-05-28 15:41:16,676 - INFO - Đã tìm thấy 4672 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.13 giây
+2025-05-28 15:41:16,678 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:41:16,680 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:41:16,680 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:41:16,680 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:41:16,681 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:41:16,681 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:41:16,682 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 1300 công việc...
+2025-05-28 15:41:16,682 - INFO - Ý định truy vấn: {'it_software', 'marketing'}
+2025-05-28 15:41:16,742 - INFO - Đã tạo vector truy vấn trong 0.06 giây.
+2025-05-28 15:41:16,742 - INFO - Ý định truy vấn: {'it_software', 'marketing'}
+2025-05-28 15:41:18,856 - INFO - Đã lọc được 72 công việc sau khi loại bỏ trùng lặp và kiểm tra nội dung
+2025-05-28 15:41:18,856 - INFO - Đã lọc được 72 công việc.
+2025-05-28 15:41:18,876 - INFO - Đã chọn top 8 gợi ý trong 2.19 giây.
+2025-05-28 15:41:19,882 - INFO - Sử dụng bộ nhớ: 390.23 MB | CPU: 4.50%
+2025-05-28 15:41:19,882 - INFO - Các công việc được gợi ý:
+2025-05-28 15:41:19,882 - INFO - - Kỹ Sư Phần Mềm Ô Tô (ID: 6a97b781-1363-11f0-8a60-0a0027000011, Tương đồng: 0.757266104221344)
+2025-05-28 15:41:19,882 - INFO - - Lập trình viên Perl (ID: 7d1dd215-ce04-4a34-a9db-03f53c90410a, Tương đồng: 0.6388888359069824)
+2025-05-28 15:41:19,885 - INFO - - Chuyên viên Thiết kế Nội dung Quảng cáo (ID: 145b8420-154c-11f0-b0af-0a0027000011, Tương đồng: 0.5967038869857788)
+2025-05-28 15:41:19,885 - INFO - - Kỹ Sư Lập Trình Hệ Thống GPS Ô Tô (ID: 6a97e467-1363-11f0-8a60-0a0027000011, Tương đồng: 0.5811911821365356)
+2025-05-28 15:41:19,885 - INFO - - Lập trình viên Toàn diện (ID: 8c19fd6d-259c-4f9a-8cd1-072e9c247d24, Tương đồng: 0.5722552537918091)
+2025-05-28 15:41:19,885 - INFO - - Kỹ sư Phần mềm Scala (ID: 9869853a-49f8-4f36-b47f-8bfd12a80a9f, Tương đồng: 0.5629758834838867)
+2025-05-28 15:41:19,885 - INFO - - Thực tập sinh Hỗ trợ DevOps (ID: 3d4aa9ba-53ca-4607-9716-8df0907a4b4d, Tương đồng: 0.5143022537231445)
+2025-05-28 15:41:19,885 - INFO - - Chuyên gia Triển khai Giải pháp Phần mềm (ID: 2f3e7b1c-5d9a-4f0d-8a6a-1b7c4d2e9f58, Tương đồng: 0.5102918148040771)
+2025-05-28 15:41:19,885 - INFO - Quá trình gợi ý hoàn tất trong 3.34 giây.
+2025-05-28 15:41:19,887 - INFO - 127.0.0.1 - - [28/May/2025 15:41:19] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:41:49,418 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:41:49.416922 ---
+2025-05-28 15:41:49,419 - INFO - Đang tải lịch sử tìm kiếm từ D:\JobRadar_\search.csv...
+2025-05-28 15:41:49,567 - INFO - Đã tải 9198 mục lịch sử tìm kiếm trong 0.15 giây.
+2025-05-28 15:41:49,568 - INFO - Đã tải lại lịch sử tìm kiếm: 9198 mục
+2025-05-28 15:41:49,572 - INFO - Đã tìm thấy 4684 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.16 giây
+2025-05-28 15:41:49,575 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:41:49,577 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:41:49,577 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:41:49,577 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:41:49,578 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:41:49,578 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:41:49,579 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 1300 công việc...
+2025-05-28 15:41:49,579 - INFO - Ý định truy vấn: {'it_software', 'marketing'}
+2025-05-28 15:41:49,645 - INFO - Đã tạo vector truy vấn trong 0.07 giây.
+2025-05-28 15:41:49,645 - INFO - Ý định truy vấn: {'it_software', 'marketing'}
+2025-05-28 15:41:52,052 - INFO - Đã lọc được 72 công việc sau khi loại bỏ trùng lặp và kiểm tra nội dung
+2025-05-28 15:41:52,056 - INFO - Đã lọc được 72 công việc.
+2025-05-28 15:41:52,086 - INFO - Đã chọn top 8 gợi ý trong 2.51 giây.
+2025-05-28 15:41:53,096 - INFO - Sử dụng bộ nhớ: 390.85 MB | CPU: 8.30%
+2025-05-28 15:41:53,096 - INFO - Các công việc được gợi ý:
+2025-05-28 15:41:53,096 - INFO - - Kỹ Sư Phần Mềm Ô Tô (ID: 6a97b781-1363-11f0-8a60-0a0027000011, Tương đồng: 0.757266104221344)
+2025-05-28 15:41:53,096 - INFO - - Lập trình viên Perl (ID: 7d1dd215-ce04-4a34-a9db-03f53c90410a, Tương đồng: 0.6388888359069824)
+2025-05-28 15:41:53,096 - INFO - - Chuyên viên Thiết kế Nội dung Quảng cáo (ID: 145b8420-154c-11f0-b0af-0a0027000011, Tương đồng: 0.5967038869857788)
+2025-05-28 15:41:53,096 - INFO - - Kỹ Sư Lập Trình Hệ Thống GPS Ô Tô (ID: 6a97e467-1363-11f0-8a60-0a0027000011, Tương đồng: 0.5811911821365356)
+2025-05-28 15:41:53,096 - INFO - - Lập trình viên Toàn diện (ID: 8c19fd6d-259c-4f9a-8cd1-072e9c247d24, Tương đồng: 0.5722552537918091)
+2025-05-28 15:41:53,096 - INFO - - Kỹ sư Phần mềm Scala (ID: 9869853a-49f8-4f36-b47f-8bfd12a80a9f, Tương đồng: 0.5629758834838867)
+2025-05-28 15:41:53,102 - INFO - - Thực tập sinh Hỗ trợ DevOps (ID: 3d4aa9ba-53ca-4607-9716-8df0907a4b4d, Tương đồng: 0.5143022537231445)
+2025-05-28 15:41:53,102 - INFO - - Chuyên gia Triển khai Giải pháp Phần mềm (ID: 2f3e7b1c-5d9a-4f0d-8a6a-1b7c4d2e9f58, Tương đồng: 0.5102918148040771)
+2025-05-28 15:41:53,102 - INFO - Quá trình gợi ý hoàn tất trong 3.69 giây.
+2025-05-28 15:41:53,102 - INFO - 127.0.0.1 - - [28/May/2025 15:41:53] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:43:31,675 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:43:31.675013 ---
+2025-05-28 15:43:31,690 - INFO - Đang tải lịch sử tìm kiếm từ D:\JobRadar_\search.csv...
+2025-05-28 15:43:31,965 - INFO - Đã tải 9214 mục lịch sử tìm kiếm trong 0.27 giây.
+2025-05-28 15:43:31,965 - INFO - Đã tải lại lịch sử tìm kiếm: 9214 mục
+2025-05-28 15:43:31,983 - INFO - Đã tìm thấy 4700 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.31 giây
+2025-05-28 15:43:31,999 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:43:32,003 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:43:32,003 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:43:32,006 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:43:32,007 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:43:32,007 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:43:32,010 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 1300 công việc...
+2025-05-28 15:43:32,014 - INFO - Ý định truy vấn: {'it_software', 'marketing'}
+2025-05-28 15:43:32,477 - INFO - Đã tạo vector truy vấn trong 0.47 giây.
+2025-05-28 15:43:32,482 - INFO - Ý định truy vấn: {'it_software', 'marketing'}
+2025-05-28 15:43:36,680 - INFO - Đã lọc được 72 công việc sau khi loại bỏ trùng lặp và kiểm tra nội dung
+2025-05-28 15:43:36,682 - INFO - Đã lọc được 72 công việc.
+2025-05-28 15:43:36,716 - INFO - Đã chọn top 8 gợi ý trong 4.71 giây.
+2025-05-28 15:43:37,719 - INFO - Sử dụng bộ nhớ: 386.71 MB | CPU: 8.90%
+2025-05-28 15:43:37,721 - INFO - Các công việc được gợi ý:
+2025-05-28 15:43:37,722 - INFO - - Kỹ Sư Phần Mềm Ô Tô (ID: 6a97b781-1363-11f0-8a60-0a0027000011, Tương đồng: 0.757266104221344)
+2025-05-28 15:43:37,722 - INFO - - Lập trình viên Perl (ID: 7d1dd215-ce04-4a34-a9db-03f53c90410a, Tương đồng: 0.6388888359069824)
+2025-05-28 15:43:37,722 - INFO - - Chuyên viên Thiết kế Nội dung Quảng cáo (ID: 145b8420-154c-11f0-b0af-0a0027000011, Tương đồng: 0.5967038869857788)
+2025-05-28 15:43:37,722 - INFO - - Kỹ Sư Lập Trình Hệ Thống GPS Ô Tô (ID: 6a97e467-1363-11f0-8a60-0a0027000011, Tương đồng: 0.5811911821365356)
+2025-05-28 15:43:37,722 - INFO - - Lập trình viên Toàn diện (ID: 8c19fd6d-259c-4f9a-8cd1-072e9c247d24, Tương đồng: 0.5722552537918091)
+2025-05-28 15:43:37,722 - INFO - - Kỹ sư Phần mềm Scala (ID: 9869853a-49f8-4f36-b47f-8bfd12a80a9f, Tương đồng: 0.5629758834838867)
+2025-05-28 15:43:37,722 - INFO - - Thực tập sinh Hỗ trợ DevOps (ID: 3d4aa9ba-53ca-4607-9716-8df0907a4b4d, Tương đồng: 0.5143022537231445)
+2025-05-28 15:43:37,722 - INFO - - Chuyên gia Triển khai Giải pháp Phần mềm (ID: 2f3e7b1c-5d9a-4f0d-8a6a-1b7c4d2e9f58, Tương đồng: 0.5102918148040771)
+2025-05-28 15:43:37,722 - INFO - Quá trình gợi ý hoàn tất trong 6.05 giây.
+2025-05-28 15:43:37,727 - INFO - 127.0.0.1 - - [28/May/2025 15:43:37] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-05-28 15:44:32,152 - INFO - 
+--- Bắt đầu gợi ý lúc 2025-05-28 15:44:32.152261 ---
+2025-05-28 15:44:32,152 - INFO - Đang tải lịch sử tìm kiếm từ D:\JobRadar_\search.csv...
+2025-05-28 15:44:32,362 - INFO - Đã tải 9218 mục lịch sử tìm kiếm trong 0.21 giây.
+2025-05-28 15:44:32,362 - INFO - Đã tải lại lịch sử tìm kiếm: 9218 mục
+2025-05-28 15:44:32,367 - INFO - Đã tìm thấy 4704 mục tìm kiếm cho người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a trong 0.22 giây
+2025-05-28 15:44:32,372 - INFO - 5 truy vấn tìm kiếm gần nhất của người dùng b471c4c1-1ba1-4c13-9019-d0a1cdfed04a:
+2025-05-28 15:44:32,372 - INFO - 1. Semantic Query: lập trình (Ngày: NaT)
+2025-05-28 15:44:32,372 - INFO - 2. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:44:32,372 - INFO - 3. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:44:32,372 - INFO - 4. Semantic Query: công việc liên quan lập trình (Ngày: NaT)
+2025-05-28 15:44:32,377 - INFO - 5. Semantic Query: việc làm dạy học (Ngày: NaT)
+2025-05-28 15:44:32,377 - INFO - Bắt đầu gợi ý với 5 lịch sử tìm kiếm và 1300 công việc...
+2025-05-28 15:44:32,377 - INFO - Ý định truy vấn: {'it_software', 'marketing'}
+2025-05-28 15:44:32,716 - INFO - Đã tạo vector truy vấn trong 0.34 giây.
+2025-05-28 15:44:32,716 - INFO - Ý định truy vấn: {'it_software', 'marketing'}
+2025-05-28 15:44:35,704 - INFO - Đã lọc được 72 công việc sau khi loại bỏ trùng lặp và kiểm tra nội dung
+2025-05-28 15:44:35,704 - INFO - Đã lọc được 72 công việc.
+2025-05-28 15:44:35,724 - INFO - Đã chọn top 8 gợi ý trong 3.35 giây.
+2025-05-28 15:44:36,731 - INFO - Sử dụng bộ nhớ: 387.40 MB | CPU: 7.30%
+2025-05-28 15:44:36,733 - INFO - Các công việc được gợi ý:
+2025-05-28 15:44:36,734 - INFO - - Kỹ Sư Phần Mềm Ô Tô (ID: 6a97b781-1363-11f0-8a60-0a0027000011, Tương đồng: 0.757266104221344)
+2025-05-28 15:44:36,734 - INFO - - Lập trình viên Perl (ID: 7d1dd215-ce04-4a34-a9db-03f53c90410a, Tương đồng: 0.6388888359069824)
+2025-05-28 15:44:36,734 - INFO - - Chuyên viên Thiết kế Nội dung Quảng cáo (ID: 145b8420-154c-11f0-b0af-0a0027000011, Tương đồng: 0.5967038869857788)
+2025-05-28 15:44:36,734 - INFO - - Kỹ Sư Lập Trình Hệ Thống GPS Ô Tô (ID: 6a97e467-1363-11f0-8a60-0a0027000011, Tương đồng: 0.5811911821365356)
+2025-05-28 15:44:36,734 - INFO - - Lập trình viên Toàn diện (ID: 8c19fd6d-259c-4f9a-8cd1-072e9c247d24, Tương đồng: 0.5722552537918091)
+2025-05-28 15:44:36,734 - INFO - - Kỹ sư Phần mềm Scala (ID: 9869853a-49f8-4f36-b47f-8bfd12a80a9f, Tương đồng: 0.5629758834838867)
+2025-05-28 15:44:36,735 - INFO - - Thực tập sinh Hỗ trợ DevOps (ID: 3d4aa9ba-53ca-4607-9716-8df0907a4b4d, Tương đồng: 0.5143022537231445)
+2025-05-28 15:44:36,735 - INFO - - Chuyên gia Triển khai Giải pháp Phần mềm (ID: 2f3e7b1c-5d9a-4f0d-8a6a-1b7c4d2e9f58, Tương đồng: 0.5102918148040771)
+2025-05-28 15:44:36,735 - INFO - Quá trình gợi ý hoàn tất trong 4.58 giây.
+2025-05-28 15:44:36,738 - INFO - 127.0.0.1 - - [28/May/2025 15:44:36] "POST /recommend-jobs/phobert HTTP/1.1" 200 -

@@ -38,8 +38,8 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*", "allow_headers": "Authorization"}})
 
 # File paths configuration
-JOBS_FILEPATH = 'D:\\2024-2025_HKI\\TLCN\\JobPortal_Project\\job_post.csv'
-SEARCH_HISTORY_FILEPATH = 'D:\\2024-2025_HKI\\TLCN\\JobPortal_Project\\search.csv'
+JOBS_FILEPATH = 'D:\\JobRadar_\\job_post.csv'
+SEARCH_HISTORY_FILEPATH = 'D:\\JobRadar_\\search.csv'
 
 # Cache cho vector công việc
 JOB_VECTOR_CACHE = {}

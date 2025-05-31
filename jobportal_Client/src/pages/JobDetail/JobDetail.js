@@ -29,124 +29,10 @@ import {
 } from "../../redux/JobPost/jobPost.thunk";
 import { saveJob } from "../../redux/Seeker/seeker.thunk";
 import Swal from "sweetalert2";
+import IndustryBadge from "../../components/common/IndustryBadge/IndustryBadge";
+import { skillBadgeStyle } from "../../configs/constants"; // Nếu bạn đã định nghĩa màu sắc chung
 
 export default function JobDetail() {
-  const industryStyles = {
-    "Thương mại điện tử": {
-      backgroundColor: "rgba(30, 144, 255, 0.1)",
-      color: "#1E90FF",
-      border: "1px solid #1E90FF",
-    },
-    "Marketing/Truyền thông": {
-      backgroundColor: "rgba(255, 140, 0, 0.1)",
-      color: "#FF8C00",
-      border: "1px solid #FF8C00",
-    },
-    "IT phần cứng": {
-      backgroundColor: "rgba(0, 0, 255, 0.1)",
-      color: "#0000FF",
-      border: "1px solid #0000FF",
-    },
-    "Công nghệ ô tô": {
-      backgroundColor: "rgba(255, 99, 71, 0.1)",
-      color: "#FF4500",
-      border: "1px solid #FF4500",
-    },
-    "IT phần mềm": {
-      backgroundColor: "rgba(0, 255, 255, 0.1)",
-      color: "#00FFFF",
-      border: "1px solid #00FFFF",
-    },
-    "Nhà hàng/Khách sạn": {
-      backgroundColor: "rgba(255, 105, 180, 0.1)",
-      color: "#FF69B4",
-      border: "1px solid #FF69B4",
-    },
-    "Thiết kế/In ấn": {
-      backgroundColor: "rgba(255, 99, 71, 0.1)",
-      color: "#FF6347",
-      border: "1px solid #FF6347",
-    },
-    "Cơ khí/Điện - điện tử": {
-      backgroundColor: "rgba(70, 130, 180, 0.1)",
-      color: "#4682B4",
-      border: "1px solid #4682B4",
-    },
-    "Kinh doanh": {
-      backgroundColor: "rgba(138, 43, 226, 0.1)",
-      color: "#8A2BE2",
-      border: "1px solid #8A2BE2",
-    },
-    "Giáo dục/Đào tạo": {
-      backgroundColor: "rgba(40, 167, 69, 0.1)",
-      color: "#28A745",
-      border: "1px solid #28A745",
-    },
-    "Kiến trúc/Xây dựng": {
-      backgroundColor: "rgba(255, 193, 7, 0.1)",
-      color: "#FFC107",
-      border: "1px solid #FFC107",
-    },
-    "Tài chính/Ngân hàng": {
-      backgroundColor: "rgba(23, 162, 184, 0.1)",
-      color: "#17A2B8",
-      border: "1px solid #17A2B8",
-    },
-    "Viễn thông": {
-      backgroundColor: "rgba(200, 35, 51, 0.1)",
-      color: "#C82333",
-      border: "1px solid #C82333",
-    },
-    "Y tế": {
-      backgroundColor: "rgba(107, 114, 128, 0.1)",
-      color: "#6B7280",
-      border: "1px solid #6B7280",
-    },
-    "Logistics": {
-      backgroundColor: "rgba(221, 160, 221, 0.1)",
-      color: "#DDA0DD",
-      border: "1px solid #DDA0DD",
-    },
-    "Kế toán/Kiểm toán": {
-      backgroundColor: "rgba(244, 162, 97, 0.1)",
-      color: "#F4A261",
-      border: "1px solid #F4A261",
-    },
-    "Sản xuất": {
-      backgroundColor: "rgba(43, 108, 176, 0.1)",
-      color: "#2B6CB0",
-      border: "1px solid #2B6CB0",
-    },
-    "Tài xế": {
-      backgroundColor: "rgba(233, 30, 99, 0.1)",
-      color: "#E91E63",
-      border: "1px solid #E91E63",
-    },
-    "Luật": {
-      backgroundColor: "rgba(72, 187, 120, 0.1)",
-      color: "#48BB78",
-      border: "1px solid #48BB78",
-    },
-    "Phiên dịch": {
-      backgroundColor: "rgba(75, 85, 99, 0.1)",
-      color: "#4B5563",
-      border: "1px solid #4B5563",
-    },
-    "Hệ thống nhúng và IoT": {
-      backgroundColor: "rgba(153, 27, 27, 0.1)",
-      color: "#991B1B",
-      border: "1px solid #991B1B",
-    },
-  };
-
-  // Hàm để lấy màu ngẫu nhiên từ danh sách màu
-  const getRandomColor = () => {
-    const r = Math.floor(Math.random() * 256);
-    const g = Math.floor(Math.random() * 256);
-    const b = Math.floor(Math.random() * 256);
-    return `rgb(${r}, ${g}, ${b})`;
-  };
-
   const dispatch = useDispatch();
   const { postId } = useParams();
   const { postByPostId, similarJobs } = useSelector((store) => store.jobPost);
@@ -266,6 +152,16 @@ export default function JobDetail() {
 
   console.log("hasApplied:", hasApplied);
   console.log("oneApplyJob:", oneApplyJob);
+
+
+  const getRandomColor = () => {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -651,29 +547,22 @@ export default function JobDetail() {
                   <h3 className="text-lg font-semibold">Lĩnh vực</h3>
                   <div className="flex flex-wrap gap-2">
                     {postByPostId?.industry?.map((industry) => (
-                      <Badge
-                        key={industry.industryId}
-                        variant="secondary"
-                        style={industryStyles[industry.industryName]}
-                      >
-                        {industry.industryName}
-                      </Badge>
+                      <IndustryBadge key={industry.industryId} name={industry.industryName} />
                     ))}
                   </div>
                 </div>
               </Card>
 
+              {/* Card for Skills */}
               <Card className="p-6 bg-white rounded-lg shadow-lg">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">
-                    Các kĩ năng cần thiết
-                  </h3>
+                  <h3 className="text-lg font-semibold">Các kĩ năng cần thiết</h3>
                   <div className="flex flex-wrap gap-2">
                     {postByPostId?.skills?.map((skill, index) => (
                       <Badge
                         key={index}
                         className="text-white"
-                        style={{ backgroundColor: getRandomColor() }}
+                        style={{ backgroundColor: getRandomColor() }} 
                       >
                         {skill.skillName}
                       </Badge>

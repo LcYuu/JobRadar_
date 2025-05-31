@@ -26,7 +26,6 @@ import com.job_portal.service.ISurveyService;
 @RestController
 @RequestMapping("/surveys")
 public class SurveyController {
-
     @Autowired
     private ISurveyService surveyService;
 
@@ -73,5 +72,4 @@ public class SurveyController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
        return ResponseEntity.ok(surveyService.getSurveysByDateRange(startDate, endDate));
     }
-
 }
