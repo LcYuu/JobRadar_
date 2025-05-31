@@ -1,13 +1,23 @@
-import React, { useCallback, useEffect, useState } from "react";
-import JobCard from "../JobCard/JobCard";
+import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "../../../ui/button";
-import { getAllJobAction } from "../../../redux/JobPost/jobPost.thunk";
+import { MoreVertical, Search, ChevronLeft, ChevronRight, Filter } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../../ui/dropdown-menu";
+import { Input } from "../../../ui/input";
+import { useNavigate } from "react-router-dom";
+import { approveJob, getAllJobAction, getAllJobsForAdmin } from "../../../redux/JobPost/jobPost.thunk";
 import useWebSocket from "../../../utils/useWebSocket";
-import Container from "../Container/Container";
 
-export default function JobList() {
-  
+import Container from "../Container/Container";
+import JobCard from "../JobCard/JobCard";
+
+
+export default function AdminJobList() {
   const dispatch = useDispatch();
   const {
     jobPost = [],
@@ -43,10 +53,6 @@ export default function JobList() {
     return () => window.removeEventListener('resize', handleResize);
   }, [size]);
 
-  useEffect(() => {
-    // Set loading state when fetching new data
-    dispatch(getAllJobAction({currentPage, size}));
-  }, [dispatch, currentPage, size]);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalPages) {
@@ -73,9 +79,10 @@ export default function JobList() {
     handleMessage(dispatch, message, topic)
   )(dispatch);
 
+
   const handleSizeChange = (e) => {
     setSize(Number(e.target.value));
-    setCurrentPage(0); // Reset về trang đầu khi thay đổi số lượng bản ghi mỗi trang
+    setCurrentPage(0);
   };
 
   if (loading) return (
@@ -103,6 +110,7 @@ export default function JobList() {
           >
             Các công việc nổi bật
           </h2>
+
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           {jobPost.length > 0 ? (
@@ -142,6 +150,7 @@ export default function JobList() {
           )}
 
           <div className={`flex items-center gap-2 ${isMobile ? 'w-full justify-between' : ''}`}>
+
             <Button
               variant="outline"
               disabled={currentPage === 0}
@@ -154,6 +163,7 @@ export default function JobList() {
               variant="outline"
               className="bg-purple-600 text-white px-2 sm:px-4"
               onClick={() => handlePageChange(currentPage)}
+
             >
               {currentPage + 1}
             </Button>
@@ -170,4 +180,5 @@ export default function JobList() {
     </Container>
   );
 }
+
 

@@ -227,7 +227,6 @@ public class SurveyServiceImpl implements ISurveyService {
 	}
 
 	public void createNewSurvey(JobPost job) {
-
 		Survey survey = new Survey();
 		survey.setCompany(job.getCompany()); // Set the newly generated companyId
 		survey.setEmailSent(false);
