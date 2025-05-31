@@ -17,7 +17,7 @@ import { toast } from "react-toastify"; // Thêm react-toastify
 export default function AdminJobList() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { jobPost, totalPages, totalElements, loading, error, approveJobStatus } = useSelector(
+  const { jobPost, totalPages, totalElements, loading, error } = useSelector(
     (store) => store.jobPost
   );
   const [currentPage, setCurrentPage] = useState(0);

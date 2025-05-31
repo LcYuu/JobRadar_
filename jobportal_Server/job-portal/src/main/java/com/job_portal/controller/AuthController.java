@@ -238,7 +238,7 @@ public class AuthController {
 
 	@PostMapping("/login")
 	public AuthResponse signin(@RequestBody LoginDTO login) {
-	    System.out.println("Received login request: " + login.getEmail());
+
 	    if (login.getEmail() == null || login.getEmail().isEmpty()) {
 	        System.out.println("Email is empty");
 	        return new AuthResponse("", "Email không được để trống");
