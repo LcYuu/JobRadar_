@@ -15,7 +15,7 @@ import { Search, ChevronDown, Sparkles, X, Menu } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import Pagination from "../../components/common/Pagination/Pagination";
 import RangeSlider from "../../components/common/RangeSlider/RangeSlider";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   countJobByType,
   fetchSalaryRange,
@@ -29,10 +29,14 @@ import { getIndustryCount } from "../../redux/Industry/industry.thunk";
 import { toast } from "react-toastify";
 import useWebSocket from "../../utils/useWebSocket";
 import { ProgressBar } from "../../ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../ui/dialog";
 
 export default function JobSearchPage() {
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
 
   // Redux state
   const {
@@ -249,6 +253,18 @@ export default function JobSearchPage() {
   }, [filters]);
 
   const handleSalaryChange = (newValues) => {
+    if (!isAuthenticated) {
+      setShowLoginDialog(true);
+      toast.info("Vui lòng đăng nhập để lọc theo mức lương", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      return;
+    }
     const newFilters = {
       ...filters,
       minSalary: newValues[0],
@@ -397,6 +413,18 @@ export default function JobSearchPage() {
 
   const handleFilterChange = useCallback(
     (newFilters) => {
+      if (!isAuthenticated) {
+        setShowLoginDialog(true);
+        toast.info("Vui lòng đăng nhập để sử dụng bộ lọc", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        return;
+      }
       console.log("Bộ lọc thay đổi:", newFilters);
       setFilters(newFilters);
       setHasUserInteracted(true);
@@ -439,10 +467,22 @@ export default function JobSearchPage() {
         }
       }
     },
-    [isUsingSemanticSearch, allResults, size, dispatch, filterResultsLocally]
+    [isUsingSemanticSearch, allResults, size, dispatch, filterResultsLocally, isAuthenticated]
   );
 
   const handleSearch = async () => {
+    if (!isAuthenticated) {
+      setShowLoginDialog(true);
+      toast.info("Vui lòng đăng nhập để sử dụng tính năng tìm kiếm", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      return;
+    }
     if (!searchInput.trim()) {
       return;
     }
@@ -740,7 +780,7 @@ export default function JobSearchPage() {
   }, [isUsingSemanticSearch, totalPages, currentPage]);
 
   useEffect(() => {
-    if (isUsingSemanticSearch && semanticResults) {
+    if (isUsingSemanticSearch, semanticResults) {
       setDisplayTotalElements(semanticResults.totalElements || 0);
     } else if (isFilterApplied) {
       setDisplayTotalElements(totalElements);
@@ -774,6 +814,11 @@ export default function JobSearchPage() {
       isFilterApplied
     });
   }, [results, totalPages, totalResults, isUsingSemanticSearch, isFilterApplied]);
+
+  const handleLoginRedirect = () => {
+    setShowLoginDialog(false);
+    navigate("/sign-in");
+  };
 
   return (
     <div className="min-h-screen bg-transparent">
@@ -1096,6 +1141,37 @@ export default function JobSearchPage() {
             </div>
           </div>
         )}
+
+        {/* Login Required Dialog */}
+        <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold text-center text-gray-800">
+                Yêu cầu đăng nhập
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4 text-center">
+              <p className="text-gray-600 mb-4">
+                Vui lòng đăng nhập để sử dụng tính năng tìm kiếm và lọc công việc
+              </p>
+            </div>
+            <DialogFooter className="flex justify-center gap-4">
+              <Button
+                variant="outline"
+                onClick={() => setShowLoginDialog(false)}
+                className="px-6"
+              >
+                Hủy
+              </Button>
+              <Button
+                onClick={handleLoginRedirect}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+              >
+                Đăng nhập
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
