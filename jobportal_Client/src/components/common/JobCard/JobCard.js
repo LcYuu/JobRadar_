@@ -10,7 +10,6 @@ import { toast } from "react-hot-toast";
 import Swal from "sweetalert2";
 
 import { jobTypeColors } from "../../../configs/constants";
-import IndustryBadge from "../IndustryBadge/IndustryBadge";
 
 
 const categoryStyles = {
@@ -47,10 +46,37 @@ function JobCardContent({ company, location, category = [], jobType }) {
         </span>
         <span className="text-muted-foreground text-sm">{location}</span>
       </div>
-      <div className="flex space-x-2">
-        {category.map((cat, index) => (
-          <IndustryBadge key={index} name={cat} />
-        ))}
+      <div className="relative flex justify-between items-start">
+        <div className="flex space-x-2">
+          {category.map((cat, index) => (
+            <Badge
+              key={index}
+              style={
+                categoryStyles[cat] || {
+                  backgroundColor: "rgba(0, 0, 0, 0.1)",
+                  color: "black",
+                }
+              }
+              variant="secondary"
+            >
+              {cat}
+            </Badge>
+          ))}
+        </div>
+        <div
+          className="text-white border px-2 py-1 rounded-md text-xs font-semibold uppercase"
+          style={
+            jobTypeColors[jobType]
+              ? {
+                  backgroundColor: jobTypeColors[jobType].backgroundColor,
+                  color: jobTypeColors[jobType].color,
+                  border: jobTypeColors[jobType].border,
+                }
+              : { backgroundColor: "#6b7280", color: "white", border: "1px solid #6b7280" }
+          }
+        >
+          {jobType}
+        </div>
       </div>
     </div>
   );

@@ -1,20 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "../../../ui/button";
-import { MoreVertical, Search, ChevronLeft, ChevronRight, Filter } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../../../ui/dropdown-menu";
-import { Input } from "../../../ui/input";
-import { useNavigate } from "react-router-dom";
-import { approveJob, getAllJobAction, getAllJobsForAdmin } from "../../../redux/JobPost/jobPost.thunk";
+
 import useWebSocket from "../../../utils/useWebSocket";
 
 import Container from "../Container/Container";
 import JobCard from "../JobCard/JobCard";
+import { getAllJobAction } from "../../../redux/JobPost/jobPost.thunk";
 
 
 export default function AdminJobList() {
@@ -29,6 +21,10 @@ export default function AdminJobList() {
   const [currentPage, setCurrentPage] = useState(0);
   const [size, setSize] = useState(12); // Số lượng bản ghi mỗi trang
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    dispatch(getAllJobAction({ currentPage, size }));
+  },[dispatch])
 
   useEffect(() => {
     // Listen for window resize events to detect mobile
@@ -74,6 +70,8 @@ export default function AdminJobList() {
     },
     [currentPage, size] // Dependencies để cập nhật currentPage, size
   );
+
+  
 
   useWebSocket(["/topic/job-updates"], (dispatch, message, topic) =>
     handleMessage(dispatch, message, topic)
