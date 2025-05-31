@@ -29,7 +29,7 @@ public class JwtValidator extends OncePerRequestFilter {
 				String email = JwtProvider.getEmailFromJwtToken(jwt);
 				List<GrantedAuthority> authorities = new ArrayList<>();
 
-				// Xác thực và cấp quyền cho người dùng
+
 				Authentication authentication = new UsernamePasswordAuthenticationToken(email, null, authorities);
 
 				// Đặt Authentication vào SecurityContextHolder

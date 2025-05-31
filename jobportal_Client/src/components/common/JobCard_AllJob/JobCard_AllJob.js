@@ -11,6 +11,7 @@ import IndustryBadge from "../IndustryBadge/IndustryBadge";
 
 
 
+
 function JobCard_AllJob({ job }) {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);

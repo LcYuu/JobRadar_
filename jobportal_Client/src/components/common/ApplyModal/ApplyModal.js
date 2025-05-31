@@ -25,14 +25,34 @@ import {
   checkIfApplied,
   createApply,
   updateApply,
-  getApplyJobByUser
+  getApplyJobByUser,
 } from "../../../redux/ApplyJob/applyJob.thunk";
+
+// Thêm CSS cho spinner animation
+const spinnerStyles = `
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.spinner {
+  display: inline-block;
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+`;
 
 const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
   const dispatch = useDispatch();
   const [editorState, setEditorState] = useState();
   const { cvs = [] } = useSelector((store) => store.cv);
   const [uploadOption, setUploadOption] = useState("existing");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     dispatch(getCVBySeeker());
@@ -97,10 +117,12 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // Start loading
 
     // Kiểm tra xem người dùng đã chọn file CV chưa
     if (!selectedFile && !formData.pathCV) {
       toast.error("Vui lòng chọn file CV hoặc chọn CV có sẵn");
+      setLoading(false); // Stop loading
       return; // Dừng quá trình submit nếu không có file
     }
 
@@ -111,24 +133,26 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
           // Nếu có chọn file mới, cần upload lên Cloudinary
           try {
             toast.info("Đang tải CV lên, vui lòng đợi...");
-            
+
             // Sanitize file name
             const originalName = selectedFile.name;
-            const sanitizedName = originalName.replace(/[^\w.-]/g, '_');
-            
+            const sanitizedName = originalName.replace(/[^\w.-]/g, "_");
+
             // Create a new File object with the sanitized name if needed
             let fileToUpload = selectedFile;
             if (sanitizedName !== originalName) {
-              fileToUpload = new File([selectedFile], sanitizedName, { type: selectedFile.type });
+              fileToUpload = new File([selectedFile], sanitizedName, {
+                type: selectedFile.type,
+              });
             }
-            
+
             const uploadedFile = await uploadToCloudinary(fileToUpload);
-            
+
             const updatedFormData = {
               ...formData,
               pathCV: uploadedFile, // Gán URL file đã upload vào formData
             };
-            
+
             await dispatch(updateApply({ applyData: updatedFormData, postId }));
             // Refresh lại danh sách đơn apply để hiển thị thông tin mới nhất
             await dispatch(getApplyJobByUser({ currentPage: 0, size: 10 }));
@@ -136,7 +160,11 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
             handleClose();
           } catch (error) {
             console.error("Upload error:", error);
-            toast.error("Đã có lỗi khi tải lên CV: " + (error.message || "Lỗi không xác định"));
+            toast.error(
+              "Đã có lỗi khi tải lên CV: " +
+                (error.message || "Lỗi không xác định")
+            );
+            setLoading(false); // Stop loading
             return;
           }
         } else {
@@ -149,7 +177,10 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
             handleClose();
           } catch (error) {
             console.error("Update error:", error);
-            toast.error("Lỗi khi cập nhật: " + (error.message || "Lỗi không xác định"));
+            toast.error(
+              "Lỗi khi cập nhật: " + (error.message || "Lỗi không xác định")
+            );
+            setLoading(false); // Stop loading
             return;
           }
         }
@@ -159,31 +190,37 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
           // Nếu có chọn file mới, cần upload lên Cloudinary
           try {
             toast.info("Đang tải CV lên, vui lòng đợi...");
-            
+
             // Sanitize file name
             const originalName = selectedFile.name;
-            const sanitizedName = originalName.replace(/[^\w.-]/g, '_');
-            
+            const sanitizedName = originalName.replace(/[^\w.-]/g, "_");
+
             // Create a new File object with the sanitized name if needed
             let fileToUpload = selectedFile;
             if (sanitizedName !== originalName) {
-              fileToUpload = new File([selectedFile], sanitizedName, { type: selectedFile.type });
+              fileToUpload = new File([selectedFile], sanitizedName, {
+                type: selectedFile.type,
+              });
             }
-            
+
             const uploadedFile = await uploadToCloudinary(fileToUpload);
-            
+
             const updatedFormData = {
               ...formData,
               pathCV: uploadedFile, // Gán URL file đã upload vào formData
             };
-            
+
             await dispatch(createApply({ applyData: updatedFormData, postId }));
             dispatch(checkIfApplied(postId));
             toast.success("Ứng tuyển thành công!");
             handleClose();
           } catch (error) {
             console.error("Upload error:", error);
-            toast.error("Đã có lỗi khi tải lên CV: " + (error.message || "Lỗi không xác định"));
+            toast.error(
+              "Đã có lỗi khi tải lên CV: " +
+                (error.message || "Lỗi không xác định")
+            );
+            setLoading(false); // Stop loading
             return;
           }
         } else {
@@ -195,7 +232,10 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
             handleClose();
           } catch (error) {
             console.error("Apply error:", error);
-            toast.error("Lỗi khi ứng tuyển: " + (error.message || "Lỗi không xác định"));
+            toast.error(
+              "Lỗi khi ứng tuyển: " + (error.message || "Lỗi không xác định")
+            );
+            setLoading(false); // Stop loading
             return;
           }
         }
@@ -203,6 +243,8 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
     } catch (error) {
       console.error("Submit error:", error);
       toast.error("Có lỗi xảy ra: " + (error.message || "Lỗi không xác định"));
+    } finally {
+      setLoading(false); // Stop loading in all cases
     }
   };
 
@@ -237,7 +279,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
     }));
     setUploadOption("existing"); // Chuyển sang chế độ chọn CV có sẵn
     setSelectedFile(null); // Đặt lại file đã chọn nếu có
-    
+
     // Đặt lại giá trị của input file
     if (document.getElementById("cv-upload")) {
       document.getElementById("cv-upload").value = "";
@@ -250,12 +292,16 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
   };
   return (
     <>
+      {/* Thêm style cho spinner animation */}
+      <style>{spinnerStyles}</style>
+      
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-lg w-full max-w-md relative max-h-[90vh] overflow-y-auto">
           <div className="sticky top-0 bg-white z-10 p-6 border-b">
             <button
               onClick={handleCloseButtonClick}
               className="absolute top-4 right-4 text-gray-500"
+              disabled={loading} // Disable nút đóng khi đang loading
             >
               <X className="h-6 w-6" />
             </button>
@@ -300,6 +346,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                   placeholder="Nhập họ tên"
                   className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
                   required
+                  disabled={loading} // Disable input khi đang loading
                 />
               </div>
 
@@ -315,6 +362,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                   placeholder="Nhập địa chỉ email"
                   className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
                   required
+                  disabled={loading} // Disable input khi đang loading
                 />
               </div>
 
@@ -342,6 +390,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                       inline: { options: ["bold", "italic", "underline"] },
                     }}
                     editorClassName="px-3 py-2 min-h-[200px] cursor-text"
+                    readOnly={loading} // Đặt readOnly khi đang loading
                   />
                   <div className="border-t p-2 flex justify-end">
                     <span className="text-sm text-gray-500">
@@ -367,8 +416,8 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                         {cvs.map((cv) => (
                           <li
                             key={cv.cvId}
-                            className="flex items-center space-x-4 p-2 hover:bg-gray-100 rounded-md cursor-pointer"
-                            onClick={() => handleCVSelection(cv)}
+                            className={`flex items-center space-x-4 p-2 hover:bg-gray-100 rounded-md ${loading ? "opacity-70 cursor-not-allowed" : "cursor-pointer"}`}
+                            onClick={() => !loading && handleCVSelection(cv)} // Disable click khi đang loading
                           >
                             <input
                               type="radio"
@@ -379,6 +428,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                                 formData.pathCV === cv.pathCV
                               }
                               className="form-radio text-indigo-600"
+                              disabled={loading} // Disable input khi đang loading
                             />
                             <div className="flex items-center space-x-2">
                               <span className="text-gray-800">{cv.cvName}</span>
@@ -392,7 +442,8 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                               href={cv.pathCV}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline"
+                              className={`text-blue-600 hover:underline ${loading ? "pointer-events-none" : ""}`}
+                              onClick={(e) => loading && e.preventDefault()} // Ngăn click khi đang loading
                             >
                               Xem
                             </a>
@@ -414,6 +465,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                         }}
                         checked={uploadOption === "new"}
                         className="form-radio text-indigo-600"
+                        disabled={loading} // Disable input khi đang loading
                       />
                       <span className="font-semibold text-gray-800">
                         Tải lên CV từ máy tính
@@ -427,11 +479,12 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                           className="hidden"
                           id="cv-upload"
                           onChange={handleFileChange}
+                          disabled={loading} // Disable input khi đang loading
                         />
                         {!selectedFile ? (
                           <label
                             htmlFor="cv-upload"
-                            className="cursor-pointer flex flex-col items-center justify-center space-y-2 text-purple-500"
+                            className={`cursor-pointer flex flex-col items-center justify-center space-y-2 text-purple-500 ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
                           >
                             <LinkIcon className="h-6 w-6" />
                             <span className="font-medium">
@@ -452,7 +505,8 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                             <button
                               type="button"
                               onClick={handleRemove}
-                              className="text-sm text-red-600 hover:underline"
+                              className={`text-sm text-red-600 hover:underline ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
+                              disabled={loading} // Disable button khi đang loading
                             >
                               Xóa
                             </button>
@@ -466,17 +520,33 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
 
               <Button
                 type="submit"
-                className="w-full bg-purple-600 text-white py-3 rounded-lg"
+                className={`w-full py-3 rounded-lg ${loading ? "bg-purple-400" : "bg-purple-600"} text-white flex items-center justify-center`}
+                disabled={loading}
               >
-                Gửi
+                {loading ? (
+                  <>
+                    <span className="spinner"></span>
+                    <span>Đang gửi...</span>
+                  </>
+                ) : (
+                  "Gửi"
+                )}
               </Button>
               <p className="text-sm text-gray-600 text-center">
                 Bằng cách gửi yêu cầu, bạn có thể xác nhận rằng bạn chấp nhận{" "}
-                <a href="#" className="text-indigo-600 hover:underline">
+                <a 
+                  href="#" 
+                  className={`text-indigo-600 hover:underline ${loading ? "pointer-events-none" : ""}`}
+                  onClick={(e) => loading && e.preventDefault()} // Ngăn click khi đang loading
+                >
                   Terms of Service
                 </a>{" "}
                 và{" "}
-                <a href="#" className="text-indigo-600 hover:underline">
+                <a 
+                  href="#" 
+                  className={`text-indigo-600 hover:underline ${loading ? "pointer-events-none" : ""}`}
+                  onClick={(e) => loading && e.preventDefault()} // Ngăn click khi đang loading
+                >
                   Privacy Policy
                 </a>{" "}
                 của chúng tôi
@@ -485,34 +555,6 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
           </div>
         </div>
       </div>
-
-      {/* <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent className="bg-white rounded-lg shadow-lg">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-semibold text-red-600">
-              Bạn có chắc chắn muốn hủy?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-600">
-              Tất cả thông tin bạn đã nhập sẽ bị mất. Bạn có chắc chắn muốn
-              thoát?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="space-x-4">
-            <AlertDialogCancel
-              onClick={() => setShowConfirmDialog(false)}
-              className="bg-gray-200 text-gray-800 rounded-lg p-3"
-            >
-              Hủy
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleClose}
-              className="bg-red-600 text-white rounded-lg p-3"
-            >
-              Xác nhận
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog> */}
     </>
   );
 };

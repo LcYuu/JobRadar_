@@ -97,7 +97,7 @@ const JobDetailEmployer = () => {
       backgroundColor: "rgba(0, 255, 0, 0.1)",
       color: "green",
     },
-    "Chưa được duyệt": {
+    "Chờ duyệt": {
       backgroundColor: "rgba(255, 165, 0, 0.1)",
       color: "orange",
     },
@@ -140,6 +140,21 @@ const JobDetailEmployer = () => {
     position: "",
     niceToHaves: "",
   });
+  
+  const handleSaveSkills = async (selectedSkills) => {
+    try {
+      const updatedJobData = {
+        ...jobData,
+        skills: selectedSkills, // Cập nhật danh sách kỹ năng
+      };
+      await dispatch(updateJob({ postId, jobPostData: updatedJobData }));
+      toast.success("Cập nhật kỹ năng thành công!");
+      dispatch(getDetailJobById(postId)); // Làm mới dữ liệu
+    } catch (error) {
+      console.error("Error updating skills:", error);
+      toast.error("Có lỗi khi cập nhật kỹ năng!");
+    }
+  };
 
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -175,6 +190,7 @@ const JobDetailEmployer = () => {
       });
     }
   }, [detailJob]);
+  console.log("🚀 ~ JobDetailEmployer ~ detailJob:", detailJob)
 
   useEffect(() => {
     const fetchProvinces = async () => {
@@ -375,22 +391,6 @@ const JobDetailEmployer = () => {
     return isValid;
   };
 
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
-  const Toast = ({ message, onClose }) => (
-    <div className="fixed top-2 right-2 sm:top-4 sm:right-4 bg-green-500 text-white px-4 py-2 sm:px-6 sm:py-3 rounded shadow-lg flex items-center gap-2 animate-fade-in-down z-50 text-xs sm:text-sm">
-      <span>{message}</span>
-      <button onClick={onClose} className="text-white hover:text-gray-200">
-        ✕
-      </button>
-    </div>
-  );
-
-  const showSuccessToast = (message) => {
-    setToastMessage(message);
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-  };
 
   const getRemainingTime = () => {
     const currentDate = new Date();
@@ -618,7 +618,7 @@ const JobDetailEmployer = () => {
           <Badge
             style={
               detailJob?.approve === false
-                ? statusStyles["Chưa được duyệt"] || {
+                ? statusStyles["Chờ duyệt"] || {
                     backgroundColor: "rgba(0, 0, 0, 0.1)",
                     color: "black",
                   }
@@ -633,7 +633,7 @@ const JobDetailEmployer = () => {
             className="text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5"
           >
             {detailJob?.approve === false
-              ? "Chưa được duyệt"
+              ? "Chờ duyệt"
               : detailJob?.status === "Hết hạn"
               ? "Hết hạn"
               : detailJob?.status}
@@ -1006,9 +1006,11 @@ const JobDetailEmployer = () => {
               )}
             </div>
             <section>
-              <SkillJobPostModal
+            <SkillJobPostModal
                 open={openSkill}
                 handleClose={handleCloseSkill}
+                onSave={handleSaveSkills} // Thêm prop onSave
+                initialSkills={detailJob?.skills || []} // Thêm prop initialSkills
                 postId={postId}
                 className="w-full max-w-[90%] sm:max-w-lg md:max-w-2xl"
               />
@@ -1016,9 +1018,6 @@ const JobDetailEmployer = () => {
           </Card>
         </div>
       </div>
-      {showToast && (
-        <Toast message={toastMessage} onClose={() => setShowToast(false)} />
-      )}
     </div>
   );
 };

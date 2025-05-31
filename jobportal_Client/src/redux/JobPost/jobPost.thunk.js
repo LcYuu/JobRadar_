@@ -291,7 +291,7 @@ export const approveJob = createAsyncThunk(
   async (postId, { dispatch, rejectWithValue }) => {
     try {
       await api.post(`/job-post/approve/${postId}`);
-      dispatch(getAllJobsForAdmin({ page: 0, size: 10 })); // Fetch updated list
+
     } catch (error) {
       return rejectWithValue(error.message);
     }

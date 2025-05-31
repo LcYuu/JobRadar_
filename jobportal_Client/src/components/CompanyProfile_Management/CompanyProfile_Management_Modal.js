@@ -14,6 +14,7 @@ import ImageIcon from "@mui/icons-material/Image";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import * as Yup from "yup";
+import { toast } from "react-toastify";
 import { uploadToCloudinary } from "../../utils/uploadToCloudinary";
 import { getAllIndustries } from "../../redux/Industry/industry.thunk";
 import {
@@ -21,6 +22,7 @@ import {
   updateCompanyProfile,
 } from "../../redux/Company/company.thunk";
 
+// City code mapping and style remain unchanged
 const cityCodeMapping = {
   1: 16, // Hà Nội
   2: 1, // Hà Giang
@@ -86,6 +88,7 @@ const cityCodeMapping = {
   95: 62, // Bạc Liêu
   96: 63, // Cà Mau
 };
+
 const style = {
   position: "absolute",
   top: "50%",
@@ -113,7 +116,7 @@ const validationSchema = Yup.object({
   address: Yup.string().required("Địa chỉ là bắt buộc"),
   industryIds: Yup.array()
     .of(Yup.string())
-    .min(1, "Vui lòng chọn ít nhất một ngành") // Bắt buộc chọn ít nhất 1 ngành
+    .min(1, "Vui lòng chọn ít nhất một ngành")
     .required("Lĩnh vực hoạt động không được để trống"),
 });
 
@@ -135,7 +138,6 @@ export default function CompanyProfileModal({ open, handleClose }) {
   });
 
   const dispatch = useDispatch();
-
   const { companyJwt } = useSelector((store) => store.company);
   const { allIndustries } = useSelector((store) => store.industry);
 
@@ -151,6 +153,7 @@ export default function CompanyProfileModal({ open, handleClose }) {
         setProvinces(data);
       } catch (error) {
         console.error("Error fetching provinces:", error);
+        toast.error("Lỗi khi tải danh sách tỉnh/thành phố");
       }
     };
     fetchProvinces();
@@ -206,6 +209,7 @@ export default function CompanyProfileModal({ open, handleClose }) {
               }
             } catch (error) {
               console.error("Error fetching address data:", error);
+              toast.error("Lỗi khi tải dữ liệu địa chỉ");
             }
           }
         }
@@ -222,7 +226,7 @@ export default function CompanyProfileModal({ open, handleClose }) {
       establishedTime:
         companyJwt?.establishedTime &&
         !isNaN(new Date(companyJwt?.establishedTime).getTime())
-          ? new Date(companyJwt?.establishedTime).toISOString().split("T")[0] // Chuyển sang định dạng YYYY-MM-DD
+          ? new Date(companyJwt?.establishedTime).toISOString().split("T")[0]
           : "",
       address: companyJwt?.address || "",
       industryIds:
@@ -230,11 +234,9 @@ export default function CompanyProfileModal({ open, handleClose }) {
           ? companyJwt.industry.map((ind) => ind.industryId)
           : [],
     },
-
     validationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
-      console.log("🔥 onSubmit called!", values); // Kiểm tra Formik có gọi không
       setIsLoading(true);
       try {
         const fullAddress =
@@ -242,17 +244,18 @@ export default function CompanyProfileModal({ open, handleClose }) {
 
         const companyData = {
           ...values,
-          address: fullAddress || "", // Đảm bảo chuỗi không bị null/undefined
-          cityId: cityCodeMapping[selectedProvince] || null, // Xử lý nếu không tìm thấy mã tỉnh
+          address: fullAddress || "",
+          cityId: cityCodeMapping[selectedProvince] || null,
           industryId: values.industryIds,
         };
-        console.log("🚀 ~ onSubmit: ~ companyData:", companyData);
 
-        await dispatch(updateCompanyProfile(companyData));
+        await dispatch(updateCompanyProfile(companyData)).unwrap();
         dispatch(getCompanyByJWT());
+        toast.success("Cập nhật hồ sơ công ty thành công!");
         handleClose();
       } catch (error) {
         console.error("Update failed:", error);
+        toast.error("Cập nhật hồ sơ công ty thất bại!");
       } finally {
         setIsLoading(false);
       }
@@ -260,11 +263,18 @@ export default function CompanyProfileModal({ open, handleClose }) {
   });
 
   const handleSelectImage = async (event) => {
-    setIsLoading(true);
-    const imageUrl = await uploadToCloudinary(event.target.files[0]);
-    setSelectedLogo(imageUrl);
-    formik.setFieldValue("logo", imageUrl); // Cập nhật giá trị avatar trong formik
-    setIsLoading(false);
+    setImageLoading(true);
+    try {
+      const imageUrl = await uploadToCloudinary(event.target.files[0]);
+      setSelectedLogo(imageUrl);
+      formik.setFieldValue("logo", imageUrl);
+      toast.success("Tải ảnh logo thành công!");
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error("Tải ảnh logo thất bại!");
+    } finally {
+      setImageLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -277,23 +287,14 @@ export default function CompanyProfileModal({ open, handleClose }) {
           const data = await response.json();
           setDistricts(data.districts);
           setLocation((prev) => ({ ...prev, province: data.name }));
-
-          // Tìm và thiết lập district ban đầu
-          if (location.district) {
-            const matchingDistrict = data.districts.find(
-              (d) => d.name === location.district
-            );
-            if (matchingDistrict) {
-              setSelectedDistrict(matchingDistrict.code);
-            }
-          }
         } catch (error) {
           console.error("Error fetching districts:", error);
+          toast.error("Lỗi khi tải danh sách quận/huyện");
         }
       }
     };
     fetchDistricts();
-  }, [selectedProvince, location.district]);
+  }, [selectedProvince]);
 
   useEffect(() => {
     const fetchWards = async () => {
@@ -305,26 +306,14 @@ export default function CompanyProfileModal({ open, handleClose }) {
           const data = await response.json();
           setWards(data.wards);
           setLocation((prev) => ({ ...prev, district: data.name }));
-
-          // Tìm và thiết lập ward ban đầu
-          if (location.ward) {
-            const matchingWard = data.wards.find(
-              (w) => w.name === location.ward
-            );
-            if (matchingWard) {
-              setSelectedWard(matchingWard.code);
-            }
-          }
         } catch (error) {
           console.error("Error fetching wards:", error);
+          toast.error("Lỗi khi tải danh sách phường/xã");
         }
       }
     };
     fetchWards();
-  }, [selectedDistrict, location.ward]);
-
-  console.log("isLoading:", isLoading, "imageLoading:", imageLoading);
-
+  }, [selectedDistrict]);
 
   return (
     <Modal
@@ -347,14 +336,14 @@ export default function CompanyProfileModal({ open, handleClose }) {
               disabled={isLoading || imageLoading}
               disableElevation
               sx={{
-                backgroundColor: "#6b46c1", // Màu tím
+                backgroundColor: "#6b46c1",
                 "&:hover": {
-                  backgroundColor: "#553c9a", // Tím đậm hơn khi hover
+                  backgroundColor: "#553c9a",
                 },
                 "&.Mui-disabled": {
-                  backgroundColor: "#a3a3a3", // Màu xám khi bị vô hiệu hóa
+                  backgroundColor: "#a3a3a3",
                 },
-                color: "#fff", // Màu chữ trắng
+                color: "#fff",
               }}
             >
               {isLoading ? "Đang lưu..." : "Lưu"}
@@ -440,12 +429,10 @@ export default function CompanyProfileModal({ open, handleClose }) {
               onChange={(e) => {
                 const newProvinceCode = e.target.value;
                 setSelectedProvince(newProvinceCode);
-                // Reset district and ward when province changes
                 setSelectedDistrict("");
                 setSelectedWard("");
                 setDistricts([]);
                 setWards([]);
-                // Find province name from code
                 const selectedProvinceData = provinces.find(
                   (p) => p.code === Number(newProvinceCode)
                 );
@@ -475,10 +462,8 @@ export default function CompanyProfileModal({ open, handleClose }) {
               onChange={(e) => {
                 const newDistrictCode = e.target.value;
                 setSelectedDistrict(newDistrictCode);
-                // Reset ward when district changes
                 setSelectedWard("");
                 setWards([]);
-                // Find district name from code
                 const selectedDistrictData = districts.find(
                   (d) => d.code === Number(newDistrictCode)
                 );
@@ -537,23 +522,23 @@ export default function CompanyProfileModal({ open, handleClose }) {
             <TextField
               fullWidth
               id="industryIds"
-              name="industryIds" // Đổi từ industryId -> industryIds
+              name="industryIds"
               label="Lĩnh vực hoạt động"
               variant="outlined"
               select
               SelectProps={{
-                multiple: true, // Cho phép chọn nhiều
+                multiple: true,
                 renderValue: (selected) =>
                   allIndustries
                     ?.filter((industry) =>
                       selected.includes(industry.industryId)
                     )
                     .map((industry) => industry.industryName)
-                    .join(", "), // Hiển thị tên ngành nghề được chọn
+                    .join(", "),
               }}
-              value={formik.values.industryIds} // Đảm bảo industryIds đồng bộ với Formik
+              value={formik.values.industryIds}
               onChange={(event) => {
-                formik.setFieldValue("industryIds", event.target.value); // Đảm bảo cập nhật industryIds
+                formik.setFieldValue("industryIds", event.target.value);
               }}
               error={
                 formik.touched.industryIds && Boolean(formik.errors.industryIds)

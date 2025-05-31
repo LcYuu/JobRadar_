@@ -4,15 +4,12 @@ import { Input } from "../../../ui/input";
 import { Button } from "../../../ui/button";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-
 import { getGenCVById, updateCV } from "../../../redux/GeneratedCV/generated_cv.thunk";
-
 import { ImageIcon, LoaderCircle } from "lucide-react";
 import { toast } from "react-toastify";
 import { Avatar } from "@mui/material";
 import { uploadToCloudinary } from "../../../utils/uploadToCloudinary";
 import ThemeColor from "../ThemeColor";
-
 
 const PersonalDetail = ({ enabledNext }) => {
   const { genCvId } = useParams();
@@ -25,27 +22,20 @@ const PersonalDetail = ({ enabledNext }) => {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [errors, setErrors] = useState({
+    email: "",
+    phone: "",
+    firstName: "",
+    lastName: "",
+    jobTitle: "",
+    address: "",
+  });
+
   const defaultAvatar =
     "https://res.cloudinary.com/ddqygrb0g/image/upload/v1739714221/avatar_fa4cj7.jpg";
 
-  // Track when Redux state changes
-  useEffect(() => {
-    if (genCv) {
-      console.log("Redux genCv state changed:", genCv);
-    }
-  }, [genCv]);
-
-  // Add a forceUpdate mechanism if needed
-  const [, forceUpdate] = useState({});
-  const forceRerender = () => forceUpdate({});
-
-  useEffect(() => {
-    console.log("cvInfo in PersonalDetail updated:", cvInfo);
-  }, [cvInfo]);
-
   useEffect(() => {
     if (genCv && genCv.cvContent) {
-      console.log("Syncing genCv:", genCv);
       try {
         const cvContent = JSON.parse(genCv.cvContent.replace(/^"|"$/g, "") || "{}");
         setCvInfo({
@@ -84,6 +74,12 @@ const PersonalDetail = ({ enabledNext }) => {
       ...prev,
       [name]: value,
     }));
+
+    if (
+      ["email", "phone", "firstName", "lastName", "jobTitle", "address"].includes(name)
+    ) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
   const handleSelectImage = (event) => {
@@ -100,76 +96,99 @@ const PersonalDetail = ({ enabledNext }) => {
     }
   };
 
+  const validateInputs = () => {
+    const newErrors = {
+      email: "",
+      phone: "",
+      firstName: "",
+      lastName: "",
+      jobTitle: "",
+      address: "",
+    };
+    let isValid = true;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cvInfo.email)) {
+      newErrors.email = "Vui lòng nhập email hợp lệ";
+      isValid = false;
+    }
+
+    if (!cvInfo.phone.match(/^\+?\d{10}$/)) {
+      newErrors.phone = "Vui lòng nhập số điện thoại 10 chữ số";
+      isValid = false;
+    }
+
+    if (!cvInfo.firstName.trim()) {
+      newErrors.firstName = "Vui lòng nhập họ";
+      isValid = false;
+    }
+
+    if (!cvInfo.lastName.trim()) {
+      newErrors.lastName = "Vui lòng nhập tên";
+      isValid = false;
+    }
+
+    if (!cvInfo.jobTitle.trim()) {
+      newErrors.jobTitle = "Vui lòng nhập chức danh";
+      isValid = false;
+    }
+
+    if (!cvInfo.address.trim()) {
+      newErrors.address = "Vui lòng nhập địa chỉ";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const onSave = async () => {
-    // Set local loading states
+    if (!validateInputs()) return;
+
     setImageLoading(true);
     setSaveLoading(true);
     setUpdateLoading(true);
-    
-    // Set global loading state
     if (onSaving) onSaving(true, "Đang lưu thông tin cá nhân...");
-    
-    // Đảm bảo loading hiển thị ít nhất 2 giây
+
     const startTime = Date.now();
 
     try {
-      // Đợi một chút để đảm bảo loading được hiển thị
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      // Step 1: Upload image if needed
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
       let uploadedUrl = cvInfo?.profileImage;
       if (selectedFile) {
         uploadedUrl = await uploadToCloudinary(selectedFile);
       }
-      
-      // Step 2: Create updated data object with the image URL
+
       const updatedCvInfo = {
         ...cvInfo,
         profileImage: uploadedUrl,
       };
-      
-      // Step 3: Update context state immediately for the preview
+
       setCvInfo(updatedCvInfo);
-      
-      // Step 4: Set updated image
       setSelectedImage(uploadedUrl);
-      
-      // Step 5: Prepare data for API call
+
       const cvData = JSON.stringify(updatedCvInfo).replace(/"/g, '\\"');
-      
-      // Step 6: Make API call and wait for it to complete
-      await dispatch(
-        updateCV({ genCvId, cvData: `{ "cvContent": "${cvData}" }` })
-      );
-      
-      // Step 7: Force a refresh by refetching the CV
+      await dispatch(updateCV({ genCvId, cvData: `{ "cvContent": "${cvData}" }` }));
       await dispatch(getGenCVById(genCvId));
-      
-      // Step 8: Force a re-render after update completes
-      forceRerender();
-      
+
       toast.success("Thông tin cập nhật thành công");
       enabledNext(true);
-      
-      // Đảm bảo loading hiển thị đủ lâu
+
       const elapsedTime = Date.now() - startTime;
-      const minLoadingTime = 2000; // 2 giây
-      
+      const minLoadingTime = 2000;
       if (elapsedTime < minLoadingTime) {
-        const remainingTime = minLoadingTime - elapsedTime;
-        await new Promise(resolve => setTimeout(resolve, remainingTime));
+        await new Promise((resolve) =>
+          setTimeout(resolve, minLoadingTime - elapsedTime)
+        );
       }
-      
     } catch (error) {
       console.error("Save preparation error:", error);
       toast.error("Cập nhật thất bại");
     } finally {
-      // Tắt loading
       setSaveLoading(false);
       setImageLoading(false);
       setUpdateLoading(false);
-      
-      // Tắt global loading
       if (onSaving) onSaving(false);
     }
   };
@@ -191,7 +210,7 @@ const PersonalDetail = ({ enabledNext }) => {
         </div>
         <ThemeColor />
       </div>
-
+  
       <div className="flex flex-col items-center mt-5">
         <Avatar
           className="mb-2"
@@ -217,66 +236,109 @@ const PersonalDetail = ({ enabledNext }) => {
             )}
           </label>
         </div>
-
       </div>
-
+  
       <div className="grid grid-cols-2 mt-5 gap-3">
         <div>
-          <label className="text-sm">First Name</label>
+          <label className="text-sm">
+            Tên <span className="text-red-500">*</span>
+          </label>
           <Input
             name="firstName"
             value={cvInfo?.firstName || ""}
             required
+            placeholder="Ví dụ: Thuận"
             onChange={handleInputChange}
+            className={errors.firstName ? "border-red-500" : ""}
           />
+          {errors.firstName && (
+            <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>
+          )}
         </div>
         <div>
-          <label className="text-sm">Last Name</label>
+          <label className="text-sm">
+            Họ <span className="text-red-500">*</span>
+          </label>
           <Input
             name="lastName"
             value={cvInfo?.lastName || ""}
             required
+            placeholder="Ví dụ: Đặng"
             onChange={handleInputChange}
+            className={errors.lastName ? "border-red-500" : ""}
           />
+          {errors.lastName && (
+            <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>
+          )}
         </div>
         <div className="col-span-2">
-          <label className="text-sm">Job Title</label>
+          <label className="text-sm">
+            Vị trí công việc <span className="text-red-500">*</span>
+          </label>
           <Input
             name="jobTitle"
             value={cvInfo?.jobTitle || ""}
             required
+            placeholder="Ví dụ: Software Engineering"
             onChange={handleInputChange}
+            className={errors.jobTitle ? "border-red-500" : ""}
           />
+          {errors.jobTitle && (
+            <p className="text-red-500 text-xs mt-1">{errors.jobTitle}</p>
+          )}
         </div>
         <div className="col-span-2">
-          <label className="text-sm">Address</label>
+          <label className="text-sm">
+            Địa chỉ <span className="text-red-500">*</span>
+          </label>
           <Input
             name="address"
             value={cvInfo?.address || ""}
             required
+            placeholder="Ví dụ: Số 1, Võ Văn Ngân, Linh Chiểu, Thủ Đức, TPHCM"
             onChange={handleInputChange}
+            className={errors.address ? "border-red-500" : ""}
           />
+          {errors.address && (
+            <p class人不10
+  
+            className="text-red-500 text-xs mt-1">{errors.address}</p>
+          )}
         </div>
         <div>
-          <label className="text-sm">Phone</label>
+          <label className="text-sm">
+            Số điện thoại <span className="text-red-500">*</span>
+          </label>
           <Input
             name="phone"
             value={cvInfo?.phone || ""}
             required
             onChange={handleInputChange}
+            placeholder="Ví dụ: 0912345678"
+            className={errors.phone ? "border-red-500" : ""}
           />
+          {errors.phone && (
+            <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+          )}
         </div>
         <div>
-          <label className="text-sm">Email</label>
+          <label className="text-sm">
+            Email <span className="text-red-500">*</span>
+          </label>
           <Input
             name="email"
             value={cvInfo?.email || ""}
             required
+            placeholder="Ví dụ: test@gmail.com"
             onChange={handleInputChange}
+            className={errors.email ? "border-red-500" : ""}
           />
+          {errors.email && (
+            <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+          )}
         </div>
       </div>
-
+  
       <div className="mt-3 flex justify-end">
         <Button disabled={saveLoading || updateLoading} onClick={onSave}>
           {saveLoading || updateLoading ? (
@@ -292,5 +354,5 @@ const PersonalDetail = ({ enabledNext }) => {
     </div>
   );
 };
-export default PersonalDetail;
 
+export default PersonalDetail;

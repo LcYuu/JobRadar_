@@ -44,28 +44,26 @@ export default function JobDetail() {
 
   const [open, setOpen] = useState(false);
   const [modalClosed, setModalClosed] = useState(false);
-  
+
   useEffect(() => {
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
-    
+
     // Load dữ liệu khi component được mount
     dispatch(getOneApplyJob(postId));
     dispatch(checkIfApplied(postId));
     if (!postByPostId || postByPostId.postId !== postId) {
       dispatch(getJobPostByPostId(postId));
     }
-  }, [dispatch, postId]); // Chỉ gọi API khi component được mount hoặc postId thay đổi
-  
+  }, [dispatch, postId]);
+
   // Cập nhật khi modal đóng
   useEffect(() => {
     if (modalClosed) {
-      // Cập nhật lại thông tin từ server
       dispatch(getOneApplyJob(postId));
       dispatch(checkIfApplied(postId));
-      // Reset để không trigger lại
       setModalClosed(false);
     }
   }, [modalClosed, dispatch, postId]);
@@ -93,7 +91,7 @@ export default function JobDetail() {
     }
     setOpen(true);
   };
-  
+
   const handleClose = () => {
     setOpen(false);
     setModalClosed(true);
@@ -127,7 +125,7 @@ export default function JobDetail() {
           confirmButtonColor: "#9333ea",
           timer: 1500,
           timerProgressBar: true,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
       } else {
         await Swal.fire({
@@ -138,7 +136,7 @@ export default function JobDetail() {
           confirmButtonColor: "#9333ea",
           timer: 1500,
           timerProgressBar: true,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
       }
     } catch (error) {
@@ -147,7 +145,7 @@ export default function JobDetail() {
         text: "Có lỗi xảy ra khi thực hiện thao tác",
         icon: "error",
         confirmButtonText: "Đóng",
-        confirmButtonColor: "#9333ea"
+        confirmButtonColor: "#9333ea",
       });
     }
   };
@@ -181,46 +179,91 @@ export default function JobDetail() {
           <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
             {/* Left column */}
             <div className="space-y-6">
-              <div className="bg-white shadow-md rounded-lg p-5 flex items-center justify-between">
-                <div className="flex items-center space-x-4 w-full pr-7">
-                  <img
-                    src={postByPostId?.company.logo}
-                    alt="Company Logo"
-                    className="h-16 w-16 rounded-lg bg-indigo-100 flex items-center justify-center text-2xl font-bold text-indigo-600"
-                  />
-                  <div className="flex-1">
-                    <h1 className="text-2xl font-bold break-words">
-                      {postByPostId?.title}
-                    </h1>
-                    <p className="text-sm text-gray-500 font-bold break-words">
-                      {postByPostId?.company.companyName} •{" "}
-                      {postByPostId?.location} • {postByPostId?.typeOfWork}
-                    </p>
+              <div className="bg-white shadow-md rounded-lg p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-4 w-full pr-7">
+                    <img
+                      src={postByPostId?.company.logo}
+                      alt="Company Logo"
+                      className="h-16 w-16 rounded-lg bg-indigo-100 flex items-center justify-center text-2xl font-bold text-indigo-600"
+                    />
+                    <div className="flex-1">
+                      <h1 className="text-2xl font-bold break-words">
+                        {postByPostId?.title}
+                      </h1>
+                      <p className="text-sm text-gray-500 font-bold break-words">
+                        {postByPostId?.company.companyName} •{" "}
+                        {postByPostId?.location} • {postByPostId?.typeOfWork}
+                      </p>
+                    </div>
+                  </div>
+                  {/* Nút Lưu bài viết */}
+                  <div className="flex-shrink-0">
+                    {user && (
+                      <button
+                        title={
+                          isSaved
+                            ? "Bài viết đã được lưu"
+                            : "Lưu bài viết để xem lại sau"
+                        }
+                        onClick={handleSaveJob}
+                        className={`p-3 rounded-full transition-all duration-300 ${
+                          isSaved
+                            ? "bg-purple-100 text-purple-600 hover:bg-purple-200"
+                            : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                        }`}
+                      >
+                        {isSaved ? (
+                          <BookmarkCheck className="w-6 h-6" />
+                        ) : (
+                          <Bookmark className="w-6 h-6" />
+                        )}
+                      </button>
+                    )}
                   </div>
                 </div>
-
-                {/* Nút Lưu bài viết */}
-                <div className="flex-shrink-0">
-                  {user && (
-                        <button
-                        title={isSaved ? 'Bài viết đã được lưu' : 'Lưu bài viết để xem lại sau'}
-                          onClick={handleSaveJob}
-                          className={`p-3 rounded-full transition-all duration-300 ${
-                            isSaved 
-                              ? 'bg-purple-100 text-purple-600 hover:bg-purple-200' 
-                              : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
-                          }`}
+                {/* Nút Nộp đơn */}
+                <div className="flex justify-end  mr-2">
+                  {oneApplyJob?.save ? (
+                    <Button
+                      variant="outline"
+                      className="text-green-600 font-bold border-green-700 cursor-not-allowed"
+                      disabled
+                    >
+                      Đã được duyệt
+                    </Button>
+                  ) : hasApplied ? (
+                    <button
+                      className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+                      onClick={handleOpenModal}
+                    >
+                      Cập nhật đơn
+                    </button>
+                  ) : user ? (
+                    <Button
+                      variant="default"
+                      className="bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+                      onClick={handleOpenModal}
+                    >
+                      Nộp đơn
+                    </Button>
+                  ) : (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="text-gray-400 cursor-not-allowed"
+                          disabled
                         >
-                          {isSaved ? (
-                            <BookmarkCheck className="w-6 h-6" />
-                          ) : (
-                            <Bookmark className="w-6 h-6" />
-                          )}
-                        </button>
-                      
+                          Nộp đơn
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Vui lòng đăng nhập để ứng tuyển</p>
+                      </TooltipContent>
+                    </Tooltip>
                   )}
                 </div>
-
                 <section>
                   <ApplyModal
                     job={postByPostId}
@@ -275,9 +318,7 @@ export default function JobDetail() {
 
                 {/* Card for Job Responsibilities */}
                 <div className="p-6 bg-white rounded-lg shadow-lg">
-                  <h2 className="text-lg font-semibold">
-                    Yêu cầu công việc
-                  </h2>
+                  <h2 className="text-lg font-semibold">Yêu cầu công việc</h2>
                   <ul className="space-y-2 text-sm text-gray-600">
                     {postByPostId?.requirement ? (
                       postByPostId.requirement
@@ -498,8 +539,6 @@ export default function JobDetail() {
                         : "N/A"}
                     </span>
                   </div>
-
-                  
                 </div>
               </Card>
 
