@@ -412,25 +412,35 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 			LocalDateTime endDate) {
 		List<Map<String, Object>> stats = new ArrayList<>();
 		LocalDateTime currentDate = startDate;
+		
+		System.out.println("Processing stats for company: " + companyId);
+		System.out.println("Start date: " + startDate);
+		System.out.println("End date: " + endDate);
+		
 		while (!currentDate.isAfter(endDate)) {
+			LocalDateTime nextDate = currentDate.plusDays(1);
+			
 			// Đếm số lượng job theo trạng thái
-			long totalJobs = jobPostRepository.countJobsByCompanyAndDateRange(companyId, currentDate, currentDate);
-			long activeJobs = jobPostRepository.countActiveJobsByCompanyAndDateRange(companyId, currentDate,
-					currentDate);
-			long closedJobs = jobPostRepository.countClosedJobsByCompanyAndDateRange(companyId, currentDate,
-					currentDate);
-			long pendingJobs = jobPostRepository.countPendingJobsByCompanyAndDateRange(companyId, currentDate,
-					currentDate);
+			long totalJobs = jobPostRepository.countJobsByCompanyAndDateRange(companyId, currentDate, nextDate);
+			long activeJobs = jobPostRepository.countActiveJobsByCompanyAndDateRange(companyId, currentDate, nextDate);
+			long closedJobs = jobPostRepository.countClosedJobsByCompanyAndDateRange(companyId, currentDate, nextDate);
+			long pendingJobs = jobPostRepository.countPendingJobsByCompanyAndDateRange(companyId, currentDate, nextDate);
+
+//			System.out.println("Stats for date " + currentDate + ":");
+//			System.out.println("Total jobs: " + totalJobs);
+//			System.out.println("Active jobs: " + activeJobs);
+//			System.out.println("Closed jobs: " + closedJobs);
+//			System.out.println("Pending jobs: " + pendingJobs);
 
 			Map<String, Object> dayStat = new HashMap<>();
-			dayStat.put("date", currentDate.toString());
+			dayStat.put("date", currentDate.toLocalDate().toString());
 			dayStat.put("totalJobs", totalJobs);
 			dayStat.put("activeJobs", activeJobs);
 			dayStat.put("closedJobs", closedJobs);
 			dayStat.put("pendingJobs", pendingJobs);
 
 			stats.add(dayStat);
-			currentDate = currentDate.plusDays(1);
+			currentDate = nextDate;
 		}
 
 		return stats;

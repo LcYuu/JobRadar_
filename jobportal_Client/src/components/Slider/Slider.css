@@ -1,8 +1,9 @@
 .slider-container {
+  position: relative;
   width: 100%;
-  max-width: 1200px;
+  max-width: 900px;
   margin: 0 auto;
-  padding: 20px;
+  min-height: 350px;
 }
 
 .awssld {
@@ -18,6 +19,8 @@
   --control-bullet-color: #000000;
   --control-bullet-active-color: #667eea;
   height: 300px !important;
+  border-radius: 1rem;
+  overflow: hidden;
 }
 
 .slider-item {
@@ -77,14 +80,27 @@
 
 @media (max-width: 768px) {
   .slider-container {
-    padding: 10px;
+    min-height: 220px;
   }
-  
   .awssld {
-    height: 200px !important;
+    min-height: 220px;
   }
-  
   .caption h2 {
     font-size: 1.2rem;
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 1s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

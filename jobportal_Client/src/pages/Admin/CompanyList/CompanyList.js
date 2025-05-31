@@ -20,6 +20,7 @@ import {
 } from "../../../redux/Company/company.thunk.js";
 import { getAllIndustries } from "../../../redux/Industry/industry.thunk.js";
 import { getReviewByCompany } from "../../../redux/Review/review.thunk.js";
+import IndustryBadge from "../../../components/common/IndustryBadge/IndustryBadge";
 
 const formatDate = (dateString) => {
   if (!dateString) return "N/A";
@@ -37,114 +38,6 @@ const formatDate = (dateString) => {
 };
 
 export default function CompanyList() {
-  const industryStyles = {
-    "Thương mại điện tử": {
-      backgroundColor: "rgba(30, 144, 255, 0.1)",
-      color: "#1E90FF",
-      border: "1px solid #1E90FF",
-    },
-    "Marketing/Truyền thông": {
-      backgroundColor: "rgba(255, 140, 0, 0.1)",
-      color: "#FF8C00",
-      border: "1px solid #FF8C00",
-    },
-    "IT phần cứng": {
-      backgroundColor: "rgba(0, 0, 255, 0.1)",
-      color: "#0000FF",
-      border: "1px solid #0000FF",
-    },
-    "Công nghệ ô tô": {
-      backgroundColor: "rgba(255, 99, 71, 0.1)",
-      color: "#FF4500",
-      border: "1px solid #FF4500",
-    },
-    "IT phần mềm": {
-      backgroundColor: "rgba(0, 255, 255, 0.1)",
-      color: "#00FFFF",
-      border: "1px solid #00FFFF",
-    },
-    "Nhà hàng/Khách sạn": {
-      backgroundColor: "rgba(255, 105, 180, 0.1)",
-      color: "#FF69B4",
-      border: "1px solid #FF69B4",
-    },
-    "Thiết kế/In ấn": {
-      backgroundColor: "rgba(255, 99, 71, 0.1)",
-      color: "#FF6347",
-      border: "1px solid #FF6347",
-    },
-    "Cơ khí/Điện - điện tử": {
-      backgroundColor: "rgba(70, 130, 180, 0.1)",
-      color: "#4682B4",
-      border: "1px solid #4682B4",
-    },
-    "Kinh doanh": {
-      backgroundColor: "rgba(138, 43, 226, 0.1)",
-      color: "#8A2BE2",
-      border: "1px solid #8A2BE2",
-    },
-    "Giáo dục/Đào tạo": {
-      backgroundColor: "rgba(40, 167, 69, 0.1)",
-      color: "#28A745",
-      border: "1px solid #28A745",
-    },
-    "Kiến trúc/Xây dựng": {
-      backgroundColor: "rgba(255, 193, 7, 0.1)",
-      color: "#FFC107",
-      border: "1px solid #FFC107",
-    },
-    "Tài chính/Ngân hàng": {
-      backgroundColor: "rgba(23, 162, 184, 0.1)",
-      color: "#17A2B8",
-      border: "1px solid #17A2B8",
-    },
-    "Viễn thông": {
-      backgroundColor: "rgba(200, 35, 51, 0.1)",
-      color: "#C82333",
-      border: "1px solid #C82333",
-    },
-    "Y tế": {
-      backgroundColor: "rgba(107, 114, 128, 0.1)",
-      color: "#6B7280",
-      border: "1px solid #6B7280",
-    },
-    "Logistics": {
-      backgroundColor: "rgba(221, 160, 221, 0.1)",
-      color: "#DDA0DD",
-      border: "1px solid #DDA0DD",
-    },
-    "Kế toán/Kiểm toán": {
-      backgroundColor: "rgba(244, 162, 97, 0.1)",
-      color: "#F4A261",
-      border: "1px solid #F4A261",
-    },
-    "Sản xuất": {
-      backgroundColor: "rgba(43, 108, 176, 0.1)",
-      color: "#2B6CB0",
-      border: "1px solid #2B6CB0",
-    },
-    "Tài xế": {
-      backgroundColor: "rgba(233, 30, 99, 0.1)",
-      color: "#E91E63",
-      border: "1px solid #E91E63",
-    },
-    "Luật": {
-      backgroundColor: "rgba(72, 187, 120, 0.1)",
-      color: "#48BB78",
-      border: "1px solid #48BB78",
-    },
-    "Phiên dịch": {
-      backgroundColor: "rgba(75, 85, 99, 0.1)",
-      color: "#4B5563",
-      border: "1px solid #4B5563",
-    },
-    "Hệ thống nhúng và IoT": {
-      backgroundColor: "rgba(153, 27, 27, 0.1)",
-      color: "#991B1B",
-      border: "1px solid #991B1B",
-    },
-  };
-
   const dispatch = useDispatch();
   const { companies, loading, totalElements, totalPages } = useSelector(
     (store) => store.company
@@ -380,26 +273,9 @@ export default function CompanyList() {
                       </td>
                       <td className={`${padding}`}>
                         <div className="flex flex-col gap-1">
-                          {company.industry?.map((ind) => {
-                            const industryName = getIndustryName(
-                              ind.industryId
-                            );
-                            const style =
-                              industryStyles[industryName] || {};
-                            return (
-                              <span
-                                key={ind.industryId}
-                                className={`inline-flex items-center px-2 py-0.5 rounded-full font-medium ${fontSize}`}
-                                style={{
-                                  backgroundColor: style.backgroundColor,
-                                  color: style.color,
-                                  border: style.border,
-                                }}
-                              >
-                                {industryName}
-                              </span>
-                            );
-                          })}
+                          {company.industry?.map((ind) => (
+                            <IndustryBadge key={ind.industryId} name={ind.industryName} />
+                          ))}
                         </div>
                       </td>
                       <td
@@ -522,27 +398,9 @@ export default function CompanyList() {
                         {company.address}
                       </p>
                       <div className="flex flex-wrap gap-1">
-                        {company.industry?.map((ind) => {
-                          const industryName = getIndustryName(
-                            ind.industryId
-                          );
-                          const style = industryStyles[industryName] || {};
-                          return (
-                            <span
-                              key={ind.industryId}
-                              className={`inline-flex items-center px-2 py-0.5 rounded-full font-medium ${
-                                isMobile ? "text-[10px]" : fontSize
-                              }`}
-                              style={{
-                                backgroundColor: style.backgroundColor,
-                                color: style.color,
-                                border: style.border,
-                              }}
-                            >
-                              {industryName}
-                            </span>
-                          );
-                        })}
+                        {company.industry?.map((ind) => (
+                          <IndustryBadge key={ind.industryId} name={ind.industryName} />
+                        ))}
                       </div>
                       {!isMobile && (
                         <p className={`${fontSize} text-gray-500`}>
