@@ -9,6 +9,7 @@ import { Bookmark, BookmarkCheck } from "lucide-react";
 import { toast } from "react-hot-toast";
 import Swal from "sweetalert2";
 import { jobTypeColors } from "../../../configs/constants";
+import IndustryBadge from "../IndustryBadge/IndustryBadge";
 
 const categoryStyles = {
   "Thiết kế": {
@@ -43,19 +44,8 @@ function JobCardContent({ company, location, category = []  }) {
         <span className="text-muted-foreground text-sm">{location}</span>
       </div>
       <div className="flex space-x-2">
-      {category.map((cat, index) => (
-          <Badge
-            key={index}
-            style={
-              categoryStyles[cat] || {
-                backgroundColor: "rgba(0, 0, 0, 0.1)",
-                color: "black",
-              }
-            }
-            variant="secondary"
-          >
-            {cat}
-          </Badge>
+        {category.map((cat, index) => (
+          <IndustryBadge key={index} name={cat} />
         ))}
       </div>
     </>

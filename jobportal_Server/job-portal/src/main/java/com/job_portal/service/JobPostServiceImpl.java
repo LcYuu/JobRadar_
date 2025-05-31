@@ -430,11 +430,11 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 			long closedJobs = jobPostRepository.countClosedJobsByCompanyAndDateRange(companyId, currentDate, nextDate);
 			long pendingJobs = jobPostRepository.countPendingJobsByCompanyAndDateRange(companyId, currentDate, nextDate);
 
-			System.out.println("Stats for date " + currentDate + ":");
-			System.out.println("Total jobs: " + totalJobs);
-			System.out.println("Active jobs: " + activeJobs);
-			System.out.println("Closed jobs: " + closedJobs);
-			System.out.println("Pending jobs: " + pendingJobs);
+//			System.out.println("Stats for date " + currentDate + ":");
+//			System.out.println("Total jobs: " + totalJobs);
+//			System.out.println("Active jobs: " + activeJobs);
+//			System.out.println("Closed jobs: " + closedJobs);
+//			System.out.println("Pending jobs: " + pendingJobs);
 
 			Map<String, Object> dayStat = new HashMap<>();
 			dayStat.put("date", currentDate.toLocalDate().toString());

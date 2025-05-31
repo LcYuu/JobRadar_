@@ -7,77 +7,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import Swal from "sweetalert2";
 import { jobTypeColors } from "../../../configs/constants";
+import IndustryBadge from "../IndustryBadge/IndustryBadge";
 
-const typeOfWorkStyles = {
-  "Toàn thời gian": {
-    backgroundColor: "rgba(0, 128, 0, 0.1)",
-    color: "rgb(0, 128, 0)",
-    border: "1px solid rgb(0, 128, 0)",
-  },
-  "Bán thời gian": {
-    backgroundColor: "rgba(255, 165, 0, 0.1)",
-    color: "rgb(255, 165, 0)",
-    border: "1px solid rgb(255, 165, 0)",
-  },
-  "Từ xa": {
-    backgroundColor: "rgba(138, 43, 226, 0.1)",
-    color: "rgb(138, 43, 226)",
-    border: "1px solid rgb(138, 43, 226)",
-  },
-  "Thực tập sinh": {
-    backgroundColor: "rgba(0, 191, 255, 0.1)",
-    color: "rgb(0, 191, 255)",
-    border: "1px solid rgb(0, 191, 255)",
-  },
-};
 
-const industryStyles = {
-  "Thiết kế": {
-    backgroundColor: "rgba(255, 99, 71, 0.1)",
-    color: "#FF6347",
-    border: "1px solid #FF6347",
-  },
-  "Kinh doanh": {
-    backgroundColor: "rgba(138, 43, 226, 0.1)",
-    color: "#8A2BE2",
-    border: "1px solid #8A2BE2",
-  },
-  Marketing: {
-    backgroundColor: "rgba(255, 140, 0, 0.1)",
-    color: "#FF8C00",
-    border: "1px solid #FF8C00",
-  },
-  "Thương mại điện tử": {
-    backgroundColor: "rgba(30, 144, 255, 0.1)",
-    color: "#1E90FF",
-    border: "1px solid #1E90FF",
-  },
-  "IT phần cứng": {
-    backgroundColor: "rgba(0, 0, 255, 0.1)",
-    color: "#0000FF",
-    border: "1px solid #0000FF",
-  },
-  "IT phần mềm": {
-    backgroundColor: "rgba(0, 255, 255, 0.1)",
-    color: "#00FFFF",
-    border: "1px solid #00FFFF",
-  },
-  "Công nghệ ô tô": {
-    backgroundColor: "rgba(255, 99, 71, 0.1)",
-    color: "#FF4500",
-    border: "1px solid #FF4500",
-  },
-  "Nhà hàng/Khách sạn": {
-    backgroundColor: "rgba(255, 105, 180, 0.1)",
-    color: "#FF69B4",
-    border: "1px solid #FF69B4",
-  },
-  "Điện - điện tử": {
-    backgroundColor: "rgba(70, 130, 180, 0.1)",
-    color: "#4682B4",
-    border: "1px solid #4682B4",
-  },
-};
 
 function JobCard_AllJob({ job }) {
   const navigate = useNavigate();
@@ -239,34 +171,10 @@ function JobCard_AllJob({ job }) {
             <div className="flex flex-wrap gap-2 overflow-hidden max-h-[40px]">
               {Array.isArray(job.industry)
                 ? job.industry.slice(0, 3).map((industry, index) => (
-                    <span
-                      key={index}
-                      className="px-2 py-1 rounded-full text-xs font-medium truncate"
-                      style={
-                        industryStyles[industry.industryName] || {
-                          backgroundColor: "rgba(0, 0, 0, 0.1)",
-                          color: "rgb(0, 0, 0)",
-                          border: "1px solid rgb(0, 0, 0)",
-                        }
-                      }
-                    >
-                      {industry.industryName}
-                    </span>
+                    <IndustryBadge key={index} name={industry.industryName} />
                   ))
                 : (
-                    <span
-                      className="px-2 py-1 rounded-full text-xs font-medium truncate"
-                      style={
-                        industryStyles[job.company.industry.industryName] || {
-                          backgroundColor: "rgba(0, 0, 0, 0.1)",
-                          color: "rgb(0, 0, 0)",
-                          border: "1px solid rgb(0, 0, 0)",
-                        }
-
-                      }
-                    >
-                      {job.company.industry.industryName}
-                    </span>
+                    <IndustryBadge name={job.company.industry.industryName} />
                   )}
             </div>
           </div>

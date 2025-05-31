@@ -29,65 +29,10 @@ import {
 } from "../../redux/JobPost/jobPost.thunk";
 import { saveJob } from "../../redux/Seeker/seeker.thunk";
 import Swal from "sweetalert2";
+import IndustryBadge from "../../components/common/IndustryBadge/IndustryBadge";
+import { skillBadgeStyle } from "../../configs/constants"; // Nếu bạn đã định nghĩa màu sắc chung
 
 export default function JobDetail() {
-  const industryStyles = {
-    "Thiết kế": {
-      backgroundColor: "rgba(255, 99, 71, 0.1)", // Màu đỏ san hô nhạt
-      color: "#FF6347", // Màu đỏ san hô
-      border: "1px solid #FF6347", // Viền màu đỏ san hô
-    },
-    "Kinh doanh": {
-      backgroundColor: "rgba(138, 43, 226, 0.1)", // Màu tím nhạt
-      color: "#8A2BE2", // Màu tím
-      border: "1px solid #8A2BE2", // Viền màu tím
-    },
-    Marketing: {
-      backgroundColor: "rgba(255, 140, 0, 0.1)", // Màu cam nhạt
-      color: "#FF8C00", // Màu cam
-      border: "1px solid #FF8C00", // Viền màu cam
-    },
-    "Thương mại điện tử": {
-      backgroundColor: "rgba(30, 144, 255, 0.1)", // Màu xanh dương đậm nhạt
-      color: "#1E90FF", // Màu xanh dương đậm
-      border: "1px solid #1E90FF", // Viền màu xanh dương đậm
-    },
-    "IT phần cứng": {
-      backgroundColor: "rgba(0, 0, 255, 0.1)", // Màu xanh dương nhạt
-      color: "#0000FF", // Màu xanh dương
-      border: "1px solid #0000FF", // Viền màu xanh dương
-    },
-    "IT phần mềm": {
-      backgroundColor: "rgba(0, 255, 255, 0.1)", // Màu xanh dương ngọc nhạt
-      color: "#00FFFF", // Màu xanh dương ngọc
-      border: "1px solid #00FFFF", // Viền màu xanh dương ngọc
-    },
-    "Công nghệ ô tô": {
-      backgroundColor: "rgba(255, 99, 71, 0.1)", // Màu cam đỏ nhạt
-      color: "#FF4500", // Màu cam đỏ
-      border: "1px solid #FF4500", // Viền màu cam đỏ
-    },
-    "Nhà hàng/Khách sạn": {
-      backgroundColor: "rgba(255, 105, 180, 0.1)", // Màu hồng nhạt
-      color: "#FF69B4", // Màu hồng đậm
-      border: "1px solid #FF69B4", // Viền màu hồng đậm
-    },
-
-    "Điện - điện tử": {
-      backgroundColor: "rgba(70, 130, 180, 0.1)", // Màu xanh thép nhạt
-      color: "#4682B4", // Màu xanh thép
-      border: "1px solid #4682B4", // Viền màu xanh thép
-    },
-  };
-
-  // Hàm để lấy màu ngẫu nhiên từ danh sách màu
-  const getRandomColor = () => {
-    const r = Math.floor(Math.random() * 256);
-    const g = Math.floor(Math.random() * 256);
-    const b = Math.floor(Math.random() * 256);
-    return `rgb(${r}, ${g}, ${b})`;
-  };
-
   const dispatch = useDispatch();
   const { postId } = useParams();
   const { postByPostId, similarJobs } = useSelector((store) => store.jobPost);
@@ -209,6 +154,16 @@ export default function JobDetail() {
 
   console.log("hasApplied:", hasApplied);
   console.log("oneApplyJob:", oneApplyJob);
+
+
+  const getRandomColor = () => {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -553,30 +508,22 @@ export default function JobDetail() {
                   <h3 className="text-lg font-semibold">Lĩnh vực</h3>
                   <div className="flex flex-wrap gap-2">
                     {postByPostId?.industry?.map((industry) => (
-                      <Badge
-                        key={industry.industryId}
-                        variant="secondary"
-                        style={industryStyles[industry.industryName]}
-                      >
-                        {industry.industryName}
-                      </Badge>
+                      <IndustryBadge key={industry.industryId} name={industry.industryName} />
                     ))}
                   </div>
                 </div>
               </Card>
 
+              {/* Card for Skills */}
               <Card className="p-6 bg-white rounded-lg shadow-lg">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">
-                    Các kĩ năng cần thiết
-                  </h3>
+                  <h3 className="text-lg font-semibold">Các kĩ năng cần thiết</h3>
                   <div className="flex flex-wrap gap-2">
                     {postByPostId?.skills?.map((skill, index) => (
-                      // Áp dụng màu ngẫu nhiên cho mỗi Badge
                       <Badge
                         key={index}
                         className="text-white"
-                        style={{ backgroundColor: getRandomColor() }}
+                        style={{ backgroundColor: getRandomColor() }} 
                       >
                         {skill.skillName}
                       </Badge>

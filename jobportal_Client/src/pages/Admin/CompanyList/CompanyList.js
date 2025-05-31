@@ -20,6 +20,7 @@ import {
 } from "../../../redux/Company/company.thunk.js";
 import { getAllIndustries } from "../../../redux/Industry/industry.thunk.js";
 import { getReviewByCompany } from "../../../redux/Review/review.thunk.js";
+import IndustryBadge from "../../../components/common/IndustryBadge/IndustryBadge";
 
 const formatDate = (dateString) => {
   if (!dateString) return "N/A";
@@ -37,54 +38,6 @@ const formatDate = (dateString) => {
 };
 
 export default function CompanyList() {
-  const industryStyles = {
-    "Thiết kế": {
-      backgroundColor: "rgba(255, 99, 71, 0.1)",
-      color: "#FF6347",
-      border: "1px solid #FF6347",
-    },
-    "Kinh doanh": {
-      backgroundColor: "rgba(138, 43, 226, 0.1)",
-      color: "#8A2BE2",
-      border: "1px solid #8A2BE2",
-    },
-    Marketing: {
-      backgroundColor: "rgba(255, 140, 0, 0.1)",
-      color: "#FF8C00",
-      border: "1px solid #FF8C00",
-    },
-    "Thương mại điện tử": {
-      backgroundColor: "rgba(30, 144, 255, 0.1)",
-      color: "#1E90FF",
-      border: "1px solid #1E90FF",
-    },
-    "IT phần cứng": {
-      backgroundColor: "rgba(0, 0, 255, 0.1)",
-      color: "#0000FF",
-      border: "1px solid #0000FF",
-    },
-    "IT phần mềm": {
-      backgroundColor: "rgba(0, 255, 255, 0.1)",
-      color: "#00FFFF",
-      border: "1px solid #00FFFF",
-    },
-    "Công nghệ ô tô": {
-      backgroundColor: "rgba(255, 99, 71, 0.1)",
-      color: "#FF4500",
-      border: "1px solid #FF4500",
-    },
-    "Nhà hàng/Khách sạn": {
-      backgroundColor: "rgba(255, 105, 180, 0.1)",
-      color: "#FF69B4",
-      border: "1px solid #FF69B4",
-    },
-    "Điện - điện tử": {
-      backgroundColor: "rgba(70, 130, 180, 0.1)",
-      color: "#4682B4",
-      border: "1px solid #4682B4",
-    },
-  };
-
   const dispatch = useDispatch();
   const { companies, loading, totalElements, totalPages } = useSelector(
     (store) => store.company
@@ -320,26 +273,9 @@ export default function CompanyList() {
                       </td>
                       <td className={`${padding}`}>
                         <div className="flex flex-col gap-1">
-                          {company.industry?.map((ind) => {
-                            const industryName = getIndustryName(
-                              ind.industryId
-                            );
-                            const style =
-                              industryStyles[industryName] || {};
-                            return (
-                              <span
-                                key={ind.industryId}
-                                className={`inline-flex items-center px-2 py-0.5 rounded-full font-medium ${fontSize}`}
-                                style={{
-                                  backgroundColor: style.backgroundColor,
-                                  color: style.color,
-                                  border: style.border,
-                                }}
-                              >
-                                {industryName}
-                              </span>
-                            );
-                          })}
+                          {company.industry?.map((ind) => (
+                            <IndustryBadge key={ind.industryId} name={ind.industryName} />
+                          ))}
                         </div>
                       </td>
                       <td
@@ -462,27 +398,9 @@ export default function CompanyList() {
                         {company.address}
                       </p>
                       <div className="flex flex-wrap gap-1">
-                        {company.industry?.map((ind) => {
-                          const industryName = getIndustryName(
-                            ind.industryId
-                          );
-                          const style = industryStyles[industryName] || {};
-                          return (
-                            <span
-                              key={ind.industryId}
-                              className={`inline-flex items-center px-2 py-0.5 rounded-full font-medium ${
-                                isMobile ? "text-[10px]" : fontSize
-                              }`}
-                              style={{
-                                backgroundColor: style.backgroundColor,
-                                color: style.color,
-                                border: style.border,
-                              }}
-                            >
-                              {industryName}
-                            </span>
-                          );
-                        })}
+                        {company.industry?.map((ind) => (
+                          <IndustryBadge key={ind.industryId} name={ind.industryName} />
+                        ))}
                       </div>
                       {!isMobile && (
                         <p className={`${fontSize} text-gray-500`}>
