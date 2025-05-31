@@ -65,7 +65,15 @@ function JobCardContent({ company, location, category = [], jobType }) {
         </div>
         <div
           className="text-white border px-2 py-1 rounded-md text-xs font-semibold uppercase"
-          style={{ backgroundColor: jobTypeColors[jobType] || "#6b7280" }}
+          style={
+            jobTypeColors[jobType]
+              ? {
+                  backgroundColor: jobTypeColors[jobType].backgroundColor,
+                  color: jobTypeColors[jobType].color,
+                  border: jobTypeColors[jobType].border,
+                }
+              : { backgroundColor: "#6b7280", color: "white", border: "1px solid #6b7280" }
+          }
         >
           {jobType}
         </div>

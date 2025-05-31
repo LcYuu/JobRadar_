@@ -581,3 +581,5 @@ TypeError: unhashable type: 'list'
 2025-05-28 14:24:39,711 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
 2025-05-28 14:24:39,768 - werkzeug - WARNING -  * Debugger is active!
 2025-05-28 14:24:39,777 - werkzeug - INFO -  * Debugger PIN: 646-913-458
+2025-05-28 15:29:03,364 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-05-28 15:29:03,364 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2

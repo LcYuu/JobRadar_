@@ -99,8 +99,6 @@ export default function BlockedCompanyModal({
         Swal.showLoading();
       },
     });
-
-    
   
     try {
       await dispatch(blockCompany({ companyId, blockedData }));
