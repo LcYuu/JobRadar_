@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
 import { Button } from "../../ui/button";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import logo from "../../assets/images/common/logo.jpg";
 import logo1 from "../../assets/images/common/logo1.jpg";
+import Swal from "sweetalert2";
 
 const slides = [
   {
@@ -37,6 +39,7 @@ export default function ProfessionalSlider() {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -46,10 +49,28 @@ export default function ProfessionalSlider() {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   }, []);
 
-  // Sửa lỗi type annotation ở đây
   const goToSlide = useCallback((index) => {
     setCurrentSlide(index);
   }, []);
+
+  const handleExploreClick = () => {
+    if (!isAuthenticated) {
+      Swal.fire({
+        title: "Yêu cầu đăng nhập",
+        text: "Vui lòng đăng nhập để khám phá các công việc",
+        icon: "warning",
+        confirmButtonText: "Đăng nhập",
+        showCancelButton: true,
+        cancelButtonText: "Hủy",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/auth/sign-in");
+        }
+      });
+      return;
+    }
+    navigate("/find-jobs");
+  };
 
   useEffect(() => {
     if (!isPlaying || isHovered) return;
@@ -101,15 +122,13 @@ export default function ProfessionalSlider() {
                 </p>
 
                 {/* CTA Button */}
-                
-                  <Button
-                    onClick={() => navigate("/find-jobs")}
-                    size="lg"
-                    className="mt-16 md:mt-14 transition-all duration-1000 delay-400 bg-white text-gray-900 hover:bg-gray-100 px-8 py-3 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 relative z-10"
-                  >
-                    Khám phá ngay
-                  </Button>
-                
+                <Button
+                  onClick={handleExploreClick}
+                  size="lg"
+                  className="mt-16 md:mt-14 transition-all duration-1000 delay-400 bg-white text-gray-900 hover:bg-gray-100 px-8 py-3 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 relative z-10"
+                >
+                  Khám phá ngay
+                </Button>
               </div>
             </div>
           </div>
