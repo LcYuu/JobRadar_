@@ -24,7 +24,7 @@ export default function AdminJobList() {
 
   useEffect(() => {
     dispatch(getAllJobAction({ currentPage, size }));
-  },[dispatch])
+  },[dispatch, currentPage, size])
 
   useEffect(() => {
     // Listen for window resize events to detect mobile

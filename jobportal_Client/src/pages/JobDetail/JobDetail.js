@@ -478,7 +478,6 @@ export default function JobDetail() {
                 </div>
               </Card>
             )}
-
             {/* Skills */}
             {postByPostId?.skills && postByPostId.skills.length > 0 && (
               <Card>

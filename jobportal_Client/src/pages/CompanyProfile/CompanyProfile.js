@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "swiper/swiper-bundle.css";
 import { Button } from "../../ui/button";
@@ -886,14 +886,18 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
   const totalStars = reviews.reduce((total, review) => total + review.star, 0);
   const averageStars = reviews.length > 0 ? totalStars / reviews.length : 0;
 
-  const validReviews = Array.isArray(reviews)
-    ? reviews.filter(
-        (item) =>
-          typeof item === "object" &&
-          item !== null &&
-          item.hasOwnProperty("reviewId")
-      )
-    : [];
+  const validReviews = useMemo(
+  () =>
+    Array.isArray(reviews)
+      ? reviews.filter(
+          (item) =>
+            typeof item === "object" &&
+            item !== null &&
+            item.hasOwnProperty("reviewId")
+        )
+      : [],
+  [reviews]
+);
 
   const handleDeleteReview = async (reviewId) => {
     const result = await Swal.fire({
@@ -1349,7 +1353,6 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
   };
 
   // Function to load replies for a specific review
-  
 
   // Load replies for all reviews when component mounts or when reviews change
   useEffect(() => {

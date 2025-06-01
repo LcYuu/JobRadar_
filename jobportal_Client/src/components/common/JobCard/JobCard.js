@@ -10,7 +10,6 @@ import { jobTypeColors } from "../../../configs/constants"
 import IndustryBadge from "../IndustryBadge/IndustryBadge"
 import "./JobCard.css";
 
-
 const categoryStyles = {
   "Thiết kế": {
     backgroundColor: "rgba(0, 128, 0, 0.1)",
@@ -92,7 +91,6 @@ export default function JobCard({ postId, jobTitle, company, location, category,
   const isSaved = savedJobs?.some((savedJob) => savedJob.postId === postId)
   const { user } = useSelector((store) => store.auth)
 
-
   const handleCardClick = () => {
     navigate(`/jobs/job-detail/${postId}`)
   }
@@ -109,7 +107,7 @@ export default function JobCard({ postId, jobTitle, company, location, category,
       })
       return
     }
-
+  
     try {
       const result = await dispatch(saveJob(postId)).unwrap()
       if (result.action === "saved") {
@@ -120,7 +118,7 @@ export default function JobCard({ postId, jobTitle, company, location, category,
           confirmButtonText: "Đóng",
           confirmButtonColor: "#9333ea",
           timer: 1500,
-          timerProgressBar: true,
+          timerProgressBar: true
           showConfirmButton: false,
         })
       } else {
@@ -134,7 +132,6 @@ export default function JobCard({ postId, jobTitle, company, location, category,
           timerProgressBar: true,
           showConfirmButton: false,
         })
-
       }
     } catch (error) {
       await Swal.fire({
@@ -193,3 +190,24 @@ export default function JobCard({ postId, jobTitle, company, location, category,
   )
 }
 
+function JobCardHeader({ jobType, companyLogo }) {
+  return (
+    <div className="flex justify-between items-start mb-4">
+      <img
+        src={companyLogo}
+        alt="Company Logo"
+        className="w-12 h-12 rounded-lg"
+      />
+      <div
+        className={`border px-2 py-1 rounded-md text-xs font-semibold uppercase`}
+        style={{
+          backgroundColor: jobTypeColors[jobType]?.backgroundColor || "#6b7280",
+          color: jobTypeColors[jobType]?.color || "#6b7280",
+          border: jobTypeColors[jobType]?.border || "1px solid #6b7280"
+        }}
+      >
+        {jobType}
+      </div>  
+    </div>
+  );
+}
