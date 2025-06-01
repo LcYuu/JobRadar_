@@ -12,25 +12,25 @@ const slides = [
     image: logo,
     title: "Khám phá các cơ hội việc làm hấp dẫn",
     subtitle: "Tìm kiếm những vị trí công việc phù hợp với kỹ năng và đam mê của bạn",
-    gradient: "from-blue-600/80 to-purple-600/80",
+    gradient: "from-blue-600/50 to-purple-600/50",
   },
   {
     image: logo1,
     title: "Tìm kiếm những công việc phù hợp với bạn",
     subtitle: "Kết nối với hàng nghìn nhà tuyển dụng uy tín trên toàn quốc",
-    gradient: "from-emerald-600/80 to-teal-600/80",
+    gradient: "from-emerald-600/50 to-teal-600/50",
   },
   {
     image: logo,
     title: "Xây dựng sự nghiệp vững chắc cho chính bạn",
     subtitle: "Phát triển kỹ năng và kinh nghiệm cùng các chuyên gia hàng đầu",
-    gradient: "from-orange-600/80 to-red-600/80",
+    gradient: "from-orange-600/50 to-red-600/50",
   },
   {
     image: logo1,
     title: "Kết nối với hàng trăm nhà tuyển dụng hàng đầu",
     subtitle: "Tiếp cận trực tiếp với các công ty Fortune 500 và startup hàng đầu",
-    gradient: "from-indigo-600/80 to-blue-600/80",
+    gradient: "from-indigo-600/50 to-blue-600/50",
   },
 ];
 
