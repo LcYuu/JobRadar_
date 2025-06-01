@@ -153,10 +153,9 @@ export default function JobDetail() {
   console.log("hasApplied:", hasApplied);
   console.log("oneApplyJob:", oneApplyJob);
 
-
   const getRandomColor = () => {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
+    const letters = "0123456789ABCDEF";
+    let color = "#";
     for (let i = 0; i < 6; i++) {
       color += letters[Math.floor(Math.random() * 16)];
     }
@@ -249,16 +248,7 @@ export default function JobDetail() {
                     </Button>
                   ) : (
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="text-gray-400 cursor-not-allowed"
-                          disabled
-                        >
-                          Nộp đơn
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
+                      <TooltipContent className="bg-gray-800 text-white text-sm font-medium px-3 py-2 rounded-lg shadow-lg border border-gray-600">
                         <p>Vui lòng đăng nhập để ứng tuyển</p>
                       </TooltipContent>
                     </Tooltip>
@@ -547,7 +537,10 @@ export default function JobDetail() {
                   <h3 className="text-lg font-semibold">Lĩnh vực</h3>
                   <div className="flex flex-wrap gap-2">
                     {postByPostId?.industry?.map((industry) => (
-                      <IndustryBadge key={industry.industryId} name={industry.industryName} />
+                      <IndustryBadge
+                        key={industry.industryId}
+                        name={industry.industryName}
+                      />
                     ))}
                   </div>
                 </div>
@@ -556,13 +549,15 @@ export default function JobDetail() {
               {/* Card for Skills */}
               <Card className="p-6 bg-white rounded-lg shadow-lg">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Các kĩ năng cần thiết</h3>
+                  <h3 className="text-lg font-semibold">
+                    Các kĩ năng cần thiết
+                  </h3>
                   <div className="flex flex-wrap gap-2">
                     {postByPostId?.skills?.map((skill, index) => (
                       <Badge
                         key={index}
                         className="text-white"
-                        style={{ backgroundColor: getRandomColor() }} 
+                        style={{ backgroundColor: getRandomColor() }}
                       >
                         {skill.skillName}
                       </Badge>
