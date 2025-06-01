@@ -1,73 +1,22 @@
 import { Card, CardContent } from "../../../ui/card";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import ApplyModal from "../ApplyModal/ApplyModal";
-import { saveJob } from "../../../redux/Seeker/seeker.thunk";
 import { useDispatch, useSelector } from "react-redux";
-import { Bookmark, BookmarkCheck } from "lucide-react";
+import { Bookmark, BookmarkCheck, MapPin, Building2 } from "lucide-react";
 import Swal from "sweetalert2";
+import { saveJob } from "../../../redux/Seeker/seeker.thunk";
 import { jobTypeColors } from "../../../configs/constants";
 import IndustryBadge from "../IndustryBadge/IndustryBadge";
 
 
-
-
 function JobCard_AllJob({ job }) {
   const navigate = useNavigate();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    additionalInfo: "",
-    cv: null,
-  });
   const dispatch = useDispatch();
   const { savedJobs } = useSelector((store) => store.seeker);
-  const {user} = useSelector((store=>store.auth));
+  const { user } = useSelector((store) => store.auth);
   const isSaved = savedJobs?.some(savedJob => savedJob.postId === job.postId);
 
   const handleCardClick = () => {
     navigate(`/jobs/job-detail/${job.postId}`);
-  };
-
-  const handleApplyClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsModalOpen(true);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData((prev) => ({
-        ...prev,
-        cv: file,
-      }));
-    }
-  };
-
-  const handleModalClose = (e) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    setIsModalOpen(false);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log(formData);
-    handleModalClose();
   };
 
   const handleSaveJob = async (e) => {
@@ -82,7 +31,6 @@ function JobCard_AllJob({ job }) {
       });
       return;
     }
-
     try {
       const result = await dispatch(saveJob(job.postId)).unwrap();
       if (result.action === "saved") {
@@ -120,101 +68,69 @@ function JobCard_AllJob({ job }) {
   };
 
   return (
-    <Card
-      className="w-full overflow-hidden cursor-pointer shadow-md hover:shadow-lg transition-all duration-300 bg-white group relative hover:bg-gray-100"
-      onClick={handleCardClick}
-      style={{ border: "none" }}
-    >
-      <CardContent className="p-6">
-        <div className="flex flex-col h-full">
-          {/* Thêm tag typeOfWork ở đây */}
-          <div className="absolute top-4 right-4 p-1 rounded-md text-xs font-semibold uppercase"
-            style={{
-              backgroundColor: jobTypeColors[job.typeOfWork]?.backgroundColor || "rgba(0,0,0,0.1)",
-              color: jobTypeColors[job.typeOfWork]?.color || "rgb(0,0,0)",
-              border: jobTypeColors[job.typeOfWork]?.border || "1px solid rgb(0,0,0)",
-            }}>
-            {job.typeOfWork}
-          </div>
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-2 mb-4">
-            <div className="flex items-center w-full overflow-hidden">
-              <div className="w-12 h-12 bg-gray-200 rounded-xl mr-4 flex items-center justify-center flex-shrink-0">
-                <img
-                  src={job.company.logo || "/placeholder.svg"}
-                  alt={`${job.company.companyName} logo`}
-                  className="w-full h-full object-cover rounded-xl"
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-lg group-hover:text-purple-600 transition-colors duration-300 line-clamp-1">
-                  {job.title || "Không có tiêu đề"}
-                </h3>
-                <p className="text-sm text-gray-500 line-clamp-1">
-                  {job.company?.companyName || "Không có công ty"}
-                </p>
-                <p className="text-sm text-gray-500 line-clamp-1">
-                  {job.city?.cityName || "Không có địa điểm"}
-                </p>
-              </div>
+    <Card className="group relative cursor-pointer overflow-hidden border border-gray-200 bg-white hover:border-primary/30 hover:shadow-xl transition-all duration-300 ease-out hover:-translate-y-1 h-full">
+      {/* Badge jobType */}
+      <div
+        className="absolute bottom-4 right-4 z-10 text-xs font-semibold px-3 py-1 rounded-md"
+        style={{
+          backgroundColor: jobTypeColors[job.typeOfWork]?.backgroundColor || "#f3f4f6",
+          color: jobTypeColors[job.typeOfWork]?.color || "#6b7280",
+        }}
+      >
+        {job.typeOfWork}
+      </div>
+      {/* Bookmark Button */}
+      <button
+        onClick={handleSaveJob}
+        className={`absolute top-4 right-4 z-10 p-2 rounded-full transition-all duration-300 shadow-sm ${
+          isSaved
+            ? "bg-primary text-white shadow-md scale-110"
+            : "bg-white/90 backdrop-blur-sm text-gray-400 hover:text-primary hover:bg-white hover:scale-110"
+        } active:scale-95`}
+        title={isSaved ? "Bỏ lưu" : "Lưu công việc"}
+      >
+        {isSaved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
+      </button>
+
+      <CardContent onClick={handleCardClick} className="p-6 h-full flex flex-col">
+        {/* Logo + Job Title */}
+        <div className="flex items-center space-x-4 mb-3">
+          <img
+            src={job.company.logo || "/placeholder.svg"}
+            alt={`${job.company.companyName} logo`}
+            className="w-12 h-12 rounded-lg object-cover shadow-sm border border-gray-100 flex-shrink-0"
+          />
+          <div className="flex-1 min-w-0">
+            <h3 className="text-xl font-bold text-gray-900 group-hover:text-primary transition-colors duration-300 leading-tight mb-1">
+              {job.title || "Không có tiêu đề"}
+            </h3>
+            <div className="flex items-center text-gray-600 mb-1">
+              <Building2 className="h-4 w-4 mr-1" />
+              <span className="text-sm font-medium">{job.company?.companyName || "Không có công ty"}</span>
             </div>
-          </div>
-          
-          {/* Hiển thị lương trong một tag */}
-          <div className="absolute bottom-4 right-4 p-1 rounded-md text-xs font-semibold">
-            <div className="flex flex-wrap gap-2 overflow-hidden max-h-[40px]">
-              <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-200">
-                Lương: {job.salary ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(job.salary) : "Không có thông tin về lương"}
-              </span>
-            </div>
-          </div>
-          {/* Industry tags */}
-          <div className="flex justify-between items-center overflow-hidden">
-            <div className="flex flex-wrap gap-2 overflow-hidden max-h-[40px]">
-              {Array.isArray(job.industry)
-                ? job.industry.slice(0, 3).map((industry, index) => (
-                    <IndustryBadge key={index} name={industry.industryName} />
-                  ))
-                : (
-                    <IndustryBadge name={job.company.industry.industryName} />
-                  )}
+            <div className="flex items-center text-gray-500">
+              <MapPin className="h-4 w-4 mr-1" />
+              <span className="text-sm">{job.city?.cityName || "Không có địa điểm"}</span>
             </div>
           </div>
         </div>
+        {/* Industry badges */}
+        <div className="flex flex-wrap gap-2 mb-2">
+          {Array.isArray(job.industry)
+            ? job.industry.slice(0, 3).map((industry, index) => (
+                <IndustryBadge key={index} name={industry.industryName} />
+              ))
+            : job.company?.industry?.industryName && (
+                <IndustryBadge name={job.company.industry.industryName} />
+              )}
+        </div>
+        {/* Salary */}
+        <div className="flex items-center gap-2 mt-auto">
+          <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-200">
+            Lương: {job.salary ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(job.salary) : "Không có thông tin về lương"}
+          </span>
+        </div>
       </CardContent>
-
-      {isModalOpen && (
-        <ApplyModal
-          job={job}
-          isOpen={isModalOpen}
-          onClose={handleModalClose}
-          onSubmit={handleSubmit}
-          formData={formData}
-          handleInputChange={handleInputChange}
-          onFileChange={handleFileChange}
-        />
-      )}
-
-<div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gray-200 bg-opacity-50">
-  <div className="flex flex-col gap-3">
-    <button
-      onClick={handleCardClick}
-      className="bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white font-medium px-5 py-2 rounded-full shadow-md transition duration-300 ease-in-out"
-    >
-      Xem chi tiết
-    </button>
-    <button
-      onClick={handleSaveJob}
-      className={`bg-gradient-to-r ${
-        isSaved
-          ? "from-red-400 to-red-600 hover:from-red-500 hover:to-red-700"
-          : "from-purple-400 to-purple-600 hover:from-purple-500 hover:to-purple-700"
-      } text-white font-medium px-5 py-2 rounded-full shadow-md transition duration-300 ease-in-out`}
-    >
-      {isSaved ? "Bỏ lưu" : "Lưu bài viết"}
-    </button>
-  </div>
-</div>
-
     </Card>
   );
 }

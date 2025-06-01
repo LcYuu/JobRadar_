@@ -3,9 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import "swiper/swiper-bundle.css";
 import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
-import { Calendar, MapPin, Briefcase, Star, Phone, Mail } from "lucide-react";
+import { Calendar, MapPin, Briefcase, Star, Phone, Mail, CheckCircle2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import JobCard_AllJob from "../../components/common/JobCard_AllJob/JobCard_AllJob";
+import IndustryBadge from "../../components/common/IndustryBadge/IndustryBadge";
 import {
   StarRounded,
   ThumbUpAlt,
@@ -646,6 +647,9 @@ export default function CompanyProfile() {
   const [hasReviewed, setHasReviewed] = useState(false);
   const [existingReview, setExistingReview] = useState(null);
 
+  // Thêm một ref để theo dõi các review đã load replies
+  const loadedRepliesRef = useRef(new Set());
+
   const handleImageClick = (imagePath) => {
     setSelectedImage(imagePath);
     setIsOpen(true);
@@ -696,15 +700,48 @@ export default function CompanyProfile() {
       toast.warning("Vui lòng nhập nội dung đánh giá");
       return;
     }
-    // Use a consistent anonymousId based on userId to ensure stability
-    const anonymousId = user
-      ? parseInt(user.userId.replace(/-/g, "").substring(0, 4), 16) % 1000
-      : Math.floor(Math.random() * 1000);
 
-    // Show loading toast while checking content moderation
+    // Khai báo loadingToastId ở đây
     const loadingToastId = toast.loading("Đang kiểm tra nội dung đánh giá...");
 
     try {
+      // Kiểm tra nội dung với AI
+      const response = await fetch('http://localhost:5000/check-comment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: feedback.message }),
+      });
+
+      const result = await response.json();
+
+      if (result.is_toxic) {
+        // Dismiss loading toast trước khi hiển thị lỗi
+        toast.dismiss(loadingToastId);
+        
+        // Hiển thị thông báo lỗi UI
+        toast.error('Nội dung đánh giá không phù hợp. Vui lòng kiểm tra lại.', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+
+        // Highlight nội dung có vấn đề
+        const highlightedContent = highlightProblematicContent(feedback.message);
+        showModerationError(result.message, highlightedContent);
+        
+        return;
+      }
+
+      // Use a consistent anonymousId based on userId to ensure stability
+      const anonymousId = user
+        ? parseInt(user.userId.replace(/-/g, "").substring(0, 4), 16) % 1000
+        : Math.floor(Math.random() * 1000);
+
       if (hasReviewed && existingReview) {
         const confirmMessage = `Bạn đã đánh giá công ty này trước đó:
 - Đánh giá cũ: ${existingReview.star}⭐ - "${existingReview.message}"
@@ -732,13 +769,13 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         await dispatch(deleteReview(reviewId));
       }
 
-      const result = await dispatch(
+      const result2 = await dispatch(
         createReview({
           reviewData: {
             star: feedback.star,
             message: feedback.message,
             isAnonymous: feedback.isAnonymous,
-            anonymousId: anonymousId, // Add random ID for anonymous reviews
+            anonymousId: anonymousId,
           },
           companyId,
         })
@@ -752,10 +789,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
       // Always dismiss the loading toast in case of error
       toast.dismiss(loadingToastId);
 
-      console.error("Error in review process:", error);
-
       // Check for different error formats
-      // Lỗi có thể là một chuỗi hoặc một đối tượng
       const errorMessage =
         typeof error === "string"
           ? error
@@ -764,24 +798,14 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
               ? error.payload
               : "Có lỗi xảy ra trong quá trình xử lý");
 
-      // Log detailed error information for debugging
-      console.log("Error details:", {
-        error,
-        message: errorMessage,
-        hasPayload: !!error.payload,
-        content: feedback.message,
-      });
-
       // Check if the error is from content moderation
       if (errorMessage && errorMessage.includes("không phù hợp")) {
-        console.log("Moderation error detected:", errorMessage);
-
         // Tạo một đối tượng lỗi đúng định dạng để truyền vào showModerationError
         const moderationError = {
           message: errorMessage,
         };
 
-        // Hiển thị lỗi kiểm duyệt nội dung với nội dung thực tế - sử dụng feedback.message
+        // Hiển thị lỗi kiểm duyệt nội dung với nội dung thực tế
         showModerationError(moderationError, feedback.message);
       } else {
         toast.error(errorMessage);
@@ -936,24 +960,46 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
   const [replyText, setReplyText] = useState("");
   const [isReplyAnonymous, setIsReplyAnonymous] = useState(false);
 
-  // Load review reactions when reviews load, but prevent infinite loops
+  // Cập nhật hàm loadRepliesForReview
+  const loadRepliesForReview = async (reviewId) => {
+    try {
+      // Kiểm tra xem đã load replies cho review này chưa
+      if (loadedRepliesRef.current.has(reviewId)) {
+        return;
+      }
+
+      // Kiểm tra xem đã có replies trong store chưa
+      if (replies && replies[reviewId]) {
+        loadedRepliesRef.current.add(reviewId);
+        return;
+      }
+
+      // Nếu chưa có, gọi API để lấy replies
+      await dispatch(getReviewReplies(reviewId)).unwrap();
+      loadedRepliesRef.current.add(reviewId);
+    } catch (error) {
+      console.error("Error loading replies:", error);
+    }
+  };
+
+  // Cập nhật useEffect để tránh gọi API liên tục
   useEffect(() => {
     if (validReviews.length > 0) {
-      // Avoid duplicate/excessive requests
-      const reviewIds = validReviews.map((review) => review.reviewId);
-      const reviewIdsString = reviewIds.join(",");
-
-      // Using a ref to track previous value to prevent unnecessary calls
-      const shouldFetch =
-        !reactions ||
-        Object.keys(reactions).length === 0 ||
-        !reviewIds.every((id) => Object.keys(reactions).includes(id));
-
-      if (shouldFetch) {
-        dispatch(getReviewReactions(reviewIds));
-      }
+      // Chỉ load replies cho các review chưa được load
+      validReviews.forEach((review) => {
+        if (!loadedRepliesRef.current.has(review.reviewId)) {
+          loadRepliesForReview(review.reviewId);
+        }
+      });
     }
-  }, [validReviews, dispatch, reactions]);
+  }, [validReviews]); // Chỉ chạy khi validReviews thay đổi
+
+  // Thêm cleanup function để reset loadedRepliesRef khi component unmount
+  useEffect(() => {
+    return () => {
+      loadedRepliesRef.current.clear();
+    };
+  }, []);
 
   // Function to handle replies
   const handleReplyClick = (reviewId) => {
@@ -1032,33 +1078,70 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
       return;
     }
 
-    // Use provided anonymous value or from the state
-    const anonymous = isAnonymous !== null ? isAnonymous : isReplyAnonymous;
-
-    // Use a consistent anonymousId based on userId or create a stable one
-    // This ensures the same user always gets the same anonymous ID
-    const anonymousId = user
-      ? parseInt(user.userId.replace(/-/g, "").substring(0, 4), 16) % 1000
-      : Math.floor(Math.random() * 1000);
-
-    // Show loading toast while checking content moderation
+    // Khai báo loadingToastId ở đây
     const loadingToastId = toast.loading("Đang kiểm tra nội dung phản hồi...");
 
+    // Trích xuất nội dung bình luận thực tế (không bao gồm tag người dùng)
+    let contentToCheck = content;
+    if (content.startsWith("@") && content.includes(":")) {
+      contentToCheck = content.split(":").slice(1).join(":").trim();
+    }
+
+    // Nếu nội dung sau khi trích xuất rỗng, có thể chỉ chứa tag, không cần kiểm tra toxic
+    if (!contentToCheck) {
+        // Dismiss loading toast
+        toast.dismiss(loadingToastId);
+        toast.warning("Nội dung phản hồi không được để trống sau tag người dùng.");
+        return;
+    }
+
+    // Kiểm tra nội dung với AI (sử dụng contentToCheck)
     try {
-      console.log("Submitting reply:", {
-        reviewId,
-        parentReplyId,
-        content,
-        anonymous,
-        parentUserInfo,
+      const response = await fetch('http://localhost:5000/check-comment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: contentToCheck }),
       });
 
-      // Prepare the payload for the API
+      const result = await response.json();
+
+      if (result.is_toxic) {
+        // Dismiss loading toast trước khi hiển thị lỗi
+        toast.dismiss(loadingToastId);
+
+        // Hiển thị thông báo lỗi UI
+        toast.error('Nội dung bình luận không phù hợp. Vui lòng kiểm tra lại.', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+
+        // Highlight nội dung có vấn đề
+        const highlightedContent = highlightProblematicContent(contentToCheck);
+        showModerationError(result.message, highlightedContent);
+
+        return;
+      }
+
+      // Use provided anonymous value or from the state
+      const anonymous = isAnonymous !== null ? isAnonymous : isReplyAnonymous;
+
+      // Use a consistent anonymousId based on userId or create a stable one
+      const anonymousId = user
+        ? parseInt(user.userId.replace(/-/g, "").substring(0, 4), 16) % 1000
+        : Math.floor(Math.random() * 1000);
+
+      // Prepare the payload for the API (sử dụng content gốc)
       const replyPayload = {
         reviewId,
-        content,
+        content: content,
         anonymous,
-        anonymousId, // Add randomized ID for anonymous users
+        anonymousId,
       };
 
       // Add parentReplyId if provided (for nested replies)
@@ -1074,7 +1157,6 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         // Add anonymous information if parent is anonymous
         if (parentUserInfo.parentIsAnonymous) {
           replyPayload.parentIsAnonymous = true;
-          // Use the existing anonymousId or generate a new one
           replyPayload.parentAnonymousId =
             parentUserInfo.parentAnonymousId ||
             Math.floor(Math.random() * 1000);
@@ -1082,14 +1164,12 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
       }
 
       // Use the Redux action instead of direct API call
-      const response = await dispatch(
+      const response2 = await dispatch(
         createReplyToReview(replyPayload)
       ).unwrap();
 
       // Dismiss the loading toast
       toast.dismiss(loadingToastId);
-
-      console.log("Reply creation response:", response);
 
       // Find the review that we're replying to
       const targetReview = reviews.find(
@@ -1112,7 +1192,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
             addReplyToParent(
               updatedReviews[i].replies || [],
               parentReplyId,
-              response
+              response2
             );
             break;
           }
@@ -1124,7 +1204,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
           if (updatedReviews[i].reviewId === reviewId) {
             // Create a new replies array for this review
             const existingReplies = updatedReviews[i].replies || [];
-            updatedReviews[i].replies = [...existingReplies, response];
+            updatedReviews[i].replies = [...existingReplies, response2];
             break;
           }
         }
@@ -1142,7 +1222,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         if (!updatedReplies[reviewId]) {
           updatedReplies[reviewId] = [];
         }
-        updatedReplies[reviewId] = [...updatedReplies[reviewId], response];
+        updatedReplies[reviewId] = [...updatedReplies[reviewId], response2];
 
         dispatch({
           type: "review/getReviewReplies/fulfilled",
@@ -1157,14 +1237,12 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
 
       // Show success message
       toast.success("Phản hồi đã được gửi thành công");
+
     } catch (error) {
       // Always dismiss the loading toast in case of error
       toast.dismiss(loadingToastId);
 
-      console.error("Error submitting reply:", error);
-
       // Check for different error formats
-      // Lỗi có thể là một chuỗi hoặc một đối tượng
       const errorMessage =
         typeof error === "string"
           ? error
@@ -1173,18 +1251,8 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
               ? error.payload
               : "Có lỗi xảy ra trong quá trình xử lý");
 
-      // Log detailed error information for debugging
-      console.log("Error details:", {
-        error,
-        message: errorMessage,
-        hasPayload: !!error.payload,
-        content,
-      });
-
       // Check if the error is from content moderation
       if (errorMessage && errorMessage.includes("không phù hợp")) {
-        console.log("Moderation error detected:", errorMessage);
-
         // Tạo một đối tượng lỗi đúng định dạng để truyền vào showModerationError
         const moderationError = {
           message: errorMessage,
@@ -1281,16 +1349,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
   };
 
   // Function to load replies for a specific review
-  const loadRepliesForReview = async (reviewId) => {
-    try {
-      // Check if we already have replies for this review to avoid duplicate calls
-      if (!replies[reviewId]) {
-        await dispatch(getReviewReplies(reviewId)).unwrap();
-      }
-    } catch (error) {
-      console.error("Error loading replies:", error);
-    }
-  };
+  
 
   // Load replies for all reviews when component mounts or when reviews change
   useEffect(() => {
@@ -1637,7 +1696,8 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         
         return;
       }
-      const token=localStorage.getItem('jwt');
+
+      const token = localStorage.getItem('jwt');
       // Gọi API cập nhật reply
       const response2 = await fetch(`${API_URL}/review/update-reply/${editReplyData.id}`, {
         method: 'PUT',
@@ -1721,7 +1781,6 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
       });
 
     } catch (error) {
-      console.error('Error updating reply:', error);
       // Hiển thị thông báo lỗi
       toast.error('Có lỗi xảy ra khi cập nhật bình luận. Vui lòng thử lại sau.', {
         position: "top-right", 
@@ -1731,7 +1790,6 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         pauseOnHover: true,
         draggable: true,
       });
-
     }
   };
 
@@ -1767,125 +1825,124 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
 
       <div className="max-w-7xl mx-auto">
         {/* Company Header */}
-        <div className="flex flex-col sm:flex-row items-start gap-2 xs:gap-4 sm:gap-6 mb-6 xs:mb-8 sm:mb-12">
-          <div className="w-16 h-16 xs:w-20 xs:h-20 sm:w-24 sm:h-24 bg-indigo-100 rounded-xl overflow-hidden flex-shrink-0">
-            <img
-              src={companyProfile?.logo}
-              alt={`${companyProfile?.companyName} Logo`}
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="w-full">
-            <div className="flex flex-col xs:flex-row xs:items-center xs:gap-3 mb-1">
-              <h1 className="text-lg xs:text-xl sm:text-2xl font-bold text-gray-900">
-                {companyProfile?.companyName}
-              </h1>
-              <div className="mt-2 xs:mt-0">
-                {averageStars !== 0 ? (
-                  <div className="flex items-center">
-                    <Badge
-                      className={`
-                        px-2 xs:px-3 py-0.5 xs:py-1 text-xs xs:text-sm text-white rounded-md hover:bg-opacity-80
-                        ${averageStars <= 1 ? "bg-red-500" : ""}
-                        ${
-                          averageStars > 1 && averageStars <= 2
-                            ? "bg-orange-500"
-                            : ""
-                        }
-                        ${
-                          averageStars > 2 && averageStars <= 3
-                            ? "bg-yellow-500"
-                            : ""
-                        }
-                        ${
-                          averageStars > 3 && averageStars <= 4
-                            ? "bg-green-500"
-                            : ""
-                        }
-                        ${averageStars > 4 ? "bg-blue-500" : ""}
-                      `}
-                    >
-                      {averageStars.toFixed(1)}
-                    </Badge>
-                    <div className="ml-2 flex">
-                      {[...Array(5)].map((_, index) => (
-                        <StarRounded
-                          key={index}
-                          className={`w-4 h-4 xs:w-5 xs:h-5 ${
-                            index < averageStars
-                              ? "text-yellow-500"
-                              : "text-gray-300"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-xs xs:text-sm text-gray-500">
-                    Chưa có đánh giá nào
-                  </p>
-                )}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 transform transition-all duration-300 hover:shadow-xl">
+          <div className="flex flex-col sm:flex-row items-start gap-6">
+            <div className="relative group">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-2xl overflow-hidden flex-shrink-0 transform transition-transform duration-300 group-hover:scale-105">
+                <img
+                  src={companyProfile?.logo}
+                  alt={`${companyProfile?.companyName} Logo`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="absolute -bottom-2 -right-2 bg-green-500 rounded-full p-1.5 shadow-lg">
+                <CheckCircle2 className="h-4 w-4 text-white" />
               </div>
             </div>
-            {!localStorage.getItem("jwt") || checkIfSaved === false ? (
-              <div className="flex items-center p-2 xs:p-3 border border-yellow-400 rounded-lg bg-yellow-50 shadow-sm mt-2 xs:mt-3">
-                <Star className="h-4 w-4 text-yellow-400 mr-2" />
-                <span className="text-xs xs:text-sm text-gray-700 font-medium">
-                  Phải đăng nhập và được apply vào công ty thì mới được đánh giá
-                </span>
-              </div>
-            ) : null}
-            <div className="flex flex-col xs:flex-row xs:flex-wrap gap-2 xs:gap-4 sm:gap-6 mt-2 xs:mt-4">
-              <div className="flex items-center gap-2 text-xs xs:text-sm text-gray-600">
-                <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                <span>
-                  Thành lập{" "}
-                  {new Date(companyProfile?.establishedTime).toLocaleDateString(
-                    "vi-VN",
-                    {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    }
+            
+            <div className="flex-1">
+              <div className="flex flex-col xs:flex-row xs:items-center xs:gap-4 mb-3">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                  {companyProfile?.companyName}
+                </h1>
+                <div className="mt-2 xs:mt-0">
+                  {averageStars !== 0 ? (
+                    <div className="flex items-center bg-white rounded-full px-3 py-1.5 shadow-sm">
+                      <Badge
+                        className={`
+                          px-2 py-1 text-sm text-white rounded-full
+                          ${averageStars <= 1 ? "bg-red-500" : ""}
+                          ${averageStars > 1 && averageStars <= 2 ? "bg-orange-500" : ""}
+                          ${averageStars > 2 && averageStars <= 3 ? "bg-yellow-500" : ""}
+                          ${averageStars > 3 && averageStars <= 4 ? "bg-green-500" : ""}
+                          ${averageStars > 4 ? "bg-blue-500" : ""}
+                        `}
+                      >
+                        {averageStars.toFixed(1)}
+                      </Badge>
+                      <div className="ml-2 flex">
+                        {[...Array(5)].map((_, index) => (
+                          <StarRounded
+                            key={index}
+                            className={`w-5 h-5 ${
+                              index < averageStars
+                                ? "text-yellow-500"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 bg-gray-50 px-3 py-1.5 rounded-full">
+                      Chưa có đánh giá nào
+                    </p>
                   )}
-                </span>
+                </div>
               </div>
-              <div className="flex items-center gap-1 xs:gap-2 text-xs xs:text-sm text-gray-600">
-                <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                <span
-                  className="max-w-[200px] xs:max-w-[250px] sm:max-w-[300px] line-clamp-2"
-                  title={companyProfile?.address || "Chưa có địa chỉ"}
-                >
-                  {companyProfile?.address || "Chưa có địa chỉ"}
-                </span>
-              </div>
-              <div className="flex flex-col gap-1 text-xs xs:text-sm text-gray-600">
-                <div className="flex items-center gap-2">
-                  <Briefcase className="w-4 h-4 text-gray-400" />
-                  <span>
-                    {companyProfile?.industry
-                      ?.slice(0, 2)
-                      .map((ind) => ind.industryName)
-                      .join(" & ") || "Chưa có ngành"}
+
+              {!localStorage.getItem("jwt") || checkIfSaved === false ? (
+                <div className="flex items-center p-3 border border-yellow-400 rounded-xl bg-yellow-50 shadow-sm mb-4">
+                  <Star className="h-5 w-5 text-yellow-400 mr-2" />
+                  <span className="text-sm text-gray-700 font-medium">
+                    Phải đăng nhập và được apply vào công ty thì mới được đánh giá
                   </span>
                 </div>
-                {companyProfile?.industry?.length > 2 && (
-                  <div className="ml-6">
-                    {companyProfile.industry.slice(2).map((ind, index) => (
-                      <div key={index}>{ind.industryName}</div>
-                    ))}
+              ) : null}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
+                  <Calendar className="w-5 h-5 text-purple-500" />
+                  <div>
+                    <p className="text-xs text-gray-500">Thành lập</p>
+                    <p className="text-sm font-medium text-gray-700">
+                      {new Date(companyProfile?.establishedTime).toLocaleDateString(
+                        "vi-VN",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )}
+                    </p>
                   </div>
-                )}
+                </div>
+
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
+                  <MapPin className="w-5 h-5 text-purple-500" />
+                  <div>
+                    <p className="text-xs text-gray-500">Địa chỉ</p>
+                    <p className="text-sm font-medium text-gray-700 break-words" title={companyProfile?.address || "Chưa có địa chỉ"}>
+                      {companyProfile?.address || "Chưa có địa chỉ"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
+                  <Briefcase className="w-5 h-5 text-purple-500" />
+                  <div>
+                    <p className="text-xs text-gray-500">Lĩnh vực</p>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {companyProfile?.industry?.slice(0, 2).map((ind, index) => (
+                        <IndustryBadge key={index} name={ind.industryName} />
+                      ))}
+                      {companyProfile?.industry?.length > 2 && (
+                        <span className="text-xs text-gray-500">+{companyProfile.industry.length - 2}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
+
+              {!localStorage.getItem("jwt") ? null : (
+                <Button
+                  onClick={handleFollowClick}
+                  className="px-6 py-2.5 text-sm bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transform transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
+                >
+                  {isFollowing ? "Bỏ theo dõi" : "Theo dõi"}
+                </Button>
+              )}
             </div>
-            {!localStorage.getItem("jwt") ? null : (
-              <Button
-                onClick={handleFollowClick}
-                className="mt-4 xs:mt-6 px-3 py-1.5 xs:px-4 xs:py-2 text-xs xs:text-sm bg-purple-500 text-white rounded-lg hover:bg-purple-700 w-full xs:w-auto"
-              >
-                {isFollowing ? "Bỏ theo dõi" : "Theo dõi"}
-              </Button>
-            )}
           </div>
         </div>
 

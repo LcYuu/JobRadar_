@@ -1,15 +1,14 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
-import { Badge } from "../../../ui/badge";
-import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card"
+import { Badge } from "../../../ui/badge"
+import { useNavigate } from "react-router-dom"
+import { saveJob } from "../../../redux/Seeker/seeker.thunk"
+import { useDispatch, useSelector } from "react-redux"
+import { Bookmark, BookmarkCheck, MapPin, ArrowRight } from "lucide-react"
+import Swal from "sweetalert2"
+import { jobTypeColors } from "../../../configs/constants"
+import IndustryBadge from "../IndustryBadge/IndustryBadge"
 import "./JobCard.css";
-import { saveJob } from "../../../redux/Seeker/seeker.thunk";
-import { useDispatch, useSelector } from "react-redux";
-import { Bookmark, BookmarkCheck } from "lucide-react";
-import { toast } from "react-hot-toast";
-import Swal from "sweetalert2";
-
-import { jobTypeColors } from "../../../configs/constants";
 
 
 const categoryStyles = {
@@ -33,88 +32,73 @@ const categoryStyles = {
     backgroundColor: "rgba(0, 0, 255, 0.1)",
     color: "blue",
   },
-};
+}
 
-
-
-function JobCardContent({ company, location, category = [], jobType }) {
+function JobCardHeader({ jobType, companyLogo, company }) {
   return (
-    <div className="relative">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-muted-foreground text-sm font-semibold inline-block max-w-[150px] truncate">
-          {company}
-        </span>
-        <span className="text-muted-foreground text-sm">{location}</span>
+    <div className="flex items-start justify-between mb-4">
+      <div className="flex items-center space-x-3">
+        <img
+          src={companyLogo || "/placeholder.svg"}
+          alt="Logo công ty"
+          className="w-12 h-12 rounded-lg object-cover shadow-sm border border-gray-100 flex-shrink-0"
+        />
+        <div className="min-w-0 flex-1 pr-10">
+          <h4 className="font-semibold text-gray-800 text-sm break-words">{company}</h4>
+          <Badge
+            variant="secondary"
+            className="text-xs font-medium px-2 py-1 mt-1"
+            style={{
+              backgroundColor: jobTypeColors[jobType]?.backgroundColor || "#f3f4f6",
+              color: jobTypeColors[jobType]?.color || "#6b7280",
+            }}
+          >
+            {jobType}
+          </Badge>
+        </div>
       </div>
-      <div className="relative flex justify-between items-start">
-        <div className="flex space-x-2">
-          {category.map((cat, index) => (
-            <Badge
-              key={index}
-              style={
-                categoryStyles[cat] || {
-                  backgroundColor: "rgba(0, 0, 0, 0.1)",
-                  color: "black",
-                }
-              }
-              variant="secondary"
-            >
-              {cat}
-            </Badge>
+    </div>
+  )
+}
+
+function JobCardContent({ location, category = [] }) {
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center text-gray-500">
+        <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+        <span className="text-sm">{location}</span>
+      </div>
+
+      {category.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {category.slice(0, 3).map((cat, index) => (
+            <IndustryBadge key={index} name={cat} />
           ))}
+          {category.length > 3 && (
+            <Badge variant="outline" className="text-xs">
+              +{category.length - 3}
+            </Badge>
+          )}
         </div>
-        <div
-          className="text-white border px-2 py-1 rounded-md text-xs font-semibold uppercase"
-          style={
-            jobTypeColors[jobType]
-              ? {
-                  backgroundColor: jobTypeColors[jobType].backgroundColor,
-                  color: jobTypeColors[jobType].color,
-                  border: jobTypeColors[jobType].border,
-                }
-              : { backgroundColor: "#6b7280", color: "white", border: "1px solid #6b7280" }
-          }
-        >
-          {jobType}
-        </div>
-      </div>
+      )}
     </div>
-  );
+  )
 }
 
-function JobCardHeader({ companyLogo }) {
-  return (
-    <div className="mb-4">
-      <img
-        src={companyLogo}
-        alt="Company Logo"
-        className="w-12 h-12 rounded-lg"
-      />
-    </div>
-  );
-}
+export default function JobCard({ postId, jobTitle, company, location, category, jobType, companyLogo }) {
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const { savedJobs } = useSelector((store) => store.seeker)
+  const isSaved = savedJobs?.some((savedJob) => savedJob.postId === postId)
+  const { user } = useSelector((store) => store.auth)
 
-export default function JobCard({
-  postId,
-  jobTitle,
-  company,
-  location,
-  category,
-  jobType,
-  companyLogo,
-}) {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { savedJobs } = useSelector((store) => store.seeker);
-  const isSaved = savedJobs?.some((savedJob) => savedJob.postId === postId);
-  const { user } = useSelector((store) => store.auth);
 
   const handleCardClick = () => {
-    navigate(`/jobs/job-detail/${postId}`);
-  };
+    navigate(`/jobs/job-detail/${postId}`)
+  }
 
   const handleSaveJob = async (e) => {
-    e.stopPropagation();
+    e.stopPropagation()
     if (!user) {
       await Swal.fire({
         title: "Yêu cầu đăng nhập",
@@ -122,12 +106,12 @@ export default function JobCard({
         icon: "warning",
         confirmButtonText: "Đóng",
         confirmButtonColor: "#9333ea",
-      });
-      return;
+      })
+      return
     }
 
     try {
-      const result = await dispatch(saveJob(postId)).unwrap();
+      const result = await dispatch(saveJob(postId)).unwrap()
       if (result.action === "saved") {
         await Swal.fire({
           title: "Thành công",
@@ -138,7 +122,7 @@ export default function JobCard({
           timer: 1500,
           timerProgressBar: true,
           showConfirmButton: false,
-        });
+        })
       } else {
         await Swal.fire({
           title: "Thành công",
@@ -149,7 +133,8 @@ export default function JobCard({
           timer: 1500,
           timerProgressBar: true,
           showConfirmButton: false,
-        });
+        })
+
       }
     } catch (error) {
       await Swal.fire({
@@ -158,67 +143,53 @@ export default function JobCard({
         icon: "error",
         confirmButtonText: "Đóng",
         confirmButtonColor: "#9333ea",
-      });
+      })
     }
-  };
+  }
 
   return (
-    <Card
-      onClick={handleCardClick}
-      className="card cursor-pointer shadow-lg hover:shadow-2xl transition-shadow duration-500 ease-in-out relative group hover:bg-gray-100"
-    >
-      <CardHeader className="card-header">
-        <JobCardHeader companyLogo={companyLogo} />
-        <CardTitle>{jobTitle}</CardTitle>
+    <Card className="group relative cursor-pointer overflow-hidden border border-gray-200 bg-white hover:border-primary/30 hover:shadow-xl transition-all duration-300 ease-out hover:-translate-y-1 h-full">
+      {/* Bookmark Button */}
+      <button
+        onClick={handleSaveJob}
+        className={`absolute top-4 right-4 z-10 p-2 rounded-full transition-all duration-300 shadow-sm ${
+          isSaved
+            ? "bg-primary text-white shadow-md scale-110"
+            : "bg-white/90 backdrop-blur-sm text-gray-400 hover:text-primary hover:bg-white hover:scale-110"
+        } active:scale-95`}
+        title={isSaved ? "Bỏ lưu" : "Lưu công việc"}
+      >
+        {isSaved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
+      </button>
 
-        {user && (
-          <button
-            onClick={handleSaveJob}
-            className={`absolute top-4 right-4 p-2 rounded-full transition-all duration-300 ${
-              isSaved
-                ? "bg-purple-100 text-purple-600 hover:bg-purple-200"
-                : "bg-gray-100 text-gray-400 hover:bg-gray-200"
-            }`}
-          >
-            {isSaved ? (
-              <BookmarkCheck className="w-5 h-5" />
-            ) : (
-              <Bookmark className="w-5 h-5" />
-            )}
-          </button>
-        )}
+      {/* Card Content */}
+      <div onClick={handleCardClick} className="p-6 h-full flex flex-col">
+        <CardHeader className="p-0 mb-4">
+          <JobCardHeader jobType={jobType} companyLogo={companyLogo} company={company} />
+        </CardHeader>
 
-      </CardHeader>
-      <CardContent className="card-content">
-        <JobCardContent
-          company={company}
-          location={location}
-          category={category}
-          jobType={jobType}
-        />
-      </CardContent>
-      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gray-200 bg-opacity-50">
-      <div className="flex flex-col gap-3">
-        <button
-          onClick={handleCardClick}
-          className="bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white font-medium px-5 py-2 rounded-full shadow-md transition duration-300 ease-in-out"
-        >
-          Xem chi tiết
-        </button>
-        <button
-          onClick={handleSaveJob}
-          className={`bg-gradient-to-r ${
-            isSaved
-              ? "from-red-400 to-red-600 hover:from-red-500 hover:to-red-700"
-              : "from-purple-400 to-purple-600 hover:from-purple-500 hover:to-purple-700"
-          } text-white font-medium px-5 py-2 rounded-full shadow-md transition duration-300 ease-in-out`}
-        >
-          {isSaved ? "Bỏ lưu" : "Lưu bài viết"}
-        </button>
+        {/* Job Title */}
+        <CardTitle className="text-xl font-bold text-gray-900 mb-4 line-clamp-2 group-hover:text-primary transition-colors duration-300 leading-tight">
+          {jobTitle}
+        </CardTitle>
+
+        {/* Job Details */}
+        <CardContent className="p-0 flex-1">
+          <JobCardContent location={location} category={category} />
+        </CardContent>
+
+        {/* View Details Button - appears on hover */}
+        <div className="mt-6 pt-4 border-t border-gray-100 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+          <div className="flex items-center justify-between text-primary font-semibold text-sm">
+            <span>Xem chi tiết</span>
+            <ArrowRight className="h-4 w-4 transform group-hover:translate-x-1 transition-transform duration-300" />
+          </div>
+        </div>
       </div>
-    </div>
 
+      {/* Subtle gradient overlay on hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
     </Card>
-  );
+  )
 }
 

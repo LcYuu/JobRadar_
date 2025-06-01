@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../../ui/tooltip";
 import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
 import { Card } from "../../ui/card";
@@ -16,21 +15,20 @@ import {
   UserCheck,
   Bookmark,
   BookmarkCheck,
+  Building2,
+  Calendar,
+  Users,
+  Star,
+  ExternalLink,
+  Share2,
 } from "lucide-react";
 import ApplyModal from "../../components/common/ApplyModal/ApplyModal";
 import JobCard_AllJob from "../../components/common/JobCard_AllJob/JobCard_AllJob";
-import {
-  checkIfApplied,
-  getOneApplyJob,
-} from "../../redux/ApplyJob/applyJob.thunk";
-import {
-  getJobPostByPostId,
-  getSimilarJobs,
-} from "../../redux/JobPost/jobPost.thunk";
+import { checkIfApplied, getOneApplyJob } from "../../redux/ApplyJob/applyJob.thunk";
+import { getJobPostByPostId, getSimilarJobs } from "../../redux/JobPost/jobPost.thunk";
 import { saveJob } from "../../redux/Seeker/seeker.thunk";
 import Swal from "sweetalert2";
 import IndustryBadge from "../../components/common/IndustryBadge/IndustryBadge";
-import { skillBadgeStyle } from "../../configs/constants"; // Nếu bạn đã định nghĩa màu sắc chung
 
 export default function JobDetail() {
   const dispatch = useDispatch();
@@ -50,8 +48,6 @@ export default function JobDetail() {
       top: 0,
       behavior: "smooth",
     });
-
-    // Load dữ liệu khi component được mount
     dispatch(getOneApplyJob(postId));
     dispatch(checkIfApplied(postId));
     if (!postByPostId || postByPostId.postId !== postId) {
@@ -59,7 +55,6 @@ export default function JobDetail() {
     }
   }, [dispatch, postId]);
 
-  // Cập nhật khi modal đóng
   useEffect(() => {
     if (modalClosed) {
       dispatch(getOneApplyJob(postId));
@@ -68,7 +63,6 @@ export default function JobDetail() {
     }
   }, [modalClosed, dispatch, postId]);
 
-  // API để lấy công việc tương tự
   useEffect(() => {
     if (postByPostId?.company?.companyId) {
       const companyId = postByPostId?.company?.companyId;
@@ -150,22 +144,22 @@ export default function JobDetail() {
     }
   };
 
-  console.log("hasApplied:", hasApplied);
-  console.log("oneApplyJob:", oneApplyJob);
-
-
-  const getRandomColor = () => {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
+  const getSkillColor = (index) => {
+    const colors = [
+      "bg-blue-100 text-blue-800",
+      "bg-green-100 text-green-800",
+      "bg-purple-100 text-purple-800",
+      "bg-orange-100 text-orange-800",
+      "bg-pink-100 text-pink-800",
+      "bg-indigo-100 text-indigo-800",
+    ];
+    return colors[index % colors.length];
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="container mx-auto px-4 py-8">
+        {/* Back Button */}
         <Button
           variant="ghost"
           className="flex items-center gap-2 mb-6 hover:bg-gray-100"
@@ -174,405 +168,336 @@ export default function JobDetail() {
           <ArrowLeft className="w-4 h-4" />
           <span>Quay lại</span>
         </Button>
-        {/* Main content wrapper */}
-        <div className="relative">
-          <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
-            {/* Left column */}
-            <div className="space-y-6">
-              <div className="bg-white shadow-md rounded-lg p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-4 w-full pr-7">
-                    <img
-                      src={postByPostId?.company.logo}
-                      alt="Company Logo"
-                      className="h-16 w-16 rounded-lg bg-indigo-100 flex items-center justify-center text-2xl font-bold text-indigo-600"
-                    />
-                    <div className="flex-1">
-                      <h1 className="text-2xl font-bold break-words">
-                        {postByPostId?.title}
-                      </h1>
-                      <p className="text-sm text-gray-500 font-bold break-words">
-                        {postByPostId?.company.companyName} •{" "}
-                        {postByPostId?.location} • {postByPostId?.typeOfWork}
-                      </p>
+
+        <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
+          {/* Left Column - Main Content */}
+          <div className="space-y-6">
+            {/* Job Header */}
+            <Card className="overflow-hidden">
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-6">
+                  <div className="flex items-start space-x-6 flex-1">
+                    <div className="relative">
+                      <img
+                        src={postByPostId?.company.logo || "/placeholder.svg"}
+                        alt="Company Logo"
+                        className="h-20 w-20 rounded-xl object-cover shadow-sm border border-gray-200"
+                      />
+                      <div className="absolute -bottom-2 -right-2 bg-green-500 rounded-full p-1">
+                        <CheckCircle2 className="h-4 w-4 text-white" />
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h1 className="text-2xl font-bold text-gray-900 mb-2">{postByPostId?.title}</h1>
+                      <div className="flex flex-wrap items-center gap-4 text-gray-600 mb-4">
+                        <div className="flex items-center gap-2">
+                          <Building2 className="h-4 w-4" />
+                          <span className="font-medium">{postByPostId?.company.companyName}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4" />
+                          <span>{postByPostId?.location}</span>
+                        </div>
+                        <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                          {postByPostId?.typeOfWork}
+                        </Badge>
+                      </div>
+                      {postByPostId?.salary && (
+                        <div className="flex items-center gap-2 text-green-600 font-semibold">
+                          <DollarSign className="h-5 w-5" />
+                          <span>
+                            {new Intl.NumberFormat("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                            }).format(postByPostId.salary)}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  {/* Nút Lưu bài viết */}
-                  <div className="flex-shrink-0">
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-3">
                     {user && (
-                      <button
-                        title={
-                          isSaved
-                            ? "Bài viết đã được lưu"
-                            : "Lưu bài viết để xem lại sau"
-                        }
+                      <Button
+                        variant="outline"
+                        size="icon"
                         onClick={handleSaveJob}
-                        className={`p-3 rounded-full transition-all duration-300 ${
-                          isSaved
-                            ? "bg-purple-100 text-purple-600 hover:bg-purple-200"
-                            : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+                        className={`transition-all duration-300 ${
+                          isSaved ? "bg-primary text-white border-primary hover:bg-primary/90" : "hover:bg-gray-50"
                         }`}
+                        title={isSaved ? "Bỏ lưu công việc" : "Lưu công việc"}
                       >
-                        {isSaved ? (
-                          <BookmarkCheck className="w-6 h-6" />
-                        ) : (
-                          <Bookmark className="w-6 h-6" />
-                        )}
-                      </button>
+                        {isSaved ? <BookmarkCheck className="w-5 h-5" /> : <Bookmark className="w-5 h-5" />}
+                      </Button>
                     )}
-                  </div>
-                </div>
-                {/* Nút Nộp đơn */}
-                <div className="flex justify-end  mr-2">
-                  {oneApplyJob?.save ? (
-                    <Button
-                      variant="outline"
-                      className="text-green-600 font-bold border-green-700 cursor-not-allowed"
-                      disabled
-                    >
-                      Đã được duyệt
+                    <Button variant="outline" size="icon" className="hover:bg-gray-50" title="Chia sẻ công việc">
+                      <Share2 className="w-5 h-5" />
                     </Button>
-                  ) : hasApplied ? (
-                    <button
-                      className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
-                      onClick={handleOpenModal}
-                    >
-                      Cập nhật đơn
-                    </button>
-                  ) : user ? (
                     <Button
-                      variant="default"
-                      className="bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
                       onClick={handleOpenModal}
+                      className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg font-semibold"
+                      disabled={hasApplied}
                     >
-                      Nộp đơn
+                      {hasApplied ? "Đã ứng tuyển" : "Ứng tuyển ngay"}
                     </Button>
-                  ) : (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="text-gray-400 cursor-not-allowed"
-                          disabled
-                        >
-                          Nộp đơn
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Vui lòng đăng nhập để ứng tuyển</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                </div>
-                <section>
-                  <ApplyModal
-                    job={postByPostId}
-                    open={open}
-                    handleClose={handleClose}
-                    oneApplyJob={oneApplyJob}
-                  />
-                </section>
-              </div>
-
-              {/* Thông báo dưới nút */}
-              {oneApplyJob && (
-                <div className="flex items-center space-x-2 mt-4">
-                  <p className="text-sm text-purple-600">
-                    Đơn ứng tuyển đã được cập nhật vào lúc{" "}
-                    {new Date(oneApplyJob.applyDate).toLocaleDateString(
-                      "vi-VN",
-                      {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      }
-                    )}
-                  </p>
-                  {oneApplyJob.pathCV && (
-                    <a
-                      href={oneApplyJob.pathCV}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-black hover:text-purple-400 ml-4"
-                      key={oneApplyJob.pathCV}
-                    >
-                      Xem CV đã nộp
-                    </a>
-                  )}
-                </div>
-              )}
-
-              {/* Job Description */}
-              <section className="space-y-4">
-                {/* Card for Job Description */}
-                <div className="p-6 bg-white rounded-lg shadow-lg">
-                  <h2 className="text-lg font-semibold">Mô tả</h2>
-                  <div className="text-sm text-gray-600">
-                    {postByPostId?.description
-                      ?.split("\n")
-                      .map((line, index) => (
-                        <p key={index}>{line.trim()}</p>
-                      ))}
                   </div>
                 </div>
 
-                {/* Card for Job Responsibilities */}
-                <div className="p-6 bg-white rounded-lg shadow-lg">
-                  <h2 className="text-lg font-semibold">Yêu cầu công việc</h2>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    {postByPostId?.requirement ? (
-                      postByPostId.requirement
-                        .split("\n")
-                        .map((item, index) => (
-                          <li key={index} className="flex items-start">
-                            <CheckCircle2 className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
-                            <span>{item.trim()}</span>
-                          </li>
-                        ))
-                    ) : (
-                      <li className="text-gray-500 italic">
-                        Chưa có thông tin
-                      </li>
-                    )}
-                  </ul>
-                </div>
-
-                {/* Card for Nice to Have */}
-                <div className="p-6 bg-white rounded-lg shadow-lg">
-                  <h2 className="text-lg font-semibold">
-                    Bạn là người phù hợp nếu
-                  </h2>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    {postByPostId?.niceToHaves ? (
-                      postByPostId.niceToHaves
-                        .split("\n")
-                        .map((item, index) => (
-                          <li key={index} className="flex items-start">
-                            <CheckCircle2 className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
-                            <span>{item.trim()}</span>
-                          </li>
-                        ))
-                    ) : (
-                      <li className="text-gray-500 italic">
-                        Chưa có thông tin
-                      </li>
-                    )}
-                  </ul>
-                </div>
-
-                {/* Card for Benefits */}
-                <div className="p-6 bg-white rounded-lg shadow-lg">
-                  <h2 className="text-lg font-semibold">Quyền lợi</h2>
-                  <ul className="space-y-2 text-sm text-gray-600">
-                    {postByPostId?.benefit ? (
-                      postByPostId.benefit.split("\n").map((item, index) => (
-                        <li key={index} className="flex items-start">
-                          <CheckCircle2 className="mr-2 h-5 w-5 text-green-500 flex-shrink-0" />
-                          <span>{item.trim()}</span>
-                        </li>
-                      ))
-                    ) : (
-                      <li className="text-gray-500 italic">
-                        Chưa có thông tin
-                      </li>
-                    )}
-                  </ul>
-                </div>
-              </section>
-
-              {/* Company Info */}
-              <Card className="relative w-full mx-auto bg-white shadow-md">
-                <div className="container mx-auto px-8 py-8">
-                  <div className="flex flex-col lg:flex-row items-start justify-between space-y-6 lg:space-y-0">
-                    {/* Company Info Left Side */}
-                    <div className="flex items-start space-x-6 flex-1">
-                      <img
-                        src={postByPostId?.company.logo}
-                        alt="Company Logo"
-                        className="h-20 w-20 rounded-lg object-cover"
-                      />
-                      <div className="space-y-4">
-                        <div>
-                          <h2 className="text-2xl font-bold">
-                            {postByPostId?.company.companyName}
-                          </h2>
-                          <Link
-                            to={`/companies/${postByPostId?.company.companyId}`}
-                            className="text-sm text-indigo-600 hover:underline"
-                          >
-                            Tìm hiểu thêm về {postByPostId?.company.companyName}{" "}
-                            →
-                          </Link>
-                        </div>
-                        <p className="text-sm text-gray-600 max-w-2xl">
-                          {postByPostId?.company.companyName}{" "}
-                          {postByPostId?.company.description}.
+                {/* Application Status */}
+                {oneApplyJob && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-blue-100 rounded-full p-2">
+                        <CheckCircle2 className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-blue-900">Đã ứng tuyển thành công</p>
+                        <p className="text-sm text-blue-700">
+                          Ngày ứng tuyển: {new Date(oneApplyJob.applyDate).toLocaleDateString("vi-VN")}
                         </p>
                       </div>
                     </div>
+                    {oneApplyJob.pathCV && (
+                      <Button variant="outline" size="sm" asChild>
+                        <a
+                          href={oneApplyJob.pathCV}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          Xem CV
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {/* Job Details Sections */}
+            <div className="space-y-6">
+              {/* Job Description */}
+              <Card>
+                <div className="p-6">
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <Briefcase className="h-5 w-5 text-blue-600" />
+                    Mô tả công việc
+                  </h2>
+                  <div className="prose prose-gray max-w-none">
+                    {postByPostId?.description?.split("\n").map((line, index) => (
+                      <p key={index} className="text-gray-700 leading-relaxed mb-3">
+                        {line.trim()}
+                      </p>
+                    ))}
                   </div>
                 </div>
               </Card>
 
-              {/* Similar Jobs Section */}
-              {similarJobs && similarJobs.length > 0 && (
-                <section className="mt-12 bg-white rounded-lg shadow-sm p-4 w-full">
-                  <div className="mb-6 flex items-center justify-between">
-                    <div>
-                      <h2 className="text-xl font-bold text-gray-900">
-                        Công việc tương tự
-                      </h2>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {postByPostId?.company?.name}
-                      </p>
-                    </div>
-                    <Button
-                      onClick={() => {
-                        navigate(`/find-jobs`, {
-                          state: {
-                            selectedIndustryIds: [
-                              postByPostId?.company?.industryId,
-                            ],
-                          },
-                        });
-                      }}
-                      className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
-                    >
-                      Xem tất cả →
+              {/* Requirements */}
+              <Card>
+                <div className="p-6">
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    Yêu cầu công việc
+                  </h2>
+                  <ul className="space-y-3">
+                    {postByPostId?.requirement ? (
+                      postByPostId.requirement.split("\n").map((item, index) => (
+                        <li key={index} className="flex items-start gap-3">
+                          <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-gray-700 leading-relaxed">{item.trim()}</span>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="text-gray-500 italic">Chưa có thông tin</li>
+                    )}
+                  </ul>
+                </div>
+              </Card>
+
+              {/* Nice to Have */}
+              {postByPostId?.niceToHaves && (
+                <Card>
+                  <div className="p-6">
+                    <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                      <Star className="h-5 w-5 text-purple-600" />
+                      Bạn là người phù hợp nếu
+                    </h2>
+                    <ul className="space-y-3">
+                      {postByPostId.niceToHaves.split("\n").map((item, index) => (
+                        <li key={index} className="flex items-start gap-3">
+                          <Star className="h-5 w-5 text-purple-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-gray-700 leading-relaxed">{item.trim()}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </Card>
+              )}
+
+              {/* Benefits */}
+              {postByPostId?.benefit && (
+                <Card>
+                  <div className="p-6">
+                    <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                      <Users className="h-5 w-5 text-orange-600" />
+                      Quyền lợi
+                    </h2>
+                    <ul className="space-y-3">
+                      {postByPostId.benefit.split("\n").map((item, index) => (
+                        <li key={index} className="flex items-start gap-3">
+                          <CheckCircle2 className="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-gray-700 leading-relaxed">{item.trim()}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </Card>
+              )}
+            </div>
+
+            {/* Company Info */}
+            <Card>
+              <div className="p-6">
+                <div className="flex items-start gap-6">
+                  <img
+                    src={postByPostId?.company.logo || "/placeholder.svg"}
+                    alt="Company Logo"
+                    className="h-24 w-24 rounded-xl object-cover shadow-sm border border-gray-200"
+                  />
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">{postByPostId?.company.companyName}</h2>
+                    <p className="text-gray-600 mb-4 leading-relaxed">{postByPostId?.company.description}</p>
+                    <Button variant="outline" asChild>
+                      <Link to={`/companies/${postByPostId?.company.companyId}`} className="flex items-center gap-2">
+                        Tìm hiểu thêm về công ty
+                        <ExternalLink className="h-4 w-4" />
+                      </Link>
                     </Button>
                   </div>
+                </div>
+              </div>
+            </Card>
 
-                  <div className="grid grid-cols-1 gap-4">
-                    {similarJobs.slice(0, 4).map((job) => (
+            {/* Similar Jobs */}
+            {similarJobs && similarJobs.length > 0 && (
+              <Card>
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-semibold">Công việc tương tự</h2>
+                    <Button variant="outline" size="sm">
+                      Xem tất cả
+                    </Button>
+                  </div>
+                  <div className="grid gap-4">
+                    {similarJobs.slice(0, 3).map((job) => (
                       <div key={job.postId} onClick={handleJobCardClick}>
                         <JobCard_AllJob
                           job={{
                             ...job,
                             company: {
                               ...job.company,
-                              logo:
-                                job.company.logo || "/default-company-logo.png",
+                              logo: job.company.logo || "/placeholder.svg",
                             },
                           }}
                         />
                       </div>
                     ))}
                   </div>
-                </section>
-              )}
-            </div>
-
-            {/* Right column (Sidebar) */}
-            <div className="space-y-6">
-              <Card className="p-6 bg-white rounded-lg shadow-lg">
-                <h3 className="mb-4 text-lg font-semibold">Thông tin khác</h3>
-                <div className="space-y-4 text-sm">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <Clock className="h-5 w-5" />
-                      <span>Hạn nộp</span>
-                    </div>
-                    <span className="font-medium">
-                      {postByPostId?.expireDate
-                        ? new Date(postByPostId.expireDate).toLocaleDateString(
-                            "vi-VN",
-                            {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            }
-                          )
-                        : "N/A"}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <Clock className="h-5 w-5" />
-                      <span>Ngày đăng bài</span>
-                    </div>
-                    <span className="font-medium">
-                      {postByPostId?.createDate
-                        ? new Date(postByPostId.createDate).toLocaleDateString(
-                            "vi-VN",
-                            {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            }
-                          )
-                        : "N/A"}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <Briefcase className="h-5 w-5" />
-                      <span>Loại công việc</span>
-                    </div>
-                    <span className="font-medium">
-                      {postByPostId?.typeOfWork}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <UserCheck className="h-5 w-5" />
-                      <span>Vị trí</span>
-                    </div>
-                    <span className="font-medium">
-                      {postByPostId?.position}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 text-gray-600">
-                      <DollarSign className="h-5 w-5" />
-                      <span>Lương</span>
-                    </div>
-                    <span className="font-medium">
-                      {postByPostId?.salary
-                        ? new Intl.NumberFormat("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                          }).format(postByPostId.salary)
-                        : "N/A"}
-                    </span>
-                  </div>
                 </div>
               </Card>
+            )}
+          </div>
 
-              <Card className="p-6 bg-white rounded-lg shadow-lg">
+          {/* Right Column - Sidebar */}
+          <div className="space-y-6">
+            {/* Job Information */}
+            <Card>
+              <div className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Thông tin công việc</h3>
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Lĩnh vực</h3>
+                  <div className="flex items-center justify-between py-2">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Calendar className="h-4 w-4" />
+                      <span className="text-sm">Hạn nộp</span>
+                    </div>
+                    <span className="font-medium text-sm">
+                      {postByPostId?.expireDate ? new Date(postByPostId.expireDate).toLocaleDateString("vi-VN") : "N/A"}
+                    </span>
+                  </div>
+
+                  <div className="border-t border-gray-200"></div>
+
+                  <div className="flex items-center justify-between py-2">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Clock className="h-4 w-4" />
+                      <span className="text-sm">Ngày đăng</span>
+                    </div>
+                    <span className="font-medium text-sm">
+                      {postByPostId?.createDate ? new Date(postByPostId.createDate).toLocaleDateString("vi-VN") : "N/A"}
+                    </span>
+                  </div>
+
+                  <div className="border-t border-gray-200"></div>
+
+                  <div className="flex items-center justify-between py-2">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Briefcase className="h-4 w-4" />
+                      <span className="text-sm">Loại công việc</span>
+                    </div>
+                    <Badge variant="secondary" className="text-xs">
+                      {postByPostId?.typeOfWork}
+                    </Badge>
+                  </div>
+
+                  <div className="border-t border-gray-200"></div>
+
+                  <div className="flex items-center justify-between py-2">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <UserCheck className="h-4 w-4" />
+                      <span className="text-sm">Vị trí</span>
+                    </div>
+                    <span className="font-medium text-sm">{postByPostId?.position}</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Industries */}
+            {postByPostId?.industry && postByPostId.industry.length > 0 && (
+              <Card>
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Lĩnh vực</h3>
                   <div className="flex flex-wrap gap-2">
-                    {postByPostId?.industry?.map((industry) => (
+                    {postByPostId.industry.map((industry) => (
                       <IndustryBadge key={industry.industryId} name={industry.industryName} />
                     ))}
                   </div>
                 </div>
               </Card>
+            )}
 
-              {/* Card for Skills */}
-              <Card className="p-6 bg-white rounded-lg shadow-lg">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Các kĩ năng cần thiết</h3>
+            {/* Skills */}
+            {postByPostId?.skills && postByPostId.skills.length > 0 && (
+              <Card>
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Kỹ năng yêu cầu</h3>
                   <div className="flex flex-wrap gap-2">
-                    {postByPostId?.skills?.map((skill, index) => (
-                      <Badge
-                        key={index}
-                        className="text-white"
-                        style={{ backgroundColor: getRandomColor() }} 
-                      >
+                    {postByPostId.skills.map((skill, index) => (
+                      <Badge key={index} variant="secondary" className={`${getSkillColor(index)} border-0`}>
                         {skill.skillName}
                       </Badge>
                     ))}
                   </div>
                 </div>
               </Card>
-            </div>
+            )}
           </div>
         </div>
+
+        <ApplyModal job={postByPostId} open={open} handleClose={handleClose} oneApplyJob={oneApplyJob} />
       </main>
     </div>
   );
