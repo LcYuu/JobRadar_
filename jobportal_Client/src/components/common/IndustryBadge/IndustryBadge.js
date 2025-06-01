@@ -13,6 +13,6 @@ export default function IndustryBadge({ name, className = "" }) {
       }}
     >
       {name}
-    </span>
+    </span> 
   );
 }

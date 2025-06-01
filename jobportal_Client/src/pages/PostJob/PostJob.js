@@ -10,13 +10,14 @@ import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { EditorState } from "draft-js";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch, useSelector } from "react-redux";
-
 import Swal from "sweetalert2";
 import { getAllSkill } from "../../redux/Skills/skill.thunk";
 import { getCity } from "../../redux/City/city.thunk";
 import { createJobPost } from "../../redux/JobPost/jobPost.thunk";
 import { getCompanyByJWT } from "../../redux/Company/company.thunk";
+import SkillPostModal from "../JobDetailEmployer/SkillJobPostModal.js"; // Import the SkillPostModal
 
+// Existing cityCodeMapping remains unchanged
 const cityCodeMapping = {
   1: 16, // Hà Nội
   2: 1, // Hà Giang
@@ -91,6 +92,7 @@ const PostJob = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [currentStep, setCurrentStep] = useState(1);
+  const { allIndustries } = useSelector((store) => store.industry);
   const { skills } = useSelector((store) => store.skill);
   const { companyJwt } = useSelector((store) => store.company);
 
@@ -111,25 +113,20 @@ const PostJob = () => {
     benefit: "",
     industryIds: [],
   });
+  console.log("🚀 ~ PostJob ~ jobData:", jobData);
 
-  const typeOfWork = [
-    { id: "Toàn thời gian", label: "Toàn thời gian" },
-    { id: "Bán thời gian", label: "Bán thời gian" },
-    { id: "Từ xa", label: "Từ xa" },
-    { id: "Thực tập sinh", label: "Thực tập sinh" },
-  ];
-
-  const [isSkillDropdownOpen, setIsSkillDropdownOpen] = useState(false);
+  const [isSkillModalOpen, setIsSkillModalOpen] = useState(false); // State for modal
   const [isIndustryDropdownOpen, setIsIndustryDropdownOpen] = useState(false);
-  const [descriptionState, setDescriptionState] = useState();
-
-  const [requirementsState, setRequirementsState] = useState();
-  const [niceToHavesState, setNiceToHavesState] = useState(() =>
+  const [descriptionState, setDescriptionState] = useState(
     EditorState.createEmpty()
   );
-  const [benefit, setBenefit] = useState(() => EditorState.createEmpty());
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-
+  const [requirementsState, setRequirementsState] = useState(
+    EditorState.createEmpty()
+  );
+  const [niceToHavesState, setNiceToHavesState] = useState(
+    EditorState.createEmpty()
+  );
+  const [benefit, setBenefit] = useState(EditorState.createEmpty());
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
@@ -147,10 +144,6 @@ const PostJob = () => {
     dispatch(getAllSkill());
     dispatch(getCity());
     dispatch(getCompanyByJWT());
-    setDescriptionState(EditorState.createEmpty());
-    setRequirementsState(EditorState.createEmpty());
-    setNiceToHavesState(EditorState.createEmpty());
-    setBenefit(EditorState.createEmpty());
   }, [dispatch]);
 
   useEffect(() => {
@@ -174,18 +167,11 @@ const PostJob = () => {
             `https://provinces.open-api.vn/api/p/${selectedProvince}?depth=2`
           );
           const data = await response.json();
-
-          // Store districts data
           setDistricts(data.districts);
-
-          // Store full location string
-          const provinceName = data.name;
           setLocation((prevLocation) => ({
             ...prevLocation,
-            province: provinceName,
+            province: data.name,
           }));
-
-          // Reset child selections
           setSelectedDistrict("");
           setSelectedWard("");
         } catch (error) {
@@ -204,17 +190,11 @@ const PostJob = () => {
             `https://provinces.open-api.vn/api/d/${selectedDistrict}?depth=2`
           );
           const data = await response.json();
-
-          // Store wards data
           setWards(data.wards);
-
-          // Update location with district name
           setLocation((prevLocation) => ({
             ...prevLocation,
             district: data.name,
           }));
-
-          // Reset ward selection
           setSelectedWard("");
         } catch (error) {
           console.error("Error fetching wards:", error);
@@ -224,7 +204,6 @@ const PostJob = () => {
     fetchWards();
   }, [selectedDistrict]);
 
-  // Add this effect to handle ward selection
   useEffect(() => {
     if (selectedWard && wards.length > 0) {
       const selectedWardData = wards.find(
@@ -239,13 +218,11 @@ const PostJob = () => {
     }
   }, [selectedWard, wards]);
 
-  const handleAddSkill = (skill) => {
-    if (skill && !jobData.skillIds.includes(skill)) {
-      setJobData({
-        ...jobData,
-        skillIds: [...jobData.skillIds, skill],
-      });
-    }
+  const handleRemoveSkill = (skillId) => {
+    setJobData({
+      ...jobData,
+      skillIds: jobData.skillIds.filter((id) => id !== skillId),
+    });
   };
 
   const handleAddIndustry = (industry) => {
@@ -257,12 +234,6 @@ const PostJob = () => {
     }
   };
 
-  const handleRemoveSkill = (skillToRemove) => {
-    setJobData({
-      ...jobData,
-      skillIds: jobData.skillIds.filter((skill) => skill !== skillToRemove),
-    });
-  };
   const handleRemoveIndustry = (industryToRemove) => {
     setJobData({
       ...jobData,
@@ -272,14 +243,15 @@ const PostJob = () => {
     });
   };
 
-  // const getEditorContent = (editorState) => {
-  //   if (!editorState || editorState.getCurrentContent) {
-  //     console.error("EditorState is undefined or invalid");
-  //     return "{}"; // Trả về nội dung mặc định
-  //   }
-  //   const contentState = editorState.getCurrentContent();
-  //   return JSON.stringify(convertToRaw(contentState));
-  // };
+  // Handle saving skills from the modal
+  const handleSaveSkills = (selectedSkills) => {
+    const skillIds = selectedSkills.map((skill) => skill.skillId);
+    setJobData({
+      ...jobData,
+      skillIds,
+    });
+    setIsSkillModalOpen(false);
+  };
 
   const validateJobData = (step, jobData) => {
     let tempErrors = {
@@ -326,9 +298,7 @@ const PostJob = () => {
         isValid = false;
       } else {
         const expireDate = new Date(jobData.expireDate);
-        const currentDate = new Date(); // Lấy thời gian hiện tại
-
-        // Kiểm tra nếu ngày hết hạn phải lớn hơn ngày hiện tại
+        const currentDate = new Date();
         if (expireDate <= currentDate) {
           tempErrors.expireDate = "Ngày hết hạn phải lớn hơn ngày hiện tại.";
           isValid = false;
@@ -344,7 +314,7 @@ const PostJob = () => {
         !Array.isArray(jobData.industryIds) ||
         jobData.industryIds.length === 0
       ) {
-        tempErrors.skillIds = "Bạn cần chọn ít nhất một ngành";
+        tempErrors.industryIds = "Bạn cần chọn ít nhất một ngành.";
         isValid = false;
       }
     }
@@ -369,8 +339,7 @@ const PostJob = () => {
       }
 
       if (!jobData.experience || jobData.experience <= 0) {
-        tempErrors.experience =
-          "Yêu cầu kinh nghiệm không được để trống và lớn hơn 0";
+        tempErrors.experience = "Yêu cầu kinh nghiệm không được để trống";
         isValid = false;
       }
 
@@ -421,7 +390,6 @@ const PostJob = () => {
       const result = await dispatch(createJobPost(jobPostData));
 
       if (result?.payload?.success) {
-        // Hiển thị thông báo thành công
         Swal.fire({
           icon: "success",
           title: "Tạo tin tuyển dụng thành công!",
@@ -431,14 +399,10 @@ const PostJob = () => {
           confirmButtonText: "OK",
         }).then((response) => {
           if (response.isConfirmed) {
-            // Điều hướng khi người dùng nhấn OK
             navigate("/employer/account-management/job-management");
           }
         });
-
-        setShowSuccessModal(true); // Hiển thị modal khi thành công
       } else {
-        // Hiển thị thông báo lỗi
         Swal.fire({
           icon: "warning",
           title: "Có lỗi xảy ra",
@@ -448,14 +412,12 @@ const PostJob = () => {
           confirmButtonText: "OK",
         }).then((response) => {
           if (response.isConfirmed) {
-            // Điều hướng khi người dùng nhấn OK
             navigate("/employer/account-management/job-management");
           }
         });
       }
     } catch (error) {
       console.error("Error:", error);
-      // Hiển thị thông báo lỗi khi có ngoại lệ
       Swal.fire({
         icon: "warning",
         title: "Có lỗi xảy ra",
@@ -463,7 +425,6 @@ const PostJob = () => {
         confirmButtonText: "OK",
       }).then((response) => {
         if (response.isConfirmed) {
-          // Điều hướng khi người dùng nhấn OK
           navigate("/employer/account-management/job-management");
         }
       });
@@ -476,26 +437,25 @@ const PostJob = () => {
 
   const handleNextStep = () => {
     const { isValid, errors } = validateJobData(currentStep, jobData);
-    console.log(errors);
-
     if (!isValid) {
-      setErrors(errors); // Lưu lỗi vào state
+      setErrors(errors);
     } else {
-      // Sử dụng callback để đảm bảo cập nhật đúng trạng thái
-      setCurrentStep((prevStep) => {
-        console.log("Current Step before update:", prevStep); // Log trước khi cập nhật
-        const nextStep = prevStep + 1;
-        console.log("Current Step after update:", nextStep); // Log sau khi cập nhật
-        return nextStep;
-      });
+      setCurrentStep((prevStep) => prevStep + 1);
     }
   };
 
   const handleExpireDateChange = (e) => {
-    const selectedDate = e.target.value; // Chỉ có ngày (YYYY-MM-DD)
-    const defaultTime = "T00:00:00"; // Mặc định 00:00:00
+    const selectedDate = e.target.value;
+    const defaultTime = "T00:00:00";
     setJobData({ ...jobData, expireDate: `${selectedDate}${defaultTime}` });
   };
+
+  const typeOfWork = [
+    { id: "Toàn thời gian", label: "Toàn thời gian" },
+    { id: "Bán thời gian", label: "Bán thời gian" },
+    { id: "Từ xa", label: "Từ xa" },
+    { id: "Thực tập sinh", label: "Thực tập sinh" },
+  ];
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -515,7 +475,6 @@ const PostJob = () => {
                 <p className="text-red-500 text-sm">{errors.title}</p>
               )}
             </div>
-
             <div>
               <Label>Hình thức làm việc</Label>
               <div className="grid grid-cols-1 gap-3 mt-2">
@@ -523,15 +482,15 @@ const PostJob = () => {
                   <label key={type.id} className="flex items-center gap-2">
                     <input
                       type="radio"
-                      name="typeOfWork" // Đảm bảo tất cả radio button thuộc cùng nhóm
+                      name="typeOfWork"
                       value={type.id}
-                      checked={jobData.typeOfWork === type.id} // Kiểm tra nếu được chọn
+                      checked={jobData.typeOfWork === type.id}
                       onChange={(e) =>
                         setJobData({
                           ...jobData,
                           typeOfWork: e.target.value,
                         })
-                      } // Cập nhật trạng thái
+                      }
                       className="w-4 h-4 rounded border-gray-300"
                     />
                     <span className="text-sm">{type.label}</span>
@@ -542,7 +501,6 @@ const PostJob = () => {
                 <p className="text-red-500 text-sm">{errors.typeOfWork}</p>
               )}
             </div>
-
             <div>
               <Label>Lương</Label>
               <div className="mt-2">
@@ -564,7 +522,6 @@ const PostJob = () => {
                 <p className="text-red-500 text-sm">{errors.salary}</p>
               )}
             </div>
-
             <div>
               <Label>Vị trí</Label>
               <Input
@@ -577,18 +534,17 @@ const PostJob = () => {
                 className="w-full mt-2 p-2 border border-gray-300 rounded-md"
               />
               <p className="text-sm text-gray-500 mt-1">
-                Nhập ví trí công việc.
+                Nhập vị trí công việc.
               </p>
               {errors.position && (
                 <p className="text-red-500 text-sm">{errors.position}</p>
               )}
             </div>
-
             <div className="mt-4">
               <Label>Ngày hết hạn</Label>
               <Input
                 type="date"
-                value={jobData.expireDate.split("T")[0]} // Hiển thị chỉ ngày
+                value={jobData.expireDate.split("T")[0] || ""}
                 onChange={(e) => handleExpireDateChange(e)}
                 className="w-full mt-2 p-2 border border-gray-300 rounded-md"
               />
@@ -599,7 +555,6 @@ const PostJob = () => {
                 <p className="text-red-500 text-sm">{errors.expireDate}</p>
               )}
             </div>
-
             <div>
               <Label>Chọn chuyên ngành</Label>
               <div className="flex flex-wrap gap-2 mt-2">
@@ -610,7 +565,7 @@ const PostJob = () => {
                   return (
                     industry && (
                       <Badge
-                        key={industry}
+                        key={industry.industryId}
                         variant="secondary"
                         className="flex items-center gap-1 bg-purple-600 text-white"
                       >
@@ -672,71 +627,44 @@ const PostJob = () => {
                 <p className="text-red-500 text-sm">{errors.industryIds}</p>
               )}
             </div>
-
             <div>
               <Label>Các kỹ năng cần thiết</Label>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {jobData.skillIds.map((skillId) => {
-                  const skill = skills.find((s) => s.skillId === skillId);
-                  return (
-                    skill && (
-                      <Badge
-                        key={skillId}
-                        variant="secondary"
-                        className="flex items-center gap-1 bg-purple-600 text-white"
-                      >
-                        {skill.skillName}
-                        <X
-                          className="w-3 h-3 cursor-pointer"
-                          onClick={() => handleRemoveSkill(skillId)}
-                        />
-                      </Badge>
-                    )
-                  );
-                })}
-              </div>
-              <div className="relative mt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full text-left flex justify-between items-center"
-                  onClick={() => setIsSkillDropdownOpen(!isSkillDropdownOpen)}
-                >
-                  <span>Thêm</span>
-                  <ChevronDown
-                    className={`w-4 h-4 transition-transform ${
-                      isSkillDropdownOpen ? "transform rotate-180" : ""
-                    }`}
-                  />
-                </Button>
-
-                {isSkillDropdownOpen && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
-                    {skills.map((skill) => (
-                      <label
-                        key={skill.skillId}
-                        className="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 rounded border-gray-300 mr-3"
-                          checked={jobData.skillIds.includes(skill.skillId)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              handleAddSkill(skill.skillId);
-                            } else {
-                              handleRemoveSkill(skill.skillId);
-                            }
-                          }}
-                        />
-                        <span className="text-sm">{skill.skillName}</span>
-                      </label>
-                    ))}
-                  </div>
+              <div className="flex flex-wrap gap-2 mt-2 min-h-[32px]">
+                {jobData.skillIds.length > 0 ? (
+                  jobData.skillIds
+                    .map((skillId) => {
+                      const skill = skills.find((s) => s.skillId === skillId);
+                      return skill ? (
+                        <Badge
+                          key={skillId}
+                          variant="secondary"
+                          className="flex items-center gap-1 bg-purple-100 text-purple-800 border border-purple-300 px-2 py-1 rounded-md hover:bg-purple-200 transition-colors"
+                        >
+                          {skill.skillName}
+                          <X
+                            className="w-3 h-3 cursor-pointer hover:text-purple-500"
+                            onClick={() => handleRemoveSkill(skillId)}
+                          />
+                        </Badge>
+                      ) : null;
+                    })
+                    .filter(Boolean)
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    Chưa có kỹ năng nào được chọn.
+                  </p>
                 )}
               </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-2 w-full border-purple-600 text-purple-600 hover:bg-purple-50"
+                onClick={() => setIsSkillModalOpen(true)}
+              >
+                Chọn kỹ năng
+              </Button>
               {errors.skillIds && (
-                <p className="text-red-500 text-sm">{errors.skillIds}</p>
+                <p className="text-red-500 text-sm mt-1">{errors.skillIds}</p>
               )}
             </div>
           </div>
@@ -748,10 +676,9 @@ const PostJob = () => {
               <h2 className="text-lg font-semibold mb-2">Chi tiết</h2>
               <p className="text-sm text-gray-500 mb-4">
                 Thêm mô tả, trách nhiệm về công việc, thế nào là ứng viên phù
-                hợp và cần có những kỹ năng gì..
+                hợp và cần có những kỹ năng gì.
               </p>
 
-              {/* Job Description */}
               <div className="mb-6">
                 <Label>Mô tả công việc</Label>
                 <p className="text-sm text-gray-500 mb-2">
@@ -776,12 +703,8 @@ const PostJob = () => {
                     editorClassName="px-3 min-h-[100px] focus:outline-none"
                     toolbar={{
                       options: ["inline", "list", "link"],
-                      inline: {
-                        options: ["bold", "italic"],
-                      },
-                      list: {
-                        options: ["unordered", "ordered"],
-                      },
+                      inline: { options: ["bold", "italic"] },
+                      list: { options: ["unordered", "ordered"] },
                     }}
                     placeholder="Nhập mô tả công việc..."
                   />
@@ -791,7 +714,6 @@ const PostJob = () => {
                 )}
               </div>
 
-              {/* Responsibilities */}
               <div className="mb-6">
                 <Label>Trách nhiệm công việc</Label>
                 <p className="text-sm text-gray-500 mb-2">
@@ -817,12 +739,8 @@ const PostJob = () => {
                     editorClassName="px-3 min-h-[100px] focus:outline-none"
                     toolbar={{
                       options: ["inline", "list", "link"],
-                      inline: {
-                        options: ["bold", "italic"],
-                      },
-                      list: {
-                        options: ["unordered", "ordered"],
-                      },
+                      inline: { options: ["bold", "italic"] },
+                      list: { options: ["unordered", "ordered"] },
                     }}
                     placeholder="Nhập trách nhiệm công việc..."
                   />
@@ -835,32 +753,62 @@ const PostJob = () => {
               <div className="mb-6">
                 <Label>Kinh nghiệm</Label>
                 <p className="text-sm text-gray-500 mb-2">
-                  Nhập số năm kinh nghiệm cần thiết cho vị trí này
+                  Nhập số năm kinh nghiệm cần thiết cho vị trí này (**Chú ý: Nhập 0 nếu
+                  không yêu cầu kinh nghiệm)
                 </p>
                 <div className="flex items-center gap-2">
                   <Input
                     type="number"
-                    min="1"
-                    value={jobData.experience.replace(" năm", "")} // Hiển thị giá trị chỉ là số
+                    min="0"
+                    value={
+                      jobData.experience === "Không yêu cầu"
+                        ? "0"
+                        : jobData.experience.replace(" năm", "")
+                    }
                     onChange={(e) => {
                       const experienceValue = e.target.value;
                       setJobData({
                         ...jobData,
-                        experience: experienceValue
-                          ? `${experienceValue} năm`
-                          : "", // Lưu giá trị dạng chuỗi với "năm"
+                        experience:
+                          experienceValue === "0"
+                            ? "Không yêu cầu"
+                            : experienceValue
+                            ? `${experienceValue} năm`
+                            : "",
                       });
                     }}
-                    placeholder="Enter years of experience"
+                    placeholder="Nhập số năm kinh nghiệm"
                     className="w-full p-2 border border-gray-300 rounded-md"
                   />
                 </div>
+
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <p className="text-sm text-gray-600 mr-2">Gợi ý:</p>
+                  {["Không yêu cầu", "1 năm", "2 năm", "3 năm", "5 năm"].map(
+                    (exp) => (
+                      <Badge
+                        key={exp}
+                        variant="outline"
+                        className={`cursor-pointer hover:bg-gray-100 ${
+                          jobData.experience === exp
+                            ? "bg-purple-100 text-purple-800 border-purple-300"
+                            : "bg-gray-50"
+                        }`}
+                        onClick={() =>
+                          setJobData({ ...jobData, experience: exp })
+                        }
+                      >
+                        {exp}
+                      </Badge>
+                    )
+                  )}
+                </div>
+
                 {errors.experience && (
                   <p className="text-red-500 text-sm">{errors.experience}</p>
                 )}
               </div>
 
-              {/* Nice-To-Haves */}
               <div className="mb-6">
                 <Label>Các yêu cầu cần có</Label>
                 <p className="text-sm text-gray-500 mb-2">
@@ -887,20 +835,16 @@ const PostJob = () => {
                     editorClassName="px-3 min-h-[100px] focus:outline-none"
                     toolbar={{
                       options: ["inline", "list", "link"],
-                      inline: {
-                        options: ["bold", "italic"],
-                      },
-                      list: {
-                        options: ["unordered", "ordered"],
-                      },
+                      inline: { options: ["bold", "italic"] },
+                      list: { options: ["unordered", "ordered"] },
                     }}
                     placeholder="Nhập yêu cầu thêm..."
                   />
                 </div>
+                {errors.niceToHaves && (
+                  <p className="text-red-500 text-sm">{errors.niceToHaves}</p>
+                )}
               </div>
-              {errors.niceToHaves && (
-                <p className="text-red-500 text-sm">{errors.niceToHaves}</p>
-              )}
             </div>
           </div>
         );
@@ -939,12 +883,8 @@ const PostJob = () => {
                     editorClassName="px-3 min-h-[100px] focus:outline-none"
                     toolbar={{
                       options: ["inline", "list", "link"],
-                      inline: {
-                        options: ["bold", "italic"],
-                      },
-                      list: {
-                        options: ["unordered", "ordered"],
-                      },
+                      inline: { options: ["bold", "italic"] },
+                      list: { options: ["unordered", "ordered"] },
                     }}
                     placeholder="Nhập lợi ích..."
                   />
@@ -1032,7 +972,6 @@ const PostJob = () => {
             </div>
           </div>
         );
-      // Thêm case 3 cho các bước tiếp theo
       default:
         return null;
     }
@@ -1047,7 +986,6 @@ const PostJob = () => {
         <h1 className="text-xl font-semibold">Đăng việc làm</h1>
       </div>
 
-      {/* Progress Steps */}
       <div className="flex items-center justify-between mb-8">
         {[
           "Thông tin công việc",
@@ -1074,10 +1012,8 @@ const PostJob = () => {
         ))}
       </div>
 
-      {/* Form Content */}
       <div className="bg-white rounded-lg p-6">{renderStepContent()}</div>
 
-      {/* Navigation */}
       <div className="flex justify-between mt-6">
         {currentStep > 1 && (
           <Button
@@ -1098,29 +1034,15 @@ const PostJob = () => {
         </Button>
       </div>
 
-      {/* {showSuccessModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-2">Đăng tin thành công!</h3>
-            <p className="text-gray-600 mb-4">
-              Yêu cầu của bạn sẽ được duyệt để được hiển thị cho mọi người tìm
-              việc
-            </p>
-            <div className="flex justify-end">
-              <Button
-                variant="default"
-                className="bg-purple-600"
-                onClick={() => {
-                  setShowSuccessModal(false);
-                  navigate("/employer/account-management/job-management"); // Chuyển về trang quản lý việc làm
-                }}
-              >
-                Đóng
-              </Button>
-            </div>
-          </div>
-        </div>
-      )} */}
+      {/* SkillPostModal for skill selection */}
+      <SkillPostModal
+        open={isSkillModalOpen}
+        handleClose={() => setIsSkillModalOpen(false)}
+        onSave={handleSaveSkills}
+        initialSkills={jobData.skillIds
+          .map((skillId) => skills.find((s) => s.skillId === skillId))
+          .filter(Boolean)}
+      />
     </div>
   );
 };

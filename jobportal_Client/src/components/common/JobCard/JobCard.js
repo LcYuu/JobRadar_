@@ -8,6 +8,8 @@ import { Bookmark, BookmarkCheck, MapPin, ArrowRight } from "lucide-react"
 import Swal from "sweetalert2"
 import { jobTypeColors } from "../../../configs/constants"
 import IndustryBadge from "../IndustryBadge/IndustryBadge"
+import "./JobCard.css";
+
 
 const categoryStyles = {
   "Thiết kế": {
@@ -90,6 +92,7 @@ export default function JobCard({ postId, jobTitle, company, location, category,
   const isSaved = savedJobs?.some((savedJob) => savedJob.postId === postId)
   const { user } = useSelector((store) => store.auth)
 
+
   const handleCardClick = () => {
     navigate(`/jobs/job-detail/${postId}`)
   }
@@ -131,6 +134,7 @@ export default function JobCard({ postId, jobTitle, company, location, category,
           timerProgressBar: true,
           showConfirmButton: false,
         })
+
       }
     } catch (error) {
       await Swal.fire({

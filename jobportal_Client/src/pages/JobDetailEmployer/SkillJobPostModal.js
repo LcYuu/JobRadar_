@@ -2,13 +2,11 @@ import { Button, Modal, IconButton } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
-
 import { Checkbox } from "../../ui/checkbox";
 import { getAllSkill } from "../../redux/Skills/skill.thunk";
-import { getDetailJobById, updateJob } from "../../redux/JobPost/jobPost.thunk";
 import { getAllIndustries } from "../../redux/Industry/industry.thunk";
 
-// Kỹ năng chung (20 kỹ năng đầu tiên)
+// Kỹ năng chung và industrySkillMapping giữ nguyên
 const commonSkills = [
   "Communication", "Teamwork", "Leadership", "Problem Solving", "Time Management",
   "Critical Thinking", "Creativity", "Adaptability", "Conflict Resolution", "Decision Making",
@@ -17,7 +15,6 @@ const commonSkills = [
   "Customer Service", "Project Management"
 ];
 
-// Ánh xạ kỹ năng chuyên ngành
 const industrySkillMapping = {
   "Thương mại điện tử": [
     "Digital Marketing", "SEO/SEM", "Customer Relationship Management (CRM)",
@@ -121,19 +118,18 @@ const industrySkillMapping = {
     "Translation Software", "Technical Translation", "Localization", "Proofreading",
     "Interpreting Ethics", "Document Translation", "Conference Interpretation"
   ],
-  "Hệ thống nhúng và IoT": [
+  "Hệ thống nhúng và IOT": [
     "Embedded Programming", "IoT Protocols", "Microcontroller Programming",
     "Sensor Integration", "Real-time Operating Systems", "Wireless Networking",
     "Edge Computing", "Firmware Design", "IoT Security", "Hardware Interfacing"
   ],
 };
 
-const SkillPostModal = ({ open, handleClose, postId }) => {
+const SkillPostModal = ({ open, handleClose, onSave, initialSkills = [], postId }) => {
   const dispatch = useDispatch();
   const { skills } = useSelector((store) => store.skill);
   const { allIndustries } = useSelector((store) => store.industry);
-  const { detailJob } = useSelector((store) => store.jobPost);
-  const [selectedSkills, setSelectedSkills] = useState(detailJob?.skills || []);
+  const [selectedSkills, setSelectedSkills] = useState(initialSkills);
   const [isLoading, setIsLoading] = useState(false);
   const [expandedSection, setExpandedSection] = useState(null);
 
@@ -145,10 +141,8 @@ const SkillPostModal = ({ open, handleClose, postId }) => {
 
   // Cập nhật selectedSkills khi mở modal
   useEffect(() => {
-    if (open && detailJob?.skills) {
-      setSelectedSkills(detailJob.skills);
-    }
-  }, [open, detailJob?.skills]);
+    setSelectedSkills(initialSkills);
+  }, [initialSkills, open]);
 
   // Tạo danh sách kỹ năng chung và kỹ năng chuyên ngành theo ngành
   const [commonSkillsList, setCommonSkillsList] = useState([]);
@@ -183,13 +177,12 @@ const SkillPostModal = ({ open, handleClose, postId }) => {
           skills: industrySkills,
         };
       });
-      // Sắp xếp industries theo thứ tự chữ cái
       formattedIndustries.sort((a, b) => a.industryName.localeCompare(b.industryName));
       setIndustrySkills(formattedIndustries);
     }
   }, [skills, allIndustries]);
 
-  // Xử lý mở/đóng section (kỹ năng chung hoặc ngành)
+  // Xử lý mở/đóng section
   const toggleSection = (sectionId) => {
     setExpandedSection(expandedSection === sectionId ? null : sectionId);
   };
@@ -203,20 +196,12 @@ const SkillPostModal = ({ open, handleClose, postId }) => {
   };
 
   // Lưu kỹ năng
-  const handleSaveSkills = async () => {
+  const handleSave = () => {
     setIsLoading(true);
     try {
-
-      const skillIds = selectedSkills.map((skill) => skill.skillId);
-      await dispatch(
-        updateJob({
-          postId,
-          jobPostData: { skillIds },
-        })
-      );
-      dispatch(getDetailJobById(postId));
+      onSave(selectedSkills);
     } catch (error) {
-      console.error("Error updating skills:", error);
+      console.error("Error saving skills:", error);
     } finally {
       setIsLoading(false);
       handleClose();
@@ -234,7 +219,7 @@ const SkillPostModal = ({ open, handleClose, postId }) => {
         </div>
 
         <div className="flex flex-col gap-3 max-h-[400px] overflow-y-auto custom-scrollbar">
-          {/* Kỹ năng chung (accordion riêng) */}
+          {/* Kỹ năng chung */}
           <div className="border-b border-gray-200">
             <div
               className="flex items-center p-3 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
@@ -324,7 +309,7 @@ const SkillPostModal = ({ open, handleClose, postId }) => {
           </Button>
           <Button
             variant="contained"
-            onClick={handleSaveSkills}
+            onClick={handleSave}
             sx={{
               backgroundColor: "#8B5CF6",
               "&:hover": {
@@ -339,7 +324,7 @@ const SkillPostModal = ({ open, handleClose, postId }) => {
                 <span>Saving...</span>
               </div>
             ) : (
-              "Save Changes"
+              "Lưu"
             )}
           </Button>
         </div>

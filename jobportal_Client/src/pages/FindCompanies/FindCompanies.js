@@ -26,51 +26,110 @@ import Swal from "sweetalert2";
 
 export default function FindCompanies() {
   const industryStyles = {
-    "Thiết kế": {
-      backgroundColor: "rgba(255, 99, 71, 0.1)", // Màu đỏ san hô nhạt
-      color: "#FF6347", // Màu đỏ san hô
-      border: "1px solid #FF6347", // Viền màu đỏ san hô
-    },
-    "Kinh doanh": {
-      backgroundColor: "rgba(138, 43, 226, 0.1)", // Màu tím nhạt
-      color: "#8A2BE2", // Màu tím
-      border: "1px solid #8A2BE2", // Viền màu tím
-    },
-    Marketing: {
-      backgroundColor: "rgba(255, 140, 0, 0.1)", // Màu cam nhạt
-      color: "#FF8C00", // Màu cam
-      border: "1px solid #FF8C00", // Viền màu cam
-    },
     "Thương mại điện tử": {
-      backgroundColor: "rgba(30, 144, 255, 0.1)", // Màu xanh dương đậm nhạt
-      color: "#1E90FF", // Màu xanh dương đậm
-      border: "1px solid #1E90FF", // Viền màu xanh dương đậm
+      backgroundColor: "rgba(30, 144, 255, 0.1)",
+      color: "#1E90FF",
+      border: "1px solid #1E90FF",
+    },
+    "Marketing/Truyền thông": {
+      backgroundColor: "rgba(255, 140, 0, 0.1)",
+      color: "#FF8C00",
+      border: "1px solid #FF8C00",
     },
     "IT phần cứng": {
-      backgroundColor: "rgba(0, 0, 255, 0.1)", // Màu xanh dương nhạt
-      color: "#0000FF", // Màu xanh dương
-      border: "1px solid #0000FF", // Viền màu xanh dương
-    },
-    "IT phần mềm": {
-      backgroundColor: "rgba(0, 255, 255, 0.1)", // Màu xanh dương ngọc nhạt
-      color: "#00FFFF", // Màu xanh dương ngọc
-      border: "1px solid #00FFFF", // Viền màu xanh dương ngọc
+      backgroundColor: "rgba(0, 0, 255, 0.1)",
+      color: "#0000FF",
+      border: "1px solid #0000FF",
     },
     "Công nghệ ô tô": {
-      backgroundColor: "rgba(255, 99, 71, 0.1)", // Màu cam đỏ nhạt
-      color: "#FF4500", // Màu cam đỏ
-      border: "1px solid #FF4500", // Viền màu cam đỏ
+      backgroundColor: "rgba(255, 99, 71, 0.1)",
+      color: "#FF4500",
+      border: "1px solid #FF4500",
+    },
+    "IT phần mềm": {
+      backgroundColor: "rgba(0, 255, 255, 0.1)",
+      color: "#00FFFF",
+      border: "1px solid #00FFFF",
     },
     "Nhà hàng/Khách sạn": {
-      backgroundColor: "rgba(255, 105, 180, 0.1)", // Màu hồng nhạt
-      color: "#FF69B4", // Màu hồng đậm
-      border: "1px solid #FF69B4", // Viền màu hồng đậm
+      backgroundColor: "rgba(255, 105, 180, 0.1)",
+      color: "#FF69B4",
+      border: "1px solid #FF69B4",
     },
-
-    "Điện - điện tử": {
-      backgroundColor: "rgba(70, 130, 180, 0.1)", // Màu xanh thép nhạt
-      color: "#4682B4", // Màu xanh thép
-      border: "1px solid #4682B4", // Viền màu xanh thép
+    "Thiết kế/In ấn": {
+      backgroundColor: "rgba(255, 99, 71, 0.1)",
+      color: "#FF6347",
+      border: "1px solid #FF6347",
+    },
+    "Cơ khí/Điện - điện tử": {
+      backgroundColor: "rgba(70, 130, 180, 0.1)",
+      color: "#4682B4",
+      border: "1px solid #4682B4",
+    },
+    "Kinh doanh": {
+      backgroundColor: "rgba(138, 43, 226, 0.1)",
+      color: "#8A2BE2",
+      border: "1px solid #8A2BE2",
+    },
+    "Giáo dục/Đào tạo": {
+      backgroundColor: "rgba(40, 167, 69, 0.1)",
+      color: "#28A745",
+      border: "1px solid #28A745",
+    },
+    "Kiến trúc/Xây dựng": {
+      backgroundColor: "rgba(255, 193, 7, 0.1)",
+      color: "#FFC107",
+      border: "1px solid #FFC107",
+    },
+    "Tài chính/Ngân hàng": {
+      backgroundColor: "rgba(23, 162, 184, 0.1)",
+      color: "#17A2B8",
+      border: "1px solid #17A2B8",
+    },
+    "Viễn thông": {
+      backgroundColor: "rgba(200, 35, 51, 0.1)",
+      color: "#C82333",
+      border: "1px solid #C82333",
+    },
+    "Y tế": {
+      backgroundColor: "rgba(107, 114, 128, 0.1)",
+      color: "#6B7280",
+      border: "1px solid #6B7280",
+    },
+    "Logistics": {
+      backgroundColor: "rgba(221, 160, 221, 0.1)",
+      color: "#DDA0DD",
+      border: "1px solid #DDA0DD",
+    },
+    "Kế toán/Kiểm toán": {
+      backgroundColor: "rgba(244, 162, 97, 0.1)",
+      color: "#F4A261",
+      border: "1px solid #F4A261",
+    },
+    "Sản xuất": {
+      backgroundColor: "rgba(43, 108, 176, 0.1)",
+      color: "#2B6CB0",
+      border: "1px solid #2B6CB0",
+    },
+    "Tài xế": {
+      backgroundColor: "rgba(233, 30, 99, 0.1)",
+      color: "#E91E63",
+      border: "1px solid #E91E63",
+    },
+    "Luật": {
+      backgroundColor: "rgba(72, 187, 120, 0.1)",
+      color: "#48BB78",
+      border: "1px solid #48BB78",
+    },
+    "Phiên dịch": {
+      backgroundColor: "rgba(75, 85, 99, 0.1)",
+      color: "#4B5563",
+      border: "1px solid #4B5563",
+    },
+    "Hệ thống nhúng và IoT": {
+      backgroundColor: "rgba(153, 27, 27, 0.1)",
+      color: "#991B1B",
+      border: "1px solid #991B1B",
     },
   };
 

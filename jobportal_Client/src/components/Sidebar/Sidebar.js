@@ -17,10 +17,11 @@ import { Button } from "../../ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "../../ui/avatar";
 import { Separator } from "../../ui/separator";
 import logo from "../../assets/images/common/logo.jpg";
-import { logoutAction } from "../../redux/Auth/auth.action";
 import Swal from "sweetalert2";
 import NotificationDropdown from "../Notification/NotificationDropdown";
 import "./Sidebar.css";
+import { logoutAction } from "../../redux/Auth/auth.thunk";
+
 
 export default function Sidebar({ selectedSection, setSelectedSection }) {
   const { user } = useSelector((state) => state.auth);

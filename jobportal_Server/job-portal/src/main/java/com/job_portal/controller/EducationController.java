@@ -50,6 +50,10 @@ public class EducationController {
 			@RequestBody EducationDTO educationDTO) {
 		String email = JwtProvider.getEmailFromJwtToken(jwt);
 		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+		
+		if (user.isEmpty()) {
+            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+        }
 
 		boolean isCreated = educationService.createEdu(educationDTO, user.get().getUserId());
 		if (isCreated) {

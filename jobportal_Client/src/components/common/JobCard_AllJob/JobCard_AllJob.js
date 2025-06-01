@@ -7,6 +7,7 @@ import { saveJob } from "../../../redux/Seeker/seeker.thunk";
 import { jobTypeColors } from "../../../configs/constants";
 import IndustryBadge from "../IndustryBadge/IndustryBadge";
 
+
 function JobCard_AllJob({ job }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();

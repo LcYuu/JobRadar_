@@ -9,6 +9,7 @@ const initialState = {
   loginStatus: null,
   isAuthenticated: !!localStorage.getItem('jwt'),
   jwt: localStorage.getItem('jwt') || null,
+  isInitializing: true,
 };
 
 const authSlice = createSlice({
@@ -25,7 +26,10 @@ const authSlice = createSlice({
     setUserFromStorage: (state, action) => {
       state.user = action.payload;
       state.isAuthenticated = true;
-    }
+    },
+    setInitialized: (state, action) => {
+      state.isInitializing = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -151,5 +155,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUser, clearMessages, setUserFromStorage } = authSlice.actions;
+export const { clearMessages, setUserFromStorage, setInitialized, setUser } = authSlice.actions;
+
 export default authSlice.reducer;

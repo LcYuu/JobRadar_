@@ -26,7 +26,6 @@ import com.job_portal.service.ISurveyService;
 @RestController
 @RequestMapping("/surveys")
 public class SurveyController {
-	
     @Autowired
     private ISurveyService surveyService;
 

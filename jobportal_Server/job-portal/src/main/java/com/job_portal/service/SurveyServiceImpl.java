@@ -32,6 +32,7 @@ import java.util.UUID;
 
 @Service
 public class SurveyServiceImpl implements ISurveyService {
+
     @Autowired
     private SurveyRepository surveyRepository;
     
@@ -275,5 +276,4 @@ public class SurveyServiceImpl implements ISurveyService {
         mailSender.send(message);
         System.out.println("Email sent successfully to: " + job.getCompany().getEmail());
     }
-
 }

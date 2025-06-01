@@ -48,7 +48,6 @@ export default function JobDetail() {
       top: 0,
       behavior: "smooth",
     });
-
     dispatch(getOneApplyJob(postId));
     dispatch(checkIfApplied(postId));
     if (!postByPostId || postByPostId.postId !== postId) {

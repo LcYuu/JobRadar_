@@ -1,5 +1,7 @@
 package com.job_portal.controller;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,47 +41,64 @@ public class CVController {
 
 	@Autowired
 	private UserAccountRepository userAccountRepository;
-	
+
 	@GetMapping("/get-all")
 	public ResponseEntity<List<CV>> getCV() {
 		List<CV> cvs = cvRepository.findAll();
 		return new ResponseEntity<>(cvs, HttpStatus.OK);
 	}
-	
-	@PostMapping("/create-cv")
-	public ResponseEntity<String> createCV(@RequestHeader("Authorization") String jwt,
-			@RequestBody CVDTO cvdto) {
-		try {
-			// Validate input data
-			if (cvdto.getPathCV() == null || cvdto.getPathCV().isEmpty()) {
-				return new ResponseEntity<>("Đường dẫn CV không được để trống", HttpStatus.BAD_REQUEST);
-			}
-			
-			if (cvdto.getCvName() == null || cvdto.getCvName().isEmpty()) {
-				return new ResponseEntity<>("Tên CV không được để trống", HttpStatus.BAD_REQUEST);
-			}
-			
-			// Extract email from JWT
-			String email = JwtProvider.getEmailFromJwtToken(jwt);
-			Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-			
-			if (user.isEmpty()) {
-				return new ResponseEntity<>("Không tìm thấy thông tin người dùng", HttpStatus.NOT_FOUND);
-			}
-			
-			boolean isCreated = cvService.createCV(cvdto, user.get().getUserId());
-			
-			if (isCreated) {
-				return new ResponseEntity<>("Tạo CV thành công", HttpStatus.CREATED);
-			} else {
-				return new ResponseEntity<>("Tạo CV thất bại: Lỗi khi lưu dữ liệu", HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<>("Lỗi hệ thống: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+
+	@GetMapping("/searchCV")
+	public ResponseEntity<List<CV>> findCVBySeekerId(@RequestHeader("Authorization") String jwt) throws AllExceptions {
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+
+		List<CV> cvs = cvService.findCVBySeekerId(user.get().getUserId());
+		return new ResponseEntity<List<CV>>(cvs, HttpStatus.CREATED);
+
 	}
-	
+
+	@PostMapping("/create-cv")
+	public ResponseEntity<String> createCV(@RequestHeader("Authorization") String jwt, @RequestBody CVDTO cvdto) {
+	    try {
+	        // Validate input data
+	        if (cvdto.getPathCV() == null || cvdto.getPathCV().isEmpty()) {
+	            return new ResponseEntity<>("Đường dẫn CV không được để trống", HttpStatus.BAD_REQUEST);
+	        }
+
+	        if (cvdto.getCvName() == null || cvdto.getCvName().isEmpty()) {
+	            return new ResponseEntity<>("Tên CV không được để trống", HttpStatus.BAD_REQUEST);
+	        }
+
+	        // Kiểm tra kích thước file
+	        File file = new File(cvdto.getPathCV());
+
+	        long fileSizeInBytes = Files.size(file.toPath());
+	        long fileSizeInMB = fileSizeInBytes / (1024 * 1024); // Chuyển từ bytes sang MB
+	        if (fileSizeInMB > 5) {
+	            return new ResponseEntity<>("File CV phải có kích thước nhỏ hơn hoặc bằng 5MB", HttpStatus.BAD_REQUEST);
+	        }
+
+	        // Extract email from JWT
+	        String email = JwtProvider.getEmailFromJwtToken(jwt);
+	        Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+
+	        if (user.isEmpty()) {
+	            return new ResponseEntity<>("Không tìm thấy thông tin người dùng", HttpStatus.NOT_FOUND);
+	        }
+
+	        boolean isCreated = cvService.createCV(cvdto, user.get().getUserId());
+
+	        if (isCreated) {
+	            return new ResponseEntity<>("Tạo CV thành công", HttpStatus.CREATED);
+	        } else {
+	            return new ResponseEntity<>("Tạo CV thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
+	        }
+	    } catch (Exception e) {
+	        return new ResponseEntity<>("Lỗi hệ thống: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+
 	@PostMapping("/cv-main/{cvId}")
 	public ResponseEntity<String> updateIsMain(@RequestHeader("Authorization") String jwt,
 			@PathVariable("cvId") Integer cvId) {
@@ -108,20 +127,4 @@ public class CVController {
 		}
 	}
 
-	@GetMapping("/searchCV")
-	public ResponseEntity<Object> searchCV(@RequestHeader("Authorization") String jwt) {
-		String email = JwtProvider.getEmailFromJwtToken(jwt);
-		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-		try {
-			List<CV> cvs = cvService.findCVBySeekerId(user.get().getUserId());
-			return ResponseEntity.ok(cvs);
-		} catch (AllExceptions e) {
-			// Trả về thông báo từ service
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-		} catch (Exception e) {
-			// Trả về thông báo lỗi chung
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
-		}
-	}
 }

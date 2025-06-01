@@ -270,6 +270,7 @@ export default function CompanyDetail() {
     });
   };
 
+  
   return (
     <div className="min-h-screen bg-gray-50 py-4 custom-1360:py-8 max-w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -478,21 +479,14 @@ export default function CompanyDetail() {
                       <div key={index} className="flex items-center gap-2 mt-1">
                         <div className="w-7 h-7 custom-1360:w-8 custom-1360:h-8 flex-shrink-0">
                           <img
-                            src={
-                              link.platform
-                                ? `/images/platforms/${link.platform.toLowerCase()}.png`
-                                : "/images/platforms/default.png"
-                            }
+                            src={require(`../../../assets/images/platforms/${link.platform.toLowerCase()}.png`)}
                             alt={link.platform?.toLowerCase() || "platform"}
                             className="h-full w-full object-contain rounded-full shadow-sm"
-                            onError={(e) =>
-                              (e.target.src = "/images/platforms/default.png")
-                            }
                           />
                         </div>
                         <a
                           href={link.url}
-                          className={`text-blue-600 truncate ${fontSize}`}
+                          className={`text-purple-600 truncate ${fontSize}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{ maxWidth: "calc(100% - 48px)" }}

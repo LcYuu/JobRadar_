@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "../../../ui/button";
 import { MoreVertical, Search, ChevronLeft, ChevronRight, Filter } from "lucide-react";
@@ -11,9 +11,12 @@ import {
 import { Input } from "../../../ui/input";
 import { useNavigate } from "react-router-dom";
 import { approveJob, getAllJobsForAdmin } from "../../../redux/JobPost/jobPost.thunk";
+import useWebSocket from "../../../utils/useWebSocket";
+import { toast } from "react-toastify"; // Thêm react-toastify
 
 export default function AdminJobList() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { jobPost, totalPages, totalElements, loading, error } = useSelector(
     (store) => store.jobPost
   );
@@ -24,19 +27,37 @@ export default function AdminJobList() {
   const [approve, setApprove] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const navigate = useNavigate();
 
+  // Fetch jobs with filters
   useEffect(() => {
     dispatch(
       getAllJobsForAdmin({ title: searchTerm, status, isApprove: approve, page: currentPage, size })
     );
   }, [dispatch, currentPage, size, searchTerm, status, approve]);
 
+  // Handle window resize
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+
+  // WebSocket message handler
+  const handleMessage = useCallback(
+    (_,message, topic) => {
+      console.log('Received:', { message, topic });
+      if (topic === "/topic/job-updates" && message === "APPROVE JOB") {
+        dispatch(
+          getAllJobsForAdmin({ title: searchTerm, status, isApprove: approve, page: currentPage, size })
+        );
+      }
+    },
+    [dispatch, currentPage, size, searchTerm, status, approve]
+  );
+
+  // Initialize WebSocket
+  useWebSocket(["/topic/job-updates"], handleMessage);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 0 && newPage < totalPages) {
@@ -62,6 +83,19 @@ export default function AdminJobList() {
   const toggleFilters = () => {
     setShowFilters(!showFilters);
   };
+
+  const handleApproveJob = async(postId) => {
+    dispatch(approveJob(postId));
+
+    try {
+      await dispatch(approveJob(postId));
+      toast.success("Chấp thuận thành công");
+    } catch (error) {
+      console.error("Có lỗi xảy ra:", error);
+      toast.error("Có lỗi xảy ra, vui lòng thử lại!");
+    }
+  };
+
 
   const isMobile = windowWidth < 800;
   const isMidRange = windowWidth >= 800 && windowWidth <= 1485;
@@ -249,7 +283,7 @@ export default function AdminJobList() {
                           <DropdownMenuContent align="end">
                             {!job.approve && (
                               <DropdownMenuItem
-                                onClick={() => dispatch(approveJob(job.postId))}
+                                onClick={() => handleApproveJob(job.postId)}
                               >
                                 Phê duyệt
                               </DropdownMenuItem>
@@ -316,7 +350,7 @@ export default function AdminJobList() {
                         <DropdownMenuContent align="end">
                           {!job.approve && (
                             <DropdownMenuItem
-                              onClick={() => dispatch(approveJob(job.postId))}
+                              onClick={() => handleApproveJob(job.postId)}
                             >
                               Phê duyệt
                             </DropdownMenuItem>

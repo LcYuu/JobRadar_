@@ -1,27 +1,27 @@
-
 import React, { useContext, useEffect, useState, useRef } from "react";
 import { Button } from "../../../ui/button";
-import { Textarea } from "../../../ui/textarea";
 import { CVInfoContext } from "../../../context/CVInfoContext";
 import { updateCV, getGenCVById } from "../../../redux/GeneratedCV/generated_cv.thunk";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Brain, LoaderCircle } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import LoadingOverlay from "../LoadingOverlay";
+import RichTextEditor from "../RichTextEditor.js"; // Adjust the import path as needed
 
-const SummeryForm = ({ enabledNext }) => {
+const SummaryForm = ({ enabledNext }) => {
   const { genCvId } = useParams();
   const { cvInfo, setCvInfo, onSaving } = useContext(CVInfoContext);
-  const [summery, setSummery] = useState(cvInfo?.summery || "");
+  const [summery, setSummary] = useState(cvInfo?.summery || "");
   const [loading, setLoading] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
+  const [summeryError, setSummeryError] = useState("");
   const dispatch = useDispatch();
   const { genCv } = useSelector((store) => store.genCV);
-  
+
   // Flag to control when to sync with cvInfo
   const isUpdating = useRef(false);
-  
+
   // Add forceUpdate mechanism
   const [, forceUpdate] = useState({});
   const forceRerender = () => forceUpdate({});
@@ -32,11 +32,15 @@ const SummeryForm = ({ enabledNext }) => {
       try {
         const content = JSON.parse(genCv.cvContent.replace(/^"|"$/g, "") || "{}");
         if (content.summery !== undefined) {
-          console.log("Syncing summary from Redux:", content.summery);
-          setSummery(content.summery);
+          console.log("Syncing summery from Redux:", content.summery);
+          setSummary(content.summery);
+          // Clear error if summary is valid
+          if (content.summery.trim()) {
+            setSummeryError("");
+          }
         }
       } catch (error) {
-        console.error("Error parsing cvContent in SummeryForm:", error);
+        console.error("Error parsing cvContent in SummaryForm:", error);
       }
     }
   }, [genCv]);
@@ -44,108 +48,124 @@ const SummeryForm = ({ enabledNext }) => {
   // Sync with cvInfo when it changes
   useEffect(() => {
     if (cvInfo?.summery !== undefined && !isUpdating.current) {
-      console.log("Syncing summary from Context:", cvInfo.summery);
-      setSummery(cvInfo.summery);
+      console.log("Syncing summery from Context:", cvInfo.summery);
+      setSummary(cvInfo.summery);
+      // Clear error if summary is valid
+      if (cvInfo.summery.trim()) {
+        setSummeryError("");
+      }
     }
   }, [cvInfo?.summery]);
 
-  const handleSummeryChange = (e) => {
-    const newSummery = e.target.value;
-    setSummery(newSummery);
-    
+  const validateSummary = (value) => {
+    // Strip HTML tags if RichTextEditor returns HTML
+    const plainText = value.replace(/<[^>]+>/g, "").trim();
+    if (!plainText) {
+      return "Vui lòng nhập mô tả về bản thân";
+    }
+    return "";
+  };
+
+  const handleSummaryChange = (e) => {
+    const newSummary = e.target.value;
+    console.log("New summery input:", newSummary);
+    setSummary(newSummary);
+
+    // Real-time validation
+    const error = validateSummary(newSummary);
+    setSummeryError(error);
+
     // Set flag to prevent infinite loop
     isUpdating.current = true;
-    
+
     // Update context immediately for real-time preview
-    setCvInfo(prev => ({
+    setCvInfo((prev) => ({
       ...prev,
-      summery: newSummery
+      summery: newSummary,
     }));
-    
+
     // Reset flag after update
     setTimeout(() => {
       isUpdating.current = false;
     }, 0);
-    
-    // Disable next button when changes are made
-    if (enabledNext) enabledNext(false);
+
+    // Enable/disable next button based on validation
+    if (enabledNext) enabledNext(!error && newSummary.trim());
+  };
+
+  const handleSummaryBlur = () => {
+    // Validate on blur
+    const error = validateSummary(summery);
+    setSummeryError(error);
   };
 
   const onSave = async () => {
-    // In log để debug
-    console.log("SummeryForm: onSave bắt đầu");
-    
-    // Đặt trạng thái loading trước - cả local và global
+    console.log("SummaryForm: onSave bắt đầu, summery:", summery);
+
+    // Validate summery
+    const error = validateSummary(summery);
+    if (error) {
+      setSummeryError(error);
+      return;
+    }
+
     setLoading(true);
     setUpdateLoading(true);
     if (onSaving) onSaving(true, "Đang lưu thông tin giới thiệu...");
-    
-    // Đảm bảo loading hiển thị ít nhất 2 giây
+
     const startTime = Date.now();
-    
+
     try {
-      // Set flag to prevent sync conflicts
       isUpdating.current = true;
-      
-      // Đợi một chút để đảm bảo loading được hiển thị
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      console.log("SummeryForm: Đang cập nhật dữ liệu...");
-      
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      console.log("SummaryForm: Đang cập nhật dữ liệu, summery length:", summery.length);
+
       // Create updated data
       const updatedData = {
         ...cvInfo,
-        summery: summery
+        summery: summery,
       };
 
       // Update context immediately
       setCvInfo(updatedData);
 
-      // Update backend - now we await to ensure we get the updated data
-      const cvData = JSON.stringify(updatedData).replace(/"/g, '\\"');
+      // Properly escape the entire JSON string for the API
+      const cvData = JSON.stringify(updatedData);
       await dispatch(
         updateCV({
           genCvId: genCvId,
-          cvData: `{ \"cvContent\": \"${cvData}\" }`,
+          cvData: `{ "cvContent": ${JSON.stringify(cvData)} }`,
         })
       );
-      
-      console.log("SummeryForm: UpdateCV đã hoàn thành, đang tải lại dữ liệu...");
-      
-      // Force refresh by fetching the CV again
+
+      console.log("SummaryForm: UpdateCV đã hoàn thành, đang tải lại dữ liệu...");
+
       await dispatch(getGenCVById(genCvId));
-      
-      // Force re-render
       forceRerender();
-      
+
       toast.success("Thông tin cập nhật thành công");
       enabledNext(true);
-      
-      // Đảm bảo loading hiển thị đủ lâu
+
       const elapsedTime = Date.now() - startTime;
-      const minLoadingTime = 2000; // 2 giây
-      
-      console.log(`SummeryForm: Đã xử lý trong ${elapsedTime}ms, tối thiểu cần ${minLoadingTime}ms`);
-      
+      const minLoadingTime = 2000;
+
+      console.log(`SummaryForm: Đã xử lý trong ${elapsedTime}ms, tối thiểu cần ${minLoadingTime}ms`);
+
       if (elapsedTime < minLoadingTime) {
         const remainingTime = minLoadingTime - elapsedTime;
-        console.log(`SummeryForm: Đợi thêm ${remainingTime}ms để hiển thị loading`);
-        await new Promise(resolve => setTimeout(resolve, remainingTime));
+        console.log(`SummaryForm: Đợi thêm ${remainingTime}ms để hiển thị loading`);
+        await new Promise((resolve) => setTimeout(resolve, remainingTime));
       }
-      
-      console.log("SummeryForm: Hoàn thành, tắt loading");
-      
+
+      console.log("SummaryForm: Hoàn thành, tắt loading");
     } catch (error) {
       console.error("Save error:", error);
+      console.error("Failed summery:", summery);
       toast.error("Cập nhật thất bại");
-      
-      // Reset updating flag in case of error
       isUpdating.current = false;
     } finally {
-      // Reset updating flag
       isUpdating.current = false;
-      
-      // Tắt loading sau khi xử lý hoàn tất
       setLoading(false);
       setUpdateLoading(false);
       if (onSaving) onSaving(false);
@@ -155,40 +175,32 @@ const SummeryForm = ({ enabledNext }) => {
   return (
     <div>
       <div className="p-5 shadow-lg rounded-lg border-t-purple-500 border-t-4 mt-10 relative">
-        {(loading || updateLoading) && console.log("SummeryForm rendering: loading active", {loading, updateLoading})}
-        
-        <LoadingOverlay 
-          isLoading={loading || updateLoading} 
-          message="Đang lưu thông tin..." 
-        />
-        
-        <h3 className="font-bold text-lg">About me</h3>
+        {(loading || updateLoading) &&
+          console.log("SummaryForm rendering: loading active", { loading, updateLoading })}
+
+        <LoadingOverlay isLoading={loading || updateLoading} message="Đang lưu thông tin..." />
+
+        <h3 className="font-bold text-lg">Giới thiệu</h3>
         <p>Thêm giới thiệu về bản thân</p>
 
         <div className="mt-7">
           <div className="flex justify-between items-end">
-            <label>Thêm giới thiệu</label>
-            <Button
-              variant="outline"
-              size="sm"
-              type="button"
-              className="border-purple-500 text-purple-500 flex gap-2"
-            >
-              <Brain className="h-4 w-4" />
-              Tạo từ AI
-            </Button>
+            <label>
+              Thêm giới thiệu <span className="text-red-500">*</span>
+            </label>
           </div>
-          <Textarea
-            className="mt-5"
-            required
-            value={summery}
-            onChange={handleSummeryChange}
-            placeholder="Write something about yourself..."
+          <RichTextEditor
+            onRichTextEditorChange={handleSummaryChange}
+            onBlur={handleSummaryBlur}
+            defaultValue={summery}
           />
+          {summeryError && (
+            <p className="text-red-500 text-xs mt-1">{summeryError}</p>
+          )}
         </div>
         <div className="mt-2 flex justify-end">
-          <Button 
-            disabled={loading || updateLoading} 
+          <Button
+            disabled={loading || updateLoading}
             onClick={onSave}
             className="relative overflow-hidden"
           >
@@ -198,9 +210,8 @@ const SummeryForm = ({ enabledNext }) => {
                 <span>Đang lưu...</span>
               </>
             ) : (
-              "Save"
+              "Lưu"
             )}
-
           </Button>
         </div>
       </div>
@@ -208,5 +219,4 @@ const SummeryForm = ({ enabledNext }) => {
   );
 };
 
-export default SummeryForm;
-
+export default SummaryForm;
