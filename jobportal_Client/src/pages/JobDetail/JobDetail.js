@@ -224,23 +224,47 @@ export default function JobDetail() {
                         size="icon"
                         onClick={handleSaveJob}
                         className={`transition-all duration-300 ${
-                          isSaved ? "bg-primary text-white border-primary hover:bg-primary/90" : "hover:bg-gray-50"
+                          isSaved
+                            ? "bg-primary text-white border-primary hover:bg-primary/90"
+                            : "hover:bg-gray-50"
                         }`}
                         title={isSaved ? "Bỏ lưu công việc" : "Lưu công việc"}
                       >
-                        {isSaved ? <BookmarkCheck className="w-5 h-5" /> : <Bookmark className="w-5 h-5" />}
+                        {isSaved ? (
+                          <BookmarkCheck className="w-5 h-5" />
+                        ) : (
+                          <Bookmark className="w-5 h-5" />
+                        )}
                       </Button>
                     )}
-                    <Button variant="outline" size="icon" className="hover:bg-gray-50" title="Chia sẻ công việc">
-                      <Share2 className="w-5 h-5" />
-                    </Button>
-                    <Button
-                      onClick={handleOpenModal}
-                      className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg font-semibold"
-                      disabled={hasApplied}
-                    >
-                      {hasApplied ? "Đã ứng tuyển" : "Ứng tuyển ngay"}
-                    </Button>
+                    {oneApplyJob?.save ? (
+                      <Button
+                        variant="outline"
+                        className="text-green-600 font-bold border-green-700 cursor-not-allowed"
+                        disabled
+                      >
+                        Đã được duyệt
+                      </Button>
+                    ) : hasApplied ? (
+                      <button
+                        className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+                        onClick={handleOpenModal}
+                      >
+                        Cập nhật đơn
+                      </button>
+                    ) : user ? (
+                      <Button
+                        variant="default"
+                        className="bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+                        onClick={handleOpenModal}
+                      >
+                        Nộp đơn
+                      </Button>
+                    ) : (
+                      <span className="text-sm text-red-600 font-medium">
+                        Vui lòng đăng nhập để có thể ứng tuyển
+                      </span>
+                    )}
                   </div>
                 </div>
 

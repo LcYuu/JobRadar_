@@ -47,7 +47,14 @@ logger = logging.getLogger(__name__)
 
 # Khởi tạo Flask
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*", "allow_headers": "Authorization"}})
+# Cấu hình CORS
+CORS(app, resources={
+    r"/*": {
+        "origins": ["http://localhost:3000"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 # Cấu hình file paths
 SEARCH_HISTORY_FILEPATH = os.environ.get("SEARCH_HISTORY_FILEPATH", os.path.join("..", "search.csv"))
@@ -324,162 +331,123 @@ def preprocess_text(text, bypass_stop_words=False, normalize_for_keywords=False)
             boosted_words.append(word)
     return ' '.join(boosted_words)
 
-# Class ImprovedCommentFilter
 class ImprovedCommentFilter:
     def __init__(self):
+        self.patterns = self._init_patterns()
+        self.model = None
         try:
-            self.en_model = AutoModelForSequenceClassification.from_pretrained("unitary/toxic-bert")
-            self.en_tokenizer = AutoTokenizer.from_pretrained("unitary/toxic-bert")
-            self.en_model.eval()
-            self.patterns = self._init_patterns()
-            self.feedback_data = []
-            logger.info("Khởi tạo ImprovedCommentFilter thành công")
+            self.model = setup_gemini(os.getenv('GEMINI_API_KEY'))
         except Exception as e:
-            logger.error(f"Lỗi khởi tạo models: {e}")
-            raise
+            logger.error(f"Lỗi khi khởi tạo Gemini model: {str(e)}")
 
     def _init_patterns(self):
-        vn_patterns = [
-            r'\b[đdĐD][ịiịĩ]+[tT]*\w*', r'\b[cC][ặăắẳẵ]+[cC]*\w*', r'\b[lL][ồôỗổ]+[nN]*\w*',
-            r'\b[đdĐD][éeèẻẽẹêếềểễệ]+[oO]*\w*', r'\b[đdĐD][ũuụủứừửữự]+[mM][aàáảãạăằắẳẵặâầấẩẫậ]*\w*',
-            r'\b[cC][hH][óoôốồổỗộơớờởỡợ]+\w*', r'\b[sS][úuứừửữự]+[cC]\w*', r'\b[nN][gG][uUưƯ]\w*',
-            r'\b[kK][hH][óoôốồổỗộơớờởỡợ][nN]\w*'
-        ]
-        en_patterns = [
-            r'\bf+u+c+k+\w*', r'\bs+h+[i1]+t+\w*', r'\bb+i+t+c+h+\w*', r'\ba+s+h+o+l+e+\w*',
-            r'\bd+u+m+b+\w*', r'\bi+d+i+o+t+\w*', r'\bs+t+u+p+i+d+\w*'
-        ]
-        all_patterns = vn_patterns + en_patterns
-        return re.compile('|'.join(all_patterns), re.IGNORECASE | re.UNICODE)
+        return {
+            'vietnamese': [
+                r'\b(địt|đụ|đéo|cặc|lồn|đĩ|điếm|chó|ngu|ngu ngốc|ngu si|đần|đần độn|khốn nạn|đồ khốn|đồ ngu|đồ chó|đồ điếm|đồ đĩ|đồ khốn nạn|đồ vô dụng|đồ vô tích sự|đồ bỏ đi|đồ rác rưởi|đồ hèn|đồ hèn nhát|đồ hèn mạt|đồ hèn hạ|đồ hèn kém|đồ hèn mọn|đồ hèn nhược|đồ hèn yếu)\b',
+            ],
+            'english': [
+                r'\b(fuck|shit|asshole|bitch|cunt|dick|pussy|bastard|motherfucker|retard|idiot|moron|stupid|dumb|fool|loser|jerk|scum|trash|garbage|worthless|useless)\b',
+            ]
+        }
 
     def _check_patterns(self, text):
-        return bool(self.patterns.search(text))
+        for lang, patterns in self.patterns.items():
+            for pattern in patterns:
+                if re.search(pattern, text, re.IGNORECASE):
+                    return True
+        return False
 
     def _get_model_score(self, text):
         try:
-            inputs = self.en_tokenizer(text, return_tensors="pt", truncation=True, max_length=256)
-            with torch.no_grad():
-                outputs = self.en_model(**inputs)
-                probs = torch.softmax(outputs.logits, dim=1)
-                toxic_score = probs[0][1].item()
-            return toxic_score
+            if not self.model:
+                return 0.0
+                
+            prompt = f"""Analyze the following text for toxicity and inappropriate content. 
+            Return a score between 0 and 1, where:
+            - 0 means completely safe and appropriate
+            - 1 means highly toxic or inappropriate
+            
+            Text: {text}
+            
+            Score:"""
+            
+            response = self.model.generate_content(prompt)
+            score = float(response.text.strip())
+            return min(max(score, 0.0), 1.0)
         except Exception as e:
-            logger.error(f"Lỗi khi lấy điểm từ model: {e}")
-            return 0.5
+            logger.error(f"Lỗi khi lấy điểm từ model: {str(e)}")
+            return 0.0
 
     def check_with_gemini(self, text, is_vietnamese=False):
         try:
-            prompt = f"""
-            Hãy phân tích nội dung bình luận sau và đánh giá mức độ phù hợp:
-            "{text}"
+            if not self.model:
+                return False, 0.0
 
-            Hãy phân tích các khía cạnh sau:
-            1. Chửi thề, văng tục
-            2. Xúc phạm, công kích cá nhân hoặc tập thể
-            3. Phân biệt đối xử (giới tính, chủng tộc, tôn giáo...)
-            4. Đe dọa, quấy rối
-            5. Spam hoặc nội dung rác
-            6. Ngôn từ tiêu cực, gây hấn
-            7. Nội dung khiêu dâm, không phù hợp thuần phong mỹ tục
+            prompt = f"""Analyze the following text for toxicity and inappropriate content.
+            The text is in {'Vietnamese' if is_vietnamese else 'English'}.
+            
+            Consider:
+            1. Profanity and offensive language
+            2. Hate speech or discriminatory content
+            3. Threats or violent content
+            4. Sexual content
+            5. Personal attacks or harassment
+            
+            Text: {text}
+            
+            Return a JSON response with:
+            - is_toxic: boolean
+            - score: float between 0 and 1
+            - reason: brief explanation
+            
+            Response:"""
 
-            {"Lưu ý phân tích thêm về ngữ cảnh và cách dùng từ trong tiếng Việt." if is_vietnamese else ""}
-
-            Chỉ trả về kết quả dạng JSON với cấu trúc:
-            {{
-                "is_toxic": true/false,
-                "confidence": 0.95,
-                "categories": ["loại vi phạm 1", "loại vi phạm 2"],
-                "explanation": "giải thích ngắn gọn",
-                "severity": "low/medium/high",
-                "context_analysis": "nhận xét về ngữ cảnh"
-            }}
-            """
-            if not GEMINI_API_KEY:
-                raise Exception("GEMINI_API_KEY chưa được thiết lập")
-            genai.configure(api_key=GEMINI_API_KEY)
-            model = genai.GenerativeModel(MODEL_NAME)
-            response = model.generate_content(prompt)
-            if not response or not response.text:
-                raise Exception("Không nhận được phản hồi từ Gemini")
-            response_text = response.text.strip()
-            if "```json" in response_text:
-                response_text = response_text.split("```json")[1].split("```")[0].strip()
-            elif "```" in response_text:
-                response_text = response_text.split("```")[1].split("```")[0].strip()
-            try:
-                result = json.loads(response_text)
-                required_fields = ['is_toxic', 'confidence', 'categories', 'explanation', 'severity']
-                for field in required_fields:
-                    if field not in result:
-                        result[field] = None if field in ['explanation', 'severity'] else ([] if field == 'categories' else False if field == 'is_toxic' else 0.5)
-                return result
-            except json.JSONDecodeError as e:
-                logger.error(f"Lỗi parse JSON từ Gemini: {e}")
-                return {
-                    "is_toxic": False,
-                    "confidence": 0.5,
-                    "categories": [],
-                    "explanation": "Không thể phân tích phản hồi từ Gemini",
-                    "severity": "low",
-                    "context_analysis": ""
-                }
+            response = self.model.generate_content(prompt)
+            result = json.loads(response.text)
+            
+            return result.get('is_toxic', False), result.get('score', 0.0)
+            
         except Exception as e:
-            logger.error(f"Lỗi khi gọi Gemini: {e}")
-            return {
-                "is_toxic": False,
-                "confidence": 0.5,
-                "categories": [],
-                "explanation": f"Lỗi khi phân tích: {str(e)}",
-                "severity": "low",
-                "context_analysis": ""
-            }
+            logger.error(f"Lỗi khi kiểm tra với Gemini: {str(e)}")
+            return False, 0.0
 
     def is_vietnamese(self, text):
-        vietnamese_chars = "áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ"
-        count = sum(1 for char in text.lower() if char in vietnamese_chars)
-        return count > 0
+        # Kiểm tra xem text có phải tiếng Việt không
+        return bool(re.search(r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]', text))
 
     def is_toxic(self, text, threshold=0.5):
-        logger.info(f"Kiểm tra nội dung: {text[:100]}...")
+        # Kiểm tra patterns trước
         if self._check_patterns(text):
             return True, 1.0
-        is_vn = self.is_vietnamese(text)
-        if is_vn:
-            gemini_result = self.check_with_gemini(text, is_vietnamese=True)
-            is_toxic = gemini_result["is_toxic"]
-            score = gemini_result["confidence"]
-            return is_toxic, score
-        else:
-            model_score = self._get_model_score(text)
-            if 0.4 <= model_score <= 0.6:
-                gemini_result = self.check_with_gemini(text, is_vietnamese=False)
-                if gemini_result["is_toxic"]:
-                    return True, max(model_score, gemini_result["confidence"])
-            return model_score > threshold, model_score
+            
+        # Nếu không match patterns, kiểm tra với model
+        is_vietnamese = self.is_vietnamese(text)
+        is_toxic, score = self.check_with_gemini(text, is_vietnamese)
+        
+        return is_toxic, score
 
     def filter_comment(self, text, threshold=0.5):
-        is_toxic, score = self.is_toxic(text, threshold)
-        is_vn = self.is_vietnamese(text)
-        if is_toxic or (0.4 <= score <= 0.6):
-            gemini_result = self.check_with_gemini(text, is_vietnamese=is_vn)
-            result = {
-                'is_toxic': is_toxic,
-                'score': score,
-                'message': 'Bình luận của bạn chứa nội dung không phù hợp.' if is_toxic else 'Bình luận phù hợp.',
-                'details': {
-                    'categories': gemini_result.get('categories', []),
-                    'explanation': gemini_result.get('explanation', ''),
-                    'severity': gemini_result.get('severity', 'low'),
-                    'context_analysis': gemini_result.get('context_analysis', '')
-                }
-            }
-        else:
-            result = {
-                'is_toxic': False,
-                'score': score,
-                'message': 'Bình luận phù hợp.'
-            }
-        return result
+        """
+        Kiểm tra và lọc comment không phù hợp
+        Returns: (is_toxic: bool, score: float)
+        """
+        try:
+            # Kiểm tra patterns trước
+            if self._check_patterns(text):
+                return True, 1.0
+                
+            # Nếu không match patterns, kiểm tra với model
+            is_vietnamese = self.is_vietnamese(text)
+            is_toxic, score = self.check_with_gemini(text, is_vietnamese)
+            
+            if is_toxic and score >= threshold:
+                return True, score
+                
+            return False, score
+            
+        except Exception as e:
+            logger.error(f"Lỗi khi lọc comment: {str(e)}")
+            return False, 0.0
 
 # Khởi tạo CommentFilter
 comment_filter = ImprovedCommentFilter()
@@ -1096,16 +1064,36 @@ def health_check():
 @app.route('/check-comment', methods=['POST'])
 def check_comment():
     try:
-        data = request.json
-        if not data or 'text' not in data:
-            return jsonify({"error": "Thiếu nội dung bình luận"}), 400
-        text = data['text']
-        threshold = data.get('threshold', 0.5)
-        result = comment_filter.filter_comment(text, threshold)
-        return jsonify(result)
+        data = request.get_json()
+        text = data.get('text', '')
+        
+        if not text:
+            return jsonify({
+                'is_toxic': False,
+                'message': 'No text provided'
+            }), 400
+
+        # Khởi tạo bộ lọc comment
+        comment_filter = ImprovedCommentFilter()
+        
+        # Kiểm tra nội dung
+        is_toxic, score = comment_filter.filter_comment(text)
+        
+        # Tạo message dựa trên kết quả
+        message = 'Nội dung không phù hợp' if is_toxic else 'Nội dung phù hợp'
+        
+        return jsonify({
+            'is_toxic': is_toxic,
+            'score': score,
+            'message': message
+        })
+
     except Exception as e:
-        logger.exception(f"Lỗi khi kiểm tra bình luận: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Lỗi khi kiểm tra comment: {str(e)}")
+        return jsonify({
+            'is_toxic': False,
+            'message': f'Lỗi server: {str(e)}'
+        }), 500
 
 if __name__ == '__main__':
     logger.info("Starting JobRadar service on port 5000")
