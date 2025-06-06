@@ -583,3 +583,708 @@ TypeError: unhashable type: 'list'
 2025-05-28 14:24:39,777 - werkzeug - INFO -  * Debugger PIN: 646-913-458
 2025-05-28 15:29:03,364 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
 2025-05-28 15:29:03,364 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-01 15:09:32,291 - __main__ - WARNING - GEMINI_API_KEY không được thiết lập.
+2025-06-01 15:09:32,295 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-01 15:09:32,295 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-01 15:09:38,423 - huggingface_hub.file_download - WARNING - Xet Storage is enabled for this repo, but the 'hf_xet' package is not installed. Falling back to regular HTTP download. For better performance, install the package with: `pip install huggingface_hub[hf_xet]` or `pip install hf_xet`
+2025-06-01 15:09:57,628 - huggingface_hub.file_download - WARNING - Error while downloading from https://huggingface.co/sentence-transformers/paraphrase-multilingual-mpnet-base-v2/resolve/main/model.safetensors: HTTPSConnectionPool(host='cas-bridge.xethub.hf.co', port=443): Read timed out.
+Trying to resume download...
+2025-06-01 15:10:33,880 - huggingface_hub.file_download - WARNING - Error while downloading from https://huggingface.co/sentence-transformers/paraphrase-multilingual-mpnet-base-v2/resolve/main/model.safetensors: HTTPSConnectionPool(host='cas-bridge.xethub.hf.co', port=443): Read timed out.
+Trying to resume download...
+2025-06-01 15:11:19,180 - huggingface_hub.file_download - WARNING - Xet Storage is enabled for this repo, but the 'hf_xet' package is not installed. Falling back to regular HTTP download. For better performance, install the package with: `pip install huggingface_hub[hf_xet]` or `pip install hf_xet`
+2025-06-01 15:11:31,770 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-01 15:11:31,773 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-01 15:11:33,481 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-06-01 15:11:33,501 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-01 15:11:33,501 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-06-01 15:11:34,756 - __main__ - INFO - Đã tải 1301 công việc.
+2025-06-01 15:11:34,785 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-06-01 15:11:34,882 - __main__ - INFO - Đã tải 1772 mục lịch sử tìm kiếm.
+2025-06-01 15:11:34,930 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-06-01 15:11:34,930 - __main__ - INFO - Tạo mới embeddings vì file không hợp lệ hoặc đã hết hạn
+2025-06-01 15:11:34,958 - __main__ - INFO - Tạo mới embeddings cho công việc
+2025-06-01 15:15:19,912 - __main__ - INFO - Đã lưu 1310 embeddings vào file
+2025-06-01 15:15:20,512 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.23:5000
+2025-06-01 15:15:20,515 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-01 15:15:20,529 - werkzeug - INFO -  * Restarting with stat
+2025-06-01 15:15:45,510 - __main__ - WARNING - GEMINI_API_KEY không được thiết lập.
+2025-06-01 15:15:45,514 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-01 15:15:45,514 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-01 15:15:53,622 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-01 15:15:53,623 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-01 15:15:54,857 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-06-01 15:15:54,865 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-01 15:15:54,866 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-06-01 15:15:55,102 - __main__ - INFO - Đã tải 1301 công việc.
+2025-06-01 15:15:55,103 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-06-01 15:15:55,147 - __main__ - INFO - Đã tải 1772 mục lịch sử tìm kiếm.
+2025-06-01 15:15:55,186 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-06-01 15:15:55,186 - __main__ - INFO - Tạo mới embeddings vì file không hợp lệ hoặc đã hết hạn
+2025-06-01 15:15:55,207 - __main__ - INFO - Tạo mới embeddings cho công việc
+2025-06-01 15:19:28,533 - __main__ - INFO - Đã lưu 1310 embeddings vào file
+2025-06-01 15:19:28,994 - werkzeug - WARNING -  * Debugger is active!
+2025-06-01 15:19:29,047 - werkzeug - INFO -  * Debugger PIN: 261-957-740
+2025-06-01 15:19:38,718 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-01 15:19:38,739 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 15:19:38] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-01 15:19:38,740 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-01 15:19:38,745 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 15:19:38] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-01 15:19:38,746 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-01 15:19:38,748 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 15:19:38] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-01 15:19:54,606 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 15:19:54] "POST /semantic-search HTTP/1.1" 200 -
+2025-06-01 15:20:18,515 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 15:20:18] "POST /semantic-search HTTP/1.1" 200 -
+2025-06-01 15:20:24,800 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-01 15:20:24,811 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 15:20:24] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-01 15:20:42,939 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-01 15:20:42,963 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 15:20:42] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-01 15:20:42,997 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-01 15:20:43,005 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 15:20:43] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-01 15:24:21,232 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 15:24:21] "POST /semantic-search HTTP/1.1" 200 -
+2025-06-01 19:37:33,787 - __main__ - WARNING - GEMINI_API_KEY không được thiết lập.
+2025-06-01 19:37:33,801 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-01 19:37:33,802 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-01 19:37:42,119 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-01 19:37:42,124 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-01 19:37:43,460 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-06-01 19:37:43,493 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-01 19:37:43,495 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-06-01 19:37:43,759 - __main__ - INFO - Đã tải 1301 công việc.
+2025-06-01 19:37:43,761 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-06-01 19:37:43,793 - __main__ - INFO - Đã tải 1772 mục lịch sử tìm kiếm.
+2025-06-01 19:37:43,817 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-06-01 19:37:43,817 - __main__ - INFO - Tạo mới embeddings vì file không hợp lệ hoặc đã hết hạn
+2025-06-01 19:37:43,828 - __main__ - INFO - Tạo mới embeddings cho công việc
+2025-06-01 19:39:51,669 - __main__ - INFO - Đã lưu 1310 embeddings vào file
+2025-06-01 19:39:51,947 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.23:5000
+2025-06-01 19:39:51,948 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-01 19:39:51,958 - werkzeug - INFO -  * Restarting with stat
+2025-06-01 19:40:10,515 - __main__ - WARNING - GEMINI_API_KEY không được thiết lập.
+2025-06-01 19:40:10,519 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-01 19:40:10,519 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-01 19:40:16,372 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-01 19:40:16,373 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-01 19:40:17,151 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-06-01 19:40:17,158 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-01 19:40:17,158 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-06-01 19:40:17,264 - __main__ - INFO - Đã tải 1301 công việc.
+2025-06-01 19:40:17,265 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-06-01 19:40:17,288 - __main__ - INFO - Đã tải 1772 mục lịch sử tìm kiếm.
+2025-06-01 19:40:17,309 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-06-01 19:40:17,309 - __main__ - INFO - Tạo mới embeddings vì file không hợp lệ hoặc đã hết hạn
+2025-06-01 19:40:17,314 - __main__ - INFO - Tạo mới embeddings cho công việc
+2025-06-01 19:42:35,998 - __main__ - INFO - Đã lưu 1310 embeddings vào file
+2025-06-01 19:42:36,556 - werkzeug - WARNING -  * Debugger is active!
+2025-06-01 19:42:36,595 - werkzeug - INFO -  * Debugger PIN: 261-957-740
+2025-06-01 19:44:32,812 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-01 19:44:32,947 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 19:44:32] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-01 19:45:07,010 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-01 19:45:07,012 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 19:45:07] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-01 19:45:29,633 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 19:45:29] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-01 19:48:10,420 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 19:48:10] "POST /semantic-search HTTP/1.1" 200 -
+2025-06-01 19:48:52,421 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-01 19:48:52,430 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 19:48:52] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-01 19:49:23,672 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 19:49:23] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-01 19:51:35,514 - werkzeug - INFO -  * Detected change in 'D:\\2024-2025_HKI\\TLCN\\JobPortal_Project\\AI\\Re.py', reloading
+2025-06-01 19:51:46,161 - werkzeug - INFO -  * Restarting with stat
+2025-06-01 19:53:06,117 - __main__ - WARNING - GEMINI_API_KEY không được thiết lập.
+2025-06-01 19:53:06,146 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-01 19:53:06,146 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-01 19:55:51,222 - __main__ - WARNING - GEMINI_API_KEY không được thiết lập.
+2025-06-01 19:55:51,260 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-01 19:55:51,262 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-01 19:55:58,982 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-01 19:55:58,983 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-01 19:55:59,878 - __main__ - INFO - Khởi tạo ImprovedCommentFilter thành công
+2025-06-01 19:55:59,881 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-01 19:55:59,882 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-06-01 19:56:00,038 - __main__ - INFO - Đã tải 1301 công việc.
+2025-06-01 19:56:00,040 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-06-01 19:56:00,071 - __main__ - INFO - Đã tải 1772 mục lịch sử tìm kiếm.
+2025-06-01 19:56:00,100 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-06-01 19:56:00,100 - __main__ - INFO - Tạo mới embeddings vì file không hợp lệ hoặc đã hết hạn
+2025-06-01 19:56:00,109 - __main__ - INFO - Tạo mới embeddings cho công việc
+2025-06-01 19:58:50,276 - __main__ - INFO - Đã lưu 1310 embeddings vào file
+2025-06-01 19:58:51,304 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.23:5000
+2025-06-01 19:58:51,304 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-01 19:58:51,369 - werkzeug - INFO -  * Restarting with stat
+2025-06-01 19:59:17,564 - __main__ - WARNING - GEMINI_API_KEY không được thiết lập.
+2025-06-01 19:59:17,567 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-01 19:59:17,567 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-01 20:06:14,210 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-01 20:06:14,210 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-01 20:06:20,946 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-01 20:06:20,950 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-01 20:06:20,950 - __main__ - ERROR - Lỗi khi khởi tạo Gemini model: name 'setup_gemini' is not defined
+2025-06-01 20:06:20,953 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-01 20:06:20,953 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-06-01 20:06:21,069 - __main__ - INFO - Đã tải 1301 công việc.
+2025-06-01 20:06:21,069 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-06-01 20:06:21,089 - __main__ - INFO - Đã tải 1772 mục lịch sử tìm kiếm.
+2025-06-01 20:06:21,102 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-06-01 20:06:21,102 - __main__ - INFO - Tạo mới embeddings vì file không hợp lệ hoặc đã hết hạn
+2025-06-01 20:06:21,109 - __main__ - INFO - Tạo mới embeddings cho công việc
+2025-06-01 20:08:29,379 - __main__ - INFO - Đã lưu 1310 embeddings vào file
+2025-06-01 20:08:29,636 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.23:5000
+2025-06-01 20:08:29,654 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-01 20:08:29,656 - werkzeug - INFO -  * Restarting with stat
+2025-06-01 20:08:48,417 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-01 20:08:48,417 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-01 20:08:53,936 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-01 20:08:53,936 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-01 20:08:53,936 - __main__ - ERROR - Lỗi khi khởi tạo Gemini model: name 'setup_gemini' is not defined
+2025-06-01 20:08:53,947 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-01 20:08:53,947 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-06-01 20:08:54,019 - __main__ - INFO - Đã tải 1301 công việc.
+2025-06-01 20:08:54,025 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-06-01 20:08:54,040 - __main__ - INFO - Đã tải 1772 mục lịch sử tìm kiếm.
+2025-06-01 20:08:54,074 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-06-01 20:08:54,074 - __main__ - INFO - Tạo mới embeddings vì file không hợp lệ hoặc đã hết hạn
+2025-06-01 20:08:54,076 - __main__ - INFO - Tạo mới embeddings cho công việc
+2025-06-01 20:11:14,116 - __main__ - INFO - Đã lưu 1310 embeddings vào file
+2025-06-01 20:11:14,365 - werkzeug - WARNING -  * Debugger is active!
+2025-06-01 20:11:14,388 - werkzeug - INFO -  * Debugger PIN: 261-957-740
+2025-06-01 20:12:26,100 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:12:26] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-01 20:12:26,322 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:12:26] "POST /check-comment HTTP/1.1" 200 -
+2025-06-01 20:12:26,421 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:12:26] "POST /check-comment HTTP/1.1" 200 -
+2025-06-01 20:12:40,356 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:12:40] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-01 20:12:40,617 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:12:40] "POST /check-comment HTTP/1.1" 200 -
+2025-06-01 20:12:40,671 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:12:40] "POST /check-comment HTTP/1.1" 200 -
+2025-06-01 20:12:51,284 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:12:51] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-01 20:12:51,541 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:12:51] "POST /check-comment HTTP/1.1" 200 -
+2025-06-01 20:13:04,400 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:13:04] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-01 20:13:04,667 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:13:04] "POST /check-comment HTTP/1.1" 200 -
+2025-06-01 20:13:04,714 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:13:04] "POST /check-comment HTTP/1.1" 200 -
+2025-06-01 20:13:11,818 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:13:11] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-01 20:13:12,067 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:13:12] "POST /check-comment HTTP/1.1" 200 -
+2025-06-01 20:13:17,248 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:13:17] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-01 20:13:17,569 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:13:17] "POST /check-comment HTTP/1.1" 200 -
+2025-06-01 20:13:17,833 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:13:17] "POST /check-comment HTTP/1.1" 200 -
+2025-06-01 20:13:24,504 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:13:24] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-01 20:13:24,758 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:13:24] "POST /check-comment HTTP/1.1" 200 -
+2025-06-01 20:13:24,818 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:13:24] "POST /check-comment HTTP/1.1" 200 -
+2025-06-01 20:13:50,165 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:13:50] "POST /semantic-search HTTP/1.1" 200 -
+2025-06-01 20:17:43,483 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-01 20:17:43,671 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:17:43] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-01 20:18:19,725 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:18:19] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-01 20:18:20,002 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:18:20] "POST /check-comment HTTP/1.1" 200 -
+2025-06-01 20:18:20,037 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:18:20] "POST /check-comment HTTP/1.1" 200 -
+2025-06-01 20:18:24,240 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:18:24] "POST /check-comment HTTP/1.1" 200 -
+2025-06-01 20:18:24,524 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:18:24] "POST /check-comment HTTP/1.1" 200 -
+2025-06-01 20:27:32,243 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-01 20:27:32,253 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:27:32] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-01 20:28:23,712 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-01 20:28:23,713 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:28:23] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-01 20:28:41,449 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-01 20:28:41,452 - werkzeug - INFO - 127.0.0.1 - - [01/Jun/2025 20:28:41] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-05 20:28:28,884 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-05 20:28:28,885 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-05 20:28:35,538 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-05 20:28:35,538 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-05 20:28:35,538 - __main__ - ERROR - Lỗi khi khởi tạo Gemini model: name 'setup_gemini' is not defined
+2025-06-05 20:28:35,538 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-05 20:28:35,538 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-06-05 20:28:35,632 - __main__ - INFO - Đã tải 1301 công việc.
+2025-06-05 20:28:35,632 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-06-05 20:28:35,650 - __main__ - INFO - Đã tải 1772 mục lịch sử tìm kiếm.
+2025-06-05 20:28:35,660 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-06-05 20:28:35,660 - __main__ - INFO - Tạo mới embeddings vì file không hợp lệ hoặc đã hết hạn
+2025-06-05 20:28:35,660 - __main__ - INFO - Tạo mới embeddings cho công việc
+2025-06-05 20:31:04,355 - __main__ - INFO - Đã lưu 1310 embeddings vào file
+2025-06-05 20:31:04,791 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.17:5000
+2025-06-05 20:31:04,795 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-05 20:31:04,808 - werkzeug - INFO -  * Restarting with stat
+2025-06-05 20:31:28,564 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-05 20:31:28,564 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-05 20:31:34,769 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-05 20:31:34,771 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-05 20:31:34,774 - __main__ - ERROR - Lỗi khi khởi tạo Gemini model: name 'setup_gemini' is not defined
+2025-06-05 20:31:34,780 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-05 20:31:34,781 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-06-05 20:31:35,016 - __main__ - INFO - Đã tải 1301 công việc.
+2025-06-05 20:31:35,023 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-06-05 20:31:35,078 - __main__ - INFO - Đã tải 1772 mục lịch sử tìm kiếm.
+2025-06-05 20:31:35,097 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-06-05 20:31:35,097 - __main__ - INFO - Tạo mới embeddings vì file không hợp lệ hoặc đã hết hạn
+2025-06-05 20:31:35,108 - __main__ - INFO - Tạo mới embeddings cho công việc
+2025-06-05 20:35:11,445 - __main__ - INFO - Đã lưu 1310 embeddings vào file
+2025-06-05 20:35:12,005 - werkzeug - WARNING -  * Debugger is active!
+2025-06-05 20:35:12,035 - werkzeug - INFO -  * Debugger PIN: 261-957-740
+2025-06-05 20:35:53,508 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-05 20:35:53,641 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 20:35:53] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-05 20:36:55,539 - __main__ - ERROR - Lỗi khi gọi Gemini API: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 15
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 3
+}
+]
+2025-06-05 20:36:55,539 - __main__ - ERROR - Lỗi server: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 15
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 3
+}
+]
+Traceback (most recent call last):
+  File "D:\2024-2025_HKI\TLCN\JobPortal_Project\AI\Re.py", line 788, in analyze_cv
+    result = analyze_cv_with_gemini(cv_text, job_data, GEMINI_API_KEY)
+  File "D:\2024-2025_HKI\TLCN\JobPortal_Project\AI\Re.py", line 607, in analyze_cv_with_gemini
+    raise e
+  File "D:\2024-2025_HKI\TLCN\JobPortal_Project\AI\Re.py", line 589, in analyze_cv_with_gemini
+    response = model.generate_content(prompt)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\generativeai\generative_models.py", line 331, in generate_content
+    response = self._client.generate_content(
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\ai\generativelanguage_v1beta\services\generative_service\client.py", line 835, in generate_content
+    response = rpc(
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\gapic_v1\method.py", line 131, in __call__
+    return wrapped_func(*args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\retry\retry_unary.py", line 294, in retry_wrapped_func
+    return retry_target(
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\retry\retry_unary.py", line 156, in retry_target
+    next_sleep = _retry_error_helper(
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\retry\retry_base.py", line 214, in _retry_error_helper
+    raise final_exc from source_exc
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\retry\retry_unary.py", line 147, in retry_target
+    result = target()
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\timeout.py", line 130, in func_with_timeout
+    return func(*args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\grpc_helpers.py", line 78, in error_remapped_callable
+    raise exceptions.from_grpc_error(exc) from exc
+google.api_core.exceptions.ResourceExhausted: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 15
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 3
+}
+]
+2025-06-05 20:36:55,698 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 20:36:55] "[35m[1mPOST /analyze HTTP/1.1[0m" 500 -
+2025-06-05 20:38:55,997 - __main__ - ERROR - Lỗi khi gọi Gemini API: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 15
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 2
+}
+]
+2025-06-05 20:38:55,997 - __main__ - ERROR - Lỗi server: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 15
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 2
+}
+]
+Traceback (most recent call last):
+  File "D:\2024-2025_HKI\TLCN\JobPortal_Project\AI\Re.py", line 788, in analyze_cv
+    result = analyze_cv_with_gemini(cv_text, job_data, GEMINI_API_KEY)
+  File "D:\2024-2025_HKI\TLCN\JobPortal_Project\AI\Re.py", line 607, in analyze_cv_with_gemini
+    raise e
+  File "D:\2024-2025_HKI\TLCN\JobPortal_Project\AI\Re.py", line 589, in analyze_cv_with_gemini
+    response = model.generate_content(prompt)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\generativeai\generative_models.py", line 331, in generate_content
+    response = self._client.generate_content(
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\ai\generativelanguage_v1beta\services\generative_service\client.py", line 835, in generate_content
+    response = rpc(
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\gapic_v1\method.py", line 131, in __call__
+    return wrapped_func(*args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\retry\retry_unary.py", line 294, in retry_wrapped_func
+    return retry_target(
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\retry\retry_unary.py", line 156, in retry_target
+    next_sleep = _retry_error_helper(
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\retry\retry_base.py", line 214, in _retry_error_helper
+    raise final_exc from source_exc
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\retry\retry_unary.py", line 147, in retry_target
+    result = target()
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\timeout.py", line 130, in func_with_timeout
+    return func(*args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\grpc_helpers.py", line 78, in error_remapped_callable
+    raise exceptions.from_grpc_error(exc) from exc
+google.api_core.exceptions.ResourceExhausted: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 15
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 2
+}
+]
+2025-06-05 20:38:56,000 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 20:38:56] "[35m[1mPOST /analyze HTTP/1.1[0m" 500 -
+2025-06-05 20:40:48,441 - __main__ - ERROR - Lỗi khi gọi Gemini API: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 15
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 10
+}
+]
+2025-06-05 20:40:48,444 - __main__ - ERROR - Lỗi server: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 15
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 10
+}
+]
+Traceback (most recent call last):
+  File "D:\2024-2025_HKI\TLCN\JobPortal_Project\AI\Re.py", line 788, in analyze_cv
+    result = analyze_cv_with_gemini(cv_text, job_data, GEMINI_API_KEY)
+  File "D:\2024-2025_HKI\TLCN\JobPortal_Project\AI\Re.py", line 607, in analyze_cv_with_gemini
+    raise e
+  File "D:\2024-2025_HKI\TLCN\JobPortal_Project\AI\Re.py", line 589, in analyze_cv_with_gemini
+    response = model.generate_content(prompt)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\generativeai\generative_models.py", line 331, in generate_content
+    response = self._client.generate_content(
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\ai\generativelanguage_v1beta\services\generative_service\client.py", line 835, in generate_content
+    response = rpc(
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\gapic_v1\method.py", line 131, in __call__
+    return wrapped_func(*args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\retry\retry_unary.py", line 294, in retry_wrapped_func
+    return retry_target(
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\retry\retry_unary.py", line 156, in retry_target
+    next_sleep = _retry_error_helper(
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\retry\retry_base.py", line 214, in _retry_error_helper
+    raise final_exc from source_exc
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\retry\retry_unary.py", line 147, in retry_target
+    result = target()
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\timeout.py", line 130, in func_with_timeout
+    return func(*args, **kwargs)
+  File "C:\Users\HP\AppData\Roaming\Python\Python310\site-packages\google\api_core\grpc_helpers.py", line 78, in error_remapped_callable
+    raise exceptions.from_grpc_error(exc) from exc
+google.api_core.exceptions.ResourceExhausted: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. [violations {
+  quota_metric: "generativelanguage.googleapis.com/generate_content_free_tier_requests"
+  quota_id: "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+  quota_dimensions {
+    key: "model"
+    value: "gemini-2.0-flash"
+  }
+  quota_dimensions {
+    key: "location"
+    value: "global"
+  }
+  quota_value: 15
+}
+, links {
+  description: "Learn more about Gemini API quotas"
+  url: "https://ai.google.dev/gemini-api/docs/rate-limits"
+}
+, retry_delay {
+  seconds: 10
+}
+]
+2025-06-05 20:40:48,448 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 20:40:48] "[35m[1mPOST /analyze HTTP/1.1[0m" 500 -
+2025-06-05 20:41:18,798 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-05 20:41:18,811 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 20:41:18] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-05 20:41:40,346 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 20:41:40] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-05 20:41:40,614 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 20:41:40] "POST /check-comment HTTP/1.1" 200 -
+2025-06-05 20:41:40,660 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 20:41:40] "POST /check-comment HTTP/1.1" 200 -
+2025-06-05 20:41:59,653 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 20:41:59] "POST /semantic-search HTTP/1.1" 200 -
+2025-06-05 20:44:30,148 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-05 20:44:30,165 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 20:44:30] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-05 20:48:11,152 - werkzeug - INFO -  * Detected change in 'D:\\2024-2025_HKI\\TLCN\\JobPortal_Project\\AI\\Re.py', reloading
+2025-06-05 20:48:20,169 - werkzeug - INFO -  * Restarting with stat
+2025-06-05 20:48:51,859 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-05 20:48:51,860 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-05 20:48:57,517 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-05 20:48:57,518 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-05 20:48:57,518 - __main__ - ERROR - Lỗi khi khởi tạo Gemini model: name 'setup_gemini' is not defined
+2025-06-05 20:48:57,522 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-05 20:48:57,523 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-06-05 20:48:57,674 - __main__ - INFO - Đã tải 1301 công việc.
+2025-06-05 20:48:57,675 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-06-05 20:48:57,697 - __main__ - INFO - Đã tải 1772 mục lịch sử tìm kiếm.
+2025-06-05 20:48:57,704 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-06-05 20:48:57,705 - __main__ - INFO - Tạo mới embeddings vì file không hợp lệ hoặc đã hết hạn
+2025-06-05 20:48:57,710 - __main__ - INFO - Tạo mới embeddings cho công việc
+2025-06-05 20:51:28,806 - __main__ - INFO - Đã lưu 1310 embeddings vào file
+2025-06-05 20:51:29,169 - werkzeug - WARNING -  * Debugger is active!
+2025-06-05 20:51:29,219 - werkzeug - INFO -  * Debugger PIN: 261-957-740
+2025-06-05 20:52:01,725 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-05 20:52:01,773 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 20:52:01] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-05 20:52:22,266 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 20:52:22] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-05 20:52:22,539 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 20:52:22] "POST /check-comment HTTP/1.1" 200 -
+2025-06-05 20:52:22,584 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 20:52:22] "POST /check-comment HTTP/1.1" 200 -
+2025-06-05 20:52:32,517 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 20:52:32] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-05 20:52:32,778 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 20:52:32] "POST /check-comment HTTP/1.1" 200 -
+2025-06-05 20:52:44,898 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-05 20:52:44,904 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 20:52:44] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-05 20:55:21,556 - werkzeug - INFO -  * Detected change in 'D:\\2024-2025_HKI\\TLCN\\JobPortal_Project\\AI\\Re.py', reloading
+2025-06-05 20:55:27,915 - werkzeug - INFO -  * Restarting with stat
+2025-06-05 20:55:49,385 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-05 20:55:49,385 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-05 20:55:54,651 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-05 20:55:54,651 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-05 20:55:54,651 - __main__ - ERROR - Lỗi khi khởi tạo Gemini model: name 'setup_gemini' is not defined
+2025-06-05 20:55:54,654 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-05 20:55:54,654 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-06-05 20:55:54,822 - __main__ - INFO - Đã tải 1301 công việc.
+2025-06-05 20:55:54,823 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-06-05 20:55:54,844 - __main__ - INFO - Đã tải 1772 mục lịch sử tìm kiếm.
+2025-06-05 20:55:54,852 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-06-05 20:55:54,852 - __main__ - INFO - Tạo mới embeddings vì file không hợp lệ hoặc đã hết hạn
+2025-06-05 20:55:54,857 - __main__ - INFO - Tạo mới embeddings cho công việc
+2025-06-05 20:58:49,558 - __main__ - INFO - Đã lưu 1310 embeddings vào file
+2025-06-05 20:58:50,101 - werkzeug - WARNING -  * Debugger is active!
+2025-06-05 20:58:50,141 - werkzeug - INFO -  * Debugger PIN: 261-957-740
+2025-06-05 20:59:09,682 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-05 20:59:09,713 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 20:59:09] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-05 21:06:24,241 - werkzeug - INFO -  * Detected change in 'D:\\2024-2025_HKI\\TLCN\\JobPortal_Project\\AI\\Re.py', reloading
+2025-06-05 21:06:30,820 - werkzeug - INFO -  * Restarting with stat
+2025-06-05 21:06:53,464 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-05 21:06:53,466 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-05 21:06:58,480 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-05 21:06:58,483 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-05 21:06:58,483 - __main__ - ERROR - Lỗi khi khởi tạo Gemini model: name 'setup_gemini' is not defined
+2025-06-05 21:06:58,489 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-05 21:06:58,489 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-06-05 21:06:58,680 - __main__ - INFO - Đã tải 1301 công việc.
+2025-06-05 21:06:58,681 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-06-05 21:06:58,723 - __main__ - INFO - Đã tải 1772 mục lịch sử tìm kiếm.
+2025-06-05 21:06:58,737 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-06-05 21:06:58,737 - __main__ - INFO - Tạo mới embeddings vì file không hợp lệ hoặc đã hết hạn
+2025-06-05 21:06:58,749 - __main__ - INFO - Tạo mới embeddings cho công việc
+2025-06-05 21:09:31,789 - __main__ - INFO - Đã lưu 1310 embeddings vào file
+2025-06-05 21:09:32,090 - werkzeug - WARNING -  * Debugger is active!
+2025-06-05 21:09:32,118 - werkzeug - INFO -  * Debugger PIN: 261-957-740
+2025-06-05 21:11:00,602 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 21:11:00] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-05 21:11:00,847 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 21:11:00] "POST /check-comment HTTP/1.1" 200 -
+2025-06-05 21:11:08,263 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 21:11:08] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-05 21:11:08,574 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 21:11:08] "POST /check-comment HTTP/1.1" 200 -
+2025-06-05 21:11:13,036 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 21:11:13] "POST /check-comment HTTP/1.1" 200 -
+2025-06-05 21:11:48,266 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 21:11:48] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-05 21:11:48,525 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 21:11:48] "POST /check-comment HTTP/1.1" 200 -
+2025-06-05 21:12:12,647 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 21:12:12] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-05 21:12:12,899 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 21:12:12] "POST /check-comment HTTP/1.1" 200 -
+2025-06-05 21:12:12,963 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 21:12:12] "POST /check-comment HTTP/1.1" 200 -
+2025-06-05 21:12:24,400 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 21:12:24] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-05 21:12:24,673 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 21:12:24] "POST /check-comment HTTP/1.1" 200 -
+2025-06-05 21:12:36,077 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 21:12:36] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-05 21:12:36,339 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 21:12:36] "POST /check-comment HTTP/1.1" 200 -
+2025-06-05 21:12:57,175 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-05 21:12:57,180 - werkzeug - INFO - 127.0.0.1 - - [05/Jun/2025 21:12:57] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-06 14:58:35,158 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-06 14:58:35,158 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-06 14:58:40,795 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-06 14:58:40,798 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-06 14:58:40,798 - __main__ - ERROR - Lỗi khi khởi tạo Gemini model: name 'setup_gemini' is not defined
+2025-06-06 15:00:16,324 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-06 15:00:16,324 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-06 15:00:22,155 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-06 15:00:22,159 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-06 15:00:22,159 - __main__ - ERROR - Lỗi khi khởi tạo Gemini model: name 'setup_gemini' is not defined
+2025-06-06 15:00:22,165 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-06 15:00:22,166 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-06-06 15:00:22,375 - __main__ - INFO - Đã tải 1301 công việc.
+2025-06-06 15:00:22,375 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-06-06 15:00:22,404 - __main__ - INFO - Đã tải 1772 mục lịch sử tìm kiếm.
+2025-06-06 15:00:22,417 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-06-06 15:00:22,419 - __main__ - INFO - Tạo mới embeddings vì file không hợp lệ hoặc đã hết hạn
+2025-06-06 15:00:22,432 - __main__ - INFO - Tạo mới embeddings cho công việc
+2025-06-06 15:03:26,759 - __main__ - INFO - Đã lưu 1310 embeddings vào file
+2025-06-06 15:03:27,126 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.17:5000
+2025-06-06 15:03:27,126 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-06 15:03:27,140 - werkzeug - INFO -  * Restarting with stat
+2025-06-06 15:03:59,998 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-06 15:03:59,999 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-06 15:04:06,839 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-06 15:04:06,841 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-06 15:04:06,843 - __main__ - ERROR - Lỗi khi khởi tạo Gemini model: name 'setup_gemini' is not defined
+2025-06-06 15:04:06,851 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-06 15:04:06,852 - __main__ - INFO - Đang tải công việc từ ..\job_post.csv...
+2025-06-06 15:04:07,052 - __main__ - INFO - Đã tải 1301 công việc.
+2025-06-06 15:04:07,054 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ ..\search.csv...
+2025-06-06 15:04:07,085 - __main__ - INFO - Đã tải 1772 mục lịch sử tìm kiếm.
+2025-06-06 15:04:07,096 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-06-06 15:04:07,098 - __main__ - INFO - Tạo mới embeddings vì file không hợp lệ hoặc đã hết hạn
+2025-06-06 15:04:07,106 - __main__ - INFO - Tạo mới embeddings cho công việc
+2025-06-06 15:07:27,433 - __main__ - INFO - Đã lưu 1310 embeddings vào file
+2025-06-06 15:07:27,896 - werkzeug - WARNING -  * Debugger is active!
+2025-06-06 15:07:27,937 - werkzeug - INFO -  * Debugger PIN: 261-957-740
+2025-06-06 15:07:37,926 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-06 15:07:37,957 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:07:37] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-06 15:07:37,985 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-06 15:07:37,988 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:07:37] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-06 15:07:37,995 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-06 15:07:38,001 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:07:38] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-06 15:07:43,913 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:07:43] "POST /analyze HTTP/1.1" 200 -
+2025-06-06 15:07:44,027 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:07:44] "POST /analyze HTTP/1.1" 200 -
+2025-06-06 15:08:06,569 - __main__ - INFO - Tệp ..\search.csv chưa thay đổi.
+2025-06-06 15:08:06,572 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:08:06] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-06 15:10:30,020 - werkzeug - INFO -  * Detected change in 'D:\\2024-2025_HKI\\TLCN\\JobPortal_Project\\AI\\Re.py', reloading
+2025-06-06 15:10:38,687 - werkzeug - INFO -  * Restarting with stat
+2025-06-06 15:11:03,343 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-06 15:11:03,343 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-06 15:11:10,589 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-06 15:11:10,595 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-06 15:11:10,597 - __main__ - ERROR - Lỗi khi khởi tạo Gemini model: name 'setup_gemini' is not defined
+2025-06-06 15:11:10,634 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-06 15:11:10,636 - __main__ - INFO - Đang tải công việc từ D:\2024-2025_HKI\TLCN\JobPortal_Project\job_post.csv...
+2025-06-06 15:11:10,831 - __main__ - INFO - Đã tải 1301 công việc.
+2025-06-06 15:11:10,832 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-06 15:11:10,870 - __main__ - INFO - Đã tải 1772 mục lịch sử tìm kiếm.
+2025-06-06 15:11:10,884 - __main__ - INFO - Đã tải 1310 embeddings từ file job_embeddings.pkl
+2025-06-06 15:11:10,885 - __main__ - INFO - Tạo mới embeddings vì file không hợp lệ hoặc đã hết hạn
+2025-06-06 15:11:10,895 - __main__ - INFO - Tạo mới embeddings cho công việc
+2025-06-06 15:14:58,164 - __main__ - INFO - Đã lưu 1310 embeddings vào file
+2025-06-06 15:14:58,525 - werkzeug - WARNING -  * Debugger is active!
+2025-06-06 15:14:58,552 - werkzeug - INFO -  * Debugger PIN: 261-957-740
+2025-06-06 15:15:12,255 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-06 15:15:12,282 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:15:12] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-06 15:15:36,770 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-06 15:15:36,772 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:15:36] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-06 15:15:45,988 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-06 15:15:45,997 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:15:45] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-06 15:15:46,085 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-06 15:15:46,088 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:15:46] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-06 15:17:14,423 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-06 15:17:14,455 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:17:14] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-06 15:17:26,920 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-06 15:17:27,692 - __main__ - INFO - Đã tải 1780 mục lịch sử tìm kiếm.
+2025-06-06 15:17:31,887 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:17:31] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-06 15:17:48,712 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-06 15:17:48,714 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: IT phần cứng
+2025-06-06 15:17:48,716 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:17:48] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-06 15:21:06,152 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-06 15:21:06,239 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: IT phần cứng
+2025-06-06 15:21:06,281 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:21:06] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-06 15:24:38,536 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:24:38] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 15:24:38,857 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:24:38] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 15:24:51,303 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:24:51] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 15:24:51,558 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:24:51] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 15:25:20,268 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:25:20] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 15:25:20,533 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:25:20] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 15:25:20,592 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:25:20] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 15:25:25,388 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:25:25] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 15:25:25,706 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:25:25] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 15:25:26,009 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:25:26] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 15:25:48,404 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:25:48] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 15:25:48,662 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:25:48] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 15:25:48,712 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:25:48] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 15:25:56,160 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:25:56] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 15:25:56,426 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:25:56] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 15:25:56,466 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:25:56] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 15:26:02,601 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:26:02] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 15:26:02,856 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:26:02] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 15:26:02,923 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:26:02] "POST /check-comment HTTP/1.1" 200 -
