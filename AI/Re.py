@@ -26,7 +26,8 @@ import redis
 import hashlib
 import pickle
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
-
+from cryptography.fernet import Fernet
+import base64
 # Thiết lập mã hóa
 os.environ['PYTHONIOENCODING'] = 'utf-8'
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
@@ -57,8 +58,8 @@ CORS(app, resources={
 })
 
 # Cấu hình file paths
-SEARCH_HISTORY_FILEPATH = os.environ.get("SEARCH_HISTORY_FILEPATH", os.path.join("..", "search.csv"))
-JOBS_FILEPATH = os.environ.get("JOBS_FILEPATH", os.path.join("..", "job_post.csv"))
+SEARCH_HISTORY_FILEPATH = os.environ.get("SEARCH_HISTORY_FILEPATH", os.path.join(os.path.dirname(os.path.dirname(__file__)), "search.csv"))
+JOBS_FILEPATH = os.environ.get("JOBS_FILEPATH", os.path.join(os.path.dirname(os.path.dirname(__file__)), "job_post.csv"))
 # Cấu hình Gemini API
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
@@ -92,13 +93,14 @@ in_memory_cache = {}
 # Biến cấu hình tối ưu hóa
 MAX_WORKERS = 8
 PRECOMPUTE_EMBEDDINGS = True
-EMBEDDINGS_FILE = "job_embeddings.pkl"
+EMBEDDINGS_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "embeddings_cache.pkl")
 EMBEDDING_REFRESH_HOURS = 24
 SEMANTIC_SEARCH_TIMEOUT = 30
 USE_JOB_INDEXING = True
 ENABLE_PREFILTERING = True
 MAX_JOBS_FOR_GEMINI = 50
 EMBEDDING_CACHE_SIZE = 1000
+CACHE_VERSION = "1.0"  # Thêm version để quản lý cache
 
 # Biến toàn cục
 job_index = {}
@@ -475,6 +477,8 @@ def extract_text_from_docx(docx_file):
         return ""
 
 def create_analysis_prompt(cv_text, job_data):
+    """Tạo prompt để gửi đến Gemini"""
+    # Trích xuất thông tin từ job_data
     job_description = job_data.get('description', '')
     job_requirements = job_data.get('requirement', '')
     job_benefits = job_data.get('benefit', '')
@@ -483,6 +487,7 @@ def create_analysis_prompt(cv_text, job_data):
     job_position = job_data.get('position', '')
     job_nice_to_haves = job_data.get('niceToHaves', '')
     
+    # Tạo một mô tả công việc đầy đủ
     full_job_description = f"""
     # Tiêu đề: {job_data.get('title', '')}
     # Vị trí: {job_position}
@@ -578,33 +583,173 @@ def create_analysis_prompt(cv_text, job_data):
             }}
         }}
     }}
+    ```
+
+    Chỉ trả về đối tượng JSON đúng định dạng, không bao gồm markdown hoặc bất kỳ văn bản nào khác. 
+    Đảm bảo rằng tất cả trường là dữ liệu đúng kiểu: điểm số là số, danh sách là mảng, và văn bản là chuỗi.
     """
     return prompt
 
 def analyze_cv_with_gemini(cv_text, job_data, api_key):
+    """Sử dụng Gemini để phân tích CV và mô tả công việc"""
+    # Thiết lập API
     setup_gemini(api_key)
+    
+    # Tạo prompt
     prompt = create_analysis_prompt(cv_text, job_data)
+    
     try:
+        # Gọi Gemini API
         model = genai.GenerativeModel(MODEL_NAME)
         response = model.generate_content(prompt)
+        
+        # Xử lý phản hồi
         if response:
             try:
+                # Gemini có thể trả về text có thể bao gồm markdown hoặc backticks
+                # Cần làm sạch để chỉ lấy phần JSON
                 response_text = response.text
+                
+                # Loại bỏ backticks và json markers nếu có
                 cleaned_text = response_text
                 if "```json" in response_text:
                     cleaned_text = response_text.split("```json")[1].split("```")[0].strip()
                 elif "```" in response_text:
                     cleaned_text = response_text.split("```")[1].split("```")[0].strip()
+                
+                # Parse JSON
                 result = json.loads(cleaned_text)
                 return result
             except Exception as e:
                 logger.error(f"Lỗi xử lý phản hồi từ Gemini: {e}")
+                logger.error(f"Phản hồi gốc: {response.text}")
                 raise Exception(f"Không thể phân tích phản hồi từ Gemini: {e}")
         else:
             raise Exception("Không nhận được phản hồi từ Gemini")
     except Exception as e:
         logger.error(f"Lỗi khi gọi Gemini API: {e}")
         raise e
+class CVSecurity:
+    def __init__(self):
+        # Tạo key mã hóa
+        self.key = Fernet.generate_key()
+        self.cipher_suite = Fernet(self.key)
+    def encrypt_cv_data(self, cv_text):
+        """Mã hóa nội dung CV"""
+        try:
+            # Mã hóa dữ liệu
+            encrypted_data = self.cipher_suite.encrypt(cv_text.encode())
+            return base64.b64encode(encrypted_data).decode()
+        except Exception as e:
+            logger.error(f"Lỗi khi mã hóa CV: {e}")
+            return None
+
+    def decrypt_cv_data(self, encrypted_data):
+        """Giải mã nội dung CV"""
+        try:
+            # Giải mã dữ liệu
+            decrypted_data = self.cipher_suite.decrypt(base64.b64decode(encrypted_data))
+            return decrypted_data.decode()
+        except Exception as e:
+            logger.error(f"Lỗi khi giải mã CV: {e}")
+            return None
+class SensitiveDataProcessor:
+    def __init__(self):
+        # Các pattern để nhận diện thông tin nhạy cảm
+        self.patterns = {
+            'email': r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}',
+            'phone': r'(?:\+84|0)[0-9]{9,10}',
+            'id_card': r'[0-9]{9}|[0-9]{12}',
+            'address': r'(?:đường|phố|quận|huyện|tỉnh|thành phố)[\s\w]+',
+        }
+    
+    def mask_sensitive_data(self, cv_text):
+        """Che giấu thông tin nhạy cảm trong CV"""
+        masked_text = cv_text
+        
+        for data_type, pattern in self.patterns.items():
+            if data_type == 'email':
+                masked_text = re.sub(pattern, '[EMAIL]', masked_text)
+            elif data_type == 'phone':
+                masked_text = re.sub(pattern, '[PHONE]', masked_text)
+            elif data_type == 'id_card':
+                masked_text = re.sub(pattern, '[ID_CARD]', masked_text)
+            elif data_type == 'address':
+                masked_text = re.sub(pattern, '[ADDRESS]', masked_text)
+                
+        return masked_text
+
+# Khởi tạo các đối tượng bảo mật
+cv_security = CVSecurity()
+sensitive_processor = SensitiveDataProcessor()
+
+def preprocess_cv(cv_text, max_length=4000):
+    """
+    Tiền xử lý CV để giảm kích thước và tối ưu hóa nội dung trước khi phân tích
+    
+    Args:
+        cv_text (str): Nội dung CV gốc
+        max_length (int): Độ dài tối đa cho phép của CV sau khi xử lý
+        
+    Returns:
+        str: CV đã được tiền xử lý
+    """
+    try:
+        # 1. Loại bỏ thông tin cá nhân nhạy cảm
+        patterns = [
+            r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}',  # email
+            r'(?:\+84|0)[0-9]{9,10}',  # phone
+            r'[0-9]{9}|[0-9]{12}',  # id card
+            r'(?:đường|phố|quận|huyện|tỉnh|thành phố)[\s\w]+',  # address (VN)
+            r'(?:address|city|district|province|country)[\s\w]+',  # address (EN)
+            r'(?:ngày sinh|date of birth|dob)[\s\w:/.]+',  # date of birth
+            r'(?:họ tên|full name|name)[\s\w:]+',  # name
+        ]
+        for pattern in patterns:
+            cv_text = re.sub(pattern, '', cv_text, flags=re.IGNORECASE)
+
+        # 2. Chỉ giữ lại các section quan trọng
+        important_sections = [
+            r'(?:education|học vấn|trình độ học vấn)(.*?)(?:\n\n|\Z|experience|kinh nghiệm|skills|kỹ năng|projects|dự án|certifications|chứng chỉ|objective|mục tiêu nghề nghiệp)',
+            r'(?:experience|kinh nghiệm)(.*?)(?:\n\n|\Z|education|học vấn|skills|kỹ năng|projects|dự án|certifications|chứng chỉ|objective|mục tiêu nghề nghiệp)',
+            r'(?:skills|kỹ năng)(.*?)(?:\n\n|\Z|education|học vấn|experience|kinh nghiệm|projects|dự án|certifications|chứng chỉ|objective|mục tiêu nghề nghiệp)',
+            r'(?:projects|dự án)(.*?)(?:\n\n|\Z|education|học vấn|experience|kinh nghiệm|skills|kỹ năng|certifications|chứng chỉ|objective|mục tiêu nghề nghiệp)',
+            r'(?:certifications|chứng chỉ)(.*?)(?:\n\n|\Z|education|học vấn|experience|kinh nghiệm|skills|kỹ năng|projects|dự án|objective|mục tiêu nghề nghiệp)',
+            r'(?:objective|mục tiêu nghề nghiệp)(.*?)(?:\n\n|\Z|education|học vấn|experience|kinh nghiệm|skills|kỹ năng|projects|dự án|certifications|chứng chỉ)',
+        ]
+        
+        extracted = ""
+        for section in important_sections:
+            matches = re.findall(section, cv_text, flags=re.IGNORECASE | re.DOTALL)
+            for match in matches:
+                extracted += match.strip() + "\n\n"
+
+        # 3. Nếu không tìm thấy section nào, sử dụng nội dung đã loại bỏ thông tin cá nhân
+        if not extracted.strip():
+            extracted = cv_text.strip()
+
+        # 4. Loại bỏ khoảng trắng thừa và ký tự đặc biệt
+        extracted = re.sub(r'\s+', ' ', extracted)
+        extracted = re.sub(r'[^\w\s_àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệđìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵ]', ' ', extracted, flags=re.UNICODE)
+        
+        # 5. Giới hạn độ dài
+        if len(extracted) > max_length:
+            # Cắt theo câu hoàn chỉnh
+            sentences = re.split(r'[.!?]+', extracted)
+            truncated = ""
+            for sentence in sentences:
+                if len(truncated + sentence) <= max_length:
+                    truncated += sentence + "."
+                else:
+                    break
+            extracted = truncated.strip()
+
+        return extracted
+
+    except Exception as e:
+        logger.error(f"Lỗi khi tiền xử lý CV: {e}")
+        return cv_text[:max_length]  # Fallback: cắt bớt nếu có lỗi
+
 
 # Hàm xử lý công việc và gợi ý
 def load_jobs_from_csv(filepath=JOBS_FILEPATH, max_jobs=1400):
@@ -877,37 +1022,44 @@ def load_embeddings_from_file():
         try:
             with open(EMBEDDINGS_FILE, 'rb') as f:
                 data = pickle.load(f)
-                job_embeddings = data.get('embeddings', {})
-                last_embedding_update = data.get('timestamp', None)
-                logger.info(f"Đã tải {len(job_embeddings)} embeddings từ file {EMBEDDINGS_FILE}")
+                # Kiểm tra version cache
+                if data.get('version') == CACHE_VERSION:
+                    job_embeddings = data.get('embeddings', {})
+                    last_embedding_update = data.get('timestamp', None)
+                    logger.info(f"Đã tải {len(job_embeddings)} embeddings từ cache")
+                    return True
+                else:
+                    logger.info("Cache không hợp lệ do version không khớp")
+                    return False
         except Exception as e:
             logger.error(f"Lỗi khi tải embeddings từ file: {e}")
-            job_embeddings = {}
-            last_embedding_update = None
+            return False
+    return False
+
+def save_embeddings_to_file():
+    try:
+        with open(EMBEDDINGS_FILE, 'wb') as f:
+            pickle.dump({
+                'embeddings': job_embeddings,
+                'timestamp': datetime.now(),
+                'version': CACHE_VERSION
+            }, f)
+        logger.info(f"Đã lưu {len(job_embeddings)} embeddings vào cache")
+        return True
+    except Exception as e:
+        logger.error(f"Lỗi khi lưu embeddings: {e}")
+        return False
 
 def precompute_embeddings(jobs):
     global job_embeddings, last_embedding_update
-    if not jobs:
-        logger.warning("Danh sách công việc rỗng, không tạo embeddings.")
-        return
-
-    # Kiểm tra nếu embeddings đã tồn tại và hợp lệ
-    if os.path.exists(EMBEDDINGS_FILE):
-        try:
-            with open(EMBEDDINGS_FILE, 'rb') as f:
-                data = pickle.load(f)
-                existing_embeddings = data.get('embeddings', {})
-                existing_timestamp = data.get('timestamp', None)
-                if len(existing_embeddings) == len(jobs) and \
-                   existing_timestamp and \
-                   (datetime.now() - existing_timestamp) < timedelta(hours=EMBEDDING_REFRESH_HOURS):
-                    job_embeddings = existing_embeddings
-                    last_embedding_update = existing_timestamp
-                    logger.info(f"Tái sử dụng {len(job_embeddings)} embeddings từ file")
-                    return
-        except Exception as e:
-            logger.error(f"Lỗi khi kiểm tra embeddings từ file: {e}")
-
+    
+    # Kiểm tra cache trước
+    if load_embeddings_from_file():
+        # Kiểm tra xem cache có còn hợp lệ không
+        if last_embedding_update and (datetime.now() - last_embedding_update) < timedelta(hours=EMBEDDING_REFRESH_HOURS):
+            logger.info("Sử dụng embeddings từ cache")
+            return
+    
     logger.info("Tạo mới embeddings cho công việc")
     job_ids = []
     for job in jobs:
@@ -930,16 +1082,8 @@ def precompute_embeddings(jobs):
         if i < len(all_embeddings):
             job_embeddings[job_id] = all_embeddings[i]
     
-    try:
-        with open(EMBEDDINGS_FILE, 'wb') as f:
-            pickle.dump({
-                'embeddings': job_embeddings,
-                'timestamp': datetime.now()
-            }, f)
-        logger.info(f"Đã lưu {len(job_embeddings)} embeddings vào file")
-    except Exception as e:
-        logger.error(f"Lỗi khi lưu embeddings: {e}")
-    
+    # Lưu embeddings vào file
+    save_embeddings_to_file()
     last_embedding_update = datetime.now()
 
 def fast_vector_search(query_embedding, jobs, top_k=100):
@@ -1099,13 +1243,17 @@ if __name__ == '__main__':
     logger.info("Starting JobRadar service on port 5000")
     jobs = load_jobs_from_csv(JOBS_FILEPATH)
     search_history = load_search_history_from_csv(SEARCH_HISTORY_FILEPATH)
+    
     if PRECOMPUTE_EMBEDDINGS:
-        load_embeddings_from_file()  # Tải embeddings từ file nếu tồn tại
-        # Chỉ chạy precompute_embeddings nếu embeddings không hợp lệ hoặc số lượng không khớp
-        if not job_embeddings or len(job_embeddings) != len(jobs) or \
+        # Chỉ tính toán lại embeddings nếu cache không hợp lệ
+        if not load_embeddings_from_file() or \
+           not job_embeddings or \
+           len(job_embeddings) != len(jobs) or \
            (last_embedding_update and (datetime.now() - last_embedding_update) > timedelta(hours=EMBEDDING_REFRESH_HOURS)):
-            logger.info("Tạo mới embeddings vì file không hợp lệ hoặc đã hết hạn")
+            logger.info("Tạo mới embeddings vì cache không hợp lệ hoặc đã hết hạn")
             precompute_embeddings(jobs)
+    
     if USE_JOB_INDEXING:
         create_job_index(jobs)
+    
     app.run(host='0.0.0.0', port=5000, debug=True)
