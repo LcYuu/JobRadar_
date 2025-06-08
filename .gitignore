@@ -4,3 +4,7 @@ node_modules
 AI.py
 
 
+search.csv
+job_post.csv
+
+app.log
