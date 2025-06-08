@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import com.job_portal.DTO.*;
 import org.slf4j.Logger;
@@ -101,6 +102,9 @@ public class JobPostController {
 	private WebSocketService webSocketService;
 
 	String filePath = "D:\\JobRadar_\\search.csv";
+	
+	private static final ConcurrentHashMap<String, Long> searchCache = new ConcurrentHashMap<>();
+    private static final long CACHE_DURATION_MS = 5000; // 5 giây
 
 	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter
 			.ofPattern("yyyy-MM-dd'T'HH:mm:ss[.SSSSSS]");
@@ -698,66 +702,85 @@ public class JobPostController {
 	}
 
 	@GetMapping("/search-job-by-feature")
-	public Page<JobPost> searchJobs(@RequestHeader(value = "Authorization", required = false) String jwt, // Jwt không
-																											// bắt buộc
-			@RequestParam(required = false) String title,
-			@RequestParam(required = false) List<String> selectedTypesOfWork,
-			@RequestParam(required = false) Long minSalary, @RequestParam(required = false) Long maxSalary,
-			@RequestParam(required = false) Integer cityId,
-			@RequestParam(required = false) List<Integer> selectedIndustryIds,
-			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size)
-			throws IOException {
+	public Page<JobPost> searchJobs(
+	        @RequestHeader(value = "Authorization", required = false) String jwt,
+	        @RequestParam(required = false) String title,
+	        @RequestParam(required = false) List<String> selectedTypesOfWork,
+	        @RequestParam(required = false) Long minSalary,
+	        @RequestParam(required = false) Long maxSalary,
+	        @RequestParam(required = false) Integer cityId,
+	        @RequestParam(required = false) List<Integer> selectedIndustryIds,
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "10") int size) throws IOException {
 
-		// Gom các thuộc tính tìm kiếm vào một chuỗi duy nhất
-		StringBuilder searchQuery = new StringBuilder();
+	    // Normalize and create search query
+	    Map<String, String> queryParams = new TreeMap<>(); // Sử dụng TreeMap để đảm bảo thứ tự nhất quán
+	    if (title != null && !title.isEmpty()) {
+	        queryParams.put("Title", title.trim().toLowerCase());
+	    }
+	    if (selectedTypesOfWork != null && !selectedTypesOfWork.isEmpty()) {
+	        // Sắp xếp để đảm bảo thứ tự nhất quán
+	        queryParams.put("TypesOfWork", String.join(",", selectedTypesOfWork.stream().sorted().map(String::toLowerCase).toList()));
+	    }
+	    if (minSalary != null) {
+	        queryParams.put("MinSalary", minSalary.toString());
+	    }
+	    if (maxSalary != null) {
+	        queryParams.put("MaxSalary", maxSalary.toString());
+	    }
+	    if (cityId != null) {
+	        String cityName = cityRepository.findCityNameById(cityId);
+	        if (cityName != null && !cityName.isEmpty()) {
+	            queryParams.put("CityName", cityName.trim().toLowerCase());
+	        }
+	    }
+	    if (selectedIndustryIds != null && !selectedIndustryIds.isEmpty()) {
+	        List<String> industryNames = industryRepository.findIndustryNamesByIds(selectedIndustryIds);
+	        // Sắp xếp để đảm bảo thứ tự nhất quán
+	        queryParams.put("IndustryNames", String.join(",", industryNames.stream().sorted().map(String::toLowerCase).toList()));
+	    }
 
-		if (title != null && !title.isEmpty()) {
-			searchQuery.append("Title: ").append(title).append(" | ");
-		}
-		if (selectedTypesOfWork != null && !selectedTypesOfWork.isEmpty()) {
-			searchQuery.append("TypesOfWork: ").append(String.join(", ", selectedTypesOfWork)).append(" | ");
-		}
-//	    if (minSalary != null) {
-//	        searchQuery.append("MinSalary: ").append(minSalary).append(" | ");
-//	    }
-		if (maxSalary != null) {
-			searchQuery.append("MaxSalary: ").append(maxSalary).append(" | ");
-		}
-		if (cityId != null) {
-			// Giả sử bạn có một service để lấy tên thành phố từ cityId
-			String cityName = cityRepository.findCityNameById(cityId); // Gọi service để lấy tên thành phố
-			if (cityName != null && !cityName.isEmpty()) {
-				searchQuery.append("CityName: ").append(cityName).append(" | ");
-			}
-		}
-		if (selectedIndustryIds != null && !selectedIndustryIds.isEmpty()) {
-			// Giả sử bạn có một service để lấy tên ngành từ ID
-			List<String> industryNames = industryRepository.findIndustryNamesByIds(selectedIndustryIds);
-			searchQuery.append("IndustryNames: ").append(String.join(", ", industryNames)).append(" | ");
-		}
+	    // Create normalized query string
+	    String queryString = queryParams.entrySet().stream()
+	            .map(entry -> entry.getKey() + ": " + entry.getValue())
+	            .collect(Collectors.joining(" | "));
 
-		// Loại bỏ dấu " | " cuối cùng nếu có
-		if (searchQuery.length() > 0) {
-			searchQuery.setLength(searchQuery.length() - 3); // Xóa dấu " | " cuối
-		}
+	    // Save search history if user is logged in
+	    if (jwt != null && !jwt.isEmpty()) {
+	        String email = JwtProvider.getEmailFromJwtToken(jwt);
+	        Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 
-		// Kiểm tra và lưu lịch sử tìm kiếm nếu người dùng đã đăng nhập
-		if (jwt != null) {
-			String email = JwtProvider.getEmailFromJwtToken(jwt);
-			Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+	        if (user.isPresent() && user.get().getSeeker() != null) {
+	            UUID userId = user.get().getSeeker().getUserId();
+	            String cacheKey = userId + ":" + queryString;
 
-			// Lưu lịch sử tìm kiếm nếu người dùng đã đăng nhập
-			if (user.isPresent() && user.get().getSeeker() != null) {
-				System.out.print(searchQuery.toString());
-				searchHistoryService.exportSearchHistoryToCSV(filePath, searchQuery.toString(),
-						user.get().getSeeker().getUserId());
+	            // Atomic check and update to prevent duplicates
+	            Long currentTime = System.currentTimeMillis();
+	            Long lastSavedTime = searchCache.computeIfAbsent(cacheKey, k -> currentTime);
 
-			}
-		}
+	            if (lastSavedTime == currentTime) {
+	                // New query, save to CSV
+	                System.out.println("Saving search query to CSV: " + queryString);
+	                searchHistoryService.exportSearchHistoryToCSV(filePath, queryString, userId);
+	            } else if ((currentTime - lastSavedTime) <= CACHE_DURATION_MS) {
+	                // Duplicate query within cache duration, skip saving
+	                System.out.println("Duplicate search query ignored: " + queryString);
+	            } else {
+	                // Cache entry expired, update and save
+	                searchCache.put(cacheKey, currentTime);
+	                System.out.println("Saving search query to CSV (cache expired): " + queryString);
+	                searchHistoryService.exportSearchHistoryToCSV(filePath, queryString, userId);
+	            }
 
-		return jobPostService.searchJobs(title, selectedTypesOfWork, minSalary, maxSalary, cityId, selectedIndustryIds,
-				page, size);
+	            // Clean up old cache entries
+	            searchCache.entrySet().removeIf(entry ->
+	                    (System.currentTimeMillis() - entry.getValue()) > CACHE_DURATION_MS);
+	        }
+	    }
 
+	    // Perform the search
+	    return jobPostService.searchJobs(title, selectedTypesOfWork, minSalary, maxSalary, cityId,
+	            selectedIndustryIds, page, size);
 	}
 
 	@GetMapping("/semantic-search")
