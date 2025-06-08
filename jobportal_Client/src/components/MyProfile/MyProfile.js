@@ -1061,7 +1061,7 @@ export default function MyProfile() {
                         : "Chưa cập nhật chuyên ngành"}
                     </div>
                     {isIndustryDropdownOpen && (
-                      <div className="absolute z-[1050] w-full mt-1 bg-white border rounded-md shadow-lg max-h-48 sm:max-h-60 overflow-auto">
+                      <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-48 sm:max-h-60 overflow-auto">
                         {industries.slice(1).map((industry) => (
                           <label
                             key={industry.industryId}
@@ -1182,7 +1182,7 @@ export default function MyProfile() {
                               variant="ghost"
                               className="h-4 w-4 sm:h-5 sm:w-5 md-custom:h-5 md-custom:w-5 lg:h-6 lg:w-6 hover:bg-blue-100"
                               onClick={() => handleEditSocialLink(link)}
-                              style={{ zIndex: 5 }}
+                              style={{ zIndex: 10 }}
                             >
                               <Edit className="h-2.5 w-2.5 sm:h-3 sm:w-3 md-custom:h-3 md-custom:w-3 lg:h-4 lg:w-4 text-blue-600" />
                             </Button>
@@ -1191,7 +1191,7 @@ export default function MyProfile() {
                               variant="ghost"
                               className="h-4 w-4 sm:h-5 sm:w-5 md-custom:h-5 md-custom:w-5 lg:h-6 lg:w-6 hover:bg-red-100"
                               onClick={() => handleDeleteSocialLink(link.id)}
-                              style={{ zIndex: 5 }}
+                              style={{ zIndex: 10 }}
                             >
                               <Delete className="h-2.5 w-2.5 sm:h-3 sm:w-3 md-custom:h-3 md-custom:w-3 lg:h-4 lg:w-4 text-red-600" />
                             </Button>

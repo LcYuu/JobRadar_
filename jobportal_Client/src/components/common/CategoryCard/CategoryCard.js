@@ -28,27 +28,7 @@ const CategoryCard = ({ icon, title, jobCount, isActive, industryId }) => {
       });
       return;
     }
-
-    // Kiểm tra industryId hợp lệ
-    if (!industryId) {
-      console.error("industryId is invalid");
-      return;
-    }
-
-    // Tạo filters để lưu vào sessionStorage
-    const filters = {
-      title: "",
-      selectedTypesOfWork: [],
-      cityId: "",
-      selectedIndustryIds: [industryId],
-      minSalary: null,
-      maxSalary: null,
-    };
-
-    // Lưu filters vào sessionStorage
-    sessionStorage.setItem("searchFilters", JSON.stringify(filters));
-
-    // Điều hướng đến trang find-jobs với state
+    // Chuyển hướng đến trang find-jobs với state chứa industryId
     navigate("/find-jobs", {
       state: {
         selectedIndustryIds: [industryId],
@@ -94,6 +74,7 @@ const CategoryCard = ({ icon, title, jobCount, isActive, industryId }) => {
         </div>
       </div>
 
+      {/* Login Required Dialog */}
       <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>

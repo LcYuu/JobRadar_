@@ -114,7 +114,7 @@ const JobStatsPage = () => {
 
       {/* Card thống kê tổng quan */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="p-6 shadow-md bg-white">
+        <Card className="p-6 shadow-md">
           <h2 className="text-lg font-semibold text-gray-700 mb-2">
             Tổng lượt xem
           </h2>
@@ -126,7 +126,7 @@ const JobStatsPage = () => {
           </p>
         </Card>
 
-        <Card className="p-6 shadow-md bg-white">
+        <Card className="p-6 shadow-md">
           <h2 className="text-lg font-semibold text-gray-700 mb-2">
             Tổng bài đăng
           </h2>
@@ -138,7 +138,7 @@ const JobStatsPage = () => {
           </p>
         </Card>
 
-        <Card className="p-6 shadow-md bg-white">
+        <Card className="p-6 shadow-md">
           <h2 className="text-lg font-semibold text-gray-700 mb-2">
             Tổng lượt ứng tuyển
           </h2>

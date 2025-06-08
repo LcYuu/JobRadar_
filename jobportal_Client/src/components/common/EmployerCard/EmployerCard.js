@@ -5,7 +5,7 @@ import ImageCarousel from "../../layout/ImageCarousel"
 const EmployerCard = ({ company }) => {
   return (
     <Link to={`/companies/${company.companyId}`} className="block group">
-      <div className="bg-white rounded-xl shadow-md hover:shadow-lg  transition-all duration-300 overflow-hidden h-full flex flex-col">
+      <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden h-full flex flex-col">
         {/* Card header with logo */}
         <div className="relative h-48 flex items-center justify-center overflow-hidden bg-gray-50">
           <div className="flex items-center justify-center w-full h-full">

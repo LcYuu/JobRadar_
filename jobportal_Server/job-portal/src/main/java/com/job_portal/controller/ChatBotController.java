@@ -1,7 +1,6 @@
 package com.job_portal.controller;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -37,26 +36,26 @@ public class ChatBotController {
 	}
 
 	@PostMapping("/send")
-	public ResponseEntity<?> sendMessage(@RequestBody ChatRequest request, 
-	                                    @RequestHeader(value = "Authorization", required = false) String jwt) {
-	    try {
-	        UUID senderId = UUID.randomUUID();// UUID mặc định cho khách
-	        if (jwt != null && !jwt.isEmpty()) {
-	            String email = JwtProvider.getEmailFromJwtToken(jwt);
-	            Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-	            if (user.isPresent()) {
-	                senderId = user.get().getUserId(); // UUID từ UserAccount
-	            }
-	        }
-	        HttpHeaders headers = new HttpHeaders();
-	        headers.setContentType(MediaType.APPLICATION_JSON);
-	        String rasaRequestBody = String.format("{\"sender\": \"%s\", \"message\": \"%s\"}", 
-	                                              senderId, request.getMessage());
-	        HttpEntity<String> rasaRequest = new HttpEntity<>(rasaRequestBody, headers);
-	        Object[] rasaResponse = restTemplate.postForObject(RASA_URL, rasaRequest, Object[].class);
-	        return ResponseEntity.ok(rasaResponse);
-	    } catch (Exception e) {
-	        return ResponseEntity.status(500).body("Lỗi khi giao tiếp với Rasa: " + e.getMessage());
-	    }
-	}
+    public ResponseEntity<?> sendMessage(@RequestBody ChatRequest request, 
+                                        @RequestHeader("Authorization") String jwt) {
+        try {
+            // Trích xuất userId từ JWT
+        	String email = JwtProvider.getEmailFromJwtToken(jwt);
+    		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+            // Prepare request to Rasa
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Authorization", jwt); // Gửi JWT đến Rasa
+            String rasaRequestBody = String.format("{\"sender\": \"%s\", \"message\": \"%s\"}", 
+                                                  user.get().getUserId(), request.getMessage());
+            HttpEntity<String> rasaRequest = new HttpEntity<>(rasaRequestBody, headers);
+
+            // Send request to Rasa
+            Object[] rasaResponse = restTemplate.postForObject(RASA_URL, rasaRequest, Object[].class);
+
+            return ResponseEntity.ok(rasaResponse);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error communicating with Rasa: " + e.getMessage());
+        }
+    }
 }

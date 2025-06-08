@@ -70,6 +70,15 @@ public class CVController {
 	            return new ResponseEntity<>("Tên CV không được để trống", HttpStatus.BAD_REQUEST);
 	        }
 
+	        // Kiểm tra kích thước file
+	        File file = new File(cvdto.getPathCV());
+
+	        long fileSizeInBytes = Files.size(file.toPath());
+	        long fileSizeInMB = fileSizeInBytes / (1024 * 1024); // Chuyển từ bytes sang MB
+	        if (fileSizeInMB > 5) {
+	            return new ResponseEntity<>("File CV phải có kích thước nhỏ hơn hoặc bằng 5MB", HttpStatus.BAD_REQUEST);
+	        }
+
 	        // Extract email from JWT
 	        String email = JwtProvider.getEmailFromJwtToken(jwt);
 	        Optional<UserAccount> user = userAccountRepository.findByEmail(email);

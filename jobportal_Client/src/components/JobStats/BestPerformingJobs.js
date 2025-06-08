@@ -90,7 +90,7 @@ const BestPerformingJobs = () => {
 
   if (loading) {
     return (
-      <Card className="p-6 shadow-lg rounded-lg bg-white">
+      <Card className="p-6 shadow-lg rounded-lg">
         <h2 className="text-xl font-semibold mb-4 text-purple-700">Bài đăng có hiệu suất tốt nhất</h2>
         <div className="flex justify-center items-center h-48">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
@@ -101,7 +101,7 @@ const BestPerformingJobs = () => {
 
   if (error) {
     return (
-      <Card className="p-6 shadow-lg rounded-lg bg-white">
+      <Card className="p-6 shadow-lg rounded-lg">
         <h2 className="text-xl font-semibold mb-4 text-purple-700">Bài đăng có hiệu suất tốt nhất</h2>
         <div className="bg-red-50 text-red-600 p-4 rounded-md">
           <p>{error}</p>
@@ -112,7 +112,7 @@ const BestPerformingJobs = () => {
 
   if (bestJobs.length === 0) {
     return (
-      <Card className="p-6 shadow-lg rounded-lg bg-white">
+      <Card className="p-6 shadow-lg rounded-lg">
         <h2 className="text-xl font-semibold mb-4 text-purple-700">Bài đăng có hiệu suất tốt nhất</h2>
         <div className="flex justify-center items-center h-48 text-gray-500">
           <p>Chưa có dữ liệu về hiệu suất bài đăng.</p>
@@ -122,7 +122,7 @@ const BestPerformingJobs = () => {
   }
 
   return (
-    <Card className="p-6 shadow-lg rounded-lg bg-white">
+    <Card className="p-6 shadow-lg rounded-lg">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-purple-700">Bài đăng có hiệu suất tốt nhất</h2>
       </div>
@@ -190,4 +190,4 @@ const BestPerformingJobs = () => {
   );
 };
 
-export default BestPerformingJobs;
+export default BestPerformingJobs; 
