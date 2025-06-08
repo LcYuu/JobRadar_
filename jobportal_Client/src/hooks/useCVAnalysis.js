@@ -5,7 +5,7 @@ import { saveAnalysisResult, fetchAnalysisResults, fetchCandidateAnalysis } from
 import { setCurrentCandidate, clearCurrentAnalysis } from '../redux/CVAnalysis/cvAnalysisSlice';
 import Swal from 'sweetalert2';
 
-// Import cùng constant từ service để đảm bảo đồng bộ
+
 const STORAGE_KEY = 'cv_analysis_results';
 
 /**
