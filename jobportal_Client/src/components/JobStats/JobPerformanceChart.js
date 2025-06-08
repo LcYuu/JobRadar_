@@ -139,7 +139,7 @@ const JobPerformanceChart = () => {
 
   if (loading) {
     return (
-      <Card className="p-6 shadow-lg">
+      <Card className="p-6 shadow-lg bg-white">
         <h2 className="text-xl font-semibold text-purple-700 mb-6">Hiệu suất các bài đăng</h2>
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
@@ -150,7 +150,7 @@ const JobPerformanceChart = () => {
 
   if (error) {
     return (
-      <Card className="p-6 shadow-lg">
+      <Card className="p-6 shadow-lg bg-white">
         <h2 className="text-xl font-semibold text-purple-700 mb-6">Hiệu suất các bài đăng</h2>
         <div className="bg-red-50 text-red-700 p-4 rounded-md">
           <p>{error}</p>
@@ -161,7 +161,7 @@ const JobPerformanceChart = () => {
 
   if (jobPerformanceData.length === 0) {
     return (
-      <Card className="p-6 shadow-lg">
+      <Card className="p-6 shadow-lg bg-white">
         <h2 className="text-xl font-semibold text-purple-700 mb-6">Hiệu suất các bài đăng</h2>
         <div className="text-center text-gray-500 p-10">
           <p>Chưa có dữ liệu hiệu suất cho các bài đăng của bạn.</p>
@@ -171,7 +171,7 @@ const JobPerformanceChart = () => {
   }
 
   return (
-    <Card className="p-6 shadow-lg">
+    <Card className="p-6 shadow-lg bg-white">
       <h2 className="text-xl font-semibold text-purple-700 mb-6">Hiệu suất các bài đăng</h2>
       <div className="h-96">
         <ResponsiveContainer width="100%" height="100%">
@@ -203,4 +203,4 @@ const JobPerformanceChart = () => {
   );
 };
 
-export default JobPerformanceChart; 
+export default JobPerformanceChart;

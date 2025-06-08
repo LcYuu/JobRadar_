@@ -20,12 +20,17 @@ import {
   Users,
   Star,
   ExternalLink,
-  Share2,
 } from "lucide-react";
 import ApplyModal from "../../components/common/ApplyModal/ApplyModal";
 import JobCard_AllJob from "../../components/common/JobCard_AllJob/JobCard_AllJob";
-import { checkIfApplied, getOneApplyJob } from "../../redux/ApplyJob/applyJob.thunk";
-import { getJobPostByPostId, getSimilarJobs } from "../../redux/JobPost/jobPost.thunk";
+import {
+  checkIfApplied,
+  getOneApplyJob,
+} from "../../redux/ApplyJob/applyJob.thunk";
+import {
+  getJobPostByPostId,
+  getSimilarJobs,
+} from "../../redux/JobPost/jobPost.thunk";
 import { saveJob } from "../../redux/Seeker/seeker.thunk";
 import Swal from "sweetalert2";
 import IndustryBadge from "../../components/common/IndustryBadge/IndustryBadge";
@@ -188,17 +193,24 @@ export default function JobDetail() {
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h1 className="text-2xl font-bold text-gray-900 mb-2">{postByPostId?.title}</h1>
+                      <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                        {postByPostId?.title}
+                      </h1>
                       <div className="flex flex-wrap items-center gap-4 text-gray-600 mb-4">
                         <div className="flex items-center gap-2">
                           <Building2 className="h-4 w-4" />
-                          <span className="font-medium">{postByPostId?.company.companyName}</span>
+                          <span className="font-medium">
+                            {postByPostId?.company.companyName}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <MapPin className="h-4 w-4" />
                           <span>{postByPostId?.location}</span>
                         </div>
-                        <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                        <Badge
+                          variant="secondary"
+                          className="bg-blue-100 text-blue-800"
+                        >
                           {postByPostId?.typeOfWork}
                         </Badge>
                       </div>
@@ -224,23 +236,47 @@ export default function JobDetail() {
                         size="icon"
                         onClick={handleSaveJob}
                         className={`transition-all duration-300 ${
-                          isSaved ? "bg-primary text-white border-primary hover:bg-primary/90" : "hover:bg-gray-50"
+                          isSaved
+                            ? "bg-primary text-white border-primary hover:bg-primary/90"
+                            : "hover:bg-gray-50"
                         }`}
                         title={isSaved ? "Bỏ lưu công việc" : "Lưu công việc"}
                       >
-                        {isSaved ? <BookmarkCheck className="w-5 h-5" /> : <Bookmark className="w-5 h-5" />}
+                        {isSaved ? (
+                          <BookmarkCheck className="w-5 h-5" />
+                        ) : (
+                          <Bookmark className="w-5 h-5" />
+                        )}
                       </Button>
                     )}
-                    <Button variant="outline" size="icon" className="hover:bg-gray-50" title="Chia sẻ công việc">
-                      <Share2 className="w-5 h-5" />
-                    </Button>
-                    <Button
-                      onClick={handleOpenModal}
-                      className="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg font-semibold"
-                      disabled={hasApplied}
-                    >
-                      {hasApplied ? "Đã ứng tuyển" : "Ứng tuyển ngay"}
-                    </Button>
+                    {oneApplyJob?.save ? (
+                      <Button
+                        variant="outline"
+                        className="text-green-600 font-bold border-green-700 cursor-not-allowed"
+                        disabled
+                      >
+                        Đã được duyệt
+                      </Button>
+                    ) : hasApplied ? (
+                      <button
+                        className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+                        onClick={handleOpenModal}
+                      >
+                        Cập nhật đơn
+                      </button>
+                    ) : user ? (
+                      <Button
+                        variant="default"
+                        className="bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+                        onClick={handleOpenModal}
+                      >
+                        Nộp đơn
+                      </Button>
+                    ) : (
+                      <span className="text-sm text-red-600 font-medium">
+                        Vui lòng đăng nhập để có thể ứng tuyển
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -252,9 +288,14 @@ export default function JobDetail() {
                         <CheckCircle2 className="h-5 w-5 text-blue-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-blue-900">Đã ứng tuyển thành công</p>
+                        <p className="font-medium text-blue-900">
+                          Đã ứng tuyển thành công
+                        </p>
                         <p className="text-sm text-blue-700">
-                          Ngày ứng tuyển: {new Date(oneApplyJob.applyDate).toLocaleDateString("vi-VN")}
+                          Ngày ứng tuyển:{" "}
+                          {new Date(oneApplyJob.applyDate).toLocaleDateString(
+                            "vi-VN"
+                          )}
                         </p>
                       </div>
                     </div>
@@ -286,11 +327,16 @@ export default function JobDetail() {
                     Mô tả công việc
                   </h2>
                   <div className="prose prose-gray max-w-none">
-                    {postByPostId?.description?.split("\n").map((line, index) => (
-                      <p key={index} className="text-gray-700 leading-relaxed mb-3">
-                        {line.trim()}
-                      </p>
-                    ))}
+                    {postByPostId?.description
+                      ?.split("\n")
+                      .map((line, index) => (
+                        <p
+                          key={index}
+                          className="text-gray-700 leading-relaxed mb-3"
+                        >
+                          {line.trim()}
+                        </p>
+                      ))}
                   </div>
                 </div>
               </Card>
@@ -304,14 +350,20 @@ export default function JobDetail() {
                   </h2>
                   <ul className="space-y-3">
                     {postByPostId?.requirement ? (
-                      postByPostId.requirement.split("\n").map((item, index) => (
-                        <li key={index} className="flex items-start gap-3">
-                          <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-gray-700 leading-relaxed">{item.trim()}</span>
-                        </li>
-                      ))
+                      postByPostId.requirement
+                        .split("\n")
+                        .map((item, index) => (
+                          <li key={index} className="flex items-start gap-3">
+                            <CheckCircle2 className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-gray-700 leading-relaxed">
+                              {item.trim()}
+                            </span>
+                          </li>
+                        ))
                     ) : (
-                      <li className="text-gray-500 italic">Chưa có thông tin</li>
+                      <li className="text-gray-500 italic">
+                        Chưa có thông tin
+                      </li>
                     )}
                   </ul>
                 </div>
@@ -326,12 +378,16 @@ export default function JobDetail() {
                       Bạn là người phù hợp nếu
                     </h2>
                     <ul className="space-y-3">
-                      {postByPostId.niceToHaves.split("\n").map((item, index) => (
-                        <li key={index} className="flex items-start gap-3">
-                          <Star className="h-5 w-5 text-purple-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-gray-700 leading-relaxed">{item.trim()}</span>
-                        </li>
-                      ))}
+                      {postByPostId.niceToHaves
+                        .split("\n")
+                        .map((item, index) => (
+                          <li key={index} className="flex items-start gap-3">
+                            <Star className="h-5 w-5 text-purple-500 flex-shrink-0 mt-0.5" />
+                            <span className="text-gray-700 leading-relaxed">
+                              {item.trim()}
+                            </span>
+                          </li>
+                        ))}
                     </ul>
                   </div>
                 </Card>
@@ -349,7 +405,9 @@ export default function JobDetail() {
                       {postByPostId.benefit.split("\n").map((item, index) => (
                         <li key={index} className="flex items-start gap-3">
                           <CheckCircle2 className="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-gray-700 leading-relaxed">{item.trim()}</span>
+                          <span className="text-gray-700 leading-relaxed">
+                            {item.trim()}
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -368,10 +426,17 @@ export default function JobDetail() {
                     className="h-24 w-24 rounded-xl object-cover shadow-sm border border-gray-200"
                   />
                   <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">{postByPostId?.company.companyName}</h2>
-                    <p className="text-gray-600 mb-4 leading-relaxed">{postByPostId?.company.description}</p>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                      {postByPostId?.company.companyName}
+                    </h2>
+                    <p className="text-gray-600 mb-4 leading-relaxed">
+                      {postByPostId?.company.description}
+                    </p>
                     <Button variant="outline" asChild>
-                      <Link to={`/companies/${postByPostId?.company.companyId}`} className="flex items-center gap-2">
+                      <Link
+                        to={`/companies/${postByPostId?.company.companyId}`}
+                        className="flex items-center gap-2"
+                      >
                         Tìm hiểu thêm về công ty
                         <ExternalLink className="h-4 w-4" />
                       </Link>
@@ -386,7 +451,9 @@ export default function JobDetail() {
               <Card>
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold">Công việc tương tự</h2>
+                    <h2 className="text-xl font-semibold">
+                      Công việc tương tự
+                    </h2>
                     <Button variant="outline" size="sm">
                       Xem tất cả
                     </Button>
@@ -416,7 +483,9 @@ export default function JobDetail() {
             {/* Job Information */}
             <Card>
               <div className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Thông tin công việc</h3>
+                <h3 className="text-lg font-semibold mb-4">
+                  Thông tin công việc
+                </h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between py-2">
                     <div className="flex items-center gap-2 text-gray-600">
@@ -424,7 +493,11 @@ export default function JobDetail() {
                       <span className="text-sm">Hạn nộp</span>
                     </div>
                     <span className="font-medium text-sm">
-                      {postByPostId?.expireDate ? new Date(postByPostId.expireDate).toLocaleDateString("vi-VN") : "N/A"}
+                      {postByPostId?.expireDate
+                        ? new Date(postByPostId.expireDate).toLocaleDateString(
+                            "vi-VN"
+                          )
+                        : "N/A"}
                     </span>
                   </div>
 
@@ -436,7 +509,11 @@ export default function JobDetail() {
                       <span className="text-sm">Ngày đăng</span>
                     </div>
                     <span className="font-medium text-sm">
-                      {postByPostId?.createDate ? new Date(postByPostId.createDate).toLocaleDateString("vi-VN") : "N/A"}
+                      {postByPostId?.createDate
+                        ? new Date(postByPostId.createDate).toLocaleDateString(
+                            "vi-VN"
+                          )
+                        : "N/A"}
                     </span>
                   </div>
 
@@ -459,7 +536,9 @@ export default function JobDetail() {
                       <UserCheck className="h-4 w-4" />
                       <span className="text-sm">Vị trí</span>
                     </div>
-                    <span className="font-medium text-sm">{postByPostId?.position}</span>
+                    <span className="font-medium text-sm">
+                      {postByPostId?.position}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -472,7 +551,10 @@ export default function JobDetail() {
                   <h3 className="text-lg font-semibold mb-4">Lĩnh vực</h3>
                   <div className="flex flex-wrap gap-2">
                     {postByPostId.industry.map((industry) => (
-                      <IndustryBadge key={industry.industryId} name={industry.industryName} />
+                      <IndustryBadge
+                        key={industry.industryId}
+                        name={industry.industryName}
+                      />
                     ))}
                   </div>
                 </div>
@@ -482,10 +564,16 @@ export default function JobDetail() {
             {postByPostId?.skills && postByPostId.skills.length > 0 && (
               <Card>
                 <div className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Kỹ năng yêu cầu</h3>
+                  <h3 className="text-lg font-semibold mb-4">
+                    Kỹ năng yêu cầu
+                  </h3>
                   <div className="flex flex-wrap gap-2">
                     {postByPostId.skills.map((skill, index) => (
-                      <Badge key={index} variant="secondary" className={`${getSkillColor(index)} border-0`}>
+                      <Badge
+                        key={index}
+                        variant="secondary"
+                        className={`${getSkillColor(index)} border-0`}
+                      >
                         {skill.skillName}
                       </Badge>
                     ))}
@@ -496,7 +584,12 @@ export default function JobDetail() {
           </div>
         </div>
 
-        <ApplyModal job={postByPostId} open={open} handleClose={handleClose} oneApplyJob={oneApplyJob} />
+        <ApplyModal
+          job={postByPostId}
+          open={open}
+          handleClose={handleClose}
+          oneApplyJob={oneApplyJob}
+        />
       </main>
     </div>
   );

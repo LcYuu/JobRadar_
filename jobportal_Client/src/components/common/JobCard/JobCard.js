@@ -1,13 +1,13 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card"
-import { Badge } from "../../../ui/badge"
-import { useNavigate } from "react-router-dom"
-import { saveJob } from "../../../redux/Seeker/seeker.thunk"
-import { useDispatch, useSelector } from "react-redux"
-import { Bookmark, BookmarkCheck, MapPin, ArrowRight } from "lucide-react"
-import Swal from "sweetalert2"
-import { jobTypeColors } from "../../../configs/constants"
-import IndustryBadge from "../IndustryBadge/IndustryBadge"
+import { Card, CardContent, CardHeader, CardTitle } from "../../../ui/card";
+import { Badge } from "../../../ui/badge";
+import { useNavigate } from "react-router-dom";
+import { saveJob } from "../../../redux/Seeker/seeker.thunk";
+import { useDispatch, useSelector } from "react-redux";
+import { Bookmark, BookmarkCheck, MapPin, ArrowRight } from "lucide-react";
+import Swal from "sweetalert2";
+import { jobTypeColors } from "../../../configs/constants";
+import IndustryBadge from "../IndustryBadge/IndustryBadge";
 import "./JobCard.css";
 
 const categoryStyles = {
@@ -31,7 +31,7 @@ const categoryStyles = {
     backgroundColor: "rgba(0, 0, 255, 0.1)",
     color: "blue",
   },
-}
+};
 
 function JobCardHeader({ jobType, companyLogo, company }) {
   return (
@@ -57,7 +57,7 @@ function JobCardHeader({ jobType, companyLogo, company }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function JobCardContent({ location, category = [] }) {
@@ -81,22 +81,22 @@ function JobCardContent({ location, category = [] }) {
         </div>
       )}
     </div>
-  )
+  );
 }
 
 export default function JobCard({ postId, jobTitle, company, location, category, jobType, companyLogo }) {
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
-  const { savedJobs } = useSelector((store) => store.seeker)
-  const isSaved = savedJobs?.some((savedJob) => savedJob.postId === postId)
-  const { user } = useSelector((store) => store.auth)
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { savedJobs } = useSelector((store) => store.seeker);
+  const isSaved = savedJobs?.some((savedJob) => savedJob.postId === postId);
+  const { user } = useSelector((store) => store.auth);
 
   const handleCardClick = () => {
-    navigate(`/jobs/job-detail/${postId}`)
-  }
+    navigate(`/jobs/job-detail/${postId}`);
+  };
 
   const handleSaveJob = async (e) => {
-    e.stopPropagation()
+    e.stopPropagation();
     if (!user) {
       await Swal.fire({
         title: "Yêu cầu đăng nhập",
@@ -104,12 +104,12 @@ export default function JobCard({ postId, jobTitle, company, location, category,
         icon: "warning",
         confirmButtonText: "Đóng",
         confirmButtonColor: "#9333ea",
-      })
-      return
+      });
+      return;
     }
-  
+
     try {
-      const result = await dispatch(saveJob(postId)).unwrap()
+      const result = await dispatch(saveJob(postId)).unwrap();
       if (result.action === "saved") {
         await Swal.fire({
           title: "Thành công",
@@ -118,9 +118,9 @@ export default function JobCard({ postId, jobTitle, company, location, category,
           confirmButtonText: "Đóng",
           confirmButtonColor: "#9333ea",
           timer: 1500,
-          timerProgressBar: true
+          timerProgressBar: true,
           showConfirmButton: false,
-        })
+        });
       } else {
         await Swal.fire({
           title: "Thành công",
@@ -131,7 +131,7 @@ export default function JobCard({ postId, jobTitle, company, location, category,
           timer: 1500,
           timerProgressBar: true,
           showConfirmButton: false,
-        })
+        });
       }
     } catch (error) {
       await Swal.fire({
@@ -140,9 +140,9 @@ export default function JobCard({ postId, jobTitle, company, location, category,
         icon: "error",
         confirmButtonText: "Đóng",
         confirmButtonColor: "#9333ea",
-      })
+      });
     }
-  }
+  };
 
   return (
     <Card className="group relative cursor-pointer overflow-hidden border border-gray-200 bg-white hover:border-primary/30 hover:shadow-xl transition-all duration-300 ease-out hover:-translate-y-1 h-full">
@@ -152,7 +152,7 @@ export default function JobCard({ postId, jobTitle, company, location, category,
         className={`absolute top-4 right-4 z-10 p-2 rounded-full transition-all duration-300 shadow-sm ${
           isSaved
             ? "bg-primary text-white shadow-md scale-110"
-            : "bg-white/90 backdrop-blur-sm text-gray-400 hover:text-primary hover:bg-white hover:scale-110"
+            : "bg-white/90 backdrop-blur-sm text-gray-400 hover:text-primary hover:bg-white hover:scale- personally"
         } active:scale-95`}
         title={isSaved ? "Bỏ lưu" : "Lưu công việc"}
       >
@@ -187,27 +187,5 @@ export default function JobCard({ postId, jobTitle, company, location, category,
       {/* Subtle gradient overlay on hover */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
     </Card>
-  )
-}
-
-function JobCardHeader({ jobType, companyLogo }) {
-  return (
-    <div className="flex justify-between items-start mb-4">
-      <img
-        src={companyLogo}
-        alt="Company Logo"
-        className="w-12 h-12 rounded-lg"
-      />
-      <div
-        className={`border px-2 py-1 rounded-md text-xs font-semibold uppercase`}
-        style={{
-          backgroundColor: jobTypeColors[jobType]?.backgroundColor || "#6b7280",
-          color: jobTypeColors[jobType]?.color || "#6b7280",
-          border: jobTypeColors[jobType]?.border || "1px solid #6b7280"
-        }}
-      >
-        {jobType}
-      </div>  
-    </div>
   );
 }

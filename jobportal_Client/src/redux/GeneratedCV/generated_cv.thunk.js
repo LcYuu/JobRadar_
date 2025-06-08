@@ -9,7 +9,6 @@ export const getGenCVBySeeker = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get(`/generated-cv/search-cv`);
-      
       return response.data;
       
     } catch (error) {

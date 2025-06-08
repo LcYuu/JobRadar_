@@ -21,7 +21,7 @@ import com.opencsv.CSVWriter;
 public class SearchHistoryServiceImpl implements ISearchHistoryService {
     @Autowired
     private SearchHistoryRepository searchHistoryRepository;
-
+    
     public void exportSearchHistoryToCSV(String filePath, String searchQuery, UUID seekerId) throws IOException {
         File file = new File(filePath);
         File parentDir = file.getParentFile();
