@@ -29,7 +29,13 @@ import { getIndustryCount } from "../../redux/Industry/industry.thunk";
 import { toast } from "react-toastify";
 import useWebSocket from "../../utils/useWebSocket";
 import { ProgressBar } from "../../ui/progress";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../../ui/dialog";
 
 export default function JobSearchPage() {
   const dispatch = useDispatch();
@@ -428,7 +434,7 @@ export default function JobSearchPage() {
       console.log("Bộ lọc thay đổi:", newFilters);
       setFilters(newFilters);
       setHasUserInteracted(true);
-      
+
       // Kiểm tra nếu không có filter nào được áp dụng
       const hasActiveFilters = Object.values(newFilters).some((value) => {
         if (Array.isArray(value)) {
@@ -467,7 +473,14 @@ export default function JobSearchPage() {
         }
       }
     },
-    [isUsingSemanticSearch, allResults, size, dispatch, filterResultsLocally, isAuthenticated]
+    [
+      isUsingSemanticSearch,
+      allResults,
+      size,
+      dispatch,
+      filterResultsLocally,
+      isAuthenticated,
+    ]
   );
 
   const handleSearch = async () => {
@@ -654,27 +667,43 @@ export default function JobSearchPage() {
         searchJob,
         jobPost,
         currentPage,
-        size
+        size,
       });
 
       if (isUsingSemanticSearch && semanticResults) {
         console.log("Sử dụng kết quả từ tìm kiếm ngữ nghĩa:", semanticResults);
-        if (!semanticResults.content || !Array.isArray(semanticResults.content)) {
-          console.error("semanticResults.content không hợp lệ:", semanticResults.content);
+        if (
+          !semanticResults.content ||
+          !Array.isArray(semanticResults.content)
+        ) {
+          console.error(
+            "semanticResults.content không hợp lệ:",
+            semanticResults.content
+          );
           return {
             content: [],
             totalElements: 0,
             totalPages: 1,
           };
         }
-        const resultsArray = Array.isArray(semanticResults.content) ? semanticResults.content : [];
-        console.log("Số lượng kết quả trước khi phân trang:", resultsArray.length);
+        const resultsArray = Array.isArray(semanticResults.content)
+          ? semanticResults.content
+          : [];
+        console.log(
+          "Số lượng kết quả trước khi phân trang:",
+          resultsArray.length
+        );
         const totalResults = resultsArray.length || 0;
         const totalPages = Math.max(Math.ceil(totalResults / size) || 1, 1);
         const startIndex = currentPage * size;
         const endIndex = Math.min(startIndex + size, totalResults);
-        console.log("Thông số phân trang:", { startIndex, endIndex, totalResults });
-        const paginatedContent = totalResults > 0 ? resultsArray.slice(startIndex, endIndex) : [];
+        console.log("Thông số phân trang:", {
+          startIndex,
+          endIndex,
+          totalResults,
+        });
+        const paginatedContent =
+          totalResults > 0 ? resultsArray.slice(startIndex, endIndex) : [];
         console.log("Số lượng kết quả hiển thị:", paginatedContent.length);
         return {
           content: paginatedContent,
@@ -687,7 +716,7 @@ export default function JobSearchPage() {
         console.log("Sử dụng kết quả từ searchJobs với bộ lọc:", {
           searchJob,
           displayTotalElements,
-          totalPagesFromSearch
+          totalPagesFromSearch,
         });
         return {
           content: searchJob || [],
@@ -699,7 +728,7 @@ export default function JobSearchPage() {
       console.log("Sử dụng tất cả công việc:", {
         jobPost,
         displayTotalElements,
-        totalPagesFromAll
+        totalPagesFromAll,
       });
       return {
         content: jobPost || [],
@@ -780,14 +809,20 @@ export default function JobSearchPage() {
   }, [isUsingSemanticSearch, totalPages, currentPage]);
 
   useEffect(() => {
-    if (isUsingSemanticSearch, semanticResults) {
+    if ((isUsingSemanticSearch, semanticResults)) {
       setDisplayTotalElements(semanticResults.totalElements || 0);
     } else if (isFilterApplied) {
       setDisplayTotalElements(totalElements);
     } else {
       setDisplayTotalElements(jobPost.length);
     }
-  }, [isUsingSemanticSearch, semanticResults, isFilterApplied, totalElements, jobPost]);
+  }, [
+    isUsingSemanticSearch,
+    semanticResults,
+    isFilterApplied,
+    totalElements,
+    jobPost,
+  ]);
 
   useEffect(() => {
     if (isFilterApplied) {
@@ -811,9 +846,15 @@ export default function JobSearchPage() {
       totalPages,
       totalResults,
       isUsingSemanticSearch,
-      isFilterApplied
+      isFilterApplied,
     });
-  }, [results, totalPages, totalResults, isUsingSemanticSearch, isFilterApplied]);
+  }, [
+    results,
+    totalPages,
+    totalResults,
+    isUsingSemanticSearch,
+    isFilterApplied,
+  ]);
 
   const handleLoginRedirect = () => {
     setShowLoginDialog(false);
@@ -858,13 +899,22 @@ export default function JobSearchPage() {
                   handleFilterChange(newFilters);
                 }}
               >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Chọn địa điểm" />
+                <SelectTrigger className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-4 text-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 hover:bg-gray-50">
+                  <div className="flex items-center justify-between w-full">
+                    <SelectValue
+                      placeholder="Chọn địa điểm"
+                      className="text-gray-500"
+                    />
+                  </div>
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                   <SelectGroup>
                     {cities.map((c) => (
-                      <SelectItem key={c.cityId} value={c.cityId}>
+                      <SelectItem
+                        key={c.cityId}
+                        value={c.cityId}
+                        className="px-4 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 cursor-pointer transition-colors duration-200"
+                      >
                         {c.cityName}
                       </SelectItem>
                     ))}
@@ -931,104 +981,109 @@ export default function JobSearchPage() {
           w-full md:w-80 space-y-6 bg-white p-6 rounded-lg shadow-lg 
           transition-all duration-300 ease-in-out
           ${isSidebarOpen ? "block" : "hidden"} md:block md:transform-none
-          relative z-[60] ${isSearching ? 'opacity-50 pointer-events-none' : ''}
+          relative z-[60] ${isSearching ? "opacity-50 pointer-events-none" : ""}
         `}
           >
             <div>
               <h3 className="font-semibold mb-2 flex justify-between items-center text-gray-800 tracking-tight">
                 Loại công việc
-                <ChevronDown 
-                  size={20} 
-                  className={`text-gray-500 cursor-pointer transform ${isOpen ? 'rotate-180' : ''}`} 
-                  onClick={() => setIsOpen(!isOpen)} 
+                <ChevronDown
+                  size={20}
+                  className={`text-gray-500 cursor-pointer transform ${
+                    isOpen ? "rotate-180" : ""
+                  }`}
+                  onClick={() => setIsOpen(!isOpen)}
                 />
               </h3>
               {isOpen && (
-              <div className="space-y-2">
-                {jobCountByType
-                  .filter((job) => job.count > 0)
-                  .map((job) => (
-                    <div
-                      className="flex items-center hover:bg-purple-100 p-2 rounded-lg"
-                      key={job.typeOfWork}
-                    >
-                      <Checkbox
-                        checked={filters.selectedTypesOfWork.includes(
-                          job.typeOfWork
-                        )}
-                        onCheckedChange={(checked) => {
-                          const updatedTypesOfWork = checked
-                            ? [...filters.selectedTypesOfWork, job.typeOfWork]
-                            : filters.selectedTypesOfWork.filter(
-                                (type) => type !== job.typeOfWork
-                              );
-                          handleFilterChange({
-                            ...filters,
-                            selectedTypesOfWork: updatedTypesOfWork,
-                          });
-                        }}
-                      />
-                      <label className="ml-2 text-sm text-gray-700 tracking-tight">
-                        {job.typeOfWork} ({job.count} việc làm)
-                      </label>
-                    </div>
-                  ))}
-              </div>
+                <div className="space-y-2">
+                  {jobCountByType
+                    .filter((job) => job.count > 0)
+                    .map((job) => (
+                      <div
+                        className="flex items-center hover:bg-purple-100 p-2 rounded-lg"
+                        key={job.typeOfWork}
+                      >
+                        <Checkbox
+                          checked={filters.selectedTypesOfWork.includes(
+                            job.typeOfWork
+                          )}
+                          onCheckedChange={(checked) => {
+                            const updatedTypesOfWork = checked
+                              ? [...filters.selectedTypesOfWork, job.typeOfWork]
+                              : filters.selectedTypesOfWork.filter(
+                                  (type) => type !== job.typeOfWork
+                                );
+                            handleFilterChange({
+                              ...filters,
+                              selectedTypesOfWork: updatedTypesOfWork,
+                            });
+                          }}
+                        />
+                        <label className="ml-2 text-sm text-gray-700 tracking-tight">
+                          {job.typeOfWork} ({job.count} việc làm)
+                        </label>
+                      </div>
+                    ))}
+                </div>
               )}
             </div>
             <div>
               <h3 className="font-semibold mb-2 flex justify-between items-center text-gray-800 tracking-tight">
                 Danh mục
-                <ChevronDown 
-                  size={20} 
-                  className={`text-gray-500 cursor-pointer transform ${isCategoryOpen ? 'rotate-180' : ''}`} 
-                  onClick={() => setIsCategoryOpen(!isCategoryOpen)} 
+                <ChevronDown
+                  size={20}
+                  className={`text-gray-500 cursor-pointer transform ${
+                    isCategoryOpen ? "rotate-180" : ""
+                  }`}
+                  onClick={() => setIsCategoryOpen(!isCategoryOpen)}
                 />
               </h3>
-                {isCategoryOpen && (
-              <div className="space-y-2">
-                {industryCount
-                  .filter((industry) => industry.jobCount > 0)
-                  .map((industry) => (
-                    <div
-                      className="flex items-center hover:bg-purple-100 p-2 rounded-lg"
-                      key={industry.industryId}
-                    >
-                      <Checkbox
-                        checked={filters.selectedIndustryIds.includes(
-                          industry.industryId
-                        )}
-                        onCheckedChange={(checked) => {
-                          const updatedIndustryIds = checked
-                            ? [
-                                ...filters.selectedIndustryIds,
-                                industry.industryId,
-                              ]
-                            : filters.selectedIndustryIds.filter(
-                                (id) => id !== industry.industryId
-                              );
-                          handleFilterChange({
-                            ...filters,
-                            selectedIndustryIds: updatedIndustryIds,
-                          });
-                        }}
-                      />
-                      <label className="ml-2 text-sm text-gray-700 tracking-tight">
-                        {industry.industryName} ({industry.jobCount} việc làm)
-                      </label>
-                    </div>
-                  ))}
-              </div>
-               )}
-
+              {isCategoryOpen && (
+                <div className="space-y-2">
+                  {industryCount
+                    .filter((industry) => industry.jobCount > 0)
+                    .map((industry) => (
+                      <div
+                        className="flex items-center hover:bg-purple-100 p-2 rounded-lg"
+                        key={industry.industryId}
+                      >
+                        <Checkbox
+                          checked={filters.selectedIndustryIds.includes(
+                            industry.industryId
+                          )}
+                          onCheckedChange={(checked) => {
+                            const updatedIndustryIds = checked
+                              ? [
+                                  ...filters.selectedIndustryIds,
+                                  industry.industryId,
+                                ]
+                              : filters.selectedIndustryIds.filter(
+                                  (id) => id !== industry.industryId
+                                );
+                            handleFilterChange({
+                              ...filters,
+                              selectedIndustryIds: updatedIndustryIds,
+                            });
+                          }}
+                        />
+                        <label className="ml-2 text-sm text-gray-700 tracking-tight">
+                          {industry.industryName} ({industry.jobCount} việc làm)
+                        </label>
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
             <div>
               <h3 className="font-semibold mb-2 flex justify-between items-center text-gray-800 tracking-tight">
                 Mức lương
-                <ChevronDown 
-                  size={20} 
-                  className={`text-gray-500 cursor-pointer transform ${isSalaryOpen ? 'rotate-180' : ''}`} 
-                  onClick={() => setIsSalaryOpen(!isSalaryOpen)} 
+                <ChevronDown
+                  size={20}
+                  className={`text-gray-500 cursor-pointer transform ${
+                    isSalaryOpen ? "rotate-180" : ""
+                  }`}
+                  onClick={() => setIsSalaryOpen(!isSalaryOpen)}
                 />
               </h3>
               {isSalaryOpen && (
@@ -1041,10 +1096,16 @@ export default function JobSearchPage() {
                   />
                   <div className="flex justify-between mt-2 text-sm text-gray-600">
                     <span>
-                      {minSalary ? `${(minSalary / 1000000).toFixed(0)}M` : "0M"} VNĐ
+                      {minSalary
+                        ? `${(minSalary / 1000000).toFixed(0)}M`
+                        : "0M"}{" "}
+                      VNĐ
                     </span>
                     <span>
-                      {maxSalary ? `${(maxSalary / 1000000).toFixed(0)}M` : "50M"} VNĐ
+                      {maxSalary
+                        ? `${(maxSalary / 1000000).toFixed(0)}M`
+                        : "50M"}{" "}
+                      VNĐ
                     </span>
                   </div>
                 </div>
@@ -1075,11 +1136,9 @@ export default function JobSearchPage() {
             ) : (
               <div className="text-center py-8">
                 <p className="text-gray-500 text-lg">
-                  {isSearching ? (
-                    "Đang tìm kiếm công việc phù hợp..."
-                  ) : (
-                    "Không tìm thấy công việc nào phù hợp với tiêu chí của bạn."
-                  )}
+                  {isSearching
+                    ? "Đang tìm kiếm công việc phù hợp..."
+                    : "Không tìm thấy công việc nào phù hợp với tiêu chí của bạn."}
                 </p>
               </div>
             )}
@@ -1152,7 +1211,8 @@ export default function JobSearchPage() {
             </DialogHeader>
             <div className="py-4 text-center">
               <p className="text-gray-600 mb-4">
-                Vui lòng đăng nhập để sử dụng tính năng tìm kiếm và lọc công việc
+                Vui lòng đăng nhập để sử dụng tính năng tìm kiếm và lọc công
+                việc
               </p>
             </div>
             <DialogFooter className="flex justify-center gap-4">

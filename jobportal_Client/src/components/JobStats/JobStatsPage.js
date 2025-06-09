@@ -114,7 +114,7 @@ const JobStatsPage = () => {
 
       {/* Card thống kê tổng quan */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="p-6 shadow-md">
+        <Card className="p-6 shadow-md bg-white rounded-lg">
           <h2 className="text-lg font-semibold text-gray-700 mb-2">
             Tổng lượt xem
           </h2>
@@ -126,7 +126,7 @@ const JobStatsPage = () => {
           </p>
         </Card>
 
-        <Card className="p-6 shadow-md">
+        <Card className="p-6 bg-white shadow-md rounded-lg">
           <h2 className="text-lg font-semibold text-gray-700 mb-2">
             Tổng bài đăng
           </h2>
@@ -138,7 +138,7 @@ const JobStatsPage = () => {
           </p>
         </Card>
 
-        <Card className="p-6 shadow-md">
+        <Card className="p-6 bg-white rounded-lg shadow-md">
           <h2 className="text-lg font-semibold text-gray-700 mb-2">
             Tổng lượt ứng tuyển
           </h2>
@@ -160,7 +160,7 @@ const JobStatsPage = () => {
         </div>
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-blue-700 mb-8">
+      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-purple-700 mb-8">
         <h2 className="font-semibold mb-2">
           Làm thế nào để cải thiện hiệu suất bài đăng?
         </h2>

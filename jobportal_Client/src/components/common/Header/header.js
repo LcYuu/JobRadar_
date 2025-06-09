@@ -48,22 +48,22 @@ export default function Header() {
       try {
         await dispatch(logoutAction());
         // Xóa dữ liệu storage
-        localStorage.removeItem('jwt');
-        localStorage.removeItem('user');
+        localStorage.removeItem("jwt");
+        localStorage.removeItem("user");
         await Swal.fire({
-          icon: 'success',
-          title: 'Đăng xuất thành công',
-          text: 'Bạn đã đăng xuất thành công.',
+          icon: "success",
+          title: "Đăng xuất thành công",
+          text: "Bạn đã đăng xuất thành công.",
           timer: 1500,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
         // Chuyển hướng
-        window.location.href = '/';
+        window.location.href = "/";
       } catch (error) {
         await Swal.fire({
-          icon: 'error',
-          title: 'Lỗi đăng xuất',
-          text: 'Có lỗi xảy ra khi đăng xuất. Vui lòng thử lại.',
+          icon: "error",
+          title: "Lỗi đăng xuất",
+          text: "Có lỗi xảy ra khi đăng xuất. Vui lòng thử lại.",
         });
       }
     }
@@ -72,55 +72,57 @@ export default function Header() {
   const handleProfileClick = () => {
     closeMenu();
     if (user?.userType?.userTypeId === 1) {
-      navigate('/admin/dashboard');
+      navigate("/admin/dashboard");
     } else if (user?.userType?.userTypeId === 3) {
-      navigate('employer/account-management/dashboard');
+      navigate("employer/account-management/dashboard");
     } else {
-      navigate('user/account-management');
+      navigate("user/account-management");
     }
   };
 
   const isProtectedRoute = () => {
     const protectedPaths = [
       // Quản lý tài khoản người dùng
-      '/user/account-management',
-      '/user/profile',
-      '/user/resume',
-      '/user/applied-jobs',
-      '/user/saved-jobs',
-      '/user/settings',
-      
+      "/user/account-management",
+      "/user/profile",
+      "/user/resume",
+      "/user/applied-jobs",
+      "/user/saved-jobs",
+      "/user/settings",
+
       // Quản lý tài khoản nhà tuyển dụng
-      '/employer/account-management',
-      '/employer/account-management/dashboard',
-      '/employer/job-management',
-      '/employer/candidate-management',
-      '/employer/company-profile',
-      '/employer/settings',
-      
+      "/employer/account-management",
+      "/employer/account-management/dashboard",
+      "/employer/job-management",
+      "/employer/candidate-management",
+      "/employer/company-profile",
+      "/employer/settings",
+
       // Quản lý admin
-      '/admin/dashboard',
-      '/admin/user-management',
-      '/admin/employer-management',
-      '/admin/job-management',
-      '/admin/report-management',
-      '/admin/settings',
-      
+      "/admin/dashboard",
+      "/admin/user-management",
+      "/admin/employer-management",
+      "/admin/job-management",
+      "/admin/report-management",
+      "/admin/settings",
+
       // Các trang yêu cầu xác thực khác
-      '/post-job',
-      '/apply-job',
-      '/chat',
-      '/notifications',
-      '/payment',
-      '/subscription'
+      "/post-job",
+      "/apply-job",
+      "/chat",
+      "/notifications",
+      "/payment",
+      "/subscription",
     ];
-    
-    return protectedPaths.some(path => window.location.pathname.startsWith(path));
+
+    return protectedPaths.some((path) =>
+      window.location.pathname.startsWith(path)
+    );
   };
 
   useEffect(() => {
     if ((!jwt || !user) && isProtectedRoute()) {
-      navigate('/auth/sign-in');
+      navigate("/auth/sign-in");
     }
   }, [jwt, user, navigate]);
 
@@ -131,47 +133,63 @@ export default function Header() {
         setIsMenuOpen(false);
       }
     };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Logic lấy tên hiển thị
-  const displayName = user?.userType?.userTypeId === 3 && user?.company?.companyName
-                     ? user.company.companyName
-                     : user?.userName || user?.email; 
+  const displayName =
+    user?.userType?.userTypeId === 3 && user?.company?.companyName
+      ? user.company.companyName
+      : user?.userName || user?.email;
 
   return (
     <header className="bg-gradient-to-r from-gray-900 to-purple-900 px-4 py-3 flex justify-between items-center relative">
       <div className="flex items-center space-x-6">
         <div className="flex items-center space-x-2">
-          <img className="w-8 h-8 bg-purple-600 rounded-full" src={logo} alt="logo" />
+          <img
+            className="w-8 h-8 bg-purple-600 rounded-full"
+            src={logo}
+            alt="logo"
+          />
           {isSeeker && (
-            <Link to="/" className="text-xl font-bold text-white">JobRadar</Link>
+            <Link to="/" className="text-xl font-bold text-white">
+              JobRadar
+            </Link>
           )}
         </div>
-        
+
         {/* Desktop Navigation */}
         {isSeeker && (
           <nav className="hidden md:block">
             <ul className="flex space-x-4">
               <li>
                 <Link to="/find-jobs">
-                  <Button variant="ghost" className="text-white hover:text-purple-200">
+                  <Button
+                    variant="ghost"
+                    className="text-white hover:text-[#e5c4f3] hover:bg-transparent"
+                  >
                     Tìm việc
                   </Button>
-                </Link> 
+                </Link>
               </li>
               <li>
                 <Link to="/find-companies">
-                  <Button variant="ghost" className="text-white hover:text-purple-200">
+                  <Button
+                    variant="ghost"
+                    className="text-white hover:text-[#e5c4f3] hover:bg-transparent"
+                  >
                     Công ty
                   </Button>
                 </Link>
               </li>
               <li>
                 <Link to="/create-cv">
-                  <Button variant="ghost" className="text-white hover:text-purple-200">
+                  <Button
+                    variant="ghost"
+                    className="text-white hover:text-[#e5c4f3] hover:bg-transparent"
+                  >
                     Tạo CV
                   </Button>
                 </Link>
@@ -202,7 +220,7 @@ export default function Header() {
             </div>
             <Button
               variant="ghost"
-              className="text-white hover:text-red-200"
+              className="text-white hover:text-[#e5c4f3] hover:bg-transparent"
               onClick={handleLogout}
             >
               Đăng xuất
@@ -210,10 +228,17 @@ export default function Header() {
           </div>
         ) : (
           <>
-            <Button variant="ghost" className="text-white hover:text-purple-200" onClick={handleSignInClick}>
+            <Button
+              variant="ghost"
+              className="text-white hover:text-[#e5c4f3] hover:bg-transparent"
+              onClick={handleSignInClick}
+            >
               Login
             </Button>
-            <Button className="bg-purple-600 text-white hover:bg-purple-700" onClick={handleSignUpClick}>
+            <Button
+              className="bg-purple-600 text-white hover:bg-purple-700"
+              onClick={handleSignUpClick}
+            >
               Sign Up
             </Button>
           </>
@@ -221,16 +246,32 @@ export default function Header() {
       </div>
 
       {/* Mobile Menu Button */}
-      <button 
-        className="md:hidden text-white p-2 focus:outline-none" 
+      <button
+        className="md:hidden text-white p-2 focus:outline-none"
         onClick={toggleMenu}
         aria-label="Toggle menu"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           {isMenuOpen ? (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           ) : (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
           )}
         </svg>
       </button>
@@ -241,22 +282,34 @@ export default function Header() {
           <div className="flex flex-col p-4 space-y-3">
             {isSeeker && (
               <>
-                <Link to="/find-jobs" onClick={closeMenu} className="text-white py-2 hover:text-purple-200">
+                <Link
+                  to="/find-jobs"
+                  onClick={closeMenu}
+                  className="text-white py-2 hover:text-[#e5c4f3] hover:bg-transparent"
+                >
                   Tìm việc
                 </Link>
-                <Link to="/find-companies" onClick={closeMenu} className="text-white py-2 hover:text-purple-200">
+                <Link
+                  to="/find-companies"
+                  onClick={closeMenu}
+                  className="text-white py-2 hover:text-[#e5c4f3] hover:bg-transparent"
+                >
                   Công ty
                 </Link>
-                <Link to="/create-cv" onClick={closeMenu} className="text-white py-2 hover:text-purple-200">
+                <Link
+                  to="/create-cv"
+                  onClick={closeMenu}
+                  className="text-white py-2 hover:text-[#e5c4f3] hover:bg-transparent"
+                >
                   Tạo CV
                 </Link>
               </>
             )}
-            
+
             <div className="pt-2 border-t border-gray-700">
               {isAuthenticated && user ? (
                 <>
-                  <div 
+                  <div
                     className="flex items-center py-2 cursor-pointer"
                     onClick={handleProfileClick}
                   >
@@ -272,7 +325,7 @@ export default function Header() {
                     <span className="text-white">{displayName}</span>
                   </div>
                   <button
-                    className="text-white py-2 w-full text-left hover:text-red-200"
+                    className="text-white py-2 w-full text-left hover:text-[#e5c4f3] hover:bg-transparent"
                     onClick={handleLogout}
                   >
                     Đăng xuất
@@ -280,10 +333,16 @@ export default function Header() {
                 </>
               ) : (
                 <>
-                  <button onClick={handleSignInClick} className="text-white py-2 w-full text-left hover:text-purple-200">
+                  <button
+                    onClick={handleSignInClick}
+                    className="text-white py-2 w-full text-left hover:text-[#e5c4f3] hover:bg-transparent"
+                  >
                     Login
                   </button>
-                  <button onClick={handleSignUpClick} className="bg-purple-600 text-white py-2 px-4 rounded w-full hover:bg-purple-700">
+                  <button
+                    onClick={handleSignUpClick}
+                    className="bg-purple-600 text-white py-2 px-4 rounded w-full hover:bg-purple-700"
+                  >
                     Sign Up
                   </button>
                 </>
@@ -295,4 +354,3 @@ export default function Header() {
     </header>
   );
 }
-

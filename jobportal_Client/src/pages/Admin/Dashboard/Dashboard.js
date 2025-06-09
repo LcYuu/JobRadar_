@@ -329,7 +329,7 @@ export default function AdminDashboard() {
                   onClick={() => handlePeriodFilter("week")}
                   className={`px-3 py-1 rounded transition-colors text-sm ${
                     activePeriod === "week"
-                      ? "bg-indigo-100 text-indigo-600"
+                      ? "bg-purple-100 text-purple-600"
                       : "hover:bg-gray-100"
                   }`}
                 >
@@ -339,7 +339,7 @@ export default function AdminDashboard() {
                   onClick={() => handlePeriodFilter("month")}
                   className={`px-3 py-1 rounded transition-colors text-sm ${
                     activePeriod === "month"
-                      ? "bg-indigo-100 text-indigo-600"
+                      ? "bg-purple-100 text-purple-600"
                       : "hover:bg-gray-100"
                   }`}
                 >
@@ -349,7 +349,7 @@ export default function AdminDashboard() {
                   onClick={() => handlePeriodFilter("year")}
                   className={`px-3 py-1 rounded transition-colors text-sm ${
                     activePeriod === "year"
-                      ? "bg-indigo-100 text-indigo-600"
+                      ? "bg-purple-100 text-purple-600"
                       : "hover:bg-gray-100"
                   }`}
                 >
@@ -368,7 +368,7 @@ export default function AdminDashboard() {
           <div className={`${chartHeight} overflow-hidden`}>
             {loading && (
               <div className="flex items-center justify-center h-full">
-                <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-indigo-600"></div>
+                <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-purple-600"></div>
               </div>
             )}
 
