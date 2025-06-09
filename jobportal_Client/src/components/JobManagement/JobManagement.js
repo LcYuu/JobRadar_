@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../ui/button";
 import {
@@ -49,6 +49,8 @@ const JobManagement = () => {
   const [sortBy, setSortBy] = useState("createdate");
   const [sortDirection, setSortDirection] = useState("desc");
   const [sortedJobs, setSortedJobs] = useState([]);
+  const [showCustomDropdown, setShowCustomDropdown] = useState(null);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     if (jobs && jobs.length > 0) {
@@ -188,6 +190,21 @@ const JobManagement = () => {
       );
     }
   };
+
+  // Logic đóng dropdown khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowCustomDropdown(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownRef]);
 
   return (
     <div className="p-4 sm:p-6">
@@ -403,44 +420,46 @@ const JobManagement = () => {
                               Xem chi tiết
                             </Button>
                           </div>
-                          <div className="hidden xl-custom:block">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  className="dropdown-trigger p-0 h-8 w-8 bg-transparent hover:bg-transparent"
-                                >
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent
-                                align="end"
-                                className="dropdown-menu-content bg-white border border-gray-300 shadow-lg rounded-md p-2 min-w-[150px] z-10"
+                          <div className="hidden xl-custom:block relative">
+                            <div
+                              className="h-8 w-8 p-0 flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-md cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowCustomDropdown(job.postId);
+                              }}
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </div>
+                            {showCustomDropdown === job.postId && (
+                              <div
+                                ref={dropdownRef}
+                                className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 shadow-lg rounded-md p-2 z-20"
                               >
-                                <DropdownMenuItem
-                                  className="dropdown-item-stop !text-red-600 !hover:text-red-800 !hover:bg-gray-100 cursor-pointer"
-                                  onClick={() =>
-                                    handleOpenExpireConfirmation(job.postId)
-                                  }
-                                  style={{
-                                    display:
-                                      job.expireDate &&
-                                      new Date(job.expireDate) < new Date()
-                                        ? "none"
-                                        : "block",
+                                {job.expireDate &&
+                                  new Date(job.expireDate) >= new Date() && (
+                                    <div
+                                      className="hover:bg-gray-100 cursor-pointer px-3 py-2 rounded-md !text-red-600 !hover:text-red-800"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleOpenExpireConfirmation(job.postId);
+                                        setShowCustomDropdown(null);
+                                      }}
+                                    >
+                                      Dừng tuyển dụng
+                                    </div>
+                                  )}
+                                <div
+                                  className="hover:bg-gray-100 cursor-pointer px-3 py-2 rounded-md !text-blue-600 !hover:text-blue-800"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleViewDetails(job.postId);
+                                    setShowCustomDropdown(null);
                                   }}
                                 >
-                                  Dừng tuyển dụng
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="dropdown-item-view !text-blue-600 !hover:text-blue-800 !hover:bg-gray-100 cursor-pointer"
-                                  style={{ color: "#2563EB" }}
-                                  onClick={() => handleViewDetails(job.postId)}
-                                >
                                   Xem chi tiết
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </td>
