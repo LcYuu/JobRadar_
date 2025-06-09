@@ -215,7 +215,7 @@ const JobManagement = () => {
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <div className="flex flex-col sm:flex-row text-purple-600 justify-between items-start sm:items-center mb-6 gap-4">
           <h1 className="text-2xl font-semibold">Quản lý công việc</h1>
           <div className="flex items-center gap-4">
             <Button
@@ -229,11 +229,11 @@ const JobManagement = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow">
-          <div className="bg-white rounded-lg shadow">
-            <div className="flex flex-col items-start sm:items-center p-4 border-b gap-4 filter-bar w-full">
-              <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center w-full sm:w-auto">
+          <div className="bg-white rounded-lg shadow flex flex-col">
+            <div className="flex flex-col pt-3 pr-3 sm:flex-row justify-end items-start sm:items-center mr-4 gap-4 w-full">
+              <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center justify-end sm:justify-center w-full sm:w-auto">
                 <select
-                  className="border rounded px-4 py-2 w-full sm:w-auto max-w-[250px] flex-shrink"
+                  className="border rounded px-4 py-2 w-full  flex-shrink"
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                 >
@@ -243,7 +243,7 @@ const JobManagement = () => {
                   <option value="Hết hạn">Hết hạn</option>
                 </select>
                 <select
-                  className="border rounded px-4 py-2 w-full sm:w-auto max-w-[250px] flex-shrink"
+                  className="border rounded px-4 py-2 w-full flex-shrink"
                   value={typeOfWork}
                   onChange={(e) => setTypeOfWork(e.target.value)}
                 >
@@ -256,7 +256,7 @@ const JobManagement = () => {
                 </select>
                 <Button
                   variant="outline"
-                  className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-500 transition-colors w-full sm:w-auto min-w-[100px] max-w-[120px] flex-shrink"
+                  className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-500 transition-colors w-full min-w-[100px] flex-shrink"
                   onClick={applyFilters}
                 >
                   <Filter className="w-4 h-4 mr-2" />
@@ -374,7 +374,7 @@ const JobManagement = () => {
                         data-label="Loại công việc"
                         before="Loại công việc:"
                       >
-                        <span className="px-3 py-1 rounded-full text-sm bg-indigo-100 text-indigo-600">
+                        <span className="px-3 py-1 rounded-full text-sm bg-purple-100 text-purple-600">
                           {job?.typeOfWork}
                         </span>
                       </td>

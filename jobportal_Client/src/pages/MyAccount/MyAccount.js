@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { Button } from "../../ui/button";
 import { Link } from "react-router-dom";
 import Sidebar from "../../components/Sidebar/Sidebar";
+import { ArrowLeft } from "@mui/icons-material";
 
 export default function Dashboard() {
   const [selectedSection, setSelectedSection] = useState("Dashboard");
@@ -74,7 +75,7 @@ export default function Dashboard() {
               <Link to="/">
                 <Button
                   variant="outline"
-                  className="py-2 px-6 text-white bg-red-500 border-red-500 hover:bg-red-600 hover:border-red-600 transition-all duration-300"
+                  className="py-2 px-6 text-white bg-purple-500 border-purple-500 hover:bg-purple-600 hover:border-purple-600 transition-all duration-300"
                   aria-label="Trở về trang chủ"
                 >
                   Trở về trang chủ

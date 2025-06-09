@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "swiper/swiper-bundle.css";
 import { Button } from "../../ui/button";
@@ -886,14 +886,18 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
   const totalStars = reviews.reduce((total, review) => total + review.star, 0);
   const averageStars = reviews.length > 0 ? totalStars / reviews.length : 0;
 
-  const validReviews = Array.isArray(reviews)
-    ? reviews.filter(
-        (item) =>
-          typeof item === "object" &&
-          item !== null &&
-          item.hasOwnProperty("reviewId")
-      )
-    : [];
+  const validReviews = useMemo(
+  () =>
+    Array.isArray(reviews)
+      ? reviews.filter(
+          (item) =>
+            typeof item === "object" &&
+            item !== null &&
+            item.hasOwnProperty("reviewId")
+        )
+      : [],
+  [reviews]
+);
 
   const handleDeleteReview = async (reviewId) => {
     const result = await Swal.fire({
@@ -1349,7 +1353,6 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
   };
 
   // Function to load replies for a specific review
-  
 
   // Load replies for all reviews when component mounts or when reviews change
   useEffect(() => {
@@ -1828,7 +1831,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 transform transition-all duration-300 hover:shadow-xl">
           <div className="flex flex-col sm:flex-row items-start gap-6">
             <div className="relative group">
-              <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-2xl overflow-hidden flex-shrink-0 transform transition-transform duration-300 group-hover:scale-105">
+              <div className="w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-purple-100 to-purple-100 rounded-2xl overflow-hidden flex-shrink-0 transform transition-transform duration-300 group-hover:scale-105">
                 <img
                   src={companyProfile?.logo}
                   alt={`${companyProfile?.companyName} Logo`}
@@ -1842,7 +1845,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
             
             <div className="flex-1">
               <div className="flex flex-col xs:flex-row xs:items-center xs:gap-4 mb-3">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 bg-gradient-to-r from-purple-600 to-purple-600 bg-clip-text text-transparent">
                   {companyProfile?.companyName}
                 </h1>
                 <div className="mt-2 xs:mt-0">
@@ -1937,7 +1940,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
               {!localStorage.getItem("jwt") ? null : (
                 <Button
                   onClick={handleFollowClick}
-                  className="px-6 py-2.5 text-sm bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transform transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
+                  className="px-6 py-2.5 text-sm bg-gradient-to-r from-purple-600 to-purple-600 text-white rounded-xl hover:from-purple-700 hover:to-purple-700 transform transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg"
                 >
                   {isFollowing ? "Bỏ theo dõi" : "Theo dõi"}
                 </Button>

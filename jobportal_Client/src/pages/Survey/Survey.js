@@ -146,7 +146,7 @@ const Survey = () => {
 
                     <Button 
                         type="submit" 
-                        className="w-full bg-indigo-600 text-white"
+                        className="w-full bg-purple-600 text-white"
                         disabled={loading}
                     >
                         {loading ? 'Đang gửi...' : 'Gửi khảo sát'}

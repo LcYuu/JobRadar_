@@ -7,12 +7,12 @@ import { saveJob } from "../../../redux/Seeker/seeker.thunk";
 import { jobTypeColors } from "../../../configs/constants";
 import IndustryBadge from "../IndustryBadge/IndustryBadge";
 
-
 function JobCard_AllJob({ job }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { savedJobs } = useSelector((store) => store.seeker);
   const { user } = useSelector((store) => store.auth);
+
   const isSaved = savedJobs?.some(savedJob => savedJob.postId === job.postId);
 
   const handleCardClick = () => {
@@ -42,7 +42,7 @@ function JobCard_AllJob({ job }) {
           confirmButtonColor: "#9333ea",
           timer: 1500,
           timerProgressBar: true,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
       } else {
         await Swal.fire({
@@ -53,7 +53,7 @@ function JobCard_AllJob({ job }) {
           confirmButtonColor: "#9333ea",
           timer: 1500,
           timerProgressBar: true,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
       }
     } catch (error) {
@@ -62,7 +62,7 @@ function JobCard_AllJob({ job }) {
         text: "Có lỗi xảy ra khi thực hiện thao tác",
         icon: "error",
         confirmButtonText: "Đóng",
-        confirmButtonColor: "#9333ea"
+        confirmButtonColor: "#9333ea",
       });
     }
   };

@@ -250,7 +250,7 @@ public class EmailUtil {
 	                htmlContent.append("<p class='salary'>Lương: Thoả thuận</p>");
 	            }
 
-	            htmlContent.append("<p class='location'>").append(job.getLocation()).append(" ngày để ứng tuyển</p>");
+	            htmlContent.append("<p class='location'>").append(job.getLocation());
 	            htmlContent.append("</div>");
 	            htmlContent.append("</div>");
 	            htmlContent.append("</a>");
@@ -258,7 +258,7 @@ public class EmailUtil {
 
 	        htmlContent.append("<div class='footer'>");
 	        htmlContent.append("<p>Truy cập <a href='http://localhost:3000'>trang web của chúng tôi</a> để biết thêm chi tiết.</p>");
-	        htmlContent.append("<p>Trân trọng,<br>Đội ngũ Thông báo Công việc</p>");
+	        htmlContent.append("<p>Trân trọng,<br>Job Radar</p>");
 	        htmlContent.append("</div>");
 	        htmlContent.append("</div>");
 	        htmlContent.append("</body></html>");

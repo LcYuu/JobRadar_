@@ -320,13 +320,13 @@ export default function SignInForm() {
     <>
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-md bg-white shadow-lg rounded-lg">
-          <CardHeader className="border-b border-indigo-300">
+          <CardHeader className="border-b border-purple-300">
             <div className="flex justify-between items-center mb-4">
               <Link to="/">
                 <img src={logo1} alt="JobRadar Logo" className="h-20 w-20" />
               </Link>
             </div>
-            <CardTitle className="text-2xl font-bold text-indigo-700 text-center">
+            <CardTitle className="text-2xl font-bold text-purple-700 text-center">
               Đăng nhập
             </CardTitle>
           </CardHeader>
@@ -365,7 +365,7 @@ export default function SignInForm() {
                   placeholder="Địa chỉ email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                  className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                   disabled={isLoading}
                 />
                 <Input
@@ -373,7 +373,7 @@ export default function SignInForm() {
                   placeholder="Mật khẩu"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                  className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                   onKeyDown={(e) => e.key === "Enter" && handleSubmit(e)}
                   disabled={isLoading}
                 />
@@ -381,14 +381,14 @@ export default function SignInForm() {
               <div className="flex justify-between items-center">
                 <Link
                   to="/auth/forgot-password"
-                  className="text-indigo-600 hover:underline text-sm"
+                  className="text-purple-600 hover:underline text-sm"
                 >
                   Quên mật khẩu?
                 </Link>
               </div>
               <Button
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white"
                 disabled={isLoading}
               >
                 {isLoading ? "Đang xử lý..." : "Đăng nhập"}
@@ -398,7 +398,7 @@ export default function SignInForm() {
               Chưa có tài khoản?{" "}
               <Link
                 to="/auth/sign-up"
-                className="font-medium text-indigo-600 hover:text-indigo-500"
+                className="font-medium text-purple-600 hover:text-purple-500"
               >
                 Đăng ký
               </Link>
@@ -454,7 +454,7 @@ export default function SignInForm() {
       </div>
       {isLoading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
         </div>
       )}
     </>

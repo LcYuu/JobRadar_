@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faFacebookF,
   faTwitter,
   faInstagram,
   faLinkedinIn,
@@ -36,86 +35,56 @@ export default function Footer() {
     return regex.test(email);
   };
 
+  // Lấy thông tin đăng ký khi component mount
   useEffect(() => {
     dispatch(findSubscriptionBySeekerId());
   }, [dispatch]);
-  
+
+  // Cập nhật email khi currentSubscription thay đổi
   useEffect(() => {
     if (currentSubscription?.email) {
       setEmail(currentSubscription.email);
+    } else {
+      setEmail(""); // Đặt lại email nếu không có đăng ký
     }
   }, [currentSubscription]);
 
-const handleSubscribe = async () => {
-  if (!email) {
-    Swal.fire({
-      icon: "error",
-      title: "Lỗi!",
-      text: "Vui lòng nhập email của bạn.",
-    });
-    return;
-  }
-
-  if (!validateEmail(email)) {
-    Swal.fire({
-      icon: "error",
-      title: "Lỗi!",
-      text: "Email không hợp lệ.",
-    });
-    return;
-  }
-
-  try {
-    let response;
-    if (currentSubscription) {
-      const subId = currentSubscription.subscriptionId;
-      response = await dispatch(updateSubscription({ subId, email }));
-    } else {
-      response = await dispatch(createSubscription({ email }));
+  const handleSubscribe = async () => {
+    if (!email) {
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi!",
+        text: "Vui lòng nhập email của bạn.",
+      });
+      return;
     }
 
-    Swal.fire({
-      icon: "success",
-      title: "Thành công!",
-      text: response.message || "Cập nhật thành công!",
-    });
-  } catch (err) {
-    Swal.fire({
-      icon: "error",
-      title: "Lỗi!",
-      text: err.message || "Đã xảy ra lỗi. Vui lòng thử lại!",
-    });
-  }
-};
+    if (!validateEmail(email)) {
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi!",
+        text: "Email không hợp lệ.",
+      });
+      return;
+    }
 
-const handleUnsubscribe = async () => {
-  if (!currentSubscription || !currentSubscription.subscriptionId) {
-    Swal.fire({
-      icon: "error",
-      title: "Lỗi!",
-      text: "Không tìm thấy thông tin đăng ký!",
-    });
-    return;
-  }
-
-  const result = await Swal.fire({
-    title: "Xác nhận hủy đăng ký?",
-    text: "Bạn có chắc chắn muốn hủy nhận thông báo không?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Đồng ý",
-    cancelButtonText: "Hủy",
-  });
-
-  if (result.isConfirmed) {
     try {
-      const subId = currentSubscription.subscriptionId;
-      const response = await dispatch(deleteSubscription(subId)).unwrap();
+      let response;
+      if (currentSubscription) {
+        const subId = currentSubscription.subscriptionId;
+        response = await dispatch(updateSubscription({ subId, email })).unwrap();
+      } else {
+        response = await dispatch(createSubscription({ email })).unwrap();
+        setEmail(""); // Đặt lại email sau khi thêm đăng ký thành công
+      }
+
+      // Làm mới thông tin đăng ký
+      await dispatch(findSubscriptionBySeekerId());
 
       Swal.fire({
         icon: "success",
-        title: "Đã hủy đăng ký!",
-        text: response.message || "Hủy đăng ký thành công!",
+        title: "Thành công!",
+        text: response.message || "Cập nhật thành công!",
       });
     } catch (err) {
       Swal.fire({
@@ -124,9 +93,50 @@ const handleUnsubscribe = async () => {
         text: err.message || "Đã xảy ra lỗi. Vui lòng thử lại!",
       });
     }
-  }
-};
+  };
 
+  const handleUnsubscribe = async () => {
+    if (!currentSubscription || !currentSubscription.subscriptionId) {
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi!",
+        text: "Không tìm thấy thông tin đăng ký!",
+      });
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: "Xác nhận hủy đăng ký?",
+      text: "Bạn có chắc chắn muốn hủy nhận thông báo không?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Đồng ý",
+      cancelButtonText: "Hủy",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const subId = currentSubscription.subscriptionId;
+        const response = await dispatch(deleteSubscription(subId)).unwrap();
+
+        // Làm mới thông tin đăng ký
+        await dispatch(findSubscriptionBySeekerId());
+        setEmail(""); // Đặt lại email sau khi xóa đăng ký
+
+        Swal.fire({
+          icon: "success",
+          title: "Đã hủy đăng ký!",
+          text: response.message || "Hủy đăng ký thành công!",
+        });
+      } catch (err) {
+        Swal.fire({
+          icon: "error",
+          title: "Lỗi!",
+          text: err.message || "Đã xảy ra lỗi. Vui lòng thử lại!",
+        });
+      }
+    }
+  };
 
   return (
     <footer className="footer bg-gray-900 py-12">
@@ -159,18 +169,21 @@ const handleUnsubscribe = async () => {
                 className="w-64 text-gray-900"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={loading} // Vô hiệu hóa input khi đang xử lý
               />
               {currentSubscription ? (
                 <Button
-                  className="bg-blue-600 text-white"
+                  className="bg-purple-600 text-white"
                   onClick={handleSubscribe}
+                  disabled={loading}
                 >
                   Cập nhật email
                 </Button>
               ) : (
                 <Button
-                  className="bg-purple-600 text-white"
+                  className="bg-purple-500 text-white"
                   onClick={handleSubscribe}
+                  disabled={loading}
                 >
                   Đăng ký
                 </Button>
@@ -181,6 +194,7 @@ const handleUnsubscribe = async () => {
               <Button
                 className="bg-red-600 text-white mt-2"
                 onClick={handleUnsubscribe}
+                disabled={loading}
               >
                 Hủy đăng ký
               </Button>
@@ -195,14 +209,14 @@ const handleUnsubscribe = async () => {
                 <li>Pricing</li>
                 <Link
                   to="/terms-of-service"
-                  className="text-indigo-600 hover:underline"
+                  className="text-purple-600 hover:underline"
                 >
                   <li>Terms</li>
                 </Link>
                 <li>Advice</li>
                 <Link
                   to="/privacy-policy"
-                  className="text-indigo-600 hover:underline"
+                  className="text-purple-600 hover:underline"
                 >
                   <li>Privacy Policy</li>
                 </Link>
@@ -222,7 +236,7 @@ const handleUnsubscribe = async () => {
 
         <div className="mt-12 pt-8 border-t border-gray-700 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-400 text-sm mb-4 md:mb-0">
-            © 2024 JobRadar. All rights reserved.
+            © 2025 JobRadar. All rights reserved.
           </p>
           <div className="flex space-x-4">
             {socialIcons.map((social, index) => (

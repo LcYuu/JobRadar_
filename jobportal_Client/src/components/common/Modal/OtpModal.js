@@ -83,7 +83,7 @@ const OtpModal = ({ isOpen, onClose, email, onResendCode, onSubmitOtp }) => {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center flex flex-col items-center">
               <SuccessIcon className="w-12 h-12" />
               <p className="text-green-600">Xác nhận thành công!</p>
-              <Button onClick={onClose} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white">
+              <Button onClick={onClose} className="w-full bg-purple-600 hover:bg-purple-700 text-white">
                 Đóng
               </Button>
             </motion.div>
@@ -96,7 +96,7 @@ const OtpModal = ({ isOpen, onClose, email, onResendCode, onSubmitOtp }) => {
               </p>
               <Button 
                 onClick={handleResend} 
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white"
                 disabled={isLoading}
               >
                 {isLoading ? 'Đang gửi...' : 'Gửi lại mã'}
@@ -124,7 +124,7 @@ const OtpModal = ({ isOpen, onClose, email, onResendCode, onSubmitOtp }) => {
               />
               <Button 
                 type="submit" 
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white mt-2"
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white mt-2"
                 disabled={isLoading}
               >
                 {isLoading ? 'Đang xử lý...' : 'Xác nhận'}

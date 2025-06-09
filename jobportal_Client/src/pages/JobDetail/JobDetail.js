@@ -151,7 +151,7 @@ export default function JobDetail() {
       "bg-purple-100 text-purple-800",
       "bg-orange-100 text-orange-800",
       "bg-pink-100 text-pink-800",
-      "bg-indigo-100 text-indigo-800",
+      "bg-purple-100 text-purple-800",
     ];
     return colors[index % colors.length];
   };
@@ -247,7 +247,7 @@ export default function JobDetail() {
                       </Button>
                     ) : hasApplied ? (
                       <button
-                        className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+                        className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
                         onClick={handleOpenModal}
                       >
                         Cập nhật đơn
@@ -502,7 +502,6 @@ export default function JobDetail() {
                 </div>
               </Card>
             )}
-
             {/* Skills */}
             {postByPostId?.skills && postByPostId.skills.length > 0 && (
               <Card>
