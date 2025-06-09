@@ -231,10 +231,10 @@ const CVAnalyzer = () => {
           
           {result.matching_score.cvImprovementSuggestions && result.matching_score.cvImprovementSuggestions.length > 0 && (
             <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
-              <h4 className="font-semibold mb-3 text-indigo-700">Gợi ý cải thiện CV</h4>
+              <h4 className="font-semibold mb-3 text-purple-700">Gợi ý cải thiện CV</h4>
               <ul className="list-disc pl-5 space-y-1">
                 {result.matching_score.cvImprovementSuggestions.map((suggestion, index) => (
-                  <li key={index} className="text-indigo-600">{suggestion}</li>
+                  <li key={index} className="text-purple-600">{suggestion}</li>
                 ))}
               </ul>
             </div>

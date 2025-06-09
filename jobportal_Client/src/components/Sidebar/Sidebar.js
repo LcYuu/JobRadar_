@@ -201,7 +201,7 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
               className={`text-3xl font-bold ${
                 user?.userType?.userTypeId === 1 || user?.userType?.userTypeId === 3
                   ? "text-gray-400 cursor-not-allowed"
-                  : "text-primary hover:text-indigo-700 transition duration-200"
+                  : "text-primary hover:text-purple-700 transition duration-200"
               }`}
             >
               JobRadar

@@ -424,7 +424,7 @@ const JobDetailEmployer = () => {
             <img
               src={detailJob?.company?.logo}
               alt="Company Logo"
-              className="h-12 w-12 sm:h-16 sm:w-16 rounded-lg bg-indigo-100 flex items-center justify-center text-xl sm:text-2xl font-bold text-indigo-600"
+              className="h-12 w-12 sm:h-16 sm:w-16 rounded-lg bg-purple-100 flex items-center justify-center text-xl sm:text-2xl font-bold text-purple-600"
             />
             {isEditing ? (
               <div className="w-full">
