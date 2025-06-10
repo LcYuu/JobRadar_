@@ -15,7 +15,51 @@ const reviewSlice = createSlice({
       replies: {},
       reactions: {}
     },
-    reducers: {},
+    reducers: {
+      updateReactionLocally: (state, action) => {
+        const { reviewId, reactionType, userId } = action.payload;
+        const currentReaction = state.reactions[reviewId];
+        
+        if (!currentReaction) {
+          state.reactions[reviewId] = {
+            likeCount: reactionType === 'LIKE' ? 1 : 0,
+            dislikeCount: reactionType === 'DISLIKE' ? 1 : 0,
+            userReaction: reactionType
+          };
+        } else {
+          // Nếu user đã có reaction trước đó
+          if (currentReaction.userReaction) {
+            // Nếu click vào cùng loại reaction -> bỏ reaction
+            if (currentReaction.userReaction === reactionType) {
+              state.reactions[reviewId] = {
+                ...currentReaction,
+                likeCount: reactionType === 'LIKE' ? currentReaction.likeCount - 1 : currentReaction.likeCount,
+                dislikeCount: reactionType === 'DISLIKE' ? currentReaction.dislikeCount - 1 : currentReaction.dislikeCount,
+                userReaction: null
+              };
+            } 
+            // Nếu click vào reaction khác -> chuyển reaction
+            else {
+              state.reactions[reviewId] = {
+                ...currentReaction,
+                likeCount: reactionType === 'LIKE' ? currentReaction.likeCount + 1 : currentReaction.likeCount - 1,
+                dislikeCount: reactionType === 'DISLIKE' ? currentReaction.dislikeCount + 1 : currentReaction.dislikeCount - 1,
+                userReaction: reactionType
+              };
+            }
+          } 
+          // Nếu user chưa có reaction
+          else {
+            state.reactions[reviewId] = {
+              ...currentReaction,
+              likeCount: reactionType === 'LIKE' ? currentReaction.likeCount + 1 : currentReaction.likeCount,
+              dislikeCount: reactionType === 'DISLIKE' ? currentReaction.dislikeCount + 1 : currentReaction.dislikeCount,
+              userReaction: reactionType
+            };
+          }
+        }
+      }
+    },
     extraReducers: (builder) => {
       builder
         // Get Reviews By Company
@@ -207,54 +251,13 @@ const reviewSlice = createSlice({
           state.loading = false;
           state.error = action.payload;
         })
-        // Review Reactions
-        .addCase(reactToReview.pending, (state) => {
-          state.loading = true;
-          state.error = null;
-        })
-        .addCase(reactToReview.fulfilled, (state, action) => {
-          state.loading = false;
-          // Update the reactions count in state
-          const { reviewId, likeCount, dislikeCount, userReaction } = action.payload;
-          
-          state.reactions = {
-            ...state.reactions,
-            [reviewId]: {
-              likeCount,
-              dislikeCount,
-              userReaction
-            }
-          };
-        })
-        .addCase(reactToReview.rejected, (state, action) => {
-          state.loading = false;
-          state.error = action.payload;
-        })
         // Get Review Reactions
         .addCase(getReviewReactions.pending, (state) => {
           state.loading = true;
           state.error = null;
         })
         .addCase(getReviewReactions.fulfilled, (state, action) => {
-          state.loading = false;
-          // Store reactions by reviewId
-          const reactionsMap = {};
-          action.payload.forEach(reaction => {
-            reactionsMap[reaction.reviewId] = {
-              likeCount: reaction.likeCount,
-              dislikeCount: reaction.dislikeCount,
-              userReaction: reaction.userReaction
-            };
-          });
-          
-          state.reactions = {
-            ...state.reactions,
-            ...reactionsMap
-          };
-        })
-        .addCase(getReviewReactions.rejected, (state, action) => {
-          state.loading = false;
-          state.error = action.payload;
+          state.reactions = action.payload;
         })
         // Delete Review Reply
         .addCase(deleteReviewReply.pending, (state) => {
@@ -383,8 +386,14 @@ const reviewSlice = createSlice({
         .addCase(updateReviewReply.rejected, (state, action) => {
           state.loading = false;
           state.error = action.payload;
+        })
+        // React to Review
+        .addCase(reactToReview.fulfilled, (state, action) => {
+          const { reviewId, reactionType } = action.payload;
+          // Không cần cập nhật state ở đây vì đã xử lý trong reducer updateReactionLocally
         });
-    },
+    }
   });
   
+export const { updateReactionLocally } = reviewSlice.actions;
   export default reviewSlice.reducer;

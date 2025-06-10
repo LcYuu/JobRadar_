@@ -895,9 +895,11 @@ export default function JobSearchPage() {
             <div className="relative w-full md:w-64">
               <Select
                 onValueChange={(value) => {
-                  const newFilters = { ...filters, cityId: value };
+                  const newCityId = value === "all" ? "" : value;
+                  const newFilters = { ...filters, cityId: newCityId };
                   handleFilterChange(newFilters);
                 }}
+                value={filters.cityId || "all"}
               >
                 <SelectTrigger className="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-4 text-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 hover:bg-gray-50">
                   <div className="flex items-center justify-between w-full">
@@ -909,15 +911,14 @@ export default function JobSearchPage() {
                 </SelectTrigger>
                 <SelectContent className="bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                   <SelectGroup>
-                    {cities.map((c) => (
-                      <SelectItem
-                        key={c.cityId}
-                        value={c.cityId}
-                        className="px-4 py-2 text-gray-700 hover:bg-purple-50 hover:text-purple-700 cursor-pointer transition-colors duration-200"
-                      >
-                        {c.cityName}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="all">Tất cả địa điểm</SelectItem>
+                    {cities
+                      .filter((c) => c.cityName?.toLowerCase() !== "none")
+                      .map((c) => (
+                        <SelectItem key={c.cityId} value={c.cityId}>
+                          {c.cityName}
+                        </SelectItem>
+                      ))}
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -1116,12 +1117,15 @@ export default function JobSearchPage() {
           {/* Nội dung công việc */}
           <div className="flex-grow space-y-4 relative z-[30]">
             <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-lg md:text-xl font-semibold">
-                  Tất cả công việc
-                </h2>
+              <h2 className="text-lg md:text-xl font-semibold">
+                Tất cả công việc
+              </h2>
+              <div className="flex items-center gap-2">
                 <span className="text-sm font-bold text-gray-500">
                   Tổng số: {displayTotalElements} kết quả
+                </span>
+                <span className="text-sm font-bold text-gray-500">
+                  | Trang {currentPage + 1}/{totalPages}
                 </span>
               </div>
             </div>

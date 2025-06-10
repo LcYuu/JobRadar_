@@ -555,9 +555,6 @@ public class ReviewController {
 		}
 	}
 	
-	/**
-	 * Cập nhật phản hồi
-	 */
 	@PutMapping("/update-reply/{replyId}")
 	public ResponseEntity<?> updateReply(@PathVariable UUID replyId, 
 	                                   @RequestBody ReviewReplyDTO replyDTO,

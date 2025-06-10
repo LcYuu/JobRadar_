@@ -44,6 +44,7 @@ const initialState = {
   totalElements: 0,
   currentPage: 0,
   expireJob: null,
+  similarJobs: [],
 };
 
 const jobPostSlice = createSlice({
@@ -168,7 +169,7 @@ const jobPostSlice = createSlice({
 
       .addCase(getSimilarJobs.fulfilled, (state,action) => {
         state.loading = false;
-        // state.simi = action.payload;
+        state.similarJobs = action.payload;
         state.error = null;
       })
 
