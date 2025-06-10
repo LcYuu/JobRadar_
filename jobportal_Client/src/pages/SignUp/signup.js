@@ -398,19 +398,19 @@ export default function SignUpForm() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-white shadow-lg rounded-lg">
-        <CardHeader className="border-b border-indigo-300">
+        <CardHeader className="border-b border-purple-300">
           <div className="flex justify-between items-center mb-4">
             <Link to="/">
               <img src={logo1} alt="JobRadar Logo" className="h-20 w-20" />
             </Link>
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-auto">
-              <TabsList className="bg-indigo-50 rounded-md">
+              <TabsList className="bg-purple-50 rounded-md">
                 <TabsTrigger
                   value="job-seeker"
                   className={`px-4 py-2 ${
                     activeTab === "job-seeker"
-                      ? "bg-indigo-600 text-white"
-                      : "bg-white text-indigo-600"
+                      ? "bg-purple-600 text-white"
+                      : "bg-white text-purple-600"
                   }`}
                 >
                   Người tìm việc
@@ -419,8 +419,8 @@ export default function SignUpForm() {
                   value="employer"
                   className={`px-4 py-2 ${
                     activeTab === "employer"
-                      ? "bg-indigo-600 text-white"
-                      : "bg-white text-indigo-600"
+                      ? "bg-purple-600 text-white"
+                      : "bg-white text-purple-600"
                   }`}
                 >
                   Nhà tuyển dụng
@@ -428,7 +428,7 @@ export default function SignUpForm() {
               </TabsList>
             </Tabs>
           </div>
-          <CardTitle className="text-2xl font-bold text-indigo-700 text-center">
+          <CardTitle className="text-2xl font-bold text-purple-700 text-center">
             Đăng ký ngay, việc liền tay
           </CardTitle>
         </CardHeader>
@@ -448,7 +448,7 @@ export default function SignUpForm() {
                         [field.name]: e.target.value,
                       }))
                     }
-                    className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                    className="border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                     disabled={field.disabled || isLoading}
                   />
                   {field.name === "taxCode" && activeTab === "employer" && (
@@ -465,7 +465,7 @@ export default function SignUpForm() {
                           addErrorMessage("Mã số thuế không hợp lệ hoặc không tồn tại");
                         }
                       }}
-                      className="absolute right-0 top-0 h-full px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-r"
+                      className="absolute right-0 top-0 h-full px-3 bg-purple-600 hover:bg-purple-700 text-white rounded-r"
                       disabled={isLoading}
                     >
                       Xác thực
@@ -495,7 +495,7 @@ export default function SignUpForm() {
             </AnimatePresence>
             <Button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
               disabled={isLoading}
             >
               {isLoading ? "Đang xử lý..." : "Đăng ký"}
@@ -505,18 +505,18 @@ export default function SignUpForm() {
             Đã có tài khoản?{" "}
             <Link
               to="/auth/sign-in"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
+              className="font-medium text-purple-600 hover:text-purple-500"
             >
               Đăng nhập
             </Link>
           </p>
           <p className="mt-4 text-center text-xs text-gray-500">
             Bằng cách nhấp vào 'Đăng ký', bạn xác nhận rằng bạn đã đọc và chấp nhận{" "}
-            <Link to="/terms-of-service" className="underline text-indigo-600">
+            <Link to="/terms-of-service" className="underline text-purple-600">
               Điều khoản dịch vụ
             </Link>{" "}
             và{" "}
-            <Link to="/privacy-policy" className="underline text-indigo-600">
+            <Link to="/privacy-policy" className="underline text-purple-600">
               Chính sách bảo mật
             </Link>
           </p>

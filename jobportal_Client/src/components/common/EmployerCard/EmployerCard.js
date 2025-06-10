@@ -11,13 +11,13 @@ const EmployerCard = ({ company }) => {
           <div className="flex items-center justify-center w-full h-full">
             <ImageCarousel logo={company.logo} className="object-contain max-h-32" />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-t from-purple-300 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
 
         {/* Card content */}
         <div className="p-6 flex-1 flex flex-col">
           <div className="flex items-start justify-between mb-3">
-            <h3 className="text-xl font-bold text-gray-800 group-hover:text-primary transition-colors duration-300">
+            <h3 className="flex-1 truncate text-xl font-bold text-gray-800 group-hover:text-primary transition-colors duration-300">
               {company.companyName}
             </h3>
             <span className="bg-primary/10 text-primary text-xs font-medium px-2.5 py-1 rounded-full">Đang tuyển</span>
@@ -31,8 +31,6 @@ const EmployerCard = ({ company }) => {
               <Users className="h-4 w-4 mr-1.5 text-gray-400" />
               <span>{company.applicationCount} người đã ứng tuyển</span>
             </div>
-
-            
 
             {/* View details button */}
             <div className="pt-3 border-t border-gray-100 mt-2">

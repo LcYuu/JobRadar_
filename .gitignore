@@ -5,3 +5,7 @@ AI.py
 /AI/.env
 
 
+search.csv
+job_post.csv
+
+app.log

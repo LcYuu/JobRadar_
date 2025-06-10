@@ -39,7 +39,7 @@ class ErrorBoundary extends React.Component {
             </details>
             <button 
               onClick={() => window.location.reload()} 
-              className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded"
+              className="mt-4 px-4 py-2 bg-purple-600 text-white rounded"
             >
               Reload Page
             </button>

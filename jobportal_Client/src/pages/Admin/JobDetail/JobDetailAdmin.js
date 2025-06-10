@@ -186,7 +186,7 @@ export default function JobDetailAdmin() {
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-base custom-1360:text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                      <FileText className="w-5 h-5 mr-2 text-indigo-500" />
+                      <FileText className="w-5 h-5 mr-2 text-purple-500" />
                       Thông tin cơ bản
                     </h3>
                     <div className="bg-gray-50 p-3 custom-1360:p-4 rounded-lg space-y-4">
@@ -247,7 +247,7 @@ export default function JobDetailAdmin() {
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-base custom-1360:text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                      <Briefcase className="w-5 h-5 mr-2 text-indigo-500" />
+                      <Briefcase className="w-5 h-5 mr-2 text-purple-500" />
                       Kỹ năng yêu cầu
                     </h3>
                     <div className="bg-gray-50 p-3 custom-1360:p-4 rounded-lg">
@@ -259,7 +259,7 @@ export default function JobDetailAdmin() {
                               variant="secondary"
                               className={`px-3 py-1 bg-white border border-gray-200 hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2 ${fontSize}`}
                             >
-                              <Code className="w-4 h-4 text-indigo-500" />
+                              <Code className="w-4 h-4 text-purple-500" />
                               <span className="font-medium text-gray-700">
                                 {skill.skillName}
                               </span>
@@ -276,7 +276,7 @@ export default function JobDetailAdmin() {
 
                   <div>
                     <h3 className="text-base custom-1360:text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                      <Building2 className="w-5 h-5 mr-2 text-indigo-500" />
+                      <Building2 className="w-5 h-5 mr-2 text-purple-500" />
                       Lĩnh vực
                     </h3>
                     <div className="flex flex-wrap gap-2">
@@ -285,7 +285,7 @@ export default function JobDetailAdmin() {
                           <Badge
                             key={ind.industryId}
                             variant="outline"
-                            className={`px-3 py-1 bg-white border-indigo-200 text-indigo-700 hover:bg-indigo-50 transition-colors duration-200 ${fontSize}`}
+                            className={`px-3 py-1 bg-white border-purple-200 text-purple-700 hover:bg-purple-50 transition-colors duration-200 ${fontSize}`}
                           >
                             {ind.industryName}
                           </Badge>
@@ -403,14 +403,14 @@ export default function JobDetailAdmin() {
                   alt="Company Logo"
                   className="w-full h-24 custom-1360:h-32 object-contain mb-4"
                 />
-                <h3 className={`text-base custom-1360:text-lg font-semibold text-indigo-600 hover:text-indigo-700 ${fontSize}`}>
+                <h3 className={`text-base custom-1360:text-lg font-semibold text-purple-600 hover:text-purple-700 ${fontSize}`}>
                   {job.company?.companyName || "N/A"}
                 </h3>
                 <p className={`text-gray-600 line-clamp-4 custom-800:line-clamp-3 ${fontSize}`}>
                   {job.company?.description || "Chưa có thông tin"}
                 </p>
 
-                <div className="flex items-center text-sm text-indigo-600 hover:text-indigo-700">
+                <div className="flex items-center text-sm text-purple-600 hover:text-purple-700">
                   <span className={fontSize}>Xem chi tiết công ty</span>
                   <ArrowRight className="w-4 h-4 ml-1" />
                 </div>

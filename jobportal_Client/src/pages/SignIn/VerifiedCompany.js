@@ -167,7 +167,7 @@ const VerifiedCompany = () => {
                       console.log("Tax code onBlur value:", e.target.value);
                     }
                   }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:bg-gray-100"
                   disabled={field.disabled}
                 />
                 {field.name === "taxCode" && (
@@ -180,7 +180,7 @@ const VerifiedCompany = () => {
                         addErrorMessage("Mã số thuế không hợp lệ hoặc không tồn tại");
                       }
                     }}
-                    className="ml-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="ml-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
                     Xác thực
                   </Button>
@@ -206,7 +206,7 @@ const VerifiedCompany = () => {
   
           <Button
             onClick={handleRegister}
-            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             Đăng ký
           </Button>

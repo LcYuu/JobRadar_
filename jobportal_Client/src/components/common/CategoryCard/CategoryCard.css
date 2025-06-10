@@ -14,7 +14,7 @@
   
   .category-card:hover {
     transform: translateY(-7px);
-    background-color: #bebcc2;
+    background-color: #e5c4f3;
   }
   .category-card.active {
     background-color: #4f46e5; /* Màu của card đang được chọn */

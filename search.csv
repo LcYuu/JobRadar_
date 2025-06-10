@@ -382,8 +382,6 @@ ID,SeekerID,Search Query,Search Date
 ,,,
 ,,,
 ,,,
-<<<<<<< HEAD
-=======
 ,,,
 ,,,
 ,,,
@@ -750,7 +748,6 @@ ID,SeekerID,Search Query,Search Date
 ,,,
 ,,,
 ,,,
->>>>>>> GT_1
 73b1454b-96d4-45e6-977c-5f78c55c3fdf,dd3f7284-9a66-4dc9-9af7-e15c1a87e28d,IndustryNames: Marketing/Truyền thông,2025-04-30T09:49:01.563695600
 0368112e-0c8b-4cb0-8aae-d3a46ee2ec3a,dd3f7284-9a66-4dc9-9af7-e15c1a87e28d,IndustryNames: Marketing/Truyền thông,2025-04-30T09:49:01.637497500
 a4cfd573-1f4a-4f8b-8cf5-ef2aaaece35b,dd3f7284-9a66-4dc9-9af7-e15c1a87e28d,IndustryNames: Marketing/Truyền thông,2025-04-30T09:49:13.215175700
@@ -1755,7 +1752,7 @@ ca73f963-8c5d-44b4-93d1-acf54b58b879,dd3f7284-9a66-4dc9-9af7-e15c1a87e28d,Indust
 bddd26cc-5159-4cf1-8fbc-c71a6e3d25ca,dd3f7284-9a66-4dc9-9af7-e15c1a87e28d,IndustryNames: Marketing/Truyền thông,2025-05-26T19:14:58.091050900
 49e7db3b-767d-4676-ba7c-19ffd3d96bfc,dd3f7284-9a66-4dc9-9af7-e15c1a87e28d,IndustryNames: Marketing/Truyền thông,2025-05-26T19:14:58.091050900
 407420d7-8821-451d-a009-1d744fe27aa9,dd3f7284-9a66-4dc9-9af7-e15c1a87e28d,IndustryNames: Marketing/Truyền thông,2025-05-26T19:14:58.133454200
-<<<<<<< HEAD
+
 0a64154d-3bf0-4608-82ca-9e83a335a1ea,dd3f7284-9a66-4dc9-9af7-e15c1a87e28d,Title: it phầm mềm,2025-05-28T15:18:23.695945500
 884218b4-52ec-485f-9cfb-c714ae49e601,dd3f7284-9a66-4dc9-9af7-e15c1a87e28d,TypesOfWork: Toàn thời gian,2025-05-28T15:18:42.078657100
 d3057cbd-9ceb-4568-9052-08e8a4dab3d4,dd3f7284-9a66-4dc9-9af7-e15c1a87e28d,TypesOfWork: Toàn thời gian,2025-05-28T15:18:42.078657100
@@ -1769,8 +1766,6 @@ c7d2bf2d-b8c8-471c-b545-ef609bbf22da,dd3f7284-9a66-4dc9-9af7-e15c1a87e28d,"Indus
 caec6e3a-8c74-4d8c-8171-86d9161fbdfe,dd3f7284-9a66-4dc9-9af7-e15c1a87e28d,"IndustryNames: Logistics, Tài xế",2025-05-28T15:18:47.736290800
 46d1ef5a-656e-4063-aa9a-e0e2aa93fc2a,dd3f7284-9a66-4dc9-9af7-e15c1a87e28d,"IndustryNames: Logistics, Tài xế",2025-05-28T15:18:47.777578600
 6db130a5-637f-4d68-8285-3349cede2ee9,dd3f7284-9a66-4dc9-9af7-e15c1a87e28d,"IndustryNames: Logistics, Tài xế",2025-05-28T15:18:47.780594400
-=======
->>>>>>> 86ac2b3d3a8906e04143f265c5fb57234d01b863
 4d78e1c5-39bf-4415-9a8d-ab1054415a25,b471c4c1-1ba1-4c13-9019-d0a1cdfed04a,TypesOfWork: Thực tập sinh,2025-06-06T15:17:19.495721600
 b8c7021d-73e9-4122-8885-20260ab8ebce,b471c4c1-1ba1-4c13-9019-d0a1cdfed04a,TypesOfWork: Thực tập sinh,2025-06-06T15:17:19.495721600
 a3fffc79-f484-4560-b39a-7abc0d5641f1,b471c4c1-1ba1-4c13-9019-d0a1cdfed04a,TypesOfWork: Thực tập sinh,2025-06-06T15:17:19.581761900
@@ -2080,3 +2075,7 @@ e89af097-f56d-403f-96d0-a336c18418e4,b471c4c1-1ba1-4c13-9019-d0a1cdfed04a,MaxSal
 3a82169c-f729-41dc-becb-1a3ede8569e5,b471c4c1-1ba1-4c13-9019-d0a1cdfed04a,MaxSalary: 45000000,2025-06-09T13:05:17.292150900
 972f1d42-245b-4cea-b5b8-a548c7b59ce3,b471c4c1-1ba1-4c13-9019-d0a1cdfed04a,MaxSalary: 45000000,2025-06-09T13:05:19.300597800
 a0988c9f-8f96-4c17-85d7-fed5259e1fa4,b471c4c1-1ba1-4c13-9019-d0a1cdfed04a,MaxSalary: 45000000,2025-06-09T13:05:19.301594300
+1fbe7701-9232-42b3-9cb3-ce5bd8088629,dd3f7284-9a66-4dc9-9af7-e15c1a87e28d,IndustryNames: Hệ thống nhúng và IOT,2025-06-08T14:58:46.640216700
+7b21c5c2-069f-4678-a287-57a756fc5ab0,dd3f7284-9a66-4dc9-9af7-e15c1a87e28d,IndustryNames: Hệ thống nhúng và IOT,2025-06-08T14:58:46.640216700
+567805fb-684a-4483-a811-592e7b033152,dd3f7284-9a66-4dc9-9af7-e15c1a87e28d,IndustryNames: Hệ thống nhúng và IOT,2025-06-08T14:58:46.695216700
+
