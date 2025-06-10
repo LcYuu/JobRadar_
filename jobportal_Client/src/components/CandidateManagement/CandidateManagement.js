@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
@@ -47,6 +47,8 @@ const CandidateManagement = () => {
   const [filteredCandidates, setFilteredCandidates] = useState([]);
   const [sortBy, setSortBy] = useState("applyDate");
   const [sortDirection, setSortDirection] = useState("desc");
+  const [showCustomDropdown, setShowCustomDropdown] = useState(null);
+  const dropdownRef = useRef(null);
 
   const {
     currentAnalysis,
@@ -190,6 +192,20 @@ const CandidateManagement = () => {
   );
 
   useWebSocket(["/topic/apply-updates"], handleMessage);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowCustomDropdown(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownRef]);
 
   return (
     <div className="p-4 sm:p-6">
@@ -457,20 +473,25 @@ const CandidateManagement = () => {
                               </Button>
                             )}
                           </div>
-                          <div className="hidden xl-custom:block">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button className="h-8 w-8 p-0 dropdown-trigger border-none">
-                                  <MoreVertical className="h-4 w-4 bg-black"/>
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent
-                                align="end"
-                                className="bg-white border border-gray-300 shadow-lg rounded-md p-2 dropdown-menu-content"
+                          <div className="hidden xl-custom:block relative">
+                            <div
+                              className="h-8 w-8 p-0 flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-md cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowCustomDropdown(candidate?.postId + '-' + candidate?.userId);
+                              }}
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </div>
+                            {showCustomDropdown === candidate?.postId + '-' + candidate?.userId && (
+                              <div
+                                ref={dropdownRef}
+                                className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 shadow-lg rounded-md p-2 z-20"
                               >
-                                <DropdownMenuItem
-                                  className="cursor-pointer dropdown-item-view hover:bg-gray-100"
-                                  onClick={() => {
+                                <div
+                                  className="hover:bg-gray-100 cursor-pointer px-3 py-2 rounded-md"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     dispatch(
                                       getNotificationViewJob({
                                         userId: candidate?.userId,
@@ -480,25 +501,25 @@ const CandidateManagement = () => {
                                     navigate(
                                       `/employer/account-management/candidate-management/applicants/${candidate?.userId}/${candidate?.postId}`
                                     );
+                                    setShowCustomDropdown(null);
                                   }}
                                 >
                                   Xem chi tiết
-                                </DropdownMenuItem>
+                                </div>
                                 {!candidate?.isSave && (
-                                  <DropdownMenuItem
-                                    className="cursor-pointer dropdown-item-stop hover:bg-gray-100"
-                                    onClick={() =>
-                                      handleUpdate(
-                                        candidate?.postId,
-                                        candidate?.userId
-                                      )
-                                    }
+                                  <div
+                                    className="hover:bg-gray-100 cursor-pointer px-3 py-2 rounded-md"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleUpdate(candidate?.postId, candidate?.userId);
+                                      setShowCustomDropdown(null);
+                                    }}
                                   >
                                     Chấp thuận đơn
-                                  </DropdownMenuItem>
+                                  </div>
                                 )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </td>
