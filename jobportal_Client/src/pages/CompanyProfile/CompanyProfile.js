@@ -51,6 +51,7 @@ import {
 } from "../../redux/SocialLink/socialLink.thunk";
 import { resetJobPost } from "../../redux/JobPost/jobPostSlice";
 import { API_URL } from '../../configs/constants';
+import { updateReactionLocally } from "../../redux/Review/reviewSlice";
 
 const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
   return (
@@ -296,14 +297,14 @@ const ReplyItem = ({
               <div className="flex gap-2">
                 {currentUser && currentUser.userId === reply.userId && (
                   <>
-                    <button
+                    {/* <button
                       onClick={() => onEdit(reply)}
                       className="text-blue-500 hover:text-blue-700 flex items-center gap-1 text-xs"
                       title="Chỉnh sửa phản hồi"
                     >
                       <Edit fontSize="small" />
                       <span>Sửa</span>
-                    </button>
+                    </button> */}
                     <button
                       onClick={() => onDelete(reply.replyId)}
                       className="text-red-500 hover:text-red-700 flex items-center gap-1 text-xs"
@@ -1331,7 +1332,14 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         newReactionType = type;
       }
 
-      // Dispatch the reaction action
+      // Cập nhật UI ngay lập tức
+      dispatch(updateReactionLocally({
+        reviewId,
+        reactionType: newReactionType,
+        userId: user.userId
+      }));
+
+      // Gọi API để cập nhật database
       await dispatch(
         reactToReview({
           reviewId,
@@ -1339,12 +1347,13 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         })
       ).unwrap();
 
-      // Refresh all reactions
-      const reviewIds = validReviews.map((review) => review.reviewId);
-      dispatch(getReviewReactions(reviewIds));
     } catch (error) {
       console.error("Error updating reaction:", error);
       toast.error("Có lỗi xảy ra khi cập nhật phản ứng");
+      
+      // Nếu có lỗi, refresh lại reactions từ server
+      const reviewIds = validReviews.map((review) => review.reviewId);
+      dispatch(getReviewReactions(reviewIds));
     }
   };
 
@@ -1660,14 +1669,20 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
 
     setEditingReplyId(reply.replyId);
     setEditReplyData({
+      id: reply.replyId,
       content: content,
-      anonymous: reply.anonymous,
+      isAnonymous: reply.anonymous,
+      parentReplyId: reply.parentReplyId
     });
   };
 
-  // Update handleSaveReplyEdit function to dismiss loading toast in error cases
   const handleSaveReplyEdit = async () => {
     try {
+      if (!editReplyData || !editReplyData.id) {
+        toast.error('Không tìm thấy thông tin reply cần chỉnh sửa');
+        return;
+      }
+
       // Kiểm tra nội dung với AI
       const response = await fetch('http://localhost:5000/check-comment', {
         method: 'POST',
@@ -1680,20 +1695,9 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
       const result = await response.json();
 
       if (result.is_toxic) {
-        // Hiển thị thông báo lỗi UI
-        toast.error('Nội dung bình luận không phù hợp. Vui lòng kiểm tra lại.', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-
-        // Highlight nội dung có vấn đề
+        toast.error('Nội dung bình luận không phù hợp. Vui lòng kiểm tra lại.');
         const highlightedContent = highlightProblematicContent(editReplyData.content);
         showModerationError(result.message, highlightedContent);
-        
         return;
       }
 
@@ -1713,7 +1717,8 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
       });
 
       if (!response2.ok) {
-        throw new Error('Failed to update reply');
+        const errorData = await response2.json();
+        throw new Error(errorData.message || 'Failed to update reply');
       }
 
       const updatedReply = await response2.json();
@@ -1724,7 +1729,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
           if (review.replies && review.replies.length > 0) {
             const findReplyRecursive = (repliesArray, replyId) => {
               for (let reply of repliesArray) {
-                if (reply.id === replyId) {
+                if (reply.replyId === replyId) {
                   return reply;
                 }
                 if (reply.replies && reply.replies.length > 0) {
@@ -1737,7 +1742,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
 
             const updateReplyRecursive = (repliesArray, replyId, updatedData) => {
               return repliesArray.map(reply => {
-                if (reply.id === replyId) {
+                if (reply.replyId === replyId) {
                   return {
                     ...reply,
                     ...updatedData,
@@ -1762,34 +1767,59 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
               };
             }
           }
-
           return review;
         });
+      });
+
+      // Cập nhật Redux store
+      dispatch({
+        type: "review/updateReviewReply/fulfilled",
+        payload: updatedReply
+      });
+
+      // Cập nhật lại tất cả các reply trong Redux store
+      const updatedReviews = reviews.map(review => {
+        if (review.replies && review.replies.length > 0) {
+          const updateReplyRecursive = (repliesArray, replyId, updatedData) => {
+            return repliesArray.map(reply => {
+              if (reply.replyId === replyId) {
+                return {
+                  ...reply,
+                  ...updatedData,
+                  replies: reply.replies || []
+                };
+              }
+              if (reply.replies && reply.replies.length > 0) {
+                return {
+                  ...reply,
+                  replies: updateReplyRecursive(reply.replies, replyId, updatedData)
+                };
+              }
+              return reply;
+            });
+          };
+
+          return {
+            ...review,
+            replies: updateReplyRecursive(review.replies, editReplyData.id, updatedReply)
+          };
+        }
+        return review;
+      });
+
+      // Cập nhật toàn bộ reviews trong Redux store
+      dispatch({
+        type: "review/getReviewByCompany/fulfilled",
+        payload: updatedReviews
       });
 
       setEditingReplyId(null);
       setEditReplyData(null);
 
-      // Hiển thị thông báo thành công
-      toast.success('Đã cập nhật bình luận thành công!', {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+      toast.success('Đã cập nhật bình luận thành công!');
 
     } catch (error) {
-      // Hiển thị thông báo lỗi
-      toast.error('Có lỗi xảy ra khi cập nhật bình luận. Vui lòng thử lại sau.', {
-        position: "top-right", 
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+      toast.error(error.message || 'Có lỗi xảy ra khi cập nhật bình luận. Vui lòng thử lại sau.');
     }
   };
 
@@ -1923,12 +1953,9 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                   <div>
                     <p className="text-xs text-gray-500">Lĩnh vực</p>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {companyProfile?.industry?.slice(0, 2).map((ind, index) => (
+                      {companyProfile?.industry?.map((ind, index) => (
                         <IndustryBadge key={index} name={ind.industryName} />
                       ))}
-                      {companyProfile?.industry?.length > 2 && (
-                        <span className="text-xs text-gray-500">+{companyProfile.industry.length - 2}</span>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -1948,7 +1975,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
 
         {/* Company Profile */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 xs:gap-6 sm:gap-8 mb-6 xs:mb-8 sm:mb-12">
-          <div className="md:col-span-2">
+          <div className="md:col-span-3">
             <h2 className="text-lg xs:text-xl sm:text-2xl text-purple-600 font-semibold mb-3 xs:mb-4">
               Giới thiệu
             </h2>
@@ -1964,13 +1991,13 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
             Liên hệ
           </h2>
           <div className="space-y-2">
-            <div className="flex items-center space-x-2 px-2 xs:px-3 sm:px-4 py-2 bg-gray-100 rounded-md">
+            <div className="flex items-center space-x-2 px-2 xs:px-3 sm:px-4 py-2  rounded-md">
               <Mail className="h-4 w-4 text-muted-foreground" />
               <span className="text-xs xs:text-sm truncate">
                 {companyProfile?.email || "Chưa có email"}
               </span>
             </div>
-            <div className="flex items-center space-x-2 px-2 xs:px-3 sm:px-4 py-2 bg-gray-100 rounded-md">
+            <div className="flex items-center space-x-2 px-2 xs:px-3 sm:px-4 py-2  rounded-md">
               <Phone className="h-4 w-4 text-muted-foreground" />
               <span className="text-xs xs:text-sm">
                 {companyProfile?.contact || "Chưa có số liên hệ"}
@@ -1988,7 +2015,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
           Array.isArray(socialLinks) &&
           socialLinks.length > 0 ? (
             <div className="space-y-2">
-              {socialLinks.slice(1).map((link, index) => (
+              {socialLinks.map((link, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <div
                     className="platform-icon-container"
@@ -2408,27 +2435,11 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         </div>
 
         {/* Review Form */}
-        {checkIfSaved === true && (
+        {!hasReviewed && checkIfSaved === true && (
           <div className="p-4 xs:p-5 sm:p-6 bg-white rounded-lg shadow-lg border border-gray-300 mb-6 xs:mb-8 sm:mb-12">
             <h2 className="text-lg xs:text-xl sm:text-2xl font-semibold mb-3 xs:mb-4 text-gray-800">
-              {hasReviewed ? "Cập nhật đánh giá của bạn" : "Đánh giá của bạn"}
+              Đánh giá của bạn
             </h2>
-            {hasReviewed && (
-              <div className="mb-4 p-3 xs:p-4 bg-blue-50 border border-purple-200 rounded-md">
-                <p className="text-xs xs:text-sm text-purple-600 mb-2">
-                  Đánh giá hiện tại của bạn:
-                </p>
-                <div className="flex items-center mb-2">
-                  <RatingStars value={existingReview.star} readOnly={true} />
-                </div>
-                <p className="font-bold text-xs xs:text-sm text-purple-600">
-                  {existingReview.message}
-                </p>
-                <p className="text-xs xs:text-sm text-gray-500 mt-2">
-                  {existingReview.isAnonymous ? "(Đánh giá ẩn danh)" : ""}
-                </p>
-              </div>
-            )}
             <div className="space-y-4">
               <div className="mb-4">
                 <RatingStars
@@ -2469,7 +2480,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                 className="w-full px-4 py-2 xs:px-6 xs:py-3 text-xs xs:text-sm bg-purple-500 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 onClick={handleSubmitReview}
               >
-                {hasReviewed ? "Cập nhật đánh giá" : "Gửi đánh giá"}
+                Gửi đánh giá
               </button>
             </div>
           </div>
