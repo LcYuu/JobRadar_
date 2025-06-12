@@ -28,6 +28,7 @@ import pickle
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from cryptography.fernet import Fernet
 import base64
+from typing import Tuple, Dict, Any
 # Thiết lập mã hóa
 os.environ['PYTHONIOENCODING'] = 'utf-8'
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
@@ -333,126 +334,425 @@ def preprocess_text(text, bypass_stop_words=False, normalize_for_keywords=False)
             boosted_words.append(word)
     return ' '.join(boosted_words)
 
-class ImprovedCommentFilter:
+class CompanyReviewFilter:
+    """Filter dành riêng cho bình luận đánh giá công ty - chỉ lọc toxic content, không lọc ý kiến phê bình"""
+    
     def __init__(self):
         self.patterns = self._init_patterns()
         self.model = None
+        self.cache = {}
+        self.cache_ttl = 300
+        
         try:
-            self.model = setup_gemini(os.getenv('GEMINI_API_KEY'))
+            api_key = os.getenv('GEMINI_API_KEY')
+            if api_key:
+                self.model = self._setup_gemini(api_key)
+                logger.info("Gemini model initialized successfully")
+            else:
+                logger.warning("GEMINI_API_KEY not found, using pattern-only filtering")
         except Exception as e:
             logger.error(f"Lỗi khi khởi tạo Gemini model: {str(e)}")
 
     def _init_patterns(self):
+        """Khởi tạo patterns - chỉ tập trung vào toxic content, không lọc ý kiến phê bình"""
         return {
-            'vietnamese': [
-                r'\b(địt|đụ|đéo|cặc|lồn|đĩ|điếm|chó|ngu|ngu ngốc|ngu si|đần|đần độn|khốn nạn|đồ khốn|đồ ngu|đồ chó|đồ điếm|đồ đĩ|đồ khốn nạn|đồ vô dụng|đồ vô tích sự|đồ bỏ đi|đồ rác rưởi|đồ hèn|đồ hèn nhát|đồ hèn mạt|đồ hèn hạ|đồ hèn kém|đồ hèn mọn|đồ hèn nhược|đồ hèn yếu)\b',
-            ],
-            'english': [
-                r'\b(fuck|shit|asshole|bitch|cunt|dick|pussy|bastard|motherfucker|retard|idiot|moron|stupid|dumb|fool|loser|jerk|scum|trash|garbage|worthless|useless)\b',
-            ]
+            # WHITELIST - Nội dung an toàn (bao gồm cả ý kiến phê bình hợp lệ)
+            'safe_expressions': re.compile(
+                r'\b(ha(ha)+|he(he)+|hi(hi)+|hu(hu)+|kk+|lol|lmao|rofl|xd|omg|wow|nice|good|great|awesome|cool|ok|okay|' +
+                r'thanks?|thank\s+you|cảm\s*ơn|cám\s*ơn|chúc\s*mừng|tuyệt\s*vời|tốt\s*quá|hay\s*quá|đẹp\s*quá)\b',
+                re.IGNORECASE
+            ),
+            'safe_emoticons': re.compile(
+                r'[:\-=][\)d\]>]|[:\-=][\(c\[<]|<3|\^_\^|\^\^|:p|:P|xD|XD|;\)|;D',
+                re.IGNORECASE
+            ),
+            
+            # Ý kiến phê bình hợp lệ về công ty (KHÔNG coi là toxic)
+            'legitimate_criticism': re.compile(
+                r'\b(không\s*(tốt|tử\s*tế|chuyên\s*nghiệp|hợp\s*lý|công\s*bằng|minh\s*bạch)|' +
+                r'tệ|kém|yếu|thiếu|chậm|không\s*đầy\s*đủ|không\s*rõ\s*ràng|phức\s*tạp|khó\s*khăn|' +
+                r'áp\s*lực|stress|mệt\s*mỏi|quá\s*tải|overtime|tăng\s*ca|không\s*cân\s*bằng|' +
+                r'lương\s*thấp|lương\s*ít|thu\s*nhập\s*thấp|không\s*tăng\s*lương|chậm\s*lương|' +
+                r'môi\s*trường\s*(không\s*tốt|tệ|xấu)|văn\s*hóa\s*(không\s*tốt|tệ)|' +
+                r'quản\s*lý\s*(không\s*tốt|kém|yếu|tệ)|sếp\s*(không\s*tốt|khó\s*tính|khắt\s*khe)|' +
+                r'thiếu\s*(cơ\s*hội|phúc\s*lợi|đào\s*tạo|hỗ\s*trợ|trang\s*thiết\s*bị)|' +
+                r'bad|terrible|awful|poor|worst|disappointing|unsatisfied|dissatisfied|' +
+                r'unprofessional|unfair|unreasonable|stressful|overwork|underpaid|toxic\s*workplace|' +
+                r'bad\s*management|terrible\s*boss|poor\s*leadership|lack\s*of|insufficient)\b',
+                re.IGNORECASE | re.MULTILINE
+            ),
+            
+            # BLACKLIST - Chỉ những nội dung thực sự toxic
+            'vietnamese_vulgar_strict': re.compile(
+                r'\b(địt|đụ|đéo|cặc|lồn|đĩ|điếm|buồi|đầu\s*buồi|đầu\s*cặc|' +
+                # Các biến thể và viết tắt
+                r'd[ịi1!]t|đ[ụu]|d[eo3]o|đ[éè3]o|c[ặa@]c|l[ồo0]n|đ[ĩi]|bu[ồo0]i|' +
+                # Viết tắt phổ biến
+                r'vcl|clgt|cmm|cmn|cmnr|đmm|đcm|vcđ|vlđ|vcd|đml|dml|' +
+                # Biến thể che giấu
+                r'd1t|d3o|c4c|l0n|bu01|' +
+                r'd\s*ị\s*t|đ\s*ụ|c\s*ặ\s*c|l\s*ồ\s*n|' +
+                r'd\.ị\.t|đ\.ụ|c\.ặ\.c|l\.ồ\.n|' +
+                r'd-ị-t|đ-ụ|c-ặ-c|l-ồ-n|d_ị_t|đ_ụ|c_ặ_c|l_ồ_n)\b',
+                re.IGNORECASE
+            ),
+            
+            'vietnamese_personal_attack': re.compile(
+                r'\b(đồ\s*(chó|heo|lợn|khỉ|ngu|ngốc|đần|điên)|' +
+                # Xúc phạm cá nhân nghiêm trọng
+                r'mẹ\s*(mày|tao)|cha\s*(mày|tao)|thằng\s*(chó|ngu|điên)|con\s*(chó|lợn|điên)|' +
+                # Đe dọa
+                r'giết|chết\s*đi|tao\s*giết\s*mày|mày\s*chết|đánh\s*chết|' +
+                # Phân biệt đối xử nghiêm trọng  
+                r'đồ\s*(đồng\s*tính|gay|les)|thằng\s*(gay|đồng\s*tính))\b',
+                re.IGNORECASE
+            ),
+            
+            'english_vulgar_strict': re.compile(
+                r'\b(fuck|shit|asshole|bitch|cunt|dick|pussy|bastard|motherfucker|' +
+                # Biến thể che giấu
+                r'f[u*@#]ck|f\*ck|fu[c*]k|f@ck|fck|fuk|phuck|' +
+                r'sh[i*]t|sh@t|sht|shyt|' +
+                r'a[s*]shole|a\*\*hole|@sshole|' +
+                r'b[i*]tch|b@tch|btch|biatch|' +
+                r'c[u*]nt|c@nt|d[i*]ck|d@ck|dik|p[u*]ssy|pu\*\*y|' +
+                # Viết tắt thô tục
+                r'wtf|stfu|gtfo|' +
+                # Leetspeak
+                r'fuk|5hit|a55|b1tch|d1ck|pu55y)\b',
+                re.IGNORECASE
+            ),
+            
+            'english_personal_attack': re.compile(
+                r'\b(kill\s*yourself|kys|go\s*die|die\s*bitch|fucking\s*(idiot|moron|retard)|' +
+                # Đe dọa bạo lực
+                r'i\s*will\s*kill|gonna\s*kill|kill\s*you|beat\s*you\s*up|' +
+                # Phân biệt đối xử nghiêm trọng
+                r'fucking\s*(gay|homo|lesbian)|gay\s*ass|homo\s*bitch)\b',
+                re.IGNORECASE
+            ),
+            
+            # Pattern phát hiện spam/troll
+            'spam_troll_pattern': re.compile(
+                r'(.)\1{10,}|' +  # Lặp lại ký tự quá nhiều (aaaaaaaaaaa...)
+                r'([a-zA-Z]{1,3}\s*){20,}|' +  # Lặp từ ngắn quá nhiều
+                r'[!@#$%^&*()]{5,}',  # Quá nhiều ký tự đặc biệt liên tiếp
+                re.IGNORECASE
+            )
         }
 
-    def _check_patterns(self, text):
-        for lang, patterns in self.patterns.items():
-            for pattern in patterns:
-                if re.search(pattern, text, re.IGNORECASE):
-                    return True
-        return False
-
-    def _get_model_score(self, text):
-        try:
-            if not self.model:
-                return 0.0
-                
-            prompt = f"""Analyze the following text for toxicity and inappropriate content. 
-            Return a score between 0 and 1, where:
-            - 0 means completely safe and appropriate
-            - 1 means highly toxic or inappropriate
-            
-            Text: {text}
-            
-            Score:"""
-            
-            response = self.model.generate_content(prompt)
-            score = float(response.text.strip())
-            return min(max(score, 0.0), 1.0)
-        except Exception as e:
-            logger.error(f"Lỗi khi lấy điểm từ model: {str(e)}")
-            return 0.0
-
-    def check_with_gemini(self, text, is_vietnamese=False):
-        try:
-            if not self.model:
-                return False, 0.0
-
-            prompt = f"""Analyze the following text for toxicity and inappropriate content.
-            The text is in {'Vietnamese' if is_vietnamese else 'English'}.
-            
-            Consider:
-            1. Profanity and offensive language
-            2. Hate speech or discriminatory content
-            3. Threats or violent content
-            4. Sexual content
-            5. Personal attacks or harassment
-            
-            Text: {text}
-            
-            Return a JSON response with:
-            - is_toxic: boolean
-            - score: float between 0 and 1
-            - reason: brief explanation
-            
-            Response:"""
-
-            response = self.model.generate_content(prompt)
-            result = json.loads(response.text)
-            
-            return result.get('is_toxic', False), result.get('score', 0.0)
-            
-        except Exception as e:
-            logger.error(f"Lỗi khi kiểm tra với Gemini: {str(e)}")
-            return False, 0.0
-
-    def is_vietnamese(self, text):
-        # Kiểm tra xem text có phải tiếng Việt không
-        return bool(re.search(r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]', text))
-
-    def is_toxic(self, text, threshold=0.5):
-        # Kiểm tra patterns trước
-        if self._check_patterns(text):
-            return True, 1.0
-            
-        # Nếu không match patterns, kiểm tra với model
-        is_vietnamese = self.is_vietnamese(text)
-        is_toxic, score = self.check_with_gemini(text, is_vietnamese)
+    def _is_legitimate_criticism(self, text: str) -> Tuple[bool, str]:
+        """Kiểm tra xem có phải là ý kiến phê bình hợp lệ về công ty không"""
+        text_lower = text.lower().strip()
         
-        return is_toxic, score
+        # Từ khóa liên quan đến đánh giá công ty (không toxic)
+        company_keywords = [
+            'công ty', 'company', 'cty', 'doanh nghiệp', 'firm',
+            'sếp', 'boss', 'manager', 'quản lý', 'lãnh đạo', 'leadership',
+            'nhân viên', 'employee', 'staff', 'colleague', 'đồng nghiệp',
+            'lương', 'salary', 'tiền lương', 'thu nhập', 'income', 'wage',
+            'môi trường', 'environment', 'văn hóa', 'culture', 'workplace',
+            'làm việc', 'work', 'job', 'career', 'nghề nghiệp',
+            'phúc lợi', 'benefit', 'bảo hiểm', 'insurance', 'chế độ',
+            'tăng ca', 'overtime', 'giờ làm', 'working hours',
+            'đào tạo', 'training', 'phát triển', 'development', 'học hỏi'
+        ]
+        
+        # Kiểm tra có từ khóa công ty không
+        has_company_context = any(keyword in text_lower for keyword in company_keywords)
+        
+        if has_company_context:
+            # Kiểm tra pattern phê bình hợp lệ
+            if 'legitimate_criticism' in self.patterns:
+                pattern = self.patterns['legitimate_criticism']
+                if pattern.search(text_lower):
+                    return True, "legitimate_company_criticism"
+        
+        # Các cụm từ phê bình phổ biến về công ty
+        criticism_phrases = [
+            'không khuyến khích', 'không recommend', 'không đáng',
+            'nên cân nhắc', 'should consider', 'think twice',
+            'không phù hợp', 'not suitable', 'not fit',
+            'trải nghiệm không tốt', 'bad experience', 'terrible experience',
+            'không hài lòng', 'not satisfied', 'dissatisfied',
+            'thất vọng', 'disappointed', 'let down'
+        ]
+        
+        for phrase in criticism_phrases:
+            if phrase in text_lower:
+                return True, f"criticism_phrase:{phrase}"
+        
+        return False, ""
 
-    def filter_comment(self, text, threshold=0.5):
+    def _is_toxic_content(self, text: str) -> Tuple[bool, float, str]:
+        """Kiểm tra nội dung toxic thực sự (chửi thề, xúc phạm, đe dọa)"""
+        text_lower = text.lower().strip()
+        
+        # Danh sách patterns toxic nghiêm trọng
+        toxic_patterns = [
+            'vietnamese_vulgar_strict',
+            'vietnamese_personal_attack',
+            'english_vulgar_strict', 
+            'english_personal_attack',
+            'spam_troll_pattern'
+        ]
+        
+        for pattern_name in toxic_patterns:
+            if pattern_name in self.patterns:
+                pattern = self.patterns[pattern_name]
+                if pattern.search(text_lower):
+                    # Mức độ nghiêm trọng khác nhau
+                    if 'vulgar' in pattern_name or 'attack' in pattern_name:
+                        severity = 0.95
+                    elif 'spam' in pattern_name:
+                        severity = 0.8
+                    else:
+                        severity = 0.85
+                    
+                    return True, severity, pattern_name
+        
+        # Kiểm tra từ bị che giấu
+        is_obscured, obscured_score, obscured_type = self._check_obscured_vulgar(text)
+        if is_obscured:
+            return True, obscured_score, obscured_type
+        
+        return False, 0.0, ""
+
+    def filter_comment(self, text: str, threshold: float = 0.7) -> Tuple[bool, float]:
         """
-        Kiểm tra và lọc comment không phù hợp
-        Returns: (is_toxic: bool, score: float)
+        Lọc bình luận đánh giá công ty:
+        - CHỈ lọc nội dung toxic (chửi thề, xúc phạm, đe dọa)
+        - KHÔNG lọc ý kiến phê bình hợp lệ về công ty
         """
-        try:
-            # Kiểm tra patterns trước
-            if self._check_patterns(text):
-                return True, 1.0
-                
-            # Nếu không match patterns, kiểm tra với model
-            is_vietnamese = self.is_vietnamese(text)
-            is_toxic, score = self.check_with_gemini(text, is_vietnamese)
-            
-            if is_toxic and score >= threshold:
-                return True, score
-                
-            return False, score
-            
-        except Exception as e:
-            logger.error(f"Lỗi khi lọc comment: {str(e)}")
+        if not text or not text.strip():
             return False, 0.0
 
-# Khởi tạo CommentFilter
-comment_filter = ImprovedCommentFilter()
+        text = text.strip()
+        cache_key = self._get_cache_key(text)
+        
+        # Check cache
+        cached_result = self._get_cached_result(cache_key)
+        if cached_result:
+            return cached_result['is_toxic'], cached_result['score']
+
+        is_toxic_final = False
+        score_final = 0.0
+        method_final = 'default'
+        pattern_type_final = ''
+        details_final = {}
+
+        try:
+            # Bước 1: Kiểm tra nội dung an toàn
+            safe_patterns = ['safe_expressions', 'safe_emoticons']
+            for pattern_name in safe_patterns:
+                if pattern_name in self.patterns:
+                    pattern = self.patterns[pattern_name]
+                    if pattern.search(text.lower()):
+                        is_toxic_final = False
+                        score_final = 0.0
+                        method_final = 'whitelist'
+                        pattern_type_final = pattern_name
+                        break
+            
+            if not is_toxic_final:  # Chỉ tiếp tục nếu chưa được đánh dấu safe
+                # Bước 2: Kiểm tra ý kiến phê bình hợp lệ
+                is_criticism, criticism_type = self._is_legitimate_criticism(text)
+                if is_criticism:
+                    is_toxic_final = False
+                    score_final = 0.0
+                    method_final = 'legitimate_criticism'
+                    pattern_type_final = criticism_type
+                else:
+                    # Bước 3: Kiểm tra nội dung toxic thực sự
+                    is_toxic_pattern, toxic_score, toxic_type = self._is_toxic_content(text)
+                    
+                    if is_toxic_pattern:
+                        is_toxic_final = True
+                        score_final = toxic_score
+                        method_final = 'toxic_pattern'
+                        pattern_type_final = toxic_type
+                    else:
+                        # Bước 4: AI analysis (với prompt đặc biệt cho company review)
+                        if self.model and len(text) > 3:
+                            is_vietnamese = self._is_vietnamese(text)
+                            is_toxic_ai, ai_score, ai_details = self._analyze_with_gemini_for_reviews(text, is_vietnamese)
+                            
+                            is_toxic_final = is_toxic_ai and ai_score >= threshold
+                            score_final = ai_score
+                            method_final = 'ai'
+                            details_final = ai_details
+
+            # Cache result
+            result_to_cache = {
+                'is_toxic': is_toxic_final,
+                'score': score_final,
+                'method': method_final,
+                'pattern_type': pattern_type_final,
+                'details': details_final
+            }
+            self._set_cache(cache_key, result_to_cache)
+            
+            return is_toxic_final, score_final
+            
+        except Exception as e:
+            logger.error(f"Error filtering comment: {str(e)}")
+            return False, 0.0
+
+    def _analyze_with_gemini_for_reviews(self, text: str, is_vietnamese: bool = False) -> Tuple[bool, float, Dict[str, Any]]:
+        """AI analysis đặc biệt cho company reviews"""
+        if not self.model:
+            return False, 0.0, {"error": "Model not available"}
+
+        try:
+            language = "Vietnamese" if is_vietnamese else "English"
+            
+            prompt = f"""You are analyzing a COMPANY REVIEW comment. Your job is to detect only TOXIC content, not legitimate criticism.
+
+IMPORTANT RULES:
+- Negative opinions about company are NOT toxic (e.g., "company is bad", "terrible workplace", "low salary", "bad management")
+- Only flag as toxic: profanity, personal attacks, threats, hate speech, harassment
+- Simple expressions like "haha", "hihi", "lol" are NOT toxic
+- Constructive criticism is NOT toxic
+
+Examples of NON-TOXIC (legitimate criticism):
+- "Công ty không tốt, lương thấp" 
+- "Bad company, terrible management"
+- "Môi trường làm việc tệ, không khuyến khích"
+- "Don't recommend this company"
+
+Examples of TOXIC:
+- Personal insults, profanity, threats
+- "Thằng sếp ngu như chó"
+- "F*** this company and everyone there"
+
+Analyze this {language} company review comment:
+
+Text: "{text}"
+
+Return JSON:
+{{
+    "is_toxic": boolean,
+    "score": float_0_to_1,
+    "reason": "brief explanation",
+    "categories": ["profanity", "personal_attack", "threat", etc]
+}}
+
+JSON:"""
+
+            response = self.model.generate_content(prompt)
+            response_text = response.text.strip()
+            
+            # Clean JSON response
+            if response_text.startswith('```json'):
+                response_text = response_text[7:-3].strip()
+            elif response_text.startswith('```'):
+                response_text = response_text[3:-3].strip()
+            
+            try:
+                result = json.loads(response_text)
+                is_toxic = result.get('is_toxic', False)
+                score = float(result.get('score', 0.0))
+                
+                return is_toxic, score, result
+                
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON parse error: {e}")
+                # Fallback parsing
+                is_toxic = 'true' in response_text.lower() and 'is_toxic' in response_text.lower()
+                score = 0.3 if is_toxic else 0.0  # Lower confidence for fallback
+                
+                return is_toxic, score, {"error": "JSON parse failed", "raw_response": response_text[:100]}
+                
+        except Exception as e:
+            logger.error(f"Gemini API error: {str(e)}")
+            return False, 0.0, {"error": str(e)}
+
+    def _check_obscured_vulgar(self, text: str) -> Tuple[bool, float, str]:
+        """Kiểm tra từ tục tĩu bị che giấu"""
+        normalized = self._normalize_text(text)
+        
+        # Chỉ các từ tục tĩu nghiêm trọng
+        vulgar_words = [
+            'dit', 'du', 'deo', 'cac', 'lon', 'di', 'buoi', 'vcl', 'clgt',
+            'fuck', 'shit', 'bitch', 'asshole', 'cunt', 'dick', 'pussy'
+        ]
+        
+        for word in vulgar_words:
+            if word in normalized:
+                if (re.search(r'[*@#$%&!0-9]', text) or 
+                    re.search(r'[\s\.\-_]{2,}', text)):
+                    return True, 0.9, f"obscured_vulgar:{word}"
+        
+        return False, 0.0, ""
+
+    def _normalize_text(self, text: str) -> str:
+        """Chuẩn hóa text để phát hiện các biến thể che giấu"""
+        normalized = re.sub(r'[*@#$%&!]+', '', text)
+        
+        leetspeak_map = {
+            '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', 
+            '7': 't', '8': 'b', '@': 'a', '$': 's', '!': 'i'
+        }
+        
+        for leet, normal in leetspeak_map.items():
+            normalized = normalized.replace(leet, normal)
+        
+        normalized = re.sub(r'[\s\.\-_]+', '', normalized)
+        return normalized.lower()
+
+    @lru_cache(maxsize=1000)
+    def _is_vietnamese(self, text: str) -> bool:
+        """Kiểm tra ngôn ngữ tiếng Việt"""
+        vietnamese_chars = re.search(r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]', text.lower())
+        return bool(vietnamese_chars)
+
+    def _get_cache_key(self, text: str) -> str:
+        return f"review_{hash(text.lower().strip())}"
+
+    def _get_cached_result(self, cache_key: str) -> Dict[str, Any]:
+        if cache_key in self.cache:
+            cached_data = self.cache[cache_key]
+            if time.time() - cached_data['timestamp'] < self.cache_ttl:
+                return cached_data['result']
+        return None
+
+    def _set_cache(self, cache_key: str, result: Dict[str, Any]):
+        self.cache[cache_key] = {
+            'result': result,
+            'timestamp': time.time()
+        }
+        
+        if len(self.cache) > 2000:
+            oldest_keys = sorted(self.cache.keys(), key=lambda k: self.cache[k]['timestamp'])[:500]
+            for key in oldest_keys:
+                del self.cache[key]
+
+    def _setup_gemini(self, api_key: str):
+        genai.configure(api_key=api_key)
+        
+        generation_config = {
+            "temperature": 0.1,
+            "top_p": 0.8, 
+            "top_k": 40,
+            "max_output_tokens": 300,
+        }
+        
+        return genai.GenerativeModel(
+            model_name=MODEL_NAME,
+            generation_config=generation_config
+        )
+
+    def get_filter_stats(self) -> Dict[str, Any]:
+        return {
+            'cache_size': len(self.cache),
+            'model_available': self.model is not None,
+            'patterns_count': len(self.patterns),
+            'filter_type': 'company_review_filter'
+        }
+
+# Khởi tạo filter cho company reviews
+company_review_filter = CompanyReviewFilter()
+
 
 # Hàm xử lý CV
 def setup_gemini(api_key):
@@ -926,7 +1226,7 @@ def analyze_cv():
             cv_text = extract_text_from_docx(cv_file)
         else:
             return jsonify({"error": "Định dạng file không được hỗ trợ"}), 400
-        
+            
         if not cv_text:
             return jsonify({"error": "Không thể trích xuất văn bản từ CV"}), 400
         
@@ -1206,38 +1506,32 @@ def health_check():
     }), 200
 
 @app.route('/check-comment', methods=['POST'])
-def check_comment():
+def check_company_review():
+    """API endpoint để kiểm tra bình luận đánh giá công ty"""
     try:
         data = request.get_json()
-        text = data.get('text', '')
-        
-        if not text:
+        if not data or 'text' not in data:
             return jsonify({
-                'is_toxic': False,
-                'message': 'No text provided'
+                'error': 'Missing text field in request body'
             }), 400
 
-        # Khởi tạo bộ lọc comment
-        comment_filter = ImprovedCommentFilter()
-        
-        # Kiểm tra nội dung
-        is_toxic, score = comment_filter.filter_comment(text)
-        
-        # Tạo message dựa trên kết quả
-        message = 'Nội dung không phù hợp' if is_toxic else 'Nội dung phù hợp'
-        
+        text = data['text']
+        threshold = float(data.get('threshold', 0.7))
+
+        is_toxic, score = company_review_filter.filter_comment(text, threshold)
+
         return jsonify({
             'is_toxic': is_toxic,
             'score': score,
-            'message': message
+            'text': text
         })
 
     except Exception as e:
-        logger.error(f"Lỗi khi kiểm tra comment: {str(e)}")
+        logger.error(f"Error checking company review: {str(e)}")
         return jsonify({
-            'is_toxic': False,
-            'message': f'Lỗi server: {str(e)}'
+            'error': str(e)
         }), 500
+
 
 if __name__ == '__main__':
     logger.info("Starting JobRadar service on port 5000")

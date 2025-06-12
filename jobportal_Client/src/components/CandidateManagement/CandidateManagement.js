@@ -89,6 +89,7 @@ const CandidateManagement = () => {
   const handleUpdate = async (postId, userId) => {
     try {
       await dispatch(updateApprove({ postId, userId })).unwrap();
+      console.log("Đơn ứng tuyển đã được chấp thuận!")
       toast.success("Đơn ứng tuyển đã được chấp thuận!");
       dispatch(
         getApplyJobByCompany({
@@ -1031,7 +1032,7 @@ const CandidateManagement = () => {
               </div>
               <div className="sticky bottom-0 bg-white p-4 sm:p-6 border-t">
                 <div className="flex justify-end gap-3">
-                  <Button
+                  {/* <Button
                     variant="outline"
                     onClick={() =>
                       window.open(currentAnalysis?.candidate?.pathCV, "_blank")
@@ -1039,7 +1040,7 @@ const CandidateManagement = () => {
                     className="text-purple-600"
                   >
                     Xem CV gốc
-                  </Button>
+                  </Button> */}
                   <Button
                     variant="default"
                     onClick={closeAnalysisModal}

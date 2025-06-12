@@ -36,15 +36,15 @@ const Chatbot = () => {
     }
   };
 
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => dispatch(clearError()), 3000);
-      if (error.includes('Token expired')) {
-        navigate('/auth/sign-in', { replace: true });
-      }
-      return () => clearTimeout(timer);
-    }
-  }, [error, dispatch, navigate]);
+  // useEffect(() => {
+  //   if (error) {
+  //     const timer = setTimeout(() => dispatch(clearError()), 3000);
+  //     if (error.includes('Token expired')) {
+  //       navigate('/auth/sign-in', { replace: true });
+  //     }
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [error, dispatch, navigate]);
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -234,7 +234,7 @@ const Chatbot = () => {
                 </div>
               </div>
             )}
-            {error && (
+            {/* {error && (
               <div className="text-center text-red-500 flex items-center justify-center gap-2 text-xs p-2">
                 {error}
                 {error.includes('Token expired') && (
@@ -246,7 +246,7 @@ const Chatbot = () => {
                   </button>
                 )}
               </div>
-            )}
+            )} */}
             <div ref={messagesEndRef} />
           </div>
 
