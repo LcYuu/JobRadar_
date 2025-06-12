@@ -15,11 +15,12 @@ import {
   Edit,
   ArrowLeft,
 } from "lucide-react";
-import SkillJobPostModal from "./SkillJobPostModal";
+
 import { Badge } from "@mui/material";
 import { toast } from "react-toastify";
 import { getDetailJobById, updateJob } from "../../redux/JobPost/jobPost.thunk";
 import IndustryJobPostModal from "./IndustryJobPostModal";
+import SkillPostModal from "./SkillJobPostModal";
 
 const cityCodeMapping = {
   1: 16, // Hà Nội
@@ -140,16 +141,22 @@ const JobDetailEmployer = () => {
     position: "",
     niceToHaves: "",
   });
-  
+
   const handleSaveSkills = async (selectedSkills) => {
     try {
+      const skillIds = selectedSkills.map((skill) => skill.skillId);
+  
       const updatedJobData = {
         ...jobData,
-        skills: selectedSkills, // Cập nhật danh sách kỹ năng
+        skillIds: skillIds,
       };
-      await dispatch(updateJob({ postId, jobPostData: updatedJobData }));
+      console.log("Sending updateJob with data:", updatedJobData);
+  
+      const result = await dispatch(updateJob({ postId, jobPostData: updatedJobData }));
+      console.log("Update job result:", result);
+  
       toast.success("Cập nhật kỹ năng thành công!");
-      dispatch(getDetailJobById(postId)); // Làm mới dữ liệu
+      dispatch(getDetailJobById(postId));
     } catch (error) {
       console.error("Error updating skills:", error);
       toast.error("Có lỗi khi cập nhật kỹ năng!");
@@ -186,11 +193,11 @@ const JobDetailEmployer = () => {
         location: detailJob.location || "",
         typeOfWork: detailJob.typeOfWork || "",
         position: detailJob.position || "",
-        niceToHaves: detailJob.niceToHaves || "",
+        niceToHaves: detailJob.niceToHaves || "", 
       });
     }
   }, [detailJob]);
-  console.log("🚀 ~ JobDetailEmployer ~ detailJob:", detailJob)
+  console.log("🚀 ~ JobDetailEmployer ~ detailJob:", detailJob);
 
   useEffect(() => {
     const fetchProvinces = async () => {
@@ -354,8 +361,8 @@ const JobDetailEmployer = () => {
       await dispatch(updateJob({ postId, jobPostData: updatedJobData }));
 
       setIsEditing(false);
+      console.log("Showing success toast...");
       toast.success("Cập nhật thành công!");
-
       dispatch(getDetailJobById(postId));
     } catch (error) {
       console.error("Error updating job:", error);
@@ -390,7 +397,6 @@ const JobDetailEmployer = () => {
     setErrors(tempErrors);
     return isValid;
   };
-
 
   const getRemainingTime = () => {
     const currentDate = new Date();
@@ -797,7 +803,7 @@ const JobDetailEmployer = () => {
                 {isEditing ? (
                   <input
                     type="date"
-                    value={jobData.expireDate}
+                    value={jobData.expireDate.split("T")[0]} // Extract only the date part
                     onChange={handleChange}
                     name="expireDate"
                     className="border p-1.5 sm:p-2 rounded text-xs sm:text-sm lg:text-base w-full sm:w-auto max-w-[200px]"
@@ -1006,7 +1012,7 @@ const JobDetailEmployer = () => {
               )}
             </div>
             <section>
-            <SkillJobPostModal
+              <SkillPostModal
                 open={openSkill}
                 handleClose={handleCloseSkill}
                 onSave={handleSaveSkills} // Thêm prop onSave

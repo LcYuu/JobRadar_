@@ -44,8 +44,7 @@ const IndustryPostModal = ({ open, handleClose, postId }) => {
     }
   };
 
-  console.log("All skills:", companyJwt?.industry); // Kiểm tra toàn bộ kỹ năng từ store
-  console.log("Selected skills:", selectedIndustry); // Kiểm tra danh sách skill đã chọn
+
 
   if (!companyJwt || !Array.isArray(companyJwt?.industry)) {
     return (
