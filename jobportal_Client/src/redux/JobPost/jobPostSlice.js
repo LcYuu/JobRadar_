@@ -1,10 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
   approveJob,
+  canPostJob,
   countJobByType,
   createJobPost,
   fetchSalaryRange,
   findEmployerCompany,
+  getAllJob,
   getAllJobAction,
   getAllJobPost,
   getAllJobsForAdmin,
@@ -44,14 +46,17 @@ const initialState = {
   totalElements: 0,
   currentPage: 0,
   expireJob: null,
+  canPost: null, // Result of canPostJob (e.g., "Công ty có thể đăng bài.")
+  canPostLoading: false, // Loading state for canPostJob
+  canPostError: null, // Error message for canPostJob
   similarJobs: [],
+
 };
 
 const jobPostSlice = createSlice({
   name: "jobPost",
   initialState,
   reducers: {
-
     // Thêm reducer để reset jobPost
     resetJobPost: (state) => {
       state.jobPost = [];
@@ -60,11 +65,31 @@ const jobPostSlice = createSlice({
       state.totalElements = 0;
       state.loading = false;
     },
-
   },
   extraReducers: (builder) => {
     builder
+      .addCase(canPostJob.pending, (state) => {
+        state.canPostLoading = true;
+        state.canPostError = null;
+        state.canPost = null;
+      })
+      .addCase(canPostJob.fulfilled, (state, action) => {
+        state.canPostLoading = false;
+        state.canPost = action.payload; // e.g., "Công ty có thể đăng bài."
+        state.canPostError = null;
+      })
+      .addCase(canPostJob.rejected, (state, action) => {
+        state.canPostLoading = false;
+        state.canPostError = action.payload; // e.g., "Công ty chỉ được đăng 1 bài trong vòng 1 giờ."
+        state.canPost = null;
+      })
       .addCase(getAllJobAction.fulfilled, (state, action) => {
+        state.loading = false;
+        state.jobPost = action.payload.content;
+        state.totalPages = action.payload.page.totalPages; // Lưu trữ tổng số trang
+        state.error = null;
+      })
+      .addCase(getAllJob.fulfilled, (state, action) => {
         state.loading = false;
         state.jobPost = action.payload.content;
         state.totalPages = action.payload.page.totalPages; // Lưu trữ tổng số trang
@@ -94,7 +119,6 @@ const jobPostSlice = createSlice({
         state.error = null; // Đặt lỗi về null
       })
 
-
       .addCase(getJobPostByPostId.fulfilled, (state, action) => {
         state.loading = false;
         state.postByPostId = action.payload;
@@ -122,12 +146,12 @@ const jobPostSlice = createSlice({
         state.error = null;
       })
       // Handle updateCompanyImages actions
-      .addCase(getAllJobPost.fulfilled, (state,action) => {
+      .addCase(getAllJobPost.fulfilled, (state, action) => {
         state.loading = false;
         state.positions = action.payload;
         state.error = null;
       })
-      .addCase(getTop5Lastest.fulfilled, (state,action) => {
+      .addCase(getTop5Lastest.fulfilled, (state, action) => {
         state.loading = false;
         state.jobs = action.payload;
         state.error = null;
@@ -139,18 +163,17 @@ const jobPostSlice = createSlice({
         state.loading = false;
         state.error = null;
       })
-      .addCase(getDetailJobById.fulfilled, (state,action) => {
+      .addCase(getDetailJobById.fulfilled, (state, action) => {
         state.loading = false;
         state.detailJob = action.payload;
         state.error = null;
       })
-      .addCase(updateJob.fulfilled, (state,action) => {
-
+      .addCase(updateJob.fulfilled, (state, action) => {
         state.loading = false;
         state.detailJob = action.payload;
         state.error = null;
       })
-      .addCase(createJobPost.fulfilled, (state,action) => {
+      .addCase(createJobPost.fulfilled, (state, action) => {
         state.loading = false;
         state.detailJob = action.payload;
         state.error = null;
@@ -167,7 +190,7 @@ const jobPostSlice = createSlice({
         state.error = null; // Reset lỗi
       })
 
-      .addCase(getSimilarJobs.fulfilled, (state,action) => {
+      .addCase(getSimilarJobs.fulfilled, (state, action) => {
         state.loading = false;
         state.similarJobs = action.payload;
         state.error = null;
@@ -180,8 +203,7 @@ const jobPostSlice = createSlice({
       })
       .addMatcher(
         (action) =>
-          action.type.endsWith("pending") &&
-          action.type.startsWith("jobPost/"),
+          action.type.endsWith("pending") && action.type.startsWith("jobPost/"),
         (state) => {
           state.loading = true;
           state.error = null;
@@ -202,4 +224,3 @@ const jobPostSlice = createSlice({
 export const { resetJobPost } = jobPostSlice.actions;
 
 export default jobPostSlice.reducer;
-

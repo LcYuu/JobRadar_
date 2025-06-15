@@ -49,11 +49,11 @@ const FormSection = () => {
 
   // Danh sách các tab
   const tabs = [
-    { id: 1, name: "Personal", icon: <User size={16} /> },
-    { id: 2, name: "About Me", icon: <FileText size={16} /> },
-    { id: 3, name: "Experience", icon: <Briefcase size={16} /> },
-    { id: 4, name: "Education", icon: <GraduationCap size={16} /> },
-    { id: 5, name: "Skills", icon: <Star size={16} /> },
+    { id: 1, name: "Thông tin cá nhân", icon: <User size={16} /> },
+    { id: 2, name: "Giới thiệu ", icon: <FileText size={16} /> },
+    { id: 3, name: "Kinh nghiệm", icon: <Briefcase size={16} /> },
+    { id: 4, name: "Học vấn", icon: <GraduationCap size={16} /> },
+    { id: 5, name: "Kỹ năng", icon: <Star size={16} /> },
   ];
 
   return (
@@ -82,7 +82,7 @@ const FormSection = () => {
             size="sm"
             onClick={() => changeTab(activeFormIndex + 1)}
           >
-            Next <ArrowRight />
+            Tiếp theo <ArrowRight />
           </Button>
         </div>
       </div>

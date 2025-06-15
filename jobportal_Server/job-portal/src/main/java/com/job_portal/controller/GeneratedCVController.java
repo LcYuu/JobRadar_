@@ -73,20 +73,20 @@ public class GeneratedCVController {
 		}
 	}
 
-//	@GetMapping("/search-cv")
-//	public ResponseEntity<Object> searchCV(@RequestHeader("Authorization") String jwt) {
-//		String email = JwtProvider.getEmailFromJwtToken(jwt);
-//		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
-//		try {
-//			List<GeneratedCV> cvs = generatedCVService.findGenCVBySeekerId(user.get().getUserId());
-//			return ResponseEntity.ok(cvs);
-//		} catch (AllExceptions e) {
-//			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-//		} catch (Exception e) {
-//			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
-//		}
-//	}
+	@GetMapping("/search-cv")
+	public ResponseEntity<Object> searchCV(@RequestHeader("Authorization") String jwt) {
+		String email = JwtProvider.getEmailFromJwtToken(jwt);
+		Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+		try {
+			List<GeneratedCV> cvs = generatedCVService.findGenCVBySeekerId(user.get().getUserId());
+			return ResponseEntity.ok(cvs);
+		} catch (AllExceptions e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Đã xảy ra lỗi trong quá trình xử lý yêu cầu.");
+		}
+	}
 
 	@DeleteMapping("/delete-cv/{genCvId}")
 	public ResponseEntity<String> deleteCV(@PathVariable("genCvId") Integer genCvId) {

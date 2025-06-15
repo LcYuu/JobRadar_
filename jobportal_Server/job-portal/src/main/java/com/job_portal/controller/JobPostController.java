@@ -138,40 +138,68 @@ public class JobPostController {
 	}
 
 	@GetMapping("/get-top8-lastest-job")
-	public ResponseEntity<List<JobPost>> getTop8LatestJobPosts() {
-		List<JobPost> jobs = jobPostService.getTop8LatestJobPosts();
+	public ResponseEntity<List<JobPostApproveDTO>> getTop8LatestJobPosts() {
+		List<JobPostApproveDTO> jobs = jobPostService.getTop8LatestJobPosts();
 		return new ResponseEntity<>(jobs, HttpStatus.OK);
 	}
 
 	@GetMapping("/get-job-approve")
-	public ResponseEntity<Page<JobPost>> getJobApprove(Pageable pageable) {
-		Page<JobPost> res = jobPostService.findByIsApprove(pageable);
-		return new ResponseEntity<>(res, HttpStatus.OK);
-	}
+	public ResponseEntity<Page<JobPostApproveDTO>> findByIsApprove(Pageable pageable) {
+        Page<JobPostApproveDTO> jobPosts = jobPostService.findByIsApprove(pageable);
+        return ResponseEntity.ok(jobPosts);
+    }
+	
+	@GetMapping("/find-all-job-approve")
+	public ResponseEntity<Page<JobPost>> findAllJobApprove(Pageable pageable) {
+        Page<JobPost> jobPosts = jobPostService.findAllJobApprove(pageable);
+        return ResponseEntity.ok(jobPosts);
+    }
+	
 
-	@PostMapping("/create-job")
-	public ResponseEntity<String> createJobPost(@RequestHeader("Authorization") String jwt,
-			@RequestBody JobPostDTO jobPostDTO) {
-		try {
-			String email = JwtProvider.getEmailFromJwtToken(jwt);
-			Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+	@GetMapping("/can-post-job")
+    public ResponseEntity<String> canPostJob(@RequestHeader("Authorization") String jwt) {
+        try {
+            String email = JwtProvider.getEmailFromJwtToken(jwt);
+            Optional<UserAccount> user = userAccountRepository.findByEmail(email);
 
-			if (!jobPostService.canPostJob(user.get().getCompany().getCompanyId())) {
-				return new ResponseEntity<>("Công ty chỉ được đăng 1 bài trong vòng 1 giờ.", HttpStatus.FORBIDDEN);
-			}
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("Người dùng không tồn tại.", HttpStatus.UNAUTHORIZED);
+            }
 
-			JobPost createdJob = jobPostService.createJob(jobPostDTO, user.get().getCompany().getCompanyId());
+            boolean canPost = jobPostService.canPostJob(user.get().getCompany().getCompanyId());
+            if (!canPost) {
+                return new ResponseEntity<>("Công ty chỉ được đăng 1 bài trong vòng 1 giờ.", HttpStatus.FORBIDDEN);
+            }
 
-			if (createdJob != null) {
-				webSocketService.sendUpdate("/topic/job-updates", "ADD JOB"); // Gửi JobPost qua WebSocket
-				return new ResponseEntity<>("Công việc được tạo thành công. Chờ Admin phê duyệt", HttpStatus.CREATED);
-			} else {
-				return new ResponseEntity<>("Công việc tạo thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		} catch (Exception e) {
-			return new ResponseEntity<>("Đã có lỗi xảy ra: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+            return new ResponseEntity<>("Công ty có thể đăng bài.", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Đã có lỗi xảy ra: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/create-job")
+    public ResponseEntity<String> createJobPost(@RequestHeader("Authorization") String jwt,
+            @RequestBody JobPostDTO jobPostDTO) {
+        try {
+            String email = JwtProvider.getEmailFromJwtToken(jwt);
+            Optional<UserAccount> user = userAccountRepository.findByEmail(email);
+
+            if (user.isEmpty()) {
+                return new ResponseEntity<>("Người dùng không tồn tại.", HttpStatus.UNAUTHORIZED);
+            }
+
+            JobPost createdJob = jobPostService.createJob(jobPostDTO, user.get().getCompany().getCompanyId());
+
+            if (createdJob != null) {
+                webSocketService.sendUpdate("/topic/job-updates", "ADD JOB");
+                return new ResponseEntity<>("Công việc được tạo thành công. Chờ Admin phê duyệt", HttpStatus.CREATED);
+            } else {
+                return new ResponseEntity<>("Công việc tạo thất bại", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>("Đã có lỗi xảy ra: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 	@PostMapping("/approve/{postId}")
 	public ResponseEntity<String> approveJobPost(@PathVariable UUID postId) {
@@ -361,189 +389,196 @@ public class JobPostController {
 	}
 
 	@PostMapping("/recommend-jobs/phobert")
-	public ResponseEntity<List<JobRecommendationDTO>> getJobRecommendations(
-			@RequestHeader("Authorization") String jwt) {
-		// Lấy email từ JWT
-		String email;
-		try {
-			email = JwtProvider.getEmailFromJwtToken(jwt);
-		} catch (Exception e) {
-			System.out.println("Lỗi giải mã JWT: " + e.getMessage());
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-		}
+    public ResponseEntity<List<JobRecommendationDTO>> getJobRecommendations(
+            @RequestHeader("Authorization") String jwt) {
+        // Lấy email từ JWT
+        String email;
+        try {
+            email = JwtProvider.getEmailFromJwtToken(jwt);
+        } catch (Exception e) {
+            System.out.println("Lỗi giải mã JWT: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
 
-		// Tìm người dùng bằng email
-		Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
-		if (!userOptional.isPresent()) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-		}
+        // Tìm người dùng bằng email
+        Optional<UserAccount> userOptional = userAccountRepository.findByEmail(email);
+        if (!userOptional.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
 
-		UUID userId = userOptional.get().getUserId();
+        UUID userId = userOptional.get().getUserId();
 
-		// Gửi yêu cầu đến API Python
-		String apiUrl = "http://localhost:5000/recommend-jobs/phobert";
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("X-User-Id", userId.toString());
-		headers.setContentType(MediaType.APPLICATION_JSON);
+        // Gửi yêu cầu đến API Python
+        String apiUrl = "http://localhost:5000/recommend-jobs/phobert";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-User-Id", userId.toString());
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-		// Chuẩn bị request body (có thể bỏ trống vì API Python không yêu cầu body)
-		HttpEntity<String> entity = new HttpEntity<>("{}", headers);
+        // Chuẩn bị request body (có thể bỏ trống vì API Python không yêu cầu body)
+        HttpEntity<String> entity = new HttpEntity<>("{}", headers);
 
-		// Định dạng ngày giờ phù hợp - hỗ trợ nhiều định dạng
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss[.SSSSSS]");
+        // Định dạng ngày giờ phù hợp - hỗ trợ nhiều định dạng
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss[.SSSSSS]");
 
-		try {
-			// Gửi request tới API Python
-			ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, String.class);
+        try {
+            // Gửi request tới API Python
+            ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, String.class);
 
-			// Xử lý NaN trong JSON trước khi parse
-			String jsonBody = response.getBody();
-			System.out.println("JSON response from Python API: " + jsonBody); // In JSON
+            // Xử lý NaN trong JSON trước khi parse
+            String jsonBody = response.getBody();
+            System.out.println("JSON response from Python API: " + jsonBody); // In JSON
 
-			jsonBody = jsonBody.replaceAll("\"createDate\":NaN", "\"createDate\":null").replaceAll("\"expireDate\":NaN",
-					"\"expireDate\":null");
-			ObjectMapper objectMapper = new ObjectMapper();
-			JsonNode jsonResponse = objectMapper.readTree(jsonBody);
+            jsonBody = jsonBody.replaceAll("\"createDate\":NaN", "\"createDate\":null")
+                    .replaceAll("\"expireDate\":NaN", "\"expireDate\":null")
+                    .replaceAll("\"averageStar\":NaN", "\"averageStar\":null");
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonResponse = objectMapper.readTree(jsonBody);
 
-			// Kiểm tra nếu phản hồi là một mảng
-			if (!jsonResponse.isArray()) {
-				System.out.println("Phản hồi từ API Python không phải là mảng JSON");
-				return ResponseEntity.ok(new ArrayList<>());
-			}
+            // Kiểm tra nếu phản hồi là một mảng
+            if (!jsonResponse.isArray()) {
+                System.out.println("Phản hồi từ API Python không phải là mảng JSON");
+                return ResponseEntity.ok(new ArrayList<>());
+            }
 
-			List<JobRecommendationDTO> jobs = new ArrayList<>();
+            List<JobRecommendationDTO> jobs = new ArrayList<>();
 
-			// Duyệt qua từng phần tử trong mảng
-			for (JsonNode jobNode : jsonResponse) {
-				JobRecommendationDTO job = new JobRecommendationDTO();
+            // Duyệt qua từng phần tử trong mảng
+            for (JsonNode jobNode : jsonResponse) {
+                JobRecommendationDTO job = new JobRecommendationDTO();
 
-				// Ánh xạ các trường từ JSON sang DTO
-				JsonNode postIdNode = jobNode.get("postId");
-				if (postIdNode != null && !postIdNode.isNull()) {
-					try {
-						job.setPostId(UUID.fromString(postIdNode.asText()));
-					} catch (IllegalArgumentException e) {
-						System.out.println("postId không hợp lệ: " + postIdNode.asText() + " - " + e.getMessage());
-						continue;
-					}
-				} else {
-					System.out.println("postId bị thiếu hoặc null");
-					continue;
-				}
+                // Ánh xạ các trường từ JSON sang DTO
+                JsonNode postIdNode = jobNode.get("postId");
+                if (postIdNode != null && !postIdNode.isNull()) {
+                    try {
+                        job.setPostId(UUID.fromString(postIdNode.asText()));
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("postId không hợp lệ: " + postIdNode.asText() + " - " + e.getMessage());
+                        continue;
+                    }
+                } else {
+                    System.out.println("postId bị thiếu hoặc null");
+                    continue;
+                }
 
-				job.setTitle(jobNode.get("title") != null ? jobNode.get("title").asText(null) : null);
-				job.setDescription(jobNode.get("description") != null ? jobNode.get("description").asText(null) : null);
-				job.setLocation(jobNode.get("location") != null ? jobNode.get("location").asText(null) : null);
+                job.setTitle(jobNode.get("title") != null ? jobNode.get("title").asText(null) : null);
+                job.setDescription(jobNode.get("description") != null ? jobNode.get("description").asText(null) : null);
+                job.setLocation(jobNode.get("location") != null ? jobNode.get("location").asText(null) : null);
 
-				JsonNode salaryNode = jobNode.get("salary");
-				job.setSalary(salaryNode != null && !salaryNode.isNull() ? salaryNode.asLong(0) : 0);
+                JsonNode salaryNode = jobNode.get("salary");
+                job.setSalary(salaryNode != null && !salaryNode.isNull() ? salaryNode.asLong(0) : 0);
 
-				job.setExperience(jobNode.get("experience") != null ? jobNode.get("experience").asText(null) : null);
-				job.setTypeOfWork(jobNode.get("typeOfWork") != null ? jobNode.get("typeOfWork").asText(null) : null);
+                job.setExperience(jobNode.get("experience") != null ? jobNode.get("experience").asText(null) : null);
+                job.setTypeOfWork(jobNode.get("typeOfWork") != null ? jobNode.get("typeOfWork").asText(null) : null);
 
-				JsonNode companyIdNode = jobNode.get("companyId");
-				if (companyIdNode != null && !companyIdNode.isNull()) {
-					try {
-						job.setCompanyId(UUID.fromString(companyIdNode.asText()));
-					} catch (IllegalArgumentException e) {
-						System.out
-								.println("companyId không hợp lệ: " + companyIdNode.asText() + " - " + e.getMessage());
-						continue;
-					}
-				} else {
-					System.out.println("companyId bị thiếu hoặc null");
-					continue;
-				}
+                JsonNode companyIdNode = jobNode.get("companyId");
+                if (companyIdNode != null && !companyIdNode.isNull()) {
+                    try {
+                        job.setCompanyId(UUID.fromString(companyIdNode.asText()));
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("companyId không hợp lệ: " + companyIdNode.asText() + " - " + e.getMessage());
+                        continue;
+                    }
+                } else {
+                    System.out.println("companyId bị thiếu hoặc null");
+                    continue;
+                }
 
-				job.setCompanyName(jobNode.get("companyName") != null ? jobNode.get("companyName").asText(null) : null);
-				job.setCityName(jobNode.get("cityName") != null ? jobNode.get("cityName").asText(null) : null);
-				job.setLogo(jobNode.get("logo") != null ? jobNode.get("logo").asText(null) : null);
+                job.setCompanyName(jobNode.get("companyName") != null ? jobNode.get("companyName").asText(null) : null);
+                job.setCityName(jobNode.get("cityName") != null ? jobNode.get("cityName").asText(null) : null);
+                job.setLogo(jobNode.get("logo") != null ? jobNode.get("logo").asText(null) : null);
 
-				// Xử lý createDate
-				String createDateStr = null;
-				try {
-					JsonNode createDateNode = jobNode.get("createDate");
-					createDateStr = createDateNode != null && !createDateNode.isNull() ? createDateNode.asText(null)
-							: null;
-				} catch (Exception e) {
-					System.out.println("Lỗi khi lấy createDate từ JSON: " + e.getMessage());
-					createDateStr = null;
-				}
+                // Xử lý createDate
+                String createDateStr = null;
+                try {
+                    JsonNode createDateNode = jobNode.get("createDate");
+                    createDateStr = createDateNode != null && !createDateNode.isNull() ? createDateNode.asText(null) : null;
+                } catch (Exception e) {
+                    System.out.println("Lỗi khi lấy createDate từ JSON: " + e.getMessage());
+                    createDateStr = null;
+                }
 
-				if (createDateStr != null && !createDateStr.isEmpty() && !"null".equals(createDateStr)
-						&& !"NaN".equals(createDateStr)) {
-					try {
-						job.setCreateDate(LocalDateTime.parse(createDateStr, formatter));
-					} catch (DateTimeParseException e) {
-						System.out.println("Lỗi chuyển đổi createDate: " + createDateStr + " - " + e.getMessage());
-						job.setCreateDate(null); // Set to null if parsing fails
-					}
-				} else {
-					job.setCreateDate(null);
-				}
+                if (createDateStr != null && !createDateStr.isEmpty() && !"null".equals(createDateStr) && !"NaN".equals(createDateStr)) {
+                    try {
+                        job.setCreateDate(LocalDateTime.parse(createDateStr, formatter));
+                    } catch (DateTimeParseException e) {
+                        System.out.println("Lỗi chuyển đổi createDate: " + createDateStr + " - " + e.getMessage());
+                        job.setCreateDate(null);
+                    }
+                } else {
+                    job.setCreateDate(null);
+                }
 
-				// Xử lý expireDate
-				String expireDateStr = null;
-				try {
-					JsonNode expireDateNode = jobNode.get("expireDate");
-					expireDateStr = expireDateNode != null && !expireDateNode.isNull() ? expireDateNode.asText(null)
-							: null;
-				} catch (Exception e) {
-					System.out.println("Lỗi khi lấy expireDate từ JSON: " + e.getMessage());
-					expireDateStr = null;
-				}
+                // Xử lý expireDate
+                String expireDateStr = null;
+                try {
+                    JsonNode expireDateNode = jobNode.get("expireDate");
+                    expireDateStr = expireDateNode != null && !expireDateNode.isNull() ? expireDateNode.asText(null) : null;
+                } catch (Exception e) {
+                    System.out.println("Lỗi khi lấy expireDate từ JSON: " + e.getMessage());
+                    expireDateStr = null;
+                }
 
-				if (expireDateStr != null && !expireDateStr.isEmpty() && !"null".equals(expireDateStr)
-						&& !"NaN".equals(expireDateStr)) {
-					try {
-						job.setExpireDate(LocalDateTime.parse(expireDateStr, formatter));
-					} catch (DateTimeParseException e) {
-						System.out.println("Lỗi chuyển đổi expireDate: " + expireDateStr + " - " + e.getMessage());
-						job.setExpireDate(null); // Set to null if parsing fails
-					}
-				} else {
-					job.setExpireDate(null);
-				}
+                if (expireDateStr != null && !expireDateStr.isEmpty() && !"null".equals(expireDateStr) && !"NaN".equals(expireDateStr)) {
+                    try {
+                        job.setExpireDate(LocalDateTime.parse(expireDateStr, formatter));
+                    } catch (DateTimeParseException e) {
+                        System.out.println("Lỗi chuyển đổi expireDate: " + expireDateStr + " - " + e.getMessage());
+                        job.setExpireDate(null);
+                    }
+                } else {
+                    job.setExpireDate(null);
+                }
 
-				// Xử lý danh sách industryNames
-				JsonNode industriesNode = jobNode.get("industryNames");
-				if (industriesNode != null && industriesNode.isArray()) {
-					List<String> industryList = new ArrayList<>();
-					for (JsonNode industry : industriesNode) {
-						industryList.add(industry.asText());
-					}
-					job.setIndustryNames(industryList);
-				} else {
-					// Handle industryNames as a string with delimiters
-					String industryNamesStr = jobNode.get("industryNames") != null
-							? jobNode.get("industryNames").asText(null)
-							: null;
-					if (industryNamesStr != null && !industryNamesStr.isEmpty()) {
-						List<String> industryList = Arrays.asList(industryNamesStr.split("\\s*\\|\\s*"));
-						job.setIndustryNames(industryList);
-					} else {
-						job.setIndustryNames(new ArrayList<>());
-					}
-				}
+                // Xử lý averageStar
+                JsonNode averageStarNode = jobNode.get("averageStar");
+                if (averageStarNode != null && !averageStarNode.isNull()) {
+                    try {
+                        job.setAverageStar(averageStarNode.asDouble(0.0));
+                    } catch (Exception e) {
+                        System.out.println("Lỗi chuyển đổi averageStar: " + averageStarNode.asText() + " - " + e.getMessage());
+                        job.setAverageStar(0.0);
+                    }
+                } else {
+                    job.setAverageStar(0.0);
+                }
 
-				// Add the job to the list
-				jobs.add(job);
-				System.out.println("Added job to list: postId=" + job.getPostId() + ", title=" + job.getTitle());
-			}
+                // Xử lý danh sách industryNames
+                JsonNode industriesNode = jobNode.get("industryNames");
+                if (industriesNode != null && industriesNode.isArray()) {
+                    List<String> industryList = new ArrayList<>();
+                    for (JsonNode industry : industriesNode) {
+                        industryList.add(industry.asText());
+                    }
+                    job.setIndustryNames(industryList);
+                } else {
+                    // Handle industryNames as a string with delimiters
+                    String industryNamesStr = jobNode.get("industryNames") != null ? jobNode.get("industryNames").asText(null) : null;
+                    if (industryNamesStr != null && !industryNamesStr.isEmpty()) {
+                        List<String> industryList = Arrays.asList(industryNamesStr.split("\\s*\\|\\s*"));
+                        job.setIndustryNames(industryList);
+                    } else {
+                        job.setIndustryNames(new ArrayList<>());
+                    }
+                }
 
-			System.out.println("Total jobs added: " + jobs.size());
-			return ResponseEntity.ok(jobs);
-		} catch (HttpClientErrorException e) {
-			System.out.println("Lỗi gọi API Python: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
-			return ResponseEntity.status(e.getStatusCode()).body(null);
-		} catch (JsonProcessingException e) {
-			System.out.println("Lỗi xử lý JSON: " + e.getMessage());
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-		} catch (Exception e) {
-			System.out.println("Lỗi chung: " + e.getMessage());
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-		}
-	}
+                // Add the job to the list
+                jobs.add(job);
+                System.out.println("Added job to list: postId=" + job.getPostId() + ", title=" + job.getTitle() + ", averageStar=" + job.getAverageStar());
+            }
+
+            System.out.println("Total jobs added: " + jobs.size());
+            return ResponseEntity.ok(jobs);
+        } catch (HttpClientErrorException e) {
+            System.out.println("Lỗi gọi API Python: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+            return ResponseEntity.status(e.getStatusCode()).body(null);
+        } catch (JsonProcessingException e) {
+            System.out.println("Lỗi xử lý JSON: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        } catch (Exception e) {
+            System.out.println("Lỗi chung: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
 	@GetMapping("/company/{companyId}/approved")
 	public ResponseEntity<Page<JobPost>> getApprovedJobsByCompany(@PathVariable UUID companyId,

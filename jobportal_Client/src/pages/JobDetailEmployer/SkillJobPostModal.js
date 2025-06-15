@@ -197,7 +197,6 @@ const SkillPostModal = ({ open, handleClose, onSave, initialSkills = [], postId 
     const update = checked
       ? [...selectedSkills, skill]
       : selectedSkills.filter((selectedSkill) => selectedSkill.skillId !== skill.skillId);
-    console.log("Updated selected skills:", update); // Debug
     setSelectedSkills(update);
   };
 

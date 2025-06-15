@@ -246,7 +246,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen flex flex-col pb-20 bg-white mt-8 px-2 sm:px-4 md:px-6">
       <div className="flex-1 space-y-4 md:space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center mt-4">
           <h1 className="text-lg sm:text-xl md:text-2xl font-semibold">Chào mừng trở lại</h1>
         </div>
 

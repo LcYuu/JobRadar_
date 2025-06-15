@@ -1,4 +1,3 @@
-
 import React, { useContext, useEffect, useState, useRef } from "react";
 
 import { Input } from "../../../ui/input";
@@ -11,7 +10,10 @@ import { CVInfoContext } from "../../../context/CVInfoContext";
 import { toast } from "react-toastify";
 
 import { useDispatch, useSelector } from "react-redux";
-import { updateCV, getGenCVById } from "../../../redux/GeneratedCV/generated_cv.thunk";
+import {
+  updateCV,
+  getGenCVById,
+} from "../../../redux/GeneratedCV/generated_cv.thunk";
 import { useParams } from "react-router-dom";
 import LoadingOverlay from "../LoadingOverlay";
 
@@ -25,10 +27,10 @@ const SkillsForm = ({ enabledNext }) => {
 
   const [loading, setLoading] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
-  
+
   // Flag to control when to sync with cvInfo
   const isUpdating = useRef(false);
-  
+
   // Add forceUpdate mechanism
   const [, forceUpdate] = useState({});
   const forceRerender = () => forceUpdate({});
@@ -37,7 +39,9 @@ const SkillsForm = ({ enabledNext }) => {
   useEffect(() => {
     if (genCv && genCv.cvContent && !isUpdating.current) {
       try {
-        const content = JSON.parse(genCv.cvContent.replace(/^"|"$/g, "") || "{}");
+        const content = JSON.parse(
+          genCv.cvContent.replace(/^"|"$/g, "") || "{}"
+        );
         if (content.skills && Array.isArray(content.skills)) {
           console.log("Syncing skills from Redux:", content.skills);
           setSkillList(content.skills);
@@ -60,23 +64,23 @@ const SkillsForm = ({ enabledNext }) => {
     const newEntries = skillList.slice();
     const { name, value } = event.target;
     newEntries[index][name] = value;
-    
+
     // Set flag to prevent infinite loop
     isUpdating.current = true;
-    
+
     setSkillList(newEntries);
-    
+
     // Update context immediately for real-time preview
-    setCvInfo(prev => ({
+    setCvInfo((prev) => ({
       ...prev,
-      skills: newEntries
+      skills: newEntries,
     }));
-    
+
     // Reset flag after update
     setTimeout(() => {
       isUpdating.current = false;
     }, 0);
-    
+
     // Disable next button when changes are made
     if (enabledNext) enabledNext(false);
   };
@@ -86,78 +90,78 @@ const SkillsForm = ({ enabledNext }) => {
       ...skillList,
       {
         name: "",
-        rating: 0
+        rating: 0,
       },
     ];
-    
+
     // Set flag to prevent infinite loop
     isUpdating.current = true;
-    
+
     setSkillList(newEntries);
-    
+
     // Update context immediately for real-time preview
-    setCvInfo(prev => ({
+    setCvInfo((prev) => ({
       ...prev,
-      skills: newEntries
+      skills: newEntries,
     }));
-    
+
     // Reset flag after update
     setTimeout(() => {
       isUpdating.current = false;
     }, 0);
-    
+
     // Disable next button when adding new skill
     if (enabledNext) enabledNext(false);
   };
 
   const RemoveSkill = () => {
     const newEntries = skillList.slice(0, -1);
-    
+
     // Set flag to prevent infinite loop
     isUpdating.current = true;
-    
+
     setSkillList(newEntries);
-    
+
     // Update context immediately for real-time preview
-    setCvInfo(prev => ({
+    setCvInfo((prev) => ({
       ...prev,
-      skills: newEntries
+      skills: newEntries,
     }));
-    
+
     // Reset flag after update
     setTimeout(() => {
       isUpdating.current = false;
     }, 0);
-    
+
     // Disable next button when removing skill
     if (enabledNext) enabledNext(false);
   };
 
   const handleLevel = (index, ratingValue) => {
     const newEntries = skillList.slice();
-    
+
     // Gán giá trị rating trực tiếp
     newEntries[index] = {
       ...newEntries[index],
-      rating: ratingValue
+      rating: ratingValue,
     };
-    
+
     // Set flag to prevent infinite loop
     isUpdating.current = true;
-    
+
     setSkillList(newEntries);
-    
+
     // Update context immediately for real-time preview
-    setCvInfo(prev => ({
+    setCvInfo((prev) => ({
       ...prev,
-      skills: newEntries
+      skills: newEntries,
     }));
-    
+
     // Reset flag after update
     setTimeout(() => {
       isUpdating.current = false;
     }, 0);
-    
+
     // Disable next button when changes are made
     if (enabledNext) enabledNext(false);
   };
@@ -165,42 +169,50 @@ const SkillsForm = ({ enabledNext }) => {
   // Hàm helper để lấy level name từ rating
   const getLevelNameFromRating = (rating) => {
     switch (rating) {
-      case 1: return "Beginner";
-      case 2: return "Elementary";
-      case 3: return "Intermediate";
-      case 4: return "Advanced";
-      case 5: return "Expert";
-      default: return "";
+      case 1:
+        return "Beginner";
+      case 2:
+        return "Elementary";
+      case 3:
+        return "Intermediate";
+      case 4:
+        return "Advanced";
+      case 5:
+        return "Expert";
+      default:
+        return "";
     }
   };
 
   const onSave = async () => {
     console.log("SkillsForm: onSave bắt đầu");
-  
+
     // Validate trước khi lưu
-    const invalidSkill = skillList.find(skill => !skill.name.trim() || skill.rating <= 0);
+    const invalidSkill = skillList.find(
+      (skill) => !skill.name.trim() || skill.rating <= 0
+    );
     if (invalidSkill) {
       toast.error("Vui lòng nhập đầy đủ tên và level cho mỗi kỹ năng");
       return;
     }
-  
+
     setLoading(true);
     setUpdateLoading(true);
     if (onSaving) onSaving(true, "Đang lưu kỹ năng...");
-  
+
     const startTime = Date.now();
-  
+
     try {
       isUpdating.current = true;
-      await new Promise(resolve => setTimeout(resolve, 300));
-  
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
       const updatedData = {
         ...cvInfo,
         skills: skillList,
       };
-  
+
       setCvInfo(updatedData);
-  
+
       const cvData = JSON.stringify(updatedData).replace(/"/g, '\\"');
       await dispatch(
         updateCV({
@@ -208,19 +220,21 @@ const SkillsForm = ({ enabledNext }) => {
           cvData: `{ \"cvContent\": \"${cvData}\" }`,
         })
       );
-  
+
       await dispatch(getGenCVById(genCvId));
       forceRerender();
-  
+
       if (enabledNext) enabledNext(true);
-  
+
       const elapsedTime = Date.now() - startTime;
       const minLoadingTime = 2000;
-  
+
       if (elapsedTime < minLoadingTime) {
-        await new Promise(resolve => setTimeout(resolve, minLoadingTime - elapsedTime));
+        await new Promise((resolve) =>
+          setTimeout(resolve, minLoadingTime - elapsedTime)
+        );
       }
-  
+
       setLoading(false);
       setUpdateLoading(false);
       if (onSaving) onSaving(false);
@@ -236,20 +250,23 @@ const SkillsForm = ({ enabledNext }) => {
       isUpdating.current = false;
     }
   };
-  
 
   return (
     <div
       className="p-5 shadow-lg rounded-lg border-t-purple-500
   border-t-4 mt-10 relative"
     >
-      {(loading || updateLoading) && console.log("SkillsForm rendering: loading active", {loading, updateLoading})}
-      
-      <LoadingOverlay 
-        isLoading={loading || updateLoading} 
-        message="Đang lưu kỹ năng..." 
+      {(loading || updateLoading) &&
+        console.log("SkillsForm rendering: loading active", {
+          loading,
+          updateLoading,
+        })}
+
+      <LoadingOverlay
+        isLoading={loading || updateLoading}
+        message="Đang lưu kỹ năng..."
       />
-      
+
       <h3 className="font-bold text-lg">Kỹ năng</h3>
       <p>Thêm các kỹ năng của bạn</p>
       <div>
@@ -266,7 +283,7 @@ const SkillsForm = ({ enabledNext }) => {
                 />
               </div>
               <div className="mt-2">
-                <label className="text-xs mb-1">Level</label>
+                <label className="text-xs mb-1">Mức độ thuần thục</label>
                 <div className="flex flex-wrap gap-2 mt-1">
                   <Button
                     type="button"
@@ -274,7 +291,7 @@ const SkillsForm = ({ enabledNext }) => {
                     variant={item.rating === 1 ? "default" : "outline"}
                     onClick={() => handleLevel(index, 1)}
                   >
-                    Beginner
+                    Mới bắt đầu
                   </Button>
                   <Button
                     type="button"
@@ -282,7 +299,7 @@ const SkillsForm = ({ enabledNext }) => {
                     variant={item.rating === 2 ? "default" : "outline"}
                     onClick={() => handleLevel(index, 2)}
                   >
-                    Elementary
+                    Sơ cấp
                   </Button>
                   <Button
                     type="button"
@@ -290,7 +307,7 @@ const SkillsForm = ({ enabledNext }) => {
                     variant={item.rating === 3 ? "default" : "outline"}
                     onClick={() => handleLevel(index, 3)}
                   >
-                    Intermediate
+                    Trung cấp
                   </Button>
                   <Button
                     type="button"
@@ -298,7 +315,7 @@ const SkillsForm = ({ enabledNext }) => {
                     variant={item.rating === 4 ? "default" : "outline"}
                     onClick={() => handleLevel(index, 4)}
                   >
-                    Advanced
+                    Nâng cao
                   </Button>
                   <Button
                     type="button"
@@ -306,7 +323,7 @@ const SkillsForm = ({ enabledNext }) => {
                     variant={item.rating === 5 ? "default" : "outline"}
                     onClick={() => handleLevel(index, 5)}
                   >
-                    Expert
+                    Chuyên gia
                   </Button>
                 </div>
                 {item.rating > 0 && (
@@ -318,7 +335,7 @@ const SkillsForm = ({ enabledNext }) => {
                       <div
                         className="absolute top-0 left-0 h-2 rounded-full transition-all duration-300"
                         style={{
-                          backgroundColor: '#8b5cf6',
+                          backgroundColor: "#8b5cf6",
                           width: `${item.rating * 20}%`,
                         }}
                       ></div>
@@ -339,8 +356,8 @@ const SkillsForm = ({ enabledNext }) => {
             - Xóa kỹ năng
           </Button>
         </div>
-        <Button 
-          disabled={loading || updateLoading} 
+        <Button
+          disabled={loading || updateLoading}
           onClick={() => onSave()}
           className="relative overflow-hidden"
         >

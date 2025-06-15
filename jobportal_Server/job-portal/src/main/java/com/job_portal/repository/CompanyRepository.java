@@ -14,6 +14,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.job_portal.DTO.CompanyDTO;
+import com.job_portal.DTO.CompanyWithAverageStarDTO;
 import com.job_portal.DTO.CompanyWithCountJobDTO;
 import com.job_portal.DTO.FollowCompanyDTO;
 import com.job_portal.models.Company;
@@ -42,30 +43,31 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 	List<Company> findTop6CompaniesByIndustryIds(@Param("industryIds") List<Integer> industryIds);
 
 	@Query(value = "SELECT \r\n"
-			+ "    BIN_TO_UUID(c.user_id) AS companyId, \r\n"
-			+ "    c.company_name AS companyName, \r\n"
-			+ "    COUNT(a.post_id) AS applicationCount, \r\n"
-			+ "    GROUP_CONCAT(DISTINCT ci.industry_id SEPARATOR ',') AS industryIds,  -- Lấy từ company_industries\r\n"
-			+ "    c.city_id AS cityId, \r\n"
-			+ "    c.address, \r\n"
-			+ "    c.description, \r\n"
-			+ "    c.logo, \r\n"
-			+ "    c.contact, \r\n"
-			+ "    c.email, \r\n"
-			+ "    c.established_time, \r\n"
-			+ "    c.tax_code\r\n"
-			+ "FROM company c\r\n"
-			+ "LEFT JOIN job_posts jp ON c.user_id = jp.company_id\r\n"
-			+ "LEFT JOIN apply_job a ON jp.post_id = a.post_id\r\n"
-			+ "LEFT JOIN company_industries ci ON c.user_id = ci.company_id  -- Thêm JOIN với company_industries\r\n"
-			+ "WHERE (a.is_save = true OR a.post_id IS NULL) \r\n"
-			+ "AND jp.is_approve = true \r\n"
-			+ "GROUP BY c.user_id, c.company_name, c.city_id, c.address, \r\n"
-			+ "         c.description, c.logo, c.contact, c.email, \r\n"
-			+ "         c.established_time, c.tax_code\r\n"
-			+ "ORDER BY COUNT(a.post_id) DESC;\r\n"
-			+ "", nativeQuery = true)
-	List<CompanyProjection> findCompaniesWithSavedApplications();
+            + "    BIN_TO_UUID(c.user_id) AS companyId, \r\n"
+            + "    c.company_name AS companyName, \r\n"
+            + "    COUNT(a.post_id) AS applicationCount, \r\n"
+            + "    GROUP_CONCAT(DISTINCT ci.industry_id SEPARATOR ',') AS industryIds, \r\n"
+            + "    c.city_id AS cityId, \r\n"
+            + "    c.address, \r\n"
+            + "    c.description, \r\n"
+            + "    c.logo, \r\n"
+            + "    c.contact, \r\n"
+            + "    c.email, \r\n"
+            + "    c.established_time, \r\n"
+            + "    c.tax_code, \r\n"
+            + "    AVG(r.star) AS averageStar \r\n"
+            + "FROM company c \r\n"
+            + "LEFT JOIN job_posts jp ON c.user_id = jp.company_id \r\n"
+            + "LEFT JOIN apply_job a ON jp.post_id = a.post_id \r\n"
+            + "LEFT JOIN company_industries ci ON c.user_id = ci.company_id \r\n"
+            + "LEFT JOIN review r ON c.user_id = r.company_id \r\n"
+            + "WHERE (a.is_save = true OR a.post_id IS NULL) \r\n"
+            + "AND jp.is_approve = true \r\n"
+            + "GROUP BY c.user_id, c.company_name, c.city_id, c.address, \r\n"
+            + "         c.description, c.logo, c.contact, c.email, \r\n"
+            + "         c.established_time, c.tax_code \r\n"
+            + "ORDER BY AVG(r.star) DESC, COUNT(a.post_id) DESC;", nativeQuery = true)
+    List<CompanyProjection> findCompaniesWithSavedApplications();
 	
 //	@Query(value = """
 //		    SELECT BIN_TO_UUID(c.user_id) AS companyId, 
@@ -216,6 +218,11 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 		    Pageable pageable
 		);
 
+	@Query("SELECT new com.job_portal.DTO.CompanyWithAverageStarDTO(" +
+	           "c.companyId, c.companyName, AVG(r.star)) " +
+	           "FROM Company c LEFT JOIN c.reviews r " +
+	           "GROUP BY c.companyId, c.companyName")
+	    List<CompanyWithAverageStarDTO> findCompaniesWithAverageStar();
 	
 
 

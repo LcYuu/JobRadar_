@@ -27,9 +27,10 @@ public interface IJobPostService {
 	public boolean approveJob(UUID postId);
 	public JobPost searchJobByPostId(UUID postId) throws AllExceptions;
 	public List<DailyJobCount> getDailyJobPostCounts(LocalDateTime startDate, LocalDateTime endDate);
-	public Page<JobPost>findByIsApprove(Pageable pageable);
+	public Page<JobPostApproveDTO> findByIsApprove(Pageable pageable);
+	public Page<JobPost> findAllJobApprove(Pageable pageable);
 	public void exportJobPostToCSV(String filePath) throws IOException;
-	public List<JobPost> getTop8LatestJobPosts();
+	public List<JobPostApproveDTO> getTop8LatestJobPosts();
 	public List<JobCountType> getJobCountByType();
 	public Page<JobPost> searchJobsWithPagination(String title, List<String> selectedTypesOfWork, Long minSalary, Long maxSalary, Integer cityId, List<Integer> selectedIndustryIds, Pageable pageable);
 //	public Page<JobPost> findByCompanyId(UUID companyId, Pageable pageable);

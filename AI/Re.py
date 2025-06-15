@@ -285,7 +285,20 @@ def get_job_embedding(job):
         if job_id in job_embeddings:
             return job_embeddings[job_id]
         
-        job_text = f"{job.get('title', '')} {job.get('description', '')} {job.get('requirements', '')}"
+        # Cải thiện job text combination
+        components = []
+        if job.get('title'):
+            components.append(f"Tiêu đề: {job['title']}")
+        if job.get('description'):
+            components.append(f"Mô tả: {job['description']}")
+        if job.get('requirements') or job.get('requirement'):
+            req_text = job.get('requirements') or job.get('requirement', '')
+            components.append(f"Yêu cầu: {req_text}")
+        if job.get('niceToHaves'):
+            components.append(f"Ưu tiên: {job['niceToHaves']}")
+        
+        job_text = ". ".join(components)
+        
         embedding = embedding_model.encode(job_text, device=DEVICE, normalize_embeddings=True)
         job_embeddings[job_id] = embedding
         return embedding
@@ -795,10 +808,10 @@ def create_analysis_prompt(cv_text, job_data):
     ## Mô tả công việc:
     {job_description}
     
-    ## Yêu cầu công việc:
+    ## Yêu cầu công việc (bắt buộc):
     {job_requirements}
     
-    ## Trách nhiệm công việc:
+    ## Ưu tiên bổ sung (nice-to-have - những kỹ năng/kinh nghiệm tốt nếu ứng viên có):
     {job_nice_to_haves}
     
     ## Quyền lợi:
@@ -806,9 +819,11 @@ def create_analysis_prompt(cv_text, job_data):
     
     ## Yêu cầu kinh nghiệm:
     {job_experience}
-    
-    ## Kỹ năng yêu cầu:
+      ## Kỹ năng yêu cầu (từ danh sách kỹ năng được chọn):
     {', '.join([skill.get('skillName', '') for skill in job_skills]) if isinstance(job_skills, list) else ''}
+    
+    ## Yêu cầu chi tiết khác (từ mô tả yêu cầu công việc):
+    {job_requirements}
     """
     
     prompt = f"""
@@ -824,41 +839,57 @@ def create_analysis_prompt(cv_text, job_data):
     # Mô tả công việc đầy đủ:
     ```
     {full_job_description}
-    ```
-    
-    Hãy thực hiện phân tích chi tiết gồm:
+    ```    Hãy thực hiện phân tích chi tiết gồm:
     1. Trích xuất tất cả kỹ năng từ CV
-    2. Trích xuất tất cả kỹ năng yêu cầu từ mô tả công việc
-    3. So sánh kỹ năng để xác định kỹ năng phù hợp và còn thiếu
-    4. Phân tích học vấn trong CV và so sánh với yêu cầu
-    5. Phân tích kinh nghiệm trong CV và so sánh với yêu cầu
-    6. Đánh giá độ tương đồng tổng thể giữa CV và mô tả công việc
+    2. Trích xuất kỹ năng yêu cầu từ HAI NGUỒN:
+       - Từ danh sách "Kỹ năng yêu cầu" (đã được chọn sẵn)
+       - Từ phần "Yêu cầu chi tiết khác" (text mô tả yêu cầu công việc)
+    3. Phân loại kỹ năng theo mức độ ưu tiên:
+       - Required skills: Kỹ năng BẮT BUỘC từ yêu cầu công việc
+       - Nice-to-have skills: Kỹ năng từ phần "Ưu tiên bổ sung"
+    4. So sánh kỹ năng để xác định kỹ năng phù hợp và còn thiếu
+    5. Phân tích học vấn trong CV và so sánh với yêu cầu
+    6. Phân tích kinh nghiệm trong CV và so sánh với yêu cầu
+    7. Đánh giá độ tương đồng tổng thể giữa CV và mô tả công việc
+    
+    **Lưu ý quan trọng về phân loại kỹ năng:**
+    - "Kỹ năng yêu cầu" + "Yêu cầu chi tiết khác" = Required skills (BẮT BUỘC)
+    - "Ưu tiên bổ sung (nice-to-have)" = Nice-to-have skills (ĐIỂM CỘNG)
+    - Thiếu required skills: Giảm điểm đáng kể
+    - Thiếu nice-to-have skills: Không giảm điểm, chỉ mất cơ hội được điểm cộng
+    - Có nice-to-have skills: Được điểm cộng (tối đa +20 điểm)
     
     Hãy trả về một chuỗi JSON hợp lệ với các trường sau:
     ```json
-    {{
-        "matching_score": {{
+    {{        "matching_score": {{
             "totalScore": [điểm số từ 0-100],
             "matchedSkills": ["skill1", "skill2", ...],
             "missingSkills": ["skill1", "skill2", ...],
             "extraSkills": ["skill1", "skill2", ...],
+            "niceToHaveSkills": ["skill1", "skill2", ...],
             "detailedScores": {{
                 "skills_match": [điểm số từ 0-100],
                 "education_match": [điểm số từ 0-100], 
                 "experience_match": [điểm số từ 0-100],
                 "overall_similarity": [điểm số từ 0-100],
-                "context_score": [điểm số từ 0-100]
+                "context_score": [điểm số từ 0-100],
+                "nice_to_have_bonus": [điểm số từ 0-20 - điểm cộng cho nice-to-have skills]
             }},
             "suitabilityLevel": ["Extremely Well Suited", "Well Suited", "Moderately Suited", "Somewhat Suited", "Not Well Suited"],
             "recommendations": ["đề xuất 1", "đề xuất 2", ...],
             "cvImprovementSuggestions": ["gợi ý cải thiện 1", "gợi ý cải thiện 2", ...]
         }},
-        "detailedAnalysis": {{
-            "skills": {{
+        "detailedAnalysis": {{            "skills": {{
                 "score": [điểm số từ 0-100],
                 "matched_skills": ["skill1", "skill2", ...],
                 "missing_skills": ["skill1", "skill2", ...],
-                "reason": "Lý do đánh giá"
+                "required_skills_matched": ["skill1", "skill2", ...],
+                "required_skills_missing": ["skill1", "skill2", ...],
+                "nice_to_have_matched": ["skill1", "skill2", ...],
+                "nice_to_have_missing": ["skill1", "skill2", ...],
+                "skills_from_requirements_text": ["skill1", "skill2", ...],
+                "skills_from_selected_list": ["skill1", "skill2", ...],
+                "reason": "Lý do đánh giá chi tiết việc phân biệt giữa yêu cầu bắt buộc và ưu tiên bổ sung, bao gồm nguồn trích xuất kỹ năng"
             }},
             "education": {{
                 "score": [điểm số từ 0-100],
@@ -873,17 +904,34 @@ def create_analysis_prompt(cv_text, job_data):
                 "cv_years": [số năm kinh nghiệm từ CV],
                 "job_years": [số năm kinh nghiệm yêu cầu],
                 "reason": "Lý do đánh giá"
-            }},
-            "weights": {{
+            }},            "weights": {{
                 "skills": [trọng số từ 0-1],
                 "education": [trọng số từ 0-1],
                 "experience": [trọng số từ 0-1],
                 "overall_similarity": [trọng số từ 0-1],
-                "context": [trọng số từ 0-1]
+                "context": [trọng số từ 0-1],
+                "nice_to_have_bonus": [trọng số từ 0-0.2 - trọng số cho điểm cộng nice-to-have]
             }}
         }}
     }}
-    ```
+    ```    **Hướng dẫn tính điểm và phân loại kỹ năng:**
+    1. **Trích xuất kỹ năng yêu cầu bắt buộc từ 2 nguồn:**
+       - Từ "Kỹ năng yêu cầu": (VD: Python, Java, React)
+       - Từ "Yêu cầu chi tiết khác": Phân tích text để tìm kỹ năng (VD: "Có kinh nghiệm với Docker" → Docker)
+    
+    2. **Trích xuất nice-to-have skills từ "Ưu tiên bổ sung":**
+       - Phân tích text để tìm kỹ năng không bắt buộc (VD: "Kinh nghiệm với AWS là một lợi thế" → AWS)
+    
+    3. **Tính điểm:**
+       - Điểm cơ bản (80%): Required skills + experience + education
+       - Điểm cộng nice-to-have (tối đa 20%): Kỹ năng ưu tiên bổ sung
+       - Không trừ điểm nặng nếu thiếu nice-to-have skills
+    
+    4. **Phân loại kết quả:**
+       - matchedSkills: Kỹ năng required khớp
+       - missingSkills: Kỹ năng required còn thiếu  
+       - niceToHaveSkills: Kỹ năng nice-to-have mà ứng viên có
+       - extraSkills: Kỹ năng khác không liên quan đến JD
 
     Chỉ trả về đối tượng JSON đúng định dạng, không bao gồm markdown hoặc bất kỳ văn bản nào khác. 
     Đảm bảo rằng tất cả trường là dữ liệu đúng kiểu: điểm số là số, danh sách là mảng, và văn bản là chuỗi.
@@ -1226,7 +1274,7 @@ def analyze_cv():
             cv_text = extract_text_from_docx(cv_file)
         else:
             return jsonify({"error": "Định dạng file không được hỗ trợ"}), 400
-            
+        
         if not cv_text:
             return jsonify({"error": "Không thể trích xuất văn bản từ CV"}), 400
         

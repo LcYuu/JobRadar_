@@ -560,7 +560,7 @@ const CandidateManagement = () => {
                 disabled={currentPage === 0}
                 onClick={() => handlePageChange(currentPage - 1)}
               >
-                Previous
+                Trước đó
               </Button>
               <Button variant="outline" className="bg-purple-600 text-white">
                 {currentPage + 1}
@@ -570,7 +570,7 @@ const CandidateManagement = () => {
                 disabled={currentPage === totalPages - 1}
                 onClick={() => handlePageChange(currentPage + 1)}
               >
-                Next
+                Tiếp theo
               </Button>
             </div>
           </div>

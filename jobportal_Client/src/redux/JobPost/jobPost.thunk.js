@@ -2,8 +2,37 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { api, API_BASE_URL } from "../../configs/api";
 
+export const canPostJob = createAsyncThunk(
+  "jobs/canPostJob",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get("/job-post/can-post-job");
+      return response.data; 
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data || "Đã có lỗi xảy ra khi kiểm tra quyền đăng bài."
+      );
+    }
+  }
+);
+
+
 export const getAllJobAction = createAsyncThunk(
   "jobs/getAll",
+  async ({ currentPage, size }, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/job-post/find-all-job-approve?page=${currentPage}&size=${size}`
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const getAllJob = createAsyncThunk(
+  "jobs/getAllJobApprove",
   async ({ currentPage, size }, { rejectWithValue }) => {
     try {
       const response = await axios.get(
@@ -57,7 +86,7 @@ export const searchJobs = createAsyncThunk(
       if (!hasActiveFilters) {
         // Nếu không có filter, gọi API lấy tất cả công việc
         const response = await axios.get(
-          `http://localhost:8080/job-post/get-job-approve?page=${currentPage}&size=${size}`
+          `http://localhost:8080/job-post/find-all-job-approve?page=${currentPage}&size=${size}`
         );
         return response.data;
       }

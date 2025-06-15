@@ -31,4 +31,6 @@ public interface JobRecommendationProjection {
 	String getIndustryNames(); // GROUP_CONCAT trả về String
 
 	String getLogo();
+	
+	Double getAverageStar();
 }

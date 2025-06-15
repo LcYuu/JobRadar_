@@ -33,7 +33,6 @@ export const fetchSocialLinksByUserId = createAsyncThunk(
         params: { userId },
       
       });
-      console.log("🚀 ~ response:", response)
       return response.data; // Trả về danh sách socialLinks
     } catch (error) {
       return rejectWithValue(
