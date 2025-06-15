@@ -233,13 +233,13 @@ export default function Header() {
               className="text-white hover:text-[#e5c4f3] hover:bg-transparent"
               onClick={handleSignInClick}
             >
-              Login
+              Đăng nhập
             </Button>
             <Button
               className="bg-purple-600 text-white hover:bg-purple-700"
               onClick={handleSignUpClick}
             >
-              Sign Up
+              Đăng ký
             </Button>
           </>
         )}
@@ -337,13 +337,13 @@ export default function Header() {
                     onClick={handleSignInClick}
                     className="text-white py-2 w-full text-left hover:text-[#e5c4f3] hover:bg-transparent"
                   >
-                    Login
+                    Đăng nhập
                   </button>
                   <button
                     onClick={handleSignUpClick}
                     className="bg-purple-600 text-white py-2 px-4 rounded w-full hover:bg-purple-700"
                   >
-                    Sign Up
+                    Đăng ký
                   </button>
                 </>
               )}

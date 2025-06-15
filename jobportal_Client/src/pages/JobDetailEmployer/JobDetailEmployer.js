@@ -15,11 +15,12 @@ import {
   Edit,
   ArrowLeft,
 } from "lucide-react";
-import SkillJobPostModal from "./SkillJobPostModal";
+
 import { Badge } from "@mui/material";
 import { toast } from "react-toastify";
 import { getDetailJobById, updateJob } from "../../redux/JobPost/jobPost.thunk";
 import IndustryJobPostModal from "./IndustryJobPostModal";
+import SkillPostModal from "./SkillJobPostModal";
 
 const cityCodeMapping = {
   1: 16, // Hà Nội
@@ -140,11 +141,10 @@ const JobDetailEmployer = () => {
     position: "",
     niceToHaves: "",
   });
-  
+
   const handleSaveSkills = async (selectedSkills) => {
     try {
       const skillIds = selectedSkills.map((skill) => skill.skillId);
-  
       const updatedJobData = {
         ...jobData,
         skillIds: skillIds,
@@ -195,7 +195,6 @@ const JobDetailEmployer = () => {
       });
     }
   }, [detailJob]);
-  console.log("🚀 ~ JobDetailEmployer ~ detailJob:", detailJob)
 
   useEffect(() => {
     const fetchProvinces = async () => {
@@ -218,7 +217,6 @@ const JobDetailEmployer = () => {
       if (addressParts.length >= 4) {
         const [ward, district, province] = addressParts.slice(-3);
         const specificAddressPart = addressParts.slice(0, -3).join(", ");
-
         setSpecificAddress(specificAddressPart);
         setLocation({
           ward,
@@ -251,7 +249,6 @@ const JobDetailEmployer = () => {
               province: selectedProvinceData.name,
             }));
           }
-
           if (location.district) {
             const matchingDistrict = data.districts.find(
               (d) => d.name === location.district
@@ -286,7 +283,6 @@ const JobDetailEmployer = () => {
               district: selectedDistrictData.name,
             }));
           }
-
           if (location.ward) {
             const matchingWard = data.wards.find(
               (w) => w.name === location.ward
@@ -356,11 +352,21 @@ const JobDetailEmployer = () => {
         cityId: cityCodeMapping[selectedProvince] || detailJob.cityId,
       };
 
-      await dispatch(updateJob({ postId, jobPostData: updatedJobData }));
+      // Wait for the updateJob to complete
+      await dispatch(updateJob({ postId, jobPostData: updatedJobData })).unwrap();
+      
+      // Show success toast
+      toast.success("Cập nhật thành công!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
 
+      // Update UI and refresh data only after toast is shown
       setIsEditing(false);
-      toast.success("Cập nhật thành công!");
-
       dispatch(getDetailJobById(postId));
     } catch (error) {
       console.error("Error updating job:", error);
@@ -395,7 +401,6 @@ const JobDetailEmployer = () => {
     setErrors(tempErrors);
     return isValid;
   };
-
 
   const getRemainingTime = () => {
     const currentDate = new Date();
@@ -803,7 +808,7 @@ const JobDetailEmployer = () => {
                 {isEditing ? (
                   <input
                     type="date"
-                    value={jobData.expireDate}
+                    value={jobData.expireDate.split("T")[0]} // Extract only the date part
                     onChange={handleChange}
                     name="expireDate"
                     className="border p-1.5 sm:p-2 rounded text-xs sm:text-sm lg:text-base w-full sm:w-auto max-w-[200px]"
@@ -1012,11 +1017,11 @@ const JobDetailEmployer = () => {
               )}
             </div>
             <section>
-            <SkillJobPostModal
+              <SkillPostModal
                 open={openSkill}
                 handleClose={handleCloseSkill}
-                onSave={handleSaveSkills} // Thêm prop onSave
-                initialSkills={detailJob?.skills || []} // Thêm prop initialSkills
+                onSave={handleSaveSkills}
+                initialSkills={detailJob?.skills || []}
                 postId={postId}
                 className="w-full max-w-[90%] sm:max-w-lg md:max-w-2xl"
               />

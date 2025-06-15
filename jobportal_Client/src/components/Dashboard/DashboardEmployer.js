@@ -72,7 +72,7 @@ export default function Dashboard_Employer() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 mx-auto">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6 sm:mb-8">
+      <div className="flex justify-between items-center mb-6 sm:mb-8 mt-3">
         <h1 className="text-xl sm:text-2xl font-semibold text-purple-600">
           Chào mừng trở lại
         </h1>
@@ -90,7 +90,7 @@ export default function Dashboard_Employer() {
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 text-white">
             {countReview?.totalReviews ?? 0}
           </h2>
-          <p className="text-purple-100 text-sm sm:text-base">Tổng số Review</p>
+          <p className="text-purple-100 text-sm sm:text-base">Tổng số đánh giá</p>
         </div>
       </div>
 

@@ -234,7 +234,6 @@ const Chatbot = () => {
                 </div>
               </div>
             )}
-            
             {/* {error && (
               <div className="text-center text-red-500 flex items-center justify-center gap-2 text-xs p-2">
                 {error}

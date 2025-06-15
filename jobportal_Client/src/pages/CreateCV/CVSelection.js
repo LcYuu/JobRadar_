@@ -27,7 +27,7 @@ const CVSelection = () => {
     //   </div>
     // </div>
     <div className="p-10 md:px-20 lg:px-32">
-      <h2 className="font-bold text-3xl">My Resume</h2>
+      <h2 className="font-bold text-3xl">Tất cả CV</h2>
       <p>Tạo CV</p>
       <div
         className="grid grid-cols-2 

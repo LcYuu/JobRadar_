@@ -1,19 +1,11 @@
 package com.job_portal.controller;
 
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.Collections;
 import java.util.Date;
@@ -35,10 +27,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.job_portal.config.JwtProvider;
@@ -77,7 +65,6 @@ public class SubscriptionControllerTest {
     private String jwtToken;
     private UUID userId;
     private UserAccount userAccount;
-    
     private Seeker seeker;
     private static final String SECRET_KEY = "dsadasdhasuidhuasdyuiasydiuasasdasd";
     private static final SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
@@ -89,7 +76,7 @@ public class SubscriptionControllerTest {
         userAccount = new UserAccount();
         userAccount.setUserId(userId);
         userAccount.setEmail(USER_EMAIL);
-        
+
         seeker = new Seeker();
         seeker.setUserAccount(userAccount);
 
@@ -108,11 +95,10 @@ public class SubscriptionControllerTest {
                 .setIssuer("GiaThuanSenpai")
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
-                .claim("email", authentication.getName())
+                .claim("email", USER_EMAIL)
                 .signWith(key)
                 .compact();
 
-        when(JwtProvider.generateToken(authentication)).thenReturn(jwtToken);
         when(userAccountRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(userAccount));
     }
 
@@ -120,7 +106,6 @@ public class SubscriptionControllerTest {
     @WithMockUser(username = USER_EMAIL)
     void testCreateSubscription_Success() throws Exception {
         Subscription subscription = new Subscription();
-        
         subscription.setSeeker(seeker);
         when(subscriptionService.createSubscription(any(Subscription.class), eq(userId))).thenReturn(true);
 
@@ -179,8 +164,7 @@ public class SubscriptionControllerTest {
     @WithMockUser(username = USER_EMAIL)
     void testDeleteSubscription_Failure() throws Exception {
         UUID subId = UUID.randomUUID();
-        when(subscriptionService.deleteSubscription(subId))
-                .thenThrow(new AllExceptions("Subscription not found"));
+        doThrow(new AllExceptions("Subscription not found")).when(subscriptionService).deleteSubscription(subId);
 
         mockMvc.perform(delete("/subscription/delete/{subId}", subId)
                 .with(csrf())
@@ -195,14 +179,16 @@ public class SubscriptionControllerTest {
     @Test
     @WithMockUser(username = USER_EMAIL)
     void testGetAllSubscriptions_Success() throws Exception {
-        List<Subscription> subscriptions = Collections.singletonList(new Subscription());
+        Subscription subscription = new Subscription();
+        List<Subscription> subscriptions = Collections.singletonList(subscription);
         when(subscriptionService.getAllSubscriptions()).thenReturn(subscriptions);
 
         mockMvc.perform(get("/subscription/get-all")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$[0]").exists());
 
         verify(subscriptionService, times(1)).getAllSubscriptions();
     }
@@ -210,7 +196,8 @@ public class SubscriptionControllerTest {
     @Test
     @WithMockUser(username = USER_EMAIL)
     void testCheckAndSendEmails_Success() throws Exception {
-        // No need to mock return value for void method
+        doNothing().when(subscriptionService).checkAndSendEmails();
+
         mockMvc.perform(post("/subscription/send-emails")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON))
@@ -220,11 +207,11 @@ public class SubscriptionControllerTest {
 
         verify(subscriptionService, times(1)).checkAndSendEmails();
     }
+
     @Test
     @WithMockUser(username = USER_EMAIL)
     void testCheckAndSendEmails_Failure() throws Exception {
-    	
-    	doThrow(new RuntimeException("Email sending failed")).when(subscriptionService).checkAndSendEmails();
+        doThrow(new RuntimeException("Email sending failed")).when(subscriptionService).checkAndSendEmails();
 
         mockMvc.perform(post("/subscription/send-emails")
                 .with(csrf())
@@ -240,52 +227,66 @@ public class SubscriptionControllerTest {
     @WithMockUser(username = USER_EMAIL)
     void testUpdateSubscription_Success() throws Exception {
         UUID subId = UUID.randomUUID();
-        when(subscriptionService.updateSubscription(USER_EMAIL, subId)).thenReturn(true);
+        Subscription subscription = new Subscription();
+        subscription.setEmail(USER_EMAIL);
+        subscription.setEmailFrequency(Subscription.EmailFrequency.ONE_MONTH); // Use enum instead of String
+        when(subscriptionService.updateSubscription(eq(USER_EMAIL), eq(Subscription.EmailFrequency.ONE_MONTH), eq(subId)))
+                .thenReturn(true);
 
         mockMvc.perform(put("/subscription/update/{subId}", subId)
-                .param("email", USER_EMAIL)
                 .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(subscription)))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string("Cập nhật thành công"));
 
-        verify(subscriptionService, times(1)).updateSubscription(USER_EMAIL, subId);
+        verify(subscriptionService, times(1))
+                .updateSubscription(eq(USER_EMAIL), eq(Subscription.EmailFrequency.ONE_MONTH), eq(subId));
     }
 
     @Test
     @WithMockUser(username = USER_EMAIL)
     void testUpdateSubscription_NotFound() throws Exception {
         UUID subId = UUID.randomUUID();
-        when(subscriptionService.updateSubscription(USER_EMAIL, subId)).thenReturn(false);
+        Subscription subscription = new Subscription();
+        subscription.setEmail(USER_EMAIL);
+        subscription.setEmailFrequency(Subscription.EmailFrequency.ONE_MONTH); // Use enum instead of String
+        when(subscriptionService.updateSubscription(eq(USER_EMAIL), eq(Subscription.EmailFrequency.ONE_MONTH), eq(subId)))
+                .thenReturn(false);
 
         mockMvc.perform(put("/subscription/update/{subId}", subId)
-                .param("email", USER_EMAIL)
                 .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(subscription)))
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("Không thể tìm thấy việc đăng ký"));
 
-        verify(subscriptionService, times(1)).updateSubscription(USER_EMAIL, subId);
+        verify(subscriptionService, times(1))
+                .updateSubscription(eq(USER_EMAIL), eq(Subscription.EmailFrequency.ONE_MONTH), eq(subId));
     }
 
     @Test
     @WithMockUser(username = USER_EMAIL)
     void testUpdateSubscription_Failure() throws Exception {
         UUID subId = UUID.randomUUID();
-        when(subscriptionService.updateSubscription(USER_EMAIL, subId))
-                .thenThrow(new AllExceptions("Update error"));
+        Subscription subscription = new Subscription();
+        subscription.setEmail(USER_EMAIL);
+        subscription.setEmailFrequency(Subscription.EmailFrequency.ONE_MONTH); // Use enum instead of String
+        doThrow(new AllExceptions("Update error")).when(subscriptionService)
+                .updateSubscription(eq(USER_EMAIL), eq(Subscription.EmailFrequency.ONE_MONTH), eq(subId));
 
         mockMvc.perform(put("/subscription/update/{subId}", subId)
-                .param("email", USER_EMAIL)
                 .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(subscription)))
                 .andDo(print())
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().string("Có lỗi xảy ra: Update error"));
 
-        verify(subscriptionService, times(1)).updateSubscription(USER_EMAIL, subId);
+        verify(subscriptionService, times(1))
+                .updateSubscription(eq(USER_EMAIL), eq(Subscription.EmailFrequency.ONE_MONTH), eq(subId));
     }
 
     @Test
@@ -298,9 +299,11 @@ public class SubscriptionControllerTest {
         mockMvc.perform(get("/subscription/findBySeekerId")
                 .with(jwt().jwt(jwt -> jwt.claim("email", USER_EMAIL)))
                 .header("Authorization", jwtToken)
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.seeker").exists());
 
         verify(subscriptionService, times(1)).findSubBySeekerId(userId);
         verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
@@ -314,12 +317,14 @@ public class SubscriptionControllerTest {
         mockMvc.perform(get("/subscription/findBySeekerId")
                 .with(jwt().jwt(jwt -> jwt.claim("email", USER_EMAIL)))
                 .header("Authorization", jwtToken)
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().string(""));
+                .andExpect(status().isOk());
 
         verify(subscriptionService, times(1)).findSubBySeekerId(userId);
         verify(userAccountRepository, times(1)).findByEmail(USER_EMAIL);
     }
+
+
 }

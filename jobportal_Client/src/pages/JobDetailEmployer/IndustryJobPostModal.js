@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Checkbox } from "../../ui/checkbox";
 import { getDetailJobById, updateJob } from "../../redux/JobPost/jobPost.thunk";
 import { getCompanyByJWT } from "../../redux/Company/company.thunk";
+import { toast } from "react-toastify";
 
 const IndustryPostModal = ({ open, handleClose, postId }) => {
   const dispatch = useDispatch();
@@ -36,6 +37,7 @@ const IndustryPostModal = ({ open, handleClose, postId }) => {
         })
       );
       dispatch(getDetailJobById(postId)); // Tải lại chi tiết công việc
+      toast.success("Cập nhật chuyên ngành thành công")
     } catch (error) {
       console.error("Error updating skills:", error);
     } finally {
@@ -44,8 +46,7 @@ const IndustryPostModal = ({ open, handleClose, postId }) => {
     }
   };
 
-  console.log("All skills:", companyJwt?.industry); // Kiểm tra toàn bộ kỹ năng từ store
-  console.log("Selected skills:", selectedIndustry); // Kiểm tra danh sách skill đã chọn
+
 
   if (!companyJwt || !Array.isArray(companyJwt?.industry)) {
     return (

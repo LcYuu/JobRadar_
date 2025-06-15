@@ -660,16 +660,16 @@ export default function JobSearchPage() {
 
   const getDisplayResults = useCallback(() => {
     try {
-      console.log("getDisplayResults được gọi với:", {
+      console.log("getDisplayResults inputs:", {
         isUsingSemanticSearch,
-        semanticResults,
+        semanticResults: semanticResults?.content,
         isFilterApplied,
         searchJob,
         jobPost,
         currentPage,
         size,
       });
-
+  
       if (isUsingSemanticSearch && semanticResults) {
         console.log("Sử dụng kết quả từ tìm kiếm ngữ nghĩa:", semanticResults);
         if (
@@ -711,7 +711,7 @@ export default function JobSearchPage() {
           totalPages: totalPages,
         };
       }
-
+  
       if (isFilterApplied) {
         console.log("Sử dụng kết quả từ searchJobs với bộ lọc:", {
           searchJob,
@@ -730,18 +730,15 @@ export default function JobSearchPage() {
         displayTotalElements,
         totalPagesFromAll,
       });
+
       return {
         content: jobPost || [],
         totalElements: displayTotalElements,
         totalPages: totalPagesFromAll || 1,
       };
     } catch (error) {
-      console.error("Lỗi trong getDisplayResults:", error);
-      return {
-        content: [],
-        totalElements: 0,
-        totalPages: 1,
-      };
+      console.error("Error in getDisplayResults:", error);
+      return { content: [], totalElements: 0, totalPages: 1 };
     }
   }, [
     isUsingSemanticSearch,
@@ -757,6 +754,7 @@ export default function JobSearchPage() {
   ]);
 
   const displayResults = getDisplayResults();
+  console.log("display" , displayResults.content)
   const results = displayResults.content || [];
   const totalPages = displayResults.totalPages || 0;
   const totalResults = displayResults.totalElements || 0;

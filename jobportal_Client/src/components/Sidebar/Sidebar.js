@@ -49,7 +49,7 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
   };
 
   const adminMenuItems = [
-    { label: "Dashboard", icon: LayoutDashboard, path: "/admin/dashboard" },
+    { label: "Trang chủ", icon: LayoutDashboard, path: "/admin/dashboard" },
     { label: "Danh sách công ty", icon: Building2, path: "/admin/company-list" },
     { label: "Danh sách người dùng", icon: Users, path: "/admin/user-list" },
     { label: "Danh sách công việc", icon: FileText, path: "/admin/job-list" },
@@ -58,7 +58,7 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
 
   const seekerMenuItems = [
     {
-      label: "Dashboard",
+      label: "Trang chủ",
       icon: LayoutDashboard,
       path: "/user/account-management/dashboard",
     },
@@ -85,8 +85,8 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
   ];
 
   const employerMenuItems = [
-    { label: "Dashboard", icon: LayoutDashboard, path: "/employer/account-management/dashboard" },
-    { label: "Profile công ty", icon: Building2, path: "/employer/account-management/company-profile" },
+    { label: "Trang chủ", icon: LayoutDashboard, path: "/employer/account-management/dashboard" },
+    { label: "Thông tin công ty", icon: Building2, path: "/employer/account-management/company-profile" },
     { label: "Danh sách ứng tuyển", icon: Users, path: "/employer/account-management/candidate-management" },
     { label: "Danh sách công việc", icon: FileText, path: "/employer/account-management/job-management" },
     { label: "Danh sách đánh giá", icon: Star, path: "/employer/account-management/review-management" },

@@ -3,27 +3,29 @@ package com.job_portal.projection;
 import java.util.UUID;
 
 public interface CompanyProjection {
-	UUID getCompanyId();
+    UUID getCompanyId();
 
-	String getCompanyName();
+    String getCompanyName();
 
-	Long getApplicationCount();
+    Long getApplicationCount();
 
-	String getIndustryIds(); 
+    String getIndustryIds();
 
-	Integer getCityId();
+    Integer getCityId();
 
-	String getAddress();
+    String getAddress();
 
-	String getDescription();
+    String getDescription();
 
-	String getLogo();
+    String getLogo();
 
-	String getContact();
+    String getContact();
 
-	String getEmail();
+    String getEmail();
 
-	java.sql.Date getEstablishedTime();
+    java.sql.Date getEstablishedTime();
 
-	String getTaxCode();
+    String getTaxCode();
+
+    Double getAverageStar();
 }

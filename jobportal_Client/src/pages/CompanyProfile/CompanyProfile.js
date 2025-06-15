@@ -1,9 +1,18 @@
+
 import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "swiper/swiper-bundle.css";
 import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
-import { Calendar, MapPin, Briefcase, Star, Phone, Mail, CheckCircle2 } from "lucide-react";
+import {
+  Calendar,
+  MapPin,
+  Briefcase,
+  Star,
+  Phone,
+  Mail,
+  CheckCircle2,
+} from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import JobCard_AllJob from "../../components/common/JobCard_AllJob/JobCard_AllJob";
 import IndustryBadge from "../../components/common/IndustryBadge/IndustryBadge";
@@ -59,6 +68,7 @@ const RatingStars = React.memo(({ value, onChange, readOnly = false, size = "def
     default: "w-5 h-5",
     large: "w-6 h-6",
   };
+
 
   return (
     <div className="flex items-center gap-1">
@@ -511,11 +521,27 @@ export default function CompanyProfile() {
   const { companyId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { jobPost = [], error, totalPages = 0, totalElements = 0 } = useSelector((store) => store.jobPost);
+  const {
+    jobPost = [],
+    error,
+    totalPages = 0,
+    totalElements = 0,
+  } = useSelector((store) => store.jobPost);
   const [reviewsList, setReviewsList] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const { socialLinks } = useSelector((store) => store.socialLink);
+
+  const handleIndustryClick = (industryId) => {
+    if (industryId) {
+      navigate("/find-companies", {
+        state: { selectedIndustryId: industryId },
+      });
+    } else {
+      console.warn(`Không tìm thấy industryId cho ngành: ${industryId}`);
+      navigate("/find-companies");
+    }
+  };
 
   // States for edit functionality
   const [editingReviewId, setEditingReviewId] = useState(null);
@@ -668,7 +694,9 @@ export default function CompanyProfile() {
 
   const { reviews, replies, reactions } = useSelector((store) => store.review);
 
-  const { checkIfSaved, companyProfile } = useSelector((store) => store.company);
+  const { checkIfSaved, companyProfile } = useSelector(
+    (store) => store.company
+  );
 
   const { seeker } = useSelector((store) => store.seeker);
   const { user } = useSelector((store) => store.auth);
@@ -745,8 +773,9 @@ export default function CompanyProfile() {
     try {      // Kiểm tra nội dung với AI
       const response = await fetch('http://localhost:5000/check-comment', {
         method: 'POST',
+
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ text: feedback.message }),
       });
@@ -760,9 +789,9 @@ export default function CompanyProfile() {
       if (result.is_toxic) {
         // Dismiss loading toast trước khi hiển thị lỗi
         toast.dismiss(loadingToastId);
-        
+
         // Hiển thị thông báo lỗi UI
-        toast.error('Nội dung đánh giá không phù hợp. Vui lòng kiểm tra lại.', {
+        toast.error("Nội dung đánh giá không phù hợp. Vui lòng kiểm tra lại.", {
           position: "top-right",
           autoClose: 5000,
           hideProgressBar: false,
@@ -1192,10 +1221,10 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         return;
     }    // Kiểm tra nội dung với AI (sử dụng contentToCheck)
     try {
-      const response = await fetch('http://localhost:5000/check-comment', {
-        method: 'POST',
+      const response = await fetch("http://localhost:5000/check-comment", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ text: contentToCheck }),
       });
@@ -1211,15 +1240,22 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         toast.dismiss(loadingToastId);
 
         // Hiển thị thông báo lỗi UI
-        toast.error('Nội dung bình luận không phù hợp. Vui lòng kiểm tra lại.', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });        // Highlight nội dung có vấn đề
-        showModerationError({ message: result.message }, contentToCheck);
+        toast.error(
+          "Nội dung bình luận không phù hợp. Vui lòng kiểm tra lại.",
+          {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          }
+        );
+
+        // Highlight nội dung có vấn đề
+        const highlightedContent = highlightProblematicContent(contentToCheck);
+        showModerationError(result.message, highlightedContent);
+
 
         return;
       }
@@ -1277,7 +1313,6 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
 
       // Show success message
       toast.success("Phản hồi đã được gửi thành công");
-
     } catch (error) {
       // Always dismiss the loading toast in case of error
       toast.dismiss(loadingToastId);
@@ -1613,10 +1648,11 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
       const response = await fetch('http://localhost:5000/check-comment', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ text: editReplyData.content }),
       });
+
 
       if (!response.ok) {
         throw new Error(`AI service error: ${response.status}`);
@@ -1628,20 +1664,23 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
         return;
       }
 
-      const token = localStorage.getItem('jwt');
+      const token = localStorage.getItem("jwt");
       // Gọi API cập nhật reply
-      const response2 = await fetch(`${API_URL}/review/update-reply/${editReplyData.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          content: editReplyData.content,
-          isAnonymous: editReplyData.isAnonymous,
-          parentReplyId: editReplyData.parentReplyId || null
-        })
-      });
+      const response2 = await fetch(
+        `${API_URL}/review/update-reply/${editReplyData.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            content: editReplyData.content,
+            isAnonymous: editReplyData.isAnonymous,
+            parentReplyId: editReplyData.parentReplyId || null,
+          }),
+        }
+      );
 
       if (!response2.ok) {
         const errorData = await response2.json();
@@ -1651,8 +1690,47 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
       // ADDED: Re-fetch all reviews for the company to ensure UI update
       await dispatch(getReviewByCompany(companyId));
 
-      setEditingReplyId(null);
-      setEditReplyData(null);
+      // Cập nhật Redux store
+      dispatch({
+        type: "review/updateReviewReply/fulfilled",
+        payload: updatedReply
+      });
+
+      // Cập nhật lại tất cả các reply trong Redux store
+      const updatedReviews = reviews.map(review => {
+        if (review.replies && review.replies.length > 0) {
+          const updateReplyRecursive = (repliesArray, replyId, updatedData) => {
+            return repliesArray.map(reply => {
+              if (reply.replyId === replyId) {
+                return {
+                  ...reply,
+                  ...updatedData,
+                  replies: reply.replies || []
+                };
+              }
+              if (reply.replies && reply.replies.length > 0) {
+                return {
+                  ...reply,
+                  replies: updateReplyRecursive(reply.replies, replyId, updatedData)
+                };
+              }
+              return reply;
+            });
+          };
+
+          return {
+            ...review,
+            replies: updateReplyRecursive(review.replies, editReplyData.id, updatedReply)
+          };
+        }
+        return review;
+      });
+
+      // Cập nhật toàn bộ reviews trong Redux store
+      dispatch({
+        type: "review/getReviewByCompany/fulfilled",
+        payload: updatedReviews
+      });
 
       toast.success('Đã cập nhật bình luận thành công!');
 
@@ -1707,7 +1785,7 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                 <CheckCircle2 className="h-4 w-4 text-white" />
               </div>
             </div>
-            
+
             <div className="flex-1">
               <div className="flex flex-col xs:flex-row xs:items-center xs:gap-4 mb-3">
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 bg-gradient-to-r from-purple-600 to-purple-600 bg-clip-text text-transparent">
@@ -1720,9 +1798,21 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                         className={`
                           px-2 py-1 text-sm text-white rounded-full
                           ${averageStars <= 1 ? "bg-red-500" : ""}
-                          ${averageStars > 1 && averageStars <= 2 ? "bg-orange-500" : ""}
-                          ${averageStars > 2 && averageStars <= 3 ? "bg-yellow-500" : ""}
-                          ${averageStars > 3 && averageStars <= 4 ? "bg-green-500" : ""}
+                          ${
+                            averageStars > 1 && averageStars <= 2
+                              ? "bg-orange-500"
+                              : ""
+                          }
+                          ${
+                            averageStars > 2 && averageStars <= 3
+                              ? "bg-yellow-500"
+                              : ""
+                          }
+                          ${
+                            averageStars > 3 && averageStars <= 4
+                              ? "bg-green-500"
+                              : ""
+                          }
                           ${averageStars > 4 ? "bg-blue-500" : ""}
                         `}
                       >
@@ -1753,41 +1843,44 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                 <div className="flex items-center p-3 border border-yellow-400 rounded-xl bg-yellow-50 shadow-sm mb-4">
                   <Star className="h-5 w-5 text-yellow-400 mr-2" />
                   <span className="text-sm text-gray-700 font-medium">
-                    Phải đăng nhập và được apply vào công ty thì mới được đánh giá
+                    Phải đăng nhập và được apply vào công ty thì mới được đánh
+                    giá
                   </span>
                 </div>
               ) : null}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
-                  <Calendar className="w-5 h-5 text-purple-500" />
+                  <Calendar className="w-5 h-5 min-w-5 min-h-5 text-purple-500" />
                   <div>
                     <p className="text-xs text-gray-500">Thành lập</p>
                     <p className="text-sm font-medium text-gray-700">
-                      {new Date(companyProfile?.establishedTime).toLocaleDateString(
-                        "vi-VN",
-                        {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }
-                      )}
+                      {new Date(
+                        companyProfile?.establishedTime
+                      ).toLocaleDateString("vi-VN", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
-                  <MapPin className="w-5 h-5 text-purple-500" />
+                  <MapPin className="w-5 h-5 min-w-5 min-h-5 text-purple-500" />
                   <div>
                     <p className="text-xs text-gray-500">Địa chỉ</p>
-                    <p className="text-sm font-medium text-gray-700 break-words" title={companyProfile?.address || "Chưa có địa chỉ"}>
+                    <p
+                      className="text-sm font-medium text-gray-700 break-words"
+                      title={companyProfile?.address || "Chưa có địa chỉ"}
+                    >
                       {companyProfile?.address || "Chưa có địa chỉ"}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-200">
-                  <Briefcase className="w-5 h-5 text-purple-500" />
+                  <Briefcase className="w-5 h-5 min-w-5 min-h-5 text-purple-500" />
                   <div>
                     <p className="text-xs text-gray-500">Lĩnh vực</p>
                     <div className="flex flex-wrap gap-1 mt-1">

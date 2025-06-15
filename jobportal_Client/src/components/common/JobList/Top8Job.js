@@ -47,26 +47,33 @@ export default function Top8Job() {
           </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {top8Job.length > 0 ? (
-            top8Job.map((job) => (
+        {top8Job.length > 0 ? (
+          top8Job.map((job) => {
+            // Tạo mảng category từ industryIds và industryNames
+            const category = job.industryIds.map((id, index) => ({
+              industryId: id,
+              industryName: job.industryNames[index] || "Không xác định",
+            }));
+
+            return (
               <JobCard
                 key={job.postId}
                 postId={job.postId}
                 jobTitle={job.title}
-                company={job.company.companyName}
-                location={job.city.cityName}
-                category={
-                  job?.industry
-                    ? job.industry.map((ind) => ind.industryName)
-                    : []
-                }
+                company={job.companyName}
+                location={job.cityName}
+                category={category} // Truyền mảng category
                 jobType={job.typeOfWork}
-                companyLogo={job.company.logo || logo1}
+                companyLogo={job.companyLogo}
+                rating={job.averageStar}
               />
-            ))
-          ) : (
+            );
+          })
+        ) : (
+          <div className="col-span-full text-center py-8">
             <p>Không có công việc nào để hiển thị.</p>
-          )}
+          </div>
+        )}
         </div>
       </section>
     </Container>

@@ -11,7 +11,7 @@ export const sendMessage = createAsyncThunk(
       const userId = user?.userId || 'guest'; // Dự phòng nếu không có userId
 
       // Chuẩn bị yêu cầu gửi tới backend
-      const chatRequest = { message: text };
+      const chatRequest = { message: text, sender: userId };
       const response = await api.post('/chatbot/send', chatRequest);
 
       // Xử lý phản hồi từ Rasa

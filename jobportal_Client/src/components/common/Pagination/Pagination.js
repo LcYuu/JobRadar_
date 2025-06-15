@@ -218,7 +218,7 @@ const Pagination = ({
         }`}
       >
         <ChevronRight className="h-4 w-4" aria-hidden="true" />
-        <span className="sr-only">Next</span>
+        <span className="sr-only">Tiếp theo</span>
       </button>
     </nav>
   );

@@ -7,7 +7,7 @@ import Sidebar from "../../components/Sidebar/Sidebar";
 import { ArrowLeft } from "@mui/icons-material";
 
 export default function Dashboard() {
-  const [selectedSection, setSelectedSection] = useState("Dashboard");
+  const [selectedSection, setSelectedSection] = useState("Trang chủ");
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useSelector((state) => state.auth);
@@ -15,15 +15,15 @@ export default function Dashboard() {
   // Route-to-section mapping for user and employer
   const sectionMap = {
     user: {
-      "user/account-management/dashboard": "Dashboard",
+      "user/account-management/dashboard": "Trang chủ",
       "user/account-management/cv": "CV của tôi",
       "user/account-management/following-companies": "Công ty theo dõi",
       "user/account-management/profile": "Hồ sơ cá nhân",
       "user/account-management/saved-jobs": "Công việc đã lưu"
     },
     employer: {
-      "employer/account-management/dashboard": "Dashboard",
-      "employer/account-management/company-profile": "Profile công ty",
+      "employer/account-management/dashboard": "Trang chủ",
+      "employer/account-management/company-profile": "Thông tin công ty",
       "employer/account-management/applications": "Danh sách ứng tuyển",
       "employer/account-management/jobs": "Danh sách công việc",
       "employer/account-management/reviews": "Danh sách đánh giá",

@@ -176,7 +176,7 @@ const CompanyReview = () => {
               disabled={page === 0}
               onClick={() => handlePageChange(page - 1)}
             >
-              Previous
+              Trước đó
             </Button>
             <Button
               variant="outline"
@@ -190,7 +190,7 @@ const CompanyReview = () => {
               disabled={page === totalPages - 1}
               onClick={() => handlePageChange(page + 1)}
             >
-              Next
+              Tiếp theo
             </Button>
           </div>
         </div>

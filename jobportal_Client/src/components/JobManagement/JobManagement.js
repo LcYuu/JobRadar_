@@ -17,19 +17,18 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { toast, ToastContainer } from "react-toastify";
 import Swal from "sweetalert2";
-import {
-  findEmployerCompany,
-  updateExpireJob,
-} from "../../redux/JobPost/jobPost.thunk";
+
 import { validateTaxCode } from "../../redux/Company/company.thunk";
 import "./JobManagement.css";
+import { canPostJob,findEmployerCompany,
+  updateExpireJob,} from "../../redux/JobPost/jobPost.thunk";
 
 const JobManagement = () => {
   const work = [
     { id: "Toàn thời gian", label: "Toàn thời gian" },
     { id: "Bán thời gian", label: "Bán thời gian" },
     { id: "Từ xa", label: "Từ xa" },
-    { id: "Thực tập sinh", label: "Thực tập sinh" },
+    { id: "Thực tập sinh", label: "Thực tập viên" },
   ];
 
   const dispatch = useDispatch();
@@ -39,6 +38,8 @@ const JobManagement = () => {
     totalPages,
     totalElements,
     expireJob,
+    canPostLoading,
+    canPostError,
   } = useSelector((store) => store.jobPost);
   const { isValid, loading, error } = useSelector((store) => store.company);
 
@@ -181,17 +182,31 @@ const JobManagement = () => {
     );
   };
 
-  const handleClick = () => {
-    if (isValid) {
-      navigate("/employer/jobs/post");
-    } else {
+  const handleClick = async () => {
+    if (!isValid) {
       toast.error(
         "Mã số thuế không chính xác. Hãy cập nhật đúng để được đăng bài"
       );
+      return;
+    }
+
+    try {
+      const result = await dispatch(canPostJob()).unwrap();
+      navigate("/employer/jobs/post");
+    } catch (error) {
+      Swal.fire({
+        icon: "info",
+        title: "Thông báo",
+        text:
+          error === "Người dùng không tồn tại."
+            ? "Vui lòng đăng nhập lại."
+            : error === "Công ty chỉ được đăng 1 bài trong vòng 1 giờ."
+            ? "Công ty chỉ được đăng 1 bài trong vòng 1 giờ. Vui lòng thử lại sau."
+            : error || "Đã có lỗi xảy ra khi kiểm tra quyền đăng bài.",
+      });
     }
   };
 
-  // Logic đóng dropdown khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -222,8 +237,9 @@ const JobManagement = () => {
               variant="default"
               className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-500 transition-colors"
               onClick={handleClick}
+              disabled={canPostLoading}
             >
-              + Đăng bài
+              {canPostLoading ? "Đang kiểm tra..." : "+ Đăng bài"}
             </Button>
           </div>
         </div>
@@ -500,7 +516,7 @@ const JobManagement = () => {
                 disabled={currentPage === 0}
                 onClick={() => handlePageChange(currentPage - 1)}
               >
-                Previous
+                Trước đó
               </Button>
               <Button variant="outline" className="bg-purple-600 text-white">
                 {currentPage + 1}
@@ -510,7 +526,7 @@ const JobManagement = () => {
                 disabled={currentPage === totalPages - 1}
                 onClick={() => handlePageChange(currentPage + 1)}
               >
-                Next
+                Tiếp theo
               </Button>
             </div>
           </div>

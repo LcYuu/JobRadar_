@@ -55,6 +55,19 @@ export default function JobDetail() {
     }
   }, [dispatch, postId]);
 
+  const handleCategoryClick = ( industryId) => {
+    if (industryId) {
+      navigate("/find-jobs", {
+        state: {
+          selectedIndustryIds: [industryId],
+        },
+      });
+    } else {
+      console.warn(`No industryId found for category: ${industryId}`);
+      navigate("/find-jobs"); // Fallback navigation without state
+    }
+  };
+
   useEffect(() => {
     if (modalClosed) {
       dispatch(getOneApplyJob(postId));
@@ -468,7 +481,7 @@ export default function JobDetail() {
                   <h3 className="text-lg font-semibold mb-4">Lĩnh vực</h3>
                   <div className="flex flex-wrap gap-2">
                     {postByPostId.industry.map((industry) => (
-                      <IndustryBadge key={industry.industryId} name={industry.industryName} />
+                      <IndustryBadge key={industry.industryId} name={industry.industryName} onClick={() => handleCategoryClick(industry.industryId)} />
                     ))}
                   </div>
                 </div>
