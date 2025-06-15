@@ -1288,3 +1288,204 @@ google.api_core.exceptions.ResourceExhausted: 429 You exceeded your current quot
 2025-06-06 15:26:02,601 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:26:02] "OPTIONS /check-comment HTTP/1.1" 200 -
 2025-06-06 15:26:02,856 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:26:02] "POST /check-comment HTTP/1.1" 200 -
 2025-06-06 15:26:02,923 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 15:26:02] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 20:50:51,778 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-06 20:50:51,782 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-06 20:50:57,317 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-06 20:50:57,317 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-06 20:50:57,317 - __main__ - ERROR - Lỗi khi khởi tạo Gemini model: name 'setup_gemini' is not defined
+2025-06-06 20:50:57,322 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-06 20:50:57,322 - __main__ - INFO - Đang tải công việc từ D:\2024-2025_HKI\TLCN\JobPortal_Project\job_post.csv...
+2025-06-06 20:50:57,455 - __main__ - INFO - Đã tải 1301 công việc.
+2025-06-06 20:50:57,457 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-06 20:50:57,480 - __main__ - INFO - Đã tải 1780 mục lịch sử tìm kiếm.
+2025-06-06 20:50:57,482 - __main__ - INFO - Tạo mới embeddings vì cache không hợp lệ hoặc đã hết hạn
+2025-06-06 20:50:57,482 - __main__ - INFO - Tạo mới embeddings cho công việc
+2025-06-06 20:53:09,198 - __main__ - INFO - Đã lưu 1301 embeddings vào cache
+2025-06-06 20:53:09,543 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.17:5000
+2025-06-06 20:53:09,543 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-06 20:53:09,558 - werkzeug - INFO -  * Restarting with stat
+2025-06-06 20:53:31,048 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-06 20:53:31,049 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-06 20:53:40,419 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-06 20:53:40,421 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-06 20:53:40,424 - __main__ - ERROR - Lỗi khi khởi tạo Gemini model: name 'setup_gemini' is not defined
+2025-06-06 20:53:40,442 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-06 20:53:40,442 - __main__ - INFO - Đang tải công việc từ D:\2024-2025_HKI\TLCN\JobPortal_Project\job_post.csv...
+2025-06-06 20:53:40,657 - __main__ - INFO - Đã tải 1301 công việc.
+2025-06-06 20:53:40,658 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-06 20:53:40,688 - __main__ - INFO - Đã tải 1780 mục lịch sử tìm kiếm.
+2025-06-06 20:53:40,708 - __main__ - INFO - Đã tải 1301 embeddings từ cache
+2025-06-06 20:53:40,841 - werkzeug - WARNING -  * Debugger is active!
+2025-06-06 20:53:40,856 - werkzeug - INFO -  * Debugger PIN: 261-957-740
+2025-06-06 21:23:37,472 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-06 21:23:37,669 - __main__ - INFO - Đã tải 1815 mục lịch sử tìm kiếm.
+2025-06-06 21:23:39,740 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:23:39] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-06 21:27:19,759 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:27:19] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:27:19,806 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:27:19] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:32:41,526 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:32:41] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:32:41,548 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:32:41] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:36:31,916 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:36:31] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:36:31,935 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:36:31] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:36:47,119 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:36:47] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:36:47,356 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:36:47] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:37:26,504 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:37:26] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:37:26,750 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:37:26] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:39:07,899 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:39:07] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:39:07,931 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:39:07] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:40:29,803 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:40:29] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:40:29,822 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:40:29] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:40:42,557 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:40:42] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:40:42,811 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:40:42] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:40:42,864 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:40:42] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:40:51,406 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:40:51] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:40:51,669 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:40:51] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:42:31,665 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:42:31] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:42:31,674 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:42:31] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:42:36,906 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:42:36] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:42:37,164 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:42:37] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:42:37,232 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:42:37] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:43:58,259 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:43:58] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:43:58,515 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:43:58] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:45:25,796 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:45:25] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:45:25,931 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:45:25] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:46:37,300 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:46:37] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:46:37,310 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:46:37] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:46:37,642 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:46:37] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:46:40,619 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:46:40] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:46:47,286 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:46:47] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:46:47,596 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:46:47] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:47:55,748 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:47:55] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:47:56,013 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:47:56] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:47:56,090 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:47:56] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:48:14,608 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:48:14] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:48:14,872 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:48:14] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:48:14,916 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:48:14] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:48:21,128 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:48:21] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:48:21,377 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:48:21] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:48:21,438 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:48:21] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:49:37,953 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:49:37] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:49:38,007 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:49:38] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:49:38,281 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:49:38] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:49:42,065 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:49:42] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:51:28,568 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:51:28] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:51:28,636 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:51:28] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 21:51:33,999 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:51:33] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 21:51:34,254 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 21:51:34] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:12:49,104 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:12:49] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 22:12:49,126 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:12:49] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:12:49,446 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:12:49] "[31m[1mPOST /check-comment HTTP/1.1[0m" 400 -
+2025-06-06 22:15:02,009 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:15:02] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 22:15:02,017 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:15:02] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:15:02,344 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:15:02] "[31m[1mPOST /check-comment HTTP/1.1[0m" 400 -
+2025-06-06 22:18:17,606 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:18:17] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 22:18:17,870 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:18:17] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:18:17,921 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:18:17] "[31m[1mPOST /check-comment HTTP/1.1[0m" 400 -
+2025-06-06 22:21:16,396 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:21:16] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 22:21:16,413 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:21:16] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:21:16,752 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:21:16] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:21:58,050 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:21:58] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 22:21:58,310 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:21:58] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:21:58,362 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:21:58] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:22:04,181 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:22:04] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 22:22:04,498 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:22:04] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:26:41,760 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:26:41] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 22:26:41,777 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:26:41] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:26:50,815 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:26:50] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 22:26:51,060 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:26:51] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:26:59,956 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:26:59] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 22:27:00,276 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:27:00] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:27:11,990 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:27:11] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 22:27:12,233 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:27:12] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:27:25,019 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:27:25] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 22:27:25,280 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:27:25] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:27:29,157 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:27:29] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:29:25,286 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:29:25] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 22:29:25,296 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:29:25] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:29:28,661 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:29:28] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:30:17,271 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:30:17] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 22:30:17,526 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:30:17] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:30:17,582 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:30:17] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:31:04,837 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:31:04] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 22:31:05,103 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:31:05] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:31:05,147 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:31:05] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:31:12,286 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:31:12] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 22:31:12,524 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:31:12] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:32:21,357 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:32:21] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 22:32:21,604 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:32:21] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:32:21,664 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:32:21] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:32:25,717 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:32:25] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:32:26,032 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:32:26] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:32:30,827 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:32:30] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-06 22:32:31,139 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:32:31] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:32:31,398 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:32:31] "POST /check-comment HTTP/1.1" 200 -
+2025-06-06 22:37:01,498 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-06 22:37:02,104 - __main__ - INFO - Đã tải 1819 mục lịch sử tìm kiếm.
+2025-06-06 22:37:02,117 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: 45000000
+2025-06-06 22:37:02,119 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-06 22:37:02,151 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: 45000000
+2025-06-06 22:37:02,169 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:37:02] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-06 22:37:02,164 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:37:02] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-06 22:41:11,907 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-06 22:41:11,931 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: 45000000
+2025-06-06 22:41:11,933 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-06 22:41:11,943 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:41:11] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-06 22:41:11,945 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: 45000000
+2025-06-06 22:41:11,949 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:41:11] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-06 22:43:04,858 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-06 22:43:04,869 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: 45000000
+2025-06-06 22:43:04,878 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:43:04] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-06 22:43:04,880 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-06 22:43:04,884 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: 45000000
+2025-06-06 22:43:04,888 - werkzeug - INFO - 127.0.0.1 - - [06/Jun/2025 22:43:04] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-09 12:34:13,802 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-09 12:34:13,802 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-09 12:34:19,083 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-09 12:34:19,083 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-09 12:34:19,083 - __main__ - ERROR - Lỗi khi khởi tạo Gemini model: name 'setup_gemini' is not defined
+2025-06-09 12:34:19,094 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-09 12:34:19,095 - __main__ - INFO - Đang tải công việc từ D:\2024-2025_HKI\TLCN\JobPortal_Project\job_post.csv...
+2025-06-09 12:34:19,200 - __main__ - INFO - Đã tải 1301 công việc.
+2025-06-09 12:34:19,200 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-09 12:34:19,234 - __main__ - INFO - Đã tải 1953 mục lịch sử tìm kiếm.
+2025-06-09 12:34:19,253 - __main__ - INFO - Đã tải 1301 embeddings từ cache
+2025-06-09 12:34:19,254 - __main__ - INFO - Tạo mới embeddings vì cache không hợp lệ hoặc đã hết hạn
+2025-06-09 12:34:19,254 - __main__ - INFO - Đã tải 1301 embeddings từ cache
+2025-06-09 12:34:19,254 - __main__ - INFO - Tạo mới embeddings cho công việc
+2025-06-09 12:36:24,957 - __main__ - INFO - Đã lưu 1301 embeddings vào cache
+2025-06-09 12:36:25,269 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.16:5000
+2025-06-09 12:36:25,270 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-09 12:36:25,277 - werkzeug - INFO -  * Restarting with stat
+2025-06-09 12:36:42,702 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-09 12:36:42,702 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-09 12:36:48,260 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-09 12:36:48,261 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-09 12:36:48,262 - __main__ - ERROR - Lỗi khi khởi tạo Gemini model: name 'setup_gemini' is not defined
+2025-06-09 12:36:48,269 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-09 12:36:48,269 - __main__ - INFO - Đang tải công việc từ D:\2024-2025_HKI\TLCN\JobPortal_Project\job_post.csv...
+2025-06-09 12:36:48,416 - __main__ - INFO - Đã tải 1301 công việc.
+2025-06-09 12:36:48,417 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-09 12:36:48,440 - __main__ - INFO - Đã tải 1953 mục lịch sử tìm kiếm.
+2025-06-09 12:36:48,462 - __main__ - INFO - Đã tải 1301 embeddings từ cache
+2025-06-09 12:36:48,518 - werkzeug - WARNING -  * Debugger is active!
+2025-06-09 12:36:48,544 - werkzeug - INFO -  * Debugger PIN: 261-957-740
+2025-06-09 12:38:30,067 - werkzeug - INFO - 127.0.0.1 - - [09/Jun/2025 12:38:30] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-09 12:38:30,282 - werkzeug - INFO - 127.0.0.1 - - [09/Jun/2025 12:38:30] "POST /check-comment HTTP/1.1" 200 -
+2025-06-09 12:38:37,451 - werkzeug - INFO - 127.0.0.1 - - [09/Jun/2025 12:38:37] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-09 12:38:37,774 - werkzeug - INFO - 127.0.0.1 - - [09/Jun/2025 12:38:37] "POST /check-comment HTTP/1.1" 200 -
+2025-06-09 12:38:38,021 - werkzeug - INFO - 127.0.0.1 - - [09/Jun/2025 12:38:38] "POST /check-comment HTTP/1.1" 200 -
+2025-06-09 12:47:25,984 - werkzeug - INFO - 127.0.0.1 - - [09/Jun/2025 12:47:25] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-09 12:47:26,177 - werkzeug - INFO - 127.0.0.1 - - [09/Jun/2025 12:47:26] "POST /check-comment HTTP/1.1" 200 -
+2025-06-09 12:47:26,317 - werkzeug - INFO - 127.0.0.1 - - [09/Jun/2025 12:47:26] "POST /check-comment HTTP/1.1" 200 -
+2025-06-09 12:54:18,023 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-09 12:54:20,733 - werkzeug - INFO - 127.0.0.1 - - [09/Jun/2025 12:54:20] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-09 13:03:08,840 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-09 13:03:09,098 - __main__ - INFO - Đã tải 2045 mục lịch sử tìm kiếm.
+2025-06-09 13:03:09,104 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: 45000000
+2025-06-09 13:03:09,109 - werkzeug - INFO - 127.0.0.1 - - [09/Jun/2025 13:03:09] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-09 13:03:38,568 - werkzeug - INFO - 127.0.0.1 - - [09/Jun/2025 13:03:38] "POST /semantic-search HTTP/1.1" 200 -

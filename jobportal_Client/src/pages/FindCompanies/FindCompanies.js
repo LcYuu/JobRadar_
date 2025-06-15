@@ -516,7 +516,7 @@ export default function FindCompanies() {
               )}
             </h2>
             <p className="text-gray-500">
-              {totalElements > 0 ? totalElements : 0} kết quả
+              Tổng số: {totalElements > 0 ? totalElements : 0} kết quả | Trang {currentPage + 1}/{totalPages}
             </p>
           </div>
           {loading ? (

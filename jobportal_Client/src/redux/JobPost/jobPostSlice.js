@@ -49,6 +49,8 @@ const initialState = {
   canPost: null, // Result of canPostJob (e.g., "Công ty có thể đăng bài.")
   canPostLoading: false, // Loading state for canPostJob
   canPostError: null, // Error message for canPostJob
+  similarJobs: [],
+
 };
 
 const jobPostSlice = createSlice({
@@ -190,7 +192,7 @@ const jobPostSlice = createSlice({
 
       .addCase(getSimilarJobs.fulfilled, (state, action) => {
         state.loading = false;
-        // state.simi = action.payload;
+        state.similarJobs = action.payload;
         state.error = null;
       })
 

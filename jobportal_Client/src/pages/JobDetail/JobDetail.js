@@ -187,7 +187,7 @@ export default function JobDetail() {
           <div className="space-y-6">
             {/* Job Header */}
             <Card className="overflow-hidden">
-              <div className="p-6">
+              <div className="p-6 border-2 border-gray-400 rounded-lg">
                 <div className="flex items-start justify-between mb-6">
                   <div className="flex items-start space-x-6 flex-1">
                     <div className="relative">
@@ -317,7 +317,7 @@ export default function JobDetail() {
             <div className="space-y-6">
               {/* Job Description */}
               <Card>
-                <div className="p-6">
+                <div className="p-6 border-2 border-gray-400 rounded-lg">
                   <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                     <Briefcase className="h-5 w-5 text-blue-600" />
                     Mô tả công việc
@@ -334,7 +334,7 @@ export default function JobDetail() {
 
               {/* Requirements */}
               <Card>
-                <div className="p-6">
+                <div className="p-6 border-2 border-gray-400 rounded-lg">
                   <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
                     Yêu cầu công việc
@@ -357,7 +357,7 @@ export default function JobDetail() {
               {/* Nice to Have */}
               {postByPostId?.niceToHaves && (
                 <Card>
-                  <div className="p-6">
+                  <div className="p-6 border-2 border-gray-400 rounded-lg">
                     <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                       <Star className="h-5 w-5 text-purple-600" />
                       Bạn là người phù hợp nếu
@@ -377,7 +377,7 @@ export default function JobDetail() {
               {/* Benefits */}
               {postByPostId?.benefit && (
                 <Card>
-                  <div className="p-6">
+                  <div className="p-6 border-2 border-gray-400 rounded-lg">
                     <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                       <Users className="h-5 w-5 text-orange-600" />
                       Quyền lợi
@@ -397,7 +397,7 @@ export default function JobDetail() {
 
             {/* Company Info */}
             <Card>
-              <div className="p-6">
+              <div className="p-6 border-2 border-gray-400 rounded-lg">
                 <div className="flex items-start gap-6">
                   <img
                     src={postByPostId?.company.logo || "/placeholder.svg"}
@@ -417,42 +417,13 @@ export default function JobDetail() {
                 </div>
               </div>
             </Card>
-
-            {/* Similar Jobs */}
-            {similarJobs && similarJobs.length > 0 && (
-              <Card>
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold">Công việc tương tự</h2>
-                    <Button variant="outline" size="sm">
-                      Xem tất cả
-                    </Button>
-                  </div>
-                  <div className="grid gap-4">
-                    {similarJobs.slice(0, 3).map((job) => (
-                      <div key={job.postId} onClick={handleJobCardClick}>
-                        <JobCard_AllJob
-                          job={{
-                            ...job,
-                            company: {
-                              ...job.company,
-                              logo: job.company.logo || "/placeholder.svg",
-                            },
-                          }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </Card>
-            )}
           </div>
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
             {/* Job Information */}
             <Card>
-              <div className="p-6">
+              <div className="p-6 border-2 border-gray-400 rounded-lg">
                 <h3 className="text-lg font-semibold mb-4">Thông tin công việc</h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between py-2">
@@ -505,7 +476,7 @@ export default function JobDetail() {
             {/* Industries */}
             {postByPostId?.industry && postByPostId.industry.length > 0 && (
               <Card>
-                <div className="p-6">
+                <div className="p-6 border-2 border-gray-400 rounded-lg">
                   <h3 className="text-lg font-semibold mb-4">Lĩnh vực</h3>
                   <div className="flex flex-wrap gap-2">
                     {postByPostId.industry.map((industry) => (
@@ -515,23 +486,54 @@ export default function JobDetail() {
                 </div>
               </Card>
             )}
-            {/* Skills */}
-            {postByPostId?.skills && postByPostId.skills.length > 0 && (
+              {/* Skills */}
+              {postByPostId?.skills && postByPostId.skills.length > 0 && (
+                  <Card>
+                    <div className="p-6 border-2 border-gray-400 rounded-lg">
+                      <h3 className="text-lg font-semibold mb-4">Kỹ năng yêu cầu</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {postByPostId.skills.map((skill, index) => (
+                          <Badge key={index} variant="secondary" className={`${getSkillColor(index)} border-0`} style={{
+                            backgroundColor: "#f0f0f0",
+                            color: "#333",
+                            border: "1px solid #e0e0e0",
+                          }}>
+                            {skill.skillName}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </Card>
+                )}
+              </div>
+            </div>
+            {/* Similar Jobs */}
+            {similarJobs && similarJobs.length > 0 && (
               <Card>
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Kỹ năng yêu cầu</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {postByPostId.skills.map((skill, index) => (
-                      <Badge key={index} variant="secondary" className={`${getSkillColor(index)} border-0`}>
-                        {skill.skillName}
-                      </Badge>
+                <div className="p-6 border-2 border-gray-400 rounded-lg mt-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-xl font-semibold">Công việc tương tự</h2>
+                  </div>
+                  <div className="grid gap-4">
+                    {similarJobs.slice(0, 5).map((job) => (
+                      <div key={job.postId} onClick={handleJobCardClick}>
+                        <JobCard_AllJob
+                          job={{
+                            ...job,
+                            company: {
+                              ...job.company,
+                              logo: job.company.logo || "/placeholder.svg",
+                            },
+                          }}
+                        />
+                      </div>
                     ))}
                   </div>
                 </div>
               </Card>
             )}
-          </div>
-        </div>
+
+            
 
         <ApplyModal job={postByPostId} open={open} handleClose={handleClose} oneApplyJob={oneApplyJob} />
       </main>
