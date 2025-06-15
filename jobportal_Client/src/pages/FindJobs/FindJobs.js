@@ -660,88 +660,54 @@ export default function JobSearchPage() {
 
   const getDisplayResults = useCallback(() => {
     try {
-      console.log("getDisplayResults được gọi với:", {
+      console.log("getDisplayResults inputs:", {
         isUsingSemanticSearch,
-        semanticResults,
+        semanticResults: semanticResults?.content,
         isFilterApplied,
         searchJob,
         jobPost,
         currentPage,
         size,
       });
-
+  
       if (isUsingSemanticSearch && semanticResults) {
-        console.log("Sử dụng kết quả từ tìm kiếm ngữ nghĩa:", semanticResults);
-        if (
-          !semanticResults.content ||
-          !Array.isArray(semanticResults.content)
-        ) {
-          console.error(
-            "semanticResults.content không hợp lệ:",
-            semanticResults.content
-          );
-          return {
-            content: [],
-            totalElements: 0,
-            totalPages: 1,
-          };
+        console.log("Using semantic results:", semanticResults.content);
+        if (!semanticResults.content || !Array.isArray(semanticResults.content)) {
+          console.error("Invalid semanticResults.content:", semanticResults.content);
+          return { content: [], totalElements: 0, totalPages: 1 };
         }
-        const resultsArray = Array.isArray(semanticResults.content)
-          ? semanticResults.content
-          : [];
-        console.log(
-          "Số lượng kết quả trước khi phân trang:",
-          resultsArray.length
-        );
+        const resultsArray = Array.isArray(semanticResults.content) ? semanticResults.content : [];
         const totalResults = resultsArray.length || 0;
         const totalPages = Math.max(Math.ceil(totalResults / size) || 1, 1);
         const startIndex = currentPage * size;
         const endIndex = Math.min(startIndex + size, totalResults);
-        console.log("Thông số phân trang:", {
-          startIndex,
-          endIndex,
-          totalResults,
-        });
-        const paginatedContent =
-          totalResults > 0 ? resultsArray.slice(startIndex, endIndex) : [];
-        console.log("Số lượng kết quả hiển thị:", paginatedContent.length);
+        const paginatedContent = totalResults > 0 ? resultsArray.slice(startIndex, endIndex) : [];
+        console.log("Paginated semantic results:", paginatedContent);
         return {
           content: paginatedContent,
           totalElements: totalResults,
           totalPages: totalPages,
         };
       }
-
+  
       if (isFilterApplied) {
-        console.log("Sử dụng kết quả từ searchJobs với bộ lọc:", {
-          searchJob,
-          displayTotalElements,
-          totalPagesFromSearch,
-        });
+        console.log("Using searchJob results:", searchJob);
         return {
           content: searchJob || [],
           totalElements: displayTotalElements,
           totalPages: totalPagesFromSearch || 1,
         };
       }
-
-      console.log("Sử dụng tất cả công việc:", {
-        jobPost,
-        displayTotalElements,
-        totalPagesFromAll,
-      });
+  
+      console.log("Using jobPost results:", jobPost);
       return {
         content: jobPost || [],
         totalElements: displayTotalElements,
         totalPages: totalPagesFromAll || 1,
       };
     } catch (error) {
-      console.error("Lỗi trong getDisplayResults:", error);
-      return {
-        content: [],
-        totalElements: 0,
-        totalPages: 1,
-      };
+      console.error("Error in getDisplayResults:", error);
+      return { content: [], totalElements: 0, totalPages: 1 };
     }
   }, [
     isUsingSemanticSearch,
@@ -757,6 +723,7 @@ export default function JobSearchPage() {
   ]);
 
   const displayResults = getDisplayResults();
+  console.log("display" , displayResults.content)
   const results = displayResults.content || [];
   const totalPages = displayResults.totalPages || 0;
   const totalResults = displayResults.totalElements || 0;

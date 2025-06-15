@@ -30,6 +30,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
@@ -54,6 +55,7 @@ import com.job_portal.models.JobPost;
 import com.job_portal.models.SearchHistory;
 import com.job_portal.models.Seeker;
 import com.job_portal.models.Skills;
+import com.job_portal.projection.JobPostApproveProjection;
 import com.job_portal.projection.JobRecommendationProjection;
 import com.job_portal.repository.CityRepository;
 import com.job_portal.repository.CompanyRepository;
@@ -283,10 +285,35 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 	}
 
 	@Override
-	public Page<JobPost> findByIsApprove(Pageable pageable) {
-		Page<JobPost> jobPost = jobPostRepository.findJobPostActive(pageable);
-		return jobPost;
-	}
+	public Page<JobPostApproveDTO> findByIsApprove(Pageable pageable) {
+        Page<JobPostApproveProjection> projections = jobPostRepository.findJobPostActive(pageable);
+        return projections.map(projection -> {
+            List<Integer> industryIds = new ArrayList<>();
+            if (projection.getIndustryIds() != null && !projection.getIndustryIds().isEmpty()) {
+                industryIds = Arrays.stream(projection.getIndustryIds().split(","))
+                        .map(Integer::parseInt)
+                        .collect(Collectors.toList());
+            }
+
+            List<String> industryNames = new ArrayList<>();
+            if (projection.getIndustryNames() != null && !projection.getIndustryNames().isEmpty()) {
+                industryNames = Arrays.stream(projection.getIndustryNames().split(","))
+                        .collect(Collectors.toList());
+            }
+
+            return new JobPostApproveDTO(
+                    projection.getPostId(),
+                    projection.getTitle(),
+                    projection.getCompanyName(),
+                    projection.getCityName(),
+                    projection.getIndustryIds(),
+                    projection.getIndustryNames(),
+                    projection.getTypeOfWork(),
+                    projection.getCompanyLogo(),
+                    projection.getAverageStar()
+            );
+        });
+    }
 
 	@Override
 	public void exportJobPostToCSV(String filePath) throws IOException {
@@ -295,7 +322,7 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 	    try (FileWriter fileWriter = new FileWriter(filePath); CSVWriter writer = new CSVWriter(fileWriter)) {
 	        // Viết tiêu đề
 	        String[] header = { "postId", "title", "description", "location", "salary", "experience", "typeOfWork",
-	                "companyId", "companyName", "cityName", "industryNames", "createDate", "expireDate", "logo" };
+	                "companyId", "companyName", "cityName", "industryNames", "createDate", "expireDate", "logo", "averageStar" };
 	        writer.writeNext(header);
 
 	        // Viết dữ liệu
@@ -316,6 +343,7 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 	                Objects.toString(job.getCreateDate(), ""),
 	                Objects.toString(job.getExpireDate(), ""),
 	                Objects.toString(job.getLogo(), ""),
+	                Objects.toString(job.getAverageStar(),"")
 	            };
 	            writer.writeNext(data);
 	        }
@@ -333,14 +361,36 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 	}
 
 	@Override
-	public List<JobPost> getTop8LatestJobPosts() {
-	    List<JobPost> latestJobs = jobPostRepository.findTop8LatestJobPosts()
-	                                                .stream()
-	                                                .limit(8)
-	                                                .collect(Collectors.toList());
-	    return latestJobs;
+	  public List<JobPostApproveDTO> getTop8LatestJobPosts() {
+        List<JobPostApproveProjection> projections = jobPostRepository.findTop8LatestJobPosts();
 
-	}
+        return projections.stream().map(projection -> {
+            List<Integer> industryIds = new ArrayList<>();
+            if (projection.getIndustryIds() != null && !projection.getIndustryIds().isEmpty()) {
+                industryIds = Arrays.stream(projection.getIndustryIds().split(","))
+                        .map(Integer::parseInt)
+                        .collect(Collectors.toList());
+            }
+
+            List<String> industryNames = new ArrayList<>();
+            if (projection.getIndustryNames() != null && !projection.getIndustryNames().isEmpty()) {
+                industryNames = Arrays.stream(projection.getIndustryNames().split(","))
+                        .collect(Collectors.toList());
+            }
+
+            return new JobPostApproveDTO(
+                    projection.getPostId(),
+                    projection.getTitle(),
+                    projection.getCompanyName(),
+                    projection.getCityName(),
+                    projection.getIndustryIds(),
+                    projection.getIndustryNames(),
+                    projection.getTypeOfWork(),
+                    projection.getCompanyLogo(),
+                    projection.getAverageStar()
+            );
+        }).collect(Collectors.toList());
+    }
 
 
 	@Override
@@ -824,5 +874,11 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 		});
 		
 		return result;
+	}
+
+	@Override
+	public Page<JobPost> findAllJobApprove(Pageable pageable) {
+		Page<JobPost> jobPost = jobPostRepository.findAllJobApprove(pageable);
+		return jobPost;
 	}
 }

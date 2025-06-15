@@ -567,7 +567,7 @@ const PostJob = () => {
                       <Badge
                         key={industry.industryId}
                         variant="secondary"
-                        className="flex items-center gap-1 bg-purple-600 text-white"
+                        className="flex items-center gap-1 bg-white text-black"
                       >
                         {industry.industryName}
                         <X
@@ -753,8 +753,8 @@ const PostJob = () => {
               <div className="mb-6">
                 <Label>Kinh nghiệm</Label>
                 <p className="text-sm text-gray-500 mb-2">
-                  Nhập số năm kinh nghiệm cần thiết cho vị trí này (**Chú ý: Nhập 0 nếu
-                  không yêu cầu kinh nghiệm)
+                  Nhập số năm kinh nghiệm cần thiết cho vị trí này (**Chú ý:
+                  Nhập 0 nếu không yêu cầu kinh nghiệm)
                 </p>
                 <div className="flex items-center gap-2">
                   <Input

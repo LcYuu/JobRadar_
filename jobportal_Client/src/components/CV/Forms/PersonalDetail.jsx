@@ -208,7 +208,6 @@ const PersonalDetail = ({ enabledNext }) => {
           <h3 className="font-bold text-lg">Thông tin cá nhân</h3>
           <p>Hãy bắt đầu với các thông tin cá nhân</p>
         </div>
-        <ThemeColor />
       </div>
   
       <div className="flex flex-col items-center mt-5">

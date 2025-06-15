@@ -14,7 +14,7 @@ import {
 } from "../../ui/select";
 import { useDispatch, useSelector } from "react-redux";
 import CompanyCard from "../../components/common/CompanyCard/CompanyCard";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   getCompanyFitSeeker,
   searchCompanies,
@@ -96,7 +96,7 @@ export default function FindCompanies() {
       color: "#6B7280",
       border: "1px solid #6B7280",
     },
-    "Logistics": {
+    Logistics: {
       backgroundColor: "rgba(221, 160, 221, 0.1)",
       color: "#DDA0DD",
       border: "1px solid #DDA0DD",
@@ -116,7 +116,7 @@ export default function FindCompanies() {
       color: "#E91E63",
       border: "1px solid #E91E63",
     },
-    "Luật": {
+    Luật: {
       backgroundColor: "rgba(72, 187, 120, 0.1)",
       color: "#48BB78",
       border: "1px solid #48BB78",
@@ -155,6 +155,7 @@ export default function FindCompanies() {
     cityId: "",
     industryId: "",
   });
+  const location = useLocation(); // Thêm dòng này
 
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -162,7 +163,6 @@ export default function FindCompanies() {
   const [selectedCategoryName, setSelectedCategoryName] =
     useState("Tất cả công ty");
   const [loading, setLoading] = useState(false);
-  const [showNotification, setShowNotification] = useState(false);
 
   useEffect(() => {
     dispatch(searchCompanies({ filters, currentPage, size }));
@@ -170,6 +170,28 @@ export default function FindCompanies() {
     dispatch(getCompanyFitSeeker());
     dispatch(getAllIndustries());
   }, [filters, currentPage, size, dispatch]);
+
+  useEffect(() => {
+    if (location.state?.selectedIndustryId) {
+      // Cập nhật cả filters và tempFilters để đồng bộ
+      setFilters((prev) => ({
+        ...prev,
+        industryId: location.state.selectedIndustryId,
+      }));
+      setTempFilters((prev) => ({
+        ...prev,
+        industryId: location.state.selectedIndustryId,
+      }));
+      setSelectedCategory(location.state.selectedIndustryId);
+      setSelectedCategoryName(
+        allIndustries.find(
+          (industry) =>
+            industry.industryId === location.state.selectedIndustryId
+        )?.industryName || "Tất cả công ty"
+      );
+      setCurrentPage(0); // Reset về trang đầu tiên
+    }
+  }, [location.state, allIndustries]);
 
   useEffect(() => {
     dispatch(getCity());
@@ -184,9 +206,11 @@ export default function FindCompanies() {
     };
     setFilters(updatedFilters);
     setCurrentPage(0);
-    
+
     // Gọi API để tìm kiếm công ty
-    await dispatch(searchCompanies({ filters: updatedFilters, currentPage, size }));
+    await dispatch(
+      searchCompanies({ filters: updatedFilters, currentPage, size })
+    );
   };
 
   useEffect(() => {
@@ -227,18 +251,18 @@ export default function FindCompanies() {
         : allIndustries.find((industry) => industry.industryId === industryId)
             ?.industryName || "Tất cả công ty"
     );
-    
+
     // Update both tempFilters and actual filters to trigger API call
     const newIndustryId = industryId || "";
     setTempFilters((prev) => ({ ...prev, industryId: newIndustryId }));
-    
+
     // Update filters to trigger API search with the selected industry
     setFilters((prev) => ({ ...prev, industryId: newIndustryId }));
     setCurrentPage(0); // Reset về trang đầu tiên khi thay đổi danh mục
   };
   // Replace with direct reference to API results
   const filteredCompanies = companyByFeature;
-  
+
   const hasFilteredCompanies = filteredCompanies.length > 0;
 
   const hasSuggestedCompanies = companyFitSeeker.length > 0;
@@ -342,7 +366,7 @@ export default function FindCompanies() {
             <Button
               variant={selectedCategory === null ? "default" : "outline"}
               onClick={() => handleCategoryChange(null)}
-              className={`hover:bg-gray-200 transition duration-200 ${
+              className={`hover:bg-purple-200 transition duration-200 ${
                 selectedCategory === null
                   ? "bg-purple-600 text-white"
                   : "bg-white"
@@ -359,7 +383,7 @@ export default function FindCompanies() {
                     : "outline"
                 }
                 onClick={() => handleCategoryChange(industry.industryId)}
-                className={`hover:bg-gray-200 transition duration-200 ${
+                className={`hover:bg-purple-200 transition duration-200 ${
                   selectedCategory === industry.industryId
                     ? "bg-purple-600 text-white"
                     : "bg-white"

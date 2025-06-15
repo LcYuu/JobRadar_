@@ -473,7 +473,7 @@ export default function CompanyList() {
               onClick={() => handlePageChange(currentPage - 1)}
               className={fontSize}
             >
-              Previous
+              Truocs đó
             </Button>
             <Button
               variant="outline"
@@ -487,7 +487,7 @@ export default function CompanyList() {
               onClick={() => handlePageChange(currentPage + 1)}
               className={fontSize}
             >
-              Next
+              Tiếp theo
             </Button>
           </div>
         </div>

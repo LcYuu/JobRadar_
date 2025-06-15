@@ -634,7 +634,9 @@ export default function MyProfile() {
                       variant="outline"
                       size="sm"
                       className="mt-2 text-xs sm:text-sm min-w-[140px]"
-                      onClick={exp.length === 0 ? handleOpenExpModal : undefined}
+                      onClick={
+                        exp.length === 0 ? handleOpenExpModal : undefined
+                      }
                       style={{ zIndex: 10 }}
                     >
                       <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-1" /> Thêm kinh
@@ -787,7 +789,9 @@ export default function MyProfile() {
                       variant="outline"
                       size="sm"
                       className="mt-2 text-xs sm:text-sm min-w-[140px]"
-                      onClick={edu.length === 0 ? handleOpenEduModal : undefined}
+                      onClick={
+                        edu.length === 0 ? handleOpenEduModal : undefined
+                      }
                       style={{ zIndex: 10 }}
                     >
                       <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-1" /> Thêm học
@@ -916,15 +920,22 @@ export default function MyProfile() {
                   </div>
                 ) : (
                   <div>
-                    <Label className="text-sm sm:text-base font-medium" style={{ whiteSpace: "nowrap" }}>
+                    <Label
+                      className="text-sm sm:text-base font-medium"
+                      style={{ whiteSpace: "nowrap" }}
+                    >
                       Email
                     </Label>
                     <div className="mt-1 flex items-center gap-2">
                       <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                       {seeker?.emailContact ? (
-                        <span className="text-sm sm:text-base truncate">{seeker.emailContact}</span>
+                        <span className="text-sm sm:text-base truncate">
+                          {seeker.emailContact}
+                        </span>
                       ) : (
-                        <span className="text-sm text-gray-400 italic">Chưa cập nhật email liên hệ</span>
+                        <span className="text-sm text-gray-400 italic">
+                          Chưa cập nhật email liên hệ
+                        </span>
                       )}
                     </div>
                   </div>
@@ -958,9 +969,13 @@ export default function MyProfile() {
                     <div className="mt-1 flex items-center gap-2">
                       <Phone className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                       {seeker?.phoneNumber ? (
-                        <span className="text-sm sm:text-base truncate">{seeker.phoneNumber}</span>
+                        <span className="text-sm sm:text-base truncate">
+                          {seeker.phoneNumber}
+                        </span>
                       ) : (
-                        <span className="text-sm text-gray-400 italic">Chưa cập nhật số điện thoại</span>
+                        <span className="text-sm text-gray-400 italic">
+                          Chưa cập nhật số điện thoại
+                        </span>
                       )}
                     </div>
                   </div>
@@ -1004,7 +1019,9 @@ export default function MyProfile() {
                           <span className="text-sm">{seeker.gender}</span>
                         </>
                       ) : (
-                        <span className="text-sm text-gray-400 italic">Chưa cập nhật giới tính</span>
+                        <span className="text-sm text-gray-400 italic">
+                          Chưa cập nhật giới tính
+                        </span>
                       )}
                     </div>
                   </div>
@@ -1012,7 +1029,9 @@ export default function MyProfile() {
 
                 {isEditingInfo ? (
                   <div>
-                    <Label className="text-sm sm:text-base font-medium">Ngày sinh</Label>
+                    <Label className="text-sm sm:text-base font-medium">
+                      Ngày sinh
+                    </Label>
                     <input
                       type="date"
                       name="dateOfBirth"
@@ -1023,20 +1042,28 @@ export default function MyProfile() {
                       }`}
                     />
                     {errors.dateOfBirth && (
-                      <p className="text-red-500 text-xs sm:text-sm">{errors.dateOfBirth}</p>
+                      <p className="text-red-500 text-xs sm:text-sm">
+                        {errors.dateOfBirth}
+                      </p>
                     )}
                   </div>
                 ) : (
                   <div>
-                    <Label className="text-sm sm:text-base font-medium whitespace-nowrap">Ngày sinh</Label>
+                    <Label className="text-sm sm:text-base font-medium whitespace-nowrap">
+                      Ngày sinh
+                    </Label>
                     <div className="mt-1 flex items-center gap-2">
                       <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                       {seeker?.dateOfBirth ? (
                         <span className="text-sm sm:text-base">
-                          {new Date(seeker.dateOfBirth).toLocaleDateString("en-GB")}
+                          {new Date(seeker.dateOfBirth).toLocaleDateString(
+                            "en-GB"
+                          )}
                         </span>
                       ) : (
-                        <span className="text-sm text-gray-400 italic">Chưa cập nhật ngày sinh</span>
+                        <span className="text-sm text-gray-400 italic">
+                          Chưa cập nhật ngày sinh
+                        </span>
                       )}
                     </div>
                   </div>
@@ -1049,32 +1076,43 @@ export default function MyProfile() {
                     </Label>
                     <div
                       className="border p-2 sm:p-3 w-full rounded-md cursor-pointer truncate"
-                      onClick={() => setIsIndustryDropdownOpen(!isIndustryDropdownOpen)}
+                      onClick={() =>
+                        setIsIndustryDropdownOpen(!isIndustryDropdownOpen)
+                      }
                     >
                       {(formData?.industryIds ?? []).length > 0
                         ? industries
                             .filter((industry) =>
-                              (formData?.industryIds ?? []).includes(industry.industryId)
+                              (formData?.industryIds ?? []).includes(
+                                industry.industryId
+                              )
                             )
                             .map((industry) => industry.industryName)
                             .join(", ")
                         : "Chưa cập nhật chuyên ngành"}
                     </div>
                     {isIndustryDropdownOpen && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-48 sm:max-h-60 overflow-auto">
+                      <div className="absolute z-[1400] w-full mt-1 bg-white border rounded-md shadow-lg max-h-48 sm:max-h-60 overflow-auto">
                         {industries.slice(1).map((industry) => (
                           <label
                             key={industry.industryId}
-                            className="flex items-center px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-gray-50 cursor-pointer"
+                            className="flex items-center px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-purple-50 cursor-pointer"
                           >
                             <input
                               type="checkbox"
-                              className="w-4 h-4 sm:w-5 sm:h-5 rounded border-gray-300 mr-2 sm:mr-3"
-                              checked={(formData.industryIds ?? []).includes(industry.industryId)}
+                              className="w-4 h-4 sm:w-5 sm:h-5 rounded border-purple-500 mr-2 sm:mr-3 accent-purple-600 focus:ring-purple-500"
+                              checked={(formData.industryIds ?? []).includes(
+                                industry.industryId
+                              )}
                               onChange={(e) => {
                                 const newIndustryIds = e.target.checked
-                                  ? [...(formData.industryIds ?? []), industry.industryId]
-                                  : (formData.industryIds ?? []).filter((id) => id !== industry.industryId);
+                                  ? [
+                                      ...(formData.industryIds ?? []),
+                                      industry.industryId,
+                                    ]
+                                  : (formData.industryIds ?? []).filter(
+                                      (id) => id !== industry.industryId
+                                    );
                                 setFormData((prev) => ({
                                   ...prev,
                                   industryIds: newIndustryIds,
@@ -1100,14 +1138,21 @@ export default function MyProfile() {
                         <span className="text-sm sm:text-base truncate">
                           {seeker.industry
                             .map((ind) => {
-                              if (typeof ind === "object" && ind.industryName) return ind.industryName;
-                              const found = industries.find((i) => i.industryId === ind || i.industryId === ind?.industryId);
+                              if (typeof ind === "object" && ind.industryName)
+                                return ind.industryName;
+                              const found = industries.find(
+                                (i) =>
+                                  i.industryId === ind ||
+                                  i.industryId === ind?.industryId
+                              );
                               return found ? found.industryName : ind;
                             })
                             .join(", ")}
                         </span>
                       ) : (
-                        <span className="text-sm text-gray-400 italic">Chưa cập nhật chuyên ngành</span>
+                        <span className="text-sm text-gray-400 italic">
+                          Chưa cập nhật chuyên ngành
+                        </span>
                       )}
                     </div>
                   </div>
@@ -1142,7 +1187,9 @@ export default function MyProfile() {
                 </Button>
               </CardHeader>
               <CardContent className="px-3 sm:px-4 md-custom:px-3.5 pb-4 sm:pb-6 pt-0 space-y-3 sm:space-y-4">
-                {socialLinks && Array.isArray(socialLinks) && socialLinks.length > 0 ? (
+                {socialLinks &&
+                Array.isArray(socialLinks) &&
+                socialLinks.length > 0 ? (
                   socialLinks.map((link, index) => (
                     <div
                       key={index}

@@ -1,8 +1,6 @@
 package com.job_portal.controller;
 
-import java.sql.Timestamp;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -212,13 +210,21 @@ public class CompanyController {
 								.collect(Collectors.toList());
 					}
 
-					return new CompanyDTO(projection.getCompanyId(), projection.getCompanyName(),
-							projection.getApplicationCount(), industryIds, projection.getCityId(),
-							projection.getAddress(), projection.getDescription(), projection.getLogo(),
-							projection.getContact(), projection.getEmail(),
-							projection.getEstablishedTime() != null ? projection.getEstablishedTime().toLocalDate()
-									: null,
-							projection.getTaxCode());
+					 return new CompanyDTO(
+	                            projection.getCompanyId(),
+	                            projection.getCompanyName(),
+	                            projection.getApplicationCount(),
+	                            industryIds,
+	                            projection.getCityId(),
+	                            projection.getAddress(),
+	                            projection.getDescription(),
+	                            projection.getLogo(),
+	                            projection.getContact(),
+	                            projection.getEmail(),
+	                            projection.getEstablishedTime() != null ? projection.getEstablishedTime().toLocalDate() : null,
+	                            projection.getTaxCode(),
+	                            projection.getAverageStar()  // Thêm averageStar
+	                    );
 				}).collect(Collectors.toList());
 	}
 

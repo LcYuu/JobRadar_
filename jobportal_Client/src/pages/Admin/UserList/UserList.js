@@ -261,7 +261,7 @@ export default function UserList() {
                               : "bg-red-100 text-red-600"
                           }`}
                         >
-                          {user.active ? "Active" : "Inactive"}
+                          {user.active ? "Còn hoạt động" : "Ngưng hoạt động"}
                         </span>
                       </td>
                       <td className={`${padding} ${fontSize}`}>
@@ -463,7 +463,7 @@ export default function UserList() {
               onClick={() => handlePageChange(currentPage - 1)}
               className={`${fontSize} ${buttonPadding}`}
             >
-              Previous
+              Trước đó
             </Button>
             <Button
               variant="outline"
@@ -477,7 +477,7 @@ export default function UserList() {
               onClick={() => handlePageChange(currentPage + 1)}
               className={`${fontSize} ${buttonPadding}`}
             >
-              Next
+              Tiếp theo
             </Button>
           </div>
         </div>

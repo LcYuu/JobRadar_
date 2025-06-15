@@ -1,6 +1,7 @@
 package com.job_portal.service;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -49,17 +50,25 @@ public class SubscriptionServiceImpl implements ISubscriptionService {
 	public boolean createSubscription(Subscription subscription, UUID userId) {
 		Optional<Seeker> seeker = seekerRepository.findById(userId);
 		
+		if (seeker.isEmpty()) {
+			logger.error("Không tìm thấy seeker với userId: {}", userId);
+			return false;
+		}
+		
 		Seeker see = seeker.get();
 		Subscription sub = new Subscription();
 		sub.setEmail(subscription.getEmail());
+		sub.setEmailFrequency(subscription.getEmailFrequency()); // Set tần suất từ input
 		sub.setCreatedAt(LocalDateTime.now());
 		sub.setSeeker(seeker.get());
 		see.setSubcription(true);
 		try {
 			Subscription saveSub = subscriptionRepository.save(sub);
 			Seeker saveSeeker = seekerRepository.save(see);
+			scheduleEmail(saveSub); // Lên lịch gửi email ngay sau khi tạo
 			return saveSub != null && saveSeeker != null;
 		} catch (Exception e) {
+			logger.error("Lỗi khi tạo subscription: {}", e.getMessage());
 			return false;
 		}
 	}
@@ -84,9 +93,13 @@ public class SubscriptionServiceImpl implements ISubscriptionService {
 	}
 
 	private void scheduleEmail(Subscription subscription) {
-		LocalDateTime nextSendTime = subscription.getLastSentAt() != null ? subscription.getLastSentAt().plusDays(3)
-				: subscription.getCreatedAt().plusDays(3);
+		if (subscription.getEmailFrequency() == null) {
+			logger.warn("Tần suất email không được thiết lập cho: {}", subscription.getEmail());
+			return;
+		}
 
+		// Tính thời gian gửi tiếp theo dựa trên emailFrequency
+		LocalDateTime nextSendTime = calculateNextSendTime(subscription);
 		long delay = java.time.Duration.between(LocalDateTime.now(), nextSendTime).toMillis();
 
 		if (delay < 0) {
@@ -94,11 +107,34 @@ public class SubscriptionServiceImpl implements ISubscriptionService {
 		} else {
 			taskScheduler.schedule(() -> sendJobNotification(subscription),
 					new java.util.Date(System.currentTimeMillis() + delay));
+			logger.info("Đã lên lịch gửi email cho {} vào {}", subscription.getEmail(), nextSendTime);
+		}
+	}
+
+	private LocalDateTime calculateNextSendTime(Subscription subscription) {
+		LocalDateTime baseTime = subscription.getLastSentAt() != null ? 
+				subscription.getLastSentAt() : subscription.getCreatedAt();
+		
+		switch (subscription.getEmailFrequency()) {
+			case THREE_DAYS:
+				return baseTime.plusDays(3);
+			case SEVEN_DAYS:
+				return baseTime.plusDays(7);
+			case TWO_WEEKS:
+				return baseTime.plusWeeks(2);
+			case ONE_MONTH:
+				return baseTime.plusMonths(1);
+			case TWO_MONTHS:
+				return baseTime.plusMonths(2);
+			default:
+				logger.warn("Tần suất không hợp lệ: {}", subscription.getEmailFrequency());
+				return baseTime.plusDays(3); // Mặc định 3 ngày nếu tần suất không hợp lệ
 		}
 	}
 
 	public void rescheduleAllSubscriptions() {
 		List<Subscription> subscriptions = subscriptionRepository.findAll();
+		logger.info("Lên lịch lại cho {} subscriptions", subscriptions.size());
 		subscriptions.forEach(this::scheduleEmail);
 	}
 
@@ -116,10 +152,12 @@ public class SubscriptionServiceImpl implements ISubscriptionService {
 	        List<Integer> industryIds = seeker.getIndustry().stream()
 	                .map(Industry::getIndustryId)
 	                .collect(Collectors.toList());
-	        LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
 	        
-	        logger.info("Tìm kiếm công việc mới cho các ngành {} từ {}", industryIds, threeDaysAgo);
-	        List<JobPost> matchedJobs = jobPostRepository.findByCreateDateAfterAndIndustryIds(threeDaysAgo, industryIds)
+	        // Tính khoảng thời gian dựa trên emailFrequency
+	        LocalDateTime lookbackTime = calculateLookbackTime(subscription);
+	        
+	        logger.info("Tìm kiếm công việc mới cho các ngành {} từ {}", industryIds, lookbackTime);
+	        List<JobPost> matchedJobs = jobPostRepository.findByCreateDateAfterAndIndustryIds(lookbackTime, industryIds)
 	                .stream()
 	                .limit(7)
 	                .collect(Collectors.toList());
@@ -151,6 +189,24 @@ public class SubscriptionServiceImpl implements ISubscriptionService {
 	    }
 	}
 
+	private LocalDateTime calculateLookbackTime(Subscription subscription) {
+		switch (subscription.getEmailFrequency()) {
+			case THREE_DAYS:
+				return LocalDateTime.now().minusDays(3);
+			case SEVEN_DAYS:
+				return LocalDateTime.now().minusDays(7);
+			case TWO_WEEKS:
+				return LocalDateTime.now().minusWeeks(2);
+			case ONE_MONTH:
+				return LocalDateTime.now().minusMonths(1);
+			case TWO_MONTHS:
+				return LocalDateTime.now().minusMonths(2);
+			default:
+				logger.warn("Tần suất không hợp lệ: {}, sử dụng mặc định 3 ngày", subscription.getEmailFrequency());
+				return LocalDateTime.now().minusDays(3);
+		}
+	}
+
 	public void checkAndSendEmails() {
 	    logger.info("Bắt đầu quá trình kiểm tra và gửi email");
 	    try {
@@ -163,8 +219,13 @@ public class SubscriptionServiceImpl implements ISubscriptionService {
 	        for (Subscription sub : subscriptions) {
 	            try {
 	                logger.info("Kiểm tra subscription của email: {}", sub.getEmail());
-	                sendJobNotification(sub);
-	                successCount++;
+	                LocalDateTime nextSendTime = calculateNextSendTime(sub);
+	                if (LocalDateTime.now().isAfter(nextSendTime) || LocalDateTime.now().isEqual(nextSendTime)) {
+	                    sendJobNotification(sub);
+	                    successCount++;
+	                } else {
+	                    logger.info("Chưa đến thời gian gửi email cho: {}", sub.getEmail());
+	                }
 	            } catch (Exception e) {
 	                logger.error("Lỗi xử lý subscription cho {}: {}", sub.getEmail(), e.getMessage());
 	                errorCount++;
@@ -179,16 +240,26 @@ public class SubscriptionServiceImpl implements ISubscriptionService {
 	}
 
 	@Override
-	public boolean updateSubscription(String email, UUID subId) throws AllExceptions {
-		boolean isUpdated = false;
-		Optional<Subscription> sub = subscriptionRepository.findById(subId);
-		
-		Subscription newSub = sub.get();
-		if(newSub.getEmail() != null) {
-			newSub.setEmail(email);
-			isUpdated = true;
-		}
-		return isUpdated;
+	public boolean updateSubscription(String email, Subscription.EmailFrequency emailFrequency, UUID subId) throws AllExceptions {
+	    Optional<Subscription> sub = subscriptionRepository.findById(subId);
+	    if (sub.isEmpty()) {
+	        throw new AllExceptions("Không tìm thấy subscription với ID: " + subId);
+	    }
+	    Subscription newSub = sub.get();
+	    boolean isUpdated = false;
+	    if (email != null && !email.equals(newSub.getEmail())) {
+	        newSub.setEmail(email);
+	        isUpdated = true;
+	    }
+	    if (emailFrequency != null && emailFrequency != newSub.getEmailFrequency()) {
+	        newSub.setEmailFrequency(emailFrequency);
+	        isUpdated = true;
+	    }
+	    if (isUpdated) {
+	        subscriptionRepository.save(newSub);
+	        scheduleEmail(newSub); // Lên lịch lại nếu có thay đổi
+	    }
+	    return isUpdated;
 	}
 
 	@Override

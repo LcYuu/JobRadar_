@@ -13,7 +13,7 @@ function JobCard_AllJob({ job }) {
   const { savedJobs } = useSelector((store) => store.seeker);
   const { user } = useSelector((store) => store.auth);
 
-  const isSaved = savedJobs?.some(savedJob => savedJob.postId === job.postId);
+  const isSaved = savedJobs?.some((savedJob) => savedJob.postId === job.postId);
 
   const handleCardClick = () => {
     navigate(`/jobs/job-detail/${job.postId}`);
@@ -73,7 +73,8 @@ function JobCard_AllJob({ job }) {
       <div
         className="absolute bottom-4 right-4 z-10 text-xs font-semibold px-3 py-1 rounded-md"
         style={{
-          backgroundColor: jobTypeColors[job.typeOfWork]?.backgroundColor || "#f3f4f6",
+          backgroundColor:
+            jobTypeColors[job.typeOfWork]?.backgroundColor || "#f3f4f6",
           color: jobTypeColors[job.typeOfWork]?.color || "#6b7280",
         }}
       >
@@ -89,45 +90,66 @@ function JobCard_AllJob({ job }) {
         } active:scale-95`}
         title={isSaved ? "Bỏ lưu" : "Lưu công việc"}
       >
-        {isSaved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
+        {isSaved ? (
+          <BookmarkCheck className="h-4 w-4" />
+        ) : (
+          <Bookmark className="h-4 w-4" />
+        )}
       </button>
 
-      <CardContent onClick={handleCardClick} className="p-6 h-full flex flex-col">
+      <CardContent
+        onClick={handleCardClick}
+        className="p-6 h-full flex flex-col"
+      >
         {/* Logo + Job Title */}
         <div className="flex items-center space-x-4 mb-3">
           <img
-            src={job.company.logo || "/placeholder.svg"}
-            alt={`${job.company.companyName} logo`}
+            src={job?.company?.logo || "/placeholder.svg"}
+            alt={`${job?.company?.companyName} logo`}
             className="w-12 h-12 rounded-lg object-cover shadow-sm border border-gray-100 flex-shrink-0"
           />
           <div className="flex-1 min-w-0">
             <h3 className="text-xl font-bold text-gray-900 group-hover:text-primary transition-colors duration-300 leading-tight mb-1">
-              {job.title || "Không có tiêu đề"}
+              {job?.title || "Không có tiêu đề"}
             </h3>
             <div className="flex items-center text-gray-600 mb-1">
               <Building2 className="h-4 w-4 mr-1" />
-              <span className="text-sm font-medium">{job.company?.companyName || "Không có công ty"}</span>
+              <span className="text-sm font-medium">
+                {job?.company?.companyName || "Không có công ty"}
+              </span>
             </div>
             <div className="flex items-center text-gray-500">
               <MapPin className="h-4 w-4 mr-1" />
-              <span className="text-sm">{job.city?.cityName || "Không có địa điểm"}</span>
+              <span className="text-sm">
+                {job?.city?.cityName || "Không có địa điểm"}
+              </span>
             </div>
           </div>
         </div>
         {/* Industry badges */}
         <div className="flex flex-wrap gap-2 mb-2">
-          {Array.isArray(job.industry)
-            ? job.industry.slice(0, 3).map((industry, index) => (
-                <IndustryBadge key={index} name={industry.industryName} />
+          {Array.isArray(job?.industry) && job.industry.length > 0 ? (
+            job.industry
+              .map((ind, index) => (
+                <IndustryBadge
+                  key={index}
+                  name={ind.industryName}
+                />
               ))
-            : job.company?.industry?.industryName && (
-                <IndustryBadge name={job.company.industry.industryName} />
-              )}
+          ) : (
+            <IndustryBadge name="Không xác định" />
+          )}
         </div>
         {/* Salary */}
         <div className="flex items-center gap-2 mt-auto">
           <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-200">
-            Lương: {job.salary ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(job.salary) : "Không có thông tin về lương"}
+            Lương:{" "}
+            {job.salary
+              ? new Intl.NumberFormat("vi-VN", {
+                  style: "currency",
+                  currency: "VND",
+                }).format(job.salary)
+              : "Không có thông tin về lương"}
           </span>
         </div>
       </CardContent>

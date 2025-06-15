@@ -479,7 +479,7 @@ const CompanyProfile_Management = () => {
       <Card className="mb-3 sm:mb-4 md:mb-6 p-3 sm:p-4 md:p-6 bg-white shadow-md rounded-lg">
         <div className="flex justify-between items-center mb-2 sm:mb-3 md:mb-4">
           <h2 className="text-base sm:text-lg md:text-xl font-semibold">
-            Contact
+            Liên hệ
           </h2>
           <Button onClick={() => handleEditInfoClick()} variant="ghost">
             <PenSquare className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />

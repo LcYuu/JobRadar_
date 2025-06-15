@@ -18,18 +18,18 @@ export const createSubscription = createAsyncThunk(
 // Cập nhật Subscription
 export const updateSubscription = createAsyncThunk(
   "subscription/update",
-  async ({ subId, email }, { rejectWithValue }) => {
+  async ({ subId, email, emailFrequency }, { rejectWithValue }) => {
     try {
       const response = await api.put(`/subscription/update/${subId}`, {
-        params: { email },
+        email,
+        emailFrequency // Gửi cả email và emailFrequency
       });
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || "Lỗi khi cập nhật subscription");
     }
   }
 );
-
 
 // Xóa Subscription
 export const deleteSubscription = createAsyncThunk(
@@ -39,7 +39,7 @@ export const deleteSubscription = createAsyncThunk(
       const response = await api.delete(`/subscription/delete/${subId}`);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || "Lỗi khi xóa subscription");
     }
   }
 );

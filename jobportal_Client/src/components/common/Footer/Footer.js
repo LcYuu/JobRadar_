@@ -20,6 +20,7 @@ import Swal from "sweetalert2";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
+  const [emailFrequency, setEmailFrequency] = useState("THREE_DAYS");
   const dispatch = useDispatch();
   const { currentSubscription, loading, message, error } = useSelector(
     (store) => store.subscription
@@ -35,17 +36,17 @@ export default function Footer() {
     return regex.test(email);
   };
 
-  // Lấy thông tin đăng ký khi component mount
   useEffect(() => {
     dispatch(findSubscriptionBySeekerId());
   }, [dispatch]);
 
-  // Cập nhật email khi currentSubscription thay đổi
   useEffect(() => {
     if (currentSubscription?.email) {
       setEmail(currentSubscription.email);
+      setEmailFrequency(currentSubscription.emailFrequency || "THREE_DAYS");
     } else {
-      setEmail(""); // Đặt lại email nếu không có đăng ký
+      setEmail("");
+      setEmailFrequency("THREE_DAYS");
     }
   }, [currentSubscription]);
 
@@ -68,29 +69,49 @@ export default function Footer() {
       return;
     }
 
+    const validFrequencies = [
+      "THREE_DAYS",
+      "SEVEN_DAYS",
+      "TWO_WEEKS",
+      "ONE_MONTH",
+      "TWO_MONTHS",
+    ];
+    if (!validFrequencies.includes(emailFrequency)) {
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi!",
+        text: "Tần suất gửi email không hợp lệ.",
+      });
+      return;
+    }
+
     try {
       let response;
       if (currentSubscription) {
         const subId = currentSubscription.subscriptionId;
-        response = await dispatch(updateSubscription({ subId, email })).unwrap();
+        response = await dispatch(
+          updateSubscription({ subId, email, emailFrequency })
+        ).unwrap();
       } else {
-        response = await dispatch(createSubscription({ email })).unwrap();
-        setEmail(""); // Đặt lại email sau khi thêm đăng ký thành công
+        response = await dispatch(
+          createSubscription({ email, emailFrequency })
+        ).unwrap();
+        setEmail("");
+        setEmailFrequency("THREE_DAYS");
       }
 
-      // Làm mới thông tin đăng ký
       await dispatch(findSubscriptionBySeekerId());
 
       Swal.fire({
         icon: "success",
         title: "Thành công!",
-        text: response.message || "Cập nhật thành công!",
+        text: response || "Cập nhật thành công!",
       });
     } catch (err) {
       Swal.fire({
         icon: "error",
         title: "Lỗi!",
-        text: err.message || "Đã xảy ra lỗi. Vui lòng thử lại!",
+        text: err || "Đã xảy ra lỗi. Vui lòng thử lại!",
       });
     }
   };
@@ -119,20 +140,20 @@ export default function Footer() {
         const subId = currentSubscription.subscriptionId;
         const response = await dispatch(deleteSubscription(subId)).unwrap();
 
-        // Làm mới thông tin đăng ký
         await dispatch(findSubscriptionBySeekerId());
-        setEmail(""); // Đặt lại email sau khi xóa đăng ký
+        setEmail("");
+        setEmailFrequency("THREE_DAYS");
 
         Swal.fire({
           icon: "success",
           title: "Đã hủy đăng ký!",
-          text: response.message || "Hủy đăng ký thành công!",
+          text: response || "Hủy đăng ký thành công!",
         });
       } catch (err) {
         Swal.fire({
           icon: "error",
           title: "Lỗi!",
-          text: err.message || "Đã xảy ra lỗi. Vui lòng thử lại!",
+          text: err || "Đã xảy ra lỗi. Vui lòng thử lại!",
         });
       }
     }
@@ -159,44 +180,52 @@ export default function Footer() {
           </div>
 
           <div className="mb-8 md:mb-0 flex flex-col items-center justify-center">
-            <h4 className="font-semibold text-white mb-2">
+            <h4 className="font-semibold text-white mb-4 text-center">
               Đăng ký nhận thông báo việc làm
             </h4>
-            <div className="flex space-x-2">
+            <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2 w-full max-w-md">
               <Input
                 type="email"
                 placeholder="Nhập email của bạn"
-                className="w-64 text-gray-900"
+                className="flex-1 text-gray-900 rounded-md border border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={loading} // Vô hiệu hóa input khi đang xử lý
+                disabled={loading}
               />
-              {currentSubscription ? (
-                <Button
-                  className="bg-purple-600 text-white"
-                  onClick={handleSubscribe}
-                  disabled={loading}
-                >
-                  Cập nhật email
-                </Button>
-              ) : (
-                <Button
-                  className="bg-purple-500 text-white"
-                  onClick={handleSubscribe}
-                  disabled={loading}
-                >
-                  Đăng ký
-                </Button>
-              )}
+              <select
+                className="flex-1 p-2 rounded-md bg-white text-gray-900 border border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                value={emailFrequency}
+                onChange={(e) => setEmailFrequency(e.target.value)}
+                disabled={loading}
+                title="Chọn tần suất nhận thông báo công việc"
+              >
+                <option value="THREE_DAYS">3 ngày</option>
+                <option value="SEVEN_DAYS">7 ngày</option>
+                <option value="TWO_WEEKS">2 tuần</option>
+                <option value="ONE_MONTH">1 tháng</option>
+                <option value="TWO_MONTHS">2 tháng</option>
+              </select>
+              <Button
+                className={`${
+                  currentSubscription ? "bg-purple-600" : "bg-purple-500"
+                } text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors ${
+                  loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                onClick={handleSubscribe}
+                disabled={loading}
+              >
+                {loading ? "Đang xử lý..." : currentSubscription ? "Cập nhật" : "Đăng ký"}
+              </Button>
             </div>
-
             {currentSubscription && (
               <Button
-                className="bg-red-600 text-white mt-2"
+                className={`bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors mt-2 ${
+                  loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
                 onClick={handleUnsubscribe}
                 disabled={loading}
               >
-                Hủy đăng ký
+                {loading ? "Đang xử lý..." : "Hủy đăng ký"}
               </Button>
             )}
           </div>

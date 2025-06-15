@@ -76,19 +76,18 @@ public class SubscriptionController {
 	}
 
 	@PutMapping("/update/{subId}")
-	public ResponseEntity<?> updateSubscription(@PathVariable UUID subId, String email) {
-		try {
-			boolean isUpdated = subscriptionService.updateSubscription(email, subId);
-
-			if (isUpdated) {
-				return ResponseEntity.ok("Cập nhật thành công");
-			} else {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không thể tìm thấy việc đăng ký");
-			}
-		} catch (AllExceptions e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Có lỗi xảy ra: " + e.getMessage());
-		}
+	public ResponseEntity<?> updateSubscription(@PathVariable UUID subId, @RequestBody Subscription subscription) {
+	    try {
+	        boolean isUpdated = subscriptionService.updateSubscription(subscription.getEmail(), subscription.getEmailFrequency(), subId);
+	        if (isUpdated) {
+	            return ResponseEntity.ok("Cập nhật thành công");
+	        } else {
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không thể tìm thấy việc đăng ký");
+	        }
+	    } catch (AllExceptions e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("Có lỗi xảy ra: " + e.getMessage());
+	    }
 	}
 	
 	@GetMapping("/findBySeekerId")
