@@ -46,6 +46,7 @@ const initialState = {
   totalElements: 0,
   currentPage: 0,
   expireJob: null,
+
   canPost: null, // Result of canPostJob (e.g., "Công ty có thể đăng bài.")
   canPostLoading: false, // Loading state for canPostJob
   canPostError: null, // Error message for canPostJob

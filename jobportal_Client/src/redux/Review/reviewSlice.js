@@ -203,6 +203,12 @@ const reviewSlice = createSlice({
               updatedReview,
               ...state.reviews.slice(reviewIndex + 1)
             ];
+
+            // ADDED: Also add the new reply to the top-level replies object
+            if (!state.replies[reviewId]) {
+              state.replies[reviewId] = [];
+            }
+            state.replies[reviewId].push(action.payload);
           }
         })
         .addCase(createReplyToReview.rejected, (state, action) => {

@@ -36,7 +36,7 @@ export const checkContentModeration = createAsyncThunk(
       console.log("Sending content for moderation check:", content);
       const response = await axios.post(
         `http://localhost:5000/check-comment`,
-        { text: content, threshold: 0.5 }
+        { text: content, threshold: 0.7 }
       );
       
       // Check the response format from the AI service

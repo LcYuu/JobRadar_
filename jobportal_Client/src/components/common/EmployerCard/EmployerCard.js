@@ -70,7 +70,6 @@ const EmployerCard = ({ company }) => {
               <Users className="h-4 w-4 mr-1.5 text-gray-400" />
               <span>{company.applicationCount} người đã ứng tuyển</span>
             </div>
-
             <div className="pt-3 border-t border-gray-100 mt-2">
               <div className="flex items-center justify-between text-sm font-medium text-primary group-hover:text-primary/80 transition-colors">
                 <span>Chi tiết</span>

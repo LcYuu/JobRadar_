@@ -24,6 +24,8 @@ import com.job_portal.repository.ReviewReactionRepository;
 import com.job_portal.repository.ReviewReplyRepository;
 import com.job_portal.repository.ReviewRepository;
 import com.social.exceptions.AllExceptions;
+import com.job_portal.service.INotificationService;
+import com.job_portal.enums.NotificationType;
 
 @Service
 public class ReviewServiceImpl implements IReviewService {
@@ -39,6 +41,9 @@ public class ReviewServiceImpl implements IReviewService {
 	
 	@Autowired
 	CompanyRepository companyRepository;
+
+	@Autowired
+	INotificationService notificationService;
 
 	@Override
 	public boolean createReview(Seeker seeker, UUID companyId, Review reviewRequest) throws AllExceptions {
@@ -83,6 +88,10 @@ public class ReviewServiceImpl implements IReviewService {
 		}
 		
 		try {
+			// Lưu thông tin người dùng trước khi xóa
+			UUID seekerId = review.get().getSeeker().getUserId();
+			String companyName = review.get().getCompany().getCompanyName();
+			
 			// Xóa tất cả các phản hồi liên quan đến đánh giá này
 			reviewReplyRepository.deleteByReviewReviewId(reviewId);
 			
@@ -95,6 +104,13 @@ public class ReviewServiceImpl implements IReviewService {
 			companyRepository.save(company);
 			
 			reviewRepository.delete(review.get());
+
+			// Gửi thông báo cho người dùng
+			String title = "Đánh giá của bạn đã bị xóa";
+			String content = String.format("Đánh giá của bạn về công ty %s đã bị xóa bởi quản trị viên.", companyName);
+			String redirectUrl = "/companies/" + company.getCompanyId();
+			notificationService.sendNotification(seekerId, title, content, NotificationType.REVIEW_DELETED, redirectUrl);
+
 			return true;
 		} catch (Exception e) {
 			throw new AllExceptions("Error deleting review: " + e.getMessage());

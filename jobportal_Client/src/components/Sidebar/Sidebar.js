@@ -128,17 +128,26 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
     });
 
     if (result.isConfirmed) {
+      try {
+        await dispatch(logoutAction());
+        // Xóa dữ liệu storage
+        localStorage.removeItem("jwt");
+        localStorage.removeItem("user");
         await Swal.fire({
-        icon: 'success',
-        title: 'Đăng xuất thành công',
-        text: 'Bạn đã đăng xuất thành công.',
-        timer: 1500,
-        showConfirmButton: false
-      });
-      dispatch(logoutAction());
-      
-      if (isMobile) {
-        setIsOpen(false);
+          icon: "success",
+          title: "Đăng xuất thành công",
+          text: "Bạn đã đăng xuất thành công.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+        // Chuyển hướng
+        window.location.href = "/";
+      } catch (error) {
+        await Swal.fire({
+          icon: "error",
+          title: "Lỗi đăng xuất",
+          text: "Có lỗi xảy ra khi đăng xuất. Vui lòng thử lại.",
+        });
       }
     }
   };
