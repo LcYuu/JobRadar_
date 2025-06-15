@@ -344,7 +344,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                   value={formData.fullName}
                   onChange={handleInputChange}
                   placeholder="Nhập họ tên"
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500"
                   required
                   disabled={loading} // Disable input khi đang loading
                 />
@@ -360,7 +360,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="Nhập địa chỉ email"
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-500"
                   required
                   disabled={loading} // Disable input khi đang loading
                 />
@@ -427,7 +427,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                                 uploadOption === "existing" &&
                                 formData.pathCV === cv.pathCV
                               }
-                              className="form-radio text-indigo-600"
+                              className="form-radio text-purple-600"
                               disabled={loading} // Disable input khi đang loading
                             />
                             <div className="flex items-center space-x-2">
@@ -464,7 +464,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                           setSelectedFile(null);
                         }}
                         checked={uploadOption === "new"}
-                        className="form-radio text-indigo-600"
+                        className="form-radio text-purple-600"
                         disabled={loading} // Disable input khi đang loading
                       />
                       <span className="font-semibold text-gray-800">
@@ -536,7 +536,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                 Bằng cách gửi yêu cầu, bạn có thể xác nhận rằng bạn chấp nhận{" "}
                 <a 
                   href="#" 
-                  className={`text-indigo-600 hover:underline ${loading ? "pointer-events-none" : ""}`}
+                  className={`text-purple-600 hover:underline ${loading ? "pointer-events-none" : ""}`}
                   onClick={(e) => loading && e.preventDefault()} // Ngăn click khi đang loading
                 >
                   Terms of Service
@@ -544,7 +544,7 @@ const ApplyModal = ({ job, open, handleClose, oneApplyJob }) => {
                 và{" "}
                 <a 
                   href="#" 
-                  className={`text-indigo-600 hover:underline ${loading ? "pointer-events-none" : ""}`}
+                  className={`text-purple-600 hover:underline ${loading ? "pointer-events-none" : ""}`}
                   onClick={(e) => loading && e.preventDefault()} // Ngăn click khi đang loading
                 >
                   Privacy Policy

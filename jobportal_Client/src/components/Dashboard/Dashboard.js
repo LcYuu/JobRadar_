@@ -40,7 +40,7 @@ export default function Dashboard_Seeker() {
 
   return (
     <div className="container mx-auto px-4 relative">
-      <Card className="mb-8 shadow-lg rounded-lg bg-gradient-to-br from-purple-500 via-indigo-500 to-blue-500 text-white overflow-visible">
+      <Card className="mb-8 shadow-lg rounded-lg bg-gradient-to-br from-purple-500 via-purple-500 to-blue-500 text-white overflow-visible">
         <CardContent className="p-6 overflow-visible">
           <h2 className="text-lg font-medium mb-4">Tổng đơn đã ứng tuyển</h2>
           <div className="flex items-center">
@@ -91,7 +91,7 @@ export default function Dashboard_Seeker() {
                         </div>
                         <div className="flex flex-col space-y-4">
                           <div className="flex items-center gap-3">
-                            <h3 className="font-bold text-lg text-indigo-800">{app.title}</h3>
+                            <h3 className="font-bold text-lg text-purple-800">{app.title}</h3>
                             <span
                               className={`px-3 py-1 rounded-full text-sm ${
                                 app.isSave ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"

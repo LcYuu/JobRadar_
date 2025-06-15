@@ -192,4 +192,3 @@ export default function JobCard({ postId, jobTitle, company, location, category,
     </Card>
   )
 }
-

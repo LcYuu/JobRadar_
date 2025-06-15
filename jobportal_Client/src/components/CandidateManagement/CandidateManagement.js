@@ -1,8 +1,16 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
-import { MoreVertical, Search, Filter, X, ChevronDown, ChevronUp, ArrowUpDown } from "lucide-react";
+import {
+  MoreVertical,
+  Search,
+  Filter,
+  X,
+  ChevronDown,
+  ChevronUp,
+  ArrowUpDown,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +47,8 @@ const CandidateManagement = () => {
   const [filteredCandidates, setFilteredCandidates] = useState([]);
   const [sortBy, setSortBy] = useState("applyDate");
   const [sortDirection, setSortDirection] = useState("desc");
+  const [showCustomDropdown, setShowCustomDropdown] = useState(null);
+  const dropdownRef = useRef(null);
 
   const {
     currentAnalysis,
@@ -61,7 +71,16 @@ const CandidateManagement = () => {
         sortDirection,
       })
     );
-  }, [dispatch, currentPage, size, searchTerm, filterStatus, filterPosition, sortBy, sortDirection]);
+  }, [
+    dispatch,
+    currentPage,
+    size,
+    searchTerm,
+    filterStatus,
+    filterPosition,
+    sortBy,
+    sortDirection,
+  ]);
 
   useEffect(() => {
     dispatch(getAllJobPost());
@@ -174,11 +193,27 @@ const CandidateManagement = () => {
 
   useWebSocket(["/topic/apply-updates"], handleMessage);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowCustomDropdown(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownRef]);
+
   return (
     <div className="p-4 sm:p-6">
       <div className="container-padding">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-          <h1 className="text-2xl font-semibold">Quản lý ứng viên</h1>
+          <h1 className="text-2xl text-purple-600 font-semibold">
+            Quản lý ứng viên
+          </h1>
           <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center filter-bar w-full sm:w-auto">
             <Input
               type="text"
@@ -291,7 +326,9 @@ const CandidateManagement = () => {
                             alt={candidate?.fullName}
                             className="w-10 h-10 rounded-full"
                           />
-                          <span className="truncate max-w-[calc(100%-3rem)]">{candidate?.fullName}</span>
+                          <span className="truncate max-w-[calc(100%-3rem)]">
+                            {candidate?.fullName}
+                          </span>
                         </div>
                       </td>
                       <td
@@ -317,14 +354,17 @@ const CandidateManagement = () => {
                         before="Ngày nộp:"
                       >
                         <span className="block whitespace-nowrap">
-                          {new Date(candidate?.applyDate).toLocaleString("vi-VN", {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            second: "2-digit",
-                          })}
+                          {new Date(candidate?.applyDate).toLocaleString(
+                            "vi-VN",
+                            {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              second: "2-digit",
+                            }
+                          )}
                         </span>
                       </td>
                       <td
@@ -335,7 +375,7 @@ const CandidateManagement = () => {
                       >
                         <Link
                           to={`/employer/jobs/${candidate?.postId}`}
-                          className="hover:underline text-blue-600 block truncate"
+                          className="hover:underline text-purple-600 block truncate"
                         >
                           {candidate?.title}
                         </Link>
@@ -346,28 +386,41 @@ const CandidateManagement = () => {
                         data-label="Mức độ phù hợp"
                         before="Mức độ phù hợp:"
                       >
-                        {candidate.matchingScore > 0 || getCachedScore(candidate) !== null ? (
+                        {candidate.matchingScore > 0 ||
+                        getCachedScore(candidate) !== null ? (
                           <Button
                             variant="outline"
                             className={`text-sm px-3 py-1 rounded-full w-full sm:w-auto ${
-                              (candidate.matchingScore || getCachedScore(candidate)) >= 70
+                              (candidate.matchingScore ||
+                                getCachedScore(candidate)) >= 70
                                 ? "bg-green-100 text-green-600"
-                                : (candidate.matchingScore || getCachedScore(candidate)) >= 50
+                                : (candidate.matchingScore ||
+                                    getCachedScore(candidate)) >= 50
                                 ? "bg-yellow-100 text-yellow-600"
                                 : "bg-red-100 text-red-600"
                             }`}
-                            onClick={() => handleAnalyzeCVMatch(candidate, false)}
+                            onClick={() =>
+                              handleAnalyzeCVMatch(candidate, false)
+                            }
                           >
-                            {Math.round(candidate.matchingScore || getCachedScore(candidate))}%
+                            {Math.round(
+                              candidate.matchingScore ||
+                                getCachedScore(candidate)
+                            )}
+                            %
                           </Button>
                         ) : (
                           <Button
                             variant="outline"
                             className="text-sm px-3 py-1 rounded-full bg-purple-100 text-purple-600 w-full sm:w-auto"
-                            onClick={() => handleAnalyzeCVMatch(candidate, true)}
+                            onClick={() =>
+                              handleAnalyzeCVMatch(candidate, true)
+                            }
                             disabled={isAnalyzingCandidate(candidate)}
                           >
-                            {isAnalyzingCandidate(candidate) ? "Đang phân tích..." : "Phân tích CV"}
+                            {isAnalyzingCandidate(candidate)
+                              ? "Đang phân tích..."
+                              : "Phân tích CV"}
                           </Button>
                         )}
                       </td>
@@ -381,7 +434,9 @@ const CandidateManagement = () => {
                           <Button
                             variant="outline"
                             className="text-purple-600 w-full sm:w-auto"
-                            onClick={() => window.open(candidate?.pathCV, "_blank")}
+                            onClick={() =>
+                              window.open(candidate?.pathCV, "_blank")
+                            }
                           >
                             Xem CV
                           </Button>
@@ -407,26 +462,36 @@ const CandidateManagement = () => {
                               <Button
                                 variant="outline"
                                 className="text-green-600 w-full"
-                                onClick={() => handleUpdate(candidate?.postId, candidate?.userId)}
+                                onClick={() =>
+                                  handleUpdate(
+                                    candidate?.postId,
+                                    candidate?.userId
+                                  )
+                                }
                               >
                                 Chấp thuận đơn
                               </Button>
                             )}
                           </div>
-                          <div className="hidden xl-custom:block">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button className="h-8 w-8 p-0">
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent
-                                align="end"
-                                className="bg-white border border-gray-300 shadow-lg rounded-md p-2"
+                          <div className="hidden xl-custom:block relative">
+                            <div
+                              className="h-8 w-8 p-0 flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-md cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowCustomDropdown(candidate?.postId + '-' + candidate?.userId);
+                              }}
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </div>
+                            {showCustomDropdown === candidate?.postId + '-' + candidate?.userId && (
+                              <div
+                                ref={dropdownRef}
+                                className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 shadow-lg rounded-md p-2 z-20"
                               >
-                                <DropdownMenuItem
-                                  className="hover:bg-gray-100 cursor-pointer"
-                                  onClick={() => {
+                                <div
+                                  className="hover:bg-gray-100 cursor-pointer px-3 py-2 rounded-md"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     dispatch(
                                       getNotificationViewJob({
                                         userId: candidate?.userId,
@@ -436,20 +501,25 @@ const CandidateManagement = () => {
                                     navigate(
                                       `/employer/account-management/candidate-management/applicants/${candidate?.userId}/${candidate?.postId}`
                                     );
+                                    setShowCustomDropdown(null);
                                   }}
                                 >
                                   Xem chi tiết
-                                </DropdownMenuItem>
+                                </div>
                                 {!candidate?.isSave && (
-                                  <DropdownMenuItem
-                                    className="hover:bg-gray-100 cursor-pointer"
-                                    onClick={() => handleUpdate(candidate?.postId, candidate?.userId)}
+                                  <div
+                                    className="hover:bg-gray-100 cursor-pointer px-3 py-2 rounded-md"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleUpdate(candidate?.postId, candidate?.userId);
+                                      setShowCustomDropdown(null);
+                                    }}
                                   >
                                     Chấp thuận đơn
-                                  </DropdownMenuItem>
+                                  </div>
                                 )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -491,10 +561,7 @@ const CandidateManagement = () => {
               >
                 Previous
               </Button>
-              <Button
-                variant="outline"
-                className="bg-purple-600 text-white"
-              >
+              <Button variant="outline" className="bg-purple-600 text-white">
                 {currentPage + 1}
               </Button>
               <Button
@@ -524,22 +591,30 @@ const CandidateManagement = () => {
                 <div className="bg-purple-50 p-4 sm:p-6 rounded-lg mb-6">
                   <div className="flex flex-col items-center mb-4">
                     <div className="text-3xl font-bold text-center text-purple-700 mb-2">
-                      {Math.round(currentAnalysis?.matching_score?.totalScore || 0)}%
+                      {Math.round(
+                        currentAnalysis?.matching_score?.totalScore || 0
+                      )}
+                      %
                     </div>
                     <div className="text-center text-purple-600 text-lg font-medium">
                       Mức độ phù hợp với công việc
                     </div>
                     <div className="mt-2 text-center text-purple-500 font-medium">
-                      {currentAnalysis?.matching_score?.suitabilityLevel || "Chưa đánh giá"}
+                      {currentAnalysis?.matching_score?.suitabilityLevel ||
+                        "Chưa đánh giá"}
                     </div>
                   </div>
                   {currentAnalysis?.matching_score?.recommendations && (
                     <div className="mt-4">
                       <h4 className="font-semibold mb-2">Nhận xét</h4>
                       <ul className="list-disc pl-5 space-y-1">
-                        {currentAnalysis.matching_score.recommendations.map((rec, index) => (
-                          <li key={index} className="text-gray-700">{rec}</li>
-                        ))}
+                        {currentAnalysis.matching_score.recommendations.map(
+                          (rec, index) => (
+                            <li key={index} className="text-gray-700">
+                              {rec}
+                            </li>
+                          )
+                        )}
                       </ul>
                     </div>
                   )}
@@ -553,8 +628,10 @@ const CandidateManagement = () => {
                           <span>Kỹ năng:</span>
                           <span className="font-medium">
                             {Math.round(
-                              currentAnalysis?.matching_score?.detailedScores?.skills_match || 0
-                            )}%
+                              currentAnalysis?.matching_score?.detailedScores
+                                ?.skills_match || 0
+                            )}
+                            %
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2.5">
@@ -562,7 +639,8 @@ const CandidateManagement = () => {
                             className="bg-blue-600 h-2.5 rounded-full"
                             style={{
                               width: `${Math.round(
-                                currentAnalysis?.matching_score?.detailedScores?.skills_match || 0
+                                currentAnalysis?.matching_score?.detailedScores
+                                  ?.skills_match || 0
                               )}%`,
                             }}
                           ></div>
@@ -573,8 +651,10 @@ const CandidateManagement = () => {
                           <span>Học vấn:</span>
                           <span className="font-medium">
                             {Math.round(
-                              currentAnalysis?.matching_score?.detailedScores?.education_match || 0
-                            )}%
+                              currentAnalysis?.matching_score?.detailedScores
+                                ?.education_match || 0
+                            )}
+                            %
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2.5">
@@ -582,7 +662,8 @@ const CandidateManagement = () => {
                             className="bg-green-600 h-2.5 rounded-full"
                             style={{
                               width: `${Math.round(
-                                currentAnalysis?.matching_score?.detailedScores?.education_match || 0
+                                currentAnalysis?.matching_score?.detailedScores
+                                  ?.education_match || 0
                               )}%`,
                             }}
                           ></div>
@@ -593,8 +674,10 @@ const CandidateManagement = () => {
                           <span>Kinh nghiệm:</span>
                           <span className="font-medium">
                             {Math.round(
-                              currentAnalysis?.matching_score?.detailedScores?.experience_match || 0
-                            )}%
+                              currentAnalysis?.matching_score?.detailedScores
+                                ?.experience_match || 0
+                            )}
+                            %
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2.5">
@@ -602,7 +685,8 @@ const CandidateManagement = () => {
                             className="bg-yellow-600 h-2.5 rounded-full"
                             style={{
                               width: `${Math.round(
-                                currentAnalysis?.matching_score?.detailedScores?.experience_match || 0
+                                currentAnalysis?.matching_score?.detailedScores
+                                  ?.experience_match || 0
                               )}%`,
                             }}
                           ></div>
@@ -613,8 +697,10 @@ const CandidateManagement = () => {
                           <span>Độ tương đồng tổng thể:</span>
                           <span className="font-medium">
                             {Math.round(
-                              currentAnalysis?.matching_score?.detailedScores?.overall_similarity || 0
-                            )}%
+                              currentAnalysis?.matching_score?.detailedScores
+                                ?.overall_similarity || 0
+                            )}
+                            %
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2.5">
@@ -622,32 +708,84 @@ const CandidateManagement = () => {
                             className="bg-purple-600 h-2.5 rounded-full"
                             style={{
                               width: `${Math.round(
-                                currentAnalysis?.matching_score?.detailedScores?.overall_similarity || 0
+                                currentAnalysis?.matching_score?.detailedScores
+                                  ?.overall_similarity || 0
                               )}%`,
-                            }}
-                          ></div>
+                            }}                          ></div>
                         </div>
                       </div>
+                      
+                      {/* Nice-to-have bonus score */}
+                      {currentAnalysis?.matching_score?.detailedScores?.nice_to_have_bonus !== undefined && (
+                        <div>
+                          <div className="flex justify-between mb-1">
+                            <span>Điểm cộng ưu tiên bổ sung:</span>
+                            <span className="font-medium text-purple-600">
+                              +{Math.round(
+                                currentAnalysis?.matching_score?.detailedScores
+                                  ?.nice_to_have_bonus || 0
+                              )}
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div
+                              className="bg-purple-400 h-2.5 rounded-full"
+                              style={{
+                                width: `${Math.min(Math.round(
+                                  currentAnalysis?.matching_score?.detailedScores
+                                    ?.nice_to_have_bonus || 0
+                                ), 20) * 5}%`,
+                              }}
+                            ></div>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Điểm thưởng cho kỹ năng nice-to-have (tối đa +20 điểm)
+                          </p>
+                        </div>
+                      )}
                     </div>
                     {currentAnalysis?.detailedAnalysis?.weights && (
                       <div className="mt-4 p-3 bg-gray-50 rounded-md">
-                        <h5 className="font-medium text-sm mb-2">Trọng số đánh giá:</h5>
+                        <h5 className="font-medium text-sm mb-2">
+                          Trọng số đánh giá:
+                        </h5>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           <div className="text-sm">
-                            Kỹ năng: {currentAnalysis.detailedAnalysis.weights.skills * 100}%
+                            Kỹ năng:{" "}
+                            {currentAnalysis.detailedAnalysis.weights.skills *
+                              100}
+                            %
                           </div>
                           <div className="text-sm">
-                            Học vấn: {currentAnalysis.detailedAnalysis.weights.education * 100}%
+                            Học vấn:{" "}
+                            {currentAnalysis.detailedAnalysis.weights
+                              .education * 100}
+                            %
                           </div>
                           <div className="text-sm">
-                            Kinh nghiệm: {currentAnalysis.detailedAnalysis.weights.experience * 100}%
+                            Kinh nghiệm:{" "}
+                            {currentAnalysis.detailedAnalysis.weights
+                              .experience * 100}
+                            %
                           </div>
                           <div className="text-sm">
-                            Ngữ cảnh: {currentAnalysis.detailedAnalysis.weights.context * 100}%
+                            Ngữ cảnh:{" "}
+                            {currentAnalysis.detailedAnalysis.weights.context *
+                              100}
+                            %
+                          </div>                          <div className="text-sm">
+                            Tương đồng tổng thể:{" "}
+                            {currentAnalysis.detailedAnalysis.weights
+                              .overall_similarity * 100}
+                            %
                           </div>
-                          <div className="text-sm">
-                            Tương đồng tổng thể: {currentAnalysis.detailedAnalysis.weights.overall_similarity * 100}%
-                          </div>
+                          {currentAnalysis.detailedAnalysis.weights.nice_to_have_bonus && (
+                            <div className="text-sm text-purple-600">
+                              Điểm cộng nice-to-have:{" "}
+                              {currentAnalysis.detailedAnalysis.weights.nice_to_have_bonus * 100}
+                              %
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
@@ -658,22 +796,58 @@ const CandidateManagement = () => {
                     <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
                       <h4 className="font-semibold mb-3">Kỹ năng bổ sung</h4>
                       <div className="flex flex-wrap gap-2">
-                        {currentAnalysis.matching_score.extraSkills.map((skill, index) => (
-                          <span
-                            key={index}
-                            className="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded"
-                          >
-                            {skill}
-                          </span>
-                        ))}
+                        {currentAnalysis.matching_score.extraSkills.map(
+                          (skill, index) => (
+                            <span
+                              key={index}
+                              className="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded"
+                            >
+                              {skill}
+                            </span>
+                          )                        )}
                       </div>
                     </div>
                   )}
+                
+                {/* Nice-to-have skills summary */}
+                {currentAnalysis?.matching_score?.niceToHaveSkills &&
+                  currentAnalysis.matching_score.niceToHaveSkills.length > 0 && (
+                    <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
+                      <h4 className="font-semibold mb-3 text-purple-700">
+                        Kỹ năng ưu tiên bổ sung (Nice-to-have)
+                        <span className="text-sm font-normal text-gray-600 ml-2">
+                          - Điểm cộng nếu ứng viên có
+                        </span>
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {currentAnalysis.matching_score.niceToHaveSkills.map(
+                          (skill, index) => (
+                            <span
+                              key={index}
+                              className="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded"
+                            >
+                              {skill}
+                            </span>
+                          )
+                        )}
+                      </div>
+                      {currentAnalysis?.matching_score?.detailedScores?.nice_to_have_bonus > 0 && (
+                        <p className="text-sm text-purple-600 mt-2 font-medium">
+                          ✨ Ứng viên đã nhận {Math.round(currentAnalysis.matching_score.detailedScores.nice_to_have_bonus)} điểm cộng cho các kỹ năng này
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  
                 {currentAnalysis?.detailedAnalysis?.skills && (
                   <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
-                    <h4 className="font-semibold mb-3">Phân tích kỹ năng chi tiết</h4>
+                    <h4 className="font-semibold mb-3">
+                      Phân tích kỹ năng chi tiết
+                    </h4>
                     <div className="mb-2">
-                      <span className="font-medium text-sm">Điểm đánh giá: </span>
+                      <span className="font-medium text-sm">
+                        Điểm đánh giá:{" "}
+                      </span>
                       <span
                         className={`${
                           currentAnalysis.detailedAnalysis.skills.score > 50
@@ -683,13 +857,15 @@ const CandidateManagement = () => {
                       >
                         {currentAnalysis.detailedAnalysis.skills.score}/100
                       </span>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    </div>                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                       <div>
-                        <h5 className="font-medium text-sm mb-2">Kỹ năng phù hợp:</h5>
-                        {currentAnalysis.detailedAnalysis.skills.matched_skills?.length > 0 ? (
+                        <h5 className="font-medium text-sm mb-2">
+                          Kỹ năng yêu cầu bắt buộc - Phù hợp:
+                        </h5>
+                        {currentAnalysis.detailedAnalysis.skills.required_skills_matched
+                          ?.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
-                            {currentAnalysis.detailedAnalysis.skills.matched_skills.map(
+                            {currentAnalysis.detailedAnalysis.skills.required_skills_matched.map(
                               (skill, index) => (
                                 <span
                                   key={index}
@@ -701,14 +877,35 @@ const CandidateManagement = () => {
                             )}
                           </div>
                         ) : (
-                          <p className="text-gray-500 text-sm">Không tìm thấy kỹ năng phù hợp</p>
+                          currentAnalysis.detailedAnalysis.skills.matched_skills
+                            ?.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {currentAnalysis.detailedAnalysis.skills.matched_skills.map(
+                                (skill, index) => (
+                                  <span
+                                    key={index}
+                                    className="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded"
+                                  >
+                                    {skill}
+                                  </span>
+                                )
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-gray-500 text-sm">
+                              Không tìm thấy kỹ năng phù hợp
+                            </p>
+                          )
                         )}
                       </div>
                       <div>
-                        <h5 className="font-medium text-sm mb-2">Kỹ năng còn thiếu:</h5>
-                        {currentAnalysis.detailedAnalysis.skills.missing_skills?.length > 0 ? (
+                        <h5 className="font-medium text-sm mb-2">
+                          Kỹ năng yêu cầu bắt buộc - Còn thiếu:
+                        </h5>
+                        {currentAnalysis.detailedAnalysis.skills.required_skills_missing
+                          ?.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
-                            {currentAnalysis.detailedAnalysis.skills.missing_skills.map(
+                            {currentAnalysis.detailedAnalysis.skills.required_skills_missing.map(
                               (skill, index) => (
                                 <span
                                   key={index}
@@ -720,12 +917,152 @@ const CandidateManagement = () => {
                             )}
                           </div>
                         ) : (
-                          <p className="text-gray-500 text-sm">Không có kỹ năng nào còn thiếu</p>
+                          currentAnalysis.detailedAnalysis.skills.missing_skills
+                            ?.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {currentAnalysis.detailedAnalysis.skills.missing_skills.map(
+                                (skill, index) => (
+                                  <span
+                                    key={index}
+                                    className="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded"
+                                  >
+                                    {skill}
+                                  </span>
+                                )
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-gray-500 text-sm">
+                              Không có kỹ năng nào còn thiếu
+                            </p>
+                          )
                         )}
                       </div>
                     </div>
+
+                    {/* Nice-to-have skills section */}
+                    {(currentAnalysis.detailedAnalysis.skills.nice_to_have_matched?.length > 0 || 
+                      currentAnalysis.detailedAnalysis.skills.nice_to_have_missing?.length > 0) && (
+                      <div className="border-t pt-4 mt-4">
+                        <h5 className="font-medium text-sm mb-3 text-purple-700">
+                          Kỹ năng ưu tiên bổ sung (Nice-to-have)
+                        </h5>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <h6 className="font-medium text-xs mb-2 text-green-700">
+                              Có sẵn (Điểm cộng):
+                            </h6>
+                            {currentAnalysis.detailedAnalysis.skills.nice_to_have_matched
+                              ?.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {currentAnalysis.detailedAnalysis.skills.nice_to_have_matched.map(
+                                  (skill, index) => (
+                                    <span
+                                      key={index}
+                                      className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-0.5 rounded"
+                                    >
+                                      {skill}
+                                    </span>
+                                  )
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-gray-500 text-xs">
+                                Không có kỹ năng nice-to-have phù hợp
+                              </p>
+                            )}
+                          </div>
+                          <div>
+                            <h6 className="font-medium text-xs mb-2 text-orange-700">
+                              Chưa có (Không ảnh hưởng tiêu cực):
+                            </h6>
+                            {currentAnalysis.detailedAnalysis.skills.nice_to_have_missing
+                              ?.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {currentAnalysis.detailedAnalysis.skills.nice_to_have_missing.map(
+                                  (skill, index) => (
+                                    <span
+                                      key={index}
+                                      className="bg-orange-100 text-orange-800 text-xs font-medium px-2 py-0.5 rounded"
+                                    >
+                                      {skill}
+                                    </span>
+                                  )
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-gray-500 text-xs">
+                                Không có kỹ năng nice-to-have nào còn thiếu
+                              </p>                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Skills Source Analysis */}
+                    {(currentAnalysis.detailedAnalysis.skills.skills_from_requirements_text?.length > 0 || 
+                      currentAnalysis.detailedAnalysis.skills.skills_from_selected_list?.length > 0) && (
+                      <div className="border-t pt-4 mt-4">
+                        <h5 className="font-medium text-sm mb-3 text-blue-700">
+                          Nguồn trích xuất kỹ năng yêu cầu
+                        </h5>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <h6 className="font-medium text-xs mb-2 text-blue-700">
+                              Từ danh sách kỹ năng được chọn:
+                            </h6>
+                            {currentAnalysis.detailedAnalysis.skills.skills_from_selected_list
+                              ?.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {currentAnalysis.detailedAnalysis.skills.skills_from_selected_list.map(
+                                  (skill, index) => (
+                                    <span
+                                      key={index}
+                                      className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded"
+                                    >
+                                      {skill}
+                                    </span>
+                                  )
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-gray-500 text-xs">
+                                Không có kỹ năng từ danh sách được chọn
+                              </p>
+                            )}
+                          </div>
+                          <div>
+                            <h6 className="font-medium text-xs mb-2 text-green-700">
+                              Từ mô tả yêu cầu công việc:
+                            </h6>
+                            {currentAnalysis.detailedAnalysis.skills.skills_from_requirements_text
+                              ?.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {currentAnalysis.detailedAnalysis.skills.skills_from_requirements_text.map(
+                                  (skill, index) => (
+                                    <span
+                                      key={index}
+                                      className="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded"
+                                    >
+                                      {skill}
+                                    </span>
+                                  )
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-gray-500 text-xs">
+                                Không có kỹ năng từ mô tả yêu cầu
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     <div>
-                      <h5 className="font-medium text-sm mb-1">Lý do đánh giá:</h5>
+                      <h5 className="font-medium text-sm mb-1">
+                        Lý do đánh giá:
+                      </h5>
                       <p className="text-sm text-gray-700">
                         {currentAnalysis.detailedAnalysis.skills.reason}
                       </p>
@@ -734,9 +1071,13 @@ const CandidateManagement = () => {
                 )}
                 {currentAnalysis?.detailedAnalysis?.education && (
                   <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
-                    <h4 className="font-semibold mb-3">Phân tích học vấn chi tiết</h4>
+                    <h4 className="font-semibold mb-3">
+                      Phân tích học vấn chi tiết
+                    </h4>
                     <div className="mb-3">
-                      <span className="font-medium text-sm">Điểm đánh giá: </span>
+                      <span className="font-medium text-sm">
+                        Điểm đánh giá:{" "}
+                      </span>
                       <span
                         className={`${
                           currentAnalysis.detailedAnalysis.education.score > 50
@@ -749,50 +1090,72 @@ const CandidateManagement = () => {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                       <div>
-                        <h5 className="font-medium text-sm mb-1">CV - Trình độ:</h5>
+                        <h5 className="font-medium text-sm mb-1">
+                          CV - Trình độ:
+                        </h5>
                         <p className="text-sm">
-                          {currentAnalysis.detailedAnalysis.education.cv_level || "Không có thông tin"}
+                          {currentAnalysis.detailedAnalysis.education
+                            .cv_level || "Không có thông tin"}
                         </p>
-                        <h5 className="font-medium text-sm mt-3 mb-1">CV - Chuyên ngành:</h5>
-                        {currentAnalysis.detailedAnalysis.education.cv_majors?.length > 0 ? (
+                        <h5 className="font-medium text-sm mt-3 mb-1">
+                          CV - Chuyên ngành:
+                        </h5>
+                        {currentAnalysis.detailedAnalysis.education.cv_majors
+                          ?.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
-                            {currentAnalysis.detailedAnalysis.education.cv_majors.map((major, index) => (
-                              <span
-                                key={index}
-                                className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded"
-                              >
-                                {major}
-                              </span>
-                            ))}
+                            {currentAnalysis.detailedAnalysis.education.cv_majors.map(
+                              (major, index) => (
+                                <span
+                                  key={index}
+                                  className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded"
+                                >
+                                  {major}
+                                </span>
+                              )
+                            )}
                           </div>
                         ) : (
-                          <p className="text-gray-500 text-sm">Không có thông tin</p>
+                          <p className="text-gray-500 text-sm">
+                            Không có thông tin
+                          </p>
                         )}
                       </div>
                       <div>
-                        <h5 className="font-medium text-sm mb-1">Yêu cầu JD - Trình độ:</h5>
+                        <h5 className="font-medium text-sm mb-1">
+                          Yêu cầu JD - Trình độ:
+                        </h5>
                         <p className="text-sm">
-                          {currentAnalysis.detailedAnalysis.education.job_level || "Không yêu cầu cụ thể"}
+                          {currentAnalysis.detailedAnalysis.education
+                            .job_level || "Không yêu cầu cụ thể"}
                         </p>
-                        <h5 className="font-medium text-sm mt-3 mb-1">Yêu cầu JD - Chuyên ngành:</h5>
-                        {currentAnalysis.detailedAnalysis.education.job_majors?.length > 0 ? (
+                        <h5 className="font-medium text-sm mt-3 mb-1">
+                          Yêu cầu JD - Chuyên ngành:
+                        </h5>
+                        {currentAnalysis.detailedAnalysis.education.job_majors
+                          ?.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
-                            {currentAnalysis.detailedAnalysis.education.job_majors.map((major, index) => (
-                              <span
-                                key={index}
-                                className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2 py-0.5 rounded"
-                              >
-                                {major}
-                              </span>
-                            ))}
+                            {currentAnalysis.detailedAnalysis.education.job_majors.map(
+                              (major, index) => (
+                                <span
+                                  key={index}
+                                  className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-0.5 rounded"
+                                >
+                                  {major}
+                                </span>
+                              )
+                            )}
                           </div>
                         ) : (
-                          <p className="text-gray-500 text-sm">Không yêu cầu cụ thể</p>
+                          <p className="text-gray-500 text-sm">
+                            Không yêu cầu cụ thể
+                          </p>
                         )}
                       </div>
                     </div>
                     <div>
-                      <h5 className="font-medium text-sm mb-1">Lý do đánh giá:</h5>
+                      <h5 className="font-medium text-sm mb-1">
+                        Lý do đánh giá:
+                      </h5>
                       <p className="text-sm text-gray-700">
                         {currentAnalysis.detailedAnalysis.education.reason}
                       </p>
@@ -801,9 +1164,13 @@ const CandidateManagement = () => {
                 )}
                 {currentAnalysis?.detailedAnalysis?.experience && (
                   <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
-                    <h4 className="font-semibold mb-3">Phân tích kinh nghiệm chi tiết</h4>
+                    <h4 className="font-semibold mb-3">
+                      Phân tích kinh nghiệm chi tiết
+                    </h4>
                     <div className="mb-3">
-                      <span className="font-medium text-sm">Điểm đánh giá: </span>
+                      <span className="font-medium text-sm">
+                        Điểm đánh giá:{" "}
+                      </span>
                       <span
                         className={`${
                           currentAnalysis.detailedAnalysis.experience.score > 50
@@ -816,20 +1183,28 @@ const CandidateManagement = () => {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                       <div>
-                        <h5 className="font-medium text-sm mb-1">CV - Số năm kinh nghiệm:</h5>
+                        <h5 className="font-medium text-sm mb-1">
+                          CV - Số năm kinh nghiệm:
+                        </h5>
                         <p className="text-sm">
-                          {currentAnalysis.detailedAnalysis.experience.cv_years || "Không có thông tin"}
+                          {currentAnalysis.detailedAnalysis.experience
+                            .cv_years || "Không có thông tin"}
                         </p>
                       </div>
                       <div>
-                        <h5 className="font-medium text-sm mb-1">Yêu cầu JD - Số năm kinh nghiệm:</h5>
+                        <h5 className="font-medium text-sm mb-1">
+                          Yêu cầu JD - Số năm kinh nghiệm:
+                        </h5>
                         <p className="text-sm">
-                          {currentAnalysis.detailedAnalysis.experience.job_years || "Không yêu cầu cụ thể"}
+                          {currentAnalysis.detailedAnalysis.experience
+                            .job_years || "Không yêu cầu cụ thể"}
                         </p>
                       </div>
                     </div>
                     <div>
-                      <h5 className="font-medium text-sm mb-1">Lý do đánh giá:</h5>
+                      <h5 className="font-medium text-sm mb-1">
+                        Lý do đánh giá:
+                      </h5>
                       <p className="text-sm text-gray-700">
                         {currentAnalysis.detailedAnalysis.experience.reason}
                       </p>
@@ -837,29 +1212,34 @@ const CandidateManagement = () => {
                   </div>
                 )}
                 {currentAnalysis?.matching_score?.cvImprovementSuggestions &&
-                  currentAnalysis.matching_score.cvImprovementSuggestions.length > 0 && (
+                  currentAnalysis.matching_score.cvImprovementSuggestions
+                    .length > 0 && (
                     <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
-                      <h4 className="font-semibold mb-3 text-indigo-700">Gợi ý cải thiện CV</h4>
+                      <h4 className="font-semibold mb-3 text-purple-700">
+                        Gợi ý cải thiện CV
+                      </h4>
                       <ul className="space-y-2">
-                        {currentAnalysis.matching_score.cvImprovementSuggestions.map((suggestion, index) => (
-                          <li key={index} className="flex items-start">
-                            <div className="flex-shrink-0 mt-0.5">
-                              <svg
-                                className="w-4 h-4 text-indigo-600"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                  clipRule="evenodd"
-                                ></path>
-                              </svg>
-                            </div>
-                            <p className="ml-2 text-gray-700">{suggestion}</p>
-                          </li>
-                        ))}
+                        {currentAnalysis.matching_score.cvImprovementSuggestions.map(
+                          (suggestion, index) => (
+                            <li key={index} className="flex items-start">
+                              <div className="flex-shrink-0 mt-0.5">
+                                <svg
+                                  className="w-4 h-4 text-purple-600"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                    clipRule="evenodd"
+                                  ></path>
+                                </svg>
+                              </div>
+                              <p className="ml-2 text-gray-700">{suggestion}</p>
+                            </li>
+                          )
+                        )}
                       </ul>
                     </div>
                   )}
@@ -868,7 +1248,9 @@ const CandidateManagement = () => {
                 <div className="flex justify-end gap-3">
                   <Button
                     variant="outline"
-                    onClick={() => window.open(currentAnalysis?.candidate?.pathCV, "_blank")}
+                    onClick={() =>
+                      window.open(currentAnalysis?.candidate?.pathCV, "_blank")
+                    }
                     className="text-purple-600"
                   >
                     Xem CV gốc

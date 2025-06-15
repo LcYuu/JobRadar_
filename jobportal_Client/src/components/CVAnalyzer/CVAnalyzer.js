@@ -165,10 +165,9 @@ const CVAnalyzer = () => {
               </div>
             )}
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div className="bg-white p-4 rounded-lg border shadow-sm">
-              <h4 className="font-semibold mb-3 text-green-700">Kỹ năng phù hợp</h4>
+              <h4 className="font-semibold mb-3 text-green-700">Kỹ năng phù hợp (Yêu cầu bắt buộc)</h4>
               {result.matching_score.matchedSkills.length > 0 ? (
                 <ul className="list-disc pl-5 space-y-1">
                   {result.matching_score.matchedSkills.map((skill, index) => (
@@ -181,7 +180,7 @@ const CVAnalyzer = () => {
             </div>
             
             <div className="bg-white p-4 rounded-lg border shadow-sm">
-              <h4 className="font-semibold mb-3 text-red-700">Kỹ năng còn thiếu</h4>
+              <h4 className="font-semibold mb-3 text-red-700">Kỹ năng còn thiếu (Yêu cầu bắt buộc)</h4>
               {result.matching_score.missingSkills.length > 0 ? (
                 <ul className="list-disc pl-5 space-y-1">
                   {result.matching_score.missingSkills.map((skill, index) => (
@@ -194,9 +193,23 @@ const CVAnalyzer = () => {
             </div>
           </div>
           
+          {/* Nice-to-have skills section */}
+          {result.matching_score.niceToHaveSkills && result.matching_score.niceToHaveSkills.length > 0 && (
+            <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
+              <h4 className="font-semibold mb-3 text-purple-700">Kỹ năng ưu tiên bổ sung (Nice-to-have) 
+                <span className="text-sm font-normal text-gray-600 ml-2">- Điểm cộng nếu có</span>
+              </h4>
+              <ul className="list-disc pl-5 space-y-1">
+                {result.matching_score.niceToHaveSkills.map((skill, index) => (
+                  <li key={index} className="text-purple-600">{skill}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          
           {result.matching_score.extraSkills && result.matching_score.extraSkills.length > 0 && (
             <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
-              <h4 className="font-semibold mb-3 text-blue-700">Kỹ năng bổ sung</h4>
+              <h4 className="font-semibold mb-3 text-blue-700">Kỹ năng bổ sung khác</h4>
               <ul className="list-disc pl-5 space-y-1">
                 {result.matching_score.extraSkills.map((skill, index) => (
                   <li key={index} className="text-blue-600">{skill}</li>
@@ -231,10 +244,10 @@ const CVAnalyzer = () => {
           
           {result.matching_score.cvImprovementSuggestions && result.matching_score.cvImprovementSuggestions.length > 0 && (
             <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
-              <h4 className="font-semibold mb-3 text-indigo-700">Gợi ý cải thiện CV</h4>
+              <h4 className="font-semibold mb-3 text-purple-700">Gợi ý cải thiện CV</h4>
               <ul className="list-disc pl-5 space-y-1">
                 {result.matching_score.cvImprovementSuggestions.map((suggestion, index) => (
-                  <li key={index} className="text-indigo-600">{suggestion}</li>
+                  <li key={index} className="text-purple-600">{suggestion}</li>
                 ))}
               </ul>
             </div>
@@ -282,8 +295,7 @@ const CVAnalyzer = () => {
                   <div className="bg-purple-600 h-2.5 rounded-full" style={{width: `${Math.round(result.matching_score.detailedScores.overall_similarity)}%`}}></div>
                 </div>
               </div>
-              
-              <div>
+                <div>
                 <div className="flex justify-between mb-1">
                   <span>Điểm ngữ cảnh:</span>
                   <span className="font-medium">{Math.round(result.matching_score.detailedScores.context_score)}%</span>
@@ -292,6 +304,20 @@ const CVAnalyzer = () => {
                   <div className="bg-pink-600 h-2.5 rounded-full" style={{width: `${Math.round(result.matching_score.detailedScores.context_score)}%`}}></div>
                 </div>
               </div>
+              
+              {/* Nice-to-have bonus score */}
+              {result.matching_score.detailedScores.nice_to_have_bonus !== undefined && (
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span>Điểm cộng ưu tiên bổ sung:</span>
+                    <span className="font-medium text-purple-600">+{Math.round(result.matching_score.detailedScores.nice_to_have_bonus)}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="bg-purple-400 h-2.5 rounded-full" style={{width: `${Math.min(Math.round(result.matching_score.detailedScores.nice_to_have_bonus), 20) * 5}%`}}></div>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Điểm thưởng cho kỹ năng nice-to-have (tối đa +20 điểm)</p>
+                </div>
+              )}
             </div>
           </div>
           
@@ -399,9 +425,51 @@ const CVAnalyzer = () => {
                         </div>
                         <div>
                           <span className="font-medium">Tương đồng tổng thể:</span> {(result.detailedAnalysis.weights.overall_similarity * 100).toFixed(0)}%
+                        </div>                        <div>
+                          <span className="font-medium">Ngữ cảnh:</span> {(result.detailedAnalysis.weights.context * 100).toFixed(0)}%
+                        </div>
+                        {result.detailedAnalysis.weights.nice_to_have_bonus && (
+                          <div className="text-purple-600">
+                            <span className="font-medium">Điểm cộng nice-to-have:</span> {(result.detailedAnalysis.weights.nice_to_have_bonus * 100).toFixed(0)}%
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Skills Source Analysis */}
+                  {result.detailedAnalysis.skills && (result.detailedAnalysis.skills.skills_from_requirements_text?.length > 0 || 
+                    result.detailedAnalysis.skills.skills_from_selected_list?.length > 0) && (
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <h4 className="font-medium text-blue-900 mb-3">Nguồn trích xuất kỹ năng yêu cầu</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <h5 className="font-medium text-sm mb-2 text-blue-700">Từ danh sách kỹ năng được chọn:</h5>
+                          {result.detailedAnalysis.skills.skills_from_selected_list?.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {result.detailedAnalysis.skills.skills_from_selected_list.map((skill, index) => (
+                                <span key={index} className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">
+                                  {skill}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-gray-500 text-sm italic">Không có kỹ năng từ danh sách được chọn</p>
+                          )}
                         </div>
                         <div>
-                          <span className="font-medium">Ngữ cảnh:</span> {(result.detailedAnalysis.weights.context * 100).toFixed(0)}%
+                          <h5 className="font-medium text-sm mb-2 text-green-700">Từ mô tả yêu cầu công việc:</h5>
+                          {result.detailedAnalysis.skills.skills_from_requirements_text?.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {result.detailedAnalysis.skills.skills_from_requirements_text.map((skill, index) => (
+                                <span key={index} className="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded">
+                                  {skill}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-gray-500 text-sm italic">Không có kỹ năng từ mô tả yêu cầu</p>
+                          )}
                         </div>
                       </div>
                     </div>

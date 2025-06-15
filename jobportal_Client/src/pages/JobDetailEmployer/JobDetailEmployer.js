@@ -143,19 +143,24 @@ const JobDetailEmployer = () => {
   
   const handleSaveSkills = async (selectedSkills) => {
     try {
+      const skillIds = selectedSkills.map((skill) => skill.skillId);
+  
       const updatedJobData = {
         ...jobData,
-        skills: selectedSkills, // Cập nhật danh sách kỹ năng
+        skillIds: skillIds,
       };
-      await dispatch(updateJob({ postId, jobPostData: updatedJobData }));
+      console.log("Sending updateJob with data:", updatedJobData);
+  
+      const result = await dispatch(updateJob({ postId, jobPostData: updatedJobData }));
+      console.log("Update job result:", result);
+  
       toast.success("Cập nhật kỹ năng thành công!");
-      dispatch(getDetailJobById(postId)); // Làm mới dữ liệu
+      dispatch(getDetailJobById(postId));
     } catch (error) {
       console.error("Error updating skills:", error);
       toast.error("Có lỗi khi cập nhật kỹ năng!");
     }
   };
-
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
@@ -424,7 +429,7 @@ const JobDetailEmployer = () => {
             <img
               src={detailJob?.company?.logo}
               alt="Company Logo"
-              className="h-12 w-12 sm:h-16 sm:w-16 rounded-lg bg-indigo-100 flex items-center justify-center text-xl sm:text-2xl font-bold text-indigo-600"
+              className="h-12 w-12 sm:h-16 sm:w-16 rounded-lg bg-purple-100 flex items-center justify-center text-xl sm:text-2xl font-bold text-purple-600"
             />
             {isEditing ? (
               <div className="w-full">
@@ -717,12 +722,13 @@ const JobDetailEmployer = () => {
                 ))
               ) : null}
             </ul>
-          </Card>
-
-          <Card className="p-4 sm:p-6 bg-white shadow-lg">
+          </Card>          <Card className="p-4 sm:p-6 bg-white shadow-lg">
             <h2 className="text-lg sm:text-xl font-semibold mb-4">
-              Trách nhiệm công việc
+              Ưu tiên bổ sung (Nice-to-have)
             </h2>
+            <p className="text-sm text-gray-600 mb-3">
+              Những kỹ năng/kinh nghiệm tốt nếu ứng viên có, nhưng không bắt buộc
+            </p>
             <ul className="space-y-2">
               {isEditing ? (
                 <textarea

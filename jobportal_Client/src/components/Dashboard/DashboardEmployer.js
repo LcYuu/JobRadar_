@@ -62,7 +62,7 @@ export default function Dashboard_Employer() {
     return industryNames.map((industryName, index) => (
       <span
         key={index}
-        className="px-2 py-1 text-xs rounded-full bg-indigo-50 text-indigo-600 font-medium mr-1"
+        className="px-2 py-1 text-xs rounded-full bg-purple-50 text-purple-600 font-medium mr-1"
       >
         {industryName}
       </span>
@@ -90,7 +90,7 @@ export default function Dashboard_Employer() {
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 text-white">
             {countReview?.totalReviews ?? 0}
           </h2>
-          <p className="text-indigo-100 text-sm sm:text-base">Tổng số Review</p>
+          <p className="text-purple-100 text-sm sm:text-base">Tổng số Review</p>
         </div>
       </div>
 
@@ -151,7 +151,7 @@ export default function Dashboard_Employer() {
                     <div className="flex gap-3 sm:gap-4">
                       {/* Job Details */}
                       <div className="flex flex-col mr-3">
-                        <h3 className="font-semibold text-base sm:text-lg text-gray-900 group-hover:text-indigo-600 transition-colors">
+                        <h3 className="font-semibold text-base sm:text-lg text-gray-900 group-hover:text-purple-600 transition-colors">
                           {job.title || "Không có tiêu đề"}
                         </h3>
                         <div className="flex flex-col gap-1 text-xs sm:text-sm text-gray-600 mt-1">

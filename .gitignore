@@ -2,5 +2,10 @@ node_modules
 .cursorignore
 .env
 AI.py
+/AI/.env
 
 
+search.csv
+job_post.csv
+
+app.log

@@ -184,7 +184,7 @@ export default function AdminJobList() {
                   <th className={`${padding} text-left w-[10%] ${fontSize}`}>Tình trạng</th>
                   <th className={`${padding} text-left w-[10%] ${fontSize}`}>Ngày đăng</th>
                   <th className={`${padding} text-left w-[10%] ${fontSize}`}>Hạn nộp</th>
-                  <th className={`${padding} text-left w-[10%] ${fontSize}`}>Action</th>
+                  <th className={`${padding} text-left w-[10%] ${fontSize}`}>Hành động</th>
                 </tr>
               </thead>
 

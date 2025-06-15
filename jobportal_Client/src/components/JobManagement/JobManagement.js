@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../ui/button";
 import {
@@ -49,6 +49,8 @@ const JobManagement = () => {
   const [sortBy, setSortBy] = useState("createdate");
   const [sortDirection, setSortDirection] = useState("desc");
   const [sortedJobs, setSortedJobs] = useState([]);
+  const [showCustomDropdown, setShowCustomDropdown] = useState(null);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     if (jobs && jobs.length > 0) {
@@ -189,6 +191,21 @@ const JobManagement = () => {
     }
   };
 
+  // Logic đóng dropdown khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowCustomDropdown(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownRef]);
+
   return (
     <div className="p-4 sm:p-6">
       <div className="container-padding">
@@ -198,7 +215,7 @@ const JobManagement = () => {
           </div>
         )}
 
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <div className="flex flex-col sm:flex-row text-purple-600 justify-between items-start sm:items-center mb-6 gap-4">
           <h1 className="text-2xl font-semibold">Quản lý công việc</h1>
           <div className="flex items-center gap-4">
             <Button
@@ -212,11 +229,11 @@ const JobManagement = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow">
-          <div className="bg-white rounded-lg shadow">
-            <div className="flex flex-col items-start sm:items-center p-4 border-b gap-4 filter-bar w-full">
-              <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center w-full sm:w-auto">
+          <div className="bg-white rounded-lg shadow flex flex-col">
+            <div className="flex flex-col pt-3 pr-3 sm:flex-row justify-end items-start sm:items-center mr-4 gap-4 w-full">
+              <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center justify-end sm:justify-center w-full sm:w-auto">
                 <select
-                  className="border rounded px-4 py-2 w-full sm:w-auto max-w-[250px] flex-shrink"
+                  className="border rounded px-4 py-2 w-full  flex-shrink"
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                 >
@@ -226,7 +243,7 @@ const JobManagement = () => {
                   <option value="Hết hạn">Hết hạn</option>
                 </select>
                 <select
-                  className="border rounded px-4 py-2 w-full sm:w-auto max-w-[250px] flex-shrink"
+                  className="border rounded px-4 py-2 w-full flex-shrink"
                   value={typeOfWork}
                   onChange={(e) => setTypeOfWork(e.target.value)}
                 >
@@ -239,7 +256,7 @@ const JobManagement = () => {
                 </select>
                 <Button
                   variant="outline"
-                  className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-500 transition-colors w-full sm:w-auto min-w-[100px] max-w-[120px] flex-shrink"
+                  className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-500 transition-colors w-full min-w-[100px] flex-shrink"
                   onClick={applyFilters}
                 >
                   <Filter className="w-4 h-4 mr-2" />
@@ -357,7 +374,7 @@ const JobManagement = () => {
                         data-label="Loại công việc"
                         before="Loại công việc:"
                       >
-                        <span className="px-3 py-1 rounded-full text-sm bg-indigo-100 text-indigo-600">
+                        <span className="px-3 py-1 rounded-full text-sm bg-purple-100 text-purple-600">
                           {job?.typeOfWork}
                         </span>
                       </td>
@@ -403,44 +420,46 @@ const JobManagement = () => {
                               Xem chi tiết
                             </Button>
                           </div>
-                          <div className="hidden xl-custom:block">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  className="dropdown-trigger p-0 h-8 w-8 bg-transparent hover:bg-transparent"
-                                >
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent
-                                align="end"
-                                className="dropdown-menu-content bg-white border border-gray-300 shadow-lg rounded-md p-2 min-w-[150px] z-10"
+                          <div className="hidden xl-custom:block relative">
+                            <div
+                              className="h-8 w-8 p-0 flex items-center justify-center text-gray-700 hover:bg-gray-100 rounded-md cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowCustomDropdown(job.postId);
+                              }}
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </div>
+                            {showCustomDropdown === job.postId && (
+                              <div
+                                ref={dropdownRef}
+                                className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 shadow-lg rounded-md p-2 z-20"
                               >
-                                <DropdownMenuItem
-                                  className="dropdown-item-stop !text-red-600 !hover:text-red-800 !hover:bg-gray-100 cursor-pointer"
-                                  onClick={() =>
-                                    handleOpenExpireConfirmation(job.postId)
-                                  }
-                                  style={{
-                                    display:
-                                      job.expireDate &&
-                                      new Date(job.expireDate) < new Date()
-                                        ? "none"
-                                        : "block",
+                                {job.expireDate &&
+                                  new Date(job.expireDate) >= new Date() && (
+                                    <div
+                                      className="hover:bg-gray-100 cursor-pointer px-3 py-2 rounded-md !text-red-600 !hover:text-red-800"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleOpenExpireConfirmation(job.postId);
+                                        setShowCustomDropdown(null);
+                                      }}
+                                    >
+                                      Dừng tuyển dụng
+                                    </div>
+                                  )}
+                                <div
+                                  className="hover:bg-gray-100 cursor-pointer px-3 py-2 rounded-md !text-blue-600 !hover:text-blue-800"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleViewDetails(job.postId);
+                                    setShowCustomDropdown(null);
                                   }}
                                 >
-                                  Dừng tuyển dụng
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="dropdown-item-view !text-blue-600 !hover:text-blue-800 !hover:bg-gray-100 cursor-pointer"
-                                  style={{ color: "#2563EB" }}
-                                  onClick={() => handleViewDetails(job.postId)}
-                                >
                                   Xem chi tiết
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </td>

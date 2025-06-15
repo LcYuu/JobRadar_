@@ -128,17 +128,26 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
     });
 
     if (result.isConfirmed) {
+      try {
+        await dispatch(logoutAction());
+        // Xóa dữ liệu storage
+        localStorage.removeItem("jwt");
+        localStorage.removeItem("user");
         await Swal.fire({
-        icon: 'success',
-        title: 'Đăng xuất thành công',
-        text: 'Bạn đã đăng xuất thành công.',
-        timer: 1500,
-        showConfirmButton: false
-      });
-      dispatch(logoutAction());
-      
-      if (isMobile) {
-        setIsOpen(false);
+          icon: "success",
+          title: "Đăng xuất thành công",
+          text: "Bạn đã đăng xuất thành công.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+        // Chuyển hướng
+        window.location.href = "/";
+      } catch (error) {
+        await Swal.fire({
+          icon: "error",
+          title: "Lỗi đăng xuất",
+          text: "Có lỗi xảy ra khi đăng xuất. Vui lòng thử lại.",
+        });
       }
     }
   };
@@ -201,7 +210,7 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
               className={`text-3xl font-bold ${
                 user?.userType?.userTypeId === 1 || user?.userType?.userTypeId === 3
                   ? "text-gray-400 cursor-not-allowed"
-                  : "text-primary hover:text-indigo-700 transition duration-200"
+                  : "text-primary hover:text-purple-700 transition duration-200"
               }`}
             >
               JobRadar

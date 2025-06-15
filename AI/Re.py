@@ -26,7 +26,9 @@ import redis
 import hashlib
 import pickle
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
-
+from cryptography.fernet import Fernet
+import base64
+from typing import Tuple, Dict, Any
 # Thiết lập mã hóa
 os.environ['PYTHONIOENCODING'] = 'utf-8'
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
@@ -47,11 +49,18 @@ logger = logging.getLogger(__name__)
 
 # Khởi tạo Flask
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*", "allow_headers": "Authorization"}})
+# Cấu hình CORS
+CORS(app, resources={
+    r"/*": {
+        "origins": ["http://localhost:3000"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 # Cấu hình file paths
-SEARCH_HISTORY_FILEPATH = os.environ.get("SEARCH_HISTORY_FILEPATH", os.path.join("..", "search.csv"))
-JOBS_FILEPATH = os.environ.get("JOBS_FILEPATH", os.path.join("..", "job_post.csv"))
+SEARCH_HISTORY_FILEPATH = os.environ.get("SEARCH_HISTORY_FILEPATH", os.path.join(os.path.dirname(os.path.dirname(__file__)), "search.csv"))
+JOBS_FILEPATH = os.environ.get("JOBS_FILEPATH", os.path.join(os.path.dirname(os.path.dirname(__file__)), "job_post.csv"))
 # Cấu hình Gemini API
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
@@ -85,13 +94,14 @@ in_memory_cache = {}
 # Biến cấu hình tối ưu hóa
 MAX_WORKERS = 8
 PRECOMPUTE_EMBEDDINGS = True
-EMBEDDINGS_FILE = "job_embeddings.pkl"
+EMBEDDINGS_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "embeddings_cache.pkl")
 EMBEDDING_REFRESH_HOURS = 24
 SEMANTIC_SEARCH_TIMEOUT = 30
 USE_JOB_INDEXING = True
 ENABLE_PREFILTERING = True
 MAX_JOBS_FOR_GEMINI = 50
 EMBEDDING_CACHE_SIZE = 1000
+CACHE_VERSION = "1.0"  # Thêm version để quản lý cache
 
 # Biến toàn cục
 job_index = {}
@@ -275,7 +285,20 @@ def get_job_embedding(job):
         if job_id in job_embeddings:
             return job_embeddings[job_id]
         
-        job_text = f"{job.get('title', '')} {job.get('description', '')} {job.get('requirements', '')}"
+        # Cải thiện job text combination
+        components = []
+        if job.get('title'):
+            components.append(f"Tiêu đề: {job['title']}")
+        if job.get('description'):
+            components.append(f"Mô tả: {job['description']}")
+        if job.get('requirements') or job.get('requirement'):
+            req_text = job.get('requirements') or job.get('requirement', '')
+            components.append(f"Yêu cầu: {req_text}")
+        if job.get('niceToHaves'):
+            components.append(f"Ưu tiên: {job['niceToHaves']}")
+        
+        job_text = ". ".join(components)
+        
         embedding = embedding_model.encode(job_text, device=DEVICE, normalize_embeddings=True)
         job_embeddings[job_id] = embedding
         return embedding
@@ -324,165 +347,425 @@ def preprocess_text(text, bypass_stop_words=False, normalize_for_keywords=False)
             boosted_words.append(word)
     return ' '.join(boosted_words)
 
-# Class ImprovedCommentFilter
-class ImprovedCommentFilter:
+class CompanyReviewFilter:
+    """Filter dành riêng cho bình luận đánh giá công ty - chỉ lọc toxic content, không lọc ý kiến phê bình"""
+    
     def __init__(self):
+        self.patterns = self._init_patterns()
+        self.model = None
+        self.cache = {}
+        self.cache_ttl = 300
+        
         try:
-            self.en_model = AutoModelForSequenceClassification.from_pretrained("unitary/toxic-bert")
-            self.en_tokenizer = AutoTokenizer.from_pretrained("unitary/toxic-bert")
-            self.en_model.eval()
-            self.patterns = self._init_patterns()
-            self.feedback_data = []
-            logger.info("Khởi tạo ImprovedCommentFilter thành công")
+            api_key = os.getenv('GEMINI_API_KEY')
+            if api_key:
+                self.model = self._setup_gemini(api_key)
+                logger.info("Gemini model initialized successfully")
+            else:
+                logger.warning("GEMINI_API_KEY not found, using pattern-only filtering")
         except Exception as e:
-            logger.error(f"Lỗi khởi tạo models: {e}")
-            raise
+            logger.error(f"Lỗi khi khởi tạo Gemini model: {str(e)}")
 
     def _init_patterns(self):
-        vn_patterns = [
-            r'\b[đdĐD][ịiịĩ]+[tT]*\w*', r'\b[cC][ặăắẳẵ]+[cC]*\w*', r'\b[lL][ồôỗổ]+[nN]*\w*',
-            r'\b[đdĐD][éeèẻẽẹêếềểễệ]+[oO]*\w*', r'\b[đdĐD][ũuụủứừửữự]+[mM][aàáảãạăằắẳẵặâầấẩẫậ]*\w*',
-            r'\b[cC][hH][óoôốồổỗộơớờởỡợ]+\w*', r'\b[sS][úuứừửữự]+[cC]\w*', r'\b[nN][gG][uUưƯ]\w*',
-            r'\b[kK][hH][óoôốồổỗộơớờởỡợ][nN]\w*'
-        ]
-        en_patterns = [
-            r'\bf+u+c+k+\w*', r'\bs+h+[i1]+t+\w*', r'\bb+i+t+c+h+\w*', r'\ba+s+h+o+l+e+\w*',
-            r'\bd+u+m+b+\w*', r'\bi+d+i+o+t+\w*', r'\bs+t+u+p+i+d+\w*'
-        ]
-        all_patterns = vn_patterns + en_patterns
-        return re.compile('|'.join(all_patterns), re.IGNORECASE | re.UNICODE)
+        """Khởi tạo patterns - chỉ tập trung vào toxic content, không lọc ý kiến phê bình"""
+        return {
+            # WHITELIST - Nội dung an toàn (bao gồm cả ý kiến phê bình hợp lệ)
+            'safe_expressions': re.compile(
+                r'\b(ha(ha)+|he(he)+|hi(hi)+|hu(hu)+|kk+|lol|lmao|rofl|xd|omg|wow|nice|good|great|awesome|cool|ok|okay|' +
+                r'thanks?|thank\s+you|cảm\s*ơn|cám\s*ơn|chúc\s*mừng|tuyệt\s*vời|tốt\s*quá|hay\s*quá|đẹp\s*quá)\b',
+                re.IGNORECASE
+            ),
+            'safe_emoticons': re.compile(
+                r'[:\-=][\)d\]>]|[:\-=][\(c\[<]|<3|\^_\^|\^\^|:p|:P|xD|XD|;\)|;D',
+                re.IGNORECASE
+            ),
+            
+            # Ý kiến phê bình hợp lệ về công ty (KHÔNG coi là toxic)
+            'legitimate_criticism': re.compile(
+                r'\b(không\s*(tốt|tử\s*tế|chuyên\s*nghiệp|hợp\s*lý|công\s*bằng|minh\s*bạch)|' +
+                r'tệ|kém|yếu|thiếu|chậm|không\s*đầy\s*đủ|không\s*rõ\s*ràng|phức\s*tạp|khó\s*khăn|' +
+                r'áp\s*lực|stress|mệt\s*mỏi|quá\s*tải|overtime|tăng\s*ca|không\s*cân\s*bằng|' +
+                r'lương\s*thấp|lương\s*ít|thu\s*nhập\s*thấp|không\s*tăng\s*lương|chậm\s*lương|' +
+                r'môi\s*trường\s*(không\s*tốt|tệ|xấu)|văn\s*hóa\s*(không\s*tốt|tệ)|' +
+                r'quản\s*lý\s*(không\s*tốt|kém|yếu|tệ)|sếp\s*(không\s*tốt|khó\s*tính|khắt\s*khe)|' +
+                r'thiếu\s*(cơ\s*hội|phúc\s*lợi|đào\s*tạo|hỗ\s*trợ|trang\s*thiết\s*bị)|' +
+                r'bad|terrible|awful|poor|worst|disappointing|unsatisfied|dissatisfied|' +
+                r'unprofessional|unfair|unreasonable|stressful|overwork|underpaid|toxic\s*workplace|' +
+                r'bad\s*management|terrible\s*boss|poor\s*leadership|lack\s*of|insufficient)\b',
+                re.IGNORECASE | re.MULTILINE
+            ),
+            
+            # BLACKLIST - Chỉ những nội dung thực sự toxic
+            'vietnamese_vulgar_strict': re.compile(
+                r'\b(địt|đụ|đéo|cặc|lồn|đĩ|điếm|buồi|đầu\s*buồi|đầu\s*cặc|' +
+                # Các biến thể và viết tắt
+                r'd[ịi1!]t|đ[ụu]|d[eo3]o|đ[éè3]o|c[ặa@]c|l[ồo0]n|đ[ĩi]|bu[ồo0]i|' +
+                # Viết tắt phổ biến
+                r'vcl|clgt|cmm|cmn|cmnr|đmm|đcm|vcđ|vlđ|vcd|đml|dml|' +
+                # Biến thể che giấu
+                r'd1t|d3o|c4c|l0n|bu01|' +
+                r'd\s*ị\s*t|đ\s*ụ|c\s*ặ\s*c|l\s*ồ\s*n|' +
+                r'd\.ị\.t|đ\.ụ|c\.ặ\.c|l\.ồ\.n|' +
+                r'd-ị-t|đ-ụ|c-ặ-c|l-ồ-n|d_ị_t|đ_ụ|c_ặ_c|l_ồ_n)\b',
+                re.IGNORECASE
+            ),
+            
+            'vietnamese_personal_attack': re.compile(
+                r'\b(đồ\s*(chó|heo|lợn|khỉ|ngu|ngốc|đần|điên)|' +
+                # Xúc phạm cá nhân nghiêm trọng
+                r'mẹ\s*(mày|tao)|cha\s*(mày|tao)|thằng\s*(chó|ngu|điên)|con\s*(chó|lợn|điên)|' +
+                # Đe dọa
+                r'giết|chết\s*đi|tao\s*giết\s*mày|mày\s*chết|đánh\s*chết|' +
+                # Phân biệt đối xử nghiêm trọng  
+                r'đồ\s*(đồng\s*tính|gay|les)|thằng\s*(gay|đồng\s*tính))\b',
+                re.IGNORECASE
+            ),
+            
+            'english_vulgar_strict': re.compile(
+                r'\b(fuck|shit|asshole|bitch|cunt|dick|pussy|bastard|motherfucker|' +
+                # Biến thể che giấu
+                r'f[u*@#]ck|f\*ck|fu[c*]k|f@ck|fck|fuk|phuck|' +
+                r'sh[i*]t|sh@t|sht|shyt|' +
+                r'a[s*]shole|a\*\*hole|@sshole|' +
+                r'b[i*]tch|b@tch|btch|biatch|' +
+                r'c[u*]nt|c@nt|d[i*]ck|d@ck|dik|p[u*]ssy|pu\*\*y|' +
+                # Viết tắt thô tục
+                r'wtf|stfu|gtfo|' +
+                # Leetspeak
+                r'fuk|5hit|a55|b1tch|d1ck|pu55y)\b',
+                re.IGNORECASE
+            ),
+            
+            'english_personal_attack': re.compile(
+                r'\b(kill\s*yourself|kys|go\s*die|die\s*bitch|fucking\s*(idiot|moron|retard)|' +
+                # Đe dọa bạo lực
+                r'i\s*will\s*kill|gonna\s*kill|kill\s*you|beat\s*you\s*up|' +
+                # Phân biệt đối xử nghiêm trọng
+                r'fucking\s*(gay|homo|lesbian)|gay\s*ass|homo\s*bitch)\b',
+                re.IGNORECASE
+            ),
+            
+            # Pattern phát hiện spam/troll
+            'spam_troll_pattern': re.compile(
+                r'(.)\1{10,}|' +  # Lặp lại ký tự quá nhiều (aaaaaaaaaaa...)
+                r'([a-zA-Z]{1,3}\s*){20,}|' +  # Lặp từ ngắn quá nhiều
+                r'[!@#$%^&*()]{5,}',  # Quá nhiều ký tự đặc biệt liên tiếp
+                re.IGNORECASE
+            )
+        }
 
-    def _check_patterns(self, text):
-        return bool(self.patterns.search(text))
+    def _is_legitimate_criticism(self, text: str) -> Tuple[bool, str]:
+        """Kiểm tra xem có phải là ý kiến phê bình hợp lệ về công ty không"""
+        text_lower = text.lower().strip()
+        
+        # Từ khóa liên quan đến đánh giá công ty (không toxic)
+        company_keywords = [
+            'công ty', 'company', 'cty', 'doanh nghiệp', 'firm',
+            'sếp', 'boss', 'manager', 'quản lý', 'lãnh đạo', 'leadership',
+            'nhân viên', 'employee', 'staff', 'colleague', 'đồng nghiệp',
+            'lương', 'salary', 'tiền lương', 'thu nhập', 'income', 'wage',
+            'môi trường', 'environment', 'văn hóa', 'culture', 'workplace',
+            'làm việc', 'work', 'job', 'career', 'nghề nghiệp',
+            'phúc lợi', 'benefit', 'bảo hiểm', 'insurance', 'chế độ',
+            'tăng ca', 'overtime', 'giờ làm', 'working hours',
+            'đào tạo', 'training', 'phát triển', 'development', 'học hỏi'
+        ]
+        
+        # Kiểm tra có từ khóa công ty không
+        has_company_context = any(keyword in text_lower for keyword in company_keywords)
+        
+        if has_company_context:
+            # Kiểm tra pattern phê bình hợp lệ
+            if 'legitimate_criticism' in self.patterns:
+                pattern = self.patterns['legitimate_criticism']
+                if pattern.search(text_lower):
+                    return True, "legitimate_company_criticism"
+        
+        # Các cụm từ phê bình phổ biến về công ty
+        criticism_phrases = [
+            'không khuyến khích', 'không recommend', 'không đáng',
+            'nên cân nhắc', 'should consider', 'think twice',
+            'không phù hợp', 'not suitable', 'not fit',
+            'trải nghiệm không tốt', 'bad experience', 'terrible experience',
+            'không hài lòng', 'not satisfied', 'dissatisfied',
+            'thất vọng', 'disappointed', 'let down'
+        ]
+        
+        for phrase in criticism_phrases:
+            if phrase in text_lower:
+                return True, f"criticism_phrase:{phrase}"
+        
+        return False, ""
 
-    def _get_model_score(self, text):
+    def _is_toxic_content(self, text: str) -> Tuple[bool, float, str]:
+        """Kiểm tra nội dung toxic thực sự (chửi thề, xúc phạm, đe dọa)"""
+        text_lower = text.lower().strip()
+        
+        # Danh sách patterns toxic nghiêm trọng
+        toxic_patterns = [
+            'vietnamese_vulgar_strict',
+            'vietnamese_personal_attack',
+            'english_vulgar_strict', 
+            'english_personal_attack',
+            'spam_troll_pattern'
+        ]
+        
+        for pattern_name in toxic_patterns:
+            if pattern_name in self.patterns:
+                pattern = self.patterns[pattern_name]
+                if pattern.search(text_lower):
+                    # Mức độ nghiêm trọng khác nhau
+                    if 'vulgar' in pattern_name or 'attack' in pattern_name:
+                        severity = 0.95
+                    elif 'spam' in pattern_name:
+                        severity = 0.8
+                    else:
+                        severity = 0.85
+                    
+                    return True, severity, pattern_name
+        
+        # Kiểm tra từ bị che giấu
+        is_obscured, obscured_score, obscured_type = self._check_obscured_vulgar(text)
+        if is_obscured:
+            return True, obscured_score, obscured_type
+        
+        return False, 0.0, ""
+
+    def filter_comment(self, text: str, threshold: float = 0.7) -> Tuple[bool, float]:
+        """
+        Lọc bình luận đánh giá công ty:
+        - CHỈ lọc nội dung toxic (chửi thề, xúc phạm, đe dọa)
+        - KHÔNG lọc ý kiến phê bình hợp lệ về công ty
+        """
+        if not text or not text.strip():
+            return False, 0.0
+
+        text = text.strip()
+        cache_key = self._get_cache_key(text)
+        
+        # Check cache
+        cached_result = self._get_cached_result(cache_key)
+        if cached_result:
+            return cached_result['is_toxic'], cached_result['score']
+
+        is_toxic_final = False
+        score_final = 0.0
+        method_final = 'default'
+        pattern_type_final = ''
+        details_final = {}
+
         try:
-            inputs = self.en_tokenizer(text, return_tensors="pt", truncation=True, max_length=256)
-            with torch.no_grad():
-                outputs = self.en_model(**inputs)
-                probs = torch.softmax(outputs.logits, dim=1)
-                toxic_score = probs[0][1].item()
-            return toxic_score
+            # Bước 1: Kiểm tra nội dung an toàn
+            safe_patterns = ['safe_expressions', 'safe_emoticons']
+            for pattern_name in safe_patterns:
+                if pattern_name in self.patterns:
+                    pattern = self.patterns[pattern_name]
+                    if pattern.search(text.lower()):
+                        is_toxic_final = False
+                        score_final = 0.0
+                        method_final = 'whitelist'
+                        pattern_type_final = pattern_name
+                        break
+            
+            if not is_toxic_final:  # Chỉ tiếp tục nếu chưa được đánh dấu safe
+                # Bước 2: Kiểm tra ý kiến phê bình hợp lệ
+                is_criticism, criticism_type = self._is_legitimate_criticism(text)
+                if is_criticism:
+                    is_toxic_final = False
+                    score_final = 0.0
+                    method_final = 'legitimate_criticism'
+                    pattern_type_final = criticism_type
+                else:
+                    # Bước 3: Kiểm tra nội dung toxic thực sự
+                    is_toxic_pattern, toxic_score, toxic_type = self._is_toxic_content(text)
+                    
+                    if is_toxic_pattern:
+                        is_toxic_final = True
+                        score_final = toxic_score
+                        method_final = 'toxic_pattern'
+                        pattern_type_final = toxic_type
+                    else:
+                        # Bước 4: AI analysis (với prompt đặc biệt cho company review)
+                        if self.model and len(text) > 3:
+                            is_vietnamese = self._is_vietnamese(text)
+                            is_toxic_ai, ai_score, ai_details = self._analyze_with_gemini_for_reviews(text, is_vietnamese)
+                            
+                            is_toxic_final = is_toxic_ai and ai_score >= threshold
+                            score_final = ai_score
+                            method_final = 'ai'
+                            details_final = ai_details
+
+            # Cache result
+            result_to_cache = {
+                'is_toxic': is_toxic_final,
+                'score': score_final,
+                'method': method_final,
+                'pattern_type': pattern_type_final,
+                'details': details_final
+            }
+            self._set_cache(cache_key, result_to_cache)
+            
+            return is_toxic_final, score_final
+            
         except Exception as e:
-            logger.error(f"Lỗi khi lấy điểm từ model: {e}")
-            return 0.5
+            logger.error(f"Error filtering comment: {str(e)}")
+            return False, 0.0
 
-    def check_with_gemini(self, text, is_vietnamese=False):
+    def _analyze_with_gemini_for_reviews(self, text: str, is_vietnamese: bool = False) -> Tuple[bool, float, Dict[str, Any]]:
+        """AI analysis đặc biệt cho company reviews"""
+        if not self.model:
+            return False, 0.0, {"error": "Model not available"}
+
         try:
-            prompt = f"""
-            Hãy phân tích nội dung bình luận sau và đánh giá mức độ phù hợp:
-            "{text}"
+            language = "Vietnamese" if is_vietnamese else "English"
+            
+            prompt = f"""You are analyzing a COMPANY REVIEW comment. Your job is to detect only TOXIC content, not legitimate criticism.
 
-            Hãy phân tích các khía cạnh sau:
-            1. Chửi thề, văng tục
-            2. Xúc phạm, công kích cá nhân hoặc tập thể
-            3. Phân biệt đối xử (giới tính, chủng tộc, tôn giáo...)
-            4. Đe dọa, quấy rối
-            5. Spam hoặc nội dung rác
-            6. Ngôn từ tiêu cực, gây hấn
-            7. Nội dung khiêu dâm, không phù hợp thuần phong mỹ tục
+IMPORTANT RULES:
+- Negative opinions about company are NOT toxic (e.g., "company is bad", "terrible workplace", "low salary", "bad management")
+- Only flag as toxic: profanity, personal attacks, threats, hate speech, harassment
+- Simple expressions like "haha", "hihi", "lol" are NOT toxic
+- Constructive criticism is NOT toxic
 
-            {"Lưu ý phân tích thêm về ngữ cảnh và cách dùng từ trong tiếng Việt." if is_vietnamese else ""}
+Examples of NON-TOXIC (legitimate criticism):
+- "Công ty không tốt, lương thấp" 
+- "Bad company, terrible management"
+- "Môi trường làm việc tệ, không khuyến khích"
+- "Don't recommend this company"
 
-            Chỉ trả về kết quả dạng JSON với cấu trúc:
-            {{
-                "is_toxic": true/false,
-                "confidence": 0.95,
-                "categories": ["loại vi phạm 1", "loại vi phạm 2"],
-                "explanation": "giải thích ngắn gọn",
-                "severity": "low/medium/high",
-                "context_analysis": "nhận xét về ngữ cảnh"
-            }}
-            """
-            if not GEMINI_API_KEY:
-                raise Exception("GEMINI_API_KEY chưa được thiết lập")
-            genai.configure(api_key=GEMINI_API_KEY)
-            model = genai.GenerativeModel(MODEL_NAME)
-            response = model.generate_content(prompt)
-            if not response or not response.text:
-                raise Exception("Không nhận được phản hồi từ Gemini")
+Examples of TOXIC:
+- Personal insults, profanity, threats
+- "Thằng sếp ngu như chó"
+- "F*** this company and everyone there"
+
+Analyze this {language} company review comment:
+
+Text: "{text}"
+
+Return JSON:
+{{
+    "is_toxic": boolean,
+    "score": float_0_to_1,
+    "reason": "brief explanation",
+    "categories": ["profanity", "personal_attack", "threat", etc]
+}}
+
+JSON:"""
+
+            response = self.model.generate_content(prompt)
             response_text = response.text.strip()
-            if "```json" in response_text:
-                response_text = response_text.split("```json")[1].split("```")[0].strip()
-            elif "```" in response_text:
-                response_text = response_text.split("```")[1].split("```")[0].strip()
+            
+            # Clean JSON response
+            if response_text.startswith('```json'):
+                response_text = response_text[7:-3].strip()
+            elif response_text.startswith('```'):
+                response_text = response_text[3:-3].strip()
+            
             try:
                 result = json.loads(response_text)
-                required_fields = ['is_toxic', 'confidence', 'categories', 'explanation', 'severity']
-                for field in required_fields:
-                    if field not in result:
-                        result[field] = None if field in ['explanation', 'severity'] else ([] if field == 'categories' else False if field == 'is_toxic' else 0.5)
-                return result
+                is_toxic = result.get('is_toxic', False)
+                score = float(result.get('score', 0.0))
+                
+                return is_toxic, score, result
+                
             except json.JSONDecodeError as e:
-                logger.error(f"Lỗi parse JSON từ Gemini: {e}")
-                return {
-                    "is_toxic": False,
-                    "confidence": 0.5,
-                    "categories": [],
-                    "explanation": "Không thể phân tích phản hồi từ Gemini",
-                    "severity": "low",
-                    "context_analysis": ""
-                }
+                logger.error(f"JSON parse error: {e}")
+                # Fallback parsing
+                is_toxic = 'true' in response_text.lower() and 'is_toxic' in response_text.lower()
+                score = 0.3 if is_toxic else 0.0  # Lower confidence for fallback
+                
+                return is_toxic, score, {"error": "JSON parse failed", "raw_response": response_text[:100]}
+                
         except Exception as e:
-            logger.error(f"Lỗi khi gọi Gemini: {e}")
-            return {
-                "is_toxic": False,
-                "confidence": 0.5,
-                "categories": [],
-                "explanation": f"Lỗi khi phân tích: {str(e)}",
-                "severity": "low",
-                "context_analysis": ""
-            }
+            logger.error(f"Gemini API error: {str(e)}")
+            return False, 0.0, {"error": str(e)}
 
-    def is_vietnamese(self, text):
-        vietnamese_chars = "áàảãạăắằẳẵặâấầẩẫậéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđ"
-        count = sum(1 for char in text.lower() if char in vietnamese_chars)
-        return count > 0
+    def _check_obscured_vulgar(self, text: str) -> Tuple[bool, float, str]:
+        """Kiểm tra từ tục tĩu bị che giấu"""
+        normalized = self._normalize_text(text)
+        
+        # Chỉ các từ tục tĩu nghiêm trọng
+        vulgar_words = [
+            'dit', 'du', 'deo', 'cac', 'lon', 'di', 'buoi', 'vcl', 'clgt',
+            'fuck', 'shit', 'bitch', 'asshole', 'cunt', 'dick', 'pussy'
+        ]
+        
+        for word in vulgar_words:
+            if word in normalized:
+                if (re.search(r'[*@#$%&!0-9]', text) or 
+                    re.search(r'[\s\.\-_]{2,}', text)):
+                    return True, 0.9, f"obscured_vulgar:{word}"
+        
+        return False, 0.0, ""
 
-    def is_toxic(self, text, threshold=0.5):
-        logger.info(f"Kiểm tra nội dung: {text[:100]}...")
-        if self._check_patterns(text):
-            return True, 1.0
-        is_vn = self.is_vietnamese(text)
-        if is_vn:
-            gemini_result = self.check_with_gemini(text, is_vietnamese=True)
-            is_toxic = gemini_result["is_toxic"]
-            score = gemini_result["confidence"]
-            return is_toxic, score
-        else:
-            model_score = self._get_model_score(text)
-            if 0.4 <= model_score <= 0.6:
-                gemini_result = self.check_with_gemini(text, is_vietnamese=False)
-                if gemini_result["is_toxic"]:
-                    return True, max(model_score, gemini_result["confidence"])
-            return model_score > threshold, model_score
+    def _normalize_text(self, text: str) -> str:
+        """Chuẩn hóa text để phát hiện các biến thể che giấu"""
+        normalized = re.sub(r'[*@#$%&!]+', '', text)
+        
+        leetspeak_map = {
+            '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', 
+            '7': 't', '8': 'b', '@': 'a', '$': 's', '!': 'i'
+        }
+        
+        for leet, normal in leetspeak_map.items():
+            normalized = normalized.replace(leet, normal)
+        
+        normalized = re.sub(r'[\s\.\-_]+', '', normalized)
+        return normalized.lower()
 
-    def filter_comment(self, text, threshold=0.5):
-        is_toxic, score = self.is_toxic(text, threshold)
-        is_vn = self.is_vietnamese(text)
-        if is_toxic or (0.4 <= score <= 0.6):
-            gemini_result = self.check_with_gemini(text, is_vietnamese=is_vn)
-            result = {
-                'is_toxic': is_toxic,
-                'score': score,
-                'message': 'Bình luận của bạn chứa nội dung không phù hợp.' if is_toxic else 'Bình luận phù hợp.',
-                'details': {
-                    'categories': gemini_result.get('categories', []),
-                    'explanation': gemini_result.get('explanation', ''),
-                    'severity': gemini_result.get('severity', 'low'),
-                    'context_analysis': gemini_result.get('context_analysis', '')
-                }
-            }
-        else:
-            result = {
-                'is_toxic': False,
-                'score': score,
-                'message': 'Bình luận phù hợp.'
-            }
-        return result
+    @lru_cache(maxsize=1000)
+    def _is_vietnamese(self, text: str) -> bool:
+        """Kiểm tra ngôn ngữ tiếng Việt"""
+        vietnamese_chars = re.search(r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]', text.lower())
+        return bool(vietnamese_chars)
 
-# Khởi tạo CommentFilter
-comment_filter = ImprovedCommentFilter()
+    def _get_cache_key(self, text: str) -> str:
+        return f"review_{hash(text.lower().strip())}"
+
+    def _get_cached_result(self, cache_key: str) -> Dict[str, Any]:
+        if cache_key in self.cache:
+            cached_data = self.cache[cache_key]
+            if time.time() - cached_data['timestamp'] < self.cache_ttl:
+                return cached_data['result']
+        return None
+
+    def _set_cache(self, cache_key: str, result: Dict[str, Any]):
+        self.cache[cache_key] = {
+            'result': result,
+            'timestamp': time.time()
+        }
+        
+        if len(self.cache) > 2000:
+            oldest_keys = sorted(self.cache.keys(), key=lambda k: self.cache[k]['timestamp'])[:500]
+            for key in oldest_keys:
+                del self.cache[key]
+
+    def _setup_gemini(self, api_key: str):
+        genai.configure(api_key=api_key)
+        
+        generation_config = {
+            "temperature": 0.1,
+            "top_p": 0.8, 
+            "top_k": 40,
+            "max_output_tokens": 300,
+        }
+        
+        return genai.GenerativeModel(
+            model_name=MODEL_NAME,
+            generation_config=generation_config
+        )
+
+    def get_filter_stats(self) -> Dict[str, Any]:
+        return {
+            'cache_size': len(self.cache),
+            'model_available': self.model is not None,
+            'patterns_count': len(self.patterns),
+            'filter_type': 'company_review_filter'
+        }
+
+# Khởi tạo filter cho company reviews
+company_review_filter = CompanyReviewFilter()
+
 
 # Hàm xử lý CV
 def setup_gemini(api_key):
@@ -507,6 +790,8 @@ def extract_text_from_docx(docx_file):
         return ""
 
 def create_analysis_prompt(cv_text, job_data):
+    """Tạo prompt để gửi đến Gemini"""
+    # Trích xuất thông tin từ job_data
     job_description = job_data.get('description', '')
     job_requirements = job_data.get('requirement', '')
     job_benefits = job_data.get('benefit', '')
@@ -515,6 +800,7 @@ def create_analysis_prompt(cv_text, job_data):
     job_position = job_data.get('position', '')
     job_nice_to_haves = job_data.get('niceToHaves', '')
     
+    # Tạo một mô tả công việc đầy đủ
     full_job_description = f"""
     # Tiêu đề: {job_data.get('title', '')}
     # Vị trí: {job_position}
@@ -522,10 +808,10 @@ def create_analysis_prompt(cv_text, job_data):
     ## Mô tả công việc:
     {job_description}
     
-    ## Yêu cầu công việc:
+    ## Yêu cầu công việc (bắt buộc):
     {job_requirements}
     
-    ## Trách nhiệm công việc:
+    ## Ưu tiên bổ sung (nice-to-have - những kỹ năng/kinh nghiệm tốt nếu ứng viên có):
     {job_nice_to_haves}
     
     ## Quyền lợi:
@@ -533,9 +819,11 @@ def create_analysis_prompt(cv_text, job_data):
     
     ## Yêu cầu kinh nghiệm:
     {job_experience}
-    
-    ## Kỹ năng yêu cầu:
+      ## Kỹ năng yêu cầu (từ danh sách kỹ năng được chọn):
     {', '.join([skill.get('skillName', '') for skill in job_skills]) if isinstance(job_skills, list) else ''}
+    
+    ## Yêu cầu chi tiết khác (từ mô tả yêu cầu công việc):
+    {job_requirements}
     """
     
     prompt = f"""
@@ -551,41 +839,57 @@ def create_analysis_prompt(cv_text, job_data):
     # Mô tả công việc đầy đủ:
     ```
     {full_job_description}
-    ```
-    
-    Hãy thực hiện phân tích chi tiết gồm:
+    ```    Hãy thực hiện phân tích chi tiết gồm:
     1. Trích xuất tất cả kỹ năng từ CV
-    2. Trích xuất tất cả kỹ năng yêu cầu từ mô tả công việc
-    3. So sánh kỹ năng để xác định kỹ năng phù hợp và còn thiếu
-    4. Phân tích học vấn trong CV và so sánh với yêu cầu
-    5. Phân tích kinh nghiệm trong CV và so sánh với yêu cầu
-    6. Đánh giá độ tương đồng tổng thể giữa CV và mô tả công việc
+    2. Trích xuất kỹ năng yêu cầu từ HAI NGUỒN:
+       - Từ danh sách "Kỹ năng yêu cầu" (đã được chọn sẵn)
+       - Từ phần "Yêu cầu chi tiết khác" (text mô tả yêu cầu công việc)
+    3. Phân loại kỹ năng theo mức độ ưu tiên:
+       - Required skills: Kỹ năng BẮT BUỘC từ yêu cầu công việc
+       - Nice-to-have skills: Kỹ năng từ phần "Ưu tiên bổ sung"
+    4. So sánh kỹ năng để xác định kỹ năng phù hợp và còn thiếu
+    5. Phân tích học vấn trong CV và so sánh với yêu cầu
+    6. Phân tích kinh nghiệm trong CV và so sánh với yêu cầu
+    7. Đánh giá độ tương đồng tổng thể giữa CV và mô tả công việc
+    
+    **Lưu ý quan trọng về phân loại kỹ năng:**
+    - "Kỹ năng yêu cầu" + "Yêu cầu chi tiết khác" = Required skills (BẮT BUỘC)
+    - "Ưu tiên bổ sung (nice-to-have)" = Nice-to-have skills (ĐIỂM CỘNG)
+    - Thiếu required skills: Giảm điểm đáng kể
+    - Thiếu nice-to-have skills: Không giảm điểm, chỉ mất cơ hội được điểm cộng
+    - Có nice-to-have skills: Được điểm cộng (tối đa +20 điểm)
     
     Hãy trả về một chuỗi JSON hợp lệ với các trường sau:
     ```json
-    {{
-        "matching_score": {{
+    {{        "matching_score": {{
             "totalScore": [điểm số từ 0-100],
             "matchedSkills": ["skill1", "skill2", ...],
             "missingSkills": ["skill1", "skill2", ...],
             "extraSkills": ["skill1", "skill2", ...],
+            "niceToHaveSkills": ["skill1", "skill2", ...],
             "detailedScores": {{
                 "skills_match": [điểm số từ 0-100],
                 "education_match": [điểm số từ 0-100], 
                 "experience_match": [điểm số từ 0-100],
                 "overall_similarity": [điểm số từ 0-100],
-                "context_score": [điểm số từ 0-100]
+                "context_score": [điểm số từ 0-100],
+                "nice_to_have_bonus": [điểm số từ 0-20 - điểm cộng cho nice-to-have skills]
             }},
             "suitabilityLevel": ["Extremely Well Suited", "Well Suited", "Moderately Suited", "Somewhat Suited", "Not Well Suited"],
             "recommendations": ["đề xuất 1", "đề xuất 2", ...],
             "cvImprovementSuggestions": ["gợi ý cải thiện 1", "gợi ý cải thiện 2", ...]
         }},
-        "detailedAnalysis": {{
-            "skills": {{
+        "detailedAnalysis": {{            "skills": {{
                 "score": [điểm số từ 0-100],
                 "matched_skills": ["skill1", "skill2", ...],
                 "missing_skills": ["skill1", "skill2", ...],
-                "reason": "Lý do đánh giá"
+                "required_skills_matched": ["skill1", "skill2", ...],
+                "required_skills_missing": ["skill1", "skill2", ...],
+                "nice_to_have_matched": ["skill1", "skill2", ...],
+                "nice_to_have_missing": ["skill1", "skill2", ...],
+                "skills_from_requirements_text": ["skill1", "skill2", ...],
+                "skills_from_selected_list": ["skill1", "skill2", ...],
+                "reason": "Lý do đánh giá chi tiết việc phân biệt giữa yêu cầu bắt buộc và ưu tiên bổ sung, bao gồm nguồn trích xuất kỹ năng"
             }},
             "education": {{
                 "score": [điểm số từ 0-100],
@@ -600,43 +904,200 @@ def create_analysis_prompt(cv_text, job_data):
                 "cv_years": [số năm kinh nghiệm từ CV],
                 "job_years": [số năm kinh nghiệm yêu cầu],
                 "reason": "Lý do đánh giá"
-            }},
-            "weights": {{
+            }},            "weights": {{
                 "skills": [trọng số từ 0-1],
                 "education": [trọng số từ 0-1],
                 "experience": [trọng số từ 0-1],
                 "overall_similarity": [trọng số từ 0-1],
-                "context": [trọng số từ 0-1]
+                "context": [trọng số từ 0-1],
+                "nice_to_have_bonus": [trọng số từ 0-0.2 - trọng số cho điểm cộng nice-to-have]
             }}
         }}
     }}
+    ```    **Hướng dẫn tính điểm và phân loại kỹ năng:**
+    1. **Trích xuất kỹ năng yêu cầu bắt buộc từ 2 nguồn:**
+       - Từ "Kỹ năng yêu cầu": (VD: Python, Java, React)
+       - Từ "Yêu cầu chi tiết khác": Phân tích text để tìm kỹ năng (VD: "Có kinh nghiệm với Docker" → Docker)
+    
+    2. **Trích xuất nice-to-have skills từ "Ưu tiên bổ sung":**
+       - Phân tích text để tìm kỹ năng không bắt buộc (VD: "Kinh nghiệm với AWS là một lợi thế" → AWS)
+    
+    3. **Tính điểm:**
+       - Điểm cơ bản (80%): Required skills + experience + education
+       - Điểm cộng nice-to-have (tối đa 20%): Kỹ năng ưu tiên bổ sung
+       - Không trừ điểm nặng nếu thiếu nice-to-have skills
+    
+    4. **Phân loại kết quả:**
+       - matchedSkills: Kỹ năng required khớp
+       - missingSkills: Kỹ năng required còn thiếu  
+       - niceToHaveSkills: Kỹ năng nice-to-have mà ứng viên có
+       - extraSkills: Kỹ năng khác không liên quan đến JD
+
+    Chỉ trả về đối tượng JSON đúng định dạng, không bao gồm markdown hoặc bất kỳ văn bản nào khác. 
+    Đảm bảo rằng tất cả trường là dữ liệu đúng kiểu: điểm số là số, danh sách là mảng, và văn bản là chuỗi.
     """
     return prompt
 
 def analyze_cv_with_gemini(cv_text, job_data, api_key):
+    """Sử dụng Gemini để phân tích CV và mô tả công việc"""
+    # Thiết lập API
     setup_gemini(api_key)
+    
+    # Tạo prompt
     prompt = create_analysis_prompt(cv_text, job_data)
+    
     try:
+        # Gọi Gemini API
         model = genai.GenerativeModel(MODEL_NAME)
         response = model.generate_content(prompt)
+        
+        # Xử lý phản hồi
         if response:
             try:
+                # Gemini có thể trả về text có thể bao gồm markdown hoặc backticks
+                # Cần làm sạch để chỉ lấy phần JSON
                 response_text = response.text
+                
+                # Loại bỏ backticks và json markers nếu có
                 cleaned_text = response_text
                 if "```json" in response_text:
                     cleaned_text = response_text.split("```json")[1].split("```")[0].strip()
                 elif "```" in response_text:
                     cleaned_text = response_text.split("```")[1].split("```")[0].strip()
+                
+                # Parse JSON
                 result = json.loads(cleaned_text)
                 return result
             except Exception as e:
                 logger.error(f"Lỗi xử lý phản hồi từ Gemini: {e}")
+                logger.error(f"Phản hồi gốc: {response.text}")
                 raise Exception(f"Không thể phân tích phản hồi từ Gemini: {e}")
         else:
             raise Exception("Không nhận được phản hồi từ Gemini")
     except Exception as e:
         logger.error(f"Lỗi khi gọi Gemini API: {e}")
         raise e
+class CVSecurity:
+    def __init__(self):
+        # Tạo key mã hóa
+        self.key = Fernet.generate_key()
+        self.cipher_suite = Fernet(self.key)
+    def encrypt_cv_data(self, cv_text):
+        """Mã hóa nội dung CV"""
+        try:
+            # Mã hóa dữ liệu
+            encrypted_data = self.cipher_suite.encrypt(cv_text.encode())
+            return base64.b64encode(encrypted_data).decode()
+        except Exception as e:
+            logger.error(f"Lỗi khi mã hóa CV: {e}")
+            return None
+
+    def decrypt_cv_data(self, encrypted_data):
+        """Giải mã nội dung CV"""
+        try:
+            # Giải mã dữ liệu
+            decrypted_data = self.cipher_suite.decrypt(base64.b64decode(encrypted_data))
+            return decrypted_data.decode()
+        except Exception as e:
+            logger.error(f"Lỗi khi giải mã CV: {e}")
+            return None
+class SensitiveDataProcessor:
+    def __init__(self):
+        # Các pattern để nhận diện thông tin nhạy cảm
+        self.patterns = {
+            'email': r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}',
+            'phone': r'(?:\+84|0)[0-9]{9,10}',
+            'id_card': r'[0-9]{9}|[0-9]{12}',
+            'address': r'(?:đường|phố|quận|huyện|tỉnh|thành phố)[\s\w]+',
+        }
+    
+    def mask_sensitive_data(self, cv_text):
+        """Che giấu thông tin nhạy cảm trong CV"""
+        masked_text = cv_text
+        
+        for data_type, pattern in self.patterns.items():
+            if data_type == 'email':
+                masked_text = re.sub(pattern, '[EMAIL]', masked_text)
+            elif data_type == 'phone':
+                masked_text = re.sub(pattern, '[PHONE]', masked_text)
+            elif data_type == 'id_card':
+                masked_text = re.sub(pattern, '[ID_CARD]', masked_text)
+            elif data_type == 'address':
+                masked_text = re.sub(pattern, '[ADDRESS]', masked_text)
+                
+        return masked_text
+
+# Khởi tạo các đối tượng bảo mật
+cv_security = CVSecurity()
+sensitive_processor = SensitiveDataProcessor()
+
+def preprocess_cv(cv_text, max_length=4000):
+    """
+    Tiền xử lý CV để giảm kích thước và tối ưu hóa nội dung trước khi phân tích
+    
+    Args:
+        cv_text (str): Nội dung CV gốc
+        max_length (int): Độ dài tối đa cho phép của CV sau khi xử lý
+        
+    Returns:
+        str: CV đã được tiền xử lý
+    """
+    try:
+        # 1. Loại bỏ thông tin cá nhân nhạy cảm
+        patterns = [
+            r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}',  # email
+            r'(?:\+84|0)[0-9]{9,10}',  # phone
+            r'[0-9]{9}|[0-9]{12}',  # id card
+            r'(?:đường|phố|quận|huyện|tỉnh|thành phố)[\s\w]+',  # address (VN)
+            r'(?:address|city|district|province|country)[\s\w]+',  # address (EN)
+            r'(?:ngày sinh|date of birth|dob)[\s\w:/.]+',  # date of birth
+            r'(?:họ tên|full name|name)[\s\w:]+',  # name
+        ]
+        for pattern in patterns:
+            cv_text = re.sub(pattern, '', cv_text, flags=re.IGNORECASE)
+
+        # 2. Chỉ giữ lại các section quan trọng
+        important_sections = [
+            r'(?:education|học vấn|trình độ học vấn)(.*?)(?:\n\n|\Z|experience|kinh nghiệm|skills|kỹ năng|projects|dự án|certifications|chứng chỉ|objective|mục tiêu nghề nghiệp)',
+            r'(?:experience|kinh nghiệm)(.*?)(?:\n\n|\Z|education|học vấn|skills|kỹ năng|projects|dự án|certifications|chứng chỉ|objective|mục tiêu nghề nghiệp)',
+            r'(?:skills|kỹ năng)(.*?)(?:\n\n|\Z|education|học vấn|experience|kinh nghiệm|projects|dự án|certifications|chứng chỉ|objective|mục tiêu nghề nghiệp)',
+            r'(?:projects|dự án)(.*?)(?:\n\n|\Z|education|học vấn|experience|kinh nghiệm|skills|kỹ năng|certifications|chứng chỉ|objective|mục tiêu nghề nghiệp)',
+            r'(?:certifications|chứng chỉ)(.*?)(?:\n\n|\Z|education|học vấn|experience|kinh nghiệm|skills|kỹ năng|projects|dự án|objective|mục tiêu nghề nghiệp)',
+            r'(?:objective|mục tiêu nghề nghiệp)(.*?)(?:\n\n|\Z|education|học vấn|experience|kinh nghiệm|skills|kỹ năng|projects|dự án|certifications|chứng chỉ)',
+        ]
+        
+        extracted = ""
+        for section in important_sections:
+            matches = re.findall(section, cv_text, flags=re.IGNORECASE | re.DOTALL)
+            for match in matches:
+                extracted += match.strip() + "\n\n"
+
+        # 3. Nếu không tìm thấy section nào, sử dụng nội dung đã loại bỏ thông tin cá nhân
+        if not extracted.strip():
+            extracted = cv_text.strip()
+
+        # 4. Loại bỏ khoảng trắng thừa và ký tự đặc biệt
+        extracted = re.sub(r'\s+', ' ', extracted)
+        extracted = re.sub(r'[^\w\s_àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệđìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵ]', ' ', extracted, flags=re.UNICODE)
+        
+        # 5. Giới hạn độ dài
+        if len(extracted) > max_length:
+            # Cắt theo câu hoàn chỉnh
+            sentences = re.split(r'[.!?]+', extracted)
+            truncated = ""
+            for sentence in sentences:
+                if len(truncated + sentence) <= max_length:
+                    truncated += sentence + "."
+                else:
+                    break
+            extracted = truncated.strip()
+
+        return extracted
+
+    except Exception as e:
+        logger.error(f"Lỗi khi tiền xử lý CV: {e}")
+        return cv_text[:max_length]  # Fallback: cắt bớt nếu có lỗi
+
 
 # Hàm xử lý công việc và gợi ý
 def load_jobs_from_csv(filepath=JOBS_FILEPATH, max_jobs=1400):
@@ -909,37 +1370,44 @@ def load_embeddings_from_file():
         try:
             with open(EMBEDDINGS_FILE, 'rb') as f:
                 data = pickle.load(f)
-                job_embeddings = data.get('embeddings', {})
-                last_embedding_update = data.get('timestamp', None)
-                logger.info(f"Đã tải {len(job_embeddings)} embeddings từ file {EMBEDDINGS_FILE}")
+                # Kiểm tra version cache
+                if data.get('version') == CACHE_VERSION:
+                    job_embeddings = data.get('embeddings', {})
+                    last_embedding_update = data.get('timestamp', None)
+                    logger.info(f"Đã tải {len(job_embeddings)} embeddings từ cache")
+                    return True
+                else:
+                    logger.info("Cache không hợp lệ do version không khớp")
+                    return False
         except Exception as e:
             logger.error(f"Lỗi khi tải embeddings từ file: {e}")
-            job_embeddings = {}
-            last_embedding_update = None
+            return False
+    return False
+
+def save_embeddings_to_file():
+    try:
+        with open(EMBEDDINGS_FILE, 'wb') as f:
+            pickle.dump({
+                'embeddings': job_embeddings,
+                'timestamp': datetime.now(),
+                'version': CACHE_VERSION
+            }, f)
+        logger.info(f"Đã lưu {len(job_embeddings)} embeddings vào cache")
+        return True
+    except Exception as e:
+        logger.error(f"Lỗi khi lưu embeddings: {e}")
+        return False
 
 def precompute_embeddings(jobs):
     global job_embeddings, last_embedding_update
-    if not jobs:
-        logger.warning("Danh sách công việc rỗng, không tạo embeddings.")
-        return
-
-    # Kiểm tra nếu embeddings đã tồn tại và hợp lệ
-    if os.path.exists(EMBEDDINGS_FILE):
-        try:
-            with open(EMBEDDINGS_FILE, 'rb') as f:
-                data = pickle.load(f)
-                existing_embeddings = data.get('embeddings', {})
-                existing_timestamp = data.get('timestamp', None)
-                if len(existing_embeddings) == len(jobs) and \
-                   existing_timestamp and \
-                   (datetime.now() - existing_timestamp) < timedelta(hours=EMBEDDING_REFRESH_HOURS):
-                    job_embeddings = existing_embeddings
-                    last_embedding_update = existing_timestamp
-                    logger.info(f"Tái sử dụng {len(job_embeddings)} embeddings từ file")
-                    return
-        except Exception as e:
-            logger.error(f"Lỗi khi kiểm tra embeddings từ file: {e}")
-
+    
+    # Kiểm tra cache trước
+    if load_embeddings_from_file():
+        # Kiểm tra xem cache có còn hợp lệ không
+        if last_embedding_update and (datetime.now() - last_embedding_update) < timedelta(hours=EMBEDDING_REFRESH_HOURS):
+            logger.info("Sử dụng embeddings từ cache")
+            return
+    
     logger.info("Tạo mới embeddings cho công việc")
     job_ids = []
     for job in jobs:
@@ -962,16 +1430,8 @@ def precompute_embeddings(jobs):
         if i < len(all_embeddings):
             job_embeddings[job_id] = all_embeddings[i]
     
-    try:
-        with open(EMBEDDINGS_FILE, 'wb') as f:
-            pickle.dump({
-                'embeddings': job_embeddings,
-                'timestamp': datetime.now()
-            }, f)
-        logger.info(f"Đã lưu {len(job_embeddings)} embeddings vào file")
-    except Exception as e:
-        logger.error(f"Lỗi khi lưu embeddings: {e}")
-    
+    # Lưu embeddings vào file
+    save_embeddings_to_file()
     last_embedding_update = datetime.now()
 
 def fast_vector_search(query_embedding, jobs, top_k=100):
@@ -1094,30 +1554,48 @@ def health_check():
     }), 200
 
 @app.route('/check-comment', methods=['POST'])
-def check_comment():
+def check_company_review():
+    """API endpoint để kiểm tra bình luận đánh giá công ty"""
     try:
-        data = request.json
+        data = request.get_json()
         if not data or 'text' not in data:
-            return jsonify({"error": "Thiếu nội dung bình luận"}), 400
+            return jsonify({
+                'error': 'Missing text field in request body'
+            }), 400
+
         text = data['text']
-        threshold = data.get('threshold', 0.5)
-        result = comment_filter.filter_comment(text, threshold)
-        return jsonify(result)
+        threshold = float(data.get('threshold', 0.7))
+
+        is_toxic, score = company_review_filter.filter_comment(text, threshold)
+
+        return jsonify({
+            'is_toxic': is_toxic,
+            'score': score,
+            'text': text
+        })
+
     except Exception as e:
-        logger.exception(f"Lỗi khi kiểm tra bình luận: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        logger.error(f"Error checking company review: {str(e)}")
+        return jsonify({
+            'error': str(e)
+        }), 500
+
 
 if __name__ == '__main__':
     logger.info("Starting JobRadar service on port 5000")
     jobs = load_jobs_from_csv(JOBS_FILEPATH)
     search_history = load_search_history_from_csv(SEARCH_HISTORY_FILEPATH)
+    
     if PRECOMPUTE_EMBEDDINGS:
-        load_embeddings_from_file()  # Tải embeddings từ file nếu tồn tại
-        # Chỉ chạy precompute_embeddings nếu embeddings không hợp lệ hoặc số lượng không khớp
-        if not job_embeddings or len(job_embeddings) != len(jobs) or \
+        # Chỉ tính toán lại embeddings nếu cache không hợp lệ
+        if not load_embeddings_from_file() or \
+           not job_embeddings or \
+           len(job_embeddings) != len(jobs) or \
            (last_embedding_update and (datetime.now() - last_embedding_update) > timedelta(hours=EMBEDDING_REFRESH_HOURS)):
-            logger.info("Tạo mới embeddings vì file không hợp lệ hoặc đã hết hạn")
+            logger.info("Tạo mới embeddings vì cache không hợp lệ hoặc đã hết hạn")
             precompute_embeddings(jobs)
+    
     if USE_JOB_INDEXING:
         create_job_index(jobs)
+    
     app.run(host='0.0.0.0', port=5000, debug=True)

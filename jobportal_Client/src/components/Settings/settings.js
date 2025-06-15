@@ -189,7 +189,7 @@ const Settings = () => {
           <div className="flex justify-end">
             <Button 
               onClick={handleSaveProfile}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-8"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-8"
             >
               Lưu hồ sơ
             </Button>

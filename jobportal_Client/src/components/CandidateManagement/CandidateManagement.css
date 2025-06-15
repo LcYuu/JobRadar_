@@ -1,4 +1,4 @@
-/* CandidateManagement.css */
+CandidateManagement.css
 
 /* Base styles */
 .table-container {
@@ -107,7 +107,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.5rem 0.75rem;
-    border-bottom:　　　　　1px solid #e5e7eb;
+    border-bottom:1px solid #e5e7eb;
     word-break: break-word;
     min-width: 0;
     max-width: 100%;
@@ -394,4 +394,45 @@
     padding: 0.5rem 1rem;
     font-size: 0.8rem;
   }
+}
+
+/* Dropdown trigger button */
+.dropdown-trigger {
+  background: none !important;
+  border: none !important;
+}
+
+.dropdown-trigger:hover {
+  background: none !important;
+  border: none !important;
+}
+
+.dropdown-trigger svg {
+  stroke: #000000 !important;
+  color: #000000 !important;
+}
+
+/* Dropdown menu content */
+.dropdown-menu-content {
+  min-width: 150px;
+  z-index: 10;
+}
+
+/* Dropdown item colors */
+.dropdown-item-view {
+  color: #2563EB !important; /* blue-600 */
+}
+
+.dropdown-item-view:hover {
+  color: #1E40AF !important; /* blue-800 */
+  background-color: #F3F4F6 !important; /* gray-100 */
+}
+
+.dropdown-item-stop {
+  color: #DC2626 !important; /* red-600 */
+}
+
+.dropdown-item-stop:hover {
+  color: #991B1B !important; /* red-800 */
+  background-color: #F3F4F6 !important; /* gray-100 */
 }
