@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Card, CardContent } from "../../ui/card";
-import { FileText } from "lucide-react";
+import { FileText, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import Pagination from "../layout/Pagination";
@@ -45,7 +45,9 @@ export default function Dashboard_Seeker() {
           <h2 className="text-lg font-medium mb-4">Tổng đơn đã ứng tuyển</h2>
           <div className="flex items-center">
             <div className="flex flex-col items-center justify-center">
-              <span className="text-6xl font-extrabold mb-2">{totalElements}</span>
+              <span className="text-6xl font-extrabold mb-2">
+                {totalElements}
+              </span>
               <span className="text-sm font-medium tracking-wide opacity-90">
                 Đơn đã gửi thành công
               </span>
@@ -79,29 +81,43 @@ export default function Dashboard_Seeker() {
                     <Link
                       to={`/jobs/job-detail/${app.postId}`}
                       className="relative  flex items-center"
-                      style={{ pointerEvents: "auto", touchAction: "manipulation" }}
+                      style={{
+                        pointerEvents: "auto",
+                        touchAction: "manipulation",
+                      }}
                     >
-                      <div className="flex items-center">
-                        <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-200 shadow-sm mr-4 shrink-0">
-                          <img
-                            src={app.logo}
-                            alt="Logo"
-                            className="w-full h-full object-cover"
-                          />
+                      <div className="flex items-start">
+                        <div className="flex flex-col items-center mr-4 shrink-0">
+                          <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-200 shadow-sm">
+                            <img
+                              src={app.logo || "/path/to/default-logo.png"}
+                              alt="Logo"
+                              className="w-full h-full object-cover bg-white"
+                            />
+                          </div>
+                          <div className="flex items-center gap-1 text-sm text-yellow-500 mt-2">
+                            <Star className="h-4 w-4 fill-current" />
+                            <span>{(app.averageStar || 0.0).toFixed(1)}</span>
+                          </div>
                         </div>
-                        <div className="flex flex-col space-y-4">
+                        <div className="flex flex-col space-y-2">
                           <div className="flex items-center gap-3">
-                            <h3 className="font-bold text-lg text-purple-800">{app.title}</h3>
+                            <h3 className="font-bold text-lg text-purple-800">
+                              {app.title}
+                            </h3>
                             <span
                               className={`px-3 py-1 rounded-full text-sm ${
-                                app.isSave ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
+                                app.isSave
+                                  ? "bg-green-100 text-green-600"
+                                  : "bg-red-100 text-red-600"
                               }`}
                             >
                               {app.isSave ? "Đã duyệt" : "Chờ duyệt"}
                             </span>
                           </div>
                           <p className="text-sm text-gray-600">
-                            {app.companyName} • {app.location} • {app.typeOfWork}
+                            {app.companyName} • {app.location} •{" "}
+                            {app.typeOfWork}
                           </p>
                           <span className="text-sm text-gray-500">
                             Thời gian ứng tuyển: {formattedDate} {formattedTime}
@@ -125,7 +141,10 @@ export default function Dashboard_Seeker() {
                         window.open(app.pathCV, "_blank");
                       }}
                       className="relative text-sm bg-purple-500 text-white py-2 px-4 min-w-[120px] min-h-[44px] rounded-lg hover:bg-purple-700 transition-all duration-300 font-medium"
-                      style={{ pointerEvents: "auto", touchAction: "manipulation" }}
+                      style={{
+                        pointerEvents: "auto",
+                        touchAction: "manipulation",
+                      }}
                     >
                       Xem CV
                     </button>

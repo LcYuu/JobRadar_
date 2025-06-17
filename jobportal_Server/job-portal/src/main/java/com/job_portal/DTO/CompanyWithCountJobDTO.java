@@ -19,5 +19,6 @@ public class CompanyWithCountJobDTO {
     private String description;
     private Integer cityId;
     private Long countJob;
+    private Double averageStar; // Thêm trường này
 
 }

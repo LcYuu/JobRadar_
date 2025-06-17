@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "../../../ui/button";
-
 import useWebSocket from "../../../utils/useWebSocket";
-
 import Container from "../Container/Container";
 import JobCard from "../JobCard/JobCard";
-import { getAllJob, getAllJobAction } from "../../../redux/JobPost/jobPost.thunk";
-import { getReviewByCompany } from "../../../redux/Review/review.thunk";
+import {
+  getAllJob,
+  getAllJobAction,
+} from "../../../redux/JobPost/jobPost.thunk";
 
 export default function JobList() {
   const dispatch = useDispatch();
@@ -58,16 +58,16 @@ export default function JobList() {
   const handleMessage = useCallback(
     (dispatch, message, topic) => {
       if (topic === "/topic/job-updates") {
-        if (message === "ADD JOB") {
-          dispatch(getAllJobAction({ currentPage, size }));
-        } else if (message === "EXPIRE JOB") {
-          dispatch(getAllJobAction({ currentPage, size }));
-        } else if (message === "APPROVE JOB") {
-          dispatch(getAllJobAction({ currentPage, size }));
+        if (
+          message === "ADD JOB" ||
+          message === "EXPIRE JOB" ||
+          message === "APPROVE JOB"
+        ) {
+          dispatch(getAllJob({ currentPage, size }));
         }
       }
     },
-    [currentPage, size] // Dependencies để cập nhật currentPage, size
+    [currentPage, size]
   );
 
   useWebSocket(["/topic/job-updates"], (dispatch, message, topic) =>
@@ -108,13 +108,14 @@ export default function JobList() {
         </h2>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-      {jobPost.length > 0 ? (
+        {Array.isArray(jobPost) && jobPost.length > 0 ? (
           jobPost.map((job) => {
-            // Tạo mảng category từ industryIds và industryNames
-            const category = job?.industryIds.map((id, index) => ({
-              industryId: id,
-              industryName: job.industryNames[index] || "Không xác định",
-            }));
+            const category = Array.isArray(job?.industryIds)
+              ? job.industryIds.map((id, index) => ({
+                  industryId: id,
+                  industryName: job.industryNames?.[index] || "Không xác định",
+                }))
+              : [];
 
             return (
               <JobCard
@@ -123,7 +124,7 @@ export default function JobList() {
                 jobTitle={job.title}
                 company={job.companyName}
                 location={job.cityName}
-                category={category} // Truyền mảng category
+                category={category}
                 jobType={job.typeOfWork}
                 companyLogo={job.companyLogo}
                 rating={job.averageStar}
