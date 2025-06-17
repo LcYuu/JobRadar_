@@ -1489,3 +1489,58 @@ google.api_core.exceptions.ResourceExhausted: 429 You exceeded your current quot
 2025-06-09 13:03:09,104 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: 45000000
 2025-06-09 13:03:09,109 - werkzeug - INFO - 127.0.0.1 - - [09/Jun/2025 13:03:09] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
 2025-06-09 13:03:38,568 - werkzeug - INFO - 127.0.0.1 - - [09/Jun/2025 13:03:38] "POST /semantic-search HTTP/1.1" 200 -
+2025-06-17 14:08:36,869 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-17 14:08:36,870 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-17 14:08:46,888 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-17 14:08:46,889 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-17 14:08:46,897 - __main__ - INFO - Gemini model initialized successfully
+2025-06-17 14:08:46,899 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-17 14:08:46,900 - __main__ - INFO - Đang tải công việc từ d:\JobRadar_\job_post.csv...
+2025-06-17 14:08:47,020 - __main__ - INFO - Đã tải 1310 công việc.
+2025-06-17 14:08:47,021 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ d:\JobRadar_\search.csv...
+2025-06-17 14:08:47,060 - __main__ - INFO - Đã tải 2078 mục lịch sử tìm kiếm.
+2025-06-17 14:08:47,061 - __main__ - INFO - Tạo mới embeddings vì cache không hợp lệ hoặc đã hết hạn
+2025-06-17 14:08:47,061 - __main__ - INFO - Tạo mới embeddings cho công việc
+2025-06-17 14:10:26,241 - __main__ - INFO - Đã lưu 1310 embeddings vào cache
+2025-06-17 14:10:27,251 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.100.75:5000
+2025-06-17 14:10:27,252 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-17 14:10:27,272 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-06-17 14:10:38,168 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-17 14:10:38,168 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-17 14:10:46,321 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-17 14:10:46,321 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-17 14:10:46,328 - __main__ - INFO - Gemini model initialized successfully
+2025-06-17 14:10:46,331 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-17 14:10:46,331 - __main__ - INFO - Đang tải công việc từ d:\JobRadar_\job_post.csv...
+2025-06-17 14:10:46,421 - __main__ - INFO - Đã tải 1310 công việc.
+2025-06-17 14:10:46,421 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ d:\JobRadar_\search.csv...
+2025-06-17 14:10:46,447 - __main__ - INFO - Đã tải 2078 mục lịch sử tìm kiếm.
+2025-06-17 14:10:46,464 - __main__ - INFO - Đã tải 1310 embeddings từ cache
+2025-06-17 14:10:46,532 - werkzeug - WARNING -  * Debugger is active!
+2025-06-17 14:10:46,542 - werkzeug - INFO -  * Debugger PIN: 646-913-458
+2025-06-17 14:10:52,869 - __main__ - INFO - Tệp d:\JobRadar_\search.csv chưa thay đổi.
+2025-06-17 14:10:54,549 - werkzeug - INFO - 127.0.0.1 - - [17/Jun/2025 14:10:54] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-17 14:11:19,078 - __main__ - INFO - Tệp d:\JobRadar_\search.csv chưa thay đổi.
+2025-06-17 14:11:19,081 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: Hệ thống nhúng và IOT
+2025-06-17 14:11:19,082 - werkzeug - INFO - 127.0.0.1 - - [17/Jun/2025 14:11:19] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-17 14:13:12,196 - __main__ - INFO - Tệp d:\JobRadar_\search.csv chưa thay đổi.
+2025-06-17 14:13:12,205 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: Hệ thống nhúng và IOT
+2025-06-17 14:13:12,207 - werkzeug - INFO - 127.0.0.1 - - [17/Jun/2025 14:13:12] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-17 14:17:05,189 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ d:\JobRadar_\search.csv...
+2025-06-17 14:17:05,286 - __main__ - INFO - Đã tải 2086 mục lịch sử tìm kiếm.
+2025-06-17 14:17:06,824 - werkzeug - INFO - 127.0.0.1 - - [17/Jun/2025 14:17:06] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-17 14:19:22,976 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ d:\JobRadar_\search.csv...
+2025-06-17 14:19:23,045 - __main__ - INFO - Đã tải 2130 mục lịch sử tìm kiếm.
+2025-06-17 14:19:24,630 - werkzeug - INFO - 127.0.0.1 - - [17/Jun/2025 14:19:24] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-17 14:19:58,643 - werkzeug - INFO - 127.0.0.1 - - [17/Jun/2025 14:19:58] "POST /semantic-search HTTP/1.1" 200 -
+2025-06-17 14:20:07,567 - werkzeug - INFO - 127.0.0.1 - - [17/Jun/2025 14:20:07] "POST /semantic-search HTTP/1.1" 200 -
+2025-06-17 14:20:12,665 - werkzeug - INFO - 127.0.0.1 - - [17/Jun/2025 14:20:12] "POST /semantic-search HTTP/1.1" 200 -
+2025-06-17 14:20:35,823 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ d:\JobRadar_\search.csv...
+2025-06-17 14:20:35,901 - __main__ - INFO - Đã tải 2154 mục lịch sử tìm kiếm.
+2025-06-17 14:20:37,478 - werkzeug - INFO - 127.0.0.1 - - [17/Jun/2025 14:20:37] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-17 14:25:14,888 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
+2025-06-17 14:25:14,889 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
+2025-06-17 14:25:14,889 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
