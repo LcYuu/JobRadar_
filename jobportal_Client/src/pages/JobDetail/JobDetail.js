@@ -352,16 +352,17 @@ export default function JobDetail() {
                     )}
                   </ul>
                 </div>
-              </Card>
-
-              {/* Nice to Have */}
+              </Card>              {/* Nice to Have */}
               {postByPostId?.niceToHaves && (
                 <Card>
                   <div className="p-6 border-2 border-gray-400 rounded-lg">
                     <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                       <Star className="h-5 w-5 text-purple-600" />
-                      Bạn là người phù hợp nếu
+                      Ưu tiên bổ sung (Nice-to-have)
                     </h2>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Những kỹ năng/kinh nghiệm tốt nếu bạn có, sẽ là điểm cộng trong quá trình đánh giá
+                    </p>
                     <ul className="space-y-3">
                       {postByPostId.niceToHaves.split("\n").map((item, index) => (
                         <li key={index} className="flex items-start gap-3">

@@ -113,7 +113,9 @@ const NotificationDropdown = () => {
               >
                 <div className="flex items-start gap-3">
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 mb-1 line-clamp-2">
+                    <p className={`font-medium text-gray-900 mb-1 line-clamp-2 ${
+                      notification.isRead ? "text-gray-500" : "font-bold text-gray-800"
+                    }`}>
                       {notification.title}
                     </p>
                     <div className="text-gray-600 text-sm space-y-1">

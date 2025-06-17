@@ -50,15 +50,6 @@ const ReviewManagement = ({ review, role, index }) => {
                     ]
                   }`}
             </span>
-            <span className="text-sm text-gray-500">
-              {new Date(review.createDate).toLocaleDateString("vi-VN", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </span>
           </div>
           {role === 1 && (
             <div className="flex items-center mb-2">
@@ -76,6 +67,15 @@ const ReviewManagement = ({ review, role, index }) => {
             <RatingStars value={review.star} readOnly />
           </div>
           <p className="text-gray-700 mt-2">{review.message}</p>
+          <span className="text-sm text-gray-500 mt-2 text-right w-full block">
+            {new Date(review.createDate).toLocaleDateString("vi-VN", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </span>
         </div>
       </div>
       <hr className="border-gray-300 rounded-lg" />

@@ -14,6 +14,7 @@ import {
   Phone,
   Plus,
   School,
+  Trash2,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 import { Button } from "../../ui/button";
@@ -397,6 +398,246 @@ export default function MyProfile() {
     setFormData((prev) => ({ ...prev, background: gradient }));
   };
 
+  const handleResetProfile = async () => {
+    const result = await Swal.fire({
+      title: "⚠️ Xác nhận xóa hồ sơ",
+      html: `
+        <div style="text-align: left; margin: 20px 0;">
+          <p style="margin-bottom: 15px; color: #dc2626; font-weight: 600;">
+            Bạn có chắc chắn muốn xóa toàn bộ thông tin hồ sơ?
+          </p>
+          <div style="background: #fef2f2; padding: 15px; border-radius: 8px; border-left: 4px solid #dc2626;">
+            <p style="margin: 5px 0; font-size: 14px;"><strong>Các thông tin sẽ bị xóa:</strong></p>
+            <ul style="margin: 10px 0 0 20px; font-size: 14px; color: #666;">
+              <li>• Mô tả về bản thân</li>
+              <li>• Tất cả kinh nghiệm làm việc (${exp?.length || 0} mục)</li>
+              <li>• Tất cả thông tin học vấn (${edu?.length || 0} mục)</li>
+              <li>• Tất cả kỹ năng (${seeker?.skills?.length || 0} kỹ năng)</li>
+              <li>• Tất cả liên kết xã hội (${socialLinks?.length || 0} mục)</li>
+              <li>• Thông tin liên hệ (email: ${seeker?.emailContact || 'chưa có'}, SĐT: ${seeker?.phoneNumber || 'chưa có'})</li>
+              <li>• Thông tin cá nhân (giới tính: ${seeker?.gender || 'chưa có'}, ngày sinh: ${seeker?.dateOfBirth ? new Date(seeker.dateOfBirth).toLocaleDateString('vi-VN') : 'chưa có'})</li>
+              <li>• Chuyên ngành (${seeker?.industry?.length || 0} ngành)</li>
+              <li>• Nền trang cá nhân</li>
+            </ul>
+          </div>
+          <p style="margin-top: 15px; font-weight: 600; color: #dc2626;">
+            ⚠️ Hành động này không thể hoàn tác!
+          </p>
+        </div>
+      `,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "🗑️ Có, xóa toàn bộ hồ sơ",
+      cancelButtonText: "❌ Hủy bỏ",
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      width: "500px",
+      customClass: {
+        popup: 'reset-profile-popup',
+        title: 'reset-profile-title',
+        htmlContainer: 'reset-profile-content'
+      }
+    });
+
+    if (result.isConfirmed) {
+      // Debug: Log dữ liệu hiện tại trước khi xóa
+      console.log("=== TRƯỚC KHI XÓA ===");
+      console.log("Skills hiện tại:", seeker?.skills);
+      console.log("Ngày sinh hiện tại:", seeker?.dateOfBirth);
+      console.log("Chuyên ngành hiện tại:", seeker?.industry);
+      console.log("Kinh nghiệm:", exp?.length);
+      console.log("Học vấn:", edu?.length);
+      console.log("Social links:", socialLinks?.length);
+
+      // Hiển thị loading
+      Swal.fire({
+        title: 'Đang xóa hồ sơ...',
+        html: 'Vui lòng đợi trong giây lát',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      try {
+        let errors = [];
+
+        // Xóa tất cả kinh nghiệm
+        if (exp && exp.length > 0) {
+          for (const expItem of exp) {
+            try {
+              await dispatch(deleteExperience(expItem.experienceId));
+            } catch (deleteExpError) {
+              console.error("Lỗi khi xóa kinh nghiệm:", deleteExpError);
+              errors.push("Một số kinh nghiệm không thể xóa");
+            }
+          }
+        }
+
+        // Xóa tất cả học vấn
+        if (edu && edu.length > 0) {
+          for (const eduItem of edu) {
+            try {
+              await dispatch(deleteEducation(eduItem.educationId));
+            } catch (deleteEduError) {
+              console.error("Lỗi khi xóa học vấn:", deleteEduError);
+              errors.push("Một số thông tin học vấn không thể xóa");
+            }
+          }
+        }
+
+        // Xóa tất cả social links
+        if (socialLinks && socialLinks.length > 0) {
+          for (const linkItem of socialLinks) {
+            try {
+              await dispatch(deleteSocialLink(linkItem.id));
+            } catch (deleteSocialLinkError) {
+              console.error("Lỗi khi xóa liên kết xã hội:", deleteSocialLinkError);
+              errors.push("Một số liên kết xã hội không thể xóa");
+            }
+          }
+        }
+
+        // Reset thông tin seeker về mặc định
+        try {
+          // Approach 1: Reset skills riêng trước
+          console.log("Đang reset skills...");
+          await dispatch(updateSeekerAction({
+            userData: {
+              skillIds: [] // Xóa tất cả skills trước
+            }
+          }));
+
+          // Approach 2: Reset thông tin cá nhân
+          console.log("Đang reset thông tin cá nhân...");
+          await dispatch(updateSeekerAction({
+            userData: {
+              description: null, // Thử dùng null
+              emailContact: null,
+              phoneNumber: null,
+              gender: null,
+              dateOfBirth: null,
+              industryIds: [],
+              background: "bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700"
+            }
+          }));
+
+          // Approach 3: Reset lại bằng empty string nếu null không work
+          console.log("Đang reset lại bằng empty string...");
+          await dispatch(updateSeekerAction({
+            userData: {
+              description: "",
+              emailContact: "",
+              phoneNumber: "",
+              gender: "",
+              dateOfBirth: "",
+              industryIds: []
+            }
+          }));
+
+        } catch (updateSeekerError) {
+          console.error("Lỗi khi cập nhật thông tin hồ sơ:", updateSeekerError);
+          errors.push("Không thể reset thông tin cá nhân");
+        }
+
+        // Reset form data về trạng thái ban đầu
+        setFormData({
+          description: "",
+          email: user?.email || "",
+          phoneNumber: "",
+          emailContact: "",
+          gender: "",
+          dateOfBirth: "", // Đặt về empty string cho input date
+          industryIds: [],
+          background: "bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700",
+        });
+        
+        setSelectedBackground("bg-gradient-to-r from-pink-200 via-purple-300 to-purple-700");
+        
+        // Reset editing states
+        setIsEditingDes(false);
+        setIsEditingInfo(false);
+        setIsIndustryDropdownOpen(false);
+        
+        // Clear errors
+        setErrors({
+          emailContact: "",
+          phoneNumber: "",
+          dateOfBirth: "",
+        });
+
+        // Refresh lại dữ liệu với delay để đảm bảo server đã cập nhật
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Đợi 1 giây
+        
+        // Refresh từng thành phần một cách tuần tự
+        console.log("Refreshing data...");
+        await dispatch(getSeekerByUser());
+        await dispatch(getExpByUser());
+        await dispatch(getEduByUser());
+        await dispatch(getProfileAction());
+        await dispatch(fetchSocialLinks());
+
+        // Force refresh lại state ngay lập tức
+        setRefreshData(true);
+        setExpUpdated(true);
+        setEduUpdated(true);
+        setSocialLinkUpdated(true);
+
+        // Force refresh một lần nữa để đảm bảo
+        setTimeout(async () => {
+          await dispatch(getSeekerByUser());
+          setRefreshData(true);
+          
+          // Debug: Log dữ liệu sau khi xóa
+          console.log("=== SAU KHI XÓA ===");
+          console.log("Form data đã reset:", formData);
+        }, 1500); // Tăng thời gian delay lên 1.5 giây
+
+        Swal.close();
+
+        if (errors.length > 0) {
+          Swal.fire({
+            title: "⚠️ Hoàn thành với một số lỗi",
+            html: `
+              <div style="text-align: left;">
+                <p style="margin-bottom: 10px;">Hồ sơ đã được reset, nhưng có một số lỗi:</p>
+                <ul style="margin-left: 20px; color: #dc2626;">
+                  ${errors.map(error => `<li>• ${error}</li>`).join('')}
+                </ul>
+                <p style="margin-top: 15px; color: #059669;">
+                  ✅ Các thông tin khác đã được xóa thành công!
+                </p>
+              </div>
+            `,
+            icon: "warning",
+            confirmButtonText: "Đã hiểu"
+          });
+        } else {
+          Swal.fire({
+            title: "🎉 Thành công!",
+            text: "Đã xóa toàn bộ thông tin hồ sơ và đặt lại về trạng thái ban đầu!",
+            icon: "success",
+            confirmButtonText: "Hoàn tất",
+            timer: 3000,
+            timerProgressBar: true
+          });
+        }
+
+      } catch (error) {
+        console.error("Lỗi không mong muốn:", error);
+        Swal.close();
+        Swal.fire({
+          title: "❌ Lỗi",
+          text: "Có lỗi không mong muốn xảy ra. Vui lòng thử lại sau!",
+          icon: "error",
+          confirmButtonText: "Đóng"
+        });
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <main
@@ -444,13 +685,24 @@ export default function MyProfile() {
                   {seeker?.address}
                 </p>
               </div>
-              <Button
-                variant="outline"
-                onClick={handleOpenProfileModal}
-                className="bg-[#6441a5] text-white hover:bg-[#7f58af] text-xs sm:text-sm px-3 sm:px-4 py-1 sm:py-2 min-w-[120px] sm:min-w-[140px] w-full sm:w-auto"
-              >
-                Chỉnh sửa hồ sơ
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handleOpenProfileModal}
+                  className="bg-[#6441a5] text-white hover:bg-[#7f58af] text-xs sm:text-sm px-3 sm:px-4 py-1 sm:py-2 min-w-[120px] sm:min-w-[140px] w-full sm:w-auto"
+                >
+                  Chỉnh sửa hồ sơ
+                </Button>
+                {/* <Button
+                  variant="outline"
+                  onClick={handleResetProfile}
+                  className="bg-red-600 text-white hover:bg-red-700 text-xs sm:text-sm px-3 sm:px-4 py-1 sm:py-2 min-w-[120px] sm:min-w-[140px] w-full sm:w-auto"
+                  title="Xóa toàn bộ thông tin hồ sơ và đặt lại về trạng thái ban đầu"
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Xóa hồ sơ
+                </Button> */}
+              </div>
             </div>
           </div>
           <section>
@@ -1284,6 +1536,25 @@ export default function MyProfile() {
           z-index: 1000;
           position: relative;
         }
+        
+        /* Custom styles for reset profile popup */
+        :global(.reset-profile-popup) {
+          border-radius: 12px !important;
+          padding: 0 !important;
+        }
+        
+        :global(.reset-profile-title) {
+          font-size: 20px !important;
+          font-weight: 700 !important;
+          color: #dc2626 !important;
+          margin-bottom: 10px !important;
+        }
+        
+        :global(.reset-profile-content) {
+          font-size: 14px !important;
+          line-height: 1.6 !important;
+        }
+        
         @media (min-width: 768px) and (max-width: 1000px) {
           .experience-container,
           .education-container {
@@ -1332,7 +1603,8 @@ export default function MyProfile() {
             gap: 0.75rem;
           }
           .experience-buttons button,
-          .education-buttons button {
+          .education-buttons button,
+          .social-link-buttons button {
             height: 2rem;
             width: 2rem;
             min-height: 2rem;

@@ -671,18 +671,40 @@ export default function JobSearchPage() {
       });
   
       if (isUsingSemanticSearch && semanticResults) {
-        console.log("Using semantic results:", semanticResults.content);
-        if (!semanticResults.content || !Array.isArray(semanticResults.content)) {
-          console.error("Invalid semanticResults.content:", semanticResults.content);
-          return { content: [], totalElements: 0, totalPages: 1 };
+        console.log("Sử dụng kết quả từ tìm kiếm ngữ nghĩa:", semanticResults);
+        if (
+          !semanticResults.content ||
+          !Array.isArray(semanticResults.content)
+        ) {
+          console.error(
+            "semanticResults.content không hợp lệ:",
+            semanticResults.content
+          );
+          return {
+            content: [],
+            totalElements: 0,
+            totalPages: 1,
+          };
         }
-        const resultsArray = Array.isArray(semanticResults.content) ? semanticResults.content : [];
+        const resultsArray = Array.isArray(semanticResults.content)
+          ? semanticResults.content
+          : [];
+        console.log(
+          "Số lượng kết quả trước khi phân trang:",
+          resultsArray.length
+        );
         const totalResults = resultsArray.length || 0;
         const totalPages = Math.max(Math.ceil(totalResults / size) || 1, 1);
         const startIndex = currentPage * size;
         const endIndex = Math.min(startIndex + size, totalResults);
-        const paginatedContent = totalResults > 0 ? resultsArray.slice(startIndex, endIndex) : [];
-        console.log("Paginated semantic results:", paginatedContent);
+        console.log("Thông số phân trang:", {
+          startIndex,
+          endIndex,
+          totalResults,
+        });
+        const paginatedContent =
+          totalResults > 0 ? resultsArray.slice(startIndex, endIndex) : [];
+        console.log("Số lượng kết quả hiển thị:", paginatedContent.length);
         return {
           content: paginatedContent,
           totalElements: totalResults,
@@ -691,15 +713,24 @@ export default function JobSearchPage() {
       }
   
       if (isFilterApplied) {
-        console.log("Using searchJob results:", searchJob);
+        console.log("Sử dụng kết quả từ searchJobs với bộ lọc:", {
+          searchJob,
+          displayTotalElements,
+          totalPagesFromSearch,
+        });
         return {
           content: searchJob || [],
           totalElements: displayTotalElements,
           totalPages: totalPagesFromSearch || 1,
         };
       }
-  
-      console.log("Using jobPost results:", jobPost);
+
+      console.log("Sử dụng tất cả công việc:", {
+        jobPost,
+        displayTotalElements,
+        totalPagesFromAll,
+      });
+
       return {
         content: jobPost || [],
         totalElements: displayTotalElements,

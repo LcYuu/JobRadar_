@@ -36,10 +36,10 @@ export default function Footer() {
     return regex.test(email);
   };
 
+  // Lấy thông tin đăng ký khi component mount
   useEffect(() => {
     dispatch(findSubscriptionBySeekerId());
   }, [dispatch]);
-
   useEffect(() => {
     if (currentSubscription?.email) {
       setEmail(currentSubscription.email);
@@ -100,12 +100,14 @@ export default function Footer() {
         setEmailFrequency("THREE_DAYS");
       }
 
+
       await dispatch(findSubscriptionBySeekerId());
 
       Swal.fire({
         icon: "success",
         title: "Thành công!",
         text: response || "Cập nhật thành công!",
+
       });
     } catch (err) {
       Swal.fire({
@@ -139,10 +141,10 @@ export default function Footer() {
       try {
         const subId = currentSubscription.subscriptionId;
         const response = await dispatch(deleteSubscription(subId)).unwrap();
-
         await dispatch(findSubscriptionBySeekerId());
         setEmail("");
         setEmailFrequency("THREE_DAYS");
+
 
         Swal.fire({
           icon: "success",
@@ -190,6 +192,7 @@ export default function Footer() {
                 className="flex-1 text-gray-900 rounded-md border border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+
                 disabled={loading}
               />
               <select
@@ -216,6 +219,7 @@ export default function Footer() {
               >
                 {loading ? "Đang xử lý..." : currentSubscription ? "Cập nhật" : "Đăng ký"}
               </Button>
+
             </div>
             {currentSubscription && (
               <Button

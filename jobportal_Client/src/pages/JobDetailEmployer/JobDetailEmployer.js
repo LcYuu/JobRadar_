@@ -149,7 +149,11 @@ const JobDetailEmployer = () => {
         ...jobData,
         skillIds: skillIds,
       };
-      await dispatch(updateJob({ postId, jobPostData: updatedJobData })).unwrap();
+      console.log("Sending updateJob with data:", updatedJobData);
+  
+      const result = await dispatch(updateJob({ postId, jobPostData: updatedJobData }));
+      console.log("Update job result:", result);
+  
       toast.success("Cập nhật kỹ năng thành công!");
       dispatch(getDetailJobById(postId));
     } catch (error) {
@@ -157,7 +161,6 @@ const JobDetailEmployer = () => {
       toast.error("Có lỗi khi cập nhật kỹ năng!");
     }
   };
-
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
@@ -724,12 +727,13 @@ const JobDetailEmployer = () => {
                 ))
               ) : null}
             </ul>
-          </Card>
-
-          <Card className="p-4 sm:p-6 bg-white shadow-lg">
+          </Card>          <Card className="p-4 sm:p-6 bg-white shadow-lg">
             <h2 className="text-lg sm:text-xl font-semibold mb-4">
-              Trách nhiệm công việc
+              Ưu tiên bổ sung (Nice-to-have)
             </h2>
+            <p className="text-sm text-gray-600 mb-3">
+              Những kỹ năng/kinh nghiệm tốt nếu ứng viên có, nhưng không bắt buộc
+            </p>
             <ul className="space-y-2">
               {isEditing ? (
                 <textarea
