@@ -1544,3 +1544,17 @@ google.api_core.exceptions.ResourceExhausted: 429 You exceeded your current quot
 2025-06-17 14:25:14,888 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
 2025-06-17 14:25:14,889 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
 2025-06-17 14:25:14,889 - werkzeug - INFO -  * Detected change in 'd:\\JobRadar_\\AI\\Re.py', reloading
+2025-06-17 14:25:17,778 - werkzeug - INFO -  * Restarting with watchdog (windowsapi)
+2025-06-17 14:25:31,469 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-17 14:25:31,469 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-17 14:25:40,937 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-17 14:25:40,937 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-17 14:25:40,945 - __main__ - INFO - Gemini model initialized successfully
+2025-06-17 14:25:40,949 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-17 14:25:40,949 - __main__ - INFO - Đang tải công việc từ d:\JobRadar_\job_post.csv...
+2025-06-17 14:25:41,015 - __main__ - INFO - Đã tải 1310 công việc.
+2025-06-17 14:25:41,016 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ d:\JobRadar_\search.csv...
+2025-06-17 14:25:41,046 - __main__ - INFO - Đã tải 2154 mục lịch sử tìm kiếm.
+2025-06-17 14:25:41,052 - __main__ - INFO - Đã tải 1310 embeddings từ cache
+2025-06-17 14:25:41,127 - werkzeug - WARNING -  * Debugger is active!
+2025-06-17 14:25:41,132 - werkzeug - INFO -  * Debugger PIN: 646-913-458
