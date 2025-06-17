@@ -712,10 +712,38 @@ const CandidateManagement = () => {
                                 currentAnalysis?.matching_score?.detailedScores
                                   ?.overall_similarity || 0
                               )}%`,
-                            }}
-                          ></div>
+                            }}                          ></div>
                         </div>
                       </div>
+                      
+                      {/* Nice-to-have bonus score */}
+                      {currentAnalysis?.matching_score?.detailedScores?.nice_to_have_bonus !== undefined && (
+                        <div>
+                          <div className="flex justify-between mb-1">
+                            <span>Điểm cộng ưu tiên bổ sung:</span>
+                            <span className="font-medium text-purple-600">
+                              +{Math.round(
+                                currentAnalysis?.matching_score?.detailedScores
+                                  ?.nice_to_have_bonus || 0
+                              )}
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div
+                              className="bg-purple-400 h-2.5 rounded-full"
+                              style={{
+                                width: `${Math.min(Math.round(
+                                  currentAnalysis?.matching_score?.detailedScores
+                                    ?.nice_to_have_bonus || 0
+                                ), 20) * 5}%`,
+                              }}
+                            ></div>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Điểm thưởng cho kỹ năng nice-to-have (tối đa +20 điểm)
+                          </p>
+                        </div>
+                      )}
                     </div>
                     {currentAnalysis?.detailedAnalysis?.weights && (
                       <div className="mt-4 p-3 bg-gray-50 rounded-md">
@@ -746,13 +774,19 @@ const CandidateManagement = () => {
                             {currentAnalysis.detailedAnalysis.weights.context *
                               100}
                             %
-                          </div>
-                          <div className="text-sm">
+                          </div>                          <div className="text-sm">
                             Tương đồng tổng thể:{" "}
                             {currentAnalysis.detailedAnalysis.weights
                               .overall_similarity * 100}
                             %
                           </div>
+                          {currentAnalysis.detailedAnalysis.weights.nice_to_have_bonus && (
+                            <div className="text-sm text-purple-600">
+                              Điểm cộng nice-to-have:{" "}
+                              {currentAnalysis.detailedAnalysis.weights.nice_to_have_bonus * 100}
+                              %
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
@@ -771,11 +805,41 @@ const CandidateManagement = () => {
                             >
                               {skill}
                             </span>
-                          )
-                        )}
+                          )                        )}
                       </div>
                     </div>
                   )}
+                
+                {/* Nice-to-have skills summary */}
+                {currentAnalysis?.matching_score?.niceToHaveSkills &&
+                  currentAnalysis.matching_score.niceToHaveSkills.length > 0 && (
+                    <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
+                      <h4 className="font-semibold mb-3 text-purple-700">
+                        Kỹ năng ưu tiên bổ sung (Nice-to-have)
+                        <span className="text-sm font-normal text-gray-600 ml-2">
+                          - Điểm cộng nếu ứng viên có
+                        </span>
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {currentAnalysis.matching_score.niceToHaveSkills.map(
+                          (skill, index) => (
+                            <span
+                              key={index}
+                              className="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded"
+                            >
+                              {skill}
+                            </span>
+                          )
+                        )}
+                      </div>
+                      {currentAnalysis?.matching_score?.detailedScores?.nice_to_have_bonus > 0 && (
+                        <p className="text-sm text-purple-600 mt-2 font-medium">
+                          ✨ Ứng viên đã nhận {Math.round(currentAnalysis.matching_score.detailedScores.nice_to_have_bonus)} điểm cộng cho các kỹ năng này
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  
                 {currentAnalysis?.detailedAnalysis?.skills && (
                   <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
                     <h4 className="font-semibold mb-3">
@@ -794,16 +858,15 @@ const CandidateManagement = () => {
                       >
                         {currentAnalysis.detailedAnalysis.skills.score}/100
                       </span>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    </div>                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                       <div>
                         <h5 className="font-medium text-sm mb-2">
-                          Kỹ năng phù hợp:
+                          Kỹ năng yêu cầu bắt buộc - Phù hợp:
                         </h5>
-                        {currentAnalysis.detailedAnalysis.skills.matched_skills
+                        {currentAnalysis.detailedAnalysis.skills.required_skills_matched
                           ?.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
-                            {currentAnalysis.detailedAnalysis.skills.matched_skills.map(
+                            {currentAnalysis.detailedAnalysis.skills.required_skills_matched.map(
                               (skill, index) => (
                                 <span
                                   key={index}
@@ -815,19 +878,35 @@ const CandidateManagement = () => {
                             )}
                           </div>
                         ) : (
-                          <p className="text-gray-500 text-sm">
-                            Không tìm thấy kỹ năng phù hợp
-                          </p>
+                          currentAnalysis.detailedAnalysis.skills.matched_skills
+                            ?.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {currentAnalysis.detailedAnalysis.skills.matched_skills.map(
+                                (skill, index) => (
+                                  <span
+                                    key={index}
+                                    className="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded"
+                                  >
+                                    {skill}
+                                  </span>
+                                )
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-gray-500 text-sm">
+                              Không tìm thấy kỹ năng phù hợp
+                            </p>
+                          )
                         )}
                       </div>
                       <div>
                         <h5 className="font-medium text-sm mb-2">
-                          Kỹ năng còn thiếu:
+                          Kỹ năng yêu cầu bắt buộc - Còn thiếu:
                         </h5>
-                        {currentAnalysis.detailedAnalysis.skills.missing_skills
+                        {currentAnalysis.detailedAnalysis.skills.required_skills_missing
                           ?.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
-                            {currentAnalysis.detailedAnalysis.skills.missing_skills.map(
+                            {currentAnalysis.detailedAnalysis.skills.required_skills_missing.map(
                               (skill, index) => (
                                 <span
                                   key={index}
@@ -839,12 +918,148 @@ const CandidateManagement = () => {
                             )}
                           </div>
                         ) : (
-                          <p className="text-gray-500 text-sm">
-                            Không có kỹ năng nào còn thiếu
-                          </p>
+                          currentAnalysis.detailedAnalysis.skills.missing_skills
+                            ?.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {currentAnalysis.detailedAnalysis.skills.missing_skills.map(
+                                (skill, index) => (
+                                  <span
+                                    key={index}
+                                    className="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded"
+                                  >
+                                    {skill}
+                                  </span>
+                                )
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-gray-500 text-sm">
+                              Không có kỹ năng nào còn thiếu
+                            </p>
+                          )
                         )}
                       </div>
                     </div>
+
+                    {/* Nice-to-have skills section */}
+                    {(currentAnalysis.detailedAnalysis.skills.nice_to_have_matched?.length > 0 || 
+                      currentAnalysis.detailedAnalysis.skills.nice_to_have_missing?.length > 0) && (
+                      <div className="border-t pt-4 mt-4">
+                        <h5 className="font-medium text-sm mb-3 text-purple-700">
+                          Kỹ năng ưu tiên bổ sung (Nice-to-have)
+                        </h5>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <h6 className="font-medium text-xs mb-2 text-green-700">
+                              Có sẵn (Điểm cộng):
+                            </h6>
+                            {currentAnalysis.detailedAnalysis.skills.nice_to_have_matched
+                              ?.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {currentAnalysis.detailedAnalysis.skills.nice_to_have_matched.map(
+                                  (skill, index) => (
+                                    <span
+                                      key={index}
+                                      className="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-0.5 rounded"
+                                    >
+                                      {skill}
+                                    </span>
+                                  )
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-gray-500 text-xs">
+                                Không có kỹ năng nice-to-have phù hợp
+                              </p>
+                            )}
+                          </div>
+                          <div>
+                            <h6 className="font-medium text-xs mb-2 text-orange-700">
+                              Chưa có (Không ảnh hưởng tiêu cực):
+                            </h6>
+                            {currentAnalysis.detailedAnalysis.skills.nice_to_have_missing
+                              ?.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {currentAnalysis.detailedAnalysis.skills.nice_to_have_missing.map(
+                                  (skill, index) => (
+                                    <span
+                                      key={index}
+                                      className="bg-orange-100 text-orange-800 text-xs font-medium px-2 py-0.5 rounded"
+                                    >
+                                      {skill}
+                                    </span>
+                                  )
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-gray-500 text-xs">
+                                Không có kỹ năng nice-to-have nào còn thiếu
+                              </p>                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Skills Source Analysis */}
+                    {(currentAnalysis.detailedAnalysis.skills.skills_from_requirements_text?.length > 0 || 
+                      currentAnalysis.detailedAnalysis.skills.skills_from_selected_list?.length > 0) && (
+                      <div className="border-t pt-4 mt-4">
+                        <h5 className="font-medium text-sm mb-3 text-blue-700">
+                          Nguồn trích xuất kỹ năng yêu cầu
+                        </h5>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <h6 className="font-medium text-xs mb-2 text-blue-700">
+                              Từ danh sách kỹ năng được chọn:
+                            </h6>
+                            {currentAnalysis.detailedAnalysis.skills.skills_from_selected_list
+                              ?.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {currentAnalysis.detailedAnalysis.skills.skills_from_selected_list.map(
+                                  (skill, index) => (
+                                    <span
+                                      key={index}
+                                      className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded"
+                                    >
+                                      {skill}
+                                    </span>
+                                  )
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-gray-500 text-xs">
+                                Không có kỹ năng từ danh sách được chọn
+                              </p>
+                            )}
+                          </div>
+                          <div>
+                            <h6 className="font-medium text-xs mb-2 text-green-700">
+                              Từ mô tả yêu cầu công việc:
+                            </h6>
+                            {currentAnalysis.detailedAnalysis.skills.skills_from_requirements_text
+                              ?.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {currentAnalysis.detailedAnalysis.skills.skills_from_requirements_text.map(
+                                  (skill, index) => (
+                                    <span
+                                      key={index}
+                                      className="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded"
+                                    >
+                                      {skill}
+                                    </span>
+                                  )
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-gray-500 text-xs">
+                                Không có kỹ năng từ mô tả yêu cầu
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     <div>
                       <h5 className="font-medium text-sm mb-1">
                         Lý do đánh giá:

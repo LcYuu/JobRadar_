@@ -5,11 +5,14 @@ import { Button } from "../../ui/button";
 import {
   countReviewByStar,
   findAllReview,
+  deleteReview,
 } from "../../redux/Review/review.thunk";
 import { useNavigate } from "react-router-dom";
 import { findAllCompany } from "../../redux/Company/company.thunk";
 import { StarRounded } from "@mui/icons-material";
 import { FiChevronDown } from "react-icons/fi";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 const RatingStars = React.memo(({ value, onChange, readOnly = false }) => {
   return (
@@ -94,6 +97,30 @@ const AdminReview = () => {
     setPage(0);
   };
 
+  const handleDeleteReview = async (reviewId) => {
+    const result = await Swal.fire({
+      title: "Bạn có chắc chắn muốn xóa đánh giá này không?",
+      text: "Hành động này không thể hoàn tác!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await dispatch(deleteReview(reviewId)).unwrap();
+        toast.success("Xóa đánh giá thành công");
+        // Refresh danh sách đánh giá
+        dispatch(findAllReview({ page, size }));
+      } catch (error) {
+        toast.error("Có lỗi xảy ra khi xóa đánh giá");
+      }
+    }
+  };
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mt-4 max-w-full">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Các đánh giá</h2>
@@ -173,18 +200,33 @@ const AdminReview = () => {
               <li
                 key={review.reviewId}
                 className="block hover:bg-purple-100 hover:shadow-lg transition rounded-lg cursor-pointer bg-gray-50 shadow-sm"
-                onClick={() =>
-                  navigate(
-                    `/admin/review-detail/${review.company.companyId}/${review.seeker.userId}`
-                  )
-                }
               >
-                <ReviewManagement
-                  review={review}
-                  role={role}
-                  index={index}
-                  className={`${padding} ${fontSize}`}
-                />
+                <div className="relative">
+                  <div
+                    onClick={() =>
+                      navigate(
+                        `/admin/review-detail/${review.company.companyId}/${review.seeker.userId}`
+                      )
+                    }
+                  >
+                    <ReviewManagement
+                      review={review}
+                      role={role}
+                      index={index}
+                      className={`${padding} ${fontSize}`}
+                    />
+                  </div>
+                  <Button
+                    variant="destructive"
+                    className="absolute top-2 right-2 text-xs text-red-500" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteReview(review.reviewId);
+                    }}
+                  >
+                    Xóa
+                  </Button>
+                </div>
               </li>
             ))}
         </ul>

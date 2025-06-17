@@ -13,7 +13,7 @@ function JobCard_AllJob({ job }) {
   const { savedJobs } = useSelector((store) => store.seeker);
   const { user } = useSelector((store) => store.auth);
 
-  const isSaved = savedJobs?.some((savedJob) => savedJob.postId === job.postId);
+  const isSaved = savedJobs?.some(savedJob => savedJob.postId === job.postId);
 
   const handleCardClick = () => {
     navigate(`/jobs/job-detail/${job.postId}`);

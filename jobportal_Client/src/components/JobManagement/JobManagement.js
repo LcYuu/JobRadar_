@@ -249,7 +249,7 @@ const JobManagement = () => {
             <div className="flex flex-col pt-3 pr-3 sm:flex-row justify-end items-start sm:items-center mr-4 gap-4 w-full">
               <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center justify-end sm:justify-center w-full sm:w-auto">
                 <select
-                  className="border rounded px-4 py-2 w-full flex-shrink"
+                  className="border rounded px-4 py-2 w-full  flex-shrink"
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
                 >

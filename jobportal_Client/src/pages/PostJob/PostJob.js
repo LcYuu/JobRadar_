@@ -341,14 +341,12 @@ const PostJob = () => {
       if (!jobData.experience || jobData.experience <= 0) {
         tempErrors.experience = "Yêu cầu kinh nghiệm không được để trống";
         isValid = false;
-      }
-
-      if (!jobData.niceToHaves || jobData.niceToHaves.trim() === "") {
-        tempErrors.niceToHaves = "Điều kiện bổ sung không được để trống.";
+      }      if (!jobData.niceToHaves || jobData.niceToHaves.trim() === "") {
+        tempErrors.niceToHaves = "Ưu tiên bổ sung không được để trống.";
         isValid = false;
       } else if (jobData.niceToHaves.length > 5000) {
         tempErrors.niceToHaves =
-          "Điều kiện bổ sung không được vượt quá 5000 ký tự.";
+          "Ưu tiên bổ sung không được vượt quá 5000 ký tự.";
         isValid = false;
       }
     }
@@ -807,14 +805,12 @@ const PostJob = () => {
                 {errors.experience && (
                   <p className="text-red-500 text-sm">{errors.experience}</p>
                 )}
-              </div>
-
-              <div className="mb-6">
-                <Label>Các yêu cầu cần có</Label>
+              </div>              <div className="mb-6">
+                <Label>Ưu tiên bổ sung (Nice-to-have)</Label>
                 <p className="text-sm text-gray-500 mb-2">
-                  Thêm các kỹ năng và trình độ cần có cho vai trò này để khuyến
-                  khích nhiều ứng viên đa dạng hơn nộp đơn (**Chú ý: Mỗi yêu cầu
-                  cách nhau bởi dấu xuống dòng)
+                  Thêm các kỹ năng và kinh nghiệm tốt nếu ứng viên có, nhưng không bắt buộc. 
+                  Những yếu tố này sẽ là điểm cộng trong quá trình đánh giá ứng viên.
+                  (**Chú ý: Mỗi yêu cầu cách nhau bởi dấu xuống dòng)
                 </p>
                 <div className="border rounded-md">
                   <Editor
@@ -838,7 +834,7 @@ const PostJob = () => {
                       inline: { options: ["bold", "italic"] },
                       list: { options: ["unordered", "ordered"] },
                     }}
-                    placeholder="Nhập yêu cầu thêm..."
+                    placeholder="Nhập các kỹ năng/kinh nghiệm ưu tiên bổ sung (VD: Kinh nghiệm với AWS, Kiến thức về Machine Learning, Chứng chỉ chuyên ngành...)"
                   />
                 </div>
                 {errors.niceToHaves && (
