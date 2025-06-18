@@ -60,7 +60,7 @@ public class SearchHistoryServiceImpl implements ISearchHistoryService {
             writer.writeNext(data, false);
             writer.flush();
 
-            System.out.println("Ghi thành công: " + Arrays.toString(data));
+            System.out.println("Ghi thành công: " + filePath + Arrays.toString(data));
             System.out.println("Kích thước file sau khi ghi: " + file.length());
         } catch (IOException e) {
             System.err.println("Lỗi khi lưu lịch sử tìm kiếm vào CSV: " + e.getMessage());

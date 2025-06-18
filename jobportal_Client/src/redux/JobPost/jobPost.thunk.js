@@ -38,6 +38,7 @@ export const getAllJob = createAsyncThunk(
       const response = await axios.get(
         `http://localhost:8080/job-post/get-job-approve?page=${currentPage}&size=${size}`
       );
+      console.log("Response getAllJob: ", response.data)
       return response.data;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -346,6 +347,18 @@ export const updateExpireJob = createAsyncThunk(
   async (postId, { rejectWithValue }) => {
     try {
       const { data } = await api.put(`/job-post/set-expire/${postId}`);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const softDeleteJob = createAsyncThunk(
+  "jobs/softDeleteJob",
+  async (postId, { rejectWithValue }) => {
+    try {
+      const { data } = await api.put(`/job-post/delete-job/${postId}`);
       return data;
     } catch (error) {
       return rejectWithValue(error.message);

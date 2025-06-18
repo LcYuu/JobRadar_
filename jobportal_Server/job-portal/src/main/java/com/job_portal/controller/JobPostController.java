@@ -100,7 +100,8 @@ public class JobPostController {
 	@Autowired
 	private WebSocketService webSocketService;
 
-	String filePath = "D:\\2024-2025_HKI\\TLCN\\JobPortal_Project\\search.csv";
+//	String filePath = "D:\\2024-2025_HKI\\TLCN\\JobPortal_Project\\search.csv";
+	String filePath = "D:\\JobRadar_\\search.csv";
 
 	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter
 			.ofPattern("yyyy-MM-dd'T'HH:mm:ss[.SSSSSS]");
@@ -259,7 +260,7 @@ public class JobPostController {
 		}
 	}
 
-	@DeleteMapping("/delete-job/{postId}")
+	@PutMapping("/delete-job/{postId}")
 	public ResponseEntity<String> deleteJob(@PathVariable("postId") UUID postId) {
 		try {
 			boolean isDeleted = jobPostService.deleteJob(postId);
