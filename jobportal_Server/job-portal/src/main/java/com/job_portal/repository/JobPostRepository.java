@@ -78,7 +78,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
             + "j.type_of_work AS typeOfWork, j.create_date AS createDate, j.expire_date AS expireDate, "
             + "COALESCE(BIN_TO_UUID(j.company_id), '') AS companyId, c.company_name AS companyName, ci.city_name AS cityName, "
             + "GROUP_CONCAT(DISTINCT i.industry_name SEPARATOR ',') AS industryNames, c.logo AS logo, "
-            + "AVG(r.star) AS averageStar "
+            + "COALESCE(AVG(r.star), 0) AS averageStar "
             + "FROM job_posts j "
             + "JOIN company c ON j.company_id = c.user_id "
             + "JOIN city ci ON c.city_id = ci.city_id "
@@ -89,7 +89,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
             + "GROUP BY j.post_id, j.title, j.description, j.location, j.salary, j.experience, j.type_of_work, "
             + "j.create_date, j.expire_date, j.company_id, c.company_name, ci.city_name, c.logo",
             nativeQuery = true)
-    List<JobRecommendationProjection> findJobPostSave();
+List<JobRecommendationProjection> findJobPostSave();
 
 	@Query(value = "SELECT \r\n"
             + "    BIN_TO_UUID(j.post_id) AS postId, \r\n"

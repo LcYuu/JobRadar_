@@ -77,10 +77,16 @@ public class ReviewServiceImpl implements IReviewService {
 			throw new AllExceptions(e.getMessage());
 		}
 	}
-
 	@Override
 	@Transactional
 	public boolean deleteReview(UUID reviewId) throws AllExceptions {
+		// Gọi method mới với mặc định isOwner = false (admin delete)
+		return deleteReview(reviewId, false);
+	}
+
+	@Override
+	@Transactional
+	public boolean deleteReview(UUID reviewId, boolean isOwner) throws AllExceptions {
 		Optional<Review> review = reviewRepository.findById(reviewId);
 		
 		if (review.isEmpty()) {
@@ -105,11 +111,13 @@ public class ReviewServiceImpl implements IReviewService {
 			
 			reviewRepository.delete(review.get());
 
-			// Gửi thông báo cho người dùng
-			String title = "Đánh giá của bạn đã bị xóa";
-			String content = String.format("Đánh giá của bạn về công ty %s đã bị xóa bởi quản trị viên.", companyName);
-			String redirectUrl = "/companies/" + company.getCompanyId();
-			notificationService.sendNotification(seekerId, title, content, NotificationType.REVIEW_DELETED, redirectUrl);
+			// Chỉ gửi thông báo khi admin xóa, không gửi khi user tự xóa
+			if (!isOwner) {
+				String title = "Đánh giá của bạn đã bị xóa";
+				String content = String.format("Đánh giá của bạn về công ty %s đã bị xóa bởi quản trị viên.", companyName);
+				String redirectUrl = "/companies/" + company.getCompanyId();
+				notificationService.sendNotification(seekerId, title, content, NotificationType.REVIEW_DELETED, redirectUrl);
+			}
 
 			return true;
 		} catch (Exception e) {

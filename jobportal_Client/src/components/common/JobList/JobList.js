@@ -6,7 +6,7 @@ import useWebSocket from "../../../utils/useWebSocket";
 
 import Container from "../Container/Container";
 import JobCard from "../JobCard/JobCard";
-import { getAllJob, getAllJobAction } from "../../../redux/JobPost/jobPost.thunk";
+import { getAllJob } from "../../../redux/JobPost/jobPost.thunk";
 import { getReviewByCompany } from "../../../redux/Review/review.thunk";
 
 export default function JobList() {
@@ -59,11 +59,11 @@ export default function JobList() {
     (dispatch, message, topic) => {
       if (topic === "/topic/job-updates") {
         if (message === "ADD JOB") {
-          dispatch(getAllJobAction({ currentPage, size }));
+          dispatch(getAllJob({ currentPage, size }));
         } else if (message === "EXPIRE JOB") {
-          dispatch(getAllJobAction({ currentPage, size }));
+          dispatch(getAllJob({ currentPage, size }));
         } else if (message === "APPROVE JOB") {
-          dispatch(getAllJobAction({ currentPage, size }));
+          dispatch(getAllJob({ currentPage, size }));
         }
       }
     },
@@ -108,13 +108,15 @@ export default function JobList() {
         </h2>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-      {jobPost.length > 0 ? (
+        {jobPost.length > 0 ? (
           jobPost.map((job) => {
-            // Tạo mảng category từ industryIds và industryNames
-            const category = job?.industryIds.map((id, index) => ({
-              industryId: id,
-              industryName: job.industryNames[index] || "Không xác định",
-            }));
+            // Tạo mảng category, kiểm tra industryIds có hợp lệ không
+            const category = Array.isArray(job?.industryIds)
+              ? job.industryIds.map((id, index) => ({
+                  industryId: id,
+                  industryName: job.industryNames?.[index] || "Không xác định",
+                }))
+              : [];
 
             return (
               <JobCard

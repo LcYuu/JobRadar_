@@ -531,7 +531,6 @@ export default function CompanyProfile() {
   const [loading, setLoading] = useState(true);
 
   const { socialLinks } = useSelector((store) => store.socialLink);
-
   const handleIndustryClick = (industryId) => {
     if (industryId) {
       navigate("/find-companies", {
@@ -1680,12 +1679,12 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
             parentReplyId: editReplyData.parentReplyId || null,
           }),
         }
-      );
-
-      if (!response2.ok) {
+      );      if (!response2.ok) {
         const errorData = await response2.json();
         throw new Error(errorData.message || 'Failed to update reply');
       }
+
+      const updatedReply = await response2.json();
 
       // ADDED: Re-fetch all reviews for the company to ensure UI update
       await dispatch(getReviewByCompany(companyId));
@@ -1885,7 +1884,12 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
                     <p className="text-xs text-gray-500">Lĩnh vực</p>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {companyProfile?.industry?.map((ind, index) => (
-                        <IndustryBadge key={index} name={ind.industryName} />
+                        <IndustryBadge
+                          key={index}
+                          name={ind.industryName}
+                          onClick={() => handleIndustryClick(ind.industryId)}
+                        />
+
                       ))}
                     </div>
                   </div>
