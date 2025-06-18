@@ -327,7 +327,6 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 
 	        // Viết dữ liệu
 	        for (JobRecommendationProjection job : jobProjections) {
-
 	            String[] data = {
 	                Objects.toString(job.getPostId(), ""),
 	                Objects.toString(job.getTitle(), ""),
@@ -343,7 +342,7 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 	                Objects.toString(job.getCreateDate(), ""),
 	                Objects.toString(job.getExpireDate(), ""),
 	                Objects.toString(job.getLogo(), ""),
-	                Objects.toString(job.getAverageStar(),"")
+	                job.getAverageStar() != null ? String.format("%.2f", job.getAverageStar()) : "0.00"
 	            };
 	            writer.writeNext(data);
 	        }

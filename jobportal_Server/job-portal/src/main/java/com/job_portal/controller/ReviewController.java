@@ -182,7 +182,6 @@ public class ReviewController {
 		return new ResponseEntity<>(countReview, HttpStatus.OK);
 
 	}
-
 	@DeleteMapping("/delete/{reviewId}")
 	public ResponseEntity<?> deleteReview(@PathVariable UUID reviewId, @RequestHeader("Authorization") String jwt) {
 	    try {
@@ -191,7 +190,26 @@ public class ReviewController {
 	        if (!userOpt.isPresent()) {
 	            return new ResponseEntity<>("Người dùng không tồn tại", HttpStatus.UNAUTHORIZED);
 	        }
-	        boolean isDeleted = reviewService.deleteReview(reviewId);
+	        
+	        UserAccount user = userOpt.get();
+	        
+	        // Kiểm tra xem review có tồn tại không
+	        Optional<Review> reviewOpt = reviewRepository.findById(reviewId);
+	        if (!reviewOpt.isPresent()) {
+	            return new ResponseEntity<>("Không tìm thấy đánh giá", HttpStatus.NOT_FOUND);
+	        }
+	        
+	        Review review = reviewOpt.get();
+	        boolean isOwner = review.getSeeker().getUserAccount().getUserId().equals(user.getUserId());
+	        boolean isAdmin = user.getUserType().getUser_type_name().equals("ADMIN");
+	        
+	        // Chỉ cho phép admin hoặc chủ sở hữu xóa review
+	        if (!isOwner && !isAdmin) {
+	            return new ResponseEntity<>("Bạn không có quyền xóa đánh giá này", HttpStatus.FORBIDDEN);
+	        }
+	        
+	        // Xóa review với thông tin về người xóa
+	        boolean isDeleted = reviewService.deleteReview(reviewId, isOwner);
 	        if (isDeleted) {
 	            return new ResponseEntity<>("Xóa đánh giá thành công", HttpStatus.OK);
 	        } else {
