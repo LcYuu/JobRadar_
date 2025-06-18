@@ -354,6 +354,18 @@ export const updateExpireJob = createAsyncThunk(
   }
 );
 
+export const softDeleteJob = createAsyncThunk(
+  "jobs/softDeleteJob",
+  async (postId, { rejectWithValue }) => {
+    try {
+      const { data } = await api.put(`/job-post/delete-job/${postId}`);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 export const semanticSearchJobsWithGemini = createAsyncThunk(
   "jobPost/semanticSearchJobsWithGemini",
   async ({ query, filters, currentPage, size }, thunkAPI) => {

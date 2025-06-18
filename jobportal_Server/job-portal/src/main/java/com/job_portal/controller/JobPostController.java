@@ -260,7 +260,7 @@ public class JobPostController {
 		}
 	}
 
-	@DeleteMapping("/delete-job/{postId}")
+	@PutMapping("/delete-job/{postId}")
 	public ResponseEntity<String> deleteJob(@PathVariable("postId") UUID postId) {
 		try {
 			boolean isDeleted = jobPostService.deleteJob(postId);

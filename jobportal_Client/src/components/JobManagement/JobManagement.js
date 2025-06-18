@@ -20,8 +20,12 @@ import Swal from "sweetalert2";
 
 import { validateTaxCode } from "../../redux/Company/company.thunk";
 import "./JobManagement.css";
-import { canPostJob,findEmployerCompany,
-  updateExpireJob,} from "../../redux/JobPost/jobPost.thunk";
+import {
+  canPostJob,
+  findEmployerCompany,
+  softDeleteJob,
+  updateExpireJob,
+} from "../../redux/JobPost/jobPost.thunk";
 
 const JobManagement = () => {
   const work = [
@@ -117,6 +121,23 @@ const JobManagement = () => {
         })
       );
       toast.success("Dừng tuyển dụng công việc thành công");
+    }
+  };
+
+  const handleDeleteJob = async (postId) => {
+    if (postId) {
+      await dispatch(softDeleteJob(postId));
+      await dispatch(
+        findEmployerCompany({
+          status,
+          typeOfWork,
+          sortBy,
+          sortDirection,
+          currentPage,
+          size,
+        })
+      );
+      toast.success("Xóa công việc thành công");
     }
   };
 
@@ -435,6 +456,19 @@ const JobManagement = () => {
                             >
                               Xem chi tiết
                             </Button>
+                            {job.status === "Hết hạn" && (
+                              <Button
+                                variant="default"
+                                className="action-button-delete !bg-gray-100 !text-gray-600 !hover:bg-gray-200 !hover:text-gray-800 w-full"
+                                style={{
+                                  backgroundColor: "#F3F4F6",
+                                  color: "#4B5563",
+                                }}
+                                onClick={() => handleDeleteJob(job.postId)}
+                              >
+                                Xóa công việc
+                              </Button>
+                            )}
                           </div>
                           <div className="hidden xl-custom:block relative">
                             <div
@@ -457,7 +491,9 @@ const JobManagement = () => {
                                       className="hover:bg-gray-100 cursor-pointer px-3 py-2 rounded-md !text-red-600 !hover:text-red-800"
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        handleOpenExpireConfirmation(job.postId);
+                                        handleOpenExpireConfirmation(
+                                          job.postId
+                                        );
                                         setShowCustomDropdown(null);
                                       }}
                                     >
@@ -474,6 +510,18 @@ const JobManagement = () => {
                                 >
                                   Xem chi tiết
                                 </div>
+                                {job.status === "Hết hạn" && (
+                                  <div
+                                    className="hover:bg-gray-100 cursor-pointer px-3 py-2 rounded-md !text-gray-600 !hover:text-gray-800"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteJob(job.postId);
+                                      setShowCustomDropdown(null);
+                                    }}
+                                  >
+                                    Xóa công việc
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>

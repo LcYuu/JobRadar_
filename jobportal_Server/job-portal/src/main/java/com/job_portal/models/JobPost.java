@@ -110,4 +110,7 @@ public class JobPost {
 	    inverseJoinColumns = @JoinColumn(name = "industry_id")
 	)
 	private List<Industry> industry = new ArrayList<>();
+	
+	@Column(name = "isDeleted", nullable = false)
+    private Boolean isDeleted = false; 
 }

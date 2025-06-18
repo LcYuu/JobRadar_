@@ -151,10 +151,8 @@ public class JobPostServiceImpl extends RedisServiceImpl implements IJobPostServ
 		if (jobPost.isEmpty()) {
 			throw new AllExceptions("Không thể tìm thấy công việc này");
 		}
-
-		// Xóa công việc trong database
-		jobPostRepository.delete(jobPost.get());
-
+		jobPost.get().setIsDeleted(true);
+		jobPostRepository.save(jobPost.get());
 		return true;
 	}
 
