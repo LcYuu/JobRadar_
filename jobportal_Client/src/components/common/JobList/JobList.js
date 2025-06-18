@@ -9,6 +9,7 @@ import {
   getAllJobAction,
 } from "../../../redux/JobPost/jobPost.thunk";
 
+
 export default function JobList() {
   const dispatch = useDispatch();
   const {

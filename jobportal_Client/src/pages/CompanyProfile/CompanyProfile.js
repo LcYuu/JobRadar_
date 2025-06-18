@@ -531,7 +531,6 @@ export default function CompanyProfile() {
   const [loading, setLoading] = useState(true);
 
   const { socialLinks } = useSelector((store) => store.socialLink);
-
   const handleIndustryClick = (industryId) => {
     if (industryId) {
       navigate("/find-companies", {
@@ -1684,16 +1683,13 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
           }),
         }
       );
-  
       if (!response2.ok) {
         const errorData = await response2.json();
         throw new Error(errorData.message || 'Failed to update reply');
       }
-  
       // Lấy dữ liệu trả về từ API
       const updatedReply = await response2.json();
-  
-      // Gọi lại API để lấy toàn bộ reviews và replies để đảm bảo UI cập nhật
+
       await dispatch(getReviewByCompany(companyId));
   
       // Cập nhật Redux store với dữ liệu reply đã cập nhật

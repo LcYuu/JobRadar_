@@ -16,6 +16,7 @@ public interface IReviewService {
 	public boolean createReview(Seeker seeker, UUID companyId, Review req) throws AllExceptions;
 	public List<Review> findReviewByCompanyId(UUID companyId) throws AllExceptions;
 	public boolean deleteReview(UUID reviewId) throws AllExceptions;
+	public boolean deleteReview(UUID reviewId, boolean isOwner) throws AllExceptions;
 	public Page<Review> findReviewByCompanyId(UUID companyId, Pageable pageable);
 	public Review findReviewByCompanyIdAndUserId(UUID companyId, UUID userId);
 	public List<CountReviewByStar> countReviewsByStar(UUID companyId);

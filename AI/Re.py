@@ -1116,6 +1116,11 @@ def load_jobs_from_csv(filepath=JOBS_FILEPATH, max_jobs=1400):
         current_date = datetime.now()
         df_active = df[df['expireDate'].notna() & (df['expireDate'] > current_date)].copy()
         df_sorted = df_active.sort_values(by='createDate', ascending=False).head(max_jobs)
+        
+        # Replace NaN with None (null in JSON) for all columns
+        df_sorted = df_sorted.where(pd.notnull(df_sorted), None)
+        
+        # Fill specific columns with default values if needed
         df_sorted = df_sorted.fillna({
             'title': 'Không có tiêu đề',
             'description': '',
@@ -1126,7 +1131,8 @@ def load_jobs_from_csv(filepath=JOBS_FILEPATH, max_jobs=1400):
             'companyName': '',
             'cityName': '',
             'logo': '',
-            'industryNames': ''
+            'industryNames': '',
+            'averageStar': 0  # Replace NaN in averageStar with 0
         })
         df_sorted['createDate'] = df_sorted['createDate'].dt.strftime('%Y-%m-%dT%H:%M:%S')
         df_sorted['expireDate'] = df_sorted['expireDate'].dt.strftime('%Y-%m-%dT%H:%M:%S')
