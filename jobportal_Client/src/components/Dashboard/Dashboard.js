@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Card, CardContent } from "../../ui/card";
-import { FileText, Star } from "lucide-react";
+import { Briefcase, FileText, MapPin, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import Pagination from "../layout/Pagination";
@@ -116,9 +116,17 @@ export default function Dashboard_Seeker() {
                             </span>
                           </div>
                           <p className="text-sm text-gray-600">
-                            {app.companyName} • {app.location} •{" "}
-                            {app.typeOfWork}
+                            {app.companyName}
                           </p>
+
+                          <div className="flex items-center text-sm text-gray-600">
+                            <MapPin className="h-4 w-4 text-gray-500 mr-2" />
+                            <span>{app.location}</span>
+                          </div>
+                          <div className="flex items-center text-sm text-gray-600">
+                            <Briefcase className="h-4 w-4 text-gray-500 mr-2" />
+                            <span>{app.typeOfWork}</span>
+                          </div>
                           <span className="text-sm text-gray-500">
                             Thời gian ứng tuyển: {formattedDate} {formattedTime}
                           </span>
