@@ -319,7 +319,7 @@ def preprocess_text(text, bypass_stop_words=False, normalize_for_keywords=False)
         logger.debug(f"Văn bản không phải chuỗi: {text}")
         return ""
     text = text.lower()
-    text = re.sub(r'[^\w\s_àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệđìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵ]', ' ', text, flags=re.UNICODE)
+    text = re.sub(r'[^\w\s_àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệđìíỉĩịòóỏõọôốồổỗộơớờởỡợùúụủũưừứựửữựỳýỷỹỵ]', ' ', text, flags=re.UNICODE)
     text = re.sub(r'\s+', ' ', text).strip()
     if not text:
         return ""
@@ -415,7 +415,7 @@ class CompanyReviewFilter:
                 # Xúc phạm cá nhân nghiêm trọng
                 r'mẹ\s*(mày|tao)|cha\s*(mày|tao)|thằng\s*(chó|ngu|điên)|con\s*(chó|lợn|điên)|' +
                 # Đe dọa
-                r'giết|chết\s*đi|tao\s*giết\s*mày|mày\s*chết|đánh\s*chết|' +
+                r'giết|chết\s*đi|tao\s*gi|'+
                 # Phân biệt đối xử nghiêm trọng  
                 r'đồ\s*(đồng\s*tính|gay|les)|thằng\s*(gay|đồng\s*tính))\b',
                 re.IGNORECASE
@@ -1110,17 +1110,24 @@ def load_jobs_from_csv(filepath=JOBS_FILEPATH, max_jobs=1400):
         if missing_columns:
             logger.error(f"Thiếu cột bắt buộc trong job_post.csv: {missing_columns}")
             return []
+        
         df = df.drop_duplicates(subset=['postId'], keep='first')
+        
+        # KHẮC PHỤC: Xử lý datetime an toàn hơn
+        # 1. Chuyển đổi datetime và xử lý NaN ngay lập tức
         df['createDate'] = pd.to_datetime(df['createDate'], errors='coerce')
         df['expireDate'] = pd.to_datetime(df['expireDate'], errors='coerce')
+        
+        # 2. Thay thế NaN trong datetime bằng giá trị mặc định
         current_date = datetime.now()
-        df_active = df[df['expireDate'].notna() & (df['expireDate'] > current_date)].copy()
+        df['createDate'] = df['createDate'].fillna(current_date)
+        df['expireDate'] = df['expireDate'].fillna(current_date + timedelta(days=30))
+        
+        # 3. Lọc công việc còn hiệu lực
+        df_active = df[df['expireDate'] > current_date].copy()
         df_sorted = df_active.sort_values(by='createDate', ascending=False).head(max_jobs)
         
-        # Replace NaN with None (null in JSON) for all columns
-        df_sorted = df_sorted.where(pd.notnull(df_sorted), None)
-        
-        # Fill specific columns with default values if needed
+        # 4. Xử lý các cột khác - thay NaN bằng giá trị mặc định TRƯỚC khi serialize
         df_sorted = df_sorted.fillna({
             'title': 'Không có tiêu đề',
             'description': '',
@@ -1132,13 +1139,44 @@ def load_jobs_from_csv(filepath=JOBS_FILEPATH, max_jobs=1400):
             'cityName': '',
             'logo': '',
             'industryNames': '',
-            'averageStar': 0  # Replace NaN in averageStar with 0
+            'averageStar': 0.0  # Đảm bảo là float, không phải NaN
         })
-        df_sorted['createDate'] = df_sorted['createDate'].dt.strftime('%Y-%m-%dT%H:%M:%S')
-        df_sorted['expireDate'] = df_sorted['expireDate'].dt.strftime('%Y-%m-%dT%H:%M:%S')
+        
+        # 5. QUAN TRỌNG: Format datetime thành string an toàn
+        def safe_datetime_format(dt_series):
+            """Safely format datetime series to string, handling any remaining NaN"""
+            return dt_series.apply(lambda x: x.strftime('%Y-%m-%dT%H:%M:%S') if pd.notnull(x) else None)
+        
+        df_sorted['createDate'] = safe_datetime_format(df_sorted['createDate'])
+        df_sorted['expireDate'] = safe_datetime_format(df_sorted['expireDate'])
+        
+        # 6. Kiểm tra và thay thế bất kỳ NaN nào còn sót lại
+        df_sorted = df_sorted.replace({np.nan: None, 'NaN': None, 'nan': None})
+        
+        # 7. Chuyển đổi thành dictionary và kiểm tra cuối cùng
         jobs = df_sorted.to_dict(orient='records')
-        logger.info(f"Đã tải {len(jobs)} công việc.")
+        
+        # 8. Post-processing: Đảm bảo không có NaN trong kết quả cuối
+        cleaned_jobs = []
+        for job in jobs:
+            cleaned_job = {}
+            for key, value in job.items():
+                if pd.isna(value) or value == 'NaN' or value == 'nan':
+                    # Gán giá trị mặc định dựa trên type của field
+                    if key in ['createDate', 'expireDate']:
+                        cleaned_job[key] = None
+                    elif key in ['salary', 'averageStar']:
+                        cleaned_job[key] = 0
+                    else:
+                        cleaned_job[key] = ''
+                else:
+                    cleaned_job[key] = value
+            cleaned_jobs.append(cleaned_job)
+        
+        jobs = cleaned_jobs
+        logger.info(f"Đã tải {len(jobs)} công việc (đã xử lý NaN).")
         return jobs
+        
     except Exception as e:
         logger.error(f"Lỗi khi tải công việc từ CSV: {e}")
         return []

@@ -282,15 +282,20 @@ export const getReviewReactions = createAsyncThunk(
   'review/getReviewReactions',
   async (reviewIds, { rejectWithValue }) => {
     try {
-      const response = await api.get(
-        `/review/get-reactions`,
-        {
-          params: { reviewIds: Array.isArray(reviewIds) ? reviewIds.join(',') : reviewIds }
-        }
-      );
+      const token = localStorage.getItem('jwt');
+      if (!token) {
+        return rejectWithValue('No token found');
+      }
+      
+      const response = await api.get('/review/get-reactions', {
+        params: { reviewIds: reviewIds.join(',') },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   }
 );
@@ -375,6 +380,24 @@ export const updateReviewReply = createAsyncThunk(
         return rejectWithValue(error.message);
       }
       return rejectWithValue(error.response?.data?.message || error.message || 'Có lỗi xảy ra khi cập nhật phản hồi');
+    }
+  }
+);
+// Thêm action mới
+export const getAdminReviewStatistics = createAsyncThunk(
+  'review/getAdminReviewStatistics',
+  async (params, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem('jwt');
+      const response = await api.get('/review/admin/statistics', {
+        params,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
   }
 );

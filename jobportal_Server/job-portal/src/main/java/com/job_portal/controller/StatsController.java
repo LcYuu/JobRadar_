@@ -64,4 +64,5 @@ public class StatsController {
 	            .body("Error fetching daily stats: " + e.getMessage());
 	    }
 	}
+	
 }

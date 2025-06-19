@@ -464,3 +464,352 @@
 2025-06-17 23:57:22,844 - werkzeug - INFO - 127.0.0.1 - - [17/Jun/2025 23:57:22] "POST /semantic-search HTTP/1.1" 200 -
 2025-06-17 23:57:33,348 - werkzeug - INFO - 127.0.0.1 - - [17/Jun/2025 23:57:33] "POST /semantic-search HTTP/1.1" 200 -
 2025-06-17 23:57:50,539 - werkzeug - INFO - 127.0.0.1 - - [17/Jun/2025 23:57:50] "POST /semantic-search HTTP/1.1" 200 -
+2025-06-18 20:38:48,041 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-18 20:38:48,043 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-18 20:38:53,370 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-18 20:38:53,371 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-18 20:38:53,378 - __main__ - INFO - Gemini model initialized successfully
+2025-06-18 20:38:53,381 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-18 20:38:53,381 - __main__ - INFO - Đang tải công việc từ D:\2024-2025_HKI\TLCN\JobPortal_Project\job_post.csv...
+2025-06-18 20:38:53,499 - __main__ - INFO - Đã tải 1297 công việc.
+2025-06-18 20:38:53,500 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 20:38:53,589 - __main__ - INFO - Đã tải 5843 mục lịch sử tìm kiếm.
+2025-06-18 20:38:53,613 - __main__ - INFO - Đã tải 1302 embeddings từ cache
+2025-06-18 20:38:53,613 - __main__ - INFO - Tạo mới embeddings vì cache không hợp lệ hoặc đã hết hạn
+2025-06-18 20:38:53,620 - __main__ - INFO - Đã tải 1302 embeddings từ cache
+2025-06-18 20:38:53,621 - __main__ - INFO - Sử dụng embeddings từ cache
+2025-06-18 20:38:53,709 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.192:5000
+2025-06-18 20:38:53,710 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-18 20:38:53,713 - werkzeug - INFO -  * Restarting with stat
+2025-06-18 20:39:10,191 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-18 20:39:10,192 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-18 20:39:15,877 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-18 20:39:15,877 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-18 20:39:15,895 - __main__ - INFO - Gemini model initialized successfully
+2025-06-18 20:39:15,897 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-18 20:39:15,897 - __main__ - INFO - Đang tải công việc từ D:\2024-2025_HKI\TLCN\JobPortal_Project\job_post.csv...
+2025-06-18 20:39:15,958 - __main__ - INFO - Đã tải 1297 công việc.
+2025-06-18 20:39:15,958 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 20:39:16,016 - __main__ - INFO - Đã tải 5843 mục lịch sử tìm kiếm.
+2025-06-18 20:39:16,022 - __main__ - INFO - Đã tải 1302 embeddings từ cache
+2025-06-18 20:39:16,023 - __main__ - INFO - Tạo mới embeddings vì cache không hợp lệ hoặc đã hết hạn
+2025-06-18 20:39:16,030 - __main__ - INFO - Đã tải 1302 embeddings từ cache
+2025-06-18 20:39:16,030 - __main__ - INFO - Sử dụng embeddings từ cache
+2025-06-18 20:39:16,092 - werkzeug - WARNING -  * Debugger is active!
+2025-06-18 20:39:16,111 - werkzeug - INFO -  * Debugger PIN: 261-957-740
+2025-06-18 20:39:41,634 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-18 20:39:44,737 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:39:44] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 20:40:07,064 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 20:40:07,267 - __main__ - INFO - Đã tải 5846 mục lịch sử tìm kiếm.
+2025-06-18 20:40:08,980 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:40:08] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 20:40:37,422 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 20:40:37,561 - __main__ - INFO - Đã tải 5851 mục lịch sử tìm kiếm.
+2025-06-18 20:40:39,408 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:40:39] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 20:41:43,773 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 20:41:44,021 - __main__ - INFO - Đã tải 5854 mục lịch sử tìm kiếm.
+2025-06-18 20:41:46,066 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:41:46] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 20:42:14,881 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 20:42:15,053 - __main__ - INFO - Đã tải 5860 mục lịch sử tìm kiếm.
+2025-06-18 20:42:15,060 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: 45000000 IT phần mềm, Cơ khí/Điện - điện tử, Hệ thống nhúng và IOT
+2025-06-18 20:42:15,061 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:42:15] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 20:42:51,360 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 20:42:53,014 - __main__ - INFO - Đã tải 5869 mục lịch sử tìm kiếm.
+2025-06-18 20:42:55,066 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:42:55] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 20:43:49,845 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-18 20:43:49,855 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: 45000000 Hệ thống nhúng và IOT
+2025-06-18 20:43:49,857 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:43:49] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 20:43:49,911 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-18 20:43:49,928 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: 45000000 Hệ thống nhúng và IOT
+2025-06-18 20:43:49,938 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:43:49] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 20:43:54,730 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-18 20:43:54,737 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: 45000000 Hệ thống nhúng và IOT
+2025-06-18 20:43:54,741 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:43:54] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 20:43:58,314 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-18 20:43:58,319 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: 45000000 Hệ thống nhúng và IOT
+2025-06-18 20:43:58,320 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:43:58] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 20:44:17,601 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-18 20:44:17,609 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: 45000000 Hệ thống nhúng và IOT
+2025-06-18 20:44:17,611 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:44:17] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 20:44:40,704 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 20:44:40,918 - __main__ - INFO - Đã tải 5876 mục lịch sử tìm kiếm.
+2025-06-18 20:44:42,415 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:44:42] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 20:44:54,216 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 20:44:54,381 - __main__ - INFO - Đã tải 5877 mục lịch sử tìm kiếm.
+2025-06-18 20:44:54,394 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: 45000000 Y tế, Luật, Phiên dịch
+2025-06-18 20:44:54,396 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:44:54] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 20:45:19,314 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 20:45:19,517 - __main__ - INFO - Đã tải 5884 mục lịch sử tìm kiếm.
+2025-06-18 20:45:21,082 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:45:21] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 20:45:34,354 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 20:45:34,551 - __main__ - INFO - Đã tải 5886 mục lịch sử tìm kiếm.
+2025-06-18 20:45:35,936 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:45:35] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 20:45:47,589 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 20:45:47,711 - __main__ - INFO - Đã tải 5887 mục lịch sử tìm kiếm.
+2025-06-18 20:45:47,714 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: 45000000 Nhà hàng/Khách sạn, Y tế
+2025-06-18 20:45:47,717 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:45:47] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 20:46:19,894 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:46:19] "POST /semantic-search HTTP/1.1" 200 -
+2025-06-18 20:46:34,108 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 20:46:34,357 - __main__ - INFO - Đã tải 5912 mục lịch sử tìm kiếm.
+2025-06-18 20:46:36,103 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:46:36] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 20:47:22,698 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 20:47:22,879 - __main__ - INFO - Đã tải 5938 mục lịch sử tìm kiếm.
+2025-06-18 20:47:25,130 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:47:25] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 20:47:58,329 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 20:47:58,541 - __main__ - INFO - Đã tải 5940 mục lịch sử tìm kiếm.
+2025-06-18 20:47:59,921 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:47:59] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 20:48:38,235 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 20:48:38,447 - __main__ - INFO - Đã tải 5949 mục lịch sử tìm kiếm.
+2025-06-18 20:48:39,867 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 20:48:39] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 21:04:13,449 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-18 21:04:13,451 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-18 21:04:20,574 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-18 21:04:20,574 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-18 21:04:20,593 - __main__ - INFO - Gemini model initialized successfully
+2025-06-18 21:04:20,599 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-18 21:04:20,600 - __main__ - INFO - Đang tải công việc từ D:\2024-2025_HKI\TLCN\JobPortal_Project\job_post.csv...
+2025-06-18 21:04:20,835 - __main__ - INFO - Đã tải 1306 công việc (đã xử lý NaN).
+2025-06-18 21:04:20,836 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 21:04:20,955 - __main__ - INFO - Đã tải 5949 mục lịch sử tìm kiếm.
+2025-06-18 21:04:20,973 - __main__ - INFO - Đã tải 1302 embeddings từ cache
+2025-06-18 21:04:20,982 - __main__ - INFO - Tạo mới embeddings vì cache không hợp lệ hoặc đã hết hạn
+2025-06-18 21:04:21,002 - __main__ - INFO - Đã tải 1302 embeddings từ cache
+2025-06-18 21:04:21,008 - __main__ - INFO - Sử dụng embeddings từ cache
+2025-06-18 21:04:21,222 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.192:5000
+2025-06-18 21:04:21,224 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-18 21:04:21,229 - werkzeug - INFO -  * Restarting with stat
+2025-06-18 21:04:54,815 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-18 21:04:54,816 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-18 21:05:01,546 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-18 21:05:01,547 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-18 21:05:01,561 - __main__ - INFO - Gemini model initialized successfully
+2025-06-18 21:05:01,567 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-18 21:05:01,568 - __main__ - INFO - Đang tải công việc từ D:\2024-2025_HKI\TLCN\JobPortal_Project\job_post.csv...
+2025-06-18 21:05:01,704 - __main__ - INFO - Đã tải 1306 công việc (đã xử lý NaN).
+2025-06-18 21:05:01,705 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 21:05:01,803 - __main__ - INFO - Đã tải 5949 mục lịch sử tìm kiếm.
+2025-06-18 21:05:01,820 - __main__ - INFO - Đã tải 1302 embeddings từ cache
+2025-06-18 21:05:01,821 - __main__ - INFO - Tạo mới embeddings vì cache không hợp lệ hoặc đã hết hạn
+2025-06-18 21:05:01,828 - __main__ - INFO - Đã tải 1302 embeddings từ cache
+2025-06-18 21:05:01,829 - __main__ - INFO - Sử dụng embeddings từ cache
+2025-06-18 21:05:01,927 - werkzeug - WARNING -  * Debugger is active!
+2025-06-18 21:05:01,961 - werkzeug - INFO -  * Debugger PIN: 261-957-740
+2025-06-18 21:07:05,667 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-18 21:07:05,764 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-18 21:07:12,466 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:07:12] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 21:07:12,477 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:07:12] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 21:07:48,868 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:07:48] "POST /semantic-search HTTP/1.1" 200 -
+2025-06-18 21:07:56,463 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 21:07:56,865 - __main__ - INFO - Đã tải 5952 mục lịch sử tìm kiếm.
+2025-06-18 21:07:59,275 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:07:59] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 21:09:15,772 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:09:15] "POST /semantic-search HTTP/1.1" 200 -
+2025-06-18 21:09:28,749 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 21:09:28,912 - __main__ - INFO - Đã tải 5953 mục lịch sử tìm kiếm.
+2025-06-18 21:09:28,926 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: lập trình viên toàn diện
+2025-06-18 21:09:28,928 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:09:28] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 21:09:37,539 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-18 21:09:37,545 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: lập trình viên toàn diện
+2025-06-18 21:09:37,547 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:09:37] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 21:10:12,317 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:10:12] "POST /semantic-search HTTP/1.1" 200 -
+2025-06-18 21:10:21,473 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 21:10:21,669 - __main__ - INFO - Đã tải 5954 mục lịch sử tìm kiếm.
+2025-06-18 21:10:23,265 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:10:23] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 21:11:05,714 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-18 21:11:05,720 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: Kỹ thuật viên Cài đặt Hệ thống Máy tính
+2025-06-18 21:11:05,722 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:11:05] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 21:11:37,610 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:11:37] "POST /semantic-search HTTP/1.1" 200 -
+2025-06-18 21:11:52,379 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:11:52] "POST /semantic-search HTTP/1.1" 200 -
+2025-06-18 21:12:16,546 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:12:16] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-18 21:12:16,804 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:12:16] "POST /check-comment HTTP/1.1" 200 -
+2025-06-18 21:12:21,830 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:12:21] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-18 21:12:22,151 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:12:22] "POST /check-comment HTTP/1.1" 200 -
+2025-06-18 21:12:27,182 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:12:27] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-18 21:12:29,167 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:12:29] "POST /check-comment HTTP/1.1" 200 -
+2025-06-18 21:12:29,180 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:12:29] "POST /check-comment HTTP/1.1" 200 -
+2025-06-18 21:12:36,172 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:12:36] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-18 21:12:37,289 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:12:37] "POST /check-comment HTTP/1.1" 200 -
+2025-06-18 21:12:48,405 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:12:48] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-18 21:12:48,661 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:12:48] "POST /check-comment HTTP/1.1" 200 -
+2025-06-18 21:13:02,688 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 21:13:05,483 - __main__ - INFO - Đã tải 5956 mục lịch sử tìm kiếm.
+2025-06-18 21:13:08,189 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:13:08] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 21:16:38,898 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-18 21:16:38,909 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: chuyên gia logistics
+2025-06-18 21:16:38,916 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:16:38] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 21:17:45,711 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-18 21:17:45,722 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: chuyên gia logistics
+2025-06-18 21:17:45,725 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:17:45] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 21:17:49,761 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-18 21:17:49,767 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: chuyên gia logistics
+2025-06-18 21:17:49,769 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:17:49] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 21:18:28,054 - __main__ - INFO - Tệp D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv chưa thay đổi.
+2025-06-18 21:18:28,062 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: chuyên gia logistics
+2025-06-18 21:18:28,085 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:18:28] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 21:23:24,904 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:23:24] "POST /analyze HTTP/1.1" 200 -
+2025-06-18 21:23:47,366 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 21:23:47] "POST /analyze HTTP/1.1" 200 -
+2025-06-18 22:50:44,451 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 22:50:44,701 - __main__ - INFO - Đã tải 5960 mục lịch sử tìm kiếm.
+2025-06-18 22:50:46,661 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 22:50:46] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 22:51:06,468 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 22:51:06,623 - __main__ - INFO - Đã tải 5965 mục lịch sử tìm kiếm.
+2025-06-18 22:51:07,524 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 22:51:07] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-18 22:51:09,041 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-18 22:51:09,130 - __main__ - INFO - Đã tải 5966 mục lịch sử tìm kiếm.
+2025-06-18 22:51:09,134 - __main__ - INFO - Sử dụng kết quả từ cache cho truy vấn: 45000000
+2025-06-18 22:51:09,135 - werkzeug - INFO - 127.0.0.1 - - [18/Jun/2025 22:51:09] "POST /recommend-jobs/phobert HTTP/1.1" 200 -
+2025-06-19 11:52:28,838 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-19 11:52:28,839 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-19 11:52:34,971 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-19 11:52:34,973 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-19 11:52:34,982 - __main__ - INFO - Gemini model initialized successfully
+2025-06-19 11:52:34,984 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-19 11:52:34,985 - __main__ - INFO - Đang tải công việc từ D:\2024-2025_HKI\TLCN\JobPortal_Project\job_post.csv...
+2025-06-19 11:52:35,429 - __main__ - INFO - Đã tải 1306 công việc (đã xử lý NaN).
+2025-06-19 11:52:35,430 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-19 11:52:35,520 - __main__ - INFO - Đã tải 5966 mục lịch sử tìm kiếm.
+2025-06-19 11:52:35,532 - __main__ - INFO - Đã tải 1302 embeddings từ cache
+2025-06-19 11:52:35,533 - __main__ - INFO - Tạo mới embeddings vì cache không hợp lệ hoặc đã hết hạn
+2025-06-19 11:52:35,541 - __main__ - INFO - Đã tải 1302 embeddings từ cache
+2025-06-19 11:52:35,541 - __main__ - INFO - Tạo mới embeddings cho công việc
+2025-06-19 11:55:49,215 - __main__ - INFO - Đã lưu 1311 embeddings vào cache
+2025-06-19 11:55:52,188 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.192:5000
+2025-06-19 11:55:52,193 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-19 11:55:52,251 - werkzeug - INFO -  * Restarting with stat
+2025-06-19 11:56:23,822 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-19 11:56:23,823 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-19 11:57:29,047 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-19 11:57:29,047 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-19 11:57:34,714 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-19 11:57:34,715 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-19 11:57:34,723 - __main__ - INFO - Gemini model initialized successfully
+2025-06-19 11:57:34,725 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-19 11:57:34,726 - __main__ - INFO - Đang tải công việc từ D:\2024-2025_HKI\TLCN\JobPortal_Project\job_post.csv...
+2025-06-19 11:57:34,918 - __main__ - INFO - Đã tải 1306 công việc (đã xử lý NaN).
+2025-06-19 11:57:34,919 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-19 11:57:35,014 - __main__ - INFO - Đã tải 5968 mục lịch sử tìm kiếm.
+2025-06-19 11:57:35,042 - __main__ - INFO - Đã tải 1311 embeddings từ cache
+2025-06-19 11:57:35,042 - __main__ - INFO - Tạo mới embeddings vì cache không hợp lệ hoặc đã hết hạn
+2025-06-19 11:57:35,049 - __main__ - INFO - Đã tải 1311 embeddings từ cache
+2025-06-19 11:57:35,049 - __main__ - INFO - Sử dụng embeddings từ cache
+2025-06-19 11:57:35,148 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.192:5000
+2025-06-19 11:57:35,148 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-19 11:57:35,151 - werkzeug - INFO -  * Restarting with stat
+2025-06-19 11:57:51,420 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-19 11:57:51,421 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-19 11:58:29,699 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-19 11:58:29,699 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-19 11:58:36,058 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-19 11:58:36,058 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-19 11:58:36,067 - __main__ - INFO - Gemini model initialized successfully
+2025-06-19 11:58:36,070 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-19 11:58:36,071 - __main__ - INFO - Đang tải công việc từ D:\2024-2025_HKI\TLCN\JobPortal_Project\job_post.csv...
+2025-06-19 11:58:36,228 - __main__ - INFO - Đã tải 1306 công việc (đã xử lý NaN).
+2025-06-19 11:58:36,228 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-19 11:58:36,287 - __main__ - INFO - Đã tải 5968 mục lịch sử tìm kiếm.
+2025-06-19 11:58:36,298 - __main__ - INFO - Đã tải 1311 embeddings từ cache
+2025-06-19 11:58:36,298 - __main__ - INFO - Tạo mới embeddings vì cache không hợp lệ hoặc đã hết hạn
+2025-06-19 11:58:36,303 - __main__ - INFO - Đã tải 1311 embeddings từ cache
+2025-06-19 11:58:36,304 - __main__ - INFO - Sử dụng embeddings từ cache
+2025-06-19 11:58:36,399 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.192:5000
+2025-06-19 11:58:36,399 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-19 11:58:36,402 - werkzeug - INFO -  * Restarting with stat
+2025-06-19 11:58:54,149 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-19 11:58:54,151 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-19 12:00:00,222 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-19 12:00:00,224 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-19 12:00:09,553 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-19 12:00:09,554 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-19 12:00:09,570 - __main__ - INFO - Gemini model initialized successfully
+2025-06-19 12:00:09,578 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-19 12:00:09,579 - __main__ - INFO - Đang tải công việc từ D:\2024-2025_HKI\TLCN\JobPortal_Project\job_post.csv...
+2025-06-19 12:00:09,788 - __main__ - INFO - Đã tải 1306 công việc (đã xử lý NaN).
+2025-06-19 12:00:09,788 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-19 12:00:09,863 - __main__ - INFO - Đã tải 5968 mục lịch sử tìm kiếm.
+2025-06-19 12:00:09,878 - __main__ - INFO - Đã tải 1311 embeddings từ cache
+2025-06-19 12:00:09,879 - __main__ - INFO - Tạo mới embeddings vì cache không hợp lệ hoặc đã hết hạn
+2025-06-19 12:00:09,888 - __main__ - INFO - Đã tải 1311 embeddings từ cache
+2025-06-19 12:00:09,888 - __main__ - INFO - Sử dụng embeddings từ cache
+2025-06-19 12:00:10,020 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.192:5000
+2025-06-19 12:00:10,020 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-19 12:00:10,024 - werkzeug - INFO -  * Restarting with stat
+2025-06-19 12:00:33,569 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-19 12:00:33,570 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-19 12:01:21,216 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-19 12:01:21,216 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-19 12:01:26,098 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-19 12:01:26,098 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-19 12:01:26,110 - __main__ - INFO - Gemini model initialized successfully
+2025-06-19 12:01:26,115 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-19 12:01:26,115 - __main__ - INFO - Đang tải công việc từ D:\2024-2025_HKI\TLCN\JobPortal_Project\job_post.csv...
+2025-06-19 12:01:26,203 - __main__ - INFO - Đã tải 1306 công việc (đã xử lý NaN).
+2025-06-19 12:01:26,204 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-19 12:01:26,279 - __main__ - INFO - Đã tải 5968 mục lịch sử tìm kiếm.
+2025-06-19 12:01:26,298 - __main__ - INFO - Đã tải 1311 embeddings từ cache
+2025-06-19 12:01:26,298 - __main__ - INFO - Tạo mới embeddings vì cache không hợp lệ hoặc đã hết hạn
+2025-06-19 12:01:26,304 - __main__ - INFO - Đã tải 1311 embeddings từ cache
+2025-06-19 12:01:26,304 - __main__ - INFO - Sử dụng embeddings từ cache
+2025-06-19 12:01:26,398 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.192:5000
+2025-06-19 12:01:26,398 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-06-19 12:01:26,400 - werkzeug - INFO -  * Restarting with stat
+2025-06-19 12:01:40,343 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: cpu
+2025-06-19 12:01:40,343 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: paraphrase-multilingual-mpnet-base-v2
+2025-06-19 12:01:45,297 - __main__ - INFO - Mô hình SentenceTransformer được tải trên cpu
+2025-06-19 12:01:45,297 - __main__ - WARNING - REDIS_URL không được thiết lập, sử dụng bộ nhớ cache trong ứng dụng
+2025-06-19 12:01:45,302 - __main__ - INFO - Gemini model initialized successfully
+2025-06-19 12:01:45,304 - __main__ - INFO - Starting JobRadar service on port 5000
+2025-06-19 12:01:45,304 - __main__ - INFO - Đang tải công việc từ D:\2024-2025_HKI\TLCN\JobPortal_Project\job_post.csv...
+2025-06-19 12:01:45,408 - __main__ - INFO - Đã tải 1306 công việc (đã xử lý NaN).
+2025-06-19 12:01:45,410 - __main__ - INFO - Đang tải lịch sử tìm kiếm từ D:\2024-2025_HKI\TLCN\JobPortal_Project\search.csv...
+2025-06-19 12:01:45,453 - __main__ - INFO - Đã tải 5968 mục lịch sử tìm kiếm.
+2025-06-19 12:01:45,459 - __main__ - INFO - Đã tải 1311 embeddings từ cache
+2025-06-19 12:01:45,459 - __main__ - INFO - Tạo mới embeddings vì cache không hợp lệ hoặc đã hết hạn
+2025-06-19 12:01:45,464 - __main__ - INFO - Đã tải 1311 embeddings từ cache
+2025-06-19 12:01:45,464 - __main__ - INFO - Sử dụng embeddings từ cache
+2025-06-19 12:01:45,524 - werkzeug - WARNING -  * Debugger is active!
+2025-06-19 12:01:45,568 - werkzeug - INFO -  * Debugger PIN: 261-957-740
+2025-06-19 12:01:50,644 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:01:50] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-19 12:01:50,956 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:01:50] "POST /check-comment HTTP/1.1" 200 -
+2025-06-19 12:01:51,219 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:01:51] "POST /check-comment HTTP/1.1" 200 -
+2025-06-19 12:01:56,498 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:01:56] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-19 12:02:17,010 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:02:17] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-19 12:02:19,243 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:02:19] "POST /check-comment HTTP/1.1" 200 -
+2025-06-19 12:02:20,188 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:02:20] "POST /check-comment HTTP/1.1" 200 -
+2025-06-19 12:02:36,735 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:02:36] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-19 12:02:38,700 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:02:38] "POST /check-comment HTTP/1.1" 200 -
+2025-06-19 12:02:39,508 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:02:39] "POST /check-comment HTTP/1.1" 200 -
+2025-06-19 12:02:58,825 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:02:58] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-19 12:02:59,933 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:02:59] "POST /check-comment HTTP/1.1" 200 -
+2025-06-19 12:03:00,928 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:03:00] "POST /check-comment HTTP/1.1" 200 -
+2025-06-19 12:03:26,867 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:03:26] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-19 12:03:28,133 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:03:28] "POST /check-comment HTTP/1.1" 200 -
+2025-06-19 12:05:42,213 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:05:42] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-19 12:05:42,456 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:05:42] "POST /check-comment HTTP/1.1" 200 -
+2025-06-19 12:05:50,833 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:05:50] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-19 12:05:51,094 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:05:51] "POST /check-comment HTTP/1.1" 200 -
+2025-06-19 12:05:59,611 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:05:59] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-19 12:05:59,919 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:05:59] "POST /check-comment HTTP/1.1" 200 -
+2025-06-19 12:06:06,282 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:06:06] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-19 12:06:06,605 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:06:06] "POST /check-comment HTTP/1.1" 200 -
+2025-06-19 12:06:12,434 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:06:12] "OPTIONS /check-comment HTTP/1.1" 200 -
+2025-06-19 12:06:13,823 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:06:13] "POST /check-comment HTTP/1.1" 200 -
+2025-06-19 12:06:13,833 - werkzeug - INFO - 127.0.0.1 - - [19/Jun/2025 12:06:13] "POST /check-comment HTTP/1.1" 200 -

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card } from "../../../ui/card";
 import { Button } from "../../../ui/button";
 import { useDispatch, useSelector } from "react-redux";
-import { Users, Building2, FileText, TrendingUp, Calendar, Send } from "lucide-react";
+import { Users, Building2, FileText, TrendingUp, Calendar, Send, Eye, Activity } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -12,6 +12,8 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  AreaChart,
+  Area,
 } from "recharts";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -22,6 +24,7 @@ import {
   getTotalCompanies,
   getTotalJobs,
   getTotalUsers,
+  getGrowthStats,
 } from "../../../redux/Stats/stats.thunk";
 
 export default function AdminDashboard() {
@@ -33,17 +36,27 @@ export default function AdminDashboard() {
     totalJobs,
     activeJobs,
     dailyStats,
+    growthStats,
     loading,
     error,
   } = useSelector((state) => state.stats);
+  
+  // Khởi tạo với tuần hiện tại
   const [chartDateRange, setChartDateRange] = useState(() => {
-    const end = new Date();
-    const start = new Date();
-    start.setDate(start.getDate() - 7);
+    const today = new Date();
+    // Tính thứ 2 của tuần hiện tại
+    const dayOfWeek = today.getDay(); // 0 = Chủ nhật, 1 = Thứ 2, ..., 6 = Thứ 7
+    const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Nếu là CN thì lùi 6 ngày, không thì tính từ thứ 2
+    
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + daysToMonday);
+    
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
 
     return {
-      startDate: start.toISOString().split("T")[0],
-      endDate: end.toISOString().split("T")[0],
+      startDate: monday.toISOString().split("T")[0],
+      endDate: sunday.toISOString().split("T")[0],
     };
   });
 
@@ -59,6 +72,8 @@ export default function AdminDashboard() {
       [name]: value,
     }));
     setDateError("");
+    // Reset activePeriod khi người dùng chọn ngày thủ công
+    setActivePeriod("custom");
   };
 
   useEffect(() => {
@@ -66,6 +81,7 @@ export default function AdminDashboard() {
     dispatch(getTotalCompanies());
     dispatch(getTotalJobs());
     dispatch(getActiveJobs());
+    dispatch(getGrowthStats());
   }, [dispatch]);
 
   useEffect(() => {
@@ -74,7 +90,6 @@ export default function AdminDashboard() {
       const end = new Date(chartDateRange.endDate);
       const today = new Date();
 
-      // Validate dates
       if (start > end) {
         setDateError("Ngày bắt đầu không thể sau ngày kết thúc");
         return;
@@ -86,6 +101,7 @@ export default function AdminDashboard() {
       }
 
       setDateError("");
+      console.log("Fetching stats for period:", activePeriod, "Range:", chartDateRange);
       dispatch(
         getDailyStats({
           startDate: chartDateRange.startDate,
@@ -106,42 +122,135 @@ export default function AdminDashboard() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Safe access to growthStats with default values
+  const safeGrowthStats = {
+    userGrowth: growthStats?.userGrowth || 0,
+    companyGrowth: growthStats?.companyGrowth || 0,
+    jobGrowth: growthStats?.jobGrowth || 0,
+    activeJobGrowth: growthStats?.activeJobGrowth || 0
+  };
+
+  // Hàm tính toán khoảng thời gian dựa trên ngày hiện tại
+  const calculateDateRange = (period) => {
+    const today = new Date();
+    let start, end;
+
+    switch (period) {
+      case "week":
+        // Tính tuần hiện tại (Thứ 2 - Chủ nhật)
+        const dayOfWeek = today.getDay(); // 0 = CN, 1 = T2, ..., 6 = T7
+        const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        
+        start = new Date(today);
+        start.setDate(today.getDate() + daysToMonday);
+        
+        end = new Date(start);
+        end.setDate(start.getDate() + 6);
+        break;
+
+      case "month":
+        // Tính tháng hiện tại (ngày 1 - ngày cuối tháng)
+        start = new Date(today.getFullYear(), today.getMonth(), 1);
+        end = new Date(today.getFullYear(), today.getMonth() + 1, 0); // Ngày cuối tháng
+        break;
+
+      case "year":
+        // Tính năm hiện tại (1/1 - 31/12)
+        start = new Date(today.getFullYear(), 0, 1); // 1/1
+        end = new Date(today.getFullYear(), 11, 31); // 31/12
+        break;
+
+      default:
+        return null;
+    }
+
+    // Đảm bảo không vượt quá ngày hiện tại
+    if (end > today) {
+      end = new Date(today);
+    }
+
+    return {
+      startDate: start.toISOString().split("T")[0],
+      endDate: end.toISOString().split("T")[0],
+    };
+  };
+
+  // CẢI THIỆN chartData processing để hiển thị tất cả các ngày cho tháng và năm
   const chartData = React.useMemo(() => {
     if (!dailyStats || !Array.isArray(dailyStats)) return [];
 
-    // Determine sampling interval based on screen width
-    const isMidRange = windowWidth >= 800 && windowWidth <= 1020;
-    const isMobile = windowWidth < 800;
-    let sampleInterval;
+    // Tính khoảng thời gian để quyết định cách hiển thị
+    const start = new Date(chartDateRange.startDate);
+    const end = new Date(chartDateRange.endDate);
+    const diffInDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+    
+    let sampleInterval = 1;
+    let shouldShowAllDays = false;
 
-    if (isMobile) {
-      sampleInterval = Math.ceil(dailyStats.length / 3); // ~3 points on mobile
-    } else if (isMidRange) {
-      // Linearly interpolate number of points between 1020px (~all points) and 800px (~4 points)
-      const maxWidth = 1020;
-      const minWidth = 800;
-      const maxPoints = dailyStats.length;
-      const minPoints = 4;
-      const widthRatio = (windowWidth - minWidth) / (maxWidth - minWidth);
-      const numPoints = Math.round(minPoints + (maxPoints - minPoints) * widthRatio);
-      sampleInterval = Math.max(1, Math.ceil(dailyStats.length / numPoints));
+    // Logic mới: hiển thị tất cả ngày cho tháng và năm
+    if (activePeriod === "month" || activePeriod === "year") {
+      shouldShowAllDays = true;
+      sampleInterval = 1; // Hiển thị tất cả các ngày
+    } else if (activePeriod === "week") {
+      shouldShowAllDays = true; // Hiển thị tất cả 7 ngày trong tuần
+      sampleInterval = 1;
     } else {
-      sampleInterval = 1; // Show all points on larger screens
+      // Chỉ áp dụng sampling cho custom range
+      const isMidRange = windowWidth >= 800 && windowWidth <= 1020;
+      const isMobile = windowWidth < 800;
+
+      if (isMobile && diffInDays > 7) {
+        sampleInterval = Math.ceil(dailyStats.length / 5); // 5 points on mobile
+      } else if (isMidRange && diffInDays > 14) {
+        sampleInterval = Math.ceil(dailyStats.length / 8); // 8 points on mid-range
+      } else if (diffInDays <= 7) {
+        sampleInterval = 1; // Show all points for week or less
+      }
     }
 
+    console.log("Chart processing:", {
+      activePeriod,
+      diffInDays,
+      shouldShowAllDays,
+      sampleInterval,
+      dataLength: dailyStats.length
+    });
+
     return dailyStats
-      .filter((_, index) => index % sampleInterval === 0) // Sample data points
+      .filter((_, index) => shouldShowAllDays || index % sampleInterval === 0)
       .map((stat) => {
         try {
           if (!stat.date) return null;
 
           const date = new Date(stat.date);
+          
+          // Format ngày tùy thuộc vào khoảng thời gian
+          let nameFormat;
+          if (activePeriod === "year" || diffInDays > 365) {
+            // Cho năm: hiển thị tháng/năm
+            nameFormat = date.toLocaleDateString("vi-VN", {
+              month: "2-digit",
+              year: "2-digit",
+            });
+          } else if (activePeriod === "month" || diffInDays > 30) {
+            // Cho tháng: hiển thị ngày/tháng
+            nameFormat = date.toLocaleDateString("vi-VN", {
+              day: "2-digit",
+              month: "2-digit",
+            });
+          } else {
+            // Cho tuần: hiển thị thứ + ngày/tháng
+            const weekdays = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+            const dayName = weekdays[date.getDay()];
+            const dateStr = date.toLocaleDateString("vi-VN", {
+              day: "2-digit",
+              month: "2-digit",
+            });
+            nameFormat = `${dayName}\n${dateStr}`;
+          }
+
           return {
-            name: date.toLocaleDateString("vi-VN", {
-              year: "numeric",
-              month: "numeric",
-              day: "numeric",
-            }),
+            name: nameFormat,
             fullDate: date.toLocaleDateString("vi-VN", {
               weekday: "long",
               year: "numeric",
@@ -150,6 +259,7 @@ export default function AdminDashboard() {
             }),
             users: Number(stat.newUsers) || 0,
             jobs: Number(stat.newJobs) || 0,
+            originalDate: stat.date,
           };
         } catch (error) {
           console.error("Error processing stat:", stat, error);
@@ -157,45 +267,35 @@ export default function AdminDashboard() {
         }
       })
       .filter(Boolean);
-  }, [dailyStats, windowWidth]);
+  }, [dailyStats, windowWidth, chartDateRange, activePeriod]);
 
   const handlePeriodFilter = (period) => {
-    const end = new Date();
-    const start = new Date();
+    const dateRange = calculateDateRange(period);
+    if (!dateRange) return;
 
-    switch (period) {
-      case "week":
-        start.setDate(end.getDate() - 7);
-        break;
-      case "month":
-        start.setMonth(end.getMonth() - 1);
-        break;
-      case "year":
-        start.setFullYear(end.getFullYear() - 1);
-        break;
-      default:
-        break;
-    }
-
+    console.log("Period filter:", period, "Calculated range:", dateRange);
+    
     setActivePeriod(period);
-    setChartDateRange({
-      startDate: start.toISOString().split("T")[0],
-      endDate: end.toISOString().split("T")[0],
-    });
+    setChartDateRange(dateRange);
   };
 
-  // Dynamic font size and margin based on screen width
+  // Dynamic font size and margin based on screen width and data amount
   const isMobile = windowWidth < 800;
   const isMidRange = windowWidth >= 800 && windowWidth <= 1020;
-  const fontSize = isMobile ? 12 : isMidRange ? 12 : 14;
+  
+  // Điều chỉnh fontSize dựa trên số lượng data points
+  let fontSize = 12;
+  if (chartData.length > 30) {
+    fontSize = isMobile ? 8 : 10;
+  } else if (chartData.length > 15) {
+    fontSize = isMobile ? 10 : 11;
+  }
+
   const chartMargin = isMobile
-    ? { top: 5, right: 15, left: 0, bottom: 5 }
+    ? { top: 20, right: 20, left: 10, bottom: 80 }
     : isMidRange
-    ? { top: 5, right: 10, left: -10, bottom: 5 }
-    : { top: 5, right: 20, left: 0, bottom: 5 };
-  const cardPadding = isMobile ? 'p-3 sm:p-4 md:p-6' : isMidRange ? 'p-2 sm:p-3' : 'p-3 sm:p-4 md:p-6';
-  const titleFontSize = isMobile ? 'text-sm sm:text-base md:text-lg' : isMidRange ? 'text-sm' : 'text-base sm:text-lg md:text-xl';
-  const chartHeight = isMobile ? 'h-56 sm:h-64 md:h-72 lg:h-80' : isMidRange ? 'h-52 sm:h-60' : 'h-56 sm:h-64 md:h-72 lg:h-80';
+    ? { top: 20, right: 20, left: 10, bottom: 70 }
+    : { top: 20, right: 30, left: 20, bottom: 60 };
 
   const handleTriggerSurvey = async () => {
     try {
@@ -216,13 +316,7 @@ export default function AdminDashboard() {
         text: 'Đã kích hoạt gửi khảo sát thành công',
         icon: 'success',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#3085d6',
-        customClass: {
-          popup: 'swal2-responsive',
-          title: 'swal2-title-responsive',
-          content: 'swal2-content-responsive',
-          confirmButton: 'swal2-confirm-button-responsive'
-        }
+        confirmButtonColor: '#10b981',
       });
     } catch (error) {
       await Swal.fire({
@@ -230,247 +324,389 @@ export default function AdminDashboard() {
         text: error.message || 'Có lỗi xảy ra khi kích hoạt gửi khảo sát',
         icon: 'error',
         confirmButtonText: 'OK',
-        confirmButtonColor: '#d33',
-        customClass: {
-          popup: 'swal2-responsive',
-          title: 'swal2-title-responsive',
-          content: 'swal2-content-responsive',
-          confirmButton: 'swal2-confirm-button-responsive'
-        }
+        confirmButtonColor: '#ef4444',
       });
     } finally {
       setIsTriggeringSurvey(false);
     }
   };
 
+  // Format growth percentage with sign
+  const formatGrowthPercentage = (value) => {
+    const numValue = Number(value) || 0;
+    if (numValue > 0) return `+${numValue}%`;
+    if (numValue < 0) return `${numValue}%`;
+    return `${numValue}%`;
+  };
+
+  // Determine if we should angle the X-axis labels
+  const shouldAngleLabels = chartData.length > 10 || (activePeriod !== "week" && windowWidth < 1200);
+
+  // Tạo label cho period buttons với thông tin chi tiết
+  const getPeriodLabel = (period) => {
+    const today = new Date();
+    switch (period) {
+      case "week":
+        const dayOfWeek = today.getDay();
+        const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        const monday = new Date(today);
+        monday.setDate(today.getDate() + daysToMonday);
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+        return {
+          label: "Tuần này",
+          detail: `${monday.getDate()}/${monday.getMonth() + 1} - ${sunday.getDate()}/${sunday.getMonth() + 1}`
+        };
+      case "month":
+        return {
+          label: "Tháng này",
+          detail: `Tháng ${today.getMonth() + 1}/${today.getFullYear()}`
+        };
+      case "year":
+        return {
+          label: "Năm này",
+          detail: `Năm ${today.getFullYear()}`
+        };
+      default:
+        return { label: period, detail: "" };
+    }
+  };
+
   return (
-    <div className="min-h-screen flex flex-col pb-20 bg-white mt-8 px-2 sm:px-4 md:px-6">
-      <div className="flex-1 space-y-4 md:space-y-6">
-        <div className="flex justify-between items-center mt-4">
-          <h1 className="text-lg sm:text-xl md:text-2xl font-semibold">Chào mừng trở lại</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b border-gray-200">
+        <div className="px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="flex-shrink-0">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <Activity className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Dashboard Quản Trị</h1>
+                <p className="text-sm text-gray-500 mt-1">
+                  Chào mừng trở lại! Theo dõi hoạt động của hệ thống
+                </p>
+              </div>
+            </div>
+            <div className="mt-4 sm:mt-0 text-sm text-gray-500">
+              Cập nhật: {new Date().toLocaleDateString("vi-VN")}
+            </div>
+          </div>
         </div>
+      </div>
 
+      <div className="px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-          <Card className="p-3 sm:p-4 md:p-6 bg-blue-50">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-blue-600">Tổng người dùng</p>
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold mt-1 text-blue-700">
-                  {totalUsers}
-                </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Total Users Card */}
+          <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-blue-100 text-sm font-medium">Tổng người dùng</p>
+                  <h3 className="text-3xl font-bold mt-2">{totalUsers || 0}</h3>
+                  <div className="flex items-center mt-3 text-blue-100">
+                    <TrendingUp className="w-4 h-4 mr-1" />
+                    <span className="text-sm">
+                      {formatGrowthPercentage(safeGrowthStats.userGrowth)} từ tháng trước
+                    </span>
+                  </div>
+                </div>
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                    <Users className="w-7 h-7 text-white" />
+                  </div>
+                </div>
               </div>
-              <Users className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-blue-600" />
             </div>
           </Card>
 
-          <Card className="p-3 sm:p-4 md:p-6 bg-purple-50">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-purple-600">Tổng công ty</p>
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold mt-1 text-purple-700">
-                  {totalCompanies}
-                </h3>
+          {/* Total Companies Card */}
+          <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-purple-100 text-sm font-medium">Tổng công ty</p>
+                  <h3 className="text-3xl font-bold mt-2">{totalCompanies || 0}</h3>
+                  <div className="flex items-center mt-3 text-purple-100">
+                    <TrendingUp className="w-4 h-4 mr-1" />
+                    <span className="text-sm">
+                      {formatGrowthPercentage(safeGrowthStats.companyGrowth)} từ tháng trước
+                    </span>
+                  </div>
+                </div>
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                    <Building2 className="w-7 h-7 text-white" />
+                  </div>
+                </div>
               </div>
-              <Building2 className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-purple-600" />
             </div>
           </Card>
 
-          <Card className="p-3 sm:p-4 md:p-6 bg-green-50">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-green-600">Tổng việc làm</p>
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold mt-1 text-green-700">
-                  {totalJobs}
-                </h3>
+          {/* Total Jobs Card */}
+          <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-green-100 text-sm font-medium">Tổng việc làm</p>
+                  <h3 className="text-3xl font-bold mt-2">{totalJobs || 0}</h3>
+                  <div className="flex items-center mt-3 text-green-100">
+                    <TrendingUp className="w-4 h-4 mr-1" />
+                    <span className="text-sm">
+                      {formatGrowthPercentage(safeGrowthStats.jobGrowth)} từ tháng trước
+                    </span>
+                  </div>
+                </div>
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                    <FileText className="w-7 h-7 text-white" />
+                  </div>
+                </div>
               </div>
-              <FileText className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-green-600" />
             </div>
           </Card>
 
-          <Card className="p-3 sm:p-4 md:p-6 bg-orange-50">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-orange-600">Việc làm đang tuyển</p>
-                <h3 className="text-lg sm:text-xl md:text-2xl font-bold mt-1 text-orange-700">
-                  {activeJobs}
-                </h3>
+          {/* Active Jobs Card */}
+          <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-orange-100 text-sm font-medium">Việc làm đang tuyển</p>
+                  <h3 className="text-3xl font-bold mt-2">{activeJobs || 0}</h3>
+                  <div className="flex items-center mt-3 text-orange-100">
+                    <TrendingUp className="w-4 h-4 mr-1" />
+                    <span className="text-sm">
+                      {formatGrowthPercentage(safeGrowthStats.activeJobGrowth)} từ tháng trước
+                    </span>
+                  </div>
+                </div>
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                    <Activity className="w-7 h-7 text-white" />
+                  </div>
+                </div>
               </div>
-              <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-orange-600" />
             </div>
           </Card>
         </div>
 
-        <Card className={`${cardPadding} mt-4 md:mt-6 max-w-full overflow-hidden`}>
-          <div className="space-y-4 md:space-y-6 mb-3 sm:mb-4 md:mb-6">
-            <h2 className={`${titleFontSize} font-semibold`}>
-              Thống kê người dùng và bài viết mới
-            </h2>
-            <div className="flex flex-col md:flex-row md:items-center justify-between md:gap-4">
-              <div className="flex items-center gap-2">
-                <input
-                  type="date"
-                  name="startDate"
-                  value={chartDateRange.startDate}
-                  onChange={handleChartDateChange}
-                  className="border rounded p-1 text-sm"
-                />
-                <span>-</span>
-                <input
-                  type="date"
-                  name="endDate"
-                  value={chartDateRange.endDate}
-                  onChange={handleChartDateChange}
-                  className="border rounded p-1 text-sm"
-                />
+        {/* Chart Section */}
+        <Card className="shadow-lg border-0 bg-white">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                  <TrendingUp className="w-5 h-5 mr-2 text-blue-600" />
+                  Thống kê người dùng và bài viết mới
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Theo dõi xu hướng tăng trưởng theo thời gian
+                  {chartData.length > 0 && (
+                    <span className="ml-2 font-medium text-blue-600">
+                      ({chartData.length} điểm dữ liệu)
+                    </span>
+                  )}
+                </p>
               </div>
-              <div className="flex gap-2 mt-2 md:mt-0">
-                <button
-                  onClick={() => handlePeriodFilter("week")}
-                  className={`px-3 py-1 rounded transition-colors text-sm ${
-                    activePeriod === "week"
-                      ? "bg-purple-100 text-purple-600"
-                      : "hover:bg-gray-100"
-                  }`}
-                >
-                  Tuần
-                </button>
-                <button
-                  onClick={() => handlePeriodFilter("month")}
-                  className={`px-3 py-1 rounded transition-colors text-sm ${
-                    activePeriod === "month"
-                      ? "bg-purple-100 text-purple-600"
-                      : "hover:bg-gray-100"
-                  }`}
-                >
-                  Tháng
-                </button>
-                <button
-                  onClick={() => handlePeriodFilter("year")}
-                  className={`px-3 py-1 rounded transition-colors text-sm ${
-                    activePeriod === "year"
-                      ? "bg-purple-100 text-purple-600"
-                      : "hover:bg-gray-100"
-                  }`}
-                >
-                  Năm
-                </button>
+              
+              <div className="flex flex-col sm:flex-row gap-4">
+                {/* Date Range Picker */}
+                <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg">
+                  <Calendar className="w-4 h-4 text-gray-500" />
+                  <input
+                    type="date"
+                    name="startDate"
+                    value={chartDateRange.startDate}
+                    onChange={handleChartDateChange}
+                    className="border-0 bg-transparent text-sm focus:outline-none"
+                  />
+                  <span className="text-gray-400">-</span>
+                  <input
+                    type="date"
+                    name="endDate"
+                    value={chartDateRange.endDate}
+                    onChange={handleChartDateChange}
+                    className="border-0 bg-transparent text-sm focus:outline-none"
+                  />
+                </div>
+
+                {/* Period Buttons với thông tin chi tiết */}
+                <div className="flex gap-1 bg-gray-100 p-1 rounded-lg">
+                  {["week", "month", "year"].map((period) => {
+                    const periodInfo = getPeriodLabel(period);
+                    return (
+                      <button
+                        key={period}
+                        onClick={() => handlePeriodFilter(period)}
+                        className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex flex-col items-center ${
+                          activePeriod === period
+                            ? "bg-blue-600 text-white shadow-sm"
+                            : "text-gray-600 hover:text-gray-900 hover:bg-white"
+                        }`}
+                        title={periodInfo.detail}
+                      >
+                        <span>{periodInfo.label}</span>
+                        {periodInfo.detail && (
+                          <span className={`text-xs mt-1 ${
+                            activePeriod === period ? "text-blue-100" : "text-gray-400"
+                          }`}>
+                            {periodInfo.detail}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
 
           {dateError && (
-            <div className="my-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-600 text-sm">
-              {dateError}
+            <div className="mx-6 mt-4 p-4 bg-red-50 border-l-4 border-red-400 rounded-md">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-red-700">{dateError}</p>
+                </div>
+              </div>
             </div>
           )}
 
-          <div className={`${chartHeight} overflow-hidden`}>
-            {loading && (
-              <div className="flex items-center justify-center h-full">
-                <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-purple-600"></div>
-              </div>
-            )}
+          <div className="p-6">
+            <div className="h-80">
+              {loading && (
+                <div className="flex items-center justify-center h-full">
+                  <div className="flex flex-col items-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    <p className="mt-4 text-sm text-gray-500">Đang tải dữ liệu...</p>
+                  </div>
+                </div>
+              )}
 
-            {error && !dateError && (
-              <div className="flex items-center justify-center h-full text-red-500 text-sm">
-                {typeof error === "string"
-                  ? error
-                  : error.message || "Có lỗi xảy ra khi tải thống kê"}
-              </div>
-            )}
+              {error && !dateError && (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <svg className="mx-auto h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">Lỗi tải dữ liệu</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      {typeof error === "string" ? error : error.message || "Có lỗi xảy ra khi tải thống kê"}
+                    </p>
+                  </div>
+                </div>
+              )}
 
-            {!loading && !error && !dateError && chartData.length === 0 && (
-              <div className="flex items-center justify-center h-full text-gray-500 text-sm">
-                Không có dữ liệu cho khoảng thời gian này
-              </div>
-            )}
+              {!loading && !error && !dateError && chartData.length === 0 && (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">Không có dữ liệu</h3>
+                    <p className="mt-1 text-sm text-gray-500">Không có dữ liệu cho khoảng thời gian này</p>
+                  </div>
+                </div>
+              )}
 
-            {!loading && !error && !dateError && chartData.length > 0 && (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={chartMargin}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="name"
-                    tick={{ fontSize, angle: isMidRange ? -45 : 0, textAnchor: isMidRange ? 'end' : 'middle' }}
-                    tickFormatter={(value) => {
-                      if (windowWidth <= 1020) {
-                        const parts = value.split('/');
-                        return parts.length === 3 ? `${parts[0]}/${parts[1]}` : value;
-                      }
-                      return value;
-                    }}
-                    height={isMidRange ? 50 : 30}
-                    interval={isMidRange ? 0 : 'preserveStartEnd'}
-                    tickCount={isMidRange ? 4 : 5}
-                  />
-                  <YAxis
-                    allowDecimals={false}
-                    tick={{ fontSize }}
-                    width={isMobile ? 35 : isMidRange ? 30 : 40}
-                  />
-                  <Tooltip
-                    formatter={(value, name) => {
-                      const labels = {
-                        users: "Người dùng mới",
-                        jobs: "Bài viết mới",
-                      };
-                      return [value, labels[name] || name];
-                    }}
-                    labelFormatter={(label, items) => {
-                      if (items?.[0]?.payload?.fullDate) {
-                        return items[0].payload.fullDate;
-                      }
-                      return label;
-                    }}
-                    contentStyle={{ fontSize }}
-                  />
-                  <Legend
-                    iconSize={isMobile ? 10 : isMidRange ? 10 : 12}
-                    wrapperStyle={{
-                      fontSize,
-                      paddingTop: '5px',
-                      marginBottom: isMobile ? '-5px' : isMidRange ? '-5px' : '0px',
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="users"
-                    name="Người dùng mới"
-                    stroke="#818cf8"
-                    strokeWidth={isMobile ? 2 : isMidRange ? 1.5 : 2}
-                    dot={false}
-                    activeDot={{ r: isMobile ? 4 : isMidRange ? 3 : 4 }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="jobs"
-                    name="Bài viết mới"
-                    stroke="#34d399"
-                    strokeWidth={isMobile ? 2 : isMidRange ? 1.5 : 2}
-                    dot={false}
-                    activeDot={{ r: isMobile ? 4 : isMidRange ? 3 : 4 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            )}
+              {/* AreaChart với logic mới */}
+              {!loading && !error && !dateError && chartData.length > 0 && (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData} margin={chartMargin}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fontSize: fontSize, fill: '#64748b' }}
+                      tickLine={{ stroke: '#e2e8f0' }}
+                      axisLine={{ stroke: '#e2e8f0' }}
+                      angle={shouldAngleLabels ? -45 : 0}
+                      textAnchor={shouldAngleLabels ? "end" : "middle"}
+                      height={shouldAngleLabels ? 80 : 60}
+                      interval={chartData.length > 30 ? Math.ceil(chartData.length / 15) : 0}
+                    />
+                    <YAxis
+                      allowDecimals={false}
+                      tick={{ fontSize: fontSize, fill: '#64748b' }}
+                      tickLine={{ stroke: '#e2e8f0' }}
+                      axisLine={{ stroke: '#e2e8f0' }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                        fontSize: '14px'
+                      }}
+                      formatter={(value, name) => {
+                        const labels = {
+                          users: "Người dùng mới",
+                          jobs: "Bài viết mới",
+                        };
+                        return [value, labels[name] || name];
+                      }}
+                      labelFormatter={(label, items) => {
+                        if (items?.[0]?.payload?.fullDate) {
+                          return items[0].payload.fullDate;
+                        }
+                        return label;
+                      }}
+                    />
+                    <Legend
+                      wrapperStyle={{
+                        fontSize: '14px',
+                        paddingTop: '20px'
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="users"
+                      name="Người dùng mới"
+                      stroke="#3B82F6"
+                      strokeWidth={3}
+                      dot={false}
+                      activeDot={false}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="jobs"
+                      name="Bài viết mới"
+                      stroke="#10B981"
+                      strokeWidth={3}
+                      dot={false}
+                      activeDot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </div>
           </div>
         </Card>
 
-        <div className="flex flex-col sm:flex-row gap-3 mt-4">
+        {/* Action Buttons */}
+        <div className="mt-8 flex flex-col sm:flex-row gap-4">
           <Button
             onClick={() => navigate("/admin/survey-statistics")}
-            className="w-full sm:w-auto text-sm"
+            className="flex-1 sm:flex-none bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
           >
+            <Eye className="w-5 h-5" />
             Xem Thống Kê Khảo Sát
           </Button>
           
           <Button
             onClick={handleTriggerSurvey}
             disabled={isTriggeringSurvey}
-            className="w-full sm:w-auto text-sm bg-purple-600 hover:bg-purple-700 flex items-center gap-2"
+            className="flex-1 sm:flex-none bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-5 h-5" />
             {isTriggeringSurvey ? 'Đang xử lý...' : 'Kích hoạt gửi khảo sát'}
           </Button>
         </div>

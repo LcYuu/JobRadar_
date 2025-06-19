@@ -1,10 +1,13 @@
 package com.job_portal.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -201,7 +204,7 @@ public class ReviewController {
 	        
 	        Review review = reviewOpt.get();
 	        boolean isOwner = review.getSeeker().getUserAccount().getUserId().equals(user.getUserId());
-	        boolean isAdmin = user.getUserType().getUser_type_name().equals("ADMIN");
+	        boolean isAdmin = user.getUserType().getUser_type_name().equalsIgnoreCase("ADMIN");
 	        
 	        // Chỉ cho phép admin hoặc chủ sở hữu xóa review
 	        if (!isOwner && !isAdmin) {
@@ -677,6 +680,119 @@ public class ReviewController {
 			return new ResponseEntity<>("Lỗi khi cập nhật phản hồi: " + e.getMessage(), 
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+	@GetMapping("/admin/statistics")
+	public ResponseEntity<?> getReviewStatisticsForAdmin(
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "10") int size,
+	        @RequestParam(required = false) String sortBy, // "totalReviews", "totalLikes", "totalDislikes", "averageRating"
+	        @RequestParam(required = false) String sortDirection, // "asc", "desc"
+	        @RequestParam(required = false) Integer minReviews,
+	        @RequestParam(required = false) Integer maxReviews,
+	        @RequestParam(required = false) Integer minLikes,
+	        @RequestParam(required = false) Integer maxLikes,
+	        @RequestParam(required = false) Integer minDislikes,
+	        @RequestParam(required = false) Integer maxDislikes,
+	        @RequestHeader("Authorization") String jwt) {
+	    try {
+	        String email = JwtProvider.getEmailFromJwtToken(jwt);
+	        Optional<UserAccount> userOpt = userAccountRepository.findByEmail(email);
+	        
+	        if (!userOpt.isPresent()) {
+	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+	        }
+	        
+	        UserAccount user = userOpt.get();
+	        boolean isAdmin = "ADMIN".equalsIgnoreCase(user.getUserType().getUser_type_name());
+	        
+	        if (!isAdmin) {
+	            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
+	        }
+
+	        // Lấy tất cả company có review
+	        List<Object[]> companyStats = reviewRepository.getCompanyReviewStatistics();
+	        
+	        List<Map<String, Object>> result = new ArrayList<>();
+	        
+	        for (Object[] stat : companyStats) {
+	            UUID companyId = (UUID) stat[0];
+	            String companyName = (String) stat[1];
+	            Long totalReviews = (Long) stat[2];
+	            Double averageRating = (Double) stat[3];
+	            
+	            // Lấy thống kê reactions
+	            Long totalLikes = reviewReactionRepository.countLikesByCompany(companyId);
+	            Long totalDislikes = reviewReactionRepository.countDislikesByCompany(companyId);
+	            
+	            // Áp dụng filter
+	            if (minReviews != null && totalReviews < minReviews) continue;
+	            if (maxReviews != null && totalReviews > maxReviews) continue;
+	            if (minLikes != null && totalLikes < minLikes) continue;
+	            if (maxLikes != null && totalLikes > maxLikes) continue;
+	            if (minDislikes != null && totalDislikes < minDislikes) continue;
+	            if (maxDislikes != null && totalDislikes > maxDislikes) continue;
+	            
+	            Map<String, Object> companyData = new HashMap<>();
+	            companyData.put("companyId", companyId);
+	            companyData.put("companyName", companyName);
+	            companyData.put("totalReviews", totalReviews);
+	            companyData.put("averageRating", averageRating);
+	            companyData.put("totalLikes", totalLikes);
+	            companyData.put("totalDislikes", totalDislikes);
+	            companyData.put("totalInteractions", totalLikes + totalDislikes);
+	            
+	            result.add(companyData);
+	        }
+	        
+	        // Sắp xếp
+	        if (sortBy != null && sortDirection != null) {
+	            Comparator<Map<String, Object>> comparator = null;
+	            
+	            switch (sortBy) {
+	                case "totalReviews":
+	                    comparator = Comparator.comparing(m -> ((Number) m.get("totalReviews")).longValue());
+	                    break;
+	                case "totalLikes":
+	                    comparator = Comparator.comparing(m -> ((Number) m.get("totalLikes")).longValue());
+	                    break;
+	                case "totalDislikes":
+	                    comparator = Comparator.comparing(m -> ((Number) m.get("totalDislikes")).longValue());
+	                    break;
+	                case "totalInteractions":
+	                    comparator = Comparator.comparing(m -> ((Number) m.get("totalInteractions")).longValue());
+	                    break;
+	                case "averageRating":
+	                    comparator = Comparator.comparing(m -> ((Number) m.get("averageRating")).doubleValue());
+	                    break;
+	            }
+	            
+	            if (comparator != null) {
+	                if ("desc".equalsIgnoreCase(sortDirection)) {
+	                    comparator = comparator.reversed();
+	                }
+	                result.sort(comparator);
+	            }
+	        }
+	        
+	        // Phân trang
+	        int start = page * size;
+	        int end = Math.min(start + size, result.size());
+	        List<Map<String, Object>> paginatedResult = result.subList(start, end);
+	        
+	        Map<String, Object> response = new HashMap<>();
+	        response.put("content", paginatedResult);
+	        response.put("totalElements", result.size());
+	        response.put("totalPages", (int) Math.ceil((double) result.size() / size));
+	        response.put("currentPage", page);
+	        response.put("pageSize", size);
+	        
+	        return ResponseEntity.ok(response);
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("Error getting review statistics: " + e.getMessage());
+	    }
 	}
 
 }

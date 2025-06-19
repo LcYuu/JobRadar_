@@ -50,3 +50,19 @@ export const getDailyStats = createAsyncThunk('stats/getDailyStats', async ({ st
     return rejectWithValue(error.response?.data?.message || 'Có lỗi xảy ra khi tải thống kê');
   }
 });
+
+export const getGrowthStats = createAsyncThunk(
+  "stats/getGrowthStats",
+  async (_, thunkAPI) => {
+    try {
+      const response = await fetch("http://localhost:8080/stats/growth-stats");
+      if (!response.ok) {
+        throw new Error("Failed to fetch growth stats");
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
