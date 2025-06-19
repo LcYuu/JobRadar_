@@ -713,10 +713,10 @@ const PostJob = () => {
               </div>
 
               <div className="mb-6">
-                <Label>Trách nhiệm công việc</Label>
+                <Label>Yêu cầu công việc</Label>
                 <p className="text-sm text-gray-500 mb-2">
-                  Danh sách các trách nhiệm cho vị trí công việc này (**Chú ý:
-                  Mỗi trách nhiệm cách nhau bởi dấu xuống dòng)
+                  Danh sách các yêu cầu cho vị trí công việc này (**Chú ý:
+                  Mỗi yêu cầu cách nhau bởi dấu xuống dòng)
                 </p>
                 <div className="border rounded-md">
                   <Editor
@@ -740,7 +740,7 @@ const PostJob = () => {
                       inline: { options: ["bold", "italic"] },
                       list: { options: ["unordered", "ordered"] },
                     }}
-                    placeholder="Nhập trách nhiệm công việc..."
+                    placeholder="Nhập yêu cầu công việc..."
                   />
                 </div>
                 {errors.requirement && (

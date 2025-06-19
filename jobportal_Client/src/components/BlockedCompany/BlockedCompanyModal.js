@@ -8,8 +8,8 @@ import {
   Select,
   MenuItem,
   TextField,
-  Button,
   IconButton,
+  Button,
 } from "@mui/material";
 import Swal from "sweetalert2";
 
@@ -64,17 +64,17 @@ export default function BlockedCompanyModal({
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
+
     const blockedUntil =
       selectedDuration !== "Vĩnh viễn"
         ? dayjs().add(selectedDuration, "day").toISOString()
         : dayjs().add(99, "year").toISOString();
-  
+
     const reasonText =
       selectedReason === "Khác" && customReason.trim()
         ? customReason
         : selectedReason;
-  
+
     if (!reasonText) {
       Swal.fire({
         icon: "error",
@@ -85,12 +85,12 @@ export default function BlockedCompanyModal({
     }
 
     handleClose();
-  
+
     const blockedData = {
       blockedReason: reasonText,
       blockedUntil,
     };
-  
+
     // Hiển thị loading
     Swal.fire({
       title: "Đang xử lý...",
@@ -99,10 +99,10 @@ export default function BlockedCompanyModal({
         Swal.showLoading();
       },
     });
-  
+
     try {
       await dispatch(blockCompany({ companyId, blockedData }));
-  
+
       // Hiển thị thông báo thành công
       Swal.fire({
         icon: "success",
@@ -113,7 +113,7 @@ export default function BlockedCompanyModal({
             : "đến năm " + dayjs(blockedUntil).format("YYYY")
         } với lý do: ${blockedData.blockedReason}`,
       });
-  
+
       // Cập nhật lại thông tin công ty
       await dispatch(getCompanyProfile(companyId));
     } catch (error) {
@@ -123,10 +123,7 @@ export default function BlockedCompanyModal({
         text: "Đã có lỗi xảy ra, vui lòng thử lại.",
       });
     }
-  
-    
   };
-  
 
   return (
     <Modal open={open} onClose={handleClose}>
@@ -197,9 +194,13 @@ export default function BlockedCompanyModal({
           <Button
             type="submit"
             variant="contained"
-            color="primary"
             fullWidth
-            sx={{ mt: 3, textTransform: "none", fontSize: 16 }}
+            sx={{
+              mt: 3,
+              textTransform: "none",
+              fontSize: 16,
+              backgroundColor: "#2563eb",
+            }}
           >
             Xác nhận khóa
           </Button>

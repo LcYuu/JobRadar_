@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import com.job_portal.DTO.ChatRequest;
-import com.job_portal.config.JwtProvider;
 import com.job_portal.models.UserAccount;
 import com.job_portal.repository.UserAccountRepository;
 
@@ -47,10 +46,14 @@ public class ChatBotController {
 	        if (userDetails != null) {
 	            // Người dùng đã đăng nhập
 	            Optional<UserAccount> user = userAccountRepository.findByEmail(userDetails.getUsername());
-	            senderId = user.isPresent() ? user.get().getUserId().toString() : UUID.randomUUID().toString();
+	            if (user.isPresent()) {
+	                senderId = user.get().getUserId().toString();
+	            } else {
+	                return ResponseEntity.status(400).body("User not found");
+	            }
 	        } else {
-	            // Khách
-	            senderId = UUID.randomUUID().toString();
+	            // Khách: Tạo senderId mới cho mỗi phiên
+	            senderId = "guest_" + UUID.randomUUID().toString();
 	        }
 
 	        // Prepare request to Rasa
@@ -72,4 +75,3 @@ public class ChatBotController {
 	    }
 	}
 }
-
