@@ -3,7 +3,7 @@ import { Button } from "../../ui/button";
 import { Card } from "../../ui/card";
 import { Input } from "../../ui/input";
 import { Badge } from "../../ui/badge";
-import { Search } from "lucide-react";
+import { Search, Star } from "lucide-react"; // Thêm Star từ lucide-react
 import {
   Select,
   SelectContent,
@@ -155,29 +155,25 @@ export default function FindCompanies() {
     cityId: "",
     industryId: "",
   });
-  const location = useLocation(); // Thêm dòng này
+  const location = useLocation();
 
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [size] = useState(12); // Tăng số lượng hiển thị mỗi trang
+  const [size] = useState(12);
   const [selectedCategoryName, setSelectedCategoryName] =
     useState("Tất cả công ty");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     dispatch(searchCompanies({ filters, currentPage, size }));
-    dispatch(getCity());
-    dispatch(getCompanyFitSeeker());
-    dispatch(getAllIndustries());
   }, [filters, currentPage, size, dispatch]);
 
   useEffect(() => {
     if (location.state?.selectedIndustryId) {
-      // Cập nhật cả filters và tempFilters để đồng bộ
-      setFilters((prev) => ({
-        ...prev,
+      setFilters({
+        ...filters,
         industryId: location.state.selectedIndustryId,
-      }));
+      });
       setTempFilters((prev) => ({
         ...prev,
         industryId: location.state.selectedIndustryId,
@@ -189,9 +185,10 @@ export default function FindCompanies() {
             industry.industryId === location.state.selectedIndustryId
         )?.industryName || "Tất cả công ty"
       );
-      setCurrentPage(0); // Reset về trang đầu tiên
+      setCurrentPage(0);
     }
-  }, [location.state, allIndustries]);
+    // eslint-disable-next-line
+  }, [location.state?.selectedIndustryId, allIndustries]);
 
   useEffect(() => {
     dispatch(getCity());
@@ -207,7 +204,6 @@ export default function FindCompanies() {
     setFilters(updatedFilters);
     setCurrentPage(0);
 
-    // Gọi API để tìm kiếm công ty
     await dispatch(
       searchCompanies({ filters: updatedFilters, currentPage, size })
     );
@@ -252,22 +248,18 @@ export default function FindCompanies() {
             ?.industryName || "Tất cả công ty"
     );
 
-    // Update both tempFilters and actual filters to trigger API call
     const newIndustryId = industryId || "";
     setTempFilters((prev) => ({ ...prev, industryId: newIndustryId }));
-
-    // Update filters to trigger API search with the selected industry
     setFilters((prev) => ({ ...prev, industryId: newIndustryId }));
-    setCurrentPage(0); // Reset về trang đầu tiên khi thay đổi danh mục
+    setCurrentPage(0);
   };
-  // Replace with direct reference to API results
+
   const filteredCompanies = companyByFeature;
 
   const hasFilteredCompanies = filteredCompanies.length > 0;
 
   const hasSuggestedCompanies = companyFitSeeker.length > 0;
 
-  // Filter out "None" from industries list
   const filteredIndustries = allIndustries.filter(
     (industry) =>
       industry &&
@@ -275,7 +267,6 @@ export default function FindCompanies() {
       industry.industryName.toLowerCase() !== "none"
   );
 
-  // Hàm lấy danh sách ngành cho từng công ty
   const getIndustryNames = (industryIds) => {
     return (industryIds || [])
       .map(
@@ -286,16 +277,14 @@ export default function FindCompanies() {
       .filter(Boolean);
   };
 
-  // Xử lý phân trang
   const handlePageChange = (newPage) => {
-    setLoading(true); // Start loading when page changes
+    setLoading(true);
     setCurrentPage(newPage);
     window.scrollTo({
       top: document.getElementById("companies-list").offsetTop - 80,
       behavior: "smooth",
     });
 
-    // Add a small delay to show loading effect
     setTimeout(() => {
       setLoading(false);
     }, 300);
@@ -490,15 +479,12 @@ export default function FindCompanies() {
               </button>
             </div>
 
-            {/* Optional: Add indicator dots or progress bar here if needed */}
+            <style jsx>{`
+              #category-scroll-container::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
           </div>
-
-          <style jsx>{`
-            /* Hide scrollbar for Chrome, Safari and Opera */
-            #category-scroll-container::-webkit-scrollbar {
-              display: none;
-            }
-          `}</style>
         </div>
 
         <div id="companies-list" className="space-y-6">
@@ -516,7 +502,8 @@ export default function FindCompanies() {
               )}
             </h2>
             <p className="text-gray-500">
-              Tổng số: {totalElements > 0 ? totalElements : 0} kết quả | Trang {currentPage + 1}/{totalPages}
+              Tổng số: {totalElements > 0 ? totalElements : 0} kết quả | Trang{" "}
+              {currentPage + 1}/{totalPages}
             </p>
           </div>
           {loading ? (
@@ -537,12 +524,20 @@ export default function FindCompanies() {
                       key={company.companyId}
                     >
                       <Card className="p-6 space-y-4 transition-all duration-300 hover:scale-105 cursor-pointer shadow-lg bg-white hover:shadow-2xl card-company">
-                        <div className="flex items-center gap-4">
-                          <img
-                            src={company.logo || "default-logo.png"}
-                            alt={`${company.companyName || "Công ty"} logo`}
-                            className="h-16 w-16 rounded-lg shadow-md"
-                          />
+                        <div className="flex items-start gap-4">
+                          <div className="flex flex-col items-center ">
+                            <img
+                              src={company.logo || "default-logo.png"}
+                              alt={`${company.companyName || "Công ty"} logo`}
+                              className="h-[64px] w-[64px] rounded-lg shadow-md bg-white object-cover"
+                            />
+                            <div className="flex items-center gap-1 text-sm text-yellow-500 mt-2">
+                              <Star className="h-4 w-4 fill-current" />
+                              <span>
+                                {(company.averageStar || 0.0).toFixed(1)}
+                              </span>
+                            </div>
+                          </div>
                           <div>
                             <h3 className="font-semibold text-lg">
                               {company.companyName || "Tên công ty không có"}
@@ -580,7 +575,6 @@ export default function FindCompanies() {
                 })}
               </div>
 
-              {/* Hiển thị phân trang khi có nhiều trang */}
               {totalPages > 1 && (
                 <div className="mt-8 flex justify-center">
                   <Pagination

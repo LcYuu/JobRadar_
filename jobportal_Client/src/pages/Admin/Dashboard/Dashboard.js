@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card } from "../../../ui/card";
 import { Button } from "../../../ui/button";
 import { useDispatch, useSelector } from "react-redux";
-import { Users, Building2, FileText, TrendingUp, Calendar, Send, Eye, Activity } from "lucide-react";
+import { Users, Building2, FileText, TrendingUp, Calendar, Send, Eye, Activity, TrendingDown } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -64,6 +64,9 @@ export default function AdminDashboard() {
   const [dateError, setDateError] = useState("");
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isTriggeringSurvey, setIsTriggeringSurvey] = useState(false);
+  const [summaryStats, setSummaryStats] = useState(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryError, setSummaryError] = useState("");
 
   const handleChartDateChange = (e) => {
     const { name, value } = e.target;
@@ -259,6 +262,7 @@ export default function AdminDashboard() {
             }),
             users: Number(stat.newUsers) || 0,
             jobs: Number(stat.newJobs) || 0,
+            companies: Number(stat.newCompanies) || 0,
             originalDate: stat.date,
           };
         } catch (error) {
@@ -372,6 +376,52 @@ export default function AdminDashboard() {
     }
   };
 
+  useEffect(() => {
+    setSummaryLoading(true);
+    fetch("http://localhost:8080/stats/summary")
+      .then((res) => res.json())
+      .then((data) => {
+        setSummaryStats(data);
+        setSummaryLoading(false);
+      })
+      .catch((err) => {
+        setSummaryError("Không thể tải thống kê tổng hợp");
+        setSummaryLoading(false);
+      });
+  }, []);
+
+  // Helper để render card tổng hợp
+  const renderSummaryCard = (title, icon, color, stats) => {
+    if (!stats) return null;
+    const { currentMonth, previousMonth, monthGrowth, currentYear, previousYear, yearGrowth } = stats;
+    const growthIcon = (growth) => {
+      if (growth == null) return null;
+      if (growth > 0) return <TrendingUp className="inline w-4 h-4 text-green-500 ml-1" />;
+      if (growth < 0) return <TrendingDown className="inline w-4 h-4 text-red-500 ml-1" />;
+      return null;
+    };
+    const formatGrowth = (growth) => {
+      if (growth == null) return "-";
+      return `${growth > 0 ? "+" : ""}${growth.toFixed(1)}%`;
+    };
+    return (
+      <Card className={`shadow-lg border-0 bg-white flex-1 min-w-[260px]`}>
+        <div className="p-6 flex flex-col gap-2">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${color}`}>{icon}</div>
+            <h3 className="text-lg font-bold text-gray-800">{title}</h3>
+          </div>
+          <div className="mt-2 flex flex-col gap-1">
+            <div className="text-sm text-gray-500">Tháng này: <span className="font-bold text-blue-600">{currentMonth}</span> <span className="ml-2 text-xs">({formatGrowth(monthGrowth)}) {growthIcon(monthGrowth)}</span></div>
+            <div className="text-sm text-gray-500">Tháng trước: <span className="font-bold">{previousMonth}</span></div>
+            <div className="text-sm text-gray-500 mt-2">Năm nay: <span className="font-bold text-green-600">{currentYear}</span> <span className="ml-2 text-xs">({formatGrowth(yearGrowth)}) {growthIcon(yearGrowth)}</span></div>
+            <div className="text-sm text-gray-500">Năm trước: <span className="font-bold">{previousYear}</span></div>
+          </div>
+        </div>
+      </Card>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Header */}
@@ -399,6 +449,21 @@ export default function AdminDashboard() {
       </div>
 
       <div className="px-4 sm:px-6 lg:px-8 py-8">
+        {/* Summary Cards */}
+        <div className="px-4 sm:px-6 lg:px-8 pt-8 pb-2">
+          {summaryLoading ? (
+            <div className="flex justify-center items-center py-8"><span className="text-gray-500">Đang tải thống kê tổng hợp...</span></div>
+          ) : summaryError ? (
+            <div className="flex justify-center items-center py-8"><span className="text-red-500">{summaryError}</span></div>
+          ) : summaryStats ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {renderSummaryCard("Người dùng", <Users className="w-6 h-6 text-blue-600" />, "bg-blue-100", summaryStats.users)}
+              {renderSummaryCard("Bài viết", <FileText className="w-6 h-6 text-green-600" />, "bg-green-100", summaryStats.jobs)}
+              {renderSummaryCard("Công ty mới", <Building2 className="w-6 h-6 text-purple-600" />, "bg-purple-100", summaryStats.companies)}
+            </div>
+          ) : null}
+        </div>
+
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Total Users Card */}
@@ -409,10 +474,10 @@ export default function AdminDashboard() {
                   <p className="text-blue-100 text-sm font-medium">Tổng người dùng</p>
                   <h3 className="text-3xl font-bold mt-2">{totalUsers || 0}</h3>
                   <div className="flex items-center mt-3 text-blue-100">
-                    <TrendingUp className="w-4 h-4 mr-1" />
+                    {/* <TrendingUp className="w-4 h-4 mr-1" />
                     <span className="text-sm">
                       {formatGrowthPercentage(safeGrowthStats.userGrowth)} từ tháng trước
-                    </span>
+                    </span> */}
                   </div>
                 </div>
                 <div className="flex-shrink-0">
@@ -432,10 +497,10 @@ export default function AdminDashboard() {
                   <p className="text-purple-100 text-sm font-medium">Tổng công ty</p>
                   <h3 className="text-3xl font-bold mt-2">{totalCompanies || 0}</h3>
                   <div className="flex items-center mt-3 text-purple-100">
-                    <TrendingUp className="w-4 h-4 mr-1" />
+                    {/* <TrendingUp className="w-4 h-4 mr-1" />
                     <span className="text-sm">
                       {formatGrowthPercentage(safeGrowthStats.companyGrowth)} từ tháng trước
-                    </span>
+                    </span> */}
                   </div>
                 </div>
                 <div className="flex-shrink-0">
@@ -455,10 +520,10 @@ export default function AdminDashboard() {
                   <p className="text-green-100 text-sm font-medium">Tổng việc làm</p>
                   <h3 className="text-3xl font-bold mt-2">{totalJobs || 0}</h3>
                   <div className="flex items-center mt-3 text-green-100">
-                    <TrendingUp className="w-4 h-4 mr-1" />
+                    {/* <TrendingUp className="w-4 h-4 mr-1" />
                     <span className="text-sm">
                       {formatGrowthPercentage(safeGrowthStats.jobGrowth)} từ tháng trước
-                    </span>
+                    </span> */}
                   </div>
                 </div>
                 <div className="flex-shrink-0">
@@ -478,10 +543,10 @@ export default function AdminDashboard() {
                   <p className="text-orange-100 text-sm font-medium">Việc làm đang tuyển</p>
                   <h3 className="text-3xl font-bold mt-2">{activeJobs || 0}</h3>
                   <div className="flex items-center mt-3 text-orange-100">
-                    <TrendingUp className="w-4 h-4 mr-1" />
+                    {/* <TrendingUp className="w-4 h-4 mr-1" />
                     <span className="text-sm">
                       {formatGrowthPercentage(safeGrowthStats.activeJobGrowth)} từ tháng trước
-                    </span>
+                    </span> */}
                   </div>
                 </div>
                 <div className="flex-shrink-0">
@@ -650,6 +715,7 @@ export default function AdminDashboard() {
                         const labels = {
                           users: "Người dùng mới",
                           jobs: "Bài viết mới",
+                          companies: "Công ty mới",
                         };
                         return [value, labels[name] || name];
                       }}
@@ -680,6 +746,15 @@ export default function AdminDashboard() {
                       dataKey="jobs"
                       name="Bài viết mới"
                       stroke="#10B981"
+                      strokeWidth={3}
+                      dot={false}
+                      activeDot={false}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="companies"
+                      name="Công ty mới"
+                      stroke="#F59E42"
                       strokeWidth={3}
                       dot={false}
                       activeDot={false}

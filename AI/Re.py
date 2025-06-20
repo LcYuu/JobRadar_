@@ -1373,6 +1373,9 @@ def semantic_search():
         
         MIN_SIMILARITY_SCORE = 0.3
         filtered_final_results = [job for job in final_results if job.get('similarity_score', 0) >= MIN_SIMILARITY_SCORE]
+        # Nếu quá nhiều kết quả, chỉ lấy 30 công việc phù hợp nhất
+        if len(filtered_final_results) > 30:
+            filtered_final_results = filtered_final_results[:30]
         set_cache(cache_key, filtered_final_results, ttl=7200)
         return jsonify(filtered_final_results)
     except Exception as e:

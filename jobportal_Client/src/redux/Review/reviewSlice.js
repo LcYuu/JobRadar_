@@ -6,6 +6,7 @@ const reviewSlice = createSlice({
   initialState: {
     reviews: [],
     reactions: {},
+    replies: {},
     adminStatistics: {
       content: [],
       totalElements: 0,

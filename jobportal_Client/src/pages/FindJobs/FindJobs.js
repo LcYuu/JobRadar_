@@ -173,6 +173,29 @@ export default function JobSearchPage() {
     }
   }, [dispatch, location.state]);
 
+  // Lắng nghe thay đổi location.state để cập nhật filters và trigger tìm kiếm lại
+  useEffect(() => {
+    if (location.state?.selectedIndustryIds) {
+      setFilters((prev) => ({
+        ...prev,
+        selectedIndustryIds: location.state.selectedIndustryIds,
+      }));
+      setCurrentPage(0);
+      setIsUsingSemanticSearch(false);
+      setSemanticResults(null);
+      setAllResults(null);
+      sessionStorage.removeItem("semanticResults");
+      sessionStorage.removeItem("allResults");
+      sessionStorage.setItem("isUsingSemanticSearch", "false");
+      // Trigger tìm kiếm lại
+      debouncedFilterChange({
+        ...filters,
+        selectedIndustryIds: location.state.selectedIndustryIds,
+      });
+    }
+    // eslint-disable-next-line
+  }, [location.state]);
+
   // Debounced filter change handler
   const debouncedFilterChange = useCallback(
     debounce((newFilters) => {
@@ -558,7 +581,10 @@ export default function JobSearchPage() {
         if (!semanticResults.content || !Array.isArray(semanticResults.content)) {
           return { content: [], totalElements: 0, totalPages: 1 };
         }
-        const resultsArray = semanticResults.content;
+        let resultsArray = semanticResults.content;
+        if (resultsArray.length > 30) {
+          resultsArray = resultsArray.slice(0, 30);
+        }
         const totalResults = resultsArray.length || 0;
         const totalPages = Math.max(Math.ceil(totalResults / size) || 1, 1);
         const startIndex = currentPage * size;

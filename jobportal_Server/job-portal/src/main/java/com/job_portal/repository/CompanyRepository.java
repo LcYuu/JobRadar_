@@ -1,6 +1,7 @@
 package com.job_portal.repository;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -224,6 +225,10 @@ public interface CompanyRepository extends JpaRepository<Company, UUID>, JpaSpec
 	           "GROUP BY c.companyId, c.companyName")
 	    List<CompanyWithAverageStarDTO> findCompaniesWithAverageStar();
 	
+	@Query("SELECT COUNT(c) FROM Company c WHERE DATE(c.userAccount.createDate) = :date")
+	long countNewCompaniesByDate(@Param("date") LocalDate date);
 
+	@Query("SELECT COUNT(c) FROM Company c WHERE DATE(c.userAccount.createDate) >= :startDate AND DATE(c.userAccount.createDate) < :endDate")
+	long countNewCompaniesByDateBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
 }
