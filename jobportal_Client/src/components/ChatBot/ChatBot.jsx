@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { sendMessage } from '../../redux/ChatBot/chatbot.thunk';
-import { addUserMessage, clearError } from '../../redux/ChatBot/chatbotSlice';
+import { addUserMessage, clearError, clearMessages } from '../../redux/ChatBot/chatbotSlice';
 import defaultAvatarImage from '../../assets/images/common/avatar.jpg';
 import defaultBotImage from '../../assets/images/common/botavatar.png';
 
@@ -16,10 +16,22 @@ const Chatbot = () => {
   const messagesEndRef = useRef(null);
   const defaultAvatar = defaultAvatarImage;
 
-  const userId = authUser ? authUser.userId : 'Guest';
+  const userId = authUser ? authUser.userId : `guest_${Math.random().toString(36).substring(2)}`;
   const userName = authUser ? authUser.userName : 'Khách';
   const userAvatar = authUser?.avatar || defaultAvatar;
   const botAvatar = defaultBotImage;
+
+  // Reset messages khi người dùng đăng nhập
+  useEffect(() => {
+    if (authUser && messages.length === 0) {
+      dispatch(
+        addUserMessage({
+          sender: 'bot',
+          text: `Chào mừng ${authUser.userName} đến với RadarBot!`,
+        })
+      );
+    }
+  }, [authUser, messages.length, dispatch]);
 
   useEffect(() => {
     if (isOpen && messagesEndRef.current) {
@@ -35,16 +47,6 @@ const Chatbot = () => {
       setInput('');
     }
   };
-
-  // useEffect(() => {
-  //   if (error) {
-  //     const timer = setTimeout(() => dispatch(clearError()), 3000);
-  //     if (error.includes('Token expired')) {
-  //       navigate('/auth/sign-in', { replace: true });
-  //     }
-  //     return () => clearTimeout(timer);
-  //   }
-  // }, [error, dispatch, navigate]);
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -234,19 +236,6 @@ const Chatbot = () => {
                 </div>
               </div>
             )}
-            {/* {error && (
-              <div className="text-center text-red-500 flex items-center justify-center gap-2 text-xs p-2">
-                {error}
-                {error.includes('Token expired') && (
-                  <button
-                    onClick={() => navigate('/auth/sign-in')}
-                    className="text-purple-500 underline"
-                  >
-                    Đăng nhập
-                  </button>
-                )}
-              </div>
-            )} */}
             <div ref={messagesEndRef} />
           </div>
 
@@ -274,7 +263,7 @@ const Chatbot = () => {
                   <path
                     fillRule="evenodd"
                     d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                    clipRule="evenodd"
+                    clipRule="evenodd"  
                   />
                 </svg>
               </button>

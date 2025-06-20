@@ -5,11 +5,11 @@ const SkillsPreview = ({ cvInfo }) => {
   // Chuyển đổi rating sang tên level
   const getRatingName = (rating) => {
     switch (Number(rating)) {
-      case 1: return "Beginner";
-      case 2: return "Elementary";
-      case 3: return "Intermediate";
-      case 4: return "Advanced";
-      case 5: return "Expert";
+      case 1: return "Mới bắt đầu";
+      case 2: return "Sơ cấp";
+      case 3: return "Trung cấp";
+      case 4: return "Nâng cao";
+      case 5: return "Chuyên gia";
       default: return "";
     }
   };

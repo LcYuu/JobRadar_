@@ -17,9 +17,9 @@ function JobCardHeader({ jobType, companyLogo, company, rating }) {
     }
 
     return (
-      <div className="flex items-center justify-center mt-1">
-        <Star className="h-5 w-5 fill-yellow-400 text-yellow-400 mr-1" />
-        <span className="text-xl text-gray-600">{rating.toFixed(1)}</span>
+      <div className="flex items-center justify-center text-sm text-yellow-500 mt-2">
+        <Star className="h-4 w-4 fill-current" />
+        <span className="text-xl ">{rating.toFixed(1)}</span>
       </div>
     );
   };
@@ -57,6 +57,7 @@ function JobCardContent({ location, category = [], navigate }) {
   const handleCategoryClick = (e, industryId) => {
     e.stopPropagation();
     if (industryId) {
+      console.log("🚀 ~ handleCategoryClick ~ industryId:", industryId)
       navigate("/find-jobs", {
         state: {
           selectedIndustryIds: [industryId],
@@ -77,7 +78,7 @@ function JobCardContent({ location, category = [], navigate }) {
 
       {category.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {category?.slice(0, 3).map((cat, index) => (
+          {category?.map((cat, index) => (
             <IndustryBadge
               key={index}
               name={cat?.industryName}
@@ -97,6 +98,7 @@ function JobCardContent({ location, category = [], navigate }) {
 }
 
 export default function JobCard({ postId, jobTitle, company, location, category, jobType, companyLogo, rating }) {
+  console.log("🚀 ~ JobCard ~ category:", category)
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { savedJobs } = useSelector((store) => store.seeker);

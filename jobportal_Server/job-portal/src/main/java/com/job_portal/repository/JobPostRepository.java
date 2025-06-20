@@ -56,7 +56,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 			+ "ORDER BY date", nativeQuery = true)
 	List<Object[]> countNewJobsPerDay(@Param("startDate") LocalDateTime startDate,
 			@Param("endDate") LocalDateTime endDate);
-	
+
 	@Query("SELECT j FROM JobPost j WHERE j.isApprove = true AND j.expireDate >= CURRENT_TIMESTAMP")
 	Page<JobPost> findAllJobApprove(Pageable pageable);
 
@@ -70,71 +70,52 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 			+ "JOIN industry i ON ci2.industry_id = i.industry_id "
 			+ "WHERE j.is_approve = true AND j.expire_date >= CURRENT_TIMESTAMP "
 			+ "GROUP BY j.post_id, j.title, j.description, j.location, j.salary, j.experience, j.type_of_work, "
-			+ "j.create_date, j.expire_date, j.company_id, c.company_name, ci.city_name, c.logo",
-		nativeQuery = true)
+			+ "j.create_date, j.expire_date, j.company_id, c.company_name, ci.city_name, c.logo", nativeQuery = true)
 	List<JobRecommendationProjection> findApprovedAndActiveJobs();
-	
+
 	@Query(value = "SELECT BIN_TO_UUID(j.post_id) AS postId, j.title, j.description, j.location, j.salary, j.experience, "
-            + "j.type_of_work AS typeOfWork, j.create_date AS createDate, j.expire_date AS expireDate, "
-            + "COALESCE(BIN_TO_UUID(j.company_id), '') AS companyId, c.company_name AS companyName, ci.city_name AS cityName, "
-            + "GROUP_CONCAT(DISTINCT i.industry_name SEPARATOR ',') AS industryNames, c.logo AS logo, "
-            + "COALESCE(AVG(r.star), 0) AS averageStar "
-            + "FROM job_posts j "
-            + "JOIN company c ON j.company_id = c.user_id "
-            + "JOIN city ci ON c.city_id = ci.city_id "
-            + "JOIN job_post_industry jp ON jp.post_id = j.post_id "
-            + "JOIN industry i ON jp.industry_id = i.industry_id "
-            + "LEFT JOIN review r ON c.user_id = r.company_id "
-            + "WHERE j.is_approve = true AND j.expire_date >= CURRENT_TIMESTAMP "
-            + "GROUP BY j.post_id, j.title, j.description, j.location, j.salary, j.experience, j.type_of_work, "
-            + "j.create_date, j.expire_date, j.company_id, c.company_name, ci.city_name, c.logo",
-            nativeQuery = true)
-List<JobRecommendationProjection> findJobPostSave();
+			+ "j.type_of_work AS typeOfWork, j.create_date AS createDate, j.expire_date AS expireDate, "
+			+ "COALESCE(BIN_TO_UUID(j.company_id), '') AS companyId, c.company_name AS companyName, ci.city_name AS cityName, "
+			+ "GROUP_CONCAT(DISTINCT i.industry_name SEPARATOR ',') AS industryNames, c.logo AS logo, "
+			+ "AVG(r.star) AS averageStar " + "FROM job_posts j " + "JOIN company c ON j.company_id = c.user_id "
+			+ "JOIN city ci ON c.city_id = ci.city_id " + "JOIN job_post_industry jp ON jp.post_id = j.post_id "
+			+ "JOIN industry i ON jp.industry_id = i.industry_id " + "LEFT JOIN review r ON c.user_id = r.company_id "
+			+ "WHERE j.is_approve = true AND j.expire_date >= CURRENT_TIMESTAMP "
+			+ "GROUP BY j.post_id, j.title, j.description, j.location, j.salary, j.experience, j.type_of_work, "
+			+ "j.create_date, j.expire_date, j.company_id, c.company_name, ci.city_name, c.logo", nativeQuery = true)
+	List<JobRecommendationProjection> findJobPostSave();
 
-	@Query(value = "SELECT \r\n"
-            + "    BIN_TO_UUID(j.post_id) AS postId, \r\n"
-            + "    j.title AS title, \r\n"
-            + "    c.company_name AS companyName, \r\n"
-            + "    ci.city_name AS cityName, \r\n"
-            + "    GROUP_CONCAT(DISTINCT cind.industry_id SEPARATOR ',') AS industryIds, \r\n"
-            + "    GROUP_CONCAT(DISTINCT i.industry_name SEPARATOR ',') AS industryNames, \r\n"
-            + "    j.type_of_work AS typeOfWork, \r\n"
-            + "    c.logo AS companyLogo, \r\n"
-            + "    AVG(r.star) AS averageStar \r\n"
-            + "FROM job_posts j \r\n"
-            + "INNER JOIN company c ON j.company_id = c.user_id \r\n"
-            + "INNER JOIN city ci ON j.city_id = ci.city_id \r\n"
-            + "LEFT JOIN company_industries cind ON c.user_id = cind.company_id \r\n"
-            + "LEFT JOIN industry i ON cind.industry_id = i.industry_id \r\n"
-            + "LEFT JOIN review r ON c.user_id = r.company_id \r\n"
-            + "WHERE j.is_approve = true \r\n"
-            + "AND j.expire_date >= CURRENT_TIMESTAMP \r\n"
-            + "GROUP BY j.post_id, j.title, c.company_name, ci.city_name, j.type_of_work, c.logo \r\n"
-            + "ORDER BY j.create_date DESC", nativeQuery = true)
-    Page<JobPostApproveProjection> findJobPostActive(Pageable pageable);
+	@Query(value = "SELECT \r\n" + "    BIN_TO_UUID(j.post_id) AS postId, \r\n" + "    j.title AS title, \r\n"
+			+ "    c.company_name AS companyName, \r\n" + "    ci.city_name AS cityName, \r\n"
+			+ "    GROUP_CONCAT(DISTINCT cind.industry_id ORDER BY cind.industry_id SEPARATOR ',') AS industryIds, \r\n"
+			+ "    GROUP_CONCAT(DISTINCT i.industry_name ORDER BY cind.industry_id SEPARATOR ',') AS industryNames, \r\n"
+			+ "    j.type_of_work AS typeOfWork, \r\n" + "    c.logo AS companyLogo, \r\n"
+			+ "    AVG(r.star) AS averageStar \r\n" + "FROM job_posts j \r\n"
+			+ "INNER JOIN company c ON j.company_id = c.user_id \r\n"
+			+ "INNER JOIN city ci ON j.city_id = ci.city_id \r\n"
+			+ "LEFT JOIN company_industries cind ON c.user_id = cind.company_id \r\n"
+			+ "LEFT JOIN industry i ON cind.industry_id = i.industry_id \r\n"
+			+ "LEFT JOIN review r ON c.user_id = r.company_id \r\n" + "WHERE j.is_approve = true \r\n"
+			+ "AND j.expire_date >= CURRENT_TIMESTAMP \r\n"
+			+ "GROUP BY j.post_id, j.title, c.company_name, ci.city_name, j.type_of_work, c.logo \r\n"
+			+ "ORDER BY j.create_date DESC", nativeQuery = true)
+	Page<JobPostApproveProjection> findJobPostActive(Pageable pageable);
 
-	@Query(value = "SELECT \r\n"
-            + "    BIN_TO_UUID(j.post_id) AS postId, \r\n"
-            + "    j.title AS title, \r\n"
-            + "    c.company_name AS companyName, \r\n"
-            + "    ci.city_name AS cityName, \r\n"
-            + "    GROUP_CONCAT(DISTINCT cind.industry_id SEPARATOR ',') AS industryIds, \r\n"
-            + "    GROUP_CONCAT(DISTINCT i.industry_name SEPARATOR ',') AS industryNames, \r\n"
-            + "    j.type_of_work AS typeOfWork, \r\n"
-            + "    c.logo AS companyLogo, \r\n"
-            + "    AVG(r.star) AS averageStar \r\n"
-            + "FROM job_posts j \r\n"
-            + "INNER JOIN company c ON j.company_id = c.user_id \r\n"
-            + "INNER JOIN city ci ON j.city_id = ci.city_id \r\n"
-            + "LEFT JOIN company_industries cind ON c.user_id = cind.company_id \r\n"
-            + "LEFT JOIN industry i ON cind.industry_id = i.industry_id \r\n"
-            + "LEFT JOIN review r ON c.user_id = r.company_id \r\n"
-            + "WHERE j.is_approve = true \r\n"
-            + "AND j.expire_date >= CURRENT_TIMESTAMP \r\n"
-            + "GROUP BY j.post_id, j.title, c.company_name, ci.city_name, j.type_of_work, c.logo \r\n"
-            + "ORDER BY j.create_date DESC \r\n"
-            + "LIMIT 8", nativeQuery = true)
-    List<JobPostApproveProjection> findTop8LatestJobPosts();
+	@Query(value = "SELECT \r\n" + "    BIN_TO_UUID(j.post_id) AS postId, \r\n" + "    j.title AS title, \r\n"
+			+ "    c.company_name AS companyName, \r\n" + "    ci.city_name AS cityName, \r\n"
+			+ "    GROUP_CONCAT(DISTINCT cind.industry_id ORDER BY cind.industry_id SEPARATOR ',') AS industryIds, \r\n"
+			+ "    GROUP_CONCAT(DISTINCT i.industry_name ORDER BY cind.industry_id SEPARATOR ',') AS industryNames, \r\n"
+			+ "    j.type_of_work AS typeOfWork, \r\n" + "    c.logo AS companyLogo, \r\n"
+			+ "    AVG(r.star) AS averageStar \r\n" + "FROM job_posts j \r\n"
+			+ "INNER JOIN company c ON j.company_id = c.user_id \r\n"
+			+ "INNER JOIN city ci ON j.city_id = ci.city_id \r\n"
+			+ "LEFT JOIN company_industries cind ON c.user_id = cind.company_id \r\n"
+			+ "LEFT JOIN industry i ON cind.industry_id = i.industry_id \r\n"
+			+ "LEFT JOIN review r ON c.user_id = r.company_id \r\n" + "WHERE j.is_approve = true \r\n"
+			+ "AND j.expire_date >= CURRENT_TIMESTAMP \r\n"
+			+ "GROUP BY j.post_id, j.title, c.company_name, ci.city_name, j.type_of_work, c.logo \r\n"
+			+ "ORDER BY j.create_date DESC \r\n" + "LIMIT 8", nativeQuery = true)
+	List<JobPostApproveProjection> findTop8LatestJobPosts();
 
 	@Query("SELECT new com.job_portal.DTO.JobCountType(j.typeOfWork, COUNT(j)) " + "FROM JobPost j "
 			+ "WHERE j.isApprove = true AND j.expireDate >= CURRENT_TIMESTAMP " + "GROUP BY j.typeOfWork")
@@ -149,13 +130,11 @@ List<JobRecommendationProjection> findJobPostSave();
 	Long findMaxSalary();
 
 	default Specification<JobPost> alwaysActiveJobs() {
-	    return (root, query, criteriaBuilder) -> {
-	        query.distinct(true); // Loại bỏ kết quả trùng lặp
-	        return criteriaBuilder.and(
-	            criteriaBuilder.isTrue(root.get("isApprove")),
-	            criteriaBuilder.greaterThanOrEqualTo(root.get("expireDate"), LocalDateTime.now())
-	        );
-	    };
+		return (root, query, criteriaBuilder) -> {
+			query.distinct(true); // Loại bỏ kết quả trùng lặp
+			return criteriaBuilder.and(criteriaBuilder.isTrue(root.get("isApprove")),
+					criteriaBuilder.greaterThanOrEqualTo(root.get("expireDate"), LocalDateTime.now()));
+		};
 	}
 
 	Page<JobPost> findByCompanyCompanyIdAndApproveTrue(UUID companyId, Pageable pageable);
@@ -184,39 +163,36 @@ List<JobRecommendationProjection> findJobPostSave();
 			@Param("companyId") String companyId);
 
 	@Query(value = """
-		    SELECT BIN_TO_UUID(jp.post_id) AS postId, jp.title, jp.description, jp.location, jp.salary, 
-		           jp.experience, jp.type_of_work AS typeOfWork, jp.create_date AS createDate, 
-		           jp.expire_date AS expireDate, COUNT(DISTINCT a.user_id) AS applicationCount, 
-		           jp.status, GROUP_CONCAT(i.industry_name SEPARATOR ', ') AS industryNames, 
-		           jp.is_approve AS isApprove
-		    FROM job_posts jp
-		    LEFT JOIN apply_job a ON jp.post_id = a.post_id
-		    JOIN company c ON jp.company_id = c.user_id
-		    JOIN company_industries ci ON c.user_id = ci.company_id
-		    JOIN industry i ON ci.industry_id = i.industry_id
-		    WHERE jp.company_id = UUID_TO_BIN(:companyId)
-		      AND (:status IS NULL OR jp.status = :status)
-		      AND (:typeOfWork IS NULL OR jp.type_of_work = :typeOfWork)
-		    GROUP BY jp.post_id, jp.title, jp.description, jp.location, jp.salary, jp.experience, 
-		             jp.type_of_work, jp.create_date, jp.expire_date, jp.status, jp.is_approve
-		    ORDER BY jp.create_date DESC, jp.post_id
-		    """,
-		    countQuery = """
-		    SELECT COUNT(DISTINCT jp.post_id)
-		    FROM job_posts jp
-		    JOIN company c ON jp.company_id = c.user_id
-		    JOIN company_industries ci ON c.user_id = ci.company_id
-		    JOIN industry i ON ci.industry_id = i.industry_id
-		    WHERE jp.company_id = UUID_TO_BIN(:companyId)
-		      AND (:status IS NULL OR jp.status = :status)
-		      AND (:typeOfWork IS NULL OR jp.type_of_work = :typeOfWork)
-		    """,
-		    nativeQuery = true)
-		Page<JobWithApplicationCountProjection> findJobsWithFiltersAndSorting(
-		        @Param("companyId") String companyId,
-		        @Param("status") String status, 
-		        @Param("typeOfWork") String typeOfWork, 
-		        Pageable pageable);
+			SELECT BIN_TO_UUID(jp.post_id) AS postId, jp.title, jp.description, jp.location, jp.salary,
+			       jp.experience, jp.type_of_work AS typeOfWork, jp.create_date AS createDate,
+			       jp.expire_date AS expireDate, COUNT(DISTINCT a.user_id) AS applicationCount,
+			       jp.status, GROUP_CONCAT(i.industry_name SEPARATOR ', ') AS industryNames,
+			       jp.is_approve AS isApprove
+			FROM job_posts jp
+			LEFT JOIN apply_job a ON jp.post_id = a.post_id
+			JOIN company c ON jp.company_id = c.user_id
+			JOIN company_industries ci ON c.user_id = ci.company_id
+			JOIN industry i ON ci.industry_id = i.industry_id
+			WHERE jp.company_id = UUID_TO_BIN(:companyId)
+			  AND jp.is_deleted = 0
+			  AND (:status IS NULL OR jp.status = :status)
+			  AND (:typeOfWork IS NULL OR jp.type_of_work = :typeOfWork)
+			GROUP BY jp.post_id, jp.title, jp.description, jp.location, jp.salary, jp.experience,
+			         jp.type_of_work, jp.create_date, jp.expire_date, jp.status, jp.is_approve
+			ORDER BY jp.create_date DESC, jp.post_id
+			""", countQuery = """
+			SELECT COUNT(DISTINCT jp.post_id)
+			FROM job_posts jp
+			JOIN company c ON jp.company_id = c.user_id
+			JOIN company_industries ci ON c.user_id = ci.company_id
+			JOIN industry i ON ci.industry_id = i.industry_id
+			WHERE jp.company_id = UUID_TO_BIN(:companyId)
+			  AND jp.is_deleted = 0
+			  AND (:status IS NULL OR jp.status = :status)
+			  AND (:typeOfWork IS NULL OR jp.type_of_work = :typeOfWork)
+			""", nativeQuery = true)
+	Page<JobWithApplicationCountProjection> findJobsWithFiltersAndSorting(@Param("companyId") String companyId,
+			@Param("status") String status, @Param("typeOfWork") String typeOfWork, Pageable pageable);
 
 	@Query("SELECT j FROM JobPost j WHERE j.expireDate < :date AND j.status = :status")
 	List<JobPost> findAllByExpireDateBeforeAndStatus(@Param("date") LocalDateTime date, @Param("status") String status);
@@ -230,7 +206,6 @@ List<JobRecommendationProjection> findJobPostSave();
 
 	@Query("SELECT COUNT(j) FROM JobPost j WHERE DATE(j.createDate) BETWEEN :startDate AND :endDate")
 	long countByCreatedAtBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
-
 
 	Page<JobPost> findByCompanyCompanyId(UUID companyId, Pageable pageable);
 
@@ -292,7 +267,9 @@ List<JobRecommendationProjection> findJobPostSave();
 	@Query("SELECT jp FROM JobPost jp "
 			+ "WHERE (:title IS NULL OR LOWER(jp.title) LIKE LOWER(CONCAT('%', :title, '%'))) "
 			+ "AND (:status IS NULL OR LOWER(jp.status) LIKE LOWER(CONCAT('%', :status, '%'))) "
-			+ "AND (:isApprove IS NULL OR jp.isApprove = :isApprove) " + "ORDER BY jp.createDate DESC")
+			+ "AND (:isApprove IS NULL OR jp.isApprove = :isApprove) "
+//			+ "AND jp.isDeleted = false "
+			+ "ORDER BY jp.createDate DESC")
 	Page<JobPost> searchJobPosts(@Param("title") String title, @Param("status") String status,
 			@Param("isApprove") Boolean isApprove, Pageable pageable);
 
@@ -311,39 +288,37 @@ List<JobRecommendationProjection> findJobPostSave();
 //			+ "jp.typeOfWork, jp.createDate, jp.expireDate, jp.status, i.industryName,  jp.isApprove ")
 //	List<JobWithApplicationCountDTO> findAllJobsWithFilters(@Param("companyId") UUID companyId,
 //			@Param("status") String status, @Param("typeOfWork") String typeOfWork);
-@Query(value = """
-		    SELECT BIN_TO_UUID(jp.post_id) AS postId, jp.title, jp.description, jp.location, jp.salary, 
-		           jp.experience, jp.type_of_work AS typeOfWork, jp.create_date AS createDate, 
-		           jp.expire_date AS expireDate, COUNT(DISTINCT a.user_id) AS applicationCount, 
-		           jp.status, GROUP_CONCAT(i.industry_name SEPARATOR ', ') AS industryNames, 
-		           jp.is_approve AS isApprove
-		    FROM job_posts jp
-		    LEFT JOIN apply_job a ON jp.post_id = a.post_id
-		    JOIN company c ON jp.company_id = c.user_id
-		    JOIN company_industries ci ON c.user_id = ci.company_id
-		    JOIN industry i ON ci.industry_id = i.industry_id
-		    WHERE jp.company_id = UUID_TO_BIN(:companyId)
-		      AND (:status IS NULL OR jp.status = :status)
-		      AND (:typeOfWork IS NULL OR jp.type_of_work = :typeOfWork)
-		    GROUP BY jp.post_id, jp.title, jp.description, jp.location, jp.salary, jp.experience, 
-		             jp.type_of_work, jp.create_date, jp.expire_date, jp.status, jp.is_approve
-		    ORDER BY jp.create_date DESC, jp.post_id
-		    """,
-		countQuery = """
-		    SELECT COUNT(DISTINCT jp.post_id)
-		    FROM job_posts jp
-		    JOIN company c ON jp.company_id = c.user_id
-		    JOIN company_industries ci ON c.user_id = ci.company_id
-		    JOIN industry i ON ci.industry_id = i.industry_id
-		    WHERE jp.company_id = UUID_TO_BIN(:companyId)
-		      AND (:status IS NULL OR jp.status = :status)
-		      AND (:typeOfWork IS NULL OR jp.type_of_work = :typeOfWork)
-		    """,
-		nativeQuery = true)
-List<JobWithApplicationCountProjection> findAllJobsWithFilters(
-		@Param("companyId") String companyId,
-		@Param("status") String status,
-		@Param("typeOfWork") String typeOfWork);
+	@Query(value = """
+			SELECT BIN_TO_UUID(jp.post_id) AS postId, jp.title, jp.description, jp.location, jp.salary,
+			       jp.experience, jp.type_of_work AS typeOfWork, jp.create_date AS createDate,
+			       jp.expire_date AS expireDate, COUNT(DISTINCT a.user_id) AS applicationCount,
+			       jp.status, GROUP_CONCAT(i.industry_name SEPARATOR ', ') AS industryNames,
+			       jp.is_approve AS isApprove
+			FROM job_posts jp
+			LEFT JOIN apply_job a ON jp.post_id = a.post_id
+			JOIN company c ON jp.company_id = c.user_id
+			JOIN company_industries ci ON c.user_id = ci.company_id
+			JOIN industry i ON ci.industry_id = i.industry_id
+			WHERE jp.company_id = UUID_TO_BIN(:companyId)
+				AND jp.is_deleted = 0
+			  AND (:status IS NULL OR jp.status = :status)
+			  AND (:typeOfWork IS NULL OR jp.type_of_work = :typeOfWork)
+			GROUP BY jp.post_id, jp.title, jp.description, jp.location, jp.salary, jp.experience,
+			         jp.type_of_work, jp.create_date, jp.expire_date, jp.status, jp.is_approve
+			ORDER BY jp.create_date DESC, jp.post_id
+			""", countQuery = """
+			   SELECT COUNT(DISTINCT jp.post_id)
+			   FROM job_posts jp
+			   JOIN company c ON jp.company_id = c.user_id
+			   JOIN company_industries ci ON c.user_id = ci.company_id
+			   JOIN industry i ON ci.industry_id = i.industry_id
+			   WHERE jp.company_id = UUID_TO_BIN(:companyId)
+			AND jp.is_deleted = 0
+			     AND (:status IS NULL OR jp.status = :status)
+			     AND (:typeOfWork IS NULL OR jp.type_of_work = :typeOfWork)
+			   """, nativeQuery = true)
+	List<JobWithApplicationCountProjection> findAllJobsWithFilters(@Param("companyId") String companyId,
+			@Param("status") String status, @Param("typeOfWork") String typeOfWork);
 
 	@Query("SELECT COUNT(j) FROM JobPost j WHERE j.isApprove = true AND DATE(j.createDate) >= :startDate AND DATE(j.createDate) < :endDate")
 	long countApprovedJobsByCreatedAtBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);

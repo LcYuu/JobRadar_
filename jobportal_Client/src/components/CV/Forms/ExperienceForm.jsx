@@ -149,7 +149,7 @@ const ExperienceForm = ({ enabledNext }) => {
         } else if (value !== "Hiện tại") {
           const start = new Date(experience.startDate);
           const end = new Date(value);
-          const today = new Date("2025-05-18");
+          const today = Date.now();
           if (isNaN(end.getTime())) {
             newErrors[index] = { ...newErrors[index], endDate: "Ngày kết thúc không hợp lệ" };
           } else if (end < start) {
@@ -328,14 +328,11 @@ const ExperienceForm = ({ enabledNext }) => {
       } else if (exp.endDate !== "Hiện tại") {
         const start = new Date(exp.startDate);
         const end = new Date(exp.endDate);
-        const today = new Date("2025-05-18");
         if (isNaN(end.getTime())) {
           errors.endDate = "Ngày kết thúc không hợp lệ";
         } else if (end < start) {
           errors.endDate = "Ngày kết thúc không được trước ngày bắt đầu";
-        } else if (end > today) {
-          errors.endDate = "Ngày kết thúc không được ở tương lai";
-        }
+        } 
       }
 
       return errors;

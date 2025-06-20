@@ -241,7 +241,7 @@ public class CompanyController {
 				.map(proj -> new CompanyWithCountJobDTO(proj.getCompanyId(), proj.getCompanyName(), proj.getLogo(),
 
 						convertStringToList(proj.getIndustryIds()), // Ví dụ: "1,2,3" → List<Integer>
-						proj.getDescription(), proj.getCityId(), proj.getCountJob()))
+						proj.getDescription(), proj.getCityId(), proj.getCountJob(),  proj.getAverageStar()))
 				.collect(Collectors.toList());
 
 		Map<String, Object> response = new HashMap<>();

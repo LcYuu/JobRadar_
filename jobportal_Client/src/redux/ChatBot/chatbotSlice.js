@@ -15,6 +15,9 @@ const chatbotSlice = createSlice({
     addUserMessage(state, action) {
       state.messages = [...state.messages, action.payload];
     },
+    clearMessages(state) {
+      state.messages = [];
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -33,5 +36,5 @@ const chatbotSlice = createSlice({
   },
 });
 
-export const { clearError, addUserMessage } = chatbotSlice.actions;
+export const { clearError, addUserMessage, clearMessages } = chatbotSlice.actions;
 export default chatbotSlice.reducer;

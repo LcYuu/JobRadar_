@@ -100,14 +100,12 @@ export default function Footer() {
         setEmailFrequency("THREE_DAYS");
       }
 
-
       await dispatch(findSubscriptionBySeekerId());
 
       Swal.fire({
         icon: "success",
         title: "Thành công!",
         text: response || "Cập nhật thành công!",
-
       });
     } catch (err) {
       Swal.fire({
@@ -144,7 +142,6 @@ export default function Footer() {
         await dispatch(findSubscriptionBySeekerId());
         setEmail("");
         setEmailFrequency("THREE_DAYS");
-
 
         Swal.fire({
           icon: "success",
@@ -185,18 +182,17 @@ export default function Footer() {
             <h4 className="font-semibold text-white mb-4 text-center">
               Đăng ký nhận thông báo việc làm
             </h4>
-            <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-2 w-full max-w-md">
+            <div className="flex flex-col lg:flex-row items-stretch space-y-3 lg:space-y-0 lg:space-x-3 w-full max-w-4xl">
               <Input
                 type="email"
                 placeholder="Nhập email của bạn"
-                className="flex-1 text-gray-900 rounded-md border border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                className="flex-[2] min-w-0 text-gray-900 rounded-md border border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-
                 disabled={loading}
               />
               <select
-                className="flex-1 p-2 rounded-md bg-white text-gray-900 border border-gray-300 focus:border-purple-500 focus:ring-purple-500"
+                className="flex-1 min-w-[140px] p-2 rounded-md bg-white text-gray-900 border border-gray-300 focus:border-purple-500 focus:ring-purple-500"
                 value={emailFrequency}
                 onChange={(e) => setEmailFrequency(e.target.value)}
                 disabled={loading}
@@ -209,17 +205,20 @@ export default function Footer() {
                 <option value="TWO_MONTHS">2 tháng</option>
               </select>
               <Button
-                className={`${
+                className={`flex-shrink-0 min-w-[120px] ${
                   currentSubscription ? "bg-purple-600" : "bg-purple-500"
-                } text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors ${
+                } text-white px-6 py-2 rounded-md hover:bg-purple-700 transition-colors ${
                   loading ? "opacity-50 cursor-not-allowed" : ""
                 }`}
                 onClick={handleSubscribe}
                 disabled={loading}
               >
-                {loading ? "Đang xử lý..." : currentSubscription ? "Cập nhật" : "Đăng ký"}
+                {loading
+                  ? "Đang xử lý..."
+                  : currentSubscription
+                  ? "Cập nhật"
+                  : "Đăng ký"}
               </Button>
-
             </div>
             {currentSubscription && (
               <Button

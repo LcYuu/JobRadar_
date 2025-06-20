@@ -21,6 +21,7 @@ import Swal from "sweetalert2";
 import NotificationDropdown from "../Notification/NotificationDropdown";
 import "./Sidebar.css";
 import { logoutAction } from "../../redux/Auth/auth.thunk";
+import { clearMessages } from "../../redux/ChatBot/chatbotSlice";
 
 
 export default function Sidebar({ selectedSection, setSelectedSection }) {
@@ -133,6 +134,7 @@ export default function Sidebar({ selectedSection, setSelectedSection }) {
         // Xóa dữ liệu storage
         localStorage.removeItem("jwt");
         localStorage.removeItem("user");
+        dispatch(clearMessages());
         await Swal.fire({
           icon: "success",
           title: "Đăng xuất thành công",

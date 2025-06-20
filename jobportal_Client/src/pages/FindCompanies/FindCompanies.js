@@ -170,8 +170,13 @@ export default function FindCompanies() {
 
   useEffect(() => {
     if (location.state?.selectedIndustryId) {
+<<<<<<< HEAD
       setFilters({
         ...filters,
+=======
+      setFilters((prev) => ({
+        ...prev,
+>>>>>>> origin/main
         industryId: location.state.selectedIndustryId,
       });
       setTempFilters((prev) => ({

@@ -6,6 +6,7 @@ import logo from "../../../assets/images/common/logo.jpg";
 
 import Swal from "sweetalert2";
 import { logoutAction } from "../../../redux/Auth/auth.thunk";
+import { clearMessages } from "../../../redux/ChatBot/chatbotSlice";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -50,6 +51,7 @@ export default function Header() {
         // Xóa dữ liệu storage
         localStorage.removeItem("jwt");
         localStorage.removeItem("user");
+        dispatch(clearMessages());
         await Swal.fire({
           icon: "success",
           title: "Đăng xuất thành công",
@@ -208,13 +210,9 @@ export default function Header() {
               onClick={handleProfileClick}
             >
               <img
-                src={user?.avatar || "/default-avatar.png"}
+                src={user?.avatar }
                 alt="User Avatar"
                 className="w-8 h-8 rounded-full mr-2"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "/default-avatar.png";
-                }}
               />
               <span className="text-white">{displayName}</span>
             </div>

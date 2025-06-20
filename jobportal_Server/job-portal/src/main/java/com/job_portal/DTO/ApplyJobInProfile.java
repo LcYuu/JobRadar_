@@ -24,4 +24,5 @@ public class ApplyJobInProfile {
 	private String companyName;
 	private String typeOfWork;
 	private String logo;
+	private Double averageStar;
 }

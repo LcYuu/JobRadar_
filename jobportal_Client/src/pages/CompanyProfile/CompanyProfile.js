@@ -1660,7 +1660,9 @@ useEffect(() => {
       if (!editReplyData || !editReplyData.id) {
         toast.error('Không tìm thấy thông tin reply cần chỉnh sửa');
         return;
-      }      // Kiểm tra nội dung với AI
+      }
+  
+      // Kiểm tra nội dung với AI
       const response = await fetch('http://localhost:5000/check-comment', {
         method: 'POST',
         headers: {
@@ -1668,18 +1670,19 @@ useEffect(() => {
         },
         body: JSON.stringify({ text: editReplyData.content }),
       });
-
-
+  
       if (!response.ok) {
         throw new Error(`AI service error: ${response.status}`);
       }
-
-      const result = await response.json();      if (result.is_toxic) {
+  
+      const result = await response.json();
+  
+      if (result.is_toxic) {
         toast.error('Nội dung bình luận không phù hợp. Vui lòng kiểm tra lại.');
         showModerationError({ message: result.message }, editReplyData.content);
         return;
       }
-
+  
       const token = localStorage.getItem("jwt");
       // Gọi API cập nhật reply
       const response2 = await fetch(
@@ -1696,22 +1699,22 @@ useEffect(() => {
             parentReplyId: editReplyData.parentReplyId || null,
           }),
         }
-      );      if (!response2.ok) {
+      );
+      if (!response2.ok) {
         const errorData = await response2.json();
         throw new Error(errorData.message || 'Failed to update reply');
       }
-
+      // Lấy dữ liệu trả về từ API
       const updatedReply = await response2.json();
 
-      // ADDED: Re-fetch all reviews for the company to ensure UI update
       await dispatch(getReviewByCompany(companyId));
-
-      // Cập nhật Redux store
+  
+      // Cập nhật Redux store với dữ liệu reply đã cập nhật
       dispatch({
         type: "review/updateReviewReply/fulfilled",
-        payload: updatedReply
+        payload: updatedReply,
       });
-
+  
       // Cập nhật lại tất cả các reply trong Redux store
       const updatedReviews = reviews.map(review => {
         if (review.replies && review.replies.length > 0) {
@@ -1721,35 +1724,37 @@ useEffect(() => {
                 return {
                   ...reply,
                   ...updatedData,
-                  replies: reply.replies || []
+                  replies: reply.replies || [],
                 };
               }
               if (reply.replies && reply.replies.length > 0) {
                 return {
                   ...reply,
-                  replies: updateReplyRecursive(reply.replies, replyId, updatedData)
+                  replies: updateReplyRecursive(reply.replies, replyId, updatedData),
                 };
               }
               return reply;
             });
           };
-
           return {
             ...review,
-            replies: updateReplyRecursive(review.replies, editReplyData.id, updatedReply)
+            replies: updateReplyRecursive(review.replies, editReplyData.id, updatedReply),
           };
         }
         return review;
       });
-
+  
       // Cập nhật toàn bộ reviews trong Redux store
       dispatch({
         type: "review/getReviewByCompany/fulfilled",
-        payload: updatedReviews
+        payload: updatedReviews,
       });
-
+  
+      // Reset trạng thái chỉnh sửa
+      setEditingReplyId(null);
+      setEditReplyData({ content: "", anonymous: false });
+  
       toast.success('Đã cập nhật bình luận thành công!');
-
     } catch (error) {
       toast.error(error.message || 'Có lỗi xảy ra khi cập nhật bình luận. Vui lòng thử lại sau.');
     }
@@ -2509,7 +2514,7 @@ useEffect(() => {
                         ...job,
                         company: {
                           ...job.company,
-                          logo: job.company.logo,
+                          logo: job?.company?.logo,
                         },
                       }}
                     />
