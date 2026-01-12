@@ -7,6 +7,7 @@ import Container from "../Container/Container";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { useNavigate } from "react-router-dom";
 
 const iconUrls = [
   "https://cdn-icons-png.flaticon.com/128/3007/3007250.png", // Thương mại điện tử
@@ -35,6 +36,7 @@ const iconUrls = [
 const CategoryList = () => {
   const dispatch = useDispatch();
   const { industries } = useSelector((store) => store.industry);
+  const navigate = useNavigate();
   // Change the threshold to 768px for mobile carousel view
   const [isSmallMobile, setIsSmallMobile] = useState(window.innerWidth < 768);
 
@@ -120,6 +122,16 @@ const CategoryList = () => {
     );
   }
 
+  // Hàm xử lý khi click vào danh mục
+  const handleCategoryClick = (industryId) => {
+    navigate("/find-jobs", {
+      state: {
+        selectedIndustryIds: [industryId],
+        key: Date.now(), // Thêm key random để luôn khác nhau
+      },
+    });
+  };
+
   return (
     <Container>
       <>
@@ -132,7 +144,7 @@ const CategoryList = () => {
           <div className="category-carousel-container">
             <Slider {...carouselSettings}>
               {industries.slice(1).map((industry, index) => (
-                <div key={industry.industryId} className="carousel-item-wrapper">
+                <div key={industry.industryId} className="carousel-item-wrapper" onClick={() => handleCategoryClick(industry.industryId)}>
                   <CategoryCard
                     icon={iconUrls[index]}
                     title={industry.industryName}
@@ -147,13 +159,14 @@ const CategoryList = () => {
           // Show regular grid layout for larger screens
           <div className="category-list">
             {industries.slice(1).map((industry, index) => (
-              <CategoryCard
-                key={industry.industryId}
-                icon={iconUrls[index]}
-                title={industry.industryName}
-                jobCount={industry.jobCount}
-                industryId={industry.industryId}
-              />
+              <div key={industry.industryId} onClick={() => handleCategoryClick(industry.industryId)}>
+                <CategoryCard
+                  icon={iconUrls[index]}
+                  title={industry.industryName}
+                  jobCount={industry.jobCount}
+                  industryId={industry.industryId}
+                />
+              </div>
             ))}
           </div>
         )}

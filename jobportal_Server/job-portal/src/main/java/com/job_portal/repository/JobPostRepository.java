@@ -320,4 +320,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID>, JpaSpec
 	List<JobWithApplicationCountProjection> findAllJobsWithFilters(@Param("companyId") String companyId,
 			@Param("status") String status, @Param("typeOfWork") String typeOfWork);
 
+	@Query("SELECT COUNT(j) FROM JobPost j WHERE j.isApprove = true AND DATE(j.createDate) >= :startDate AND DATE(j.createDate) < :endDate")
+	long countApprovedJobsByCreatedAtBetween(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
 }

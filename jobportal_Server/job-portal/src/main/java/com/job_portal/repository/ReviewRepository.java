@@ -36,4 +36,10 @@ public interface ReviewRepository extends JpaRepository<Review, UUID>, JpaSpecif
 			    GROUP BY s.star
 			""")
 	List<CountReviewByStar> countReviewsByStar(@Param("companyId") UUID companyId);
+	
+	@Query("SELECT r.company.companyId, r.company.companyName, COUNT(r), AVG(r.star) " +
+		       "FROM Review r " +
+		       "GROUP BY r.company.companyId, r.company.companyName " +
+		       "ORDER BY COUNT(r) DESC")
+		List<Object[]> getCompanyReviewStatistics();
 }

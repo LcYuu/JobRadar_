@@ -166,17 +166,19 @@ export default function FindCompanies() {
 
   useEffect(() => {
     dispatch(searchCompanies({ filters, currentPage, size }));
-    dispatch(getCity());
-    dispatch(getCompanyFitSeeker());
-    dispatch(getAllIndustries());
   }, [filters, currentPage, size, dispatch]);
 
   useEffect(() => {
     if (location.state?.selectedIndustryId) {
+<<<<<<< HEAD
+      setFilters({
+        ...filters,
+=======
       setFilters((prev) => ({
         ...prev,
+>>>>>>> origin/main
         industryId: location.state.selectedIndustryId,
-      }));
+      });
       setTempFilters((prev) => ({
         ...prev,
         industryId: location.state.selectedIndustryId,
@@ -190,7 +192,8 @@ export default function FindCompanies() {
       );
       setCurrentPage(0);
     }
-  }, [location.state, allIndustries]);
+    // eslint-disable-next-line
+  }, [location.state?.selectedIndustryId, allIndustries]);
 
   useEffect(() => {
     dispatch(getCity());

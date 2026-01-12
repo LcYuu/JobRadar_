@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "swiper/swiper-bundle.css";
@@ -964,13 +963,21 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
   }, [jobPost, currentPage, jobsPerPage]);
 
   useEffect(() => {
-    const userId = companyId;
-    dispatch(resetJobPost());
-    dispatch(getCompanyProfile(companyId));
-    dispatch(getReviewByCompany(companyId));
-    dispatch(checkSaved(companyId));
-    dispatch(fetchSocialLinksByUserId(userId));
-  }, [dispatch, companyId]);
+  const userId = companyId;
+  dispatch(resetJobPost());
+  dispatch(getCompanyProfile(companyId));
+  
+  // Load reviews trước, sau đó load reactions
+  dispatch(getReviewByCompany(companyId)).then((result) => {
+    if (result.payload && result.payload.length > 0 && user) {
+      const reviewIds = result.payload.map((review) => review.reviewId);
+      dispatch(getReviewReactions(reviewIds));
+    }
+  });
+  
+  dispatch(checkSaved(companyId));
+  dispatch(fetchSocialLinksByUserId(userId));
+}, [dispatch, companyId, user]);
 
   const handleFollowClick = async () => {
     try {
@@ -1429,7 +1436,17 @@ Bạn có chắc chắn muốn thay đổi đánh giá không?`;
       dispatch(getReviewReactions(reviewIds));
     }
   };
-
+// Thêm useEffect này để load reactions sau khi reviews được load
+useEffect(() => {
+  if (validReviews && validReviews.length > 0) {
+    const reviewIds = validReviews.map((review) => review.reviewId);
+    
+    // Chỉ dispatch nếu user đã đăng nhập
+    if (user) {
+      dispatch(getReviewReactions(reviewIds));
+    }
+  }
+}, [validReviews, dispatch, user]);
   // Function to load replies for a specific review
 
   // Load replies for all reviews when component mounts or when reviews change
